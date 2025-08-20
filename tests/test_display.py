@@ -448,6 +448,28 @@ def test_to_lines_chinese(mocker, m5stickv):
     assert result == ["你好"]
 
 
+def test_to_lines_endpos(mocker, m5stickv):
+    from krux.display import Display
+
+    mocker.patch("krux.display.lcd.width", return_value=135)
+    text = "I am a long line of text, and I will be repeated." * 30
+    d = Display()
+    d.to_portrait()
+    lines, endpos = d.to_lines_endpos(text, max_lines=25)
+    assert len(lines) == 25
+    assert endpos == 393
+
+
+def test_index_pages(mocker, m5stickv):
+    from krux.display import Display
+
+    mocker.patch("krux.display.lcd.width", return_value=135)
+    text = "I am some text." * 100
+    d = Display()
+    d.to_portrait()
+    assert d.index_pages(text, max_lines=25) == [0, 375, 750, 1125]
+
+
 def test_outline(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux

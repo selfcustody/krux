@@ -103,6 +103,10 @@ def test_convert_encoding(m5stickv, mocker):
                 # ensure that converting back gives the original value
                 assert convert_encoding(result, conv) == control
 
+    # some bytes never appear in utf8, convert_encoding returns None
+    non_utf8 = bytes([0xC0, 0xC1, 0xFE, 0xFF])
+    assert convert_encoding(non_utf8, "utf8") == None
+
 
 def test_identify_datum(m5stickv, mocker):
     """Test that identify_datum can identify various datum types."""
@@ -242,8 +246,18 @@ def test_detect_encodings_no_verify(mocker, m5stickv):
     assert 64 not in detect_encodings(string)
 
     # no test for ascii, checking max(ord) <= 127 will always be correct
-    # no test for latin-1, it doesn't exist in uPython, but range will be correct
-    # no test for utf-8, yet; but some byte-combos are not allowed in utf-8
+
+    # latin-1 and also utf8 (uPython has no latin-1)
+    string = "Ceci est une ligne de latin1 en français. Esta é uma linha de latin1 em português"
+    assert detect_encodings(string, verify=False) == ["latin-1", "utf8"]
+    assert detect_encodings(string) == ["latin-1", "utf8"]
+
+    # utf8 is assumed for all strings
+    string = """This is a line of ascii text\nCeci est une ligne d'unicode en français\nEsta é uma linha de unicode em português
+これは日本語のUnicodeの行です\n这是一行简体中文的unicode\nĐây là một dòng mã unicode trong tiếng Việt\nЭто строка юникода на русском языке.
+이것은 한국어의 유니코드 줄입니다"""
+    assert detect_encodings(string, verify=False) == ["utf8"]
+    assert detect_encodings(string) == ["utf8"]
 
 
 def test_datumtoolmenu_init_abort(m5stickv, mocker):
@@ -431,6 +445,10 @@ def test_datumtool_view_qr(m5stickv, mocker):
     text_bg = "much longer text" * 100
     bytes_psbt = b'psbt\xff\x01\x00\xa4\x02\x00\x00\x00\x03\xae\xe25\xaf(\x9a\xc9\xee\xc23\xca"\x15\xbf?\xf4\xc1\xcaxAP\xd6\x0f[\x94kA\x87\x8b\x15\x04,\x00\x00\x00\x00\x00\xfd\xff\xff\xffT\xc9\x91i\xc4ZIg Z!\xd6)\xbf+z\x161\xc4uoS \xf0\x9d\x96\xcf#\xdc\xdbc\xa0\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x04\x1eVt\x8d\x80H\x1f\x89k\x07T(\xca\xaf\x91\x1e"\x1a2\xef\xa5_\\s\xf9\x8b\xc2J\xa0\xc8\x11\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x01\xe8\x03\x00\x00\x00\x00\x00\x00\x16\x00\x14\xae\xcd\x1e\xdc>\xffe\xaa \x9d\x02\x15\xe7=p\x90]\xc1hlZ\x0f+\x00O\x01\x045\x87\xcf\x03\x06\xb07\xf6\x80\x00\x00\x00k"\xc5\x12;\xa1\n\xde\xafK\xfc\xbbE\xd1\xa0-\x82\x8f%\xbf\x86F\x95z\x98\xd0b\x87\xc4\xe2\xb8P\x02\x8bB\xcdGv7l\x82y\x1bIAU\x15\x1fV\xc2\xd7\xb4q\xe0\xc7\xa5&\xa7\xce`\xdd\x87.8g\x10s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x01\x00~\x02\x00\x00\x00\x02\x9a\x9b\xe1\xca)\x10\\\x97t<\x0f\xd1\xeey\xc0\xe6\r"\x8aa\xc8\xec\xbft\xf9\xe7\xcf\xfa\x01\x19\x0c{\x02\x00\x00\x00\x00\xfd\xff\xff\xff\x9a\x9b\xe1\xca)\x10\\\x97t<\x0f\xd1\xeey\xc0\xe6\r"\x8aa\xc8\xec\xbft\xf9\xe7\xcf\xfa\x01\x19\x0c{\x01\x00\x00\x00\x00\xfd\xff\xff\xff\x01@\x07\x00\x00\x00\x00\x00\x00\x19v\xa9\x14:-AE\xa4\xf0\x98R;>\x81\'\xf1\xda\x87\xcf\xc5[\x8ey\x88\xacZ\x0f+\x00\x01\x03\x04\x01\x00\x00\x00"\x06\x02\xa7E\x13\x95sSi\xf2\xec\xdf\xc8)\xc0\xf7t\xe8\x8e\xf10=\xfe[/\x04\xdb\xaa\xb3\nS]\xfd\xd6\x18s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00U\x02\x00\x00\x00\x01\x873 i\xd7\x11\xa7\xcd*`\xd5\x84\x1c8\n,U\xe8\xa2\n\xdd\xdaV\xa2\x9c\x00\x84e\xef\xf6[\xa2\x01\x00\x00\x00\x00\xff\xff\xff\xff\x01\x00\x00\x00\x00\x00\x00\x00\x00\x19v\xa9\x14:-AE\xa4\xf0\x98R;>\x81\'\xf1\xda\x87\xcf\xc5[\x8ey\x88\xac\x00\x00\x00\x00\x01\x03\x04\x01\x00\x00\x00"\x06\x02\xa7E\x13\x95sSi\xf2\xec\xdf\xc8)\xc0\xf7t\xe8\x8e\xf10=\xfe[/\x04\xdb\xaa\xb3\nS]\xfd\xd6\x18s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00U\x02\x00\x00\x00\x01\x05j\xc0\xa7"\x1f\xe5\x82x\xc9\xa7h\xd0\x1a!\xe6\xb6GJ\x01\x9a\xf6\xe7?\x08\xc8R\xe6\x86|\xad\xa5\x00\x00\x00\x00\x00\xff\xff\xff\xff\x01\x00\x00\x00\x00\x00\x00\x00\x00\x19v\xa9\x14:-AE\xa4\xf0\x98R;>\x81\'\xf1\xda\x87\xcf\xc5[\x8ey\x88\xac\x00\x00\x00\x00\x01\x03\x04\x01\x00\x00\x00"\x06\x02\xa7E\x13\x95sSi\xf2\xec\xdf\xc8)\xc0\xf7t\xe8\x8e\xf10=\xfe[/\x04\xdb\xaa\xb3\nS]\xfd\xd6\x18s\xc5\xda\n,\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
     text_desc = "wsh(multi(1,xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB/1/0/*,xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH/0/0/*))#t2zpj2eu"
+    latin1 = "Ceci est une ligne de latin1 en français. Esta é uma linha de latin1 em português"
+    unicode = """This is a line of ascii text\nCeci est une ligne d'unicode en français\nEsta é uma linha de unicode em português
+これは日本語のUnicodeの行です\n这是一行简体中文的unicode\nĐây là một dòng mã unicode trong tiếng Việt\nЭто строка юникода на русском языке.
+이것은 한국어의 유니코드 줄입니다"""
 
     BTN_SEQUENCE = (
         BUTTON_PAGE_PREV,  # skip updating qr title
@@ -525,7 +543,6 @@ def test_datumtool_view_qr(m5stickv, mocker):
     page.title = "QR contents"
     page.datum = "PSBT"
     page.view_qr()
-    print(ctx.display.method_calls)
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
     # with longer text for big BBQr
@@ -541,6 +558,52 @@ def test_datumtool_view_qr(m5stickv, mocker):
     page.contents = bytes_psbt
     page.title = "QR contents"
     page.datum = "PSBT"
+    page.view_qr()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # with short latin-1 as a string works
+    BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # deny label update
+        BUTTON_ENTER,  # dismiss QR
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # leave QR view
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = latin1
+    page.title = "QR contents"
+    page.datum = None
+    page.view_qr()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # with unicode as a string doesn't work
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    page = DatumTool(ctx)
+    page.contents = unicode
+    page.title = "QR contents"
+    page.datum = None
+    page.view_qr()
+    assert ctx.input.wait_for_button.call_count == 1
+    ctx.display.flash_text.assert_called_with(
+        "Failed encoding (('Static', (0,))), try as bytes. 'str' object has no attribute 'decode'",
+        248,
+        2000,
+        highlight_prefix="",
+    )
+    print(ctx.display.method_calls)
+
+    # but can work if encoding unicode string as utf-8 bytes
+    BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # deny label update
+        BUTTON_ENTER,  # dismiss QR
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # leave QR view
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = unicode.encode()
+    page.title = "QR contents"
+    page.datum = None
     page.view_qr()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
@@ -593,24 +656,23 @@ def test_datumtool__info_box(m5stickv, mocker):
 def test_datumtool__show_contents(m5stickv, mocker):
     """With DatumTool already initialized, test ._show_contents()"""
     from krux.pages.datum_tool import DatumTool
-
-    SOME_BUTTON, ANOTHER_BUTTON = 0, 1
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     # call with text
-    ctx = create_ctx(mocker, [SOME_BUTTON])
+    ctx = create_ctx(mocker, [BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_ENTER])
     page = DatumTool(ctx)
     page.contents = "Loaded string contents in DatumTool"
     page.title = "Text"
     page.datum = ""
     page.about = "about"
     page._show_contents()
-    assert ctx.input.wait_for_button.call_count == 1
+    assert ctx.input.wait_for_button.call_count == 3
     ctx.display.draw_hcentered_text.assert_called_with(
-        '"Loaded string contents in DatumTool"', offset_y=38, max_lines=14
+        "Text\n\nabout p1/1", info_box=True
     )
 
     # call with bytes
-    ctx = create_ctx(mocker, [ANOTHER_BUTTON])
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
     page = DatumTool(ctx)
     page.contents = b"\xde\xad\xbe\xef"
     page.title = "Bytes"
@@ -619,7 +681,7 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 1
     ctx.display.draw_hcentered_text.assert_called_with(
-        "0xdeadbeef", offset_y=38, max_lines=14
+        "Bytes\n\nabout p1/1", info_box=True
     )
 
 
@@ -759,7 +821,7 @@ def test_datumtool__decrypt_as_kef_envelope(m5stickv, mocker):
     assert page.decrypted == True
 
 
-def test_dataumtool__build_options_menu(m5stickv, mocker):
+def test_datumtool__build_options_menu(m5stickv, mocker):
     """With DatumTool already initialized, test ._build_options_menu()"""
     from krux.pages.datum_tool import DatumTool
 
@@ -857,7 +919,7 @@ def test_dataumtool__build_options_menu(m5stickv, mocker):
     ]
 
 
-def test_dataumtool_view_contents(m5stickv, mocker):
+def test_datumtool_view_contents(m5stickv, mocker, mock_file_operations):
     """With DatumTool already initialized, test .view_contents()"""
     from krux.pages.datum_tool import DatumTool
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -952,6 +1014,9 @@ def test_dataumtool_view_contents(m5stickv, mocker):
         BUTTON_PAGE_PREV,  # to Go (w/o altering filename)
         BUTTON_ENTER,  # go Go
         BUTTON_ENTER,  # confirm filename
+        BUTTON_ENTER,  # confirm Overwrite
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
         BUTTON_PAGE_PREV,  # to Back
         BUTTON_ENTER,  # go Back
     )
