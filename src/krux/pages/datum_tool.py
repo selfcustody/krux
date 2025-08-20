@@ -266,11 +266,12 @@ def detect_encodings(str_data, verify=True):
     if ord(max_chr) <= 127:
         encodings.append("ascii")
 
-    # might it be latin-1 or utf8
+    # might it be latin-1
     if 128 <= ord(max_chr) <= 255:
         encodings.append("latin-1")
-    else:
-        encodings.append("utf8")
+
+    # assume utf8
+    encodings.append("utf8")
 
     return encodings
 
@@ -493,12 +494,11 @@ class DatumTool(Page):
                 )
             except Exception as err:
                 self.flash_error(
-                    "TODO UR (crypto-account/crypto-descr/etc): "
-                    + repr(menu_opts[idx])
-                    + ")\n"
-                    + str(err)
+                    "Failed encoding ({}), try as bytes. {}".format(
+                        repr(menu_opts[idx]),
+                        str(err),
+                    )
                 )
-                self.view_qr()
 
         return MENU_CONTINUE
 
