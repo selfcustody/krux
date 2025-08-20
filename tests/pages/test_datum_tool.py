@@ -668,7 +668,7 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 3
     ctx.display.draw_hcentered_text.assert_called_with(
-        "Text\n\nabout p1/1", info_box=True
+        "Text\n\nabout p1/1", info_box=True, highlight_prefix=":"
     )
 
     # call with bytes
@@ -681,7 +681,7 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 1
     ctx.display.draw_hcentered_text.assert_called_with(
-        "Bytes\n\nabout p1/1", info_box=True
+        "Bytes\n\nabout p1/1", info_box=True, highlight_prefix=":"
     )
 
 
