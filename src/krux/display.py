@@ -251,11 +251,16 @@ class Display:
         return self.usable_width() if not kboard.is_m5stickv else self.width()
 
     def to_lines(self, text, max_lines=None):
-        """Takes a string of text and converts it to lines to display on
-        the screen
+        """Maintains original API while using .to_lines_endpos()"""
+
+        return self.to_lines_endpos(text, max_lines)[0]
+
+    def to_lines_endpos(self, text, max_lines=None):
+        """Takes a string of text and returns tuple(lines, end) to display on
+        the screen and know how far into text it read; next page starts there.
         """
         if isinstance(text, list):
-            return text
+            return (text, sum((len(x) for x in text)))
         lines = []
         start = 0
         line_count = 0
@@ -271,7 +276,7 @@ class Display:
 
         # Quick return if content fits in one line
         if len(text) <= columns and "\n" not in text:
-            return [text]
+            return ([text], len(text))
 
         if not max_lines:
             max_lines = TOTAL_LINES
@@ -282,19 +287,20 @@ class Display:
             if line_break == -1:
                 next_break = len(text)
             else:
-                next_break = min(line_break, len(text))
+                next_break = min(line_break + 1, len(text))
 
-            end = start + columns
+            end = start + columns + 1
             # If next segment fits on one line, add it and continue
-            if end >= next_break:
-                lines.append(text[start:next_break].rstrip())
-                start = next_break + 1
+            if end > next_break:
+                end = next_break
+                lines.append(text[start:end].rstrip())
+                start = end
                 line_count += 1
                 continue
 
             # If the end of the line is in the middle of a word,
             # move the end back to the end of the previous word
-            if text[end] != " " and text[end] != "\n":
+            if text[end - 1 : end] != " " and text[end - 1 : end] != "\n":
                 end = text.rfind(" ", start, end)
 
             # If there is no space, force break the word
@@ -304,14 +310,32 @@ class Display:
             lines.append(text[start:end].rstrip())
             # don't jump space if we're breaking a word
             jump_space = 1 if text[end] == " " else 0
-            start = end + jump_space
+            end += jump_space
+            start = end
             line_count += 1
 
-        # Replace last line with ellipsis if we didn't finish the text
+        # Append/replace ellipsis on last line if we didn't finish the text
         if line_count == max_lines and start < len(text):
-            lines[-1] = lines[-1][: columns - 3] + "..."
+            len_last = len(lines[-1])
+            if len_last + 3 > columns:
+                lines[-1] = lines[-1][: columns - 2] + ".."
+                end += columns - len_last - 3
+            else:
+                lines[-1] += ".."
 
-        return lines
+        return (lines, end)
+
+    def index_pages(self, text, max_lines):
+        """Uses to_lines_endpos() to return a list of page starting positions"""
+        start, pages = 0, [0]
+        while True:
+            lines, end = self.to_lines_endpos(text[start:], max_lines)
+            if len(lines) == max_lines and lines[-1][-2:] == "..":
+                start += end
+                pages.append(start)
+                continue
+            break
+        return pages
 
     def clear(self):
         """Clears the display"""
