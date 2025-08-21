@@ -1453,7 +1453,7 @@ def test_cancel_sign_high_fee(mocker, m5stickv, tdata):
                 "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h",
                 highlight_prefix=":",
             ),
-            mocker.call("Processing.."),
+            mocker.call("Processing…"),
             mocker.call(
                 "Warning: High fees!\n799.7% of the amount.", highlight_prefix=":"
             ),
@@ -1506,7 +1506,7 @@ def test_sign_high_fee(mocker, m5stickv, tdata):
                 "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h",
                 highlight_prefix=":",
             ),
-            mocker.call("Processing.."),
+            mocker.call("Processing…"),
             mocker.call(
                 "Warning: High fees!\n799.7% of the amount.", highlight_prefix=":"
             ),
@@ -1561,7 +1561,7 @@ def test_sign_self(mocker, m5stickv, tdata):
                 "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h",
                 highlight_prefix=":",
             ),
-            mocker.call("Processing.."),
+            mocker.call("Processing…"),
             mocker.call(
                 "Warning: High fees!\n799.7% of the amount.", highlight_prefix=":"
             ),
@@ -1617,7 +1617,7 @@ def test_sign_spent_and_self(mocker, m5stickv, tdata):
                 "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h",
                 highlight_prefix=":",
             ),
-            mocker.call("Processing.."),
+            mocker.call("Processing…"),
             mocker.call(
                 "Warning: High fees!\n235.9% of the amount.", highlight_prefix=":"
             ),

@@ -195,8 +195,8 @@ def test_to_lines(mocker, m5stickv):
         (135, "More Than Two Words", ["More Than Two", "Words"]),  # 13 + 5 chars
         (
             135,
-            "A bunch of words that span multiple lines..",
-            ["A bunch of words", "that span", "multiple lines.."],  # 16 + 9 + 16 chars
+            "A bunch of words that span multiple lines…",
+            ["A bunch of words", "that span", "multiple lines…"],  # 16 + 9 + 16 chars
         ),
         (
             135,
@@ -335,7 +335,7 @@ def test_to_lines(mocker, m5stickv):
     cut_text = [
         "A really long text. A",
         "really long text. A really",
-        "long text. A really long..",
+        "long text. A really long…",
     ]
     assert lines == cut_text
 
@@ -457,7 +457,7 @@ def test_to_lines_endpos(mocker, m5stickv):
     d.to_portrait()
     lines, endpos = d.to_lines_endpos(text, max_lines=25)
     assert len(lines) == 25
-    assert endpos == 394
+    assert endpos == 395
 
 
 def test_index_pages(mocker, m5stickv):
@@ -467,7 +467,7 @@ def test_index_pages(mocker, m5stickv):
     text = "I am some text." * 100
     d = Display()
     d.to_portrait()
-    assert d.index_pages(text, max_lines=25) == [0, 376, 751, 1126]
+    assert d.index_pages(text, max_lines=25) == [0, 377, 752, 1127]
 
 
 def test_outline(mocker, m5stickv):

@@ -488,10 +488,10 @@ class Page:
             prefix = ""
             fixed_chars = 0
         if not crop_middle:
-            return "{}{}..".format(prefix, text[: usable_chars - len(prefix) - 2])
-        usable_chars -= len(prefix) + fixed_chars + 2
+            return "{}{}…".format(prefix, text[: usable_chars - len(prefix) - 1])
+        usable_chars -= len(prefix) + fixed_chars + 1
         half = usable_chars // 2
-        return "{}{}..{}".format(prefix, text[: half + fixed_chars], text[-half:])
+        return "{}{}…{}".format(prefix, text[: half + fixed_chars], text[-half:])
 
     def has_printer(self):
         """Checks if the device has a printer setup"""
@@ -500,7 +500,7 @@ class Page:
     def has_sd_card(self):
         """Checks if the device has an SD card inserted"""
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Checking for SD card.."))
+        self.ctx.display.draw_centered_text(t("Checking for SD card…"))
         try:
             # Check for SD hot-plug
             with SDHandler():
@@ -512,7 +512,7 @@ class Page:
         """Handler for the 'shutdown' menu item"""
         if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Shutting down.."))
+            self.ctx.display.draw_centered_text(t("Shutting down…"))
             time.sleep_ms(SHUTDOWN_WAIT_TIME)
             return MENU_SHUTDOWN
         return MENU_CONTINUE

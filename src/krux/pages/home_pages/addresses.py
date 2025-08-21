@@ -83,9 +83,9 @@ class Addresses(Page):
             return MENU_CONTINUE
 
         loading_txt = (
-            t("Loading change addresses..")
+            t("Loading change addresses…")
             if addr_type == 1
-            else t("Loading receive addresses..")
+            else t("Loading receive addresses…")
         )
         max_addresses = self.ctx.display.max_menu_lines() - 3
         address_index = 0
@@ -94,7 +94,7 @@ class Addresses(Page):
             if address_index >= max_addresses:
                 items.append(
                     (
-                        "%d..%d" % (address_index - max_addresses, address_index - 1),
+                        "%d…%d" % (address_index - max_addresses, address_index - 1),
                         lambda: MENU_EXIT,
                     )
                 )
@@ -119,7 +119,7 @@ class Addresses(Page):
 
             items.append(
                 (
-                    "%d..%d" % (address_index, address_index + max_addresses - 1),
+                    "%d…%d" % (address_index, address_index + max_addresses - 1),
                     lambda: MENU_EXIT,
                 )
             )
@@ -229,7 +229,7 @@ class Addresses(Page):
             return
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
+        self.ctx.display.draw_centered_text(t("Processing…"))
 
         try:
             with SDHandler():
@@ -244,7 +244,7 @@ class Addresses(Page):
                         if i % SCAN_ADDRESS_LIMIT == 0:
                             self.ctx.display.clear()
                             self.ctx.display.draw_centered_text(
-                                t("Processing..")
+                                t("Processing…")
                                 + "\n\n%d%%" % int((i - start_address) / quantity * 100)
                             )
                             wdt.feed()
@@ -319,7 +319,7 @@ class Addresses(Page):
             ):
                 return MENU_CONTINUE
 
-            checking_match_txt = t("Verifying..") + " " + t("%d to %d")
+            checking_match_txt = t("Verifying…") + " " + t("%d to %d")
             checked_no_match_txt = t("Checked %d addresses with no matches.")
             is_valid_txt = "%s\n\n" + t("is a valid address!")
             not_found_txt = "%s\n\n" + t("was NOT FOUND in the first %d addresses")

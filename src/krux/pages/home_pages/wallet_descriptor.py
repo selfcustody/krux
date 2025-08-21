@@ -153,7 +153,7 @@ class WalletDescriptor(Page):
             return MENU_CONTINUE
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
+        self.ctx.display.draw_centered_text(t("Processing…"))
         if wallet_data is None:
             # Camera or SD card loading failed!
             self.flash_error(t("Failed to load"))

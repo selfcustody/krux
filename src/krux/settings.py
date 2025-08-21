@@ -51,7 +51,8 @@ POLICY_TYPE_NAMES = [
     NAME_MINISCRIPT,
 ]
 
-THIN_SPACE = " "
+THIN_SPACE = " "  # "\u2009"
+ELLIPSIS = "…"  # "\u2026"
 
 
 class SettingsNamespace:

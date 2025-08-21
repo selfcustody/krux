@@ -317,11 +317,11 @@ class Display:
         # Append/replace ellipsis on last line if we didn't finish the text
         if line_count == max_lines and start < len(text):
             len_last = len(lines[-1])
-            if len_last + 3 > columns:
-                lines[-1] = lines[-1][: columns - 2] + ".."
-                end += columns - len_last - 3
+            if len_last + 1 > columns:
+                lines[-1] = lines[-1][: columns - 1] + "…"
+                end += columns - len_last - 2
             else:
-                lines[-1] += ".."
+                lines[-1] += "…"
 
         return (lines, end)
 
@@ -330,7 +330,7 @@ class Display:
         start, pages = 0, [0]
         while True:
             lines, end = self.to_lines_endpos(text[start:], max_lines)
-            if len(lines) == max_lines and lines[-1][-2:] == "..":
+            if len(lines) == max_lines and lines[-1][-1:] == "…":
                 start += end
                 pages.append(start)
                 continue
