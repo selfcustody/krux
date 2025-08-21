@@ -37,7 +37,7 @@ class KBoard:
         self.has_touchscreen = board.config["krux"]["display"].get("touch", False)
         self.has_minimal_display = self.is_m5stickv or self.is_cube
         self.can_control_brightness = (
-            self.is_cube or self.is_m5stickv or self.is_wonder_mv
+            self.is_cube or self.is_m5stickv or self.is_wonder_mv or self.is_wonder_k
         )
         self.can_flip_orientation = (
             self.is_yahboom or self.is_wonder_mv or self.is_wonder_k
