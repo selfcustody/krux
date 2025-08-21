@@ -318,10 +318,10 @@ class Display:
         if line_count == max_lines and start < len(text):
             len_last = len(lines[-1])
             if len_last + 3 > columns:
-                lines[-1] = lines[-1][: columns - 3] + "..."
-                end += columns - len_last - 4
+                lines[-1] = lines[-1][: columns - 2] + ".."
+                end += columns - len_last - 3
             else:
-                lines[-1] += "..."
+                lines[-1] += ".."
 
         return (lines, end)
 
@@ -330,7 +330,7 @@ class Display:
         start, pages = 0, [0]
         while True:
             lines, end = self.to_lines_endpos(text[start:], max_lines)
-            if len(lines) == max_lines and lines[-1][-3:] == "...":
+            if len(lines) == max_lines and lines[-1][-2:] == "..":
                 start += end
                 pages.append(start)
                 continue
