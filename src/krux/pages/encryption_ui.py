@@ -403,7 +403,7 @@ class EncryptionKey(Page):
         # Check for presence of character types
         has_upper = any(c.isupper() for c in key_string)
         has_lower = any(c.islower() for c in key_string)
-        has_digit = any(c.isdigit() for c in key_string)
+        has_digit = any(c.isdecimal() for c in key_string)
         has_special = any(not is_alnum(c) for c in key_string)
 
         # Count how many character types are present
