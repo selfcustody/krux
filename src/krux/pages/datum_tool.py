@@ -57,6 +57,8 @@ DATUM_BBQR_TYPES = {
     DATUM_ADDRESS: ["U"],
 }
 
+STATIC_QR_MAX_SIZE = 4  # version 5 - 37x37
+
 
 def urobj_to_data(ur_obj):
     """returns flatened data from a UR object. belongs in qr or qr_capture???"""
@@ -320,7 +322,6 @@ class DatumToolMenu(Page):
                     UPPERCASE_LETTERS,
                     NUM_SPECIAL_1,
                     NUM_SPECIAL_2,
-                    "123456789abcdef0",
                 ],
             )
             if updated == text:
@@ -385,15 +386,21 @@ class DatumTool(Page):
 
     def view_qr(self):
         """Reusable handler for viewing a QR code"""
-        from ..qr import QR_CAPACITY_BYTE, QR_CAPACITY_ALPHANUMERIC
+        from ..qr import QR_CAPACITY_BYTE, QR_CAPACITY_ALPHANUMERIC, QR_CAPACITY_NUMERIC
         from ..bbqr import encode_bbqr
         import urtypes
         from ur.ur import UR
 
-        if isinstance(self.contents, bytes):
-            seedqrview_thresh = QR_CAPACITY_BYTE[4]
-        else:
-            seedqrview_thresh = QR_CAPACITY_ALPHANUMERIC[4]
+        # Helper function to check if character is alphanumeric
+        def is_alnum(c):
+            return ("A" <= c <= "Z") or ("0" <= c <= "9") or c in (" $%*+-./:")
+
+        seedqrview_thresh = QR_CAPACITY_BYTE[STATIC_QR_MAX_SIZE]
+        if not isinstance(self.contents, bytes):
+            if all(c.isdecimal() for c in self.contents):
+                seedqrview_thresh = QR_CAPACITY_NUMERIC[STATIC_QR_MAX_SIZE]
+            elif all(is_alnum(c) for c in self.contents):
+                seedqrview_thresh = QR_CAPACITY_ALPHANUMERIC[STATIC_QR_MAX_SIZE]
 
         if len(self.contents) <= seedqrview_thresh:
             from .encryption_ui import prompt_for_text_update
@@ -419,10 +426,10 @@ class DatumTool(Page):
                     break
                 self.title = updated
 
-            # when not sensitive, allow export to sd
             kvargs = {}
+            # when not sensitive, allow export to sd
             if not self.sensitive:
-                kvargs = {"allow_export": True, "transcript_tools": False}
+                kvargs["allow_export"] = True
 
             seed_qr_view = SeedQRView(self.ctx, data=self.contents, title=self.title)
             seed_qr_view.display_qr(**kvargs)
