@@ -433,7 +433,5 @@ def upgrade():
         os.remove(firmware_path)
         os.remove(firmware_path + ".sig")
 
-    display.flash_text(
-        "Shutting down.."
-    )  # TODO: why does replacing ".." with ellipsis make tests fail?
+    display.flash_text("Shutting down…")
     return True
