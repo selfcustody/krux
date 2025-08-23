@@ -246,6 +246,29 @@ def test_load_wallet_descritor_manager(mocker, amigo, tdata):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_no_passphrase_menu(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Proceed on message
+        BUTTON_ENTER,  # Type passphrase
+        BUTTON_PAGE_PREV,  # Move to Go (passphrase will be "")
+        BUTTON_ENTER,  # Press Go
+        BUTTON_ENTER,  # Confirm no passphrase
+    ]
+
+    FINGERPRINT_NO_PASSPHRASE = "73c5da0a"
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+    assert wallet.key.fingerprint == ctx.wallet.key.fingerprint
+    home = Home(ctx)
+    home.passphrase()
+    assert ctx.wallet.key.fingerprint_hex_str() == FINGERPRINT_NO_PASSPHRASE
+
+
 def test_change_passphrase_menu(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
