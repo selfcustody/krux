@@ -81,6 +81,16 @@ class PassphraseEditor(Page):
             if passphrase in (ESC_KEY, MENU_EXIT):
                 return None
 
+            # if a passphrase is not set, but use press Go,
+            # the passphrase will be equal to "". This is equivalent
+            # to not having a passphrase, but is different
+            # from a None passphrase, which means no passphrase.
+            # Similarly, a passphrase with a space is not allowed.
+            if isinstance(passphrase, str) and len(passphrase) == 0:
+                self.flash_error(t("Failed to load"))
+                self.flash_error(t("Empty passphrase"))
+                return None
+
             from ..themes import theme
             from ..key import Key
 
