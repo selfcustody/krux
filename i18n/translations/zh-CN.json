@@ -73,6 +73,7 @@
     "Driver": "驱动程序",
     "Empty": "为空",
     "Enable?": "启用？",
+    "Empty passphrase": "空密码",
     "Encrypt": "加密",
     "Encrypted": "已加密",
     "Encrypted QR Code": "加密二维码",
