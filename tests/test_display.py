@@ -195,8 +195,8 @@ def test_to_lines(mocker, m5stickv):
         (135, "More Than Two Words", ["More Than Two", "Words"]),  # 13 + 5 chars
         (
             135,
-            "A bunch of words that span multiple lines…",
-            ["A bunch of words", "that span", "multiple lines…"],  # 16 + 9 + 16 chars
+            "A bunch of words that span multiple lines..",
+            ["A bunch of words", "that span", "multiple lines.."],  # 16 + 9 + 16 chars
         ),
         (
             135,
@@ -451,13 +451,59 @@ def test_to_lines_chinese(mocker, m5stickv):
 def test_to_lines_endpos(mocker, m5stickv):
     from krux.display import Display
 
+    # m5stick has max 16 chars per line and 16 lines
+    max_lines = 16
+
     mocker.patch("krux.display.lcd.width", return_value=135)
     text = "I am a long line of text, and I will be repeated." * 30
     d = Display()
     d.to_portrait()
-    lines, endpos = d.to_lines_endpos(text, max_lines=25)
-    assert len(lines) == 25
-    assert endpos == 395
+    lines, endpos = d.to_lines_endpos(text, max_lines)
+    assert len(lines) == max_lines
+    assert endpos == 248
+
+    # test exactly enough to finish the page w/o ellipsis
+    for white in (" ", "\n", "\t"):
+        print("whitespace:", repr(white))
+        text = white.join(
+            ["line {:02d} 16 chars".format(x) for x in range(1, max_lines + 1)]
+        )
+        d = Display()
+        d.to_portrait()
+        lines, endpos = d.to_lines_endpos(text, max_lines)
+        assert len(lines) == max_lines
+        assert endpos == len(text)
+        assert lines[-1][-1] != "\u2026"  # no ellipsis
+
+        # ... and that one char too big would span a page w/ ellipsis
+        text += "+"
+        lines, endpos = d.to_lines_endpos(text, max_lines)
+        print(text, lines)
+        assert len(lines) == max_lines
+        assert endpos == len(text) - len("chars+")
+        assert lines[-1][-1] == "\u2026"  # has ellipsis
+        lines, endpos = d.to_lines_endpos(text[endpos:], max_lines)
+        assert len(lines) == 1
+        assert lines[-1] == "chars+"  # space gets stripped
+
+    # without anywhere convenient to break, force break
+    text = "".join(["line_{:02d}_16_chars".format(x) for x in range(1, max_lines + 1)])
+    d = Display()
+    d.to_portrait()
+    lines, endpos = d.to_lines_endpos(text, max_lines)
+    assert len(lines) == max_lines
+    assert endpos == len(text)
+    assert lines[-1][-1] != "\u2026"  # no ellipsis
+
+    # ... and that one char too big would span a page w/ ellipsis
+    text += "+"
+    lines, endpos = d.to_lines_endpos(text, max_lines)
+    assert len(lines) == max_lines
+    assert endpos == len(text) - len("s+")
+    assert lines[-1][-1] == "\u2026"  # has ellipsis
+    lines, endpos = d.to_lines_endpos(text[endpos:], max_lines)
+    assert len(lines) == 1
+    assert lines[-1] == "s+"
 
 
 def test_index_pages(mocker, m5stickv):

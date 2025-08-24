@@ -604,7 +604,7 @@ class PSBTSigner:
                     )
                     if fingerprint_srt not in fingerprints:
                         if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:
-                            fingerprints[-1] = "..."
+                            fingerprints[-1] = ELLIPSIS
                             break
                         fingerprints.append(fingerprint_srt)
 

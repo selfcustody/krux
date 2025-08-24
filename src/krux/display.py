@@ -24,7 +24,7 @@ import board
 import time
 from .themes import theme
 from .krux_settings import Settings
-from .settings import THIN_SPACE
+from .settings import THIN_SPACE, ELLIPSIS
 from .kboard import kboard
 
 DEFAULT_PADDING = 10
@@ -282,46 +282,54 @@ class Display:
             max_lines = TOTAL_LINES
 
         while start < len(text) and line_count < max_lines:
-            # Find the next line break, if any
-            line_break = text.find("\n", start)
-            if line_break == -1:
-                next_break = len(text)
-            else:
-                next_break = min(line_break + 1, len(text))
+            # jump horizontal whitespace at start of line
+            while text[start : start + 1] in (" ", "\t"):
+                start += 1
 
-            end = start + columns + 1
-            # If next segment fits on one line, add it and continue
-            if end > next_break:
-                end = next_break
+            # by default, will force-break
+            end = start + columns
+
+            # break early for a newline
+            next_break = text.find("\n", start, end + 1)
+            if next_break > -1:
+                # If next segment fits on one line, add it and continue
+                end = next_break + 1
                 lines.append(text[start:end].rstrip())
                 start = end
                 line_count += 1
                 continue
 
-            # If the end of the line is in the middle of a word,
-            # move the end back to the end of the previous word
-            if text[end - 1 : end] != " " and text[end - 1 : end] != "\n":
-                end = text.rfind(" ", start, end)
+            # best break is whitespace/end after force-break
+            if text[end : end + 1] in (" ", "\t", ""):
+                lines.append(text[start:end].rstrip())
+                start = end
+                line_count += 1
+                continue
 
-            # If there is no space, force break the word
-            if end == -1 or end < start:
-                end = start + columns
+            # next best break is horizontal whitespace nearest force-break
+            next_break = max(
+                text.rfind(" ", start, end),
+                text.rfind("\t", start, end),
+            )
+            if next_break > -1:
+                end = next_break + 1
+                lines.append(text[start:end].rstrip())
+                start = end
+                line_count += 1
+                continue
 
+            # force-break
             lines.append(text[start:end].rstrip())
-            # don't jump space if we're breaking a word
-            jump_space = 1 if text[end] == " " else 0
-            end += jump_space
             start = end
             line_count += 1
 
-        # Append/replace ellipsis on last line if we didn't finish the text
-        if line_count == max_lines and start < len(text):
-            len_last = len(lines[-1])
-            if len_last + 1 > columns:
-                lines[-1] = lines[-1][: columns - 1] + "…"
-                end += columns - len_last - 2
+        # replace/append ellipsis on last line if we didn't finish the text
+        if line_count == max_lines and end < len(text):
+            if len(lines[-1]) == columns:
+                lines[-1] = lines[-1][: columns - 1] + ELLIPSIS
+                end -= 1
             else:
-                lines[-1] += "…"
+                lines[-1] += ELLIPSIS
 
         return (lines, end)
 
@@ -330,7 +338,7 @@ class Display:
         start, pages = 0, [0]
         while True:
             lines, end = self.to_lines_endpos(text[start:], max_lines)
-            if len(lines) == max_lines and lines[-1][-1:] == "…":
+            if len(lines) == max_lines and lines[-1][-1] == ELLIPSIS:
                 start += end
                 pages.append(start)
                 continue
