@@ -26,7 +26,7 @@ import urtypes
 from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_decode
 from .krux_settings import t
-from .settings import THIN_SPACE
+from .settings import THIN_SPACE, ELLIPSIS
 from .qr import FORMAT_PMOFN, FORMAT_BBQR
 from .key import Key, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 from .sats_vb import SatsVB
@@ -593,7 +593,7 @@ class PSBTSigner:
                     )
                     if fingerprint_srt not in fingerprints:
                         if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:
-                            fingerprints[-1] = "..."
+                            fingerprints[-1] = ELLIPSIS
                             break
                         fingerprints.append(fingerprint_srt)
             elif self.policy["type"] == P2TR:

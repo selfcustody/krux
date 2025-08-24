@@ -227,6 +227,8 @@ class DiceEntropy(Page):
 
     def new_key(self):
         """Create a new key from dice rolls"""
+        from ...settings import ELLIPSIS
+
         len_mnemonic = choose_len_mnemonic(self.ctx)
         if not len_mnemonic:
             return None
@@ -261,7 +263,7 @@ class DiceEntropy(Page):
                     )
                     buffer_title = entropy
                     if len(entropy) > 10:
-                        buffer_title = "..." + entropy[-10:]
+                        buffer_title = ELLIPSIS + entropy[-10:]
                     roll = self.capture_from_keypad(
                         dice_title,
                         [self.roll_states],

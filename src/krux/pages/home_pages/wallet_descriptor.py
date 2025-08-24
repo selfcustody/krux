@@ -229,7 +229,7 @@ class WalletDescriptor(Page):
 
     def display_loading_wallet(self, wallet):
         """Displays wallet descriptor attributes while loading"""
-        from ...settings import THIN_SPACE
+        from ...settings import THIN_SPACE, ELLIPSIS
 
         def draw_header():
             nonlocal offset_y
@@ -343,6 +343,6 @@ class WalletDescriptor(Page):
                         )
                 offset_y += FONT_HEIGHT
                 if offset_y >= BOTTOM_PROMPT_LINE:
-                    self.ctx.display.draw_hcentered_text("...", offset_y)
+                    self.ctx.display.draw_hcentered_text(ELLIPSIS, offset_y)
                     self.ctx.input.wait_for_button()
                     draw_header()

@@ -433,5 +433,5 @@ def upgrade():
         os.remove(firmware_path)
         os.remove(firmware_path + ".sig")
 
-    display.flash_text("Shutting down…")
+    display.flash_text(t("Shutting down…"))
     return True

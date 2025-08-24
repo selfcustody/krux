@@ -333,7 +333,7 @@ class Login(Page):
             wallet_info += "\n" + (
                 t("No Passphrase")
                 if not passphrase
-                else t("Passphrase") + " (%d): *..*" % len(passphrase)
+                else t("Passphrase") + " (%d): *…*" % len(passphrase)
             )
 
             self.ctx.display.clear()
