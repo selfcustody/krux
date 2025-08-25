@@ -520,6 +520,41 @@ def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_load_camera_fails_on_decrypt_kef_key_error(mocker, m5stickv):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages import MENU_CONTINUE
+
+    # nonsensical 0x8f byte encrypted w/ key="a" to test decryption failure
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x84\x2b\x2c",
+            0,
+        ),
+    )
+
+    btn_seq = [
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # type key
+        BUTTON_PAGE,  # to "b"
+        BUTTON_ENTER,  # enter "b"
+        BUTTON_PAGE_PREV,  # back to "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key "b" (while "a" is correct key)
+    ]
+    ctx = create_ctx(mocker, btn_seq)
+    login = Login(ctx)
+    assert login.load_key_from_qr_code() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    ctx.display.flash_text.assert_called_with(
+        "Failed to decrypt", 248, 2000, highlight_prefix=""
+    )
+
+
 ############### load words from text tests
 
 

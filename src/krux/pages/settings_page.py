@@ -452,22 +452,31 @@ class SettingsPage(Page):
     def _category_change_exit_check(
         self, settings_namespace, setting, starting_category
     ):
-        if setting.attr in ("locale", "hide_mnemonic"):
-            # If locale or hide changed, needs to recreate Login
-            if setting.__get__(settings_namespace) != starting_category:
+        # Check if category changed
+        if setting.__get__(settings_namespace) != starting_category:
+            if setting.attr in ("locale", "hide_mnemonic"):
+                # If locale or hide changed, needs to recreate Login
                 return MENU_EXIT
-        elif setting.attr == "theme":
-            self.ctx.display.clear()
-            if self.prompt(
-                t("Change theme and reboot?"), self.ctx.display.height() // 2
-            ):
-                self._settings_exit_check()
+            if setting.attr == "theme":
                 self.ctx.display.clear()
-                self.ctx.power_manager.reboot()
-                return MENU_EXIT  # In case reboot fails
-            # Restore previous theme
-            setting.__set__(settings_namespace, starting_category)
-            theme.update()
+                if self.prompt(
+                    t("Change theme and reboot?"), self.ctx.display.height() // 2
+                ):
+                    self._settings_exit_check()
+                    self.ctx.display.clear()
+                    self.ctx.power_manager.reboot()
+                    return MENU_EXIT  # In case reboot fails
+                # Restore previous theme
+                setting.__set__(settings_namespace, starting_category)
+                theme.update()
+            if setting.attr == "flipped_orientation":
+                # need to recreate camera singleton
+                from ..camera import Camera
+
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(t("Processing.."))
+
+                self.ctx.camera = Camera()
 
         return MENU_CONTINUE
 

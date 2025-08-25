@@ -203,11 +203,11 @@ def extract_calver(context):
         try:
             chunk = context[i : i + CALVER_SIZE].decode("ascii")
             if (
-                chunk[:2].isdigit()
+                chunk[:2].isdecimal()
                 and chunk[2] == "."
-                and chunk[3:5].isdigit()
+                and chunk[3:5].isdecimal()
                 and chunk[5] == "."
-                and chunk[6:].isdigit()
+                and chunk[6:].isdecimal()
             ):
                 return chunk
         except:

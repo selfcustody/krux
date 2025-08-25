@@ -294,6 +294,7 @@ class Cipher:
             raise ValueError("Invalid call to ._authenticate()")
 
         # some modes need to unpad
+        len_pre_unpad = len(decrypted)
         if v_pkcs_pad in (False, True):
             decrypted = _unpad(decrypted, pkcs_pad=v_pkcs_pad)
 
@@ -314,8 +315,8 @@ class Cipher:
         max_attempts = 1
         if v_pkcs_pad is False:
             # NUL padding is imperfect, still attempt to authenticate -- up to a limit...
-            # ... of abs(v_auth) + 2 times (ie: auth is all 0x00 + plaintext ends 2 * 0x00)
-            max_attempts = abs(v_auth) + 2
+            # ... lesser of num bytes unpadded and auth size+1, + 1
+            max_attempts = min(len_pre_unpad - len(decrypted), abs(v_auth) + 1) + 1
 
         for _ in range(max_attempts):
             if v_auth > 0:

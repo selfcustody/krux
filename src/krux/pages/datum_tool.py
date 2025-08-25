@@ -38,6 +38,14 @@ from .encryption_ui import (
 )
 from ..display import FONT_WIDTH, FONT_HEIGHT, DEFAULT_PADDING, TOTAL_LINES
 from ..krux_settings import t
+from ..input import (
+    BUTTON_PAGE,
+    SWIPE_LEFT,
+    SWIPE_UP,
+    BUTTON_PAGE_PREV,
+    SWIPE_RIGHT,
+    SWIPE_DOWN,
+)
 
 DATUM_DESCRIPTOR = "DESC"
 DATUM_PSBT = "PSBT"
@@ -56,6 +64,8 @@ DATUM_BBQR_TYPES = {
     DATUM_XPUB: ["U"],
     DATUM_ADDRESS: ["U"],
 }
+
+STATIC_QR_MAX_SIZE = 4  # version 5 - 37x37
 
 
 def urobj_to_data(ur_obj):
@@ -124,7 +134,7 @@ def identify_datum(data):
     if isinstance(data, bytes):
         if data[:5] == b"psbt\xff":
             datum = DATUM_PSBT
-    else:
+    elif len(data) > 33:
         encodings = detect_encodings(data)
 
         if data[:1] in "xyzYZtuvUV" and data[1:4] == "pub" and 58 in encodings:
@@ -258,11 +268,12 @@ def detect_encodings(str_data, verify=True):
     if ord(max_chr) <= 127:
         encodings.append("ascii")
 
-    # might it be latin-1 or utf8
+    # might it be latin-1
     if 128 <= ord(max_chr) <= 255:
         encodings.append("latin-1")
-    else:
-        encodings.append("utf8")
+
+    # assume utf8
+    encodings.append("utf8")
 
     return encodings
 
@@ -276,9 +287,9 @@ class DatumToolMenu(Page):
             Menu(
                 ctx,
                 [
-                    (t("Scan a QR"), self.scan_qr),
-                    (t("Text Entry"), self.text_entry),
-                    (t("Read File"), self.read_file),
+                    (t("Via Camera"), self.scan_qr),
+                    (t("Via Manual Input"), self.text_entry),
+                    (t("From Storage"), self.read_file),
                 ],
             ),
         )
@@ -320,7 +331,6 @@ class DatumToolMenu(Page):
                     UPPERCASE_LETTERS,
                     NUM_SPECIAL_1,
                     NUM_SPECIAL_2,
-                    "123456789abcdef0",
                 ],
             )
             if updated == text:
@@ -385,15 +395,21 @@ class DatumTool(Page):
 
     def view_qr(self):
         """Reusable handler for viewing a QR code"""
-        from ..qr import QR_CAPACITY_BYTE, QR_CAPACITY_ALPHANUMERIC
+        from ..qr import QR_CAPACITY_BYTE, QR_CAPACITY_ALPHANUMERIC, QR_CAPACITY_NUMERIC
         from ..bbqr import encode_bbqr
         import urtypes
         from ur.ur import UR
 
-        if isinstance(self.contents, bytes):
-            seedqrview_thresh = QR_CAPACITY_BYTE[4]
-        else:
-            seedqrview_thresh = QR_CAPACITY_ALPHANUMERIC[4]
+        # Helper function to check if character is alphanumeric
+        def is_alnum(c):
+            return ("A" <= c <= "Z") or ("0" <= c <= "9") or c in (" $%*+-./:")
+
+        seedqrview_thresh = QR_CAPACITY_BYTE[STATIC_QR_MAX_SIZE]
+        if not isinstance(self.contents, bytes):
+            if all(c.isdecimal() for c in self.contents):
+                seedqrview_thresh = QR_CAPACITY_NUMERIC[STATIC_QR_MAX_SIZE]
+            elif all(is_alnum(c) for c in self.contents):
+                seedqrview_thresh = QR_CAPACITY_ALPHANUMERIC[STATIC_QR_MAX_SIZE]
 
         if len(self.contents) <= seedqrview_thresh:
             from .encryption_ui import prompt_for_text_update
@@ -419,10 +435,10 @@ class DatumTool(Page):
                     break
                 self.title = updated
 
-            # when not sensitive, allow export to sd
             kvargs = {}
+            # when not sensitive, allow export to sd
             if not self.sensitive:
-                kvargs = {"allow_export": True}
+                kvargs["allow_export"] = True
 
             seed_qr_view = SeedQRView(self.ctx, data=self.contents, title=self.title)
             seed_qr_view.display_qr(**kvargs)
@@ -485,12 +501,11 @@ class DatumTool(Page):
                 )
             except Exception as err:
                 self.flash_error(
-                    "TODO UR (crypto-account/crypto-descr/etc): "
-                    + repr(menu_opts[idx])
-                    + ")\n"
-                    + str(err)
+                    "Failed encoding ({}), try as bytes. {}".format(
+                        repr(menu_opts[idx]),
+                        str(err),
+                    )
                 )
-                self.view_qr()
 
         return MENU_CONTINUE
 
@@ -503,10 +518,10 @@ class DatumTool(Page):
             self.contents,
             self.title.split(",")[-1].replace(" ", "_"),
             save_as_binary=isinstance(self.contents, bytes),
-            prompt=True,
+            prompt=False,
         )
 
-    def _info_box(self, preview=True):
+    def _info_box(self, preview=True, about_suffix=""):
         """clears screen, displays info_box, returns height-in-lines"""
         from binascii import hexlify
 
@@ -522,10 +537,21 @@ class DatumTool(Page):
                             ",".join([str(x) for x in self.encodings]),
                         ]
                     ),
-                    (self.datum + " " if self.datum else "") + self.about,
+                    " ".join(
+                        [
+                            x
+                            for x in [
+                                self.about,
+                                self.datum,
+                                about_suffix,
+                            ]
+                            if x
+                        ]
+                    ),
                 ]
             ),
             info_box=True,
+            highlight_prefix=":",
         )
         if preview:
             num_lines += 1
@@ -546,17 +572,45 @@ class DatumTool(Page):
         """Displays infobox and contents"""
         from binascii import hexlify
 
-        info_len = self._info_box(preview=False)
-        self.ctx.display.draw_hcentered_text(
+        info_len = self._info_box(preview=False, about_suffix="pX/Y")
+        max_lines = TOTAL_LINES - (info_len + 2)
+        pages = self.ctx.display.index_pages(
             (
-                '"' + self.contents + '"'
+                self.contents
                 if isinstance(self.contents, str)
-                else "0x" + hexlify(self.contents).decode()
+                else hexlify(self.contents).decode()
             ),
-            offset_y=DEFAULT_PADDING + (info_len + 1) * FONT_HEIGHT,
-            max_lines=TOTAL_LINES - (info_len + 2),
+            max_lines,
         )
-        self.ctx.input.wait_for_button()
+
+        page = 0
+        while True:
+            start = pages[page]
+            if len(pages) < 10:
+                page_indicator = "p{}/{}".format(page + 1, len(pages))
+            else:
+                page_indicator = "p{}".format(page + 1)
+
+            info_len = self._info_box(preview=False, about_suffix=page_indicator)
+            offset_y = DEFAULT_PADDING + (info_len + 1) * FONT_HEIGHT
+            for line in self.ctx.display.to_lines(
+                (
+                    self.contents[start:]
+                    if isinstance(self.contents, str)
+                    else hexlify(self.contents).decode()[start:]
+                ),
+                max_lines,
+            ):
+                self.ctx.display.draw_string(DEFAULT_PADDING, offset_y, line)
+                offset_y += FONT_HEIGHT
+
+            btn = self.ctx.input.wait_for_button()
+            if btn in (BUTTON_PAGE, SWIPE_UP, SWIPE_LEFT):
+                page = (page + 1) % len(pages)
+            elif btn in (BUTTON_PAGE_PREV, SWIPE_DOWN, SWIPE_RIGHT):
+                page = (page - 1) % len(pages)
+            else:
+                break
 
     def _analyze_contents(self):
         """
@@ -643,11 +697,11 @@ class DatumTool(Page):
 
         if not offer_convert:
             menu.append((t("Convert Datum"), lambda: "convert_begin"))
-            menu.append((t("Export to QR"), lambda: "export_qr"))
+            menu.append((t("QR Code"), lambda: "export_qr"))
 
             # when not sensitive, allow export to sd
             if not self.sensitive:
-                menu.append((t("Export to SD"), lambda: "export_sd"))
+                menu.append((t("Save to SD card"), lambda: "export_sd"))
 
         else:
             if isinstance(self.contents, bytes):
@@ -685,7 +739,10 @@ class DatumTool(Page):
 
             if self.history:
                 for i, option in enumerate(menu):
-                    if option[1]() == self.history[-1]:
+                    if (
+                        option[1]() in ("HEX", "hex")
+                        and self.history[-1] in ("HEX", "hex")
+                    ) or option[1]() == self.history[-1]:
                         menu[i] = (option[0] + " (" + t("Undo") + ")", lambda: "undo")
                         break
 

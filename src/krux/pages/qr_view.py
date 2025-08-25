@@ -99,10 +99,7 @@ class SeedQRView(Page):
         max_width = self.ctx.display.width()
         if zoom:
             max_width -= DEFAULT_PADDING
-            if self.qr_size == 21:
-                qr_size = 7
-            else:
-                qr_size = 5
+            qr_size = self.region_size
             offset_x = 0
             offset_y = 0
             scale = max_width // qr_size

@@ -335,7 +335,7 @@ def test_to_lines(mocker, m5stickv):
     cut_text = [
         "A really long text. A",
         "really long text. A really",
-        "long text. A really long...",
+        "long text. A really long..",
     ]
     assert lines == cut_text
 
@@ -446,6 +446,28 @@ def test_to_lines_chinese(mocker, m5stickv):
 
     lcd.string_has_wide_glyph.assert_called_once_with("你好")
     assert result == ["你好"]
+
+
+def test_to_lines_endpos(mocker, m5stickv):
+    from krux.display import Display
+
+    mocker.patch("krux.display.lcd.width", return_value=135)
+    text = "I am a long line of text, and I will be repeated." * 30
+    d = Display()
+    d.to_portrait()
+    lines, endpos = d.to_lines_endpos(text, max_lines=25)
+    assert len(lines) == 25
+    assert endpos == 394
+
+
+def test_index_pages(mocker, m5stickv):
+    from krux.display import Display
+
+    mocker.patch("krux.display.lcd.width", return_value=135)
+    text = "I am some text." * 100
+    d = Display()
+    d.to_portrait()
+    assert d.index_pages(text, max_lines=25) == [0, 376, 751, 1126]
 
 
 def test_outline(mocker, m5stickv):

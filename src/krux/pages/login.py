@@ -331,7 +331,9 @@ class Login(Page):
                 network_name, policy_type, script_type, derivation_path, True
             )
             wallet_info += "\n" + (
-                t("No Passphrase") if not passphrase else t("Passphrase") + ": *..*"
+                t("No Passphrase")
+                if not passphrase
+                else t("Passphrase") + " (%d): *..*" % len(passphrase)
             )
 
             self.ctx.display.clear()
@@ -484,7 +486,11 @@ class Login(Page):
 
         try:
             data = decrypt_kef(self.ctx, data)
-        except:
+        except KeyError:
+            self.flash_error(t("Failed to decrypt"))
+            return MENU_CONTINUE
+        except ValueError:
+            # ValueError=not KEF or declined to decrypt
             pass
 
         words = []
