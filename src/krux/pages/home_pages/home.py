@@ -195,10 +195,8 @@ class Home(Page):
                 (t("Message"), self.sign_message),
             ],
         )
-        index, status = submenu.run_loop()
-        if index == submenu.back_index:
-            return MENU_CONTINUE
-        return status
+        submenu.run_loop()
+        return MENU_CONTINUE
 
     def load_psbt(self):
         """Loads a PSBT from camera or SD card"""
