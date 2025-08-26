@@ -140,6 +140,8 @@ def test_change_policy_types(m5stickv, mocker, tdata):
         BUTTON_PAGE,  # Change to Multisig
         BUTTON_ENTER,  # Confirm Multisig
         BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave policy type menu
+        BUTTON_PAGE_PREV,  # Go to Back
         BUTTON_ENTER,  # Leave
     ]
 
@@ -335,6 +337,186 @@ def test_change_script_type(m5stickv, mocker, tdata):
     )
     assert ctx.wallet.key.script_type == "p2pkh"
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE_2)
+
+    # Change to nested segwit single-sig
+    BTN_SEQUENCE_3 = [
+        *([BUTTON_PAGE] * 2),  # Go to "Script Type"
+        BUTTON_ENTER,  # Enter "Script Type"
+        BUTTON_PAGE,  # Change from Legacy to Nested Segwit
+        BUTTON_ENTER,  # Confirm Nested Segwit
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE_3, ctx.wallet)
+    wallet_settings = WalletSettings(ctx)
+    network, policy_type, script_type, account, derivation_path = (
+        wallet_settings.customize_wallet(ctx.wallet.key)
+    )
+    ctx.wallet = Wallet(
+        Key(
+            mnemonic,
+            policy_type,
+            network,
+            "",  # passphrase
+            account,
+            script_type,
+        )
+    )
+    assert ctx.wallet.key.script_type == "p2sh-p2wpkh"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE_3)
+
+    # Change native segwit single-sig
+    BTN_SEQUENCE_4 = [
+        *([BUTTON_PAGE] * 2),  # Go to "Script Type"
+        BUTTON_ENTER,  # Enter "Script Type"
+        *([BUTTON_PAGE] * 2),  # Change from Legacy to Native Segwit
+        BUTTON_ENTER,  # Confirm Native Segwit
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE_4, ctx.wallet)
+    wallet_settings = WalletSettings(ctx)
+    network, policy_type, script_type, account, derivation_path = (
+        wallet_settings.customize_wallet(ctx.wallet.key)
+    )
+    ctx.wallet = Wallet(
+        Key(
+            mnemonic,
+            policy_type,
+            network,
+            "",  # passphrase
+            account,
+            script_type,
+        )
+    )
+    assert ctx.wallet.key.script_type == "p2wpkh"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE_4)
+
+
+def test_change_multisig_script_types(m5stickv, mocker, tdata):
+    from krux.pages.wallet_settings import WalletSettings
+    from krux.wallet import Wallet
+    from krux.key import Key, TYPE_MULTISIG
+    from krux.pages import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    # Start with p2sh multisig, move to change to another script type, but back out
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # Go to "Policy Type"
+        BUTTON_ENTER,  # Enter "Policy Type"
+        BUTTON_PAGE,  # Change to Multisig
+        BUTTON_ENTER,  # Confirm Multisig
+        BUTTON_ENTER,  # Choose Legacy - 45
+        *([BUTTON_PAGE] * 2),  # Move to script type
+        BUTTON_ENTER,  # Enter "Script Type"
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, Wallet(tdata.SINGLESIG_12_WORD_KEY))
+    wallet_settings = WalletSettings(ctx)
+    mnemonic = ctx.wallet.key.mnemonic
+    network, policy_type, script_type, account, derivation_path = (
+        wallet_settings.customize_wallet(ctx.wallet.key)
+    )
+    ctx.wallet = Wallet(
+        Key(
+            mnemonic,
+            policy_type,
+            network,
+            "",  # passphrase
+            account,
+            script_type,
+        )
+    )
+
+    # assert wallet is legacy multisig sh
+    assert ctx.wallet.is_multisig() is True
+    assert ctx.wallet.is_miniscript() is False
+    assert ctx.wallet.key.policy_type == TYPE_MULTISIG
+    assert ctx.wallet.key.script_type == "p2sh"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # Change to nested segwit multisig
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # Go to "Policy Type"
+        BUTTON_ENTER,  # Enter "Policy Type"
+        BUTTON_PAGE,  # Change to Multisig
+        BUTTON_ENTER,  # Confirm Multisig
+        BUTTON_PAGE,  # Choose Nested Segwit - 48
+        BUTTON_ENTER,  # Choose Nested Segwit - 48
+        *([BUTTON_PAGE] * 2),  # Move to script type
+        BUTTON_ENTER,  # Enter "Script Type"
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, Wallet(tdata.SINGLESIG_12_WORD_KEY))
+    wallet_settings = WalletSettings(ctx)
+    mnemonic = ctx.wallet.key.mnemonic
+    network, policy_type, script_type, account, derivation_path = (
+        wallet_settings.customize_wallet(ctx.wallet.key)
+    )
+    ctx.wallet = Wallet(
+        Key(
+            mnemonic,
+            policy_type,
+            network,
+            "",  # passphrase
+            account,
+            script_type,
+        )
+    )
+
+    # assert wallet is legacy multisig sh
+    assert ctx.wallet.is_multisig() is True
+    assert ctx.wallet.is_miniscript() is False
+    assert ctx.wallet.key.policy_type == TYPE_MULTISIG
+    assert ctx.wallet.key.script_type == "p2sh-p2wsh"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # Change to native segwit multisig
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # Go to "Policy Type"
+        BUTTON_ENTER,  # Enter "Policy Type"
+        BUTTON_PAGE,  # Change to Multisig
+        BUTTON_ENTER,  # Confirm Multisig
+        *([BUTTON_PAGE] * 2),  # Choose Native Segwit - 48
+        BUTTON_ENTER,  # Choose Native Segwit - 48
+        *([BUTTON_PAGE] * 2),  # Move to script type
+        BUTTON_ENTER,  # Enter "Script Type"
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, Wallet(tdata.SINGLESIG_12_WORD_KEY))
+    wallet_settings = WalletSettings(ctx)
+    mnemonic = ctx.wallet.key.mnemonic
+    network, policy_type, script_type, account, derivation_path = (
+        wallet_settings.customize_wallet(ctx.wallet.key)
+    )
+    ctx.wallet = Wallet(
+        Key(
+            mnemonic,
+            policy_type,
+            network,
+            "",  # passphrase
+            account,
+            script_type,
+        )
+    )
+
+    # assert wallet is legacy multisig sh
+    assert ctx.wallet.is_multisig() is True
+    assert ctx.wallet.is_miniscript() is False
+    assert ctx.wallet.key.policy_type == TYPE_MULTISIG
+    assert ctx.wallet.key.script_type == "p2wsh"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_change_account(m5stickv, mocker, tdata):
@@ -540,21 +722,22 @@ def test_change_derivation_path_not_hardened_node(amigo, mocker, tdata):
     from krux.key import Key
     from krux.pages import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
+    # test derivation path with non-hardened node for multisig p2sh
+    # should not get warning/prompt as last node is hardened
     BTN_SEQUENCE = [
         BUTTON_PAGE,  # Go to "Policy Type"
         BUTTON_ENTER,  # Enter "Policy Type"
-        *([BUTTON_PAGE] * 2),  # Change to Miniscript
-        BUTTON_ENTER,  # Confirm Miniscript
-        BUTTON_PAGE,  # Change from Native Segwit to Taproot
-        BUTTON_ENTER,  # Confirm Taproot
+        BUTTON_PAGE,  # Change to Multisig
+        BUTTON_ENTER,  # Confirm Multisig
+        BUTTON_ENTER,  # Choose Legacy - 45
         *([BUTTON_PAGE] * 3),  # Go to "Derivation Path"
         BUTTON_ENTER,  # Enter "Derivation Path"
-        *([BUTTON_PAGE_PREV] * 3),  # Move to "Del"
-        BUTTON_ENTER,  # Del last "h" from the derivation path
-        *([BUTTON_PAGE] * 2),  # Move to "Go"
+        *([BUTTON_PAGE_PREV] * 5),  # Move to "/"
+        BUTTON_ENTER,  # Add "/"
+        BUTTON_PAGE_PREV,  # Move to "0"
+        BUTTON_ENTER,  # Add "0"
+        *([BUTTON_PAGE] * 5),  # Move to "Go"
         BUTTON_ENTER,  # Go
-        # Get not hardened warning/pompt
-        BUTTON_ENTER,  # Accept warning
         BUTTON_PAGE_PREV,  # Go to Back
         BUTTON_ENTER,  # Leave
     ]
@@ -562,6 +745,8 @@ def test_change_derivation_path_not_hardened_node(amigo, mocker, tdata):
     ctx = create_ctx(mocker, BTN_SEQUENCE, Wallet(tdata.SINGLESIG_12_WORD_KEY))
     mnemonic = ctx.wallet.key.mnemonic
     wallet_settings = WalletSettings(ctx)
+    mocker.spy(wallet_settings, "prompt")
+
     network, policy_type, script_type, account, derivation_path = (
         wallet_settings.customize_wallet(ctx.wallet.key)
     )
@@ -577,5 +762,147 @@ def test_change_derivation_path_not_hardened_node(amigo, mocker, tdata):
         )
     )
 
+    assert ctx.wallet.key.derivation_str() == "m/45h/0"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    wallet_settings.prompt.assert_not_called()
+
+    # Test derivation path with non-hardened node for miniscript p2wsh
+    # should get warning/prompt as last node is not hardened
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # Go to "Policy Type"
+        BUTTON_ENTER,  # Enter "Policy Type"
+        *([BUTTON_PAGE] * 2),  # Change to Miniscript
+        BUTTON_ENTER,  # Confirm Miniscript
+        BUTTON_ENTER,  # Confirm Native Segwit
+        *([BUTTON_PAGE] * 3),  # Go to "Derivation Path"
+        BUTTON_ENTER,  # Enter "Derivation Path"
+        *([BUTTON_PAGE_PREV] * 3),  # Move to "Del"
+        BUTTON_ENTER,  # Del last "h" from the derivation path
+        *([BUTTON_PAGE] * 2),  # Move to "Go"
+        BUTTON_ENTER,  # Go
+        # Get not hardened warning/prompt, but not accept it
+        BUTTON_PAGE_PREV,  # Move to "No"
+        BUTTON_ENTER,  # Do not accept warning
+        BUTTON_PAGE_PREV,  # Move to "Go"
+        BUTTON_ENTER,  # Go
+        # Get not hardened warning/prompt, accept it this time
+        BUTTON_ENTER,  # Accept warning
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, Wallet(tdata.SINGLESIG_12_WORD_KEY))
+    mnemonic = ctx.wallet.key.mnemonic
+    wallet_settings = WalletSettings(ctx)
+    mocker.spy(wallet_settings, "prompt")
+
+    network, policy_type, script_type, account, derivation_path = (
+        wallet_settings.customize_wallet(ctx.wallet.key)
+    )
+    ctx.wallet = Wallet(
+        Key(
+            mnemonic,
+            policy_type,
+            network,
+            "",  # passphrase
+            account,
+            script_type,
+            derivation_path,
+        )
+    )
+
+    prompt_calls = [
+        *(
+            [
+                mocker.call(
+                    "".join(
+                        [
+                            "Some nodes are not hardened:",
+                            "\n\n",
+                            "Node 3: 2",
+                            "\n\n",
+                            "Proceed?",
+                        ]
+                    ),
+                    ctx.display.height() // 2,
+                    highlight_prefix=":",
+                )
+            ]
+            * 2
+        )
+    ]
+
     assert ctx.wallet.key.derivation_str() == "m/48h/0h/0h/2"
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    wallet_settings.prompt.assert_has_calls(prompt_calls)
+
+    # Test derivation path with non-hardened node for miniscript p2tr
+    # should get warning/prompt as last node is not hardened
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # Go to "Policy Type"
+        BUTTON_ENTER,  # Enter "Policy Type"
+        *([BUTTON_PAGE] * 2),  # Change to Miniscript
+        BUTTON_ENTER,  # Confirm Miniscript
+        BUTTON_PAGE,  # Change from Native Segwit to Taproot
+        BUTTON_ENTER,  # Confirm Taproot
+        *([BUTTON_PAGE] * 3),  # Go to "Derivation Path"
+        BUTTON_ENTER,  # Enter "Derivation Path"
+        *([BUTTON_PAGE_PREV] * 3),  # Move to "Del"
+        BUTTON_ENTER,  # Del last "h" from the derivation path
+        *([BUTTON_PAGE] * 2),  # Move to "Go"
+        BUTTON_ENTER,  # Go
+        # Get not hardened warning/prompt, but not accept it
+        BUTTON_PAGE_PREV,  # Move to "No"
+        BUTTON_ENTER,  # Do not accept warning
+        BUTTON_PAGE_PREV,  # Move to "Go"
+        BUTTON_ENTER,  # Go
+        # Get not hardened warning/prompt, accept it this time
+        BUTTON_ENTER,  # Accept warning
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, Wallet(tdata.SINGLESIG_12_WORD_KEY))
+    mnemonic = ctx.wallet.key.mnemonic
+    wallet_settings = WalletSettings(ctx)
+    mocker.spy(wallet_settings, "prompt")
+
+    network, policy_type, script_type, account, derivation_path = (
+        wallet_settings.customize_wallet(ctx.wallet.key)
+    )
+    ctx.wallet = Wallet(
+        Key(
+            mnemonic,
+            policy_type,
+            network,
+            "",  # passphrase
+            account,
+            script_type,
+            derivation_path,
+        )
+    )
+
+    prompt_calls = [
+        *(
+            [
+                mocker.call(
+                    "".join(
+                        [
+                            "Some nodes are not hardened:",
+                            "\n\n",
+                            "Node 3: 2",
+                            "\n\n",
+                            "Proceed?",
+                        ]
+                    ),
+                    ctx.display.height() // 2,
+                    highlight_prefix=":",
+                )
+            ]
+            * 2
+        )
+    ]
+
+    assert ctx.wallet.key.derivation_str() == "m/48h/0h/0h/2"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    wallet_settings.prompt.assert_has_calls(prompt_calls)
