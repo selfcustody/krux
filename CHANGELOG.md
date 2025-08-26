@@ -61,6 +61,7 @@ A new advanced utility for working with files, QRs, and manual text input. It su
 - Hide the "Change Addresses" menu option when cannot be determined by the wallet descriptor.
 - The hide mnemonic setting now ignores user confirmation when loading a mnemonic via word numbers.
 - Minor text improvements for clarity and easier translation.
+- Maixpy Fix: Increase glyphs indexing capacity affecting Amigo's translations
 
 
 # Changelog 25.03.0 - March 2025
