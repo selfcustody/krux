@@ -68,10 +68,10 @@ def open_bdf_save_kff(filename, width, height):
         save_file.write(font_hex_merged)
 
     # Creates the Krux font file, to be used on each project
-    # font.c file: ../MaixPy/projects/<device_name>/compile/
-    # overrides/components/micropython/port/src/omv/img/font.c
+    # font_device.h file: ../MaixPy/projects/<device_name>/compile/
+    # overrides/components/micropython/port/src/omv/img/include/font_device.h
     # in order to replace the contents of the unicode[] variable
-    #  in the font.c
+    #  in the font_device.h
     wide_glyphs = None
     if filename in (WIDE14, WIDE16, WIDE24):
         wide_glyphs = ["ko-KR", "zh-CN", "ja-JP"]
@@ -84,9 +84,9 @@ def open_bdf_save_kff(filename, width, height):
 
 
 def save_new_fontc(font_name, overwrite=False):
-    """If overwrite=True them overwrite the content of the font.c file
+    """If overwrite=True them overwrite the content of the font_device.h file
     on each project, based on the font_name passed otherwise save
-    a new font.c file"""
+    a new font_device.h file"""
 
     filename_kff = "tiny"
     device_name = "m5stickv"
@@ -107,7 +107,7 @@ def save_new_fontc(font_name, overwrite=False):
 
     maixpy_path_start = "../MaixPy/projects/maixpy_"
     maixpy_path_end = (
-        "/compile/overrides/components/micropython/port/src/omv/img/font.c"
+        "/compile/overrides/components/micropython/port/src/omv/img/include/font_device.h"
     )
 
     with open(filename_kff + ".kff", "r", encoding="utf-8") as read_file:
@@ -148,7 +148,7 @@ def save_new_fontc(font_name, overwrite=False):
                 save_file.write(unicode_str)
     else:
         with open(
-            filename_kff + "_font.c", "w", encoding="utf-8", newline="\n"
+            filename_kff + "_font_device.h", "w", encoding="utf-8", newline="\n"
         ) as save_file:
             save_file.write(unicode_str)
 
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     open_bdf_save_kff(WIDE16, 16, 16)
     open_bdf_save_kff(WIDE24, 24, 24)
 
-    # generate new font.c files (delete kff files)
+    # generate new font_device.h files (delete kff files)
     save_new_fontc(FONT14, replace)
     save_new_fontc(FONT16, replace)
     save_new_fontc(FONT24, replace)
