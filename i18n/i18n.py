@@ -123,7 +123,6 @@ def post_process_translation(slug, translation, verbose=False):
         translation = translation.replace(" \\ n", "\\n")
 
     # fix poorly translated unicode ellipsis
-    # fix poorly translated ellipsis
     ellipsis = "\u2026"
     if slug[-1] == ellipsis:
         err = "Poor ellipsis translation: {}, {}".format(repr(slug), repr(translation))
