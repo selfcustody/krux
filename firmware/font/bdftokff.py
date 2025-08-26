@@ -106,8 +106,9 @@ def save_new_fontc(font_name, overwrite=False):
         device_name = "amigo"
 
     maixpy_path_start = "../MaixPy/projects/maixpy_"
-    maixpy_path_end = (
-        "/compile/overrides/components/micropython/port/src/omv/img/include/font_device.h"
+    maixpy_path_end = os.path.join(
+        "/compile/overrides/components/micropython/port",
+        "src/omv/img/include/font_device.h",
     )
 
     with open(filename_kff + ".kff", "r", encoding="utf-8") as read_file:
