@@ -251,6 +251,69 @@ def test_load_wallet_descritor_manager(mocker, amigo, tdata):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_no_change_passphrase_menu(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    FINGERPRINT_NO_PASSPHRASE = "73c5da0a"
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Move to No
+        BUTTON_ENTER,  # Confirm No
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+
+    assert wallet.key.fingerprint == ctx.wallet.key.fingerprint
+
+    home = Home(ctx)
+    mocker.spy(home, "prompt")
+    home.passphrase()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert wallet.key.fingerprint == ctx.wallet.key.fingerprint
+    assert ctx.wallet.key.fingerprint_hex_str() == FINGERPRINT_NO_PASSPHRASE
+    home.prompt.assert_called_once_with(
+        "Add or change wallet passphrase?", ctx.display.height() // 2
+    )
+
+
+def test_cancel_passphrase_menu(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.pages.wallet_settings import PassphraseEditor
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Proceed on message
+        BUTTON_ENTER,  # Type passphrase
+        *([BUTTON_PAGE_PREV] * 2),  # Move to esc
+        BUTTON_ENTER,  # Press esc
+        BUTTON_ENTER,  # Confirm no passphrase
+    ]
+
+    FINGERPRINT_NO_PASSPHRASE = "73c5da0a"
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+    assert wallet.key.fingerprint == ctx.wallet.key.fingerprint
+
+    home = Home(ctx)
+    mocker.spy(home, "prompt")
+    mocker.spy(PassphraseEditor, "load_passphrase_menu")
+    home.passphrase()
+
+    assert ctx.wallet.key.fingerprint_hex_str() == FINGERPRINT_NO_PASSPHRASE
+    home.prompt.assert_called_once_with(
+        "Add or change wallet passphrase?", ctx.display.height() // 2
+    )
+    PassphraseEditor.load_passphrase_menu.assert_called_once_with(
+        mocker.ANY, ctx.wallet.key.mnemonic
+    )
+
+
 def test_change_passphrase_menu(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
@@ -280,6 +343,30 @@ def test_change_passphrase_menu(mocker, amigo, tdata):
     assert ctx.wallet.key.fingerprint_hex_str() == FINGERPRINT_WITH_PASSPHRASE
 
 
+def test_cancel_customize_wallet_menu(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Move to No
+        BUTTON_ENTER,  # Press No
+    ]
+
+    # Wallet before customization
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    assert wallet.key.network["name"] == "Mainnet"
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+    home = Home(ctx)
+    home.customize()
+
+    # Wallet after cancel customization
+    # should remain the same as before
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.key.network["name"] == "Mainnet"
+
+
 def test_customize_wallet_menu(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
@@ -302,6 +389,36 @@ def test_customize_wallet_menu(mocker, amigo, tdata):
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert ctx.wallet.key.network["name"] == "Testnet"
+
+
+def test_cancel_load_bip85_menu(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.pages.home_pages.bip85 import Bip85
+
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Move to No
+        BUTTON_ENTER,  # Confirm No
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+
+    # Wallet before loading BIP85
+    assert ctx.wallet.key.fingerprint_hex_str() == wallet.key.fingerprint_hex_str()
+
+    home = Home(ctx)
+    mocker.spy(Bip85, "export")
+    home.bip85()
+
+    # Wallet after cancel loading BIP85
+    # should remain the same as before
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.key.fingerprint_hex_str() == wallet.key.fingerprint_hex_str()
+
+    Bip85.export.assert_not_called()
 
 
 def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
@@ -409,6 +526,46 @@ def test_load_sign_message_menu(mocker, amigo):
     home.sign_message()
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_load_sign_psbt_menu(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
+    home = Home(ctx)
+    for _method in [
+        "_pre_load_psbt_warn",
+        "load_psbt",
+        "_post_load_psbt_warn",
+        "_fees_psbt_warn",
+        "_display_transaction_for_review",
+        "_sign_menu",
+    ]:
+        mocker.spy(home, _method)
+
+    home.sign_psbt()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # assert that some methods where called, but not all
+    for _method in [
+        ("_pre_load_psbt_warn", "assert_called_once"),
+        ("load_psbt", "assert_called_once"),
+        ("_post_load_psbt_warn", "assert_not_called"),
+        ("_fees_psbt_warn", "assert_not_called"),
+        ("_display_transaction_for_review", "assert_not_called"),
+        ("_sign_menu", "assert_not_called"),
+    ]:
+        home_method = getattr(home, _method[0])
+        getattr(home_method, _method[1])()
 
 
 def test_sign_psbt_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
