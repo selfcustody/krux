@@ -6,7 +6,7 @@ To rebuild the font for all devices, run:
 poetry run python bdftokff.py True
 ```
 
-If the `True` argument was passed, the Python script will automatically overwrite the contents of the `font.c` file in each of the projects `../MaixPy/projects/*/compile/overrides/components/micropython/port/src/omv/img/font.c`, otherwise the script will produce 3 files: `m5stickv_font.c`, `amigo_font.c` and `bit_dock_yahboom_font.c`. Use these files to manually replace the contents of the `font.c` file in each of your projects.
+If the `True` argument was passed, the Python script will automatically overwrite the contents of the `font_device.h` file in each of the projects `../MaixPy/projects/*/compile/overrides/components/micropython/port/src/omv/img/include/font_device.h`, otherwise the script will produce 3 files: `m5stickv_font_device.h`, `amigo_font_device.h` and `bit_dock_yahboom_font_device.h`. Use these files to manually replace the contents of the `font_device.h` file in each of your projects.
 
 # How it works
 Krux uses bitmap fonts that are custom-built for each device it runs on. The format that the firmware expects fonts to be in is a custom format referred to as "krux font format," or `.kff`. 
@@ -35,4 +35,4 @@ To rebuild the font for all devices, run:
 ./bdftokff.sh ter-u24b 12 24 > amigo.kff
 ```
 
-Once you have `.kff` files, for each project that you want to use the updated fonts, edit `../MaixPy/projects/*/compile/overrides/components/micropython/port/src/omv/img/font.c` (substituting `maixpy_amigo` for `*` if only for an amigo) and replace the array contents in the `unicode` variable with the byte array found within the appropriate `.kff` file, then rebuild the firmware.
+Once you have `.kff` files, for each project that you want to use the updated fonts, edit `../MaixPy/projects/*/compile/overrides/components/micropython/port/src/omv/img/include/font_device.h` (substituting `maixpy_amigo` for `*` if only for an amigo) and replace the array contents in the `unicode` variable with the byte array found within the appropriate `.kff` file, then rebuild the firmware.
