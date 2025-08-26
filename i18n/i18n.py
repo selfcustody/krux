@@ -88,7 +88,7 @@ def validate_translation_files():
         for f in listdir(TRANSLATION_FILES_DIR)
         if isfile(join(TRANSLATION_FILES_DIR, f))
     ]
-    for translation_filename in translation_filenames:
+    for translation_filename in sorted(translation_filenames):
         print("Validating %s..." % translation_filename)
         valid = True
         with open(
@@ -108,6 +108,41 @@ def validate_translation_files():
         passed = passed and valid
     if not passed:
         sys.exit(1)
+
+
+def post_process_translation(slug, translation, verbose=False):
+    """
+    A place for post-translation fixes of poor translations per slug/translation
+    returns original -- or corrected translation
+    """
+    err = None
+
+    # fix poorly translated newlines
+    if " \\ n" in translation:
+        err = "Poor newline translation: {}, {}".format(repr(slug), repr(translation))
+        translation = translation.replace(" \\ n", "\\n")
+
+    # fix poorly translated unicode ellipsis
+    ellipsis = "\u2026"
+    if slug[-1] == ellipsis:
+        err = "Poor ellipsis translation: {}, {}".format(repr(slug), repr(translation))
+        if translation[-2:] == ellipsis * 2:
+            translation = translation[:-1]
+        elif translation[-4:] == "." * 4:
+            translation = translation[:-4] + ellipsis
+        elif translation[-3:] == "." * 3:
+            translation = translation[:-3] + ellipsis
+        elif translation[-1:] in (".", " "):
+            translation = translation[:-1] + ellipsis
+        elif translation[-1] != ellipsis:
+            translation = translation + ellipsis
+        else:
+            err = None  # translation was fine
+
+    if verbose and err:
+        print(err, file=sys.stderr)
+
+    return translation
 
 
 def print_missing(save_to_file=False, merge_after=False):
@@ -132,7 +167,7 @@ def print_missing(save_to_file=False, merge_after=False):
     if save_to_file and not exists(filled_dir):
         mkdir(filled_dir)
 
-    for translation_filename in translation_filenames:
+    for translation_filename in sorted(translation_filenames):
         target = translation_filename[:5]
         if force_target:
             if not force_target in translation_filename:
@@ -148,9 +183,13 @@ def print_missing(save_to_file=False, merge_after=False):
             for slug in slugs:
                 if slug not in translations or translations[slug] == "":
                     try:
-                        translated = translator.translate(slug).replace(" \ n", "\\n")
+                        translated = translator.translate(slug)
+                        translated = post_process_translation(
+                            slug, translated, verbose=(save_to_file or merge_after)
+                        )
                         print('"%s":' % slug, '"%s",' % translated)
                         new_translations[slug] = translated
+
                     except Exception as e:
                         print("Error:", e)
                         print("Failed to translate:", slug)
@@ -206,7 +245,7 @@ def remove_unnecessary():
         for f in listdir(TRANSLATION_FILES_DIR)
         if isfile(join(TRANSLATION_FILES_DIR, f))
     ]
-    for translation_filename in translation_filenames:
+    for translation_filename in sorted(translation_filenames):
         print("Cleaning %s..." % translation_filename)
         clean = True
         with open(
@@ -252,7 +291,7 @@ def bake_translations():
     translation_filenames.sort()
     code_slugs = find_translation_slugs()
     code_slugs = sorted(code_slugs)
-    for translation_filename in translation_filenames:
+    for translation_filename in sorted(translation_filenames):
         with open(
             join(TRANSLATION_FILES_DIR, translation_filename), "r", encoding="utf8"
         ) as translation_file:
@@ -343,7 +382,8 @@ def prettify_translation_files():
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         raise ValueError(
-            "ERROR: Provide one action as argument (validate, new, fill, clean, prettify, bake)"
+            "ERROR: Provide one action as argument"
+            + " (validate, new, fill, fill_merge, clean, prettify, bake)"
         )
 
     if not exists(SRC_DIR):

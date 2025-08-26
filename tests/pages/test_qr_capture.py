@@ -65,7 +65,7 @@ def test_capture_qr_code(mocker, multiple_devices, tdata):
             [mocker.call() for _ in range(len(case[0]))]
         )
         ctx.display.draw_centered_text.assert_has_calls(
-            [mocker.call("Loading Camera..")]
+            [mocker.call("Loading Camera…")]
         )
         spy_sensor_stop.assert_called()
         spy_wdt.assert_called()

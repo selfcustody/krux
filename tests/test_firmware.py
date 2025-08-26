@@ -13117,7 +13117,7 @@ def test_upgrade_succeed(mocker, m5stickv, mock_success_input_cls, tdata):
             ),
         ]
     )
-    display_mocker.flash_text.assert_called_with("Shutting down..")
+    display_mocker.flash_text.assert_called_with("Shutting down…")
 
 
 def test_upgrade_fails_write_data(mocker, m5stickv, mock_success_input_cls, tdata):

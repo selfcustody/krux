@@ -80,7 +80,7 @@ class SaveFile(Page):
                         if new_filename:
                             # clear and say something to the user
                             self.ctx.display.clear()
-                            self.ctx.display.draw_centered_text(t("Processing.."))
+                            self.ctx.display.draw_centered_text(t("Processing…"))
 
                             # Now save the file
                             if save_as_binary:

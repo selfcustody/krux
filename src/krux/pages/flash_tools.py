@@ -192,7 +192,7 @@ class FlashTools(Page):
         ):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Erasing user's data..")
+                t("Erasing user's data…")
                 + "\n\n"
                 + t("Do not power off, it may take a while to complete.")
             )
@@ -300,7 +300,7 @@ class FlashHash(Page):
     def generate(self):
         """Generates the Tamper Check Flash Hash snapshot."""
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(t("Processing.."))
+        self.ctx.display.draw_hcentered_text(t("Processing…"))
         firmware_hash = self.hash_pin_with_flash()
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text("TC Flash Hash")

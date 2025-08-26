@@ -263,7 +263,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             None,
             False,
             "a test message with a colon ':' character.",
-            "3. bc1qgl5..3cn3",  # bc1qgl5vlg0zdl7yvprgxj9fevsc6q6x5dmcyk3cn3
+            "3. bc1qgl5…3cn3",  # bc1qgl5vlg0zdl7yvprgxj9fevsc6q6x5dmcyk3cn3
             "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
         (  # 1 - Sign P2WPKH Testnet
@@ -278,7 +278,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             None,
             False,
             "A test message.",
-            "3. tb1qynp..m5km",
+            "3. tb1qynp…m5km",
             "ILc30ti8OPSpCtzfj7sNnftANBCuVpyRX7pnM3iAgOk9F9IUtnXNPus0+MF12y5HKYHAB6IVYr66sLmL3Vi3oEE=",
         ),
         (  # 2 - Sign P2TR Mainnet
@@ -293,7 +293,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             None,
             False,
             "a test message with a colon ':' character.",
-            "3. bc1py0v..xler",
+            "3. bc1py0v…xler",
             "H3Z5VioeLaC0rpdI2CflUu34IANgGxum0Rr9lmCziQRfUQv+vFND+nHvxHmJZA0uvLLI1/mTEEHD2bBfN6Y2d6w=",
         ),
         (  # 3 - Sign Legacy Mainnet
@@ -308,7 +308,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             None,
             False,
             "a test message with a colon ':' character.",
-            "3. 1MVGa13..yrsJ",
+            "3. 1MVGa13…yrsJ",
             "IEpq8rUwSmDxO3GgwaZ75tw3DArtHtLi08kgQuRNXdteMI5KNEAWbpzsY8gRzGkspZN4YFiRu4RNCM+IsKkWys8=",
         ),
         (  # 4 - Sign Nested Segwit Mainnet
@@ -323,7 +323,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             None,
             False,
             "a test message with a colon ':' character.",
-            "3. 38CahkV..sEAN",
+            "3. 38CahkV…sEAN",
             "HyH8898c2S6eF8hTPGhRqLC6UQrJrhw/fdguBeFG0cCrOFkbG8TCVURXOgxXaEV93vrFlHyxNGEvL10IcsLtvvI=",
         ),
         (  # 5 - Sign P2WPKH Mainnet - Save to SD card
@@ -340,7 +340,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             None,
             True,  # Sign to SD
             "A test message.",
-            "3. bc1qgl5..3cn3",
+            "3. bc1qgl5…3cn3",
             "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
         (  # 6 - Sign P2WPKH Mainnet - Load from and save to SD card
@@ -359,7 +359,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             b"A test message.\nm/84'/0h/0H/0/3\nP2WPKH",
             True,  # Sign to SD
             "A test message.",
-            "3. bc1qgl5..3cn3",
+            "3. bc1qgl5…3cn3",
             "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
         (  # 7 - Sign empty - Load from and save to SD card
@@ -379,7 +379,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             b"",
             True,  # Sign to SD
             "A test message.",
-            "3. bc1qgl..cn3",
+            "3. bc1qgl…cn3",
             "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
     ]

@@ -26,7 +26,7 @@ import urtypes
 from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_decode
 from .krux_settings import t
-from .settings import THIN_SPACE
+from .settings import THIN_SPACE, ELLIPSIS
 from .qr import FORMAT_PMOFN, FORMAT_BBQR
 from .key import Key, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 from .sats_vb import SatsVB
@@ -593,7 +593,7 @@ class PSBTSigner:
                     )
                     if fingerprint_srt not in fingerprints:
                         if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:
-                            fingerprints[-1] = "..."
+                            fingerprints[-1] = ELLIPSIS
                             break
                         fingerprints.append(fingerprint_srt)
             elif self.policy["type"] == P2TR:
@@ -604,7 +604,7 @@ class PSBTSigner:
                     )
                     if fingerprint_srt not in fingerprints:
                         if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:
-                            fingerprints[-1] = "..."
+                            fingerprints[-1] = ELLIPSIS
                             break
                         fingerprints.append(fingerprint_srt)
 
@@ -616,7 +616,7 @@ def is_multisig(policy):
     """Returns a boolean indicating if the policy is a multisig"""
     return (
         "type" in policy
-        and P2WSH in policy["type"]
+        and policy["type"] in (P2SH, P2SH_P2WSH, P2WSH)
         and "m" in policy
         and "n" in policy
         # and "cosigners" in policy
@@ -719,14 +719,18 @@ def get_cosigners_taproot_miniscript(taproot_derivations, xpubs, origin_less_xpu
 
 
 # Modified from: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L64
+# and https://github.com/SeedSigner/seedsigner/blob/dev/src/seedsigner/models/psbt_parser.py
 def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
     """Parse scope and get policy"""
     from embit.finalizer import parse_multisig
 
     # we don't know the policy yet, let's parse it
     script_type = scriptpubkey.script_type()
-    # p2sh can be either legacy multisig, or nested segwit multisig
-    # or nested segwit singlesig
+
+    # p2sh can be either:
+    # - legacy multisig (p2sh);
+    # - nested segwit singlesig (p2sh-p2wpkh);
+    # - nested segwit multisig (p2sh-p2wsh).
     if script_type == P2SH:
         if scope.witness_script is not None:
             script_type = P2SH_P2WSH
@@ -735,14 +739,32 @@ def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
             and scope.redeem_script.script_type() == P2WPKH
         ):
             script_type = P2SH_P2WPKH
+
     policy = {"type": script_type}
+
+    if P2SH == script_type:
+        try:
+            # Try to parse as multisig
+            if scope.redeem_script is None:
+                raise ValueError("Missing redeem script")
+            m, pubkeys = parse_multisig(scope.redeem_script)
+            policy.update({"m": m, "n": len(pubkeys)})
+
+            # check pubkeys are derived from cosigners
+            cosigners = get_cosigners(pubkeys, scope.bip32_derivations, xpubs)
+            policy.update({"cosigners": cosigners})
+        except:
+            pass
+
     if P2WSH in script_type:
         try:
             # Try to parse as multisig
             if scope.witness_script is None:
                 raise ValueError("Missing witness script")
+
             m, pubkeys = parse_multisig(scope.witness_script)
             policy.update({"m": m, "n": len(pubkeys)})
+
             # check pubkeys are derived from cosigners
             cosigners = get_cosigners(pubkeys, scope.bip32_derivations, xpubs)
             policy.update({"cosigners": cosigners})
@@ -750,15 +772,18 @@ def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
             try:
                 # Try to parse as miniscript
                 policy.update({"miniscript": P2WSH})
+
                 # Will succeed to verify cosigners only if the descriptor is loaded
                 cosigners = get_cosigners_miniscript(scope.bip32_derivations, xpubs)
                 policy.update({"cosigners": cosigners})
             except:
                 pass
-    elif script_type == P2TR:
+
+    if script_type == P2TR:
         try:
             # Try to parse as taproot miniscript
             if len(scope.taproot_bip32_derivations) > 1:
+
                 # Assume is miniscript if there are multiple cosigners
                 policy.update({"miniscript": P2TR})
 
@@ -770,7 +795,7 @@ def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
             # otherwise it probably is single-sig taproot
             if len(cosigners) > 1:
                 policy.update({"cosigners": cosigners})
-        except Exception as e:
-            print(e)
+        except:
+            pass
 
     return policy

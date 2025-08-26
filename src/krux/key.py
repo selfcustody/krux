@@ -37,7 +37,9 @@ from .settings import (
 )
 
 DER_SINGLE = "m/%dh/%dh/%dh"
-DER_MULTI = "m/%dh/%dh/%dh/2h"
+DER_MULTI_LEGACY = "m/%dh/%d"
+DER_MULTI_SEGWIT_NESTED = "m/%dh/%dh/%dh/1h"
+DER_MULTI_SEGWIT_NATIVE = "m/%dh/%dh/%dh/2h"
 DER_MINISCRIPT = "m/%dh/%dh/%dh/2h"
 
 # Pay To Public Key Hash - 44h Legacy single-sig
@@ -92,7 +94,12 @@ POLICY_TYPE_IDS = {
     NAME_MINISCRIPT: TYPE_MINISCRIPT,
 }
 
-MULTISIG_SCRIPT_PURPOSE = 48
+MULTISIG_SCRIPT_PURPOSE = {
+    P2SH: 45,
+    P2WSH: 48,
+    P2SH_P2WSH: 48,
+}
+
 MINISCRIPT_PURPOSE = 48
 
 FINGERPRINT_SYMBOL = "⊚"
@@ -117,10 +124,23 @@ class Key:
         self.network = network
         self.passphrase = passphrase
         self.account_index = account_index
-        if policy_type == TYPE_MULTISIG and script_type != P2WSH:
+
+        # Validate script type based on policy type
+        # and set default script type if necessary
+        # for multisig policies.
+        if policy_type == TYPE_MULTISIG and script_type not in (
+            P2SH,
+            P2SH_P2WSH,
+            P2WSH,
+        ):
             script_type = P2WSH
+
+        # Validate script type based on policy type
+        # and set default script type if necessary
+        # for miniscript policies.
         if policy_type == TYPE_MINISCRIPT and script_type not in (P2WSH, P2TR):
             script_type = P2WSH
+
         self.script_type = script_type
         self.root = Key.extract_root(mnemonic, passphrase, network)
         self.fingerprint = self.root.child(0).fingerprint
@@ -231,7 +251,28 @@ class Key:
                 account,
             )
         if policy_type == TYPE_MULTISIG:
-            return DER_MULTI % (MULTISIG_SCRIPT_PURPOSE, network["bip32"], account)
+            if script_type == P2SH:
+                # As defined in BIP-45, there is no account.
+                # (m / 45' / cosigner_index / change / address_index)
+                # Instead there's a cosigner index and it is non-hardened.
+                # Use the account variable to keep the interface consistent.
+                return DER_MULTI_LEGACY % (MULTISIG_SCRIPT_PURPOSE[P2SH], account)
+            if script_type == P2SH_P2WSH:
+                # As defined in BIP-48, there is account.
+                # (m / 48' / coin_type' / account' / 1' / change / address_index)
+                return DER_MULTI_SEGWIT_NESTED % (
+                    MULTISIG_SCRIPT_PURPOSE[P2SH_P2WSH],
+                    network["bip32"],
+                    account,
+                )
+            if script_type == P2WSH:
+                # As defined in BIP-48, there is account.
+                # (m / 48' / coin_type' / account' / 2' / change / address_index)
+                return DER_MULTI_SEGWIT_NATIVE % (
+                    MULTISIG_SCRIPT_PURPOSE[P2WSH],
+                    network["bip32"],
+                    account,
+                )
         if policy_type == TYPE_MINISCRIPT:
             return DER_MINISCRIPT % (MINISCRIPT_PURPOSE, network["bip32"], account)
 

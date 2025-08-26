@@ -139,7 +139,7 @@ FROM build-software AS build-firmware
 ARG DEVICE="maixpy_m5stickv"
 WORKDIR /src/firmware/MaixPy
 
-# overrides the DEVICE specific font.c in componets/micropython
+# overrides the DEVICE specific C files (font, sensor, ...) in componets/micropython
 RUN cp -rf projects/"${DEVICE}"/compile/overrides/. ./
 
 RUN cd projects/"${DEVICE}" && \

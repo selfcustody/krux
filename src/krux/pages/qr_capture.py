@@ -119,7 +119,7 @@ class QRCodeCapture(Page):
         """Captures either singular or animated QRs and parses their contents"""
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Loading Camera.."))
+        self.ctx.display.draw_centered_text(t("Loading Camera…"))
         self.ctx.camera.initialize_run()
 
         parser = QRPartParser()
