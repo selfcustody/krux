@@ -256,7 +256,7 @@ class Home(Page):
         gc.collect()
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Signing.."))
+        self.ctx.display.draw_centered_text(t("Signing…"))
 
         if index == 1:  # Sign to QR code
             signer.sign()
@@ -472,7 +472,7 @@ class Home(Page):
 
         # PSBT read OK! Will try to sign
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Loading.."))
+        self.ctx.display.draw_centered_text(t("Loading…"))
 
         qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
         from ...psbt import PSBTSigner
@@ -488,7 +488,7 @@ class Home(Page):
             return MENU_CONTINUE
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
+        self.ctx.display.draw_centered_text(t("Processing…"))
         outputs, fee_percent = signer.outputs()
 
         if not self._fees_psbt_warn(fee_percent):

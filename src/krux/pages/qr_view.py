@@ -346,7 +346,7 @@ class SeedQRView(Page):
                 import lcd
 
                 self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Processing.."))
+                self.ctx.display.draw_centered_text(t("Processing…"))
 
                 code, size = self.add_frame(self.code, self.qr_size)
                 raw_image = image.Image(size=(size, size))
@@ -388,7 +388,7 @@ class SeedQRView(Page):
         from .file_operations import SaveFile
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
+        self.ctx.display.draw_centered_text(t("Processing…"))
 
         code, size = self.add_frame(self.code, self.qr_size)
 

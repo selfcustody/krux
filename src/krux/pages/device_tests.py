@@ -79,7 +79,7 @@ class DeviceTests(Page):
             for idx, test in enumerate(all_tests):
                 self.ctx.display.draw_centered_text(" " * chars_per_line)  #
                 self.ctx.display.draw_centered_text(
-                    t("Processing..") + " {}/{}".format(idx + 1, len(all_tests))
+                    t("Processing…") + " {}/{}".format(idx + 1, len(all_tests))
                 )
 
                 test_name = test.__name__ if callable(test) else test[0].__name__
@@ -156,7 +156,7 @@ class DeviceTests(Page):
         """run a single test w/ interactive=True, display success/fail and results"""
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing..") + " " + test.__name__)
+        self.ctx.display.draw_centered_text(t("Processing…") + " " + test.__name__)
         success = False
         try:
             result = test(interactive=True)
