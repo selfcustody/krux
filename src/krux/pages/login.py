@@ -331,7 +331,9 @@ class Login(Page):
                 network_name, policy_type, script_type, derivation_path, True
             )
             wallet_info += "\n" + (
-                t("No Passphrase") if not passphrase else t("Passphrase") + ": *..*"
+                t("No Passphrase")
+                if not passphrase
+                else t("Passphrase") + " (%d): *…*" % len(passphrase)
             )
 
             self.ctx.display.clear()
@@ -387,7 +389,7 @@ class Login(Page):
                 )
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Loading.."))
+        self.ctx.display.draw_centered_text(t("Loading…"))
 
         self.ctx.wallet = Wallet(key)
         return MENU_EXIT
@@ -445,7 +447,7 @@ class Login(Page):
                     self.flash_error(t("Key was not provided"))
                     return MENU_CONTINUE
                 self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Processing.."))
+                self.ctx.display.draw_centered_text(t("Processing…"))
                 word_bytes = encrypted_qr.decrypt(key)
                 if word_bytes is None:
                     self.flash_error(t("Failed to decrypt"))
@@ -484,7 +486,11 @@ class Login(Page):
 
         try:
             data = decrypt_kef(self.ctx, data)
-        except:
+        except KeyError:
+            self.flash_error(t("Failed to decrypt"))
+            return MENU_CONTINUE
+        except ValueError:
+            # ValueError=not KEF or declined to decrypt
             pass
 
         words = []

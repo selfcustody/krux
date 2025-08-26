@@ -32,6 +32,12 @@ Export *receive or change* addresses to a CSV file on the SD card.
 ### Export QR Codes as SVG
 Exported QR codes can now be saved as SVG images.
 
+### Extended Encryption Options
+The KEF encryption format now supports additional modes (CTR and the new default, GCM) and can hide strings of arbitrary length. This enables secure handling of passphrases, wallet descriptors, PSBTs, addresses, and other messages.
+
+### Datum Tool
+A new advanced utility for working with files, QRs, and manual text input. It supports conversion between binary and common string encodings, encryption/decryption of KEF envelopes, and exporting contents to QR or SD.
+
 ### Other Bug Fixes and Improvements
 - Numbers are no longer printed as words in "Backup Mnemonic > Other formats > Numbers".
 - Keypad touch area has been expanded to the screen edges.
@@ -40,9 +46,12 @@ Exported QR codes can now be saved as SVG images.
 - "Load mnemonic > Via Manual Input > Word Numbers" now shows the double mnemonic indicator (*) if it is a double mnemonic.
 - Added fingerprint to mnemonic preview and editor.
 - Fingerprint preview now shown when changing wallet passphrase.
+- Passphrase and key now display their length after entry to reduce user mistakes.
 - Saving encrypted mnemonic now prompts whether to use the fingerprint as ID.
 - Optimized device's board value checks.
 - Added QR Code to About screen.
+- Fixed camera not rotating on Yahboom or WonderMV with flipped orientation.
+- Restart prompt for theme settings now appears only when changes are made.
 - Wallet Descriptor now validates and warns if change addresses cannot be determined.
 - Wallet customization prompt now warns about Descriptor unloading, but does nothing if no changes are made.
 - Fixed issues with long wallet derivation path.
@@ -52,6 +61,7 @@ Exported QR codes can now be saved as SVG images.
 - Hide the "Change Addresses" menu option when cannot be determined by the wallet descriptor.
 - The hide mnemonic setting now ignores user confirmation when loading a mnemonic via word numbers.
 - Minor text improvements for clarity and easier translation.
+- Maixpy Fix: Increase glyphs indexing capacity affecting Amigo's translations
 
 
 # Changelog 25.03.0 - March 2025

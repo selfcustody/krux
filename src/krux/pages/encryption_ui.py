@@ -54,6 +54,11 @@ def decrypt_kef(ctx, data):
     from binascii import unhexlify
     from krux.baseconv import base_decode, hint_encodings
 
+    # nothing to decrypt or declined raises ValueError here,
+    # so callers can `except ValueError: pass`, then treat original data.
+    # If user decides to decrypt and fails with wrong key, then
+    # `KeyError("Failed to decrypt")` raised by `KEFEnvelope.unseal_ui()`
+    # will bubble up to caller.
     err = "Not decrypted"  # intentionally vague
 
     # if data is str, assume encoded, look for kef envelope
@@ -212,7 +217,7 @@ class KEFEnvelope(Page):
             return True
         menu_items = [
             (v["name"], k)
-            for k, v in kef.VERSIONS.items()
+            for k, v in sorted(kef.VERSIONS.items())
             if isinstance(v, dict) and v["mode"] is not None
         ]
         idx, _ = Menu(
@@ -339,7 +344,7 @@ class KEFEnvelope(Page):
             self.version = kef.suggest_versions(plaintext, self.mode_name)[0]
             self.version_name = kef.VERSIONS[self.version]["name"]
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
+        self.ctx.display.draw_centered_text(t("Processing…"))
         cipher = kef.Cipher(self.__key, self.label, self.iterations)
         self.ciphertext = cipher.encrypt(plaintext, self.version, self.__iv)
         self.__key = None
@@ -359,7 +364,7 @@ class KEFEnvelope(Page):
         if not (self.__key or self.input_key_ui(creating=False)):
             return None
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
+        self.ctx.display.draw_centered_text(t("Processing…"))
         cipher = kef.Cipher(self.__key, self.label, self.iterations)
         plaintext = cipher.decrypt(self.ciphertext, self.version)
         self.__key = None
@@ -398,7 +403,7 @@ class EncryptionKey(Page):
         # Check for presence of character types
         has_upper = any(c.isupper() for c in key_string)
         has_lower = any(c.islower() for c in key_string)
-        has_digit = any(c.isdigit() for c in key_string)
+        has_digit = any(c.isdecimal() for c in key_string)
         has_special = any(not is_alnum(c) for c in key_string)
 
         # Count how many character types are present
@@ -448,8 +453,13 @@ class EncryptionKey(Page):
                 decrypted = decrypted.decode()
             except:
                 pass
+
             key = decrypted if decrypted else key
-        except:
+        except KeyError:
+            self.flash_error(t("Failed to decrypt"))
+            return None
+        except ValueError:
+            # ValueError=not KEF or declined to decrypt
             pass
 
         while True:
@@ -461,7 +471,9 @@ class EncryptionKey(Page):
             offset_y = DEFAULT_PADDING
             displayable = key if isinstance(key, str) else "0x" + hexlify(key).decode()
             key_lines = self.ctx.display.draw_hcentered_text(
-                "{}: {}".format(t("Key"), displayable), offset_y, highlight_prefix=":"
+                "{} ({}): {}".format(t("Key"), len(key), displayable),
+                offset_y,
+                highlight_prefix=":",
             )
 
             if creating:
@@ -661,7 +673,7 @@ class LoadEncryptedMnemonic(Page):
             self.flash_error(t("Key was not provided"))
             return MENU_CONTINUE
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
+        self.ctx.display.draw_centered_text(t("Processing…"))
         mnemonic_storage = MnemonicStorage()
         try:
             words = mnemonic_storage.decrypt(key, mnemonic_id, sd_card).split()

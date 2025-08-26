@@ -75,7 +75,7 @@ class Tools(Page):
     def sd_check(self):
         """Handler for the 'SD Check' menu item"""
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Checking for SD card.."))
+        self.ctx.display.draw_centered_text(t("Checking for SD card…"))
         try:
             # Check for SD hot-plug
             with SDHandler():

@@ -50,11 +50,12 @@ from ..settings import (
     NAME_MULTISIG,
     NAME_MINISCRIPT,
 )
-from ..key import P2PKH, P2SH_P2WPKH, P2WPKH, P2WSH, P2TR
+from ..key import P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 
 PASSPHRASE_MAX_LEN = 200
 DERIVATION_KEYPAD = "1234567890/h"
 
+P2SH_DEFAULT_DERIVATION = "m/45h"
 MINISCRIPT_DEFAULT_DERIVATION = "m/48h/0h/0h/2h"
 
 
@@ -90,7 +91,7 @@ class PassphraseEditor(Page):
                 color=theme.highlight_color,
             )
             self.ctx.display.draw_hcentered_text(
-                t("Passphrase") + ":",
+                t("Passphrase") + " (%d):" % len(passphrase),
                 DEFAULT_PADDING + FONT_HEIGHT * 2,
                 theme.highlight_color,
             )
@@ -124,7 +125,11 @@ class PassphraseEditor(Page):
 
         try:
             data = decrypt_kef(self.ctx, data).decode()
-        except:
+        except KeyError:
+            self.flash_error(t("Failed to decrypt"))
+            return MENU_CONTINUE
+        except ValueError:
+            # ValueError=not KEF or declined to decrypt
             pass
 
         if len(data) > PASSPHRASE_MAX_LEN:
@@ -138,6 +143,15 @@ class WalletSettings(Page):
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
+
+    def _get_account_text_from_policy_type(self, policy_type, script_type):
+        """Get the account text based on policy type and script type"""
+        if (
+            policy_type == TYPE_MULTISIG and script_type == P2SH
+        ) or policy_type == TYPE_MINISCRIPT:
+            return t("Derivation Path")
+
+        return t("Account")
 
     def customize_wallet(self, key):
         """Customize wallet derivation properties"""
@@ -162,27 +176,26 @@ class WalletSettings(Page):
             )
 
             self.ctx.display.clear()
+            derivation_path = self.fit_to_line(derivation_path, crop_middle=False)
+            info_len = self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
+
+            # if the wallet is P2SH, we need to change
+            # the "Account" label to "Cossiger Index"
+            # as well if it uses a miniscript policy
+            # type we need to change it to "Derivation Path"
+            account_txt = self._get_account_text_from_policy_type(
+                policy_type, script_type
+            )
+
             submenu = Menu(
                 self.ctx,
                 [
                     (t("Network"), lambda: None),
                     (t("Policy Type"), lambda: None),
-                    (
-                        t("Script Type"),
-                        (lambda: None) if policy_type != TYPE_MULTISIG else None,
-                    ),
-                    (
-                        (
-                            t("Account")
-                            if policy_type != TYPE_MINISCRIPT
-                            else t("Derivation Path")
-                        ),
-                        lambda: None,
-                    ),
+                    (t("Script Type"), lambda: None),
+                    (account_txt, lambda: None),
                 ],
-                offset=self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
-                * FONT_HEIGHT
-                + DEFAULT_PADDING,
+                offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
             )
 
             # draw network with highlight color
@@ -211,8 +224,9 @@ class WalletSettings(Page):
                         script_type = P2WPKH if script_type is None else script_type
 
                     elif policy_type == TYPE_MULTISIG:
-                        # If is multisig, force to p2wsh
-                        script_type = P2WSH
+                        # If is multisig,force to p2wsh if not set
+                        script_type = self._script_type_multisig()
+                        script_type = P2WSH if script_type is None else script_type
 
                     elif policy_type == TYPE_MINISCRIPT and script_type not in (
                         P2WSH,
@@ -225,13 +239,17 @@ class WalletSettings(Page):
             elif index == 2:
                 if policy_type == TYPE_MINISCRIPT:
                     new_script_type = self._miniscript_type()
+                elif policy_type == TYPE_MULTISIG:
+                    new_script_type = self._script_type_multisig()
                 else:
                     new_script_type = self._script_type()
                 if new_script_type is not None:
                     derivation_path = ""
                     script_type = new_script_type
             elif index == 3:
-                if policy_type != TYPE_MINISCRIPT:
+                if policy_type != TYPE_MINISCRIPT and not (
+                    policy_type == TYPE_MULTISIG and script_type == P2SH
+                ):
                     new_account = utils.capture_index_from_keypad(
                         t("Account Index"), account
                     )
@@ -292,6 +310,22 @@ class WalletSettings(Page):
             return None
         return script_type
 
+    def _script_type_multisig(self):
+        """Script type selection menu"""
+        submenu = Menu(
+            self.ctx,
+            [
+                ("Legacy - 45", lambda: P2SH),
+                ("Nested Segwit - 48", lambda: P2SH_P2WSH),
+                ("Native Segwit - 48", lambda: P2WSH),
+            ],
+            disable_statusbar=True,
+        )
+        index, script_type = submenu.run_loop()
+        if index == len(submenu.menu) - 1:
+            return None
+        return script_type
+
     def _miniscript_type(self):
         """Script type selection menu for miniscript policy type"""
         submenu = Menu(
@@ -309,17 +343,42 @@ class WalletSettings(Page):
 
     def _derivation_path_str(self, policy_type, script_type, network, account):
         derivation_path = "m/"
+
+        # Add the purpose type to the derivation path in accordance with
+        # the specified BIP (45, 48, or 84)
         if policy_type == TYPE_SINGLESIG:
             derivation_path += str(SINGLESIG_SCRIPT_PURPOSE[script_type])
         elif policy_type == TYPE_MULTISIG:
-            derivation_path += str(MULTISIG_SCRIPT_PURPOSE)
+            derivation_path += str(MULTISIG_SCRIPT_PURPOSE[script_type])
         elif policy_type == TYPE_MINISCRIPT:
             # For now, miniscript is the same as multisig
             derivation_path += str(MINISCRIPT_PURPOSE)
+
+        # The first derivation node is always hardened
         derivation_path += "h/"
+
+        # While BIP45 states that m/45h/<n> -- where <n> is the
+        # cosiger index (non hardened) -- this is a very old BIP
+        # and not many wallets support it. Also Seedsigner and
+        # Sparrow uses m/45h as default derivation path. Therefore
+        # to maintain compatibility with those wallets, use m/45h.
+        if policy_type == TYPE_MULTISIG and script_type == P2SH:
+            return P2SH_DEFAULT_DERIVATION
+
+        # If another we're using BIP48 or BIP84,
+        # we use the zeroth (for mainnet) or first (for testnet)
+        # derivation node as the coin type (hardened) as well
+        # the account index (hardened)
         derivation_path += "0h" if network == NETWORKS[MAIN_TXT] else "1h"
         derivation_path += "/" + str(account) + "h"
-        if policy_type in (TYPE_MULTISIG, TYPE_MINISCRIPT):
+
+        # As stated in the BIP48, the script type is
+        # 1h for P2SH_P2WSH and 2h for P2WSH
+        if policy_type is TYPE_MULTISIG and script_type == P2SH_P2WSH:
+            derivation_path += "/1h"
+        elif policy_type is TYPE_MULTISIG and script_type == P2WSH:
+            derivation_path += "/2h"
+        elif policy_type is TYPE_MINISCRIPT:
             derivation_path += "/2h"
         return derivation_path
 
@@ -357,9 +416,10 @@ class WalletSettings(Page):
                 continue
 
             # Check if all nodes are hardened
+            # except for BIP45 non-hardened cosigner index
             not_hardened_txt = ""
             for i, node in enumerate(nodes):
-                if node[-1] != "h":
+                if node[-1] != "h" and not derivation.startswith("m/45h"):
                     not_hardened_txt += "Node {}: {}\n".format(i, node)
             if not_hardened_txt:
                 self.ctx.display.clear()

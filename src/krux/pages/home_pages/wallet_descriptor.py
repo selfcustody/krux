@@ -153,7 +153,7 @@ class WalletDescriptor(Page):
             return MENU_CONTINUE
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
+        self.ctx.display.draw_centered_text(t("Processing…"))
         if wallet_data is None:
             # Camera or SD card loading failed!
             self.flash_error(t("Failed to load"))
@@ -163,7 +163,11 @@ class WalletDescriptor(Page):
 
         try:
             wallet_data = decrypt_kef(self.ctx, wallet_data).decode()
-        except:
+        except KeyError:
+            self.flash_error(t("Failed to decrypt"))
+            return MENU_CONTINUE
+        except ValueError:
+            # ValueError=not KEF or declined to decrypt
             pass
 
         from ...wallet import Wallet, AssumptionWarning
@@ -225,7 +229,7 @@ class WalletDescriptor(Page):
 
     def display_loading_wallet(self, wallet):
         """Displays wallet descriptor attributes while loading"""
-        from ...settings import THIN_SPACE
+        from ...settings import THIN_SPACE, ELLIPSIS
 
         def draw_header():
             nonlocal offset_y
@@ -339,6 +343,6 @@ class WalletDescriptor(Page):
                         )
                 offset_y += FONT_HEIGHT
                 if offset_y >= BOTTOM_PROMPT_LINE:
-                    self.ctx.display.draw_hcentered_text("...", offset_y)
+                    self.ctx.display.draw_hcentered_text(ELLIPSIS, offset_y)
                     self.ctx.input.wait_for_button()
                     draw_header()

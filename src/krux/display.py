@@ -24,7 +24,7 @@ import board
 import time
 from .themes import theme
 from .krux_settings import Settings
-from .settings import THIN_SPACE
+from .settings import THIN_SPACE, ELLIPSIS
 from .kboard import kboard
 
 DEFAULT_PADDING = 10
@@ -251,11 +251,16 @@ class Display:
         return self.usable_width() if not kboard.is_m5stickv else self.width()
 
     def to_lines(self, text, max_lines=None):
-        """Takes a string of text and converts it to lines to display on
-        the screen
+        """Maintains original API while using .to_lines_endpos()"""
+
+        return self.to_lines_endpos(text, max_lines)[0]
+
+    def to_lines_endpos(self, text, max_lines=None):
+        """Takes a string of text and returns tuple(lines, end) to display on
+        the screen and know how far into text it read; next page starts there.
         """
         if isinstance(text, list):
-            return text
+            return (text, sum((len(x) for x in text)))
         lines = []
         start = 0
         line_count = 0
@@ -271,47 +276,74 @@ class Display:
 
         # Quick return if content fits in one line
         if len(text) <= columns and "\n" not in text:
-            return [text]
+            return ([text], len(text))
 
         if not max_lines:
             max_lines = TOTAL_LINES
 
         while start < len(text) and line_count < max_lines:
-            # Find the next line break, if any
-            line_break = text.find("\n", start)
-            if line_break == -1:
-                next_break = len(text)
-            else:
-                next_break = min(line_break, len(text))
+            # jump horizontal whitespace at start of line
+            while text[start : start + 1] in (" ", "\t"):
+                start += 1
 
+            # by default, will force-break
             end = start + columns
-            # If next segment fits on one line, add it and continue
-            if end >= next_break:
-                lines.append(text[start:next_break].rstrip())
-                start = next_break + 1
+
+            # break early for a newline
+            next_break = text.find("\n", start, end + 1)
+            if next_break > -1:
+                # If next segment fits on one line, add it and continue
+                end = next_break + 1
+                lines.append(text[start:end].rstrip())
+                start = end
                 line_count += 1
                 continue
 
-            # If the end of the line is in the middle of a word,
-            # move the end back to the end of the previous word
-            if text[end] != " " and text[end] != "\n":
-                end = text.rfind(" ", start, end)
+            # best break is whitespace/end after force-break
+            if text[end : end + 1] in (" ", "\t", ""):
+                lines.append(text[start:end].rstrip())
+                start = end
+                line_count += 1
+                continue
 
-            # If there is no space, force break the word
-            if end == -1 or end < start:
-                end = start + columns
+            # next best break is horizontal whitespace nearest force-break
+            next_break = max(
+                text.rfind(" ", start, end),
+                text.rfind("\t", start, end),
+            )
+            if next_break > -1:
+                end = next_break + 1
+                lines.append(text[start:end].rstrip())
+                start = end
+                line_count += 1
+                continue
 
+            # force-break
             lines.append(text[start:end].rstrip())
-            # don't jump space if we're breaking a word
-            jump_space = 1 if text[end] == " " else 0
-            start = end + jump_space
+            start = end
             line_count += 1
 
-        # Replace last line with ellipsis if we didn't finish the text
-        if line_count == max_lines and start < len(text):
-            lines[-1] = lines[-1][: columns - 3] + "..."
+        # replace/append ellipsis on last line if we didn't finish the text
+        if line_count == max_lines and end < len(text):
+            if len(lines[-1]) == columns:
+                lines[-1] = lines[-1][: columns - 1] + ELLIPSIS
+                end -= 1
+            else:
+                lines[-1] += ELLIPSIS
 
-        return lines
+        return (lines, end)
+
+    def index_pages(self, text, max_lines):
+        """Uses to_lines_endpos() to return a list of page starting positions"""
+        start, pages = 0, [0]
+        while True:
+            lines, end = self.to_lines_endpos(text[start:], max_lines)
+            if len(lines) == max_lines and lines[-1][-1] == ELLIPSIS:
+                start += end
+                pages.append(start)
+                continue
+            break
+        return pages
 
     def clear(self):
         """Clears the display"""

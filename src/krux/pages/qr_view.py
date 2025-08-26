@@ -99,10 +99,7 @@ class SeedQRView(Page):
         max_width = self.ctx.display.width()
         if zoom:
             max_width -= DEFAULT_PADDING
-            if self.qr_size == 21:
-                qr_size = 7
-            else:
-                qr_size = 5
+            qr_size = self.region_size
             offset_x = 0
             offset_y = 0
             scale = max_width // qr_size
@@ -349,7 +346,7 @@ class SeedQRView(Page):
                 import lcd
 
                 self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Processing.."))
+                self.ctx.display.draw_centered_text(t("Processing…"))
 
                 code, size = self.add_frame(self.code, self.qr_size)
                 raw_image = image.Image(size=(size, size))
@@ -391,7 +388,7 @@ class SeedQRView(Page):
         from .file_operations import SaveFile
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
+        self.ctx.display.draw_centered_text(t("Processing…"))
 
         code, size = self.add_frame(self.code, self.qr_size)
 
