@@ -45,6 +45,7 @@ Below is a list of some distributors where you can find this device:
 - [Electromaker](https://www.electromaker.io/shop/product/m5stickv-k210-ai-camera-without-wifi)
 - [Lee's Electronic](https://leeselectronic.com/en/product/169940-m5stick-ai-camera-kendryte-k210-risc-v-core-no-wifi.html)
 - [AliExpress](https://www.aliexpress.com/w/wholesale-stickv-k210.html)
+- [Alibaba](https://www.alibaba.com/trade/search?SearchText=stickv+k210)
 - [ABRA](https://abra-electronics.com/sensors/cameras/m5stickv-k210-ai-camera-ideal-for-machine-vision.html)
 - [Adafruit](https://www.adafruit.com/product/4321)
 - [Cytron](https://www.cytron.io/c-development-tools/c-fpga/p-m5stickv-k210-ai-camera-without-wifi)
@@ -61,6 +62,7 @@ Below is a list of some distributors where you can find this device:
 - [Digi-Key](https://www.digikey.com/en/products/detail/seeed-technology-co-ltd/102110463/13168813)
 - [Mouser](https://www.mouser.com/c/?q=sipeed)
 - [Electromaker](https://www.electromaker.io/shop/search/sipeed)
+- [Switch Science](https://www.switch-science.com/search?q=maix+amigo)
 
 <div style="clear: both"></div>
 

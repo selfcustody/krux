@@ -40,7 +40,7 @@ from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..bip39 import entropy_checksum
 from ..kboard import kboard
 
-# Tiny Seed last bit index positions according to checksums
+# Tinyseed last bit index positions according to checksums
 TS_LAST_BIT_NO_CS = 143
 TS_LAST_BIT_12W_CS = 139
 TS_LAST_BIT_24W_CS = 135
@@ -53,7 +53,7 @@ TS_GO_POSITION = TS_ESC_START_POSITION + 11
 class TinySeed(Page):
     """Class for handling Tinyseed format"""
 
-    def __init__(self, ctx, label="Tiny Seed"):
+    def __init__(self, ctx, label="Tinyseed"):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.label = label
@@ -142,7 +142,7 @@ class TinySeed(Page):
             y += self.y_pad
 
     def export(self):
-        """Shows seed as a punch pattern for Tiny Seed layout"""
+        """Shows seed as a punch pattern for Tinyseed layout"""
         words = self.ctx.wallet.key.mnemonic.split(" ")
         num_pages = len(words) // 12
         for page in range(num_pages):
@@ -153,7 +153,7 @@ class TinySeed(Page):
             self.ctx.display.clear()
 
     def print_tiny_seed(self):
-        """Creates a bitmap image of a punched Tiny Seed and sends it to a thermal printer"""
+        """Creates a bitmap image of a punched Tinyseed and sends it to a thermal printer"""
         from ..printers import create_printer
 
         self.printer = create_printer()
@@ -169,7 +169,7 @@ class TinySeed(Page):
         self.ctx.display.draw_hcentered_text(
             t("Printing…"), self.ctx.display.height() // 2
         )
-        self.printer.print_string("Tiny Seed\n\n")
+        self.printer.print_string("Tinyseed\n\n")
         num_pages = len(words) // 12
         for page in range(num_pages):
             ts_image = image.Image(size=(image_size, image_size), copy_to_fb=True)
@@ -335,7 +335,7 @@ class TinySeed(Page):
         return index
 
     def enter_tiny_seed(self, w24=False, seed_numbers=None, scanning_24=False):
-        """UI to manually enter a Tiny Seed"""
+        """UI to manually enter a Tinyseed"""
 
         def _editable_bit():
             if w24:
@@ -399,11 +399,11 @@ class TinySeed(Page):
 
 
 class TinyScanner(Page):
-    """Uses camera sensor to detect punch pattern on a Tiny Seed, in metal or paper"""
+    """Uses camera sensor to detect punch pattern on a Tinyseed, in metal or paper"""
 
     # Settings for different binary grid types
     binary_grid_settings = {
-        "Tiny Seed": {
+        "Tinyseed": {
             "xpad_factor": (240 / (12 * 345)),
             "ypad_factor": (210 / (12 * 272)),
             "x_offset_factor_amigo_p0": 39 / 345,
@@ -449,7 +449,7 @@ class TinyScanner(Page):
 
     grid_settings = None
 
-    def __init__(self, ctx, grid_type="Tiny Seed"):
+    def __init__(self, ctx, grid_type="Tinyseed"):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.capturing = False  # Flag used for first page of 24-word seed
@@ -491,7 +491,7 @@ class TinyScanner(Page):
         return True
 
     def _gradient_corners(self, rect, img):
-        """Compute histogram thresholds from four corners of the Tiny Seed region."""
+        """Compute histogram thresholds from four corners of the Tinyseed region."""
         if not kboard.is_amigo:
             region_ul = (
                 rect[0] + rect[2] // 8,
@@ -582,7 +582,7 @@ class TinyScanner(Page):
         return filtered
 
     def _detect_tiny_seed(self, img):
-        """Detect the Tiny Seed region as a bright blob."""
+        """Detect the Tinyseed region as a bright blob."""
         aspect_low = self.grid_settings["aspect_low"]
         aspect_high = self.grid_settings["aspect_high"]
 
@@ -659,7 +659,7 @@ class TinyScanner(Page):
             x_map.reverse()
         else:
             y_map.reverse()
-        # Think in portrait mode, with Tiny Seed tilted 90 degrees
+        # Think in portrait mode, with Tinyseed tilted 90 degrees
         # Loop ahead will sweep TinySeed bits/dots and evaluate its luminosity
         for x in x_map:
             for y in y_map:
@@ -770,7 +770,7 @@ class TinyScanner(Page):
         return None
 
     def scanner(self, w24=False):
-        """Scans the Tiny Seed using the camera sensor."""
+        """Scans the Tinyseed using the camera sensor."""
         page = 0
         if w24:
             w24_seed_numbers = [0] * 24

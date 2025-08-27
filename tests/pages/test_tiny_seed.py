@@ -315,8 +315,8 @@ def test_tinyscanner_initializes_tinyseed_with_label(multiple_devices, mocker):
 
     test_cases = [
         # TinyScanner grid_type param, expected exception, expected TinySeed label
-        (None, None, "Tiny Seed"),
-        ("Tiny Seed", None, "Tiny Seed"),
+        (None, None, "Tinyseed"),
+        ("Tinyseed", None, "Tinyseed"),
         ("OneKey KeyTag", None, "OneKey KeyTag"),
         ("Binary Grid", None, "Binary Grid"),
         ("Unsupported Format", KeyError, None),

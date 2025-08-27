@@ -233,8 +233,8 @@ class KEFEnvelope(Page):
     def input_iterations_ui(self):
         """implements ui to allow user to set key-stretch iterations"""
         curr_value = str(self.iterations)
-        dflt_prompt = t("Use default Key iter.?")
-        title = t("Key iter.") + ": 10K - 510K"
+        dflt_prompt = t("Use default PBKDF2 iter.?")
+        title = t("PBKDF2 iter.") + ": 10K - 510K"
         keypads = [DIGITS]
         iterations = prompt_for_text_update(
             self.ctx, curr_value, dflt_prompt, True, "?", title, keypads
@@ -267,7 +267,7 @@ class KEFEnvelope(Page):
             error_txt = t("Failed gathering camera entropy")
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Additional entropy from camera required for") + " " + self.mode_name
+                t("Additional entropy from camera required for %s") % self.mode_name
             )
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 self.flash_error(error_txt)
@@ -302,7 +302,7 @@ class KEFEnvelope(Page):
                 t("KEF Encrypted") + " (" + str(len(self.ciphertext)) + " B)",
                 self.fit_to_line(displayable_label, t("ID") + ": "),
                 t("Version") + ": " + self.version_name,
-                t("Key iter.") + ": " + str(self.iterations),
+                t("PBKDF2 iter.") + ": " + str(self.iterations),
             ]
         )
         self.ctx.display.clear()

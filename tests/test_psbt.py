@@ -1534,10 +1534,10 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
         (
             tdata.P2PKH_PSBT,
             [
-                "Inputs (3): ₿ 0.00 001 856\n\nSpend (1): ₿ 0.00 001 000\n\nFee: ₿ 0.00 000 856 (85.6%) ~1.8 sat/vB",
+                "Inputs (3): ₿ 0.00 001 856\n\nSpend (1): ₿ 0.00 001 000\n\nFee: ₿ 0.00 000 856 (85.6%) ~1.8 sat/vB",
                 "1. Spend: \n\n"
                 + format_address("tb1q4mx3ahp7laj65gyaqg27w0tsjpwuz6rvaxx3tl")
-                + "\n\n₿ 0.00 001 000",
+                + "\n\n₿ 0.00 001 000",
             ],
             Wallet(
                 Key(
@@ -1551,13 +1551,13 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
         (
             tdata.P2WPKH_PSBT,
             [
-                "Inputs (1): ₿ 1.00 000 000\n\nSpend (1): ₿ 0.10 000 000\n\nSelf-transfer or Change (1): ₿ 0.89 997 180\n\nFee: ₿ 0.00 002 820 (0.1%) ~20.0 sat/vB",
+                "Inputs (1): ₿ 1.00 000 000\n\nSpend (1): ₿ 0.10 000 000\n\nSelf-transfer or Change (1): ₿ 0.89 997 180\n\nFee: ₿ 0.00 002 820 (0.1%) ~20.0 sat/vB",
                 "1. Spend: \n\n"
                 + format_address("tb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx")
-                + "\n\n₿ 0.10 000 000",
+                + "\n\n₿ 0.10 000 000",
                 "1. Change: \n\n"
                 + format_address("tb1q9u62588spffmq4dzjxsr5l297znf3z6j5p2688")
-                + "\n\n₿ 0.89 997 180",
+                + "\n\n₿ 0.89 997 180",
             ],
             Wallet(
                 Key(
@@ -1571,13 +1571,13 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
         (
             tdata.P2SH_P2WPKH_PSBT,
             [
-                "Inputs (1): ₿ 1.00 000 000\n\nSpend (1): ₿ 0.10 000 000\n\nSelf-transfer or Change (1): ₿ 0.89 996 700\n\nFee: ₿ 0.00 003 300 (0.1%) ~20.0 sat/vB",
+                "Inputs (1): ₿ 1.00 000 000\n\nSpend (1): ₿ 0.10 000 000\n\nSelf-transfer or Change (1): ₿ 0.89 996 700\n\nFee: ₿ 0.00 003 300 (0.1%) ~20.0 sat/vB",
                 "1. Spend: \n\n"
                 + format_address("tb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx")
-                + "\n\n₿ 0.10 000 000",
+                + "\n\n₿ 0.10 000 000",
                 "1. Change: \n\n"
                 + format_address("2MvdUi5o3f2tnEFh9yGvta6FzptTZtkPJC8")
-                + "\n\n₿ 0.89 996 700",
+                + "\n\n₿ 0.89 996 700",
             ],
             Wallet(
                 Key(
@@ -1591,20 +1591,20 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
         (
             tdata.P2TR_PSBT,
             [
-                "Inputs (1): ₿ 0.00 010 111\n\nSpend (1): ₿ 0.00 001 000\n\nSelf-transfer or Change (2): ₿ 0.00 008 738\n\nFee: ₿ 0.00 000 373 (3.9%) ~2.0 sat/vB",
+                "Inputs (1): ₿ 0.00 010 111\n\nSpend (1): ₿ 0.00 001 000\n\nSelf-transfer or Change (2): ₿ 0.00 008 738\n\nFee: ₿ 0.00 000 373 (3.9%) ~2.0 sat/vB",
                 "1. Spend: \n\n"
                 + format_address("tb1q4mx3ahp7laj65gyaqg27w0tsjpwuz6rvaxx3tl")
-                + "\n\n₿ 0.00 001 000",
+                + "\n\n₿ 0.00 001 000",
                 "1. Self-transfer: \n\n"
                 + format_address(
                     "tb1pn5kekm0xpnwd6kg8c8qfvv2fr0w5xnhw42927wem7xwk84f7gzvsvctkhp"
                 )
-                + "\n\n₿ 0.00 001 000",
+                + "\n\n₿ 0.00 001 000",
                 "1. Change: \n\n"
                 + format_address(
                     "tb1pwhn9lzpaukrjwvwe365x7hcgvtcfywwsaxcq7j04jgrfcxzdq23qhzr7wt"
                 )
-                + "\n\n₿ 0.00 007 738",
+                + "\n\n₿ 0.00 007 738",
             ],
             Wallet(
                 Key(
@@ -1642,17 +1642,17 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
         (
             tdata.P2WSH_PSBT,
             [
-                "Inputs (2): ₿ 0.20 000 000\n\nSpend (2): ₿ 0.19 993 880\n\nFee: ₿ 0.00 006 120 (0.1%) ~20.1 sat/vB",
+                "Inputs (2): ₿ 0.20 000 000\n\nSpend (2): ₿ 0.19 993 880\n\nFee: ₿ 0.00 006 120 (0.1%) ~20.1 sat/vB",
                 "1. Spend: \n\n"
                 + format_address(
                     "tb1q4xgr8suxvgenukgf4c7r6qaawxxmy9zelh24q8hg5pfxzn2ekn3qfw808t"
                 )
-                + "\n\n₿ 0.01 000 000",
+                + "\n\n₿ 0.01 000 000",
                 "2. Spend: \n\n"
                 + format_address(
                     "tb1q35pg2rdt3p0v27dmdh9st43q8vzl29cps6kt3yradnqmg55eahfqfgn83n"
                 )
-                + "\n\n₿ 0.18 993 880",
+                + "\n\n₿ 0.18 993 880",
             ],
             Wallet(
                 Key(
@@ -1668,13 +1668,13 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
         (
             tdata.P2SH_P2WSH_PSBT,
             [
-                "Inputs (1): ₿ 1.00 000 000\n\nSpend (2): ₿ 0.99 995 740\n\nFee: ₿ 0.00 004 260 (0.1%) ~20.0 sat/vB",
+                "Inputs (1): ₿ 1.00 000 000\n\nSpend (2): ₿ 0.99 995 740\n\nFee: ₿ 0.00 004 260 (0.1%) ~20.0 sat/vB",
                 "1. Spend: \n\n"
                 + format_address("2N3vYfcg14Axr4NN33ADUorE2kEGEchFJpC")
-                + "\n\n₿ 0.89 995 740",
+                + "\n\n₿ 0.89 995 740",
                 "2. Spend: \n\n"
                 + format_address("tb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx")
-                + "\n\n₿ 0.10 000 000",
+                + "\n\n₿ 0.10 000 000",
             ],
             Wallet(
                 Key(
@@ -1690,20 +1690,20 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
         (
             tdata.DESC_P2WSH_PSBT,
             [
-                "Inputs (1): ₿ 0.01 000 000\n\nSpend (3): ₿ 0.00 938 408\n\nFee: ₿ 0.00 061 592 (6.6%) ~265.5 sat/vB",
+                "Inputs (1): ₿ 0.01 000 000\n\nSpend (3): ₿ 0.00 938 408\n\nFee: ₿ 0.00 061 592 (6.6%) ~265.5 sat/vB",
                 "1. Spend: \n\n"
                 + format_address("tb1qs9q8afpd6nc78r8l7456agajhpde657uzn9uh4")
-                + "\n\n₿ 0.00 100 000",
+                + "\n\n₿ 0.00 100 000",
                 "2. Spend: \n\n"
                 + format_address(
                     "tb1q6dac4cdyf9sfuln0kzfgswc96nlh2g98s4uyez5tvm7ymhq9ua0sa0z6h7"
                 )
-                + "\n\n₿ 0.00 200 000",
+                + "\n\n₿ 0.00 200 000",
                 "3. Spend: \n\n"
                 + format_address(
                     "tb1q0xmw6txz6lp2aakdujwhhrel0m7grfvvn00nzwjda7ps06c3jwnqk7m0ww"
                 )
-                + "\n\n₿ 0.00 638 408",
+                + "\n\n₿ 0.00 638 408",
             ],
             Wallet(
                 Key(
@@ -1715,20 +1715,20 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
             ),
             WSH_MULTISIG,
             [
-                "Inputs (1): ₿ 0.01 000 000\n\nSpend (1): ₿ 0.00 100 000\n\nSelf-transfer or Change (2): ₿ 0.00 838 408\n\nFee: ₿ 0.00 061 592 (6.6%) ~265.5 sat/vB",
+                "Inputs (1): ₿ 0.01 000 000\n\nSpend (1): ₿ 0.00 100 000\n\nSelf-transfer or Change (2): ₿ 0.00 838 408\n\nFee: ₿ 0.00 061 592 (6.6%) ~265.5 sat/vB",
                 "1. Spend: \n\n"
                 + format_address("tb1qs9q8afpd6nc78r8l7456agajhpde657uzn9uh4")
-                + "\n\n₿ 0.00 100 000",
+                + "\n\n₿ 0.00 100 000",
                 "1. Self-transfer: \n\n"
                 + format_address(
                     "tb1q6dac4cdyf9sfuln0kzfgswc96nlh2g98s4uyez5tvm7ymhq9ua0sa0z6h7"
                 )
-                + "\n\n₿ 0.00 200 000",
+                + "\n\n₿ 0.00 200 000",
                 "1. Change: \n\n"
                 + format_address(
                     "tb1q0xmw6txz6lp2aakdujwhhrel0m7grfvvn00nzwjda7ps06c3jwnqk7m0ww"
                 )
-                + "\n\n₿ 0.00 638 408",
+                + "\n\n₿ 0.00 638 408",
             ],
         ),
     ]
@@ -1763,20 +1763,20 @@ def test_outputs_miniscript(mocker, m5stickv, tdata):
         (
             tdata.MINIS_P2WSH_PSBT,
             [
-                "Inputs (1): ₿ 0.01 997 062\n\nSpend (3): ₿ 0.01 995 019\n\nFee: ₿ 0.00 002 043 (0.1%)",
+                "Inputs (1): ₿ 0.01 997 062\n\nSpend (3): ₿ 0.01 995 019\n\nFee: ₿ 0.00 002 043 (0.1%)",
                 "1. Spend: \n\n"
                 + format_address("tb1q26gnrxhmv79m7sady6xyt2y23rxc6nmt50dfyq")
-                + "\n\n₿ 0.00 500 000",
+                + "\n\n₿ 0.00 500 000",
                 "2. Spend: \n\n"
                 + format_address(
                     "tb1qnlhau4cw3f76k583xk8p6ekd02a0dvhmqjzl7aw6ehda8r7upheskzwzea"
                 )
-                + "\n\n₿ 0.01 000 000",
+                + "\n\n₿ 0.01 000 000",
                 "3. Spend: \n\n"
                 + format_address(
                     "tb1qmanyu7mm2q24esrnawjxukla9pr7s4yyzwjy2chjhsyumfe0r34q5dzsug"
                 )
-                + "\n\n₿ 0.00 495 019",
+                + "\n\n₿ 0.00 495 019",
             ],
             Wallet(
                 Key(
@@ -1788,20 +1788,20 @@ def test_outputs_miniscript(mocker, m5stickv, tdata):
             ),
             WSH_MINISCRIPT,
             [
-                "Inputs (1): ₿ 0.01 997 062\n\nSpend (1): ₿ 0.00 500 000\n\nSelf-transfer or Change (2): ₿ 0.01 495 019\n\nFee: ₿ 0.00 002 043 (0.1%)",
+                "Inputs (1): ₿ 0.01 997 062\n\nSpend (1): ₿ 0.00 500 000\n\nSelf-transfer or Change (2): ₿ 0.01 495 019\n\nFee: ₿ 0.00 002 043 (0.1%)",
                 "1. Spend: \n\n"
                 + format_address("tb1q26gnrxhmv79m7sady6xyt2y23rxc6nmt50dfyq")
-                + "\n\n₿ 0.00 500 000",
+                + "\n\n₿ 0.00 500 000",
                 "1. Self-transfer: \n\n"
                 + format_address(
                     "tb1qnlhau4cw3f76k583xk8p6ekd02a0dvhmqjzl7aw6ehda8r7upheskzwzea"
                 )
-                + "\n\n₿ 0.01 000 000",
+                + "\n\n₿ 0.01 000 000",
                 "1. Change: \n\n"
                 + format_address(
                     "tb1qmanyu7mm2q24esrnawjxukla9pr7s4yyzwjy2chjhsyumfe0r34q5dzsug"
                 )
-                + "\n\n₿ 0.00 495 019",
+                + "\n\n₿ 0.00 495 019",
             ],
         ),
     ]
@@ -1834,22 +1834,22 @@ def test_outputs_tr_miniscript(mocker, m5stickv, tdata):
         (
             tdata.MINIS_TR_PSBT,
             [
-                "Inputs (1): ₿ 0.01 995 759\n\nSpend (3): ₿ 0.01 993 789\n\nFee: ₿ 0.00 001 970 (0.1%)",
+                "Inputs (1): ₿ 0.01 995 759\n\nSpend (3): ₿ 0.01 993 789\n\nFee: ₿ 0.00 001 970 (0.1%)",
                 "1. Spend: \n\n"
                 + format_address(
                     "tb1qrtvmveqwrzsndt8tzzkgepp2mw8de95dk7hz70kr95f5dt7axvrsgq8lcp"
                 )
-                + "\n\n₿ 0.01 000 000",
+                + "\n\n₿ 0.01 000 000",
                 "2. Spend: \n\n"
                 + format_address(
                     "tb1pgzdsuzcewwntpm6c3xrrn5lmdc0cvnpsdyrsz7gvcq5t0kqry2rswl8vnz"
                 )
-                + "\n\n₿ 0.00 500 000",
+                + "\n\n₿ 0.00 500 000",
                 "3. Spend: \n\n"
                 + format_address(
                     "tb1pt064gyzas6dnqq9p955p7ujus8z7l3xg3apxm425u72dupy3wffqjzkszd"
                 )
-                + "\n\n₿ 0.00 493 789",
+                + "\n\n₿ 0.00 493 789",
             ],
             Wallet(
                 Key(
@@ -1861,22 +1861,22 @@ def test_outputs_tr_miniscript(mocker, m5stickv, tdata):
             ),
             TR_MINISCRIPT,
             [
-                "Inputs (1): ₿ 0.01 995 759\n\nSpend (1): ₿ 0.01 000 000\n\nSelf-transfer or Change (2): ₿ 0.00 993 789\n\nFee: ₿ 0.00 001 970 (0.1%)",
+                "Inputs (1): ₿ 0.01 995 759\n\nSpend (1): ₿ 0.01 000 000\n\nSelf-transfer or Change (2): ₿ 0.00 993 789\n\nFee: ₿ 0.00 001 970 (0.1%)",
                 "1. Spend: \n\n"
                 + format_address(
                     "tb1qrtvmveqwrzsndt8tzzkgepp2mw8de95dk7hz70kr95f5dt7axvrsgq8lcp"
                 )
-                + "\n\n₿ 0.01 000 000",
+                + "\n\n₿ 0.01 000 000",
                 "1. Self-transfer: \n\n"
                 + format_address(
                     "tb1pgzdsuzcewwntpm6c3xrrn5lmdc0cvnpsdyrsz7gvcq5t0kqry2rswl8vnz"
                 )
-                + "\n\n₿ 0.00 500 000",
+                + "\n\n₿ 0.00 500 000",
                 "1. Change: \n\n"
                 + format_address(
                     "tb1pt064gyzas6dnqq9p955p7ujus8z7l3xg3apxm425u72dupy3wffqjzkszd"
                 )
-                + "\n\n₿ 0.00 493 789",
+                + "\n\n₿ 0.00 493 789",
             ],
         ),
     ]
@@ -1909,22 +1909,22 @@ def test_outputs_tr_miniscript_provably_unspendable(mocker, m5stickv, tdata):
         (
             tdata.EXP_TR_MINIS_PSBT,
             [
-                "Inputs (1): ₿ 0.01 994 469\n\nSpend (3): ₿ 0.01 991 994\n\nFee: ₿ 0.00 002 475 (0.2%)",
+                "Inputs (1): ₿ 0.01 994 469\n\nSpend (3): ₿ 0.01 991 994\n\nFee: ₿ 0.00 002 475 (0.2%)",
                 "1. Spend: \n\n"
                 + format_address(
                     "tb1psawr7wemsqgvplsxu0wvk6hdqrzf5rv387xuxx43mgjnkzn932pqne6l2c"
                 )
-                + "\n\n₿ 0.00 500 000",
+                + "\n\n₿ 0.00 500 000",
                 "2. Spend: \n\n"
                 + format_address(
                     "tb1p3gev77tasfmd45w64dq5azkdl3y02cxlnkykw2v00x3jnu6yu8pskn06gu"
                 )
-                + "\n\n₿ 0.01 000 000",
+                + "\n\n₿ 0.01 000 000",
                 "3. Spend: \n\n"
                 + format_address(
                     "tb1pzfd2t5k93dfvsl4a3ka36jcd9n4ppuskg7vfqeeu3zjqc5p8luaqs7f0ct"
                 )
-                + "\n\n₿ 0.00 491 994",
+                + "\n\n₿ 0.00 491 994",
             ],
             Wallet(
                 Key(
@@ -1936,22 +1936,22 @@ def test_outputs_tr_miniscript_provably_unspendable(mocker, m5stickv, tdata):
             ),
             TR_EXP_MULTI_MINISCRIPT,
             [
-                "Inputs (1): ₿ 0.01 994 469\n\nSpend (1): ₿ 0.01 000 000\n\nSelf-transfer or Change (2): ₿ 0.00 991 994\n\nFee: ₿ 0.00 002 475 (0.2%)",
+                "Inputs (1): ₿ 0.01 994 469\n\nSpend (1): ₿ 0.01 000 000\n\nSelf-transfer or Change (2): ₿ 0.00 991 994\n\nFee: ₿ 0.00 002 475 (0.2%)",
                 "1. Spend: \n\n"
                 + format_address(
                     "tb1p3gev77tasfmd45w64dq5azkdl3y02cxlnkykw2v00x3jnu6yu8pskn06gu"
                 )
-                + "\n\n₿ 0.01 000 000",
+                + "\n\n₿ 0.01 000 000",
                 "1. Self-transfer: \n\n"
                 + format_address(
                     "tb1psawr7wemsqgvplsxu0wvk6hdqrzf5rv387xuxx43mgjnkzn932pqne6l2c"
                 )
-                + "\n\n₿ 0.00 500 000",
+                + "\n\n₿ 0.00 500 000",
                 "1. Change: \n\n"
                 + format_address(
                     "tb1pzfd2t5k93dfvsl4a3ka36jcd9n4ppuskg7vfqeeu3zjqc5p8luaqs7f0ct"
                 )
-                + "\n\n₿ 0.00 491 994",
+                + "\n\n₿ 0.00 491 994",
             ],
         ),
     ]
@@ -1993,10 +1993,10 @@ def test_sign_single_1_input_1_output_no_change(m5stickv):
     MNEMONIC = "action action action action action action action action action action action action"
     PSBT_B64 = "cHNidP8BAFMCAAAAAcfPlS2RvKvXxP/UxRmlAzMZcpLPKTOsBNbFM1JpT5Q7BwAAAAD9////AXAXAAAAAAAAF6kUK7ey9d8Pcw7ufsChrS3L5Ays13SHEgQlAE8BBDWHzwNOAaDGgAAAAA6sE2xHBRocbxB2m7sG3JvBy6PH2P+6FU8Xz26TLNf+Ax8/bmYn6gHZ6KY5opTh2Ajf+3sKBpZ40s59aYtcEnY+EODFlcVUAACAAQAAgAAAAIAAAQD9fQECAAAAAwZh04JGb3rJ3RJGINf/5lNG3RFk9DQyfqaKJK336OcaAQAAAAD9////pZE7Tecrp3E9O5JGSLma4D5TCG5N3uD4deLODBvkt4EAAAAAAP3///+lkTtN5yuncT07kkZIuZrgPlMIbk3e4Ph14s4MG+S3gQEAAAAA/f///wgsAQAAAAAAABYAFARbVWJaVJuYh2b3/HFtU3tQ9eoCLAEAAAAAAAAWABT4gSb5k7/g3ZrEXLyHFlP/C11NFCwBAAAAAAAAFgAU04NlSannloiWwZHvG1uf9aL0NPosAQAAAAAAABYAFNDJ5cj/6H72UNT95nAOLylXp/S5LAEAAAAAAAAWABTj8DqdkD3qZujRRRl4HlpWaADUBywBAAAAAAAAFgAUmPKKcthXsgBlI5AZbJtdEUrFe6gsAQAAAAAAABYAFF1lFcZm2E/gjALNKEfBtzGMsrsqmRgAAAAAAAAWABRk/PxLrogzR/Meytzu0v72RMgGh878JAABAR+ZGAAAAAAAABYAFGT8/EuuiDNH8x7K3O7S/vZEyAaHAQMEAQAAACIGAloQH2tjbm2ayZtJb2Gb0juSNIH9MIoEfX2UW0zE3l/SGODFlcVUAACAAQAAgAAAAIAAAAAAYwAAAAAA"
     OUTPUT = [
-        "Inputs (1): ₿ 0.00 006 297\n\nSpend (1): ₿ 0.00 006 000\n\nFee: ₿ 0.00 000 297 (5.0%) ~2.7 sat/vB",
+        "Inputs (1): ₿ 0.00 006 297\n\nSpend (1): ₿ 0.00 006 000\n\nFee: ₿ 0.00 000 297 (5.0%) ~2.7 sat/vB",
         "1. Spend: \n\n"
         + format_address("2MwEP7AfPt8NC65ACmcUhUtDZgGSxYiWUy4")
-        + "\n\n₿ 0.00 006 000",
+        + "\n\n₿ 0.00 006 000",
     ]
 
     wallet = Wallet(Key(MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
@@ -2104,7 +2104,7 @@ def test_sign_sats_vB(m5stickv):
     outputs, _ = signer.outputs()
     assert (
         outputs[0]
-        == "Inputs (5): ₿ 0.00 001 500\n\nSpend (1): ₿ 0.00 001 000\n\nFee: ₿ 0.00 000 500 (50.0%) ~1.3 sat/vB"
+        == "Inputs (5): ₿ 0.00 001 500\n\nSpend (1): ₿ 0.00 001 000\n\nFee: ₿ 0.00 000 500 (50.0%) ~1.3 sat/vB"
     )
 
     PSBT_satvB_28_04 = "cHNidP8BAH4CAAAAAcfPlS2RvKvXxP/UxRmlAzMZcpLPKTOsBNbFM1JpT5Q7BwAAAAD9////AugDAAAAAAAAIgAguKIqvP6jJ6Lj5PVWAoa1nazfyQ8DzfgI34hQnNxYStPoAwAAAAAAABepFGJYgmsnwywOzlosjYc84fGiiGPTh7r5KgBPAQQ1h88DTgGgxoAAAAAOrBNsRwUaHG8Qdpu7Btybwcujx9j/uhVPF89ukyzX/gMfP25mJ+oB2eimOaKU4dgI3/t7CgaWeNLOfWmLXBJ2PhDgxZXFVAAAgAEAAIAAAACAAAEA/X0BAgAAAAMGYdOCRm96yd0SRiDX/+ZTRt0RZPQ0Mn6miiSt9+jnGgEAAAAA/f///6WRO03nK6dxPTuSRki5muA+UwhuTd7g+HXizgwb5LeBAAAAAAD9////pZE7Tecrp3E9O5JGSLma4D5TCG5N3uD4deLODBvkt4EBAAAAAP3///8ILAEAAAAAAAAWABQEW1ViWlSbmIdm9/xxbVN7UPXqAiwBAAAAAAAAFgAU+IEm+ZO/4N2axFy8hxZT/wtdTRQsAQAAAAAAABYAFNODZUmp55aIlsGR7xtbn/Wi9DT6LAEAAAAAAAAWABTQyeXI/+h+9lDU/eZwDi8pV6f0uSwBAAAAAAAAFgAU4/A6nZA96mbo0UUZeB5aVmgA1AcsAQAAAAAAABYAFJjyinLYV7IAZSOQGWybXRFKxXuoLAEAAAAAAAAWABRdZRXGZthP4IwCzShHwbcxjLK7KpkYAAAAAAAAFgAUZPz8S66IM0fzHsrc7tL+9kTIBofO/CQAAQEfmRgAAAAAAAAWABRk/PxLrogzR/Meytzu0v72RMgGhwEDBAEAAAAiBgJaEB9rY25tmsmbSW9hm9I7kjSB/TCKBH19lFtMxN5f0hjgxZXFVAAAgAEAAIAAAACAAAAAAGMAAAAAAAA="
@@ -2112,7 +2112,7 @@ def test_sign_sats_vB(m5stickv):
     outputs, _ = signer.outputs()
     assert (
         outputs[0]
-        == "Inputs (1): ₿ 0.00 006 297\n\nSpend (2): ₿ 0.00 002 000\n\nFee: ₿ 0.00 004 297 (214.9%) ~27.9 sat/vB"
+        == "Inputs (1): ₿ 0.00 006 297\n\nSpend (2): ₿ 0.00 002 000\n\nFee: ₿ 0.00 004 297 (214.9%) ~27.9 sat/vB"
     )
 
     PSBT_satvB_12_03 = "cHNidP8BAP0WAQIAAAABx8+VLZG8q9fE/9TFGaUDMxlyks8pM6wE1sUzUmlPlDsHAAAAAP3///8GTAEAAAAAAAAiACC4oiq8/qMnouPk9VYChrWdrN/JDwPN+AjfiFCc3FhK0xwCAAAAAAAAF6kUYliCayfDLA7OWiyNhzzh8aKIY9OHTAEAAAAAAAAiACDwabzM44F/2f9evGkQqXxhFwjzErVHgJfc2IE2I91E/U0BAAAAAAAAIlEgJeBfcLU573hJOaYb6XQGR/eOKVSvBR9TW3+FoxRQEWIkAgAAAAAAABl2qRRrgQv3nFAPaNKPYAXmsjT7Ru6DJoisHAIAAAAAAAAXqRSDAQVKg8ZQzf3pc5CIXtSjjvybt4e/+SoATwEENYfPA04BoMaAAAAADqwTbEcFGhxvEHabuwbcm8HLo8fY/7oVTxfPbpMs1/4DHz9uZifqAdnopjmilOHYCN/7ewoGlnjSzn1pi1wSdj4Q4MWVxVQAAIABAACAAAAAgAABAP19AQIAAAADBmHTgkZvesndEkYg1//mU0bdEWT0NDJ+pookrffo5xoBAAAAAP3///+lkTtN5yuncT07kkZIuZrgPlMIbk3e4Ph14s4MG+S3gQAAAAAA/f///6WRO03nK6dxPTuSRki5muA+UwhuTd7g+HXizgwb5LeBAQAAAAD9////CCwBAAAAAAAAFgAUBFtVYlpUm5iHZvf8cW1Te1D16gIsAQAAAAAAABYAFPiBJvmTv+DdmsRcvIcWU/8LXU0ULAEAAAAAAAAWABTTg2VJqeeWiJbBke8bW5/1ovQ0+iwBAAAAAAAAFgAU0MnlyP/ofvZQ1P3mcA4vKVen9LksAQAAAAAAABYAFOPwOp2QPepm6NFFGXgeWlZoANQHLAEAAAAAAAAWABSY8opy2FeyAGUjkBlsm10RSsV7qCwBAAAAAAAAFgAUXWUVxmbYT+CMAs0oR8G3MYyyuyqZGAAAAAAAABYAFGT8/EuuiDNH8x7K3O7S/vZEyAaHzvwkAAEBH5kYAAAAAAAAFgAUZPz8S66IM0fzHsrc7tL+9kTIBocBAwQBAAAAIgYCWhAfa2NubZrJm0lvYZvSO5I0gf0wigR9fZRbTMTeX9IY4MWVxVQAAIABAACAAAAAgAAAAABjAAAAAAAAAAAAAA=="
@@ -2120,7 +2120,7 @@ def test_sign_sats_vB(m5stickv):
     outputs, _ = signer.outputs()
     assert (
         outputs[0]
-        == "Inputs (1): ₿ 0.00 006 297\n\nSpend (6): ₿ 0.00 002 625\n\nFee: ₿ 0.00 003 672 (139.9%) ~12.0 sat/vB"
+        == "Inputs (1): ₿ 0.00 006 297\n\nSpend (6): ₿ 0.00 002 625\n\nFee: ₿ 0.00 003 672 (139.9%) ~12.0 sat/vB"
     )
 
     PSBT_satvB_8_75 = "cHNidP8BAP0WAQIAAAABx8+VLZG8q9fE/9TFGaUDMxlyks8pM6wE1sUzUmlPlDsHAAAAAP3///8GJAIAAAAAAAAZdqkUa4EL95xQD2jSj2AF5rI0+0bugyaIrDUFAAAAAAAAIlEgJeBfcLU573hJOaYb6XQGR/eOKVSvBR9TW3+FoxRQEWIcAgAAAAAAABepFIMBBUqDxlDN/elzkIhe1KOO/Ju3hxwCAAAAAAAAF6kUYliCayfDLA7OWiyNhzzh8aKIY9OHTAEAAAAAAAAiACC4oiq8/qMnouPk9VYChrWdrN/JDwPN+AjfiFCc3FhK00wBAAAAAAAAIgAg8Gm8zOOBf9n/XrxpEKl8YRcI8xK1R4CX3NiBNiPdRP2/+SoATwEENYfPA04BoMaAAAAADqwTbEcFGhxvEHabuwbcm8HLo8fY/7oVTxfPbpMs1/4DHz9uZifqAdnopjmilOHYCN/7ewoGlnjSzn1pi1wSdj4Q4MWVxVQAAIABAACAAAAAgAABAP19AQIAAAADBmHTgkZvesndEkYg1//mU0bdEWT0NDJ+pookrffo5xoBAAAAAP3///+lkTtN5yuncT07kkZIuZrgPlMIbk3e4Ph14s4MG+S3gQAAAAAA/f///6WRO03nK6dxPTuSRki5muA+UwhuTd7g+HXizgwb5LeBAQAAAAD9////CCwBAAAAAAAAFgAUBFtVYlpUm5iHZvf8cW1Te1D16gIsAQAAAAAAABYAFPiBJvmTv+DdmsRcvIcWU/8LXU0ULAEAAAAAAAAWABTTg2VJqeeWiJbBke8bW5/1ovQ0+iwBAAAAAAAAFgAU0MnlyP/ofvZQ1P3mcA4vKVen9LksAQAAAAAAABYAFOPwOp2QPepm6NFFGXgeWlZoANQHLAEAAAAAAAAWABSY8opy2FeyAGUjkBlsm10RSsV7qCwBAAAAAAAAFgAUXWUVxmbYT+CMAs0oR8G3MYyyuyqZGAAAAAAAABYAFGT8/EuuiDNH8x7K3O7S/vZEyAaHzvwkAAEBH5kYAAAAAAAAFgAUZPz8S66IM0fzHsrc7tL+9kTIBocBAwQBAAAAIgYCWhAfa2NubZrJm0lvYZvSO5I0gf0wigR9fZRbTMTeX9IY4MWVxVQAAIABAACAAAAAgAAAAABjAAAAAAAAAAAAAA=="
@@ -2128,7 +2128,7 @@ def test_sign_sats_vB(m5stickv):
     outputs, _ = signer.outputs()
     assert (
         outputs[0]
-        == "Inputs (1): ₿ 0.00 006 297\n\nSpend (6): ₿ 0.00 003 625\n\nFee: ₿ 0.00 002 672 (73.8%) ~8.7 sat/vB"
+        == "Inputs (1): ₿ 0.00 006 297\n\nSpend (6): ₿ 0.00 003 625\n\nFee: ₿ 0.00 002 672 (73.8%) ~8.7 sat/vB"
     )
 
     PSBT_satvB_5_48 = "cHNidP8BAP0WAQIAAAABx8+VLZG8q9fE/9TFGaUDMxlyks8pM6wE1sUzUmlPlDsHAAAAAP3///8GJAIAAAAAAAAZdqkUa4EL95xQD2jSj2AF5rI0+0bugyaIrBwCAAAAAAAAF6kUYliCayfDLA7OWiyNhzzh8aKIY9OHHAIAAAAAAAAXqRSDAQVKg8ZQzf3pc5CIXtSjjvybt4dMAQAAAAAAACIAIPBpvMzjgX/Z/168aRCpfGEXCPMStUeAl9zYgTYj3UT9TAEAAAAAAAAiACC4oiq8/qMnouPk9VYChrWdrN/JDwPN+AjfiFCc3FhK0x0JAAAAAAAAIlEgJeBfcLU573hJOaYb6XQGR/eOKVSvBR9TW3+FoxRQEWK/+SoATwEENYfPA04BoMaAAAAADqwTbEcFGhxvEHabuwbcm8HLo8fY/7oVTxfPbpMs1/4DHz9uZifqAdnopjmilOHYCN/7ewoGlnjSzn1pi1wSdj4Q4MWVxVQAAIABAACAAAAAgAABAP19AQIAAAADBmHTgkZvesndEkYg1//mU0bdEWT0NDJ+pookrffo5xoBAAAAAP3///+lkTtN5yuncT07kkZIuZrgPlMIbk3e4Ph14s4MG+S3gQAAAAAA/f///6WRO03nK6dxPTuSRki5muA+UwhuTd7g+HXizgwb5LeBAQAAAAD9////CCwBAAAAAAAAFgAUBFtVYlpUm5iHZvf8cW1Te1D16gIsAQAAAAAAABYAFPiBJvmTv+DdmsRcvIcWU/8LXU0ULAEAAAAAAAAWABTTg2VJqeeWiJbBke8bW5/1ovQ0+iwBAAAAAAAAFgAU0MnlyP/ofvZQ1P3mcA4vKVen9LksAQAAAAAAABYAFOPwOp2QPepm6NFFGXgeWlZoANQHLAEAAAAAAAAWABSY8opy2FeyAGUjkBlsm10RSsV7qCwBAAAAAAAAFgAUXWUVxmbYT+CMAs0oR8G3MYyyuyqZGAAAAAAAABYAFGT8/EuuiDNH8x7K3O7S/vZEyAaHzvwkAAEBH5kYAAAAAAAAFgAUZPz8S66IM0fzHsrc7tL+9kTIBocBAwQBAAAAIgYCWhAfa2NubZrJm0lvYZvSO5I0gf0wigR9fZRbTMTeX9IY4MWVxVQAAIABAACAAAAAgAAAAABjAAAAAAAAAAAAAA=="
@@ -2136,7 +2136,7 @@ def test_sign_sats_vB(m5stickv):
     outputs, _ = signer.outputs()
     assert (
         outputs[0]
-        == "Inputs (1): ₿ 0.00 006 297\n\nSpend (6): ₿ 0.00 004 625\n\nFee: ₿ 0.00 001 672 (36.2%) ~5.5 sat/vB"
+        == "Inputs (1): ₿ 0.00 006 297\n\nSpend (6): ₿ 0.00 004 625\n\nFee: ₿ 0.00 001 672 (36.2%) ~5.5 sat/vB"
     )
 
     PSBT_satvB_2_2 = "cHNidP8BAP0WAQIAAAABx8+VLZG8q9fE/9TFGaUDMxlyks8pM6wE1sUzUmlPlDsHAAAAAP3///8GJAIAAAAAAAAZdqkUa4EL95xQD2jSj2AF5rI0+0bugyaIrAUNAAAAAAAAIlEgJeBfcLU573hJOaYb6XQGR/eOKVSvBR9TW3+FoxRQEWJMAQAAAAAAACIAILiiKrz+oyei4+T1VgKGtZ2s38kPA834CN+IUJzcWErTHAIAAAAAAAAXqRSDAQVKg8ZQzf3pc5CIXtSjjvybt4dMAQAAAAAAACIAIPBpvMzjgX/Z/168aRCpfGEXCPMStUeAl9zYgTYj3UT9HAIAAAAAAAAXqRRiWIJrJ8MsDs5aLI2HPOHxoohj04e/+SoATwEENYfPA04BoMaAAAAADqwTbEcFGhxvEHabuwbcm8HLo8fY/7oVTxfPbpMs1/4DHz9uZifqAdnopjmilOHYCN/7ewoGlnjSzn1pi1wSdj4Q4MWVxVQAAIABAACAAAAAgAABAP19AQIAAAADBmHTgkZvesndEkYg1//mU0bdEWT0NDJ+pookrffo5xoBAAAAAP3///+lkTtN5yuncT07kkZIuZrgPlMIbk3e4Ph14s4MG+S3gQAAAAAA/f///6WRO03nK6dxPTuSRki5muA+UwhuTd7g+HXizgwb5LeBAQAAAAD9////CCwBAAAAAAAAFgAUBFtVYlpUm5iHZvf8cW1Te1D16gIsAQAAAAAAABYAFPiBJvmTv+DdmsRcvIcWU/8LXU0ULAEAAAAAAAAWABTTg2VJqeeWiJbBke8bW5/1ovQ0+iwBAAAAAAAAFgAU0MnlyP/ofvZQ1P3mcA4vKVen9LksAQAAAAAAABYAFOPwOp2QPepm6NFFGXgeWlZoANQHLAEAAAAAAAAWABSY8opy2FeyAGUjkBlsm10RSsV7qCwBAAAAAAAAFgAUXWUVxmbYT+CMAs0oR8G3MYyyuyqZGAAAAAAAABYAFGT8/EuuiDNH8x7K3O7S/vZEyAaHzvwkAAEBH5kYAAAAAAAAFgAUZPz8S66IM0fzHsrc7tL+9kTIBocBAwQBAAAAIgYCWhAfa2NubZrJm0lvYZvSO5I0gf0wigR9fZRbTMTeX9IY4MWVxVQAAIABAACAAAAAgAAAAABjAAAAAAAAAAAAAA=="
@@ -2144,7 +2144,7 @@ def test_sign_sats_vB(m5stickv):
     outputs, _ = signer.outputs()
     assert (
         outputs[0]
-        == "Inputs (1): ₿ 0.00 006 297\n\nSpend (6): ₿ 0.00 005 625\n\nFee: ₿ 0.00 000 672 (12.0%) ~2.2 sat/vB"
+        == "Inputs (1): ₿ 0.00 006 297\n\nSpend (6): ₿ 0.00 005 625\n\nFee: ₿ 0.00 000 672 (12.0%) ~2.2 sat/vB"
     )
 
     PSBT_satvB_1_8 = "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"
@@ -2152,7 +2152,7 @@ def test_sign_sats_vB(m5stickv):
     outputs, _ = signer.outputs()
     assert (
         outputs[0]
-        == "Inputs (7): ₿ 0.00 002 100\n\nSpend (3): ₿ 0.00 000 997\n\nFee: ₿ 0.00 001 103 (110.7%) ~1.8 sat/vB"
+        == "Inputs (7): ₿ 0.00 002 100\n\nSpend (3): ₿ 0.00 000 997\n\nFee: ₿ 0.00 001 103 (110.7%) ~1.8 sat/vB"
     )
 
     wallet = Wallet(Key(MNEMONIC, TYPE_MULTISIG, NETWORKS["test"]))
@@ -2161,7 +2161,7 @@ def test_sign_sats_vB(m5stickv):
     outputs, _ = signer.outputs()
     assert (
         outputs[0]
-        == "Inputs (2): ₿ 0.00 130 622\n\nSpend (9): ₿ 0.00 028 343\n\nFee: ₿ 0.00 102 279 (360.9%) ~165.2 sat/vB"
+        == "Inputs (2): ₿ 0.00 130 622\n\nSpend (9): ₿ 0.00 028 343\n\nFee: ₿ 0.00 102 279 (360.9%) ~165.2 sat/vB"
     )
 
     # TODO: Add a multisig with descriptor so change can be deteted

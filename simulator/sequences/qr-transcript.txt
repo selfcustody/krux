@@ -4,19 +4,28 @@ include _wait-for-logo.txt
 x3 press BUTTON_B
 press BUTTON_A
 
-# Navigate to Create QR Code
-x2 press BUTTON_B
+# Navigate to Datum
+press BUTTON_B
 press BUTTON_A
 
-# Confirm
+# Navigate to Via Manual Input
+press BUTTON_B
 press BUTTON_A
 
 # Enter letter a
 press BUTTON_A
 
-# Navigate to Go and proceed
+# Navigate to Go, enter and proceed
 press BUTTON_C
+x2 press BUTTON_A
+
+# Move to QR code
+press BUTTON_B
 press BUTTON_A
+
+# Cancel update text
+press BUTTON_B
+press_amigo_only BUTTON_A
 
 screenshot standard-qr-code.png
 

@@ -73,7 +73,7 @@ class MnemonicsView(Page):
                 ),
                 (t("Numbers"), self.display_mnemonic_numbers),
                 ("Stackbit 1248", self.stackbit),
-                ("Tiny Seed", self.tiny_seed),
+                ("Tinyseed", self.tiny_seed),
             ],
         )
         submenu.run_loop()
@@ -196,7 +196,7 @@ class MnemonicsView(Page):
         return MENU_CONTINUE
 
     def tiny_seed(self):
-        """Displays the seed in Tiny Seed format"""
+        """Displays the seed in Tinyseed format"""
         from ..tiny_seed import TinySeed
 
         tiny_seed = TinySeed(self.ctx)
@@ -208,6 +208,6 @@ class MnemonicsView(Page):
             and self.ctx.camera.mode is not None
         ):
             # TinySeed printing requires a camera frame buffer to draw in.
-            if self.print_prompt(t("Print Tiny Seed?")):
+            if self.print_prompt(t("Print Tinyseed?")):
                 tiny_seed.print_tiny_seed()
         return MENU_CONTINUE
