@@ -333,7 +333,7 @@ class Login(Page):
             wallet_info += "\n" + (
                 t("No Passphrase")
                 if not passphrase
-                else t("Passphrase") + " (%d): *..*" % len(passphrase)
+                else t("Passphrase") + " (%d): *…*" % len(passphrase)
             )
 
             self.ctx.display.clear()
@@ -389,7 +389,7 @@ class Login(Page):
                 )
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Loading.."))
+        self.ctx.display.draw_centered_text(t("Loading…"))
 
         self.ctx.wallet = Wallet(key)
         return MENU_EXIT
@@ -447,7 +447,7 @@ class Login(Page):
                     self.flash_error(t("Key was not provided"))
                     return MENU_CONTINUE
                 self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Processing.."))
+                self.ctx.display.draw_centered_text(t("Processing…"))
                 word_bytes = encrypted_qr.decrypt(key)
                 if word_bytes is None:
                     self.flash_error(t("Failed to decrypt"))

@@ -175,7 +175,7 @@ class SettingsPage(Page):
             self.flash_error(t("Tamper check codes do not match"))
             return MENU_CONTINUE
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
+        self.ctx.display.draw_centered_text(t("Processing…"))
         # Hashes the Tamper Check Code once
         tc_code_bytes = tamper_check_code.encode()
         tc_code_hash = uhashlib_hw.sha256(tc_code_bytes).digest()
@@ -221,7 +221,7 @@ class SettingsPage(Page):
         # flash is always mounted, so settings is always persisted
         if Settings().persist.location == SD_PATH:
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Checking for SD card.."))
+            self.ctx.display.draw_centered_text(t("Checking for SD card…"))
             try:
                 # Check for SD hot-plug
                 with SDHandler():
@@ -474,7 +474,7 @@ class SettingsPage(Page):
                 from ..camera import Camera
 
                 self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Processing.."))
+                self.ctx.display.draw_centered_text(t("Processing…"))
 
                 self.ctx.camera = Camera()
 

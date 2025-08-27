@@ -330,9 +330,9 @@ def test_files_and_folders_with_long_filenames(m5stickv, mocker, mock_file_opera
     file_manager.select_file()
     ctx.display.to_lines.assert_has_calls(
         [
-            mocker.call("subdir1..g_name/"),
+            mocker.call("subdir1…g_name/"),
             mocker.call("subdir2/"),
-            mocker.call("file2_h..ng_name"),
+            mocker.call("file2_h…ng_name"),
             mocker.call("settings.json"),
         ]
     )
