@@ -141,6 +141,7 @@ class CameraEntropy(Page):
         import shannon
         from ..wdt import wdt
         from ..camera import ENTROPY_MODE
+        from ..format import replace_decimal_separator
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("TOUCH or ENTER to capture"))
@@ -186,10 +187,11 @@ class CameraEntropy(Page):
         shannon_16b_total = shannon_16b * img_pixels
 
         entropy_msg = t("Shannon's entropy:") + "\n"
-        entropy_msg += str(round(shannon_16b, 2)) + " " + "bits/px" + "\n"
-        entropy_msg += t("(%d total)") % int(shannon_16b_total) + "\n\n"
-        entropy_msg += t("Pixels deviation index:") + " "
-        entropy_msg += str(self.stdev_index)
+        entropy_msg += (t("%d bits (%s bits/px)") + "\n\n") % (
+            int(shannon_16b_total),
+            replace_decimal_separator("%.2g" % shannon_16b),
+        )
+        entropy_msg += "%s %s" % (t("Pixels deviation index:"), str(self.stdev_index))
         self.ctx.display.clear()
         self.ctx.input.reset_ios_state()
         if (

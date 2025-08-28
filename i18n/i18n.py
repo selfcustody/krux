@@ -23,12 +23,15 @@
 import binascii
 import sys
 import json
-from os import listdir, walk, mkdir
+from os import listdir, walk, mkdir, remove, rmdir
 from os.path import isfile, isdir, exists, join, basename
 import re
 
 SRC_DIR = "../src"
 TRANSLATION_FILES_DIR = "translations"
+
+ELLIPSIS_UNICODE = "\u2026"
+ELLIPSIS_ASCII = "..."
 
 KRUX_LICENSE = """# The MIT License (MIT)
 
@@ -117,13 +120,22 @@ def post_process_translation(slug, translation, verbose=False):
     """
     err = None
 
+    translation = translation.replace(ELLIPSIS_ASCII, ELLIPSIS_UNICODE)
+    translation = translation.replace("（", "(")
+    translation = translation.replace("）", ")")
+    translation = translation.replace("。", ".")
+    translation = translation.replace("，", ",")
+    translation = translation.replace("：", ":")
+    translation = translation.replace("？", "?")
+    translation = translation.replace("！", "!")
+
     # fix poorly translated newlines
     if " \\ n" in translation:
         err = "Poor newline translation: {}, {}".format(repr(slug), repr(translation))
         translation = translation.replace(" \\ n", "\\n")
 
     # fix poorly translated unicode ellipsis
-    ellipsis = "\u2026"
+    ellipsis = ELLIPSIS_UNICODE
     if slug[-1] == ellipsis:
         err = "Poor ellipsis translation: {}, {}".format(repr(slug), repr(translation))
         if translation[-2:] == ellipsis * 2:
@@ -183,7 +195,9 @@ def print_missing(save_to_file=False, merge_after=False):
             for slug in slugs:
                 if slug not in translations or translations[slug] == "":
                     try:
+                        slug = slug.replace(ELLIPSIS_UNICODE, ELLIPSIS_ASCII)
                         translated = translator.translate(slug)
+                        slug = slug.replace(ELLIPSIS_ASCII, ELLIPSIS_UNICODE)
                         translated = post_process_translation(
                             slug, translated, verbose=(save_to_file or merge_after)
                         )
@@ -228,12 +242,12 @@ def print_missing(save_to_file=False, merge_after=False):
                     print(
                         f"Saved translations to {join(TRANSLATION_FILES_DIR, translation_filename)}"
                     )
-                    import os
 
-                    os.remove(join(filled_dir, translation_filename))
+                    remove(join(filled_dir, translation_filename))
                     print(
                         f"Removed translation {join(filled_dir, translation_filename)}"
                     )
+        rmdir(filled_dir)
         print("\n\n")
 
 

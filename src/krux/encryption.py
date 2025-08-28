@@ -204,7 +204,7 @@ class EncryptedQRCode:
                 "Encrypted QR Code:",
                 "ID: " + displayable_id,
                 "Version: " + version_name,
-                "Key iter.: " + str(self.iterations),
+                "PBKDF2 iter.: " + str(self.iterations),
             ]
         )
 

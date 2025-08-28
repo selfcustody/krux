@@ -48,22 +48,22 @@ CTR_ENCRYPTED_QR = b"\x07test ID\x0f\x00\x00\nd\xc2\xd8\xb7U\xe8\x02~\xda}\xcdO\
 GCM_ENCRYPTED_QR = b"\x07test ID\x14\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\xbf\xb7vo]]\x8aO\x90\x8e\x86\xe784L\x02]\x8f\xedT"
 
 ECB_QR_PUBLIC_DATA = (
-    "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB\nKey iter.: 100000"
+    "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB\nPBKDF2 iter.: 100000"
 )
 OLDECB_QR_PUBLIC_DATA = (
-    "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB v1\nKey iter.: 100000"
+    "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB v1\nPBKDF2 iter.: 100000"
 )
 CBC_QR_PUBLIC_DATA = (
-    "Encrypted QR Code:\nID: test ID\nVersion: AES-CBC\nKey iter.: 100000"
+    "Encrypted QR Code:\nID: test ID\nVersion: AES-CBC\nPBKDF2 iter.: 100000"
 )
 OLDCBC_QR_PUBLIC_DATA = (
-    "Encrypted QR Code:\nID: test ID\nVersion: AES-CBC v1\nKey iter.: 100000"
+    "Encrypted QR Code:\nID: test ID\nVersion: AES-CBC v1\nPBKDF2 iter.: 100000"
 )
 CTR_QR_PUBLIC_DATA = (
-    "Encrypted QR Code:\nID: test ID\nVersion: AES-CTR\nKey iter.: 100000"
+    "Encrypted QR Code:\nID: test ID\nVersion: AES-CTR\nPBKDF2 iter.: 100000"
 )
 GCM_QR_PUBLIC_DATA = (
-    "Encrypted QR Code:\nID: test ID\nVersion: AES-GCM\nKey iter.: 100000"
+    "Encrypted QR Code:\nID: test ID\nVersion: AES-GCM\nPBKDF2 iter.: 100000"
 )
 
 
@@ -557,7 +557,7 @@ def test_customize_pbkdf2_iterations_create_and_decode(m5stickv):
     print("case Decode: customize_pbkdf2_iterations")
     public_data = encrypted_qr.public_data(qr_data)
     assert public_data == (
-        "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB\nKey iter.: 99999"
+        "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB\nPBKDF2 iter.: 99999"
     )
     word_bytes = encrypted_qr.decrypt(TEST_KEY)
     words = bip39.mnemonic_from_bytes(word_bytes)
