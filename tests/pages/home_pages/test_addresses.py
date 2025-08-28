@@ -713,6 +713,79 @@ def test_scan_address_fails_on_decrypt_kef_key_error(mocker, m5stickv):
         "Failed to decrypt", 248, 2000, highlight_prefix=""
     )
 
+    # will be ValueError, if user fails to load key
+    btn_seq = [
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_PAGE_PREV,  # back to "Go"
+        BUTTON_PAGE_PREV,  # back to Esc
+        BUTTON_ENTER,  # go Esc
+        BUTTON_PAGE_PREV,  # deny key ''
+        BUTTON_ENTER,
+    ]
+    ctx = create_ctx(mocker, btn_seq)
+    addresses_ui = Addresses(ctx)
+    assert addresses_ui.scan_address() == MENU_CONTINUE
+    # assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    print(ctx.display.method_calls)
+    ctx.display.flash_text.assert_called_with(
+        "Invalid address", 248, 2000, highlight_prefix=""
+    )
+
+
+def test_scan_kef_address(mocker, m5stickv, tdata):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages.home_pages.addresses import Addresses
+    from krux.wallet import Wallet
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages import MENU_CONTINUE
+
+    # valid address encrypted w/ key="a" to test kef address
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            "B2FkZHJlc3MFAAABARN21DbewFuk26WhryWxyfA6cI8i0ynYiahNPqsE7xq4YT3GaiG02/uDyY/8OhRMwW0l",
+            0,
+        ),
+    )
+    btn_seq = [
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # type key
+        BUTTON_ENTER,  # enter "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key "a"
+        BUTTON_ENTER,  # dismiss addr qr
+        BUTTON_ENTER,  # confirm to check address
+        BUTTON_ENTER,  # dismiss results
+    ]
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet, None)
+    addresses_ui = Addresses(ctx)
+    assert addresses_ui.scan_address() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    ctx.display.to_lines.assert_called_with(
+        "0.\n\nbc1q rhjq rz2d 9tdy m3p2 r9m2 vwzn 2sn2 yl6k 5m35 7y\n\nis a valid address!"
+    )
+
+    # nonsensical b"InvalidAddress" plaintext encrypted w/ key="a" to test kef non-address
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            "B2ludmFsaWQFAAABLCM5eVz0ZezVL+rKbZhK26Kbog==",
+            0,
+        ),
+    )
+    btn_seq = btn_seq[:6]
+    ctx = create_ctx(mocker, btn_seq)
+    addresses_ui = Addresses(ctx)
+    assert addresses_ui.scan_address() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    ctx.display.flash_text.assert_called_with(
+        "Invalid address", 248, 2000, highlight_prefix=""
+    )
+
 
 def test_list_receive_addresses(mocker, m5stickv, tdata):
     from krux.format import format_address

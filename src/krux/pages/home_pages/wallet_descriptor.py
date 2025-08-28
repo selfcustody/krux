@@ -125,6 +125,26 @@ class WalletDescriptor(Page):
     def _load_wallet(self):
         """Load a wallet output descriptor from the camera or SD card"""
 
+        def load_wallet_or_exception(wallet_data, qr_format):
+            from ...wallet import AssumptionWarning
+
+            wallet_load_exception = None
+
+            try:
+                wallet.load(wallet_data, qr_format)
+            except AssumptionWarning as e:
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(e.args[0], theme.error_color)
+                if self.prompt(t("Accept assumption?"), BOTTOM_PROMPT_LINE):
+                    try:
+                        wallet.load(wallet_data, qr_format, allow_assumption=e.args[1])
+                    except Exception as e_again:
+                        wallet_load_exception = e_again
+            except Exception as e:
+                wallet_load_exception = e
+
+            return wallet_load_exception
+
         persisted = False
         load_method = self.load_method()
         if load_method == LOAD_FROM_CAMERA:
@@ -152,41 +172,42 @@ class WalletDescriptor(Page):
         else:  # Cancel
             return MENU_CONTINUE
 
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing…"))
         if wallet_data is None:
             # Camera or SD card loading failed!
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
 
-        from ..encryption_ui import decrypt_kef
+        from ...wallet import Wallet
 
-        try:
-            wallet_data = decrypt_kef(self.ctx, wallet_data).decode()
-        except KeyError:
-            self.flash_error(t("Failed to decrypt"))
-            return MENU_CONTINUE
-        except ValueError:
-            # ValueError=not KEF or declined to decrypt
-            pass
-
-        from ...wallet import Wallet, AssumptionWarning
-
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing…"))
         wallet = Wallet(self.ctx.wallet.key)
         wallet.persisted = persisted
-        wallet_load_exception = None
-        try:
-            wallet.load(wallet_data, qr_format)
-        except AssumptionWarning as e:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(e.args[0], theme.error_color)
-            if self.prompt(t("Accept assumption?"), BOTTOM_PROMPT_LINE):
+
+        wallet_load_exception = load_wallet_or_exception(wallet_data, qr_format)
+
+        if not wallet.is_loaded():
+            from ..encryption_ui import decrypt_kef
+
+            if isinstance(wallet_data, bytes):
                 try:
-                    wallet.load(wallet_data, qr_format, allow_assumption=e.args[1])
-                except Exception as e_again:
-                    wallet_load_exception = e_again
-        except Exception as e:
-            wallet_load_exception = e
+                    wallet_data = wallet_data.decode()
+                except UnicodeDecodeError:
+                    pass
+
+            try:
+                wallet_data = decrypt_kef(self.ctx, wallet_data)
+            except ValueError:
+                # ValueError=not KEF or declined to decrypt
+                pass
+            except:
+                # KeyError or other exception during decryption
+                self.flash_error(t("Failed to decrypt"))
+                return MENU_CONTINUE
+
+            if wallet_data:
+                wallet_load_exception = load_wallet_or_exception(wallet_data, qr_format)
+
         if wallet_load_exception:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(

@@ -225,6 +225,62 @@ def test_wallet_load_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
     )
 
 
+def test_load_kef_desc(mocker, m5stickv):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages import MENU_CONTINUE
+
+    # a single-sig kef descriptor encrypted with key 'a'
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            "D3NpbmdsZS1zaWctZGVzYwUAAAEFLL1FjNrDp7xVh8cYVlRJHLS0n3fYWMQpyXYwHenPlZUkHQZrcsRbYrext1g7E6OzRt8g+D5kpjyLB6vBCmM/LCuJXpjYg8MO+fRkXUPqEBKteenYLDKFZbBumooJxfkHBoLXGSzNkBVbRjoIu/6uiVvRRCjB8cXexekIG3aZruuymy/0bGrLqRYX25Ns83lgegv4ygZAevWgBqFiAYPON6ld",
+            0,
+        ),
+    )
+    btn_seq = [
+        BUTTON_ENTER,  # confirm load
+        BUTTON_ENTER,  # go load from camera
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # type key
+        BUTTON_ENTER,  # enter "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key "a"
+        BUTTON_ENTER,  # confirm "Load?""
+    ]
+    wallet = Wallet(None)
+    ctx = create_ctx(mocker, btn_seq, wallet, None)
+    walletdescriptor_ui = WalletDescriptor(ctx)
+    assert walletdescriptor_ui.wallet() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    ctx.display.flash_text.assert_called_with(
+        "Wallet output descriptor loaded!", 65535, 2000, highlight_prefix=""
+    )
+
+    # nonsensical "Not a descriptor" plaintext encrypted w/ key="a" to test kef non-descriptor
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            "B2ludmFsaWQFAAAB3zXZLXysZV8mHFzb9CM3z9wa7Q==",
+            0,
+        ),
+    )
+    wallet = Wallet(None)
+    ctx = create_ctx(mocker, btn_seq, wallet, None)
+    walletdescriptor_ui = WalletDescriptor(ctx)
+    assert walletdescriptor_ui.wallet() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    ctx.display.draw_centered_text.assert_called_with(
+        "Invalid wallet:\nValueError(\"Character ' ' is not a valid base58 character\")",
+        248,
+    )
+
+
 def test_load_desc_without_change(mocker, m5stickv, tdata):
     import krux
 
