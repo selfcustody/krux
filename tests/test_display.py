@@ -184,12 +184,12 @@ def test_to_lines(mocker, m5stickv):
         (135, "Two  Words", ["Two  Words"]),
         (135, "Two   Words", ["Two   Words"]),
         (135, "Two        Words", ["Two        Words"]),
-        (135, "Two\nWords", ["Two", "Words"]),
+        (135, "Two\nWords", ["Two", "Words"]),  # case 4
         (135, "Two\n\nWords", ["Two", "", "Words"]),
         (135, "Two\n\n\nWords", ["Two", "", "", "Words"]),
         (135, "Two\n\n\n\nWords", ["Two", "", "", "", "Words"]),
         (135, "Two\n\n\n\n\nWords", ["Two", "", "", "", "", "Words"]),
-        (135, "\nTwo\nWords\n", ["", "Two", "Words"]),
+        (135, "\nTwo\nWords\n", ["", "Two", "Words"]),  # case 9
         (135, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),  # case 10
         (135, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
         (135, "More Than Two Words", ["More Than Two", "Words"]),  # 13 + 5 chars
@@ -449,7 +449,7 @@ def test_to_lines_chinese(mocker, m5stickv):
 
 
 def test_to_lines_endpos(mocker, m5stickv):
-    from krux.display import Display
+    from krux.display import Display, FONT_WIDTH, TOTAL_LINES
 
     # m5stick has max 16 chars per line and 16 lines
     max_lines = 16
@@ -458,31 +458,30 @@ def test_to_lines_endpos(mocker, m5stickv):
     text = "I am a long line of text, and I will be repeated." * 30
     d = Display()
     d.to_portrait()
-    lines, endpos = d.to_lines_endpos(text, max_lines)
+    lines, endpos = d._to_lines_endpos(text, max_lines)
     assert len(lines) == max_lines
-    assert endpos == 248
+    assert endpos == 249
 
     # test exactly enough to finish the page w/o ellipsis
-    for white in (" ", "\n", "\t"):
+    for white in (" ", "\n"):
         print("whitespace:", repr(white))
         text = white.join(
             ["line {:02d} 16 chars".format(x) for x in range(1, max_lines + 1)]
         )
         d = Display()
         d.to_portrait()
-        lines, endpos = d.to_lines_endpos(text, max_lines)
+        lines, endpos = d._to_lines_endpos(text, max_lines)
         assert len(lines) == max_lines
         assert endpos == len(text)
         assert lines[-1][-1] != "\u2026"  # no ellipsis
 
         # ... and that one char too big would span a page w/ ellipsis
         text += "+"
-        lines, endpos = d.to_lines_endpos(text, max_lines)
-        print(text, lines)
+        lines, endpos = d._to_lines_endpos(text, max_lines)
         assert len(lines) == max_lines
         assert endpos == len(text) - len("chars+")
         assert lines[-1][-1] == "\u2026"  # has ellipsis
-        lines, endpos = d.to_lines_endpos(text[endpos:], max_lines)
+        lines, endpos = d._to_lines_endpos(text[endpos:], max_lines)
         assert len(lines) == 1
         assert lines[-1] == "chars+"  # space gets stripped
 
@@ -490,30 +489,52 @@ def test_to_lines_endpos(mocker, m5stickv):
     text = "".join(["line_{:02d}_16_chars".format(x) for x in range(1, max_lines + 1)])
     d = Display()
     d.to_portrait()
-    lines, endpos = d.to_lines_endpos(text, max_lines)
+    lines, endpos = d._to_lines_endpos(text, max_lines)
     assert len(lines) == max_lines
     assert endpos == len(text)
     assert lines[-1][-1] != "\u2026"  # no ellipsis
 
     # ... and that one char too big would span a page w/ ellipsis
     text += "+"
-    lines, endpos = d.to_lines_endpos(text, max_lines)
+    lines, endpos = d._to_lines_endpos(text, max_lines)
+    old_end_pos = endpos
     assert len(lines) == max_lines
     assert endpos == len(text) - len("s+")
     assert lines[-1][-1] == "\u2026"  # has ellipsis
-    lines, endpos = d.to_lines_endpos(text[endpos:], max_lines)
+    lines, endpos = d._to_lines_endpos(text[endpos:], max_lines)
     assert len(lines) == 1
     assert lines[-1] == "s+"
 
+    # simple cases
 
-def test_index_pages(mocker, m5stickv):
-    from krux.display import Display
+    chars_per_line = 10
+    display_width = FONT_WIDTH * chars_per_line
+    mocker.patch("krux.display.lcd.width", return_value=display_width)
 
-    mocker.patch("krux.display.lcd.width", return_value=135)
-    text = "I am some text." * 100
     d = Display()
     d.to_portrait()
-    assert d.index_pages(text, max_lines=25) == [0, 377, 752, 1127]
+
+    text = "0123456789abc"
+    max_lines = 1
+    lines, endpos = d._to_lines_endpos(text, max_lines)
+    print(lines, endpos, text[endpos:])
+    assert len(lines) == max_lines
+    assert len(lines[0]) == chars_per_line
+    assert "012345678…" == lines[0]
+    assert "9" not in lines[0]
+    assert text[endpos:] == "9abc"
+
+    text = "0123456789abc" * 13  # 13 * 13 = 169
+    text += "x"  # 169 + 1 = 170
+    max_lines = TOTAL_LINES  # 17
+    print(TOTAL_LINES)
+    lines, endpos = d._to_lines_endpos(text, max_lines)
+    print(lines, len(lines), endpos)
+    for i in range(max_lines):
+        assert len(lines[i]) == chars_per_line
+
+    lines, _ = d._to_lines_endpos(text[endpos:])
+    assert lines == [""]  # vazio
 
 
 def test_outline(mocker, m5stickv):
@@ -593,35 +614,6 @@ def test_vline(mocker, m5stickv):
 
     d.draw_vline(0, 0, 100, krux.display.lcd.WHITE)
     krux.display.lcd.draw_line.assert_called_with(0, 0, 0, 100, krux.display.lcd.WHITE)
-
-
-def test_fill_circle(mocker, m5stickv):
-    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
-    import krux
-    from krux.display import Display
-
-    d = Display()
-
-    d.fill_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
-
-    krux.display.lcd.draw_circle.assert_called_with(
-        100, 100, 50, 0, krux.display.lcd.WHITE
-    )
-
-
-def test_fill_circle_on_inverted_display(mocker, amigo):
-    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
-    import krux
-    from krux.display import Display
-
-    d = Display()
-    mocker.patch.object(d, "width", new=lambda: 480)
-
-    d.fill_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
-
-    krux.display.lcd.draw_circle.assert_called_with(
-        480 - 100, 100, 50, 0, krux.display.lcd.WHITE
-    )
 
 
 def test_fill_rectangle(mocker, m5stickv):
@@ -927,9 +919,24 @@ def test_max_menu_lines(mocker, m5stickv):
         + [(i, 3) for i in range(129, 157)]
         + [(i, 2) for i in range(157, 185)]
     )
+    menu_lines = [
+        (
+            "Very big text menu item that spans multiple lines and occupy space of other menu item",
+            None,
+        ),
+        ("menu item", None),
+        ("menu item", None),
+        ("menu item", None),
+    ]
     for line_offset, expected_lines in cases:
         lines = d.max_menu_lines(line_offset=line_offset)
         assert lines == expected_lines
+        lines = d.max_menu_lines(line_offset, menu_lines)
+        assert (
+            lines == expected_lines - 1
+        )  # reduce the number because the menu param has an entry with multiple lines
+        lines = d.max_menu_lines(line_offset, menu_lines[1:])
+        assert lines == expected_lines  # removed the entry that spans multiple lines
 
 
 def test_render_image(mocker, multiple_devices):

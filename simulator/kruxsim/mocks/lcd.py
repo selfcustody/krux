@@ -479,6 +479,7 @@ if "lcd" not in sys.modules:
         draw_circle=draw_circle,
         draw_line=draw_line,
         draw_outline=draw_outline,
+        string_has_wide_glyph=string_has_wide_glyph,
         BLACK=COLOR_BLACK,
         WHITE=COLOR_WHITE,
     )

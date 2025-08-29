@@ -636,7 +636,7 @@ def test_datumtool__info_box(m5stickv, mocker):
     page._info_box()
     assert ctx.input.wait_for_button.call_count == 0
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("Text\n\nabout", info_box=True, highlight_prefix=":")]
+        [mocker.call("Text\nabout", info_box=True, highlight_prefix=":")]
     )
 
     # call with bytes
@@ -649,7 +649,7 @@ def test_datumtool__info_box(m5stickv, mocker):
     page._info_box()
     assert ctx.input.wait_for_button.call_count == 0
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("Bytes\n\nabout", info_box=True, highlight_prefix=":")]
+        [mocker.call("Bytes\nabout", info_box=True, highlight_prefix=":")]
     )
 
 
@@ -657,6 +657,7 @@ def test_datumtool__show_contents(m5stickv, mocker):
     """With DatumTool already initialized, test ._show_contents()"""
     from krux.pages.datum_tool import DatumTool
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.settings import THIN_SPACE
 
     # call with text
     ctx = create_ctx(mocker, [BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_ENTER])
@@ -668,7 +669,7 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 3
     ctx.display.draw_hcentered_text.assert_called_with(
-        "Text\n\nabout p1/1", info_box=True, highlight_prefix=":"
+        "Text\nabout p" + THIN_SPACE + "1/1", info_box=True, highlight_prefix=":"
     )
 
     # call with bytes
@@ -681,7 +682,7 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 1
     ctx.display.draw_hcentered_text.assert_called_with(
-        "Bytes\n\nabout p1/1", info_box=True, highlight_prefix=":"
+        "Bytes\nabout p" + THIN_SPACE + "1/1", info_box=True, highlight_prefix=":"
     )
 
 

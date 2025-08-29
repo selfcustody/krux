@@ -221,7 +221,7 @@ class Page:
         if lcd.string_width_px(buffer) < self.ctx.display.width():
             text_to_show = title if not show_swipe_hint else swipe_hint
             self.ctx.display.draw_hcentered_text(
-                text_to_show, offset_y, color=theme.highlight_color
+                text_to_show, offset_y, color=theme.highlight_color, max_lines=1
             )
             offset_y += 2 * FONT_HEIGHT if big_title else (FONT_HEIGHT * 3 // 2)
         if not buffer_title:
@@ -477,7 +477,7 @@ class Page:
     def fit_to_line(self, text, prefix="", fixed_chars=0, crop_middle=True):
         """Fits text with prefix plus fixed_chars at the beginning into one line,
         removing the central content and leaving the ends"""
-        usable_chars = self.ctx.display.usable_pixels_in_line() // FONT_WIDTH
+        usable_chars = self.ctx.display.ascii_chars_per_line()
         if len(prefix) + len(text) <= usable_chars:
             return prefix + text
 
@@ -638,7 +638,7 @@ class Menu:
             self.disable_statusbar = True
             self.menu_offset = offset
         max_viewable = min(
-            self.ctx.display.max_menu_lines(self.menu_offset), len(self.menu)
+            self.ctx.display.max_menu_lines(self.menu_offset, self.menu), len(self.menu)
         )
         self.menu_view = ListView(self.menu, max_viewable)
 
@@ -717,9 +717,13 @@ class Menu:
                         # which may be a different index than before we moved backward
                         selected_item_index = len(self.menu_view) - 1
                 elif btn == SWIPE_UP:
+                    selected_item_index = 0
                     self.menu_view.move_forward()
                 elif btn == SWIPE_DOWN:
                     self.menu_view.move_backward()
+                    # Update selected item index to be the last viewable item,
+                    # which may be a different index than before we moved backward
+                    selected_item_index = len(self.menu_view) - 1
                 elif btn is None and self.menu_offset == STATUS_BAR_HEIGHT:
                     # Activates screensaver if there's no info_box(other things draw on the screen)
                     self.screensaver()
@@ -925,7 +929,9 @@ class Menu:
             )
             offset_y //= 2
             offset_y += FONT_HEIGHT // 2
-        offset_y = max(offset_y, STATUS_BAR_HEIGHT)
+        offset_y = (
+            max(offset_y, STATUS_BAR_HEIGHT) + 2
+        )  # add 2 because of small devices
         items_pad = max(
             self.ctx.display.height()
             - STATUS_BAR_HEIGHT

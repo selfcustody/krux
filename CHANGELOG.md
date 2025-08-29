@@ -50,6 +50,7 @@ A new advanced utility for working with files, QRs, and manual text input. It su
 - Saving encrypted mnemonic now prompts whether to use the fingerprint as ID.
 - Optimized device's board value checks.
 - Added QR Code to About screen.
+- Fixed camera zoom mode clearing the QR codes progress bar.
 - Fixed camera not rotating on Yahboom or WonderMV with flipped orientation.
 - Restart prompt for theme settings now appears only when changes are made.
 - Wallet Descriptor now validates and warns if change addresses cannot be determined.
@@ -61,6 +62,9 @@ A new advanced utility for working with files, QRs, and manual text input. It su
 - Hide the "Change Addresses" menu option when cannot be determined by the wallet descriptor.
 - The hide mnemonic setting now ignores user confirmation when loading a mnemonic via word numbers.
 - Minor text improvements for clarity and easier translation.
+- Resolve issue where mixed ASCII and Asian fonts fail to use the full available width.
+- Fixed an issue where menu entries were cut off when translations spanned two lines instead of one.
+- Fix selected entry update bug when switching between PAGE and swipe in large menus.
 - Maixpy Fix: Increase glyphs indexing capacity affecting Amigo's translations
 
 

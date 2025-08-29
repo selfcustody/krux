@@ -37,7 +37,9 @@ SWIPE_UP = 6
 SWIPE_DOWN = 7
 FAST_FORWARD = 8
 FAST_BACKWARD = 9
-ACTIVATING_BUTTONS = 8  # Won't trigger actions, just indicates buttons can used
+
+# A button was pressed, but the previous state was a touch (sometimes prevents triggering an action)
+ACTIVATING_BUTTONS = 999
 
 # Release must be confirmed X times
 BUTTON_RELEASE_FILTER = 10 if kboard.need_release_filter else 1
