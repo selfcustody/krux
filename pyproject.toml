@@ -25,6 +25,8 @@ name = "krux"
 version = "25.05.beta11"
 description = "Open-source signing device firmware for Bitcoin"
 authors = ["Jeff S <jeffreesun@protonmail.com>"]
+readme = "README.md"
+license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.12.3"
@@ -53,14 +55,13 @@ qrcode = "^7.4.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
-pylint = "^3.2.5"
-pytest = "^8.2.2"
+pylint = "^3.3.8"
+pytest = "^8.3.5"
 pytest-cov = "^5.0.0"
 pytest-mock = "^3.14.0"
 PyQRCode = "^1.2.1"
-pycryptodome = "^3.17.0"
+pycryptodome = "^3.22.0"
 poethepoet = "^0.24.4"
-dill = "^0.3.8"
 
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]
