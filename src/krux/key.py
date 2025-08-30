@@ -31,12 +31,10 @@ from embit.networks import NETWORKS
 from .settings import (
     TEST_TXT,
     THIN_SPACE,
-    NAME_SINGLE_SIG,
-    NAME_MULTISIG,
-    NAME_MINISCRIPT,
 )
 
 DER_SINGLE = "m/%dh/%dh/%dh"
+DER_MULTI_LEGACY_NO_PATHS = "m/45h"
 DER_MULTI_LEGACY = "m/%dh/%d"
 DER_MULTI_SEGWIT_NESTED = "m/%dh/%dh/%dh/1h"
 DER_MULTI_SEGWIT_NATIVE = "m/%dh/%dh/%dh/2h"
@@ -70,12 +68,43 @@ P2WSH = "p2wsh"
 # address starts with bc1p (mainnet) or tb1p (testnet)
 P2TR = "p2tr"
 
-SCRIPT_LONG_NAMES = {
-    "Legacy - 44": P2PKH,
-    "Nested Segwit - 49": P2SH_P2WPKH,
-    "Native Segwit - 84": P2WPKH,
-    "Taproot - 86": P2TR,
-}
+# Policy types
+NAME_SINGLE_SIG = "Single-sig"
+NAME_MULTISIG = "Multisig"
+NAME_MINISCRIPT = "Miniscript"
+
+# Policy types names
+POLICY_TYPE_NAMES = [
+    NAME_SINGLE_SIG,
+    NAME_MULTISIG,
+    NAME_MINISCRIPT,
+]
+
+SINGLESIG_SCRIPT_NAMES = [
+    "Legacy - 44",
+    "Nested Segwit - 49",
+    "Native Segwit - 84",
+    "Taproot - 86",
+]
+
+MULTISIG_SCRIPT_NAMES = ["Legacy - 45", "Nested Segwit - 48", "Native Segwit - 48"]
+
+MINISCRIPT_SCRIPT_NAMES = ["Native Segwit - 48", "Taproot - 48"]
+
+
+# Single-sig script types supported by Krux
+# P2PKH, P2SH-P2WPKH, P2WPKH, P2TR
+SINGLESIG_SCRIPT_MAP = dict(
+    zip(SINGLESIG_SCRIPT_NAMES, [P2PKH, P2SH_P2WPKH, P2WPKH, P2TR])
+)
+
+# Multisig script types supported by Krux
+# P2SH, P2SH-P2WSH, P2WSH
+MULTISIG_SCRIPT_MAP = dict(zip(MULTISIG_SCRIPT_NAMES, [P2SH, P2SH_P2WSH, P2WSH]))
+
+# Miniscript script types supported by Krux
+# P2WSH, P2TR
+MINISCRIPT_SCRIPT_MAP = dict(zip(MINISCRIPT_SCRIPT_NAMES, [P2WSH, P2TR]))
 
 SINGLESIG_SCRIPT_PURPOSE = {
     P2PKH: 44,
@@ -83,6 +112,14 @@ SINGLESIG_SCRIPT_PURPOSE = {
     P2WPKH: 84,
     P2TR: 86,
 }
+
+MULTISIG_SCRIPT_PURPOSE = {
+    P2SH: 45,
+    P2SH_P2WSH: 48,
+    P2WSH: 48,
+}
+
+MINISCRIPT_PURPOSE = 48
 
 TYPE_SINGLESIG = 0
 TYPE_MULTISIG = 1
@@ -94,13 +131,6 @@ POLICY_TYPE_IDS = {
     NAME_MINISCRIPT: TYPE_MINISCRIPT,
 }
 
-MULTISIG_SCRIPT_PURPOSE = {
-    P2SH: 45,
-    P2WSH: 48,
-    P2SH_P2WSH: 48,
-}
-
-MINISCRIPT_PURPOSE = 48
 
 FINGERPRINT_SYMBOL = "⊚"
 DERIVATION_PATH_SYMBOL = "↳"
@@ -128,11 +158,7 @@ class Key:
         # Validate script type based on policy type
         # and set default script type if necessary
         # for multisig policies.
-        if policy_type == TYPE_MULTISIG and script_type not in (
-            P2SH,
-            P2SH_P2WSH,
-            P2WSH,
-        ):
+        if policy_type == TYPE_MULTISIG and script_type not in MULTISIG_SCRIPT_PURPOSE:
             script_type = P2WSH
 
         # Validate script type based on policy type
@@ -252,10 +278,11 @@ class Key:
             )
         if policy_type == TYPE_MULTISIG:
             if script_type == P2SH:
-                # As defined in BIP-45, there is no account.
-                # (m / 45' / cosigner_index / change / address_index)
-                # Instead there's a cosigner index and it is non-hardened.
-                # Use the account variable to keep the interface consistent.
+                # As defined in BIP-45, there is no account but instead an
+                # cosigner index. But the majority of old implementations,
+                # or even recent ones like Sparrow, use without cosigner index.
+                if account is None:
+                    return DER_MULTI_LEGACY_NO_PATHS
                 return DER_MULTI_LEGACY % (MULTISIG_SCRIPT_PURPOSE[P2SH], account)
             if script_type == P2SH_P2WSH:
                 # As defined in BIP-48, there is account.
@@ -263,7 +290,7 @@ class Key:
                 return DER_MULTI_SEGWIT_NESTED % (
                     MULTISIG_SCRIPT_PURPOSE[P2SH_P2WSH],
                     network["bip32"],
-                    account,
+                    0 if account is None else account,
                 )
             if script_type == P2WSH:
                 # As defined in BIP-48, there is account.
@@ -271,10 +298,14 @@ class Key:
                 return DER_MULTI_SEGWIT_NATIVE % (
                     MULTISIG_SCRIPT_PURPOSE[P2WSH],
                     network["bip32"],
-                    account,
+                    0 if account is None else account,
                 )
         if policy_type == TYPE_MINISCRIPT:
-            return DER_MINISCRIPT % (MINISCRIPT_PURPOSE, network["bip32"], account)
+            return DER_MINISCRIPT % (
+                MINISCRIPT_PURPOSE,
+                network["bip32"],
+                0 if account is None else account,
+            )
 
         raise ValueError("Invalid policy type: %s" % policy_type)
 
