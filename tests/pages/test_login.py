@@ -31,7 +31,7 @@ def mock_retro_compatibility(mocker, amigo):
 
 def test_menu_load_from_camera(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER
 
     BTN_SEQUENCE = (
         # Load Key from Camera
@@ -55,7 +55,7 @@ def test_menu_load_from_camera(m5stickv, mocker):
 
 def test_menu_load_from_manual(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     BTN_SEQUENCE = (
         # Load Key from Manual
@@ -155,7 +155,7 @@ def test_load_setting_menu(m5stickv, mocker):
 
 def test_load_from_storage(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     BTN_SEQUENCE = (
         # Load Key from Storage
@@ -183,7 +183,7 @@ def test_load_from_storage(m5stickv, mocker):
 
 def test_new_12w_from_snapshot(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER
 
     # mocks a result of a hashed image
     mocker.patch(
@@ -668,7 +668,7 @@ def test_load_key_from_text(m5stickv, mocker):
 
 def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printer):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+    from krux.input import BUTTON_ENTER, BUTTON_TOUCH
 
     cases = [
         (
@@ -731,9 +731,6 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printe
 
 
 def test_create_key_from_text(m5stickv, mocker):
-    from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
-
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
@@ -1204,7 +1201,7 @@ def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
 
 def test_leaving_keypad(mocker, amigo):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # Proceed
@@ -1222,7 +1219,7 @@ def test_leaving_keypad(mocker, amigo):
 
 def test_no_passphrase_on_amigo(mocker, amigo):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     case = (
         [BUTTON_ENTER]
@@ -1315,7 +1312,7 @@ def test_passphrase(amigo, mocker, mocker_printer):
 
 def test_load_12w_from_tiny_seed(amigo, mocker, mocker_printer):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
         [BUTTON_ENTER]  # 1 press 12w
@@ -1368,7 +1365,7 @@ def test_load_24w_from_tiny_seed(m5stickv, mocker, mocker_printer):
 
 def test_load_key_from_tiny_seed_scanner_12w(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER
 
     BTN_SEQUENCE = (
         [BUTTON_ENTER]  # 12 words
@@ -1461,7 +1458,7 @@ def test_about(mocker, multiple_devices):
     from krux.pages.login import Login
     import board
     from krux.metadata import VERSION
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER
     from krux.kboard import kboard
     from krux.qr import FORMAT_NONE
 
