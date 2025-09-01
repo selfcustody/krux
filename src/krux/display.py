@@ -258,11 +258,11 @@ class Display:
         return self._to_lines_endpos(text, max_lines)[0]
 
     def ascii_chars_per_line(self):
-        """return the qtd of non wide chars that fit on one line (columns)"""
+        """Returns the qtd of non wide chars that fit on one line (columns)"""
         return self._usable_pixels_in_line() // FONT_WIDTH
 
     def _asian_chars_per_line(self):
-        """return the qtd of wide chars that fit on one line (columns)"""
+        """Returns the qtd of wide chars that fit on one line (columns)"""
         return self._usable_pixels_in_line() // FONT_WIDTH_WIDE
 
     def _to_lines_endpos(self, text, max_lines=TOTAL_LINES):
@@ -398,7 +398,7 @@ class Display:
         lcd.draw_string(x, y, text, color, bg_color)
 
     def get_center_offset_x(self, line):
-        """Return the ammount of offset_x to be at center"""
+        """Returns the ammount of offset_x to be at center"""
         return max(0, (self.width() - lcd.string_width_px(line)) // 2)
 
     def draw_hcentered_text(
@@ -476,7 +476,7 @@ class Display:
         return len(lines)  # return number of lines drawn
 
     def get_center_offset_y(self, lines_qtd):
-        """Return the ammount of offset_y to be at center"""
+        """Returns the ammount of offset_y to be at center"""
         return max(0, (self.height() - lines_qtd * FONT_HEIGHT) // 2)
 
     def draw_centered_text(
