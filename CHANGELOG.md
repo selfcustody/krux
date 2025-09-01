@@ -38,6 +38,9 @@ The KEF encryption format now supports additional modes (CTR and the new default
 ### Datum Tool
 A new advanced utility for working with files, QRs, and manual text input. It supports conversion between binary and common string encodings, encryption/decryption of KEF envelopes, and exporting contents to QR or SD.
 
+### Support for "old" multisig policies and scripts
+We added support for BIP45 (Legacy multisig `P2SH`) and complete BIP48 (Nested-Segwit `P2SH-P2WSH`).
+
 ### Other Bug Fixes and Improvements
 - Numbers are no longer printed as words in "Backup Mnemonic > Other formats > Numbers".
 - Keypad touch area has been expanded to the screen edges.
@@ -62,7 +65,7 @@ A new advanced utility for working with files, QRs, and manual text input. It su
 - The hide mnemonic setting now ignores user confirmation when loading a mnemonic via word numbers.
 - Minor text improvements for clarity and easier translation.
 - Maixpy Fix: Increase glyphs indexing capacity affecting Amigo's translations
-
+- Fixed an issue that allowed choose incompatible script types from choosen policies (e.g., `P2WPKH` for a `Multisig`).
 
 # Changelog 25.03.0 - March 2025
 
