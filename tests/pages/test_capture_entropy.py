@@ -3,7 +3,7 @@ import hashlib
 import random
 
 ENTROPY_MESSAGE_STR = (
-    f"Shannon's entropy:\n%s bits/px\n(%s total)\n\nPixels deviation index: %s"
+    f"Shannon's entropy:\n%s bits (%s bits/px)\n\nPixels deviation index: %s"
 )
 
 ENTROPY_INSUFFICIENT_MESSAGE_STR = "Insufficient entropy!\n\n" + ENTROPY_MESSAGE_STR
@@ -87,7 +87,7 @@ def test_insufficient_variance(amigo, mocker):
 
     # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
     call_message = mocker.call(
-        ENTROPY_INSUFFICIENT_MESSAGE_STR % (shannon_value, total_shannon, variance), RED
+        ENTROPY_INSUFFICIENT_MESSAGE_STR % (total_shannon, shannon_value, variance), RED
     )
 
     ctx.display.draw_centered_text.assert_has_calls([call_message])
@@ -139,7 +139,7 @@ def test_insufficient_shannons_entropy(amigo, mocker):
 
     # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
     call_message = mocker.call(
-        ENTROPY_INSUFFICIENT_MESSAGE_STR % (shannon_value, total_shannon, variance), RED
+        ENTROPY_INSUFFICIENT_MESSAGE_STR % (total_shannon, shannon_value, variance), RED
     )
 
     ctx.display.draw_centered_text.assert_has_calls([call_message])
@@ -196,7 +196,7 @@ def test_poor_variance(amigo, mocker):
 
     # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
     call_message = mocker.call(
-        ENTROPY_MESSAGE_STR % (shannon_value, total_shannon, variance),
+        ENTROPY_MESSAGE_STR % (total_shannon, shannon_value, variance),
         highlight_prefix=":",
     )
 
@@ -251,7 +251,7 @@ def test_good_variance_good_shannons_entropy(amigo, mocker):
 
     # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
     call_message = mocker.call(
-        ENTROPY_MESSAGE_STR % (shannon_value, total_shannon, variance),
+        ENTROPY_MESSAGE_STR % (total_shannon, shannon_value, variance),
         highlight_prefix=":",
     )
 

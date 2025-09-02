@@ -113,9 +113,9 @@ You can also install [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/ide
     <source src="../img/cam-adjust-pliers.mp4" type="video/mp4"></source>
 </video>
 
-The image on the screen shows exactly what Krux sees through its camera. If the QR code appears blurry, the camera lens may be out of focus. You can adjust the focus by gently rotating the lens clockwise or counterclockwise until the image becomes clear. Note that the lens may have been secured at the factory with a drop of glue, which can make the initial adjustment difficult. To rotate the plastic lens ring, use your fingertip, tweezers, or small precision pliers (preferably covered with electrical tape to avoid damage). After the first adjustment, future focusing should be much easier.
+The screen displays exactly what Krux sees through its camera. If the QR code looks blurry, the lens may be out of focus. You can correct this by gently rotating the lens: turn it **counterclockwise (unscrewing to reduce focus distance)** or **clockwise (screwing to increase focus distance)** until the image sharpens. Be aware that the factory may have secured the lens with a small drop of glue, making the first adjustment a bit harder. To rotate the plastic lens ring, use your fingertip, tweezers, or small precision pliers (ideally wrapped with electrical tape to prevent scratches). Once adjusted, future focusing should be much easier.
 
-If you've already adjusted the lens, the issue may be the distance between the device and the QR code. Start by holding the device as close to the code as possible, then slowly pull it back until the entire QR code is visible on the screen. If the QR code appears sharp and clear, Krux should recognize it quickly and provide immediate feedback.
+If the lens is already adjusted, the problem may be the distance to the QR code. Hold the device close to the code, then slowly pull it back until the full QR code fits on the screen. Once the code appears sharp and clear, Krux should detect it quickly and respond immediately.
 
 ----8<----
 camera-scan-tips.en.txt

@@ -114,7 +114,7 @@ class Login(Page):
             self.ctx,
             [
                 (t("QR Code"), self.load_key_from_qr_code),
-                ("Tiny Seed", lambda: self.load_key_from_tiny_seed_image("Tiny Seed")),
+                ("Tinyseed", lambda: self.load_key_from_tiny_seed_image("Tinyseed")),
                 (
                     "OneKey KeyTag",
                     lambda: self.load_key_from_tiny_seed_image("OneKey KeyTag"),
@@ -137,7 +137,7 @@ class Login(Page):
             [
                 (t("Words"), self.load_key_from_text),
                 (t("Word Numbers"), self.pre_load_key_from_digits),
-                ("Tiny Seed (Bits)", self.load_key_from_tiny_seed),
+                ("Tinyseed (Bits)", self.load_key_from_tiny_seed),
                 ("Stackbit 1248", self.load_key_from_1248),
             ],
         )
@@ -782,7 +782,7 @@ class Login(Page):
         return MENU_CONTINUE
 
     def load_key_from_tiny_seed(self):
-        """Menu handler to manually load key from Tiny Seed sheet metal storage method"""
+        """Menu handler to manually load key from Tinyseed sheet metal storage method"""
         from .tiny_seed import TinySeed
 
         len_mnemonic = choose_len_mnemonic(self.ctx)
@@ -796,8 +796,8 @@ class Login(Page):
             return self._load_key_from_words(words)
         return MENU_CONTINUE
 
-    def load_key_from_tiny_seed_image(self, grid_type="Tiny Seed"):
-        """Menu handler to scan key from Tiny Seed sheet metal storage method"""
+    def load_key_from_tiny_seed_image(self, grid_type="Tinyseed"):
+        """Menu handler to scan key from Tinyseed sheet metal storage method"""
         from .tiny_seed import TinyScanner
 
         len_mnemonic = choose_len_mnemonic(self.ctx)

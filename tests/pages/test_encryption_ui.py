@@ -686,9 +686,7 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     # setup data: a fake kef envelope, non-kef data, decrypt-evidence, and responding "No" to "Decrypt?"
     fake_kef = kef.wrap(b"", 0, 10000, bytes([i * 8 for i in range(32)]))
     non_kef = b"this is not a valid kef envelope"
-    evidence = (
-        "KEF Encrypted (32 B)\nID: \nVersion: AES-ECB v1\nKey iter.: 10000\n\nDecrypt?"
-    )
+    evidence = "KEF Encrypted (32 B)\nID: \nVersion: AES-ECB v1\nPBKDF2 iter.: 10000\n\nDecrypt?"
     BTN_SEQUENCE = [BUTTON_PAGE_PREV]
 
     print("test w/ kef bytes")
@@ -1431,10 +1429,10 @@ def test_kefenvelope_public_info_ui(m5stickv, mocker):
         + bytes([i for i in range(32)])
     )
     text_id_evidence = (
-        "KEF Encrypted (32 B)\nID: ID\nVersion: AES-ECB v1\nKey iter.: 100000000"
+        "KEF Encrypted (32 B)\nID: ID\nVersion: AES-ECB v1\nPBKDF2 iter.: 100000000"
     )
     binary_id_evidence = (
-        "KEF Encrypted (32 B)\nID: 0xbeef\nVersion: AES-ECB v1\nKey iter.: 100000000"
+        "KEF Encrypted (32 B)\nID: 0xbeef\nVersion: AES-ECB v1\nPBKDF2 iter.: 100000000"
     )
 
     print("requires a kef_envelope argument or for parse() to have already been called")
@@ -1573,7 +1571,7 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     assert isinstance(sealed, bytes) and len(sealed) > 8
     ctx.display.draw_centered_text.assert_has_calls(
         [
-            mocker.call("Use default Key iter.? 100001", highlight_prefix="?"),
+            mocker.call("Use default PBKDF2 iter.? 100001", highlight_prefix="?"),
             mocker.call("Use default Mode? AES-GCM", highlight_prefix="?"),
             mocker.call("Additional entropy from camera required for AES-GCM"),
             mocker.call("Update KEF ID? my ID", highlight_prefix="?"),
@@ -1613,7 +1611,7 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
     assert isinstance(sealed, bytes) and len(sealed) > 8
     ctx.display.draw_centered_text.assert_has_calls(
         [
-            mocker.call("Use default Key iter.? 100001", highlight_prefix="?"),
+            mocker.call("Use default PBKDF2 iter.? 100001", highlight_prefix="?"),
             mocker.call("Use default Mode? AES-GCM", highlight_prefix="?"),
             mocker.call("Additional entropy from camera required for AES-GCM"),
             mocker.call("Update KEF ID? my ID", highlight_prefix="?"),

@@ -11,6 +11,8 @@ press BUTTON_B
 press BUTTON_A
 press BUTTON_B
 press BUTTON_A
+x2 press BUTTON_B
+press BUTTON_A
 
 # Return to initial state
 press BUTTON_C

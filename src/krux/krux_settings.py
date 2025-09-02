@@ -304,7 +304,7 @@ class DisplayAmgSettings(SettingsNamespace):
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
-            "flipped_x": t("Flipped X Coordinates"),
+            "flipped_x": t("Mirror X Coordinates"),
             "inverted_colors": t("Inverted Colors"),
             "bgr_colors": t("BGR Colors"),
             "lcd_type": t("LCD Type"),
@@ -331,7 +331,7 @@ class DisplaySettings(SettingsNamespace):
         if kboard.can_control_brightness:
             options["brightness"] = t("Brightness")
         if kboard.can_flip_orientation:
-            options["flipped_orientation"] = t("Flipped Orientation")
+            options["flipped_orientation"] = t("Rotate 180°")
 
         return options[attr]
 
@@ -401,7 +401,7 @@ class EncryptionSettings(SettingsNamespace):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "version": t("Encryption Mode"),
-            "pbkdf2_iterations": t("PBKDF2 Iter."),
+            "pbkdf2_iterations": t("PBKDF2 iter."),
         }[attr]
 
 
