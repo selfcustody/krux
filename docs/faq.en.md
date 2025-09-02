@@ -3,7 +3,7 @@ The term "hardware wallet" typically refers to devices dedicated to storing priv
 
 Krux was initially developed as a signer, operating exclusively in amnesic mode, which requires users to load their keys each time the device is powered on. However, Krux has evolved and now offers the option to store mnemonics, similar to traditional hardware wallets. These mnemonics can be stored in the device's internal memory or on SD cards.
 
-Krux does not include hardware secure elements. The security of stored data relies on encryption. Read more about [Krux Encrypted Mnemonics](./getting-started/features/encrypted-mnemonics.md).
+Krux does not include hardware secure elements. The security of stored data relies on encryption. Read more about [Krux Encryption - Regarding BIP39 Mnemonics](getting-started/features/encryption/encryption.md/#regarding-bip39-mnemonics).
 
 **Note**: Due to the inherent fragility of electronic components, never use your Krux device or SD card encrypted storage as your sole backup method. Always maintain a physical backup for added security.
 

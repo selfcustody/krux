@@ -12,11 +12,11 @@
 | Camera | `OV7740` | `OV7740` rear<br>`GC0328` front | `GC0328` | `OV2640` or<br>`OV5642` | `OV2640` <i style="font-size: 85%">(VER:1.0)</i> or<br>`GC2145` <i style="font-size: 85%">(VER:1.1)</i> | `OV7740` | `GC2145` |
 | Battery  | 200mAh | 520mAh | :x: | :x: | :x: | 200mAh | :x: |
 | Requirements | None | None | [Rotary encoder](https://duckduckgo.com/?q=ky-040)<br> [3D printed case](https://github.com/selfcustody/DockEncoderCase)<br> Soldering<br>Assembly | Buttons<br> [3D printed case](https://github.com/selfcustody/MaixBitCase)<br> Soldering<br>Assembly | None | None | None |
-| Warnings  | [:material-numeric-1-circle:{ title="M5StickV and USB-C" }](#m5stickv-info) | [:material-numeric-2-circle:{ title="Maix Amigo screens" }](#amigo-info) | [:material-numeric-3-circle:{ title="Maix Dock and soldered pin" }](#dock-info) | Camera has<br> lens distortion | Micro USB | 3-Way button | None |
+| Warnings  | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) | [:material-numeric-2-circle:{ title="Maix Amigo screens" }](#amigo-info) | [:material-numeric-3-circle:{ title="Maix Dock and soldered pin" }](#dock-info) | Camera has<br> lens distortion | Micro USB | 3-Way button | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) [:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info) |
 
-<i style="font-size: 85%">:material-numeric-1-circle:{id="m5stickv-info"}:
+<i style="font-size: 85%">:material-numeric-1-circle:{id="pull-up-resistor-info"}:
 ----8<----
-m5stickv-usb-c.en.txt
+usb-c-pull-up-resistor.en.txt
 ----8<----
 </i>
 
@@ -30,6 +30,10 @@ amigo-more-info-faq.en.txt:2
 Some Maix Dock units are shipped with soldered pin connectors, which prevent them from fitting into the [3D-printed case](https://github.com/selfcustody/DockEncoderCase). Certain boards also come with built-in Wi-Fi. 
 </i>
 
+<i style="font-size: 85%">:material-numeric-4-circle:{id="wondermv-info"}:
+WonderMV may restart when certain SD cards are inserted. See [Why does my WonderMV reboot](troubleshooting.md/#why-does-my-wondermv-reboot-when-i-insert-an-sd-card).
+</i>
+
 <i style="font-size: 85%">**All devices feature Kendryte K210 chip:**
 28nm process, dual-core RISC-V 64bit @400MHz, 8 MB high-speed SRAM, DVP camera and MCU LCD interface, AES Accelerator, SHA256 Accelerator, FFT Accelerator.
 </i>
@@ -37,7 +41,7 @@ Some Maix Dock units are shipped with soldered pin connectors, which prevent the
 ### M5StickV
 <img src="../img/maixpy_m5stickv/logo-250.png" align="right" style="width: 15%;">
 
-Krux was first ported to this device in March 2022. Featuring the smallest screen size and resolution, it also includes a built-in battery. Below is a list of distributors where it can be found:
+Krux was first ported to this device in March 2022. Featuring the smallest screen size and resolution, it also includes a built-in battery. Refer to the [USB-C recognition warning <i style="font-size: 85%">:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info)</i> above for important notes. Below is a list of distributors where it can be found:
 
 - [M5Stack](https://shop.m5stack.com/products/stickv)
 - [Mouser](https://www.mouser.com/c/?q=m5stickv)
@@ -95,7 +99,7 @@ Supported by Krux since July 2024, this device features the second smallest scre
 ### WonderMV
 <img src="../img/maixpy_wonder_mv/logo-304.png" align="right" style="width: 16%;">
 
-Supported by Krux since September 2024, this touchscreen device features a metal backplate and includes a compatible 32 GB card, a USB card reader, and two Molex 51004 4-pin male-to-male cables for connecting to a [thermal printer](#optional-ttl-serial-thermal-printer). Below is a list of distributors where it is available:
+Supported by Krux since September 2024, this touchscreen device features a metal backplate and includes a compatible 32 GB card, a USB card reader, and two 5264 4-pin connector male-to-male cables for connecting to a [thermal printer](#optional-ttl-serial-thermal-printer). Refer to the [USB-C recognition warning <i style="font-size: 85%">:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info)</i> and the [SD card warning <i style="font-size: 85%">:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info)</i> above for important notes. The following distributors offer this device:
 
 - [AliExpress](https://www.aliexpress.com/w/wholesale-k210-wondermv.html)
 - [Amazon](https://www.amazon.com/s?k=k210+WonderMV)
@@ -142,7 +146,7 @@ warning-printer.en.txt
 
 Krux has the capability to print all QR codes it generates, including those for mnemonics, xpubs, wallet backups, and signed PSBTs, using a locally-connected thermal printer via its serial port.
 
-Many TTL serial thermal printers may be compatible, but currently, the [Goojprt QR203](https://www.aliexpress.com/w/wholesale-Goojprt-QR203.html) has the best support (except this printer only supports ASCII or Chinese characters, non-ASCII characters will be printed as Chinese). The [Adafruit printer starter pack](https://www.adafruit.com/product/600) can also be a convenient option to get started, as it includes all the necessary components for printing (except the conversion cable). To ensure proper functionality, enable the printer driver in [settings](./getting-started/settings.md/#thermal), set the Tx pin and baud rate value to either 19200 or 9600 (depends on the printer), as explained in this [Adafruit printer tutorial](https://learn.adafruit.com/mini-thermal-receipt-printer/first-test). You will need to connect the device's Tx to the printer's Rx and device's ground to the printer's ground, do not connect any other pins because a wrong connection may damage your device. The printer requires a dedicated power supply, typically with an output of 5 to 9V (or 12V) and capable of supplying at least 2A. For more information, [see this discussion](https://github.com/selfcustody/krux/discussions/312).
+Many TTL serial thermal printers may be compatible, but currently, the [Goojprt QR203](https://www.aliexpress.com/w/wholesale-Goojprt-QR203.html) has the best support (except this printer only supports ASCII or Chinese characters, non-ASCII characters will be printed as Chinese). The [Adafruit printer starter pack](https://www.adafruit.com/product/600) can also be a convenient option to get started, as it includes all the necessary components for printing (except the conversion cable). To ensure proper functionality, enable the printer driver in [settings](getting-started/settings.md/#thermal), set the Tx pin and baud rate value to either 19200 or 9600 (depends on the printer), as explained in this [Adafruit printer tutorial](https://learn.adafruit.com/mini-thermal-receipt-printer/first-test). You will need to connect the device's Tx to the printer's Rx and device's ground to the printer's ground, do not connect any other pins because a wrong connection may damage your device. The printer requires a dedicated power supply, typically with an output of 5 to 9V (or 12V) and capable of supplying at least 2A. For more information, [see this discussion](https://github.com/selfcustody/krux/discussions/312).
 
-#### (Optional) Conversion Cable for Thermal Printer
+#### Conversion Cable
 To connect the printer to M5StickV, Amigo or Cube, you will need a [grove conversion cable](https://store-usa.arduino.cc/products/grove-4-pin-male-to-grove-4-pin-cable-5-pcs) with a 4-pin male Grove connector on one end (to connect to the device) and 4-pin male jumpers on the other end (to connect to the printer). Check your device and printer model connection first, Yahboom comes with PH2.0 4Pin female connector; Dock and Bit doesn't have a connector; WonderMV comes with [Molex 51004 4-pin connector](https://www.digikey.ca/en/products/detail/molex/0530150410/1785079) (used with smart servo). For a more reliable connection, it is recommended to cut and solder the wires of your custom cables instead of using jumpers. Here we have a description of some [inter-integrated circuit (I2C) connector standards](https://www.cable-tester.com/i2c-pin-out/).
