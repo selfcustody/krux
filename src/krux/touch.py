@@ -79,9 +79,8 @@ class Touch:
     def valid_position(self, data):
         """Checks if touch position is within buttons area"""
 
-        if (
-            hasattr(Settings().hardware.display, "flipped_orientation")
-            and Settings().hardware.display.flipped_orientation
+        if hasattr(Settings().hardware, "display") and getattr(
+            Settings().hardware.display, "flipped_orientation", False
         ):
             data = (self.height - data[0], self.width - data[1])
 
@@ -176,9 +175,8 @@ class Touch:
     def _store_points(self, data):
         """Store pressed points and calculare an average pressed point"""
 
-        if (
-            hasattr(Settings().hardware.display, "flipped_orientation")
-            and Settings().hardware.display.flipped_orientation
+        if hasattr(Settings().hardware, "display") and getattr(
+            Settings().hardware.display, "flipped_orientation", False
         ):
             new_y = max(0, self.height - data[0])
             new_y = min(new_y, self.height - 1)
