@@ -37,6 +37,17 @@ def tdata(mocker):
     )
     TAPROOT1_KEY = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"], "", 1, P2TR)
 
+    # p2sh wallet without cosigner indexes
+    MULTISIG_LEGACY_NO_COSIGNER_1 = Key(
+        TEST_MNEMONIC1, TYPE_MULTISIG, NETWORKS["main"], "", None, P2SH
+    )
+    MULTISIG_LEGACY_NO_COSIGNER_2 = Key(
+        TEST_MNEMONIC2, TYPE_MULTISIG, NETWORKS["main"], "", None, P2SH
+    )
+    MULTISIG_LEGACY_NO_COSIGNER_3 = Key(
+        TEST_MNEMONIC3, TYPE_MULTISIG, NETWORKS["main"], "", None, P2SH
+    )
+
     # p2sh wallets use accounts as cosigners index
     MULTISIG_LEGACY_1 = Key(
         TEST_MNEMONIC1, TYPE_MULTISIG, NETWORKS["main"], "", 0, P2SH
@@ -99,6 +110,9 @@ def tdata(mocker):
 
     SPECTER_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)"
     SPECTER_SINGLESIG_WALLET_DATA = '{"label": "Specter Singlesig Wallet", "blockheight": 0, "descriptor": "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)#9qx3vqss", "devices": [{"type": "other", "label": "Key1"}]}'
+
+    SPECTER_MULTISIG_LEGACY_NO_COSIGNER_DESCRIPTOR = "sh(sortedmulti(2,[55f8fc5d/45h]xpub68X9bBoTapmaBNo9gY3kKgZn8N56y8Zp77jKKreST5nR55bHpVkA6qFK14Bn9eqwxfPREXdsgfiv29FfQpMB4aogy2CJRpijx4a6owUbB8F/<0;1>/*,[3e15470d/45h]xpub68Lxu59A4X7Gv7hk2LkFYN3kGmDqNujChEb8vVKjPNzTZ3CHHn4w2WcWWKk6hFmywsoZ2wPCFbZJznp3HBS83rgiwrboGWMWgBQ56mfu8dQ/<0;1>/*,[d3a80c8b/45h]xpub69SjFTNciZ7guWTn2mrcY8qgGGWM5rpcbB5H23XWFHYxunyUmXBwWh5zxKJd5MWbLShFyijYvHKaxVfiMoREZSTut3SgcS9p7JNLrhYmVxm/<0;1>/*))#wjg7upna"
+    SPECTER_MULTISIG_LEGACY_NO_COSIGNER_WALLET_DATA = '{"label": "Specter Multisig Legacy Wallet", "blockheight": 0, "descriptor": "sh(sortedmulti(2,[55f8fc5d/45h]xpub68X9bBoTapmaBNo9gY3kKgZn8N56y8Zp77jKKreST5nR55bHpVkA6qFK14Bn9eqwxfPREXdsgfiv29FfQpMB4aogy2CJRpijx4a6owUbB8F/<0;1>/*,[3e15470d/45h]xpub68Lxu59A4X7Gv7hk2LkFYN3kGmDqNujChEb8vVKjPNzTZ3CHHn4w2WcWWKk6hFmywsoZ2wPCFbZJznp3HBS83rgiwrboGWMWgBQ56mfu8dQ/<0;1>/*,[d3a80c8b/45h]xpub69SjFTNciZ7guWTn2mrcY8qgGGWM5rpcbB5H23XWFHYxunyUmXBwWh5zxKJd5MWbLShFyijYvHKaxVfiMoREZSTut3SgcS9p7JNLrhYmVxm/<0;1>/*))#wjg7upna", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
 
     SPECTER_MULTISIG_LEGACY_DESCRIPTOR = "sh(sortedmulti(2,[d3a80c8b/45h/2]xpub6ApMSMmLpzeYTv72drQnbXkzg1nedyDQVyvtZVUWCS3B1pSSp24Y1tDtzcnD1ovCBhb3QuhYtN5rE8ayoZ3c2fNBYYmPN9VQVSNTKKFe8SH/<0;1>/*,[55f8fc5d/45h/0]xpub6Ac49WroT3nhb4uicbE5EUD7WiH2Xooubauvqw5fJYTLbmWFHnGjXRXwkPnFcTgK47KzzKTJNcjua2PisceZfwdoCUXYmX5Ju2v4RU2C7ps/<0;1>/*,[3e15470d/45h/1]xpub6AFDaW88dK7HvhWpHPGwGRym7h2pk8BZYjNUQ5GSkqeoGcMXC9cai7zBCwVeRFrD4wGeWkS3wSqU2jh9nEs2f5SHiM8Fa96ffce7maiKVtm/<0;1>/*))"
     SPECTER_MULTISIG_LEGACY_WALLET_DATA = '{"label": "Specter Multisig Legacy Wallet", "blockheight": 0, "descriptor": "sh(sortedmulti(2,[d3a80c8b/45h/2]xpub6ApMSMmLpzeYTv72drQnbXkzg1nedyDQVyvtZVUWCS3B1pSSp24Y1tDtzcnD1ovCBhb3QuhYtN5rE8ayoZ3c2fNBYYmPN9VQVSNTKKFe8SH/<0;1>/*,[55f8fc5d/45h/0]xpub6Ac49WroT3nhb4uicbE5EUD7WiH2Xooubauvqw5fJYTLbmWFHnGjXRXwkPnFcTgK47KzzKTJNcjua2PisceZfwdoCUXYmX5Ju2v4RU2C7ps/<0;1>/*,[3e15470d/45h/1]xpub6AFDaW88dK7HvhWpHPGwGRym7h2pk8BZYjNUQ5GSkqeoGcMXC9cai7zBCwVeRFrD4wGeWkS3wSqU2jh9nEs2f5SHiM8Fa96ffce7maiKVtm/<0;1>/*))#jnvu8ps2", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
@@ -267,6 +281,9 @@ def tdata(mocker):
             "LEGACY1_KEY",
             "NESTEDSW1_KEY",
             "TAPROOT1_KEY",
+            "MULTISIG_LEGACY_NO_COSIGNER_1",
+            "MULTISIG_LEGACY_NO_COSIGNER_2",
+            "MULTISIG_LEGACY_NO_COSIGNER_3",
             "MULTISIG_LEGACY_1",
             "MULTISIG_LEGACY_2",
             "MULTISIG_LEGACY_3",
@@ -292,6 +309,8 @@ def tdata(mocker):
             "KRUX_TAPROOT1_XPUB",
             "SPECTER_SINGLESIG_DESCRIPTOR",
             "SPECTER_SINGLESIG_WALLET_DATA",
+            "SPECTER_MULTISIG_LEGACY_NO_COSIGNER_DESCRIPTOR",
+            "SPECTER_MULTISIG_LEGACY_NO_COSIGNER_WALLET_DATA",
             "SPECTER_MULTISIG_LEGACY_DESCRIPTOR",
             "SPECTER_MULTISIG_LEGACY_WALLET_DATA",
             "SPECTER_MULTISIG_NESTED_DESCRIPTOR",
@@ -336,6 +355,9 @@ def tdata(mocker):
         LEGACY1_KEY,
         NESTEDSW1_KEY,
         TAPROOT1_KEY,
+        MULTISIG_LEGACY_NO_COSIGNER_1,
+        MULTISIG_LEGACY_NO_COSIGNER_2,
+        MULTISIG_LEGACY_NO_COSIGNER_3,
         MULTISIG_LEGACY_1,
         MULTISIG_LEGACY_2,
         MULTISIG_LEGACY_3,
@@ -361,6 +383,8 @@ def tdata(mocker):
         KRUX_TAPROOT1_XPUB,
         SPECTER_SINGLESIG_DESCRIPTOR,
         SPECTER_SINGLESIG_WALLET_DATA,
+        SPECTER_MULTISIG_LEGACY_NO_COSIGNER_DESCRIPTOR,
+        SPECTER_MULTISIG_LEGACY_NO_COSIGNER_WALLET_DATA,
         SPECTER_MULTISIG_LEGACY_DESCRIPTOR,
         SPECTER_MULTISIG_LEGACY_WALLET_DATA,
         SPECTER_MULTISIG_NESTED_DESCRIPTOR,
@@ -496,11 +520,19 @@ def test_is_multisig(mocker, m5stickv, tdata):
     wallet = Wallet(tdata.MINISCRIPT_KEY)
     assert not wallet.is_multisig()
 
-    # Multisig key p2sh
+    # Multisig key p2sh without co-signer
+    wallet = Wallet(tdata.MULTISIG_LEGACY_NO_COSIGNER_1)
+    assert wallet.is_multisig()
+
+    # Multisig key p2sh with loaded descriptor with co-signer
+    wallet.load(tdata.SPECTER_MULTISIG_LEGACY_NO_COSIGNER_WALLET_DATA, FORMAT_NONE)
+    assert wallet.is_multisig()
+
+    # Multisig key p2sh with co-signer
     wallet = Wallet(tdata.MULTISIG_LEGACY_1)
     assert wallet.is_multisig()
 
-    # Multisig key p2sh with loaded descriptor
+    # Multisig key p2sh with loaded descriptor with co-signer
     wallet.load(tdata.SPECTER_MULTISIG_LEGACY_DESCRIPTOR, FORMAT_NONE)
     assert wallet.is_multisig()
 
@@ -1046,7 +1078,9 @@ def test_load_multisig(mocker, m5stickv, tdata):
     ]
     from ur.ur import UR
 
+    n = 0
     for case in cases:
+        print(f"Testing case {n}")
         for wallet in [case[0]]:
             wallet.load(case[1], case[2])
             assert wallet.wallet_data == case[1]
@@ -1063,6 +1097,7 @@ def test_load_multisig(mocker, m5stickv, tdata):
             ):
                 print(type(case[1]), case[1])
                 assert wallet.has_change_addr()
+        n += 1
 
 
 def test_load_singlesig(mocker, m5stickv, tdata):

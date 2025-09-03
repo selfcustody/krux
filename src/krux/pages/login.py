@@ -41,13 +41,17 @@ from ..krux_settings import Settings
 from ..qr import FORMAT_UR
 from ..key import (
     Key,
+    P2WPKH,
     P2WSH,
-    P2TR,
-    SCRIPT_LONG_NAMES,
+    P2SH,
+    SINGLESIG_SCRIPT_MAP,
+    MULTISIG_SCRIPT_MAP,
+    MINISCRIPT_SCRIPT_MAP,
     TYPE_SINGLESIG,
     TYPE_MULTISIG,
     TYPE_MINISCRIPT,
     POLICY_TYPE_IDS,
+    NAME_MULTISIG,
 )
 from ..krux_settings import t
 
@@ -292,20 +296,39 @@ class Login(Page):
         ):
             # Retro compatibility with old settings - Multisig (false or true)
             if Settings().wallet.multisig:
-                Settings().wallet.policy_type = TYPE_MULTISIG
-        else:
-            # New settings - Policy type (single-sig, multisig, miniscript)
-            policy_type = POLICY_TYPE_IDS.get(
-                Settings().wallet.policy_type, TYPE_SINGLESIG
-            )
+                Settings().wallet.policy_type = NAME_MULTISIG
+
+        # New settings - Policy type (single-sig, multisig, miniscript)
+        policy_type = POLICY_TYPE_IDS.get(Settings().wallet.policy_type, TYPE_SINGLESIG)
         network = NETWORKS[Settings().wallet.network]
         account = 0
+
+        # If single-sig, by default we use p2wpkh
+        # but respect the script type setting
+        # in default wallet settings
         if policy_type == TYPE_SINGLESIG:
-            script_type = SCRIPT_LONG_NAMES.get(Settings().wallet.script_type)
-        elif policy_type == TYPE_MINISCRIPT and Settings().wallet.script_type == P2TR:
-            script_type = P2TR
-        else:
-            script_type = P2WSH
+            script_type = SINGLESIG_SCRIPT_MAP.get(
+                Settings().wallet.script_type, P2WPKH
+            )
+
+        # If multi-sig, by default we use p2wsh
+        # but respect the script type setting
+        # in default wallet settings, but if we're
+        # using P2SH, we don't use, by default,
+        # an account (m/45')
+        if policy_type == TYPE_MULTISIG:
+            script_type = MULTISIG_SCRIPT_MAP.get(Settings().wallet.script_type, P2WSH)
+            if script_type == P2SH:
+                account = None
+
+        # If miniscript, by default we use p2wsh
+        # but respect the script type setting
+        # in default wallet settings            #
+        if policy_type == TYPE_MINISCRIPT:
+            script_type = MINISCRIPT_SCRIPT_MAP.get(
+                Settings().wallet.script_type, P2WSH
+            )
+
         derivation_path = ""
 
         from ..wallet import Wallet

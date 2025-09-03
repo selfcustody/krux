@@ -166,7 +166,7 @@ class Utils(Page):
             TYPE_MULTISIG,
             TYPE_MINISCRIPT,
         )
-        from ..settings import NAME_SINGLE_SIG, NAME_MULTISIG, NAME_MINISCRIPT
+        from ..key import NAME_SINGLE_SIG, NAME_MULTISIG, NAME_MINISCRIPT
 
         wallet_info = network + "\n"
 
