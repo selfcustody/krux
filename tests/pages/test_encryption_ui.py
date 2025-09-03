@@ -418,7 +418,7 @@ def test_encrypted_qr_code_mode_and_density(amigo, mocker):
             data = called_kwargs.get("data")
             mode = "binary"
             if isinstance(data, str):
-                if data.isdecimal():
+                if data.isdigit():
                     mode = "numeric"
                 elif is_qr_alphanumeric(data):
                     mode = "alphanumeric"
