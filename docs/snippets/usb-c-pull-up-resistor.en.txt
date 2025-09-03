@@ -1,0 +1,1 @@
+The USB-C ports on the M5StickV and WonderMV lack the pull-up resistors required for host (computer) recognition and power. If you don't have a USB-A port available, you can use a USB hub between your computer's USB-C port and these devices.

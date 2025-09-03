@@ -4,13 +4,11 @@ Krux works with:
 
 - [Sparrow Wallet](https://www.sparrowwallet.com/) (desktop)
 - [Specter Desktop](https://specter.solutions/) (desktop)
-- [Liana](https://wizardsardine.com/liana/) (desktop)*
+- [Liana](https://wizardsardine.com/liana/) (desktop)
 - [Bitcoin Safe](https://bitcoin-safe.org/) (desktop)
 - [Nunchuk](https://nunchuk.io/) (mobile)
 - [BlueWallet](https://bluewallet.io/) (mobile)
 - [Bitcoin Keeper](https://bitcoinkeeper.app/) (mobile)
-
-***Note**: For Liana, the exchange of extended public keys, wallet output descriptors, and PSBTs is performed via copy and paste. On Krux, use SD cards and a standard text editor, or use QR codes via an intermediary application such as [SeedQReader](https://github.com/tadeubas/SeedQReader).
 
 ## Step 1: Install the Coordinator Wallet
 
@@ -20,37 +18,33 @@ Download and install the appropriate version of your chosen coordinator wallet f
 
 Depending on the coordinator, the steps to add Krux as a signer may vary slightly:
 
-**Specter and Nunchuk Single-sig:** Add Krux key, then create a wallet that uses it.
-
-**Specter and Nunchuk Multisig:** Add Krux key, add other keys, then create a wallet that uses them.
-
-**Sparrow, Liana, Bitcoin Safe and BlueWallet**: Create a wallet (or vault in Blue Wallet) and add key(s) during setup.
-
-**Bitcoin Keeper**: Add Wallet -> Create Wallet, select single-key or multi-key, and add key(s), or add key(s), then Add Wallet -> Create Wallet and select that key(s).
+- **Specter and Nunchuk Single-sig:** Add Krux key, then create a wallet that uses it.
+- **Specter and Nunchuk Multisig:** Add Krux key, add other keys, then create a wallet that uses them.
+- **Sparrow, Liana, Bitcoin Safe and BlueWallet**: Create a wallet (or vault in Blue Wallet) and add key(s) during setup.
+- **Bitcoin Keeper**: Add Wallet -> Create Wallet, select single-key or multi-key, and add key(s), or add key(s), then Add Wallet -> Create Wallet and select that key(s).
+<!-- -->
 
 1. Load a mnemonic and wallet in Krux.
 
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-mnemonic-300.png" class="amigo">
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-overview-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-250.png" class="m5stickv">
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-250.png" class="m5stickv">
+    <img src="../../../img/maixpy_amigo/load-mnemonic-seq-mnemonic-300.png" class="amigo">
+    <img src="../../../img/maixpy_amigo/load-mnemonic-seq-overview-300.png" class="amigo">
+    <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-250.png" class="m5stickv">
+    <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-250.png" class="m5stickv">
 
 2. On your coordinator, select **"Krux"** if it's listed among the available signer devices. If not, choose **"Other"** or a QR code-compatible signer such as **"SeedSigner"**. Since Krux supports various QR formats, other available options may also be compatible.
-
 3. When prompted by your coordinator to import signer's public key, access the `Extended Public Key` on Krux.
 
-<img src="../../../img/maixpy_amigo/extended-public-key-selected-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/extended-public-key-selected-250.png" class="m5stickv">
+    <img src="../../../img/maixpy_amigo/extended-public-key-selected-300.png" class="amigo">
+    <img src="../../../img/maixpy_m5stickv/extended-public-key-selected-250.png" class="m5stickv">
 
 4. Export an *XPUB* (or *YPUB, ZPUB*, .., based on the script type) as a QR code.
 
-<img src="../../../img/maixpy_amigo/extended-public-key-xpub-qr-menu-selected-300.png" class="amigo">
-<img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-qr-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/extended-public-key-xpub-qr-menu-selected-250.png" class="m5stickv">
-<img src="../../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-qr-250.png" class="m5stickv">
+    <img src="../../../img/maixpy_amigo/extended-public-key-xpub-qr-menu-selected-300.png" class="amigo">
+    <img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-qr-300.png" class="amigo">
+    <img src="../../../img/maixpy_m5stickv/extended-public-key-xpub-qr-menu-selected-250.png" class="m5stickv">
+    <img src="../../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-qr-250.png" class="m5stickv">
 
 5. Scan this QR code with your coordinator.
-
 6. Ensure the coordinator’s wallet attributes (policy type, script type, fingerprint, and derivation) match those in Krux.
 
 Alternatively, you can export the extended public keys as files to an SD card. Instead of displaying them as QR codes, select the `XPUB - Text` option, then choose `Save to SD card`.
@@ -81,18 +75,17 @@ Alternatively, you can export the extended public keys as files to an SD card. I
 4. If you access **Wallet -> Wallet Descriptor** again, you will be able to:
     - Check the wallet cosigners.
     - Save the descriptor on an SD card (useful if you initially loaded it from QR codes).
-
+    
     **Tip**: Having a backup of the wallet descriptor is essential for recovering your wallet.
 
 ## Step 4: Verify Addresses
 
-<img src="../../../img/maixpy_m5stickv/list-address-receive-250.png"  align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/list-address-receive-300.png"  align="right" class="amigo">
+<img src="../../../img/maixpy_m5stickv/list-address-receive-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/list-address-receive-300.png" align="right" class="amigo">
 
 For single-sig or multisig (after loading a descriptor):
 
 - Go to `Address` on Krux.
-
 - List `Receive Addresses` and `Change Addresses` or use `Scan Address` to verify if addresses from your coordinator are matched by Krux.
 
 <div style="clear: both"></div>

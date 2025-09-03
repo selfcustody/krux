@@ -7,7 +7,7 @@ After entering your mnemonic, and loading a wallet, you will find yourself on Kr
 <img src="../../../img/maixpy_m5stickv/backup-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/backup-options-300.png" align="right" class="amigo">
 
-This will open a new submenu with different types of backups. `QR Code` based, `Encrypted`  and `Other Formats`.
+This will open a new submenu with different types of backups. `QR Code` based, `Encrypted` and `Other Formats`.
 
 If you set a [printer](../settings.md/#printer), it will also give the option to print them!
 
@@ -57,7 +57,7 @@ This feature allows you to back up your mnemonic by encrypting it and storing it
 
 When using any of the encryption methods, you will be prompted to enter an encryption key. This key can be provided in text or QR code format. Additionally, you have the option to set a custom ID for easier management of your mnemonics. If a custom ID is not specified, the current loaded wallet fingerprint will be used.
 
-**Note**: The stored encrypted mnemonic is protected only by the key you defined to encrypt it. Also, it is advisable not to rely solely on digital methods for backup. Read the considerations section on [Krux Mnemonics Encryption](../../getting-started/features/encrypted-mnemonics.md#considerations).
+**Note**: The stored encrypted mnemonic is protected only by the key you defined to encrypt it. Also, it is advisable not to rely solely on digital methods for backup. Read the considerations section on [Krux Mnemonics Encryption](../features/encryption/encryption.md/#considerations).
 
 - **Store on Flash**
 

@@ -385,7 +385,7 @@ def detect_format(data):
     try:
         if data.startswith("p"):
             header = data.split(" ")[0]
-            if "of" in header and header[1:].split("of")[0].isdecimal():
+            if "of" in header and header[1:].split("of")[0].isdigit():
                 qr_format = FORMAT_PMOFN
         elif data.lower().startswith("ur:"):
             qr_format = FORMAT_UR

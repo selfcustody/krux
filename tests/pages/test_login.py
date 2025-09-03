@@ -7,12 +7,31 @@ def mocker_printer(mocker):
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
 
 
+@pytest.fixture
+def mock_retro_compatibility(mocker, amigo):
+    from krux.settings import CategorySetting
+
+    class MockDefaultWallet:
+        namespace = "settings.wallet"
+        network = CategorySetting("network", "main", ["main", "test"])
+        script_type = CategorySetting("script_type", "test", ["test"])
+        multisig = CategorySetting("multisig", True, [True, False])
+
+        def label(self, _):
+            pass
+
+    mocker.patch(
+        "krux.krux_settings.DefaultWallet",
+        mocker.MagicMock(return_value=MockDefaultWallet()),
+    )
+
+
 ################### Test menus
 
 
 def test_menu_load_from_camera(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER
 
     BTN_SEQUENCE = (
         # Load Key from Camera
@@ -36,7 +55,7 @@ def test_menu_load_from_camera(m5stickv, mocker):
 
 def test_menu_load_from_manual(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     BTN_SEQUENCE = (
         # Load Key from Manual
@@ -136,7 +155,7 @@ def test_load_setting_menu(m5stickv, mocker):
 
 def test_load_from_storage(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     BTN_SEQUENCE = (
         # Load Key from Storage
@@ -164,7 +183,7 @@ def test_load_from_storage(m5stickv, mocker):
 
 def test_new_12w_from_snapshot(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER
 
     # mocks a result of a hashed image
     mocker.patch(
@@ -649,7 +668,7 @@ def test_load_key_from_text(m5stickv, mocker):
 
 def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printer):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+    from krux.input import BUTTON_ENTER, BUTTON_TOUCH
 
     cases = [
         (
@@ -712,9 +731,6 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printe
 
 
 def test_create_key_from_text(m5stickv, mocker):
-    from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
-
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
@@ -1185,7 +1201,7 @@ def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
 
 def test_leaving_keypad(mocker, amigo):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # Proceed
@@ -1203,7 +1219,7 @@ def test_leaving_keypad(mocker, amigo):
 
 def test_no_passphrase_on_amigo(mocker, amigo):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     case = (
         [BUTTON_ENTER]
@@ -1296,7 +1312,7 @@ def test_passphrase(amigo, mocker, mocker_printer):
 
 def test_load_12w_from_tiny_seed(amigo, mocker, mocker_printer):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
         [BUTTON_ENTER]  # 1 press 12w
@@ -1349,7 +1365,7 @@ def test_load_24w_from_tiny_seed(m5stickv, mocker, mocker_printer):
 
 def test_load_key_from_tiny_seed_scanner_12w(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER
 
     BTN_SEQUENCE = (
         [BUTTON_ENTER]  # 12 words
@@ -1442,7 +1458,7 @@ def test_about(mocker, multiple_devices):
     from krux.pages.login import Login
     import board
     from krux.metadata import VERSION
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER
     from krux.kboard import kboard
     from krux.qr import FORMAT_NONE
 
@@ -1534,3 +1550,249 @@ def test_auto_complete_qr_words(m5stickv, mocker):
     expected_result = ["abandon", "ability", "able"] + ["abandon"] * 9
     result = login.auto_complete_qr_words(words)
     assert result == expected_result
+
+
+def test_retro_compatibility(mocker, amigo, mock_retro_compatibility):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.key import TYPE_MULTISIG, P2WSH
+
+    BTN_SEQUENCE = [BUTTON_PAGE] * 2 + [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER]
+    MNEMONIC = "diet glad hat rural panther lawsuit act drop gallery urge where fit"
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+
+    mocker.patch(
+        "krux.pages.encryption_ui.LoadEncryptedMnemonic.load_from_storage",
+        mocker.MagicMock(return_value=MNEMONIC.split(" ")),
+    )
+
+    login.load_key()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.wallet.key.policy_type == TYPE_MULTISIG
+    assert ctx.wallet.key.script_type == P2WSH
+
+
+def test_load_default_wallet(mocker, amigo):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.settings import MAIN_TXT, TEST_TXT
+    from krux.key import (
+        NAME_SINGLE_SIG,
+        NAME_MULTISIG,
+        NAME_MINISCRIPT,
+        SINGLESIG_SCRIPT_NAMES,
+        MULTISIG_SCRIPT_NAMES,
+        MINISCRIPT_SCRIPT_NAMES,
+        TYPE_SINGLESIG,
+        TYPE_MULTISIG,
+        TYPE_MINISCRIPT,
+        P2PKH,
+        P2SH_P2WPKH,
+        P2WPKH,
+        P2SH,
+        P2SH_P2WSH,
+        P2WSH,
+        P2TR,
+    )
+    from krux.krux_settings import Settings
+
+    cases = [
+        # 1 - Mainnet, Single-sig, Legacy
+        (
+            MAIN_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[0],
+            TYPE_SINGLESIG,
+            P2PKH,
+            "m/44h/0h/0h",
+        ),
+        # 2 - Mainnet, Single-sig, Nested SegWit
+        (
+            MAIN_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[1],
+            TYPE_SINGLESIG,
+            P2SH_P2WPKH,
+            "m/49h/0h/0h",
+        ),
+        # 3 - Mainnet, Single-sig, Native SegWit
+        (
+            MAIN_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[2],
+            TYPE_SINGLESIG,
+            P2WPKH,
+            "m/84h/0h/0h",
+        ),
+        # 4 - Mainnet, Single-sig, Taproot
+        (
+            MAIN_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[3],
+            TYPE_SINGLESIG,
+            P2TR,
+            "m/86h/0h/0h",
+        ),
+        # 5 - Mainnet, Multisig, Legacy
+        (
+            MAIN_TXT,
+            NAME_MULTISIG,
+            MULTISIG_SCRIPT_NAMES[0],
+            TYPE_MULTISIG,
+            P2SH,
+            "m/45h",
+        ),
+        # 6 - Mainnet, Multisig, Nested SegWit
+        (
+            MAIN_TXT,
+            NAME_MULTISIG,
+            MULTISIG_SCRIPT_NAMES[1],
+            TYPE_MULTISIG,
+            P2SH_P2WSH,
+            "m/48h/0h/0h/1h",
+        ),
+        # 7 - Mainnet, Multisig, Native SegWit
+        (
+            MAIN_TXT,
+            NAME_MULTISIG,
+            MULTISIG_SCRIPT_NAMES[2],
+            TYPE_MULTISIG,
+            P2WSH,
+            "m/48h/0h/0h/2h",
+        ),
+        # 8 - Mainnet, Miniscript, Native SegWit
+        (
+            MAIN_TXT,
+            NAME_MINISCRIPT,
+            MINISCRIPT_SCRIPT_NAMES[0],
+            TYPE_MINISCRIPT,
+            P2WSH,
+            "m/48h/0h/0h/2h",
+        ),
+        # 9 - Mainnet, Miniscript, Taproot
+        (
+            MAIN_TXT,
+            NAME_MINISCRIPT,
+            MINISCRIPT_SCRIPT_NAMES[1],
+            TYPE_MINISCRIPT,
+            P2TR,
+            "m/48h/0h/0h/2h",
+        ),
+        # 10 - Testnet, Single-sig, Legacy
+        (
+            TEST_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[0],
+            TYPE_SINGLESIG,
+            P2PKH,
+            "m/44h/1h/0h",
+        ),
+        # 11 - Testnet, Single-sig, Nested SegWit
+        (
+            TEST_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[1],
+            TYPE_SINGLESIG,
+            P2SH_P2WPKH,
+            "m/49h/1h/0h",
+        ),
+        # 12 - Testnet, Single-sig, Native SegWit
+        (
+            TEST_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[2],
+            TYPE_SINGLESIG,
+            P2WPKH,
+            "m/84h/1h/0h",
+        ),
+        # 13 - Testnet, Single-sig, Taproot
+        (
+            TEST_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[3],
+            TYPE_SINGLESIG,
+            P2TR,
+            "m/86h/1h/0h",
+        ),
+        # 14 - Testnet, Multisig, Legacy
+        (
+            TEST_TXT,
+            NAME_MULTISIG,
+            MULTISIG_SCRIPT_NAMES[0],
+            TYPE_MULTISIG,
+            P2SH,
+            "m/45h",
+        ),
+        # 15 - Testnet, Multisig, Nested SegWit
+        (
+            TEST_TXT,
+            NAME_MULTISIG,
+            MULTISIG_SCRIPT_NAMES[1],
+            TYPE_MULTISIG,
+            P2SH_P2WSH,
+            "m/48h/1h/0h/1h",
+        ),
+        # 16 - Testnet, Multisig, Native SegWit
+        (
+            TEST_TXT,
+            NAME_MULTISIG,
+            MULTISIG_SCRIPT_NAMES[2],
+            TYPE_MULTISIG,
+            P2WSH,
+            "m/48h/1h/0h/2h",
+        ),
+        # 17 - Testnet, Miniscript, Native SegWit
+        (
+            TEST_TXT,
+            NAME_MINISCRIPT,
+            MINISCRIPT_SCRIPT_NAMES[0],
+            TYPE_MINISCRIPT,
+            P2WSH,
+            "m/48h/1h/0h/2h",
+        ),
+        # 18 - Testnet, Miniscript, Taproot
+        (
+            TEST_TXT,
+            NAME_MINISCRIPT,
+            MINISCRIPT_SCRIPT_NAMES[1],
+            TYPE_MINISCRIPT,
+            P2TR,
+            "m/48h/1h/0h/2h",
+        ),
+    ]
+
+    MNEMONIC = "diet glad hat rural panther lawsuit act drop gallery urge where fit"
+
+    for case in cases:
+        print(case)
+        BTN_SEQUENCE = (
+            # Load Key from Storage
+            [BUTTON_PAGE] * 2
+            + [BUTTON_ENTER]
+            + [
+                BUTTON_ENTER,  # 1 press to continue loading key
+                BUTTON_ENTER,  # 1 press to load wallet
+            ]
+        )
+
+        ctx = create_ctx(mocker, BTN_SEQUENCE)
+        Settings().wallet.network = case[0]
+        Settings().wallet.policy_type = case[1]
+        Settings().wallet.script_type = case[2]
+
+        login = Login(ctx)
+        mocker.patch(
+            "krux.pages.encryption_ui.LoadEncryptedMnemonic.load_from_storage",
+            mocker.MagicMock(return_value=MNEMONIC.split(" ")),
+        )
+        login.load_key()
+
+        assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+        assert ctx.wallet.key.mnemonic == MNEMONIC
+        assert ctx.wallet.key.policy_type == case[3]
+        assert ctx.wallet.key.script_type == case[4]
+        assert ctx.wallet.key.derivation == case[5]

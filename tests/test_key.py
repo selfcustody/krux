@@ -153,7 +153,26 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 2 - 12 words, testnet, multisig P2SH
+            # 2 - 12 words, testnet, multisig P2SH without cosigner index
+            [
+                tdata.TEST_12_WORD_MNEMONIC,
+                TYPE_MULTISIG,
+                NETWORKS["test"],
+                "",
+                None,
+                P2SH,
+            ],
+            {
+                "mnemonic": tdata.TEST_12_WORD_MNEMONIC,
+                "policy_type": TYPE_MULTISIG,
+                "network": NETWORKS["test"],
+                "root key": "tprv8ZgxMBicQKsPfJtsjGcMm6f7ibxmy2LbqbePeCJnhE3tFNKfuWmNHUyMnAfgwQXDSAhfTLGvN4f8zjEFochGbnHiZcrGXnyHDKQaTRK5trx",
+                "derivation": "m/45h",
+                "xpub": "tpubD8tn7Rd9J6j2TAz18j2qXbu9TVAkxX4sekKcgQhanzYJpNFztibFFGv9F6GZg9oBkZvKr79kDmYxiKkGogCQx2Fz2cwc7MNyY2AWZxxuX4y",
+            },
+        ),
+        (
+            # 3 - 12 words, testnet, multisig P2SH with cosigner index
             [
                 tdata.TEST_12_WORD_MNEMONIC,
                 TYPE_MULTISIG,
@@ -172,7 +191,7 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 3 - 12 words, testnet, nested multisig P2WSH in a P2SH
+            # 4 - 12 words, testnet, nested multisig P2WSH in a P2SH
             [
                 tdata.TEST_12_WORD_MNEMONIC,
                 TYPE_MULTISIG,
@@ -191,7 +210,7 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 4 - 12 words, testnet, multisig P2WSH
+            # 5 - 12 words, testnet, multisig P2WSH
             [
                 tdata.TEST_12_WORD_MNEMONIC,
                 TYPE_MULTISIG,
@@ -210,7 +229,7 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 5 - 12 words, mainnet, singlesig, P2WPKH
+            # 6 - 12 words, mainnet, singlesig, P2WPKH
             [tdata.TEST_12_WORD_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"]],
             {
                 "mnemonic": tdata.TEST_12_WORD_MNEMONIC,
@@ -222,7 +241,7 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 6 - 12 words, mainnet, singlesig, nested P2WPKH in a P2SH
+            # 7 - 12 words, mainnet, singlesig, nested P2WPKH in a P2SH
             [
                 tdata.TEST_12_WORD_MNEMONIC,
                 TYPE_SINGLESIG,
@@ -241,7 +260,26 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 7 - 12 words, mainnet, multisig P2SH
+            # 8 - 12 words, mainnet, multisig P2SH without cosigner index
+            [
+                tdata.TEST_12_WORD_MNEMONIC,
+                TYPE_MULTISIG,
+                NETWORKS["main"],
+                "",
+                None,
+                P2SH,
+            ],
+            {
+                "mnemonic": tdata.TEST_12_WORD_MNEMONIC,
+                "policy_type": TYPE_MULTISIG,
+                "network": NETWORKS["main"],
+                "root key": "xprv9s21ZrQH143K4VfM4hkrbT38QUYZjWJbW3jGmmtLDFZQTmaav9RcmjburzW2w38u4jAtTEfACi5LXsgWgQMKnj282ydxsSFEJDfA1o1TySf",
+                "derivation": "m/45h",
+                "xpub": "xpub68X9bBoTapmaBNo9gY3kKgZn8N56y8Zp77jKKreST5nR55bHpVkA6qFK14Bn9eqwxfPREXdsgfiv29FfQpMB4aogy2CJRpijx4a6owUbB8F",
+            },
+        ),
+        (
+            # 9 - 12 words, mainnet, multisig P2SH with cosigner index
             [
                 tdata.TEST_12_WORD_MNEMONIC,
                 TYPE_MULTISIG,
@@ -260,7 +298,7 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 8 - 12 words, mainnet, nested multisig P2WSH in a P2SH
+            # 10 - 12 words, mainnet, nested multisig P2WSH in a P2SH
             [
                 tdata.TEST_12_WORD_MNEMONIC,
                 TYPE_MULTISIG,
@@ -279,7 +317,7 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 9 - 12 words, mainnet, multisig P2WSH
+            # 11 - 12 words, mainnet, multisig P2WSH
             [
                 tdata.TEST_12_WORD_MNEMONIC,
                 TYPE_MULTISIG,
@@ -298,7 +336,7 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 10 - 24 words, testnet, singlesig, P2WPKH
+            # 12 - 24 words, testnet, singlesig, P2WPKH
             [tdata.TEST_24_WORD_MNEMONIC, TYPE_SINGLESIG],
             {
                 "mnemonic": tdata.TEST_24_WORD_MNEMONIC,
@@ -310,7 +348,7 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 11 - 24 words, testnet, singlesig, nested P2WPKH in a P2SH
+            # 13 - 24 words, testnet, singlesig, nested P2WPKH in a P2SH
             [
                 tdata.TEST_24_WORD_MNEMONIC,
                 TYPE_SINGLESIG,
@@ -329,7 +367,26 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 12 - 24 words, testnet, multisig P2SH
+            # 14 - 24 words, testnet, multisig P2SH without cosigner index
+            [
+                tdata.TEST_24_WORD_MNEMONIC,
+                TYPE_MULTISIG,
+                NETWORKS["test"],
+                "",
+                None,
+                P2SH,
+            ],
+            {
+                "mnemonic": tdata.TEST_24_WORD_MNEMONIC,
+                "policy_type": TYPE_MULTISIG,
+                "network": NETWORKS["test"],
+                "root key": "tprv8ZgxMBicQKsPe5ghS4VTSeC3XwXJqVcJo4pzkFpuqZzFxhjuMsF13r8avzU8nwnwng6PCZ5EcJuPuqWwvJVCMRj3G9ZZyJ884RcrjAQ52BG",
+                "derivation": "m/45h",
+                "xpub": "tpubD8ibRJxqmo4jButbUXjLkHP7btKVNJEGEsBSH3NsjHkMJKrzMzv2AxHLkMptDkjDjnLTeWu4nhPMgyJeg3HMwJ921TM6x31kG8zUroVy46N",
+            },
+        ),
+        (
+            # 15 - 24 words, testnet, multisig P2SH with cosigner index
             [
                 tdata.TEST_24_WORD_MNEMONIC,
                 TYPE_MULTISIG,
@@ -348,7 +405,7 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 13 - 24 words, testnet, nested multisig P2WSH in a P2SH
+            # 16 - 24 words, testnet, nested multisig P2WSH in a P2SH
             [
                 tdata.TEST_24_WORD_MNEMONIC,
                 TYPE_MULTISIG,
@@ -367,7 +424,7 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 14 - 24 words, testnet, netive multisig P2WSH
+            # 17 - 24 words, testnet, netive multisig P2WSH
             [
                 tdata.TEST_24_WORD_MNEMONIC,
                 TYPE_MULTISIG,
@@ -386,7 +443,7 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 15 - 24 words, mainnet, singlesig, P2WPKH
+            # 18 - 24 words, mainnet, singlesig, P2WPKH
             [tdata.TEST_24_WORD_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"]],
             {
                 "mnemonic": tdata.TEST_24_WORD_MNEMONIC,
@@ -398,7 +455,7 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 16 - 24 words, mainnet, singlesig, nested P2WPKH in a P2SH
+            # 19 - 24 words, mainnet, singlesig, nested P2WPKH in a P2SH
             [
                 tdata.TEST_24_WORD_MNEMONIC,
                 TYPE_SINGLESIG,
@@ -417,7 +474,45 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 17 - 24 words, mainnet, multisig P2SH
+            # 20 - 24 words, mainnet, multisig P2SH without cosigner index
+            [
+                tdata.TEST_24_WORD_MNEMONIC,
+                TYPE_MULTISIG,
+                NETWORKS["main"],
+                "",
+                None,
+                P2SH,
+            ],
+            {
+                "mnemonic": tdata.TEST_24_WORD_MNEMONIC,
+                "policy_type": TYPE_MULTISIG,
+                "network": NETWORKS["main"],
+                "root key": "xprv9s21ZrQH143K3GTAmVdxGza4Dp76byaJTWussqQTMbVnB6zpNVuFY6m91pJUnaQdREZcCTTUSxKbSyyCo69FYNTSjWMGJwQ59KsSHUeNNQd",
+                "derivation": "m/45h",
+                "xpub": "xpub68Lxu59A4X7Gv7hk2LkFYN3kGmDqNujChEb8vVKjPNzTZ3CHHn4w2WcWWKk6hFmywsoZ2wPCFbZJznp3HBS83rgiwrboGWMWgBQ56mfu8dQ",
+            },
+        ),
+        (
+            # 21 - 24 words, mainnet, multisig P2SH with cosigner index
+            [
+                tdata.TEST_24_WORD_MNEMONIC,
+                TYPE_MULTISIG,
+                NETWORKS["main"],
+                "",
+                0,
+                P2SH,
+            ],
+            {
+                "mnemonic": tdata.TEST_24_WORD_MNEMONIC,
+                "policy_type": TYPE_MULTISIG,
+                "network": NETWORKS["main"],
+                "root key": "xprv9s21ZrQH143K3GTAmVdxGza4Dp76byaJTWussqQTMbVnB6zpNVuFY6m91pJUnaQdREZcCTTUSxKbSyyCo69FYNTSjWMGJwQ59KsSHUeNNQd",
+                "derivation": "m/45h/0",
+                "xpub": "xpub6AFDaW88dK7HtjsGFc49wPqupDqx6sdKH3yFaTqFzaB66UcQm2YN7zBSCem4cY7k1jff9o6L1Hb3NokRPKoMnUHLdLBsoAwD5uDn531racV",
+            },
+        ),
+        (
+            # 22 - 24 words, mainnet, multisig P2SH-P2WSH
             [
                 tdata.TEST_24_WORD_MNEMONIC,
                 TYPE_MULTISIG,
@@ -436,7 +531,7 @@ def test_init(mocker, m5stickv, tdata):
             },
         ),
         (
-            # 18 - 24 words, mainnet, native multisig P2WSH
+            # 23 - 24 words, mainnet, native multisig P2WSH
             [
                 tdata.TEST_24_WORD_MNEMONIC,
                 TYPE_MULTISIG,
@@ -458,6 +553,7 @@ def test_init(mocker, m5stickv, tdata):
 
     n = 0
     for case in cases:
+        print(f"Key init test case {n}")
         key = Key(*case[0])
 
         assert isinstance(key, Key)
@@ -467,6 +563,7 @@ def test_init(mocker, m5stickv, tdata):
         assert key.root.to_base58() == case[1]["root key"]
         assert key.derivation == case[1]["derivation"]
         assert key.account.to_base58() == case[1]["xpub"]
+        n += 1
 
 
 def test_xpub(mocker, m5stickv, tdata):
