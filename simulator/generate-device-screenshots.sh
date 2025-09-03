@@ -74,6 +74,7 @@ poetry run poe simulator --sequence sequences/tools-device-tests-test-suite.txt 
 poetry run poe simulator --sequence sequences/tools-print-test-qr.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/tools-descriptor-addresses.txt --sd --device $device
 poetry run poe simulator --sequence sequences/tools-flash.txt  --sd --device $device
+poetry run poe simulator --sequence sequences/tc-flash-hash.txt --sd --device $device
 
 # Settings
 poetry run poe simulator --sequence sequences/all-settings.txt  --device $device

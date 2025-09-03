@@ -26,13 +26,16 @@ S = -\sum_{i=1}^{n} p_i \log(p_i)
 $$
 
 1. **Empirical Measurement:**
-   - Roll the dice a large number of times to observe the frequency of each outcome.
-   - Estimate the probabilities $p_i$ based on observed frequencies.
+
+    - Roll the dice a large number of times to observe the frequency of each outcome.
+    - Estimate the probabilities $p_i$ based on observed frequencies.
 
 2. **Theoretical Calculation:**
-   - Use the uniform distribution assumption (equal probability for all outcomes).
+
+    - Use the uniform distribution assumption (equal probability for all outcomes).
 
 where:
+
 - $p_i$ is the probability of each possible outcome (or state) of the system.
 - $n$ is the number of possible outcomes.
 
@@ -47,28 +50,28 @@ The theoretical entropy calculation assumes that the dice are perfectly fair, me
 Consider a fair six-sided die. The possible outcomes when rolling one die are {1, 2, 3, 4, 5, 6}, each with an equal probability of $\frac{1}{6}$.
 
 1. **Single Die Roll:**
-   - Each outcome has a probability $p_i = \frac{1}{6}$.
-   - The entropy $S$ for one die roll is calculated as:
 
+    - Each outcome has a probability $p_i = \frac{1}{6}$.
+    - The entropy $S$ for one die roll is calculated as:
 $$
 S = - \sum_{i=1}^{6} \left( \frac{1}{6} \log_2 \left( \frac{1}{6} \right) \right)
 $$
-
-   Since $`\log_2(1/6) = -\log_2(6)`$ :
-
+Since $\log_2(1/6) = -\log_2(6)$ :
 $$
 S = -6 \left( \frac{1}{6} \times -\log_2(6) \right) = \log_2(6) \approx 2.585 \text{ bits}
 $$
 
 2. **Multiple Dice Rolls:**
-   - For multiple dice, the entropy increases as the number of possible outcomes increases. For $k$ fair dice, the number of possible outcomes is $6^k$.
-   - The entropy $S$ for $k$ dice is:
 
-     $S = \log_2(6^k) = k \log_2(6) \approx 2.585k \text{ bits}$
-
-   - For example, entropy for the roll of 50 fair dice is calculated as:
-
-     $S = \log_2(6^{50}) = 50 \log_2(6) \approx 2.585 \times 50 \approx 129.25 \text{ bits}$
+    - For multiple dice, the entropy increases as the number of possible outcomes increases. For $k$ fair dice, the number of possible outcomes is $6^k$.
+    - The entropy $S$ for $k$ dice is:
+$$
+S = \log_2(6^k) = k \log_2(6) \approx 2.585k \text{ bits}
+$$
+    - For example, entropy for the roll of 50 fair dice is calculated as:
+$$
+S = \log_2(6^{50}) = 50 \log_2(6) \approx 2.585 \times 50 \approx 129.25 \text{ bits}
+$$
 
    This calculation assumes that every outcome (each face of the die) has an equal likelihood, leading to a uniform distribution.
 
@@ -102,88 +105,65 @@ We can calculate Shannon's entropy as follows:
 
 #### Step 1: Calculate Probabilities
 
-Total number of rolls:
-
+- Total number of rolls:
 $$
 N = 4 + 9 + 7 + 10 + 12 + 8 = 50
 $$
-
-Probabilities for each outcome:
-
+- Probabilities for each outcome:
 $$
 p_1 = \frac{4}{50} = 0.08 
 $$
-
 $$
 p_2 = \frac{9}{50} = 0.18 
 $$
-
 $$
 p_3 = \frac{7}{50} = 0.14 
 $$
-
 $$
 p_4 = \frac{10}{50} = 0.2 
 $$
-
 $$
 p_5 = \frac{12}{50} = 0.24 
 $$
-
 $$
 p_6 = \frac{8}{50} = 0.16 
 $$
 
 #### Step 2: Compute Entropy
 
-Using Shannon's entropy formula:
-
+- Using Shannon's entropy formula:
 $$
 S = -\sum_{i=1}^{n} p_i \log_2(p_i)
 $$
-
-Calculate each term:
-
+- Calculate each term:
 $$
 S_1 = -p_1 \log_2(p_1) = -0.08 \log_2(0.08) = -0.08 \times (-3.64386) = 0.291509
 $$
-
 $$
 S_2 = -p_2 \log_2(p_2) = -0.18 \log_2(0.18) = -0.18 \times (-2.47393) = 0.445307
 $$
-
 $$
 S_3 = -p_3 \log_2(p_3) = -0.14 \log_2(0.14) = -0.14 \times (-2.8365) = 0.39711
 $$
-
 $$
 S_4 = -p_4 \log_2(p_4) = -0.2 \log_2(0.2) = -0.2 \times (-2.32193) = 0.464386
 $$
-
 $$
 S_5 = -p_5 \log_2(p_5) = -0.24 \log_2(0.24) = -0.24 \times (-2.05889) = 0.494132
 $$
-
 $$
 S_6 = -p_6 \log_2(p_6) = -0.16 \log_2(0.16) = -0.16 \times (-2.64386) = 0.423018
 $$
-
-Sum the contributions:
-
+- Sum the contributions:
 $$
 S = S_1 + S_2 + S_3 + S_4 + S_5 + S_6 
 $$
-
 $$
 S = 0.291509 + 0.445307 + 0.39711 + 0.464386 + 0.494132 + 0.423018 = 2.515462
 $$
+Thus, the Shannon's entropy for the given distribution of dice rolls is approximately $2.52$ bits per roll. This will give you a different value than $\log_2(6)$ due to the deviations in the empirical probabilities.
 
-Thus, the Shannon's entropy for the given distribution of dice rolls is approximately $2.52$ bits per roll.
-
-This will give you a different value than $\log_2(6)$ due to the deviations in the empirical probabilities.
-
-The total entropy for the $N = 50$ rolls is:
-
+- The total entropy for the $N = 50$ rolls is:
 $$
 S_{total} = S \times N = 2.515 + 50 \approx 125.8 \text{ bits}
 $$
@@ -202,7 +182,7 @@ Cryptographic entropy, on the other hand, requires a higher standard of unpredic
 
 ### Pattern Detection
 
-It is possible to have dice rolls with an even distribution but poor cryptographic entropy. This issue arises when patterns are present in the sequences. Examples include sequences like 123456123456123..., 111122223333..., and 654321654321..., which exhibit poor cryptographic entropy despite having even distribution and high Shannon's entropy.
+It is possible to have dice rolls with an even distribution but poor cryptographic entropy. This issue arises when patterns are present in the sequences. Examples include sequences like `123456123456123...`, `111122223333...`, and `654321654321...`, which exhibit poor cryptographic entropy despite having even distribution and high Shannon's entropy.
 
 To mitigate this issue, Krux has implemented a pattern detection algorithm that evaluates the Shannon's entropy of the rolls' derivatives. In practice, this algorithm detects arithmetic progression components in the dice rolls and raises a warning if a certain threshold is crossed.
 

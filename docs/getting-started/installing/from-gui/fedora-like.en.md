@@ -35,7 +35,7 @@ verify-the-signature-tip.en.txt
 ### Fedora
 
 ```bash
-sudo  dnf install {{latest_installer_rpm}}
+sudo dnf install {{latest_installer_rpm}}
 ```
 
 ### Other RedHat based distros:
