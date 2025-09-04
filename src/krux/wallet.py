@@ -478,12 +478,9 @@ def parse_address(address_data):
 
     if not isinstance(sc, Script):
         try:
-            sc = address_to_scriptpubkey(addr)
+            address_to_scriptpubkey(addr)
         except:
             raise ValueError("invalid address")
-
-    if not isinstance(sc, Script):
-        raise ValueError("invalid address")
 
     return addr
 
