@@ -135,9 +135,9 @@ def save_new_fontc(font_name, overwrite=False):
         with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
             save_file.write(unicode_str)
 
-        # Also replace for bit, yahboom, wonder_mv, and yahboom_devkit
+        # Also replace for bit, yahboom, wonder_mv, wonder_k, and yahboom_devkit
         if font_name in (FONT16, WIDE16):
-            for project in ["bit", "yahboom", "wonder_mv", "yahboom_devkit"]:
+            for project in ["bit", "yahboom", "wonder_mv", "wonder_k", "yahboom_devkit"]:
                 filename = maixpy_path_start + project + maixpy_path_end
                 with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
                     save_file.write(unicode_str)
