@@ -35,6 +35,9 @@ WIDE14 = "FusionPixel-14"
 WIDE16 = "unifont-16"
 WIDE24 = "NotoSansCJK-24"
 
+DEFAULT_DEVICES = ["m5stickv", "dock", "amigo"]
+OTHER_SMALL_FONT_DEVICES = ["cube"]
+
 
 def open_bdf_save_kff(filename, width, height):
     """Open a bdf font filename and save the corresponding kff file based on the filename"""
@@ -89,23 +92,25 @@ def save_new_fontc(font_name, overwrite=False):
     a new font_device.h file"""
 
     filename_kff = "tiny"
-    device_name = "m5stickv"
+    device_name = DEFAULT_DEVICES[0]
     if font_name == FONT16:
         filename_kff = "small"
-        device_name = "dock"
+        device_name = DEFAULT_DEVICES[1]
     elif font_name == FONT24:
         filename_kff = "medium"
-        device_name = "amigo"
+        device_name = DEFAULT_DEVICES[2]
     elif font_name == WIDE14:
         filename_kff = "tiny_wide"
     elif font_name == WIDE16:
         filename_kff = "small_wide"
-        device_name = "dock"
+        device_name = DEFAULT_DEVICES[1]
     elif font_name == WIDE24:
         filename_kff = "medium_wide"
-        device_name = "amigo"
+        device_name = DEFAULT_DEVICES[2]
 
-    maixpy_path_start = "../MaixPy/projects/maixpy_"
+    maixpy_path_projects = "../MaixPy/projects/"
+    maixpy_prefix = "maixpy_"
+    maixpy_path_start = maixpy_path_projects + maixpy_prefix
     maixpy_path_end = os.path.join(
         "/compile/overrides/components/micropython/port",
         "src/omv/img/include/font_device.h",
@@ -135,18 +140,25 @@ def save_new_fontc(font_name, overwrite=False):
         with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
             save_file.write(unicode_str)
 
-        # Also replace for bit, yahboom, wonder_mv, and yahboom_devkit
+        # Replace with 16 for every other project
         if font_name in (FONT16, WIDE16):
-            for project in ["bit", "yahboom", "wonder_mv", "yahboom_devkit"]:
+            for project in os.listdir(maixpy_path_projects):
+                if project not in DEFAULT_DEVICES + OTHER_SMALL_FONT_DEVICES:
+                    filename = maixpy_path_projects + project + maixpy_path_end
+                    try:
+                        with open(
+                            filename, "w", encoding="utf-8", newline="\n"
+                        ) as save_file:
+                            save_file.write(unicode_str)
+                    except Exception as e:
+                        print("Replace for %s" % font_name, e)
+
+        # Replace with 14 for every OTHER_SMALL_FONT_DEVICES
+        if font_name in (FONT14, WIDE14):
+            for project in OTHER_SMALL_FONT_DEVICES:
                 filename = maixpy_path_start + project + maixpy_path_end
                 with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
                     save_file.write(unicode_str)
-
-        # Also replace for Cube
-        if font_name in (FONT14, WIDE14):
-            filename = maixpy_path_start + "cube" + maixpy_path_end
-            with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
-                save_file.write(unicode_str)
     else:
         with open(
             filename_kff + "_font_device.h", "w", encoding="utf-8", newline="\n"
