@@ -87,8 +87,8 @@ for project in projects:
             existing.append(char)
         else:
             missing.append(char)
-    print("  missing: {}".format("".join(missing)))
     if len(missing) > 0:
+        print("  missing: {}".format("".join(missing)))
         print(
             "  missing %d unicode points between: %s (or %d) and %s (or %d)"
             % (
