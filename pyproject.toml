@@ -100,6 +100,7 @@ pytest.ref = "tests"
 
 # pre commit task (do formatting, linting and tests)
 pre-commit = ["format", "lint", "i18n validate", "test-simple"]
+pre-release = ["format", "lint", "i18n validate", "i18n-build", "update-glyphs", "test-simple"]
 
 # run docs locally
 docs = "poetry run mkdocs serve"
@@ -140,8 +141,15 @@ flash-cmd = "python firmware/Kboot/build/ktool.py -b 2000000 build/kboot.kfpkg"
 flash.ref = "flash-cmd -B goE"
 flash-dock.ref = "flash-cmd -B dan"
 
-# task for bdftokff?
-# python bdftokff.py True
+# task for bdftokff font glyphs update
+update-glyphs = "python ./firmware/font/bdftokff.py True"
+glyphs.ref = "update-glyphs"
+fonts.ref = "update-glyphs"
 
 # task for sign_release?
 # python sign_release.py
+
+# task for missing glyphs
+missing-glyphs = "python ./firmware/font/missing_glyphs.py"
+fonts-missing.ref = "missing-glyphs"
+missing.ref = "missing-glyphs"

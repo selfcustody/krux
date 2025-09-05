@@ -30,7 +30,7 @@ exec_folder = 'simulator'
 current_dir = os.getcwd()
 
 # check if is executing in exec_folder, if not, try to change to exec_folder
-if current_dir[len(current_dir) - len(exec_folder):] not in exec_folder:
+if not current_dir.endswith(exec_folder):
     os.chdir(exec_folder)
 
 parser = argparse.ArgumentParser()
