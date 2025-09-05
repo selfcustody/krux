@@ -37,7 +37,7 @@ then prints lists of:
 
 import os
 import json
-import re
+from hextokff import CHAR_LIST_EXCEPT_ASIAN
 
 exec_folder = os.path.join("firmware", "font")
 current_dir = os.getcwd()
@@ -53,14 +53,8 @@ projects = os.listdir(PROJECTS_DIR)
 TRANSLATIONS_DIR = "../../i18n/translations"
 translations = os.listdir(TRANSLATIONS_DIR)
 
-# base list of chars uses data from CHAR_LIST_EXCEPT_ASIAN in firmware/font/hextokff.py
-with open("hextokff.py", "r", encoding="utf-8") as file:
-    lines = file.read()
-    match = re.search(
-        r'^CHAR_LIST_EXCEPT_ASIAN\s*=\s*["\']+(.*?)["\']+\s*$', lines, re.MULTILINE
-    )
-
-chars = list(set(match.group(1)))
+# base list of chars uses data from firmware/font/hextokff.py
+chars = list(CHAR_LIST_EXCEPT_ASIAN)
 
 # add additional chars found in translations
 for translation in translations:
