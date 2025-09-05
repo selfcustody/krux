@@ -37,6 +37,13 @@ then prints lists of:
 
 import os
 import json
+import re
+
+exec_folder = os.path.join("firmware", "font")
+current_dir = os.getcwd()
+
+if not current_dir.endswith(exec_folder):
+    os.chdir(exec_folder)
 
 # a list of projects
 PROJECTS_DIR = "../MaixPy/projects"
@@ -46,11 +53,14 @@ projects = os.listdir(PROJECTS_DIR)
 TRANSLATIONS_DIR = "../../i18n/translations"
 translations = os.listdir(TRANSLATIONS_DIR)
 
-# base list of chars must be kept up-to-date from firmware/font/hextokff.py
-chars = list(
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    " !#$%&'()*+,-./:;<=>?@[\\]^_\"{|}~█₿… ⊚↳«»"
-)
+# base list of chars uses data from CHAR_LIST_EXCEPT_ASIAN in firmware/font/hextokff.py
+with open("hextokff.py", "r", encoding="utf-8") as file:
+    lines = file.read()
+    match = re.search(
+        r'^CHAR_LIST_EXCEPT_ASIAN\s*=\s*["\']+(.*?)["\']+\s*$', lines, re.MULTILINE
+    )
+
+chars = list(set(match.group(1)))
 
 # add additional chars found in translations
 for translation in translations:
@@ -78,24 +88,27 @@ FMT_HFILE = "{}/{}/compile/overrides/components/micropython/port/src/omv/img/inc
 for project in projects:
     font_file = FMT_HFILE.format(PROJECTS_DIR, project)
     print("\nChecking font file %s for existing/missing glyphs..." % font_file)
-    contents = open(font_file, "r").readlines()
-    existing, missing = [], []
-    for char in chars:
-        ord4hex = "{:04X}".format(ord(char))
-        entry_header = "0x{:2s},0x{:2s},\n".format(ord4hex[:2], ord4hex[2:])
-        if entry_header in contents:
-            existing.append(char)
-        else:
-            missing.append(char)
-    if len(missing) > 0:
-        print("  missing: {}".format("".join(missing)))
-        print(
-            "  missing %d unicode points between: %s (or %d) and %s (or %d)"
-            % (
-                len(missing),
-                hex(ord(min(missing))),
-                ord(min(missing)),
-                hex(ord(max(missing))),
-                ord(max(missing)),
+    try:
+        contents = open(font_file, "r").readlines()
+        existing, missing = [], []
+        for char in chars:
+            ord4hex = "{:04X}".format(ord(char))
+            entry_header = "0x{:2s},0x{:2s},\n".format(ord4hex[:2], ord4hex[2:])
+            if entry_header in contents:
+                existing.append(char)
+            else:
+                missing.append(char)
+        if len(missing) > 0:
+            print("  missing: {}".format("".join(missing)))
+            print(
+                "  missing %d unicode points between: %s (or %d) and %s (or %d)"
+                % (
+                    len(missing),
+                    hex(ord(min(missing))),
+                    ord(min(missing)),
+                    hex(ord(max(missing))),
+                    ord(max(missing)),
+                )
             )
-        )
+    except Exception as e:
+        print("Exception ocurred while opening %s:" % font_file, e)
