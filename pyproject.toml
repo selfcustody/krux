@@ -137,8 +137,10 @@ flash-cmd = "python firmware/Kboot/build/ktool.py -b 2000000 build/kboot.kfpkg"
 flash.ref = "flash-cmd -B goE"
 flash-dock.ref = "flash-cmd -B dan"
 
-# task for bdftokff?
-# python bdftokff.py True
+# task for bdftokff font glyphs update
+update-glyphs = "python ./firmware/font/bdftokff.py True"
+glyphs.ref = "update-glyphs"
+fonts.ref = "update-glyphs"
 
 # task for sign_release?
 # python sign_release.py
