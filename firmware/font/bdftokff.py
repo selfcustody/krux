@@ -28,6 +28,13 @@ import hexfill
 import hexmerge
 import hextokff
 
+exec_folder = os.path.join("firmware", "font")
+current_dir = os.getcwd()
+
+if not current_dir.endswith(exec_folder):
+    os.chdir(exec_folder)
+
+
 FONT14 = "ter-u14n"
 FONT16 = "ter-u16n"
 FONT24 = "ter-u24b"
@@ -35,8 +42,17 @@ WIDE14 = "FusionPixel-14"
 WIDE16 = "unifont-16"
 WIDE24 = "NotoSansCJK-24"
 
-DEFAULT_DEVICES = ["m5stickv", "dock", "amigo"]
-OTHER_SMALL_FONT_DEVICES = ["cube"]
+SMALL_FONT_REF = "m5stickv"
+MID_FONT_REF = "dock"
+BIG_FONT_REF = "amigo"
+
+REF_DEVICES = [SMALL_FONT_REF, MID_FONT_REF, BIG_FONT_REF]
+
+SMALL_FONT_DEVICES_TO_COPY = ["cube"]
+MID_FONT_DEVICES_TO_COPY = ["bit", "yahboom", "wonder_mv", "yahboom_devkit"]
+BIG_FONT_DEVICES_TO_COPY = []
+
+ALL_DEVICES = REF_DEVICES + SMALL_FONT_DEVICES_TO_COPY + MID_FONT_DEVICES_TO_COPY
 
 
 def open_bdf_save_kff(filename, width, height):
@@ -92,21 +108,21 @@ def save_new_fontc(font_name, overwrite=False):
     a new font_device.h file"""
 
     filename_kff = "tiny"
-    device_name = DEFAULT_DEVICES[0]
+    device_name = SMALL_FONT_REF
     if font_name == FONT16:
         filename_kff = "small"
-        device_name = DEFAULT_DEVICES[1]
+        device_name = MID_FONT_REF
     elif font_name == FONT24:
         filename_kff = "medium"
-        device_name = DEFAULT_DEVICES[2]
+        device_name = BIG_FONT_REF
     elif font_name == WIDE14:
         filename_kff = "tiny_wide"
     elif font_name == WIDE16:
         filename_kff = "small_wide"
-        device_name = DEFAULT_DEVICES[1]
+        device_name = MID_FONT_REF
     elif font_name == WIDE24:
         filename_kff = "medium_wide"
-        device_name = DEFAULT_DEVICES[2]
+        device_name = BIG_FONT_REF
 
     maixpy_path_projects = "../MaixPy/projects/"
     maixpy_prefix = "maixpy_"
@@ -140,10 +156,63 @@ def save_new_fontc(font_name, overwrite=False):
         with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
             save_file.write(unicode_str)
 
+        # Replace with 24 for every BIG_FONT_DEVICES_TO_COPY
+        if font_name in (FONT24, WIDE24):
+            for project in BIG_FONT_DEVICES_TO_COPY:
+                filename = maixpy_path_start + project + maixpy_path_end
+                try:
+                    with open(
+                        filename, "w", encoding="utf-8", newline="\n"
+                    ) as save_file:
+                        save_file.write(unicode_str)
+                except Exception as e:
+                    print(
+                        "Exception occured while replacing font %s in device %s"
+                        % (font_name, project),
+                        e,
+                    )
+
+        # Replace with 16 for every MID_FONT_DEVICES_TO_COPY
+        if font_name in (FONT16, WIDE16):
+            for project in MID_FONT_DEVICES_TO_COPY:
+                filename = maixpy_path_start + project + maixpy_path_end
+                try:
+                    with open(
+                        filename, "w", encoding="utf-8", newline="\n"
+                    ) as save_file:
+                        save_file.write(unicode_str)
+                except Exception as e:
+                    print(
+                        "Exception occured while replacing font %s in device %s"
+                        % (font_name, project),
+                        e,
+                    )
+
+        # Replace with 14 for every SMALL_FONT_DEVICES_TO_COPY
+        if font_name in (FONT14, WIDE14):
+            for project in SMALL_FONT_DEVICES_TO_COPY:
+                filename = maixpy_path_start + project + maixpy_path_end
+                try:
+                    with open(
+                        filename, "w", encoding="utf-8", newline="\n"
+                    ) as save_file:
+                        save_file.write(unicode_str)
+                except Exception as e:
+                    print(
+                        "Exception occured while replacing font %s in device %s"
+                        % (font_name, project),
+                        e,
+                    )
+
         # Replace with 16 for every other project
         if font_name in (FONT16, WIDE16):
             for project in os.listdir(maixpy_path_projects):
-                if project not in DEFAULT_DEVICES + OTHER_SMALL_FONT_DEVICES:
+                if project.removeprefix(maixpy_prefix) not in ALL_DEVICES:
+                    print(
+                        "ERROR, device %s not mapped, will assume font: %s"
+                        % (project, font_name)
+                    )
+                    print("Please UPDATE bdftokff.py adding %s !!!" % project)
                     filename = maixpy_path_projects + project + maixpy_path_end
                     try:
                         with open(
@@ -151,14 +220,12 @@ def save_new_fontc(font_name, overwrite=False):
                         ) as save_file:
                             save_file.write(unicode_str)
                     except Exception as e:
-                        print("Replace for %s" % font_name, e)
+                        print(
+                            "Exception occured while replacing font %s in device %s"
+                            % (font_name, project),
+                            e,
+                        )
 
-        # Replace with 14 for every OTHER_SMALL_FONT_DEVICES
-        if font_name in (FONT14, WIDE14):
-            for project in OTHER_SMALL_FONT_DEVICES:
-                filename = maixpy_path_start + project + maixpy_path_end
-                with open(filename, "w", encoding="utf-8", newline="\n") as save_file:
-                    save_file.write(unicode_str)
     else:
         with open(
             filename_kff + "_font_device.h", "w", encoding="utf-8", newline="\n"
