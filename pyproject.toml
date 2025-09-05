@@ -144,3 +144,8 @@ fonts.ref = "update-glyphs"
 
 # task for sign_release?
 # python sign_release.py
+
+# task for missing glyphs
+missing-glyphs = "python ./firmware/font/missing_glyphs.py"
+fonts-missing.ref = "missing-glyphs"
+missing.ref = "missing-glyphs"
