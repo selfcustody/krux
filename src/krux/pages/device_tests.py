@@ -238,17 +238,17 @@ class DeviceTests(Page):
         while True:
             try:
                 id_, version, iterations, cipherpayload = kef.unwrap(kef_envelope)
-                if interactive:
-                    results.append(kef.VERSIONS[version]["name"])
+                results.append(kef.VERSIONS[version]["name"])
             except:
                 break
             decryptor = kef.Cipher(b"abc", id_, iterations)
-            try:
-                kef_envelope = decryptor.decrypt(cipherpayload, version)
-            except:
-                err += results[-1] + "FAILED\n"
+            kef_envelope = decryptor.decrypt(cipherpayload, version)
+            if kef_envelope is None:
+                err += "FAILED {}\n".format(kef.VERSIONS[version]["name"])
+                break
+
         if kef_envelope != expected_plain:
-            err += "unexpected plain text: {}".format(hexlify(kef_envelope).decode())
+            err += "unexpected plain text: {}".format(kef_envelope)
 
         if err:
             raise AssertionError(err)
@@ -256,6 +256,7 @@ class DeviceTests(Page):
         results.append(
             "expected plaintext revealed: 0x{}".format(hexlify(kef_envelope).decode())
         )
+
         return results
 
     def hw_acc_hashing(self, interactive=False):
