@@ -15,6 +15,15 @@ def mocked_run_one_test(mocker):
 
 
 @pytest.fixture
+def mock_multi_layer_decrypt(mocker):
+    """Fixture to mock multi_layer_decrypt failing"""
+
+    return mocker.patch(
+        "krux.kef.Cipher.decrypt", side_effect=lambda cpl, version: None
+    )
+
+
+@pytest.fixture
 def mock_hw_acc_hashing(mocker):
     """Fixture to mock the hardware acceleration hashing test to fail"""
     bad_digest = b"\x00" * 32
@@ -165,6 +174,37 @@ def test_skip_all_tests(m5stickv, mocker, mocked_print_qr, mocked_run_one_test):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_fail_multi_layer_decrypt(m5stickv, mocker, mock_multi_layer_decrypt):
+    """Directly test multi_layer_decrypt() hitting the except block"""
+    from krux.pages.device_tests import DeviceTests
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # select back
+        BUTTON_ENTER,  # go back
+    )
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DeviceTests(ctx)
+    page.test_suite()
+
+    # assert that kef.Cipher.decrypt was called
+    decrypt = mock_multi_layer_decrypt
+    assert decrypt.call_count > 0
+
+    # assert that the test suite results are displayed correctly
+    # and that the on-device-test failed
+    page.ctx.display.draw_hcentered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Test Suite Results\nsuccess rate: 75%\nfailed: 1/4", info_box=True
+            )
+        ]
+    )
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
 def test_fail_hw_acc_hashing(m5stickv, mocker, mock_hw_acc_hashing):
     """Directly test hw_acc_hashing() hmac hitting the except block"""
     from krux.pages.device_tests import DeviceTests
@@ -189,7 +229,7 @@ def test_fail_hw_acc_hashing(m5stickv, mocker, mock_hw_acc_hashing):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 50%\nfailed: 2/4", info_box=True
             )
         ]
     )
@@ -223,7 +263,7 @@ def test_fail_sha256(m5stickv, mocker, mock_hashlib_sha256):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 75%\nfailed: 1/4", info_box=True
             )
         ]
     )
@@ -259,7 +299,7 @@ def test_fail_hexilify(m5stickv, mocker, mock_hexlify_endianess):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 75%\nfailed: 1/4", info_box=True
             )
         ]
     )
@@ -295,7 +335,7 @@ def test_fail_b2a_base64(m5stickv, mocker, mock_b2a_base64_endianess):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 75%\nfailed: 1/4", info_box=True
             )
         ]
     )
@@ -340,7 +380,7 @@ def test_fail_deflate_compression(m5stickv, mocker, mock_deflate):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 75%\nfailed: 1/4", info_box=True
             )
         ]
     )
@@ -371,7 +411,7 @@ def test_fail_maixpy_code(m5stickv, mocker, mock_maixpy_code):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 75%\nfailed: 1/4", info_box=True
             )
         ]
     )
@@ -402,7 +442,7 @@ def test_fail_zlib_code(m5stickv, mocker, mock_zlib_code):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 75%\nfailed: 1/4", info_box=True
             )
         ]
     )
@@ -472,6 +512,27 @@ def test_run_intreactively(m5stickv, mocker):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [mocker.call("Test Suite Results\nsuccess rate: 100%", info_box=True)]
     )
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_run_one_test_multi_layer_decrypt(m5stickv, mocker):
+    from krux.pages.device_tests import DeviceTests
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # hit enter to proceed
+        BUTTON_PAGE_PREV,  #
+        BUTTON_ENTER,  # go back
+    )
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DeviceTests(ctx)
+
+    # since bypassing test-suite, fake existing results
+    page.results = [(page.multi_layer_decrypt, False)]
+    page.run_one_test(page.multi_layer_decrypt)
+    assert page.results == [(page.multi_layer_decrypt, True)]
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
