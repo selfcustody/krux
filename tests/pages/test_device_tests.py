@@ -189,7 +189,7 @@ def test_fail_hw_acc_hashing(m5stickv, mocker, mock_hw_acc_hashing):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 50%\nfailed: 2/4", info_box=True
             )
         ]
     )
@@ -223,7 +223,7 @@ def test_fail_sha256(m5stickv, mocker, mock_hashlib_sha256):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 75%\nfailed: 1/4", info_box=True
             )
         ]
     )
@@ -259,7 +259,7 @@ def test_fail_hexilify(m5stickv, mocker, mock_hexlify_endianess):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 75%\nfailed: 1/4", info_box=True
             )
         ]
     )
@@ -295,7 +295,7 @@ def test_fail_b2a_base64(m5stickv, mocker, mock_b2a_base64_endianess):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 75%\nfailed: 1/4", info_box=True
             )
         ]
     )
@@ -340,7 +340,7 @@ def test_fail_deflate_compression(m5stickv, mocker, mock_deflate):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 75%\nfailed: 1/4", info_box=True
             )
         ]
     )
@@ -371,7 +371,7 @@ def test_fail_maixpy_code(m5stickv, mocker, mock_maixpy_code):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 75%\nfailed: 1/4", info_box=True
             )
         ]
     )
@@ -402,7 +402,7 @@ def test_fail_zlib_code(m5stickv, mocker, mock_zlib_code):
     page.ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "Test Suite Results\nsuccess rate: 66%\nfailed: 1/3", info_box=True
+                "Test Suite Results\nsuccess rate: 75%\nfailed: 1/4", info_box=True
             )
         ]
     )

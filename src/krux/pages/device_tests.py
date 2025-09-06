@@ -57,6 +57,7 @@ class DeviceTests(Page):
     def test_suite(self, interactive=False):
         """run each on-device tests in all_tests, report summary and details"""
         all_tests = [
+            self.multi_layer_decrypt,
             self.hw_acc_hashing,
             self.deflate_compression,
             self.touch_gestures,
@@ -201,6 +202,61 @@ class DeviceTests(Page):
     #   or interactive=True to enable user interaction during single tests
     # * return something True on success
     # * return False/empty/None/Exception on failure
+
+    def multi_layer_decrypt(self, interactive=False):
+        """
+        Decrypts a matryoshka of all kef versions built w/ Crypto.Cipher --
+        outside-of MaixyPy's ucryptolib on k210 devices.
+        Runs as very first test because it's suspected that an uninitialized
+        hasher (in uhashlib_hw.pbkdf2_hmac_sha256()) can cause problems when
+        booted from ktool (until something is hashed), as opposed to booting
+        from flash where both bootloaders and firmware are hashed during Kboot.
+        """
+        from binascii import hexlify
+        from krux import kef
+
+        results = []
+        err = ""
+        expected_plain = b"\xde\xad\xbe\xef"
+        kef_envelope = (
+            b"\x00\x15\x00\x00\x01OR\xa1\x93l>2q \x9e\x9ddZt\xe3e\xfa\x93`"
+            b"\x97 \xa4\xf5)\xddp~I[\xd0\xb7*\xe8\xe4s\xed\x06ca\x9c'5\x0eb"
+            b"\xd8\x82\xc28\xeelP~&\x0b\xf8\x98\xea*S\xf00\xed7EFk\xa6a\xce"
+            b"\x80~`\xaeAK\nT\xcd6d\x0c\x16\x88\xb4R\xfe\xe2\xfc#5\xf8\x8f5"
+            b".\x0c\xfa\xa2iN\x02W\x16\xce\x88\x88\x99)\xc8=\xe11\x0ey\xe6"
+            b"\xa1\xcb3&\xac\x01\xb0\xb8\xd5#\xce\xa6\xfd-k(+\x97\xe6\x07\x02"
+            b'\x8d\\\xdc51<\xe3K_\xba\x0b\xf5]"O6\x03\xe3\x9aV\xec=\xda\xfa'
+            b"\xec.;@CmPc\x01\x9a\x1eG\xde\xd2\x13\xcc\n\x0e\xf4\x80/\xea\xec"
+            b"\xf0\x05q\xe0\x0c\x01\xfeK\xc5v\xc9|A\x0eM.\xd95\x7f\x16\xc8/%"
+            b"\xbb\x1aX\xecoi\x9e\x92bd\xf7\x90\xc2I\xa6\x13\xc1j\xa5\xee\xc0"
+            b"\x7f/c\xc8yOp\x8d&\x17\xfe\xd5*Q\x12s\xd3\x8d/\x9dhjG\xc6{G\xee"
+            b"\xef\x07H\x86\xeat\x1e\xb5\xa6\xb1\x94\x80\x83\x15\x98<0i\xb5"
+            b"\xb5\x8eQ~\x0b\x84\x97\xc1H\x0e\xbf\x9c\x83\x98\xc9\xb8\xe4i"
+            b"\xab\x8fx\xa8*\xb2z\x85\x97W\xd5\xd67\xe0\x9c\xec,\x02\xed\x1b"
+            b"(\xec\x1d\x0c6\xb7\x95\xcf"
+        )
+        while True:
+            try:
+                id_, version, iterations, cipherpayload = kef.unwrap(kef_envelope)
+                if interactive:
+                    results.append(kef.VERSIONS[version]["name"])
+            except:
+                break
+            decryptor = kef.Cipher(b"abc", id_, iterations)
+            try:
+                kef_envelope = decryptor.decrypt(cipherpayload, version)
+            except:
+                err += results[-1] + "FAILED\n"
+        if kef_envelope != expected_plain:
+            err += "unexpected plain text: {}".format(hexlify(kef_envelope).decode())
+
+        if err:
+            raise AssertionError(err)
+
+        results.append(
+            "expected plaintext revealed: 0x{}".format(hexlify(kef_envelope).decode())
+        )
+        return results
 
     def hw_acc_hashing(self, interactive=False):
         """
