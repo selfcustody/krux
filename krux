@@ -114,7 +114,7 @@ elif [ "$1" == "flash" -o "$1" == "boot" ]; then
             # https://devicehunt.com/view/type/usb/vendor/1a86/device/7523
             device_vendor_product_id="1a86:7523"
         elif [ "$device" == "maixpy_tzt" ]; then
-        # https://devicehunt.com/view/type/usb/vendor/1a86/device/55d3
+            # https://devicehunt.com/view/type/usb/vendor/1a86/device/55d3
             device_vendor_product_id="1a86:55d3"
         fi
         if [ -z "$device_vendor_product_id" ]; then

@@ -1,7 +1,7 @@
 # Changelog 25.XX.X - XXX 2025
 
 ### New Device Support: TZT
-The TZT CanMV is similar to the WonderMV, but adds five buttons and a premium, fully enclosed aluminum housing that completely wraps the device.
+The TZT CanMV is similar to the WonderMV but includes five buttons and a premium milled aluminum housing.
 
 ### 2x Faster TC Flash Hash
 SHA-256 and PBKDF2-HMAC now leverage hardware-accelerated hashing, doubling the execution speed of TC Flash.
