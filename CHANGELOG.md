@@ -1,7 +1,7 @@
 # Changelog 25.XX.X - XXX 2025
 
 ### New Device Support: TZT
-The TZT CanMV is similar to the WonderMV, but adds five buttons and a premium, fully enclosed aluminum housing that completely wraps the device.
+The TZT CanMV is similar to the WonderMV but includes five buttons and a premium milled aluminum housing.
 
 # Changelog 25.09.0 - September 2025
 
