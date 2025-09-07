@@ -1,8 +1,8 @@
 {
     "% of the amount.": "% の金額.",
-    "%d bits (%s bits/px)": "%dビット(%sビット/px)",
     "%d of %d multisig": "%d の%d マルチシグネチャ",
     "%d to %d": "%d へ %d",
+    "%s bits (%s bits/px)": "%sビット(%sビット/px)",
     "%s removed.": "%s 削除されました.",
     "(Experimental)": "(実験的)",
     "(watch-only)": "(閲覧専用)",

@@ -1,8 +1,8 @@
 {
     "% of the amount.": "tutarın %'si.",
-    "%d bits (%s bits/px)": "%d bit (%s bit/piksel)",
     "%d of %d multisig": "%d / %d çoklu imza",
     "%d to %d": "%d to %d",
+    "%s bits (%s bits/px)": "%s bit (%s bit/piksel)",
     "%s removed.": "%s kaldırıldı.",
     "(Experimental)": "(Deneysel)",
     "(watch-only)": "(sadece izle)",

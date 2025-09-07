@@ -1,8 +1,8 @@
 {
     "% of the amount.": "수량: %",
-    "%d bits (%s bits/px)": "%d 비트 (%s 비트/픽셀)",
     "%d of %d multisig": "%d의 %d 멀티시그",
     "%d to %d": "%d 부터 %d",
+    "%s bits (%s bits/px)": "%s 비트 (%s 비트/픽셀)",
     "%s removed.": "%s 제거되었습니다.",
     "(Experimental)": "(실험적 기능)",
     "(watch-only)": "(잔액조회 전용)",

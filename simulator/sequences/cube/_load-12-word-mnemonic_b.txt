@@ -6,12 +6,9 @@ x3 press BUTTON_A
 qrcode 12-word-mnemonic_b.png
 wait 0.5
 
-# Confirm words
+# Confirm words (two times? bug simulator with cube)
+x2 press BUTTON_A
+
+# Confirm wallet
 press BUTTON_A
 
-# Don't add a passphrase
-press BUTTON_C
-press BUTTON_A
-
-# Confirm fingerprint
-press BUTTON_A

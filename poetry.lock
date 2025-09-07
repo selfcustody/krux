@@ -569,13 +569,13 @@ htmlsoup = ["BeautifulSoup4"]
 
 [[package]]
 name = "markdown"
-version = "3.8.2"
+version = "3.9"
 description = "Python implementation of John Gruber's Markdown."
 optional = true
 python-versions = ">=3.9"
 files = [
-    {file = "markdown-3.8.2-py3-none-any.whl", hash = "sha256:5c83764dbd4e00bdd94d85a19b8d55ccca20fe35b2e678a1422b380324dd5f24"},
-    {file = "markdown-3.8.2.tar.gz", hash = "sha256:247b9a70dd12e27f67431ce62523e675b866d254f900c4fe75ce3dda62237c45"},
+    {file = "markdown-3.9-py3-none-any.whl", hash = "sha256:9f4d91ed810864ea88a6f32c07ba8bee1346c0cc1f6b1f9f6c822f2a9667d280"},
+    {file = "markdown-3.9.tar.gz", hash = "sha256:d2900fe1782bd33bdbbd56859defef70c2e78fc46668f8eb9df3128138f2cb6a"},
 ]
 
 [package.extras]
@@ -1342,13 +1342,13 @@ cp2110 = ["hidapi"]
 
 [[package]]
 name = "pytest"
-version = "8.4.1"
+version = "8.4.2"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pytest-8.4.1-py3-none-any.whl", hash = "sha256:539c70ba6fcead8e78eebbf1115e8b589e7565830d7d006a8723f19ac8a0afb7"},
-    {file = "pytest-8.4.1.tar.gz", hash = "sha256:7c67fd69174877359ed9371ec3af8a3d2b04741818c51e5e99cc1742251fa93c"},
+    {file = "pytest-8.4.2-py3-none-any.whl", hash = "sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79"},
+    {file = "pytest-8.4.2.tar.gz", hash = "sha256:86c0d0b93306b961d58d62a4db4879f27fe25513d4b969df351abdddb3c30e01"},
 ]
 
 [package.dependencies]
@@ -1381,13 +1381,13 @@ testing = ["fields", "hunter", "process-tests", "pytest-xdist", "virtualenv"]
 
 [[package]]
 name = "pytest-mock"
-version = "3.14.1"
+version = "3.15.0"
 description = "Thin-wrapper around the mock package for easier use with pytest"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 files = [
-    {file = "pytest_mock-3.14.1-py3-none-any.whl", hash = "sha256:178aefcd11307d874b4cd3100344e7e2d888d9791a6a1d9bfe90fbc1b74fd1d0"},
-    {file = "pytest_mock-3.14.1.tar.gz", hash = "sha256:159e9edac4c451ce77a5cdb9fc5d1100708d2dd4ba3c3df572f14097351af80e"},
+    {file = "pytest_mock-3.15.0-py3-none-any.whl", hash = "sha256:ef2219485fb1bd256b00e7ad7466ce26729b30eadfc7cbcdb4fa9a92ca68db6f"},
+    {file = "pytest_mock-3.15.0.tar.gz", hash = "sha256:ab896bd190316b9d5d87b277569dfcdf718b2d049a2ccff5f7aca279c002a1cf"},
 ]
 
 [package.dependencies]
@@ -1697,7 +1697,7 @@ files = [
 watchmedo = ["PyYAML (>=3.10)"]
 
 [extras]
-docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]
+docs = ["mkdocs", "mkdocs-macros-plugin", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]
 flash = ["pyserial"]
 sign = ["qrcode"]
 simulator = ["Pillow", "numpy", "opencv-python", "pygame", "pyzbar"]
@@ -1705,4 +1705,4 @@ simulator = ["Pillow", "numpy", "opencv-python", "pygame", "pyzbar"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12.3"
-content-hash = "53e6a7e40ca56a7245992d3cb18aeae483a9d1f2a106b7031c50b92578560824"
+content-hash = "16d6a945791d7bb5d4a31b1db12250f4ae00a46f8c2763be3275ce2de3771190"

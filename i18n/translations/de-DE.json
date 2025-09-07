@@ -1,8 +1,8 @@
 {
     "% of the amount.": "% des Betrags.",
-    "%d bits (%s bits/px)": "%d Bits (%s Bits/px)",
     "%d of %d multisig": "%d von %d Multisig",
     "%d to %d": "%d bis %d ",
+    "%s bits (%s bits/px)": "%s Bits (%s Bits/px)",
     "%s removed.": "%s wurde entfernt.",
     "(Experimental)": "(Experimental)",
     "(watch-only)": "(nur zur Betrachtung)",
