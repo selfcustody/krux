@@ -87,6 +87,10 @@ class Bip85(Page):
             from ...wallet import Wallet
 
             self.ctx.wallet = Wallet(key)
+            self.flash_text(
+                t("%s: loaded!") % key.fingerprint_hex_str(True), highlight_prefix=":"
+            )
+
         return MENU_CONTINUE
 
     def _base64_password_qr(self, code, title):

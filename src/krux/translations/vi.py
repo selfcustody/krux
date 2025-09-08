@@ -26,6 +26,7 @@ translation_array = [
     "%d đến %d",
     "%s bit (%s bit/px)",
     "%s Đã bỏ.",
+    "%s: đã tải!",
     "(Thực nghiệm)",
     "(chỉ xem)",
     "12 từ",

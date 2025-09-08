@@ -26,6 +26,7 @@ translation_array = [
     "%d to %d",
     "%s bit (%s bit/piksel)",
     "%s kaldırıldı.",
+    "%s: yüklendi!",
     "(Deneysel)",
     "(sadece izle)",
     "12 kelime",

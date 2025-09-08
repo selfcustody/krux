@@ -4,6 +4,7 @@
     "%d to %d": "%d к %d",
     "%s bits (%s bits/px)": "%s бит (%s бит/px)",
     "%s removed.": "%s удален.",
+    "%s: loaded!": "%s: загружено!",
     "(Experimental)": "(Эксперементальный)",
     "(watch-only)": "(Только часы)",
     "12 words": "12 слов",

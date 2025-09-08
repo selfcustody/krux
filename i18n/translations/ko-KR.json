@@ -4,6 +4,7 @@
     "%d to %d": "%d 부터 %d",
     "%s bits (%s bits/px)": "%s 비트 (%s 비트/픽셀)",
     "%s removed.": "%s 제거되었습니다.",
+    "%s: loaded!": "%s: 로드됨!",
     "(Experimental)": "(실험적 기능)",
     "(watch-only)": "(잔액조회 전용)",
     "12 words": "12단어",

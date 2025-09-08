@@ -26,6 +26,7 @@ translation_array = [
     "%d tot %d",
     "%s bits (%s bits/px)",
     "%s verwijderd.",
+    "%s: geladen!",
     "(Experimenteel)",
     "(alleen inzien)",
     "12 woorden",
