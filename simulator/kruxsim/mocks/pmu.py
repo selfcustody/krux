@@ -22,7 +22,7 @@
 import sys
 from unittest import mock
 import pygame as pg
-
+from kruxsim.mocks.board import BOARD_CONFIG
 PRESSED = 0
 RELEASED = 1
 
@@ -63,7 +63,9 @@ class PMUController:
         pass
 
     def get_battery_voltage(self):
-        return 3820
+        if BOARD_CONFIG["type"] in ("amigo", "m5stickv", "cube"):
+            return 3820
+        return 0
 
     def get_usb_voltage(self):
         return 0

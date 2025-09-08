@@ -22,10 +22,11 @@
 # pylint: disable=C0301
 translation_array = [
     "% des Betrags.",
-    "%d Bits (%s Bits/px)",
     "%d von %d Multisig",
     "%d bis %d ",
+    "%s Bits (%s Bits/px)",
     "%s wurde entfernt.",
+    "%s: geladen!",
     "(Experimental)",
     "(nur zur Betrachtung)",
     "12 Wörter",

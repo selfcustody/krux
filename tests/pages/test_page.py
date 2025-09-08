@@ -424,7 +424,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
 
     curr_device = board.config["type"]
     device_type = curr_device if curr_device in (AMIGO, M5) else DOCK
-    max_chars_in_line = ctx.display.usable_pixels_in_line() // FONT_WIDTH
+    max_chars_in_line = ctx.display.ascii_chars_per_line()
 
     for i, case in enumerate(cases):
         print(i)
@@ -479,7 +479,7 @@ def test_fit_to_line_prefix(mocker, multiple_devices, mock_page_cls):
 
     curr_device = board.config["type"]
     device_type = curr_device if curr_device in (AMIGO, M5) else DOCK
-    max_chars_in_line = ctx.display.usable_pixels_in_line() // FONT_WIDTH
+    max_chars_in_line = ctx.display.ascii_chars_per_line()
 
     for i, case in enumerate(cases):
         print(i)
@@ -555,7 +555,7 @@ def test_fit_to_line_not_crop_middle(mocker, multiple_devices, mock_page_cls):
 
     curr_device = board.config["type"]
     device_type = curr_device if curr_device in (AMIGO, M5) else DOCK
-    max_chars_in_line = ctx.display.usable_pixels_in_line() // FONT_WIDTH
+    max_chars_in_line = ctx.display.ascii_chars_per_line()
 
     for i, case in enumerate(cases):
         print(i)

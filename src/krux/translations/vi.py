@@ -22,10 +22,11 @@
 # pylint: disable=C0301
 translation_array = [
     "% của số tiền.",
-    "%d bit (%s bit/px)",
     "%d của %d đa chữ kí",
     "%d đến %d",
+    "%s bit (%s bit/px)",
     "%s Đã bỏ.",
+    "%s: đã tải!",
     "(Thực nghiệm)",
     "(chỉ xem)",
     "12 từ",

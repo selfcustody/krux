@@ -41,6 +41,9 @@ The KEF encryption format now supports additional modes (CTR and the new default
 ### Datum Tool
 A new advanced utility for working with files, QRs, and manual text input. It supports conversion between binary and common string encodings, encryption/decryption of KEF envelopes, and exporting contents to QR or SD.
 
+### Support for "old" multisig policies and scripts
+We added support for BIP45 (Legacy multisig `P2SH`) and complete BIP48 (Nested-Segwit `P2SH-P2WSH`).
+
 ### Other Bug Fixes and Improvements
 - Numbers are no longer printed as words in "Backup Mnemonic > Other formats > Numbers".
 - Keypad touch area has been expanded to the screen edges.
@@ -53,6 +56,7 @@ A new advanced utility for working with files, QRs, and manual text input. It su
 - Saving encrypted mnemonic now prompts whether to use the fingerprint as ID.
 - Optimized device's board value checks.
 - Added QR Code to About screen.
+- Fixed camera zoom mode clearing the QR codes progress bar.
 - Fixed camera not rotating on Yahboom or WonderMV with flipped orientation.
 - Restart prompt for theme settings now appears only when changes are made.
 - Wallet Descriptor now validates and warns if change addresses cannot be determined.
@@ -64,8 +68,11 @@ A new advanced utility for working with files, QRs, and manual text input. It su
 - Hide the "Change Addresses" menu option when cannot be determined by the wallet descriptor.
 - The hide mnemonic setting now ignores user confirmation when loading a mnemonic via word numbers.
 - Minor text improvements for clarity and easier translation.
+- Fixed an issue where mixed ASCII and Asian fonts fail to use the full available width.
+- Fixed an issue where menu entries were cut off when translations spanned two lines instead of one.
+- Fixed a selected entry update bug when switching between PAGE and swipe in large menus.
 - Maixpy Fix: Increase glyphs indexing capacity affecting Amigo's translations
-
+- Fixed an issue that allowed choose incompatible script types from choosen policies (e.g., `P2WPKH` for a `Multisig`).
 
 # Changelog 25.03.0 - March 2025
 

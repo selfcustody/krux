@@ -22,10 +22,11 @@
 # pylint: disable=C0301
 translation_array = [
     "% van het bedrag.",
-    "%d bits (%s bits/px)",
     "%d van %d multisig",
     "%d tot %d",
+    "%s bits (%s bits/px)",
     "%s verwijderd.",
+    "%s: geladen!",
     "(Experimenteel)",
     "(alleen inzien)",
     "12 woorden",

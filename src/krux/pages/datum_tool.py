@@ -39,6 +39,10 @@ from .encryption_ui import (
 from ..display import FONT_WIDTH, FONT_HEIGHT, DEFAULT_PADDING, TOTAL_LINES
 from ..krux_settings import t
 from ..input import (
+    BUTTON_TOUCH,
+    BUTTON_ENTER,
+    FAST_FORWARD,
+    FAST_BACKWARD,
     BUTTON_PAGE,
     SWIPE_LEFT,
     SWIPE_UP,
@@ -406,7 +410,7 @@ class DatumTool(Page):
 
         seedqrview_thresh = QR_CAPACITY_BYTE[STATIC_QR_MAX_SIZE]
         if not isinstance(self.contents, bytes):
-            if all(c.isdecimal() for c in self.contents):
+            if all(c.isdigit() for c in self.contents):
                 seedqrview_thresh = QR_CAPACITY_NUMERIC[STATIC_QR_MAX_SIZE]
             elif all(is_alnum(c) for c in self.contents):
                 seedqrview_thresh = QR_CAPACITY_ALPHANUMERIC[STATIC_QR_MAX_SIZE]
@@ -526,91 +530,103 @@ class DatumTool(Page):
         from binascii import hexlify
 
         self.ctx.display.clear()
-        num_lines = self.ctx.display.draw_hcentered_text(
-            "\n".join(
+        parts = [
+            self.title,
+            "".join(
                 [
-                    self.title,
-                    "".join(
-                        [
-                            "wasKEF " if self.decrypted else "",
-                            "secret " if self.sensitive else "",
-                            ",".join([str(x) for x in self.encodings]),
-                        ]
-                    ),
-                    " ".join(
-                        [
-                            x
-                            for x in [
-                                self.about,
-                                self.datum,
-                                about_suffix,
-                            ]
-                            if x
-                        ]
-                    ),
+                    "wasKEF " if self.decrypted else "",
+                    "secret " if self.sensitive else "",
+                    ",".join([str(x) for x in self.encodings]),
                 ]
             ),
+            " ".join(
+                [
+                    x
+                    for x in [
+                        self.about,
+                        self.datum,
+                        about_suffix,
+                    ]
+                    if x
+                ]
+            ),
+        ]
+        num_lines = self.ctx.display.draw_hcentered_text(
+            "\n".join(p for p in parts if p),
             info_box=True,
             highlight_prefix=":",
         )
         if preview:
-            num_lines += 1
             self.ctx.display.draw_hcentered_text(
                 (
                     '"' + self.contents + '"'
                     if isinstance(self.contents, str)
                     else "0x" + hexlify(self.contents).decode()
                 ),
-                offset_y=DEFAULT_PADDING + num_lines * FONT_HEIGHT,
+                offset_y=DEFAULT_PADDING + num_lines * FONT_HEIGHT + 2,
                 max_lines=1,
                 info_box=True,
             )
+            num_lines += 1
 
         return num_lines
 
     def _show_contents(self):
         """Displays infobox and contents"""
         from binascii import hexlify
+        from ..settings import THIN_SPACE
+        from ..kboard import kboard
+        import math
 
-        info_len = self._info_box(preview=False, about_suffix="pX/Y")
-        max_lines = TOTAL_LINES - (info_len + 2)
-        pages = self.ctx.display.index_pages(
-            (
-                self.contents
-                if isinstance(self.contents, str)
-                else hexlify(self.contents).decode()
-            ),
-            max_lines,
+        page_indicator = "p" + THIN_SPACE + "%d/%s"
+        max_lines = 0
+        offset_x = (
+            DEFAULT_PADDING
+            if not kboard.is_m5stickv
+            else (self.ctx.display.width() % FONT_WIDTH) // 2
         )
+        contents = (
+            self.contents
+            if isinstance(self.contents, str)
+            else hexlify(self.contents).decode()
+        )
+        content_len = len(contents)
 
-        page = 0
+        def _update_infobox(curr_page, total="?"):
+            info_len = self._info_box(
+                preview=False, about_suffix=page_indicator % (curr_page, total)
+            )
+            max_lines = TOTAL_LINES - (info_len + 1)
+            total = math.ceil(
+                content_len / (self.ctx.display.ascii_chars_per_line() * max_lines)
+            )
+            return info_len, total, max_lines
+
+        curr_page = 0
+        start_index = 0
+        info_len, last_page, max_lines = _update_infobox(curr_page + 1)
+
         while True:
-            start = pages[page]
-            if len(pages) < 10:
-                page_indicator = "p{}/{}".format(page + 1, len(pages))
-            else:
-                page_indicator = "p{}".format(page + 1)
+            info_len, last_page, max_lines = _update_infobox(curr_page + 1, last_page)
+            lines = self.ctx.display.to_lines(contents[start_index:], max_lines)
 
-            info_len = self._info_box(preview=False, about_suffix=page_indicator)
-            offset_y = DEFAULT_PADDING + (info_len + 1) * FONT_HEIGHT
-            for line in self.ctx.display.to_lines(
-                (
-                    self.contents[start:]
-                    if isinstance(self.contents, str)
-                    else hexlify(self.contents).decode()[start:]
-                ),
-                max_lines,
-            ):
-                self.ctx.display.draw_string(DEFAULT_PADDING, offset_y, line)
+            offset_y = DEFAULT_PADDING + (info_len) * FONT_HEIGHT + 1
+            for line in lines:
+                self.ctx.display.draw_string(offset_x, offset_y, line)
                 offset_y += FONT_HEIGHT
 
             btn = self.ctx.input.wait_for_button()
-            if btn in (BUTTON_PAGE, SWIPE_UP, SWIPE_LEFT):
-                page = (page + 1) % len(pages)
-            elif btn in (BUTTON_PAGE_PREV, SWIPE_DOWN, SWIPE_RIGHT):
-                page = (page - 1) % len(pages)
-            else:
+            if btn in (BUTTON_PAGE, FAST_FORWARD, SWIPE_UP, SWIPE_LEFT):
+                curr_page = (curr_page + 1) % last_page
+            elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD, SWIPE_DOWN, SWIPE_RIGHT):
+                curr_page = (curr_page - 1) % last_page
+            elif btn in (BUTTON_ENTER, BUTTON_TOUCH):
                 break
+            start_index = (
+                0
+                if curr_page == 0
+                else curr_page * self.ctx.display.ascii_chars_per_line() * max_lines - 1
+            )
 
     def _analyze_contents(self):
         """
@@ -781,7 +797,7 @@ class DatumTool(Page):
         menu = Menu(
             self.ctx,
             todo_menu,
-            offset=(info_len + 1) * FONT_HEIGHT + DEFAULT_PADDING,
+            offset=(info_len + 1) * FONT_HEIGHT + DEFAULT_PADDING + 2,
             **back_status
         )
         _, status = menu.run_loop()

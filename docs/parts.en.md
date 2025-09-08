@@ -2,7 +2,7 @@
 
 ### Compatible Devices (comparative table)
 
-| Device | M5StickV | Maix Amigo | Maix Dock | Maix Bit | Yahboom k210 module | Maix Cube | WonderMV |
+| Device | [M5StickV](#m5stickv) | [Maix Amigo](#maix-amigo) | [Maix Dock](#maix-dock-and-maix-bit) | [Maix Bit](#maix-dock-and-maix-bit) | [Yahboom k210 module](#yahboom-k210-module) | [Maix Cube](#maix-cube) | [WonderMV](#wondermv) |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Price range | US$ 50-55 | US$ 50-85 | US$ 27-35  | US$ 32-42 | US$ 45-61 | US$ 34-49 | US$ 58-86 |
 | Screen size / resolution | 1.14" / 135*240 | 3.5" / 320*480 | 2.4" / 240*320 | 2.4" / 240*320 | 2" / 240*320 | 1.3" / 240*240 | 2" / 240*320 |
@@ -12,11 +12,11 @@
 | Camera | `OV7740` | `OV7740` rear<br>`GC0328` front | `GC0328` | `OV2640` or<br>`OV5642` | `OV2640` <i style="font-size: 85%">(VER:1.0)</i> or<br>`GC2145` <i style="font-size: 85%">(VER:1.1)</i> | `OV7740` | `GC2145` |
 | Battery  | 200mAh | 520mAh | :x: | :x: | :x: | 200mAh | :x: |
 | Requirements | None | None | [Rotary encoder](https://duckduckgo.com/?q=ky-040)<br> [3D printed case](https://github.com/selfcustody/DockEncoderCase)<br> Soldering<br>Assembly | Buttons<br> [3D printed case](https://github.com/selfcustody/MaixBitCase)<br> Soldering<br>Assembly | None | None | None |
-| Warnings  | [:material-numeric-1-circle:{ title="M5StickV and USB-C" }](#m5stickv-info) | [:material-numeric-2-circle:{ title="Maix Amigo screens" }](#amigo-info) | [:material-numeric-3-circle:{ title="Maix Dock and soldered pin" }](#dock-info) | Camera has<br> lens distortion | Micro USB | 3-Way button | None |
+| Warnings  | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) | [:material-numeric-2-circle:{ title="Maix Amigo screens" }](#amigo-info) | [:material-numeric-3-circle:{ title="Maix Dock and soldered pin" }](#dock-info) | Camera has<br> lens distortion | Micro USB | 3-Way button | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) [:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info) |
 
-<i style="font-size: 85%">:material-numeric-1-circle:{id="m5stickv-info"}:
+<i style="font-size: 85%">:material-numeric-1-circle:{id="pull-up-resistor-info"}:
 ----8<----
-m5stickv-usb-c.en.txt
+usb-c-pull-up-resistor.en.txt
 ----8<----
 </i>
 
@@ -27,7 +27,11 @@ amigo-more-info-faq.en.txt:2
 </i>
 
 <i style="font-size: 85%">:material-numeric-3-circle:{id="dock-info"}:
-Some stores ship the Maix Dock with soldered pin connectors that do not fit into the [3D printed case](https://github.com/selfcustody/DockEncoderCase).
+Some Maix Dock units are shipped with soldered pin connectors, which prevent them from fitting into the [3D-printed case](https://github.com/selfcustody/DockEncoderCase). Certain boards also come with built-in Wi-Fi. 
+</i>
+
+<i style="font-size: 85%">:material-numeric-4-circle:{id="wondermv-info"}:
+WonderMV may restart when certain SD cards are inserted. See [Why does my WonderMV reboot](troubleshooting.md/#why-does-my-wondermv-reboot-when-i-insert-an-sd-card).
 </i>
 
 <i style="font-size: 85%">**All devices feature Kendryte K210 chip:**
@@ -37,7 +41,7 @@ Some stores ship the Maix Dock with soldered pin connectors that do not fit into
 ### M5StickV
 <img src="../img/maixpy_m5stickv/logo-250.png" align="right" style="width: 15%;">
 
-Below is a list of some distributors where you can find this device:
+Krux was first ported to this device in March 2022. Featuring the smallest screen size and resolution, it also includes a built-in battery. Refer to the [USB-C recognition warning <i style="font-size: 85%">:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info)</i> above for important notes. Below is a list of distributors where it can be found:
 
 - [M5Stack](https://shop.m5stack.com/products/stickv)
 - [Mouser](https://www.mouser.com/c/?q=m5stickv)
@@ -55,21 +59,21 @@ Below is a list of some distributors where you can find this device:
 ### Maix Amigo
 <img src="../img/maixpy_amigo/logo-300.png" align="right" style="width: 16%;">
 
-Below is a list of some distributors where you can find this device:
+Krux has supported this device since its second version in August 2022. It offers the largest screen size and resolution, a touchscreen, and a built-in battery. Below is a list of distributors where it is available:
 
 - [AliExpress](https://www.aliexpress.com/w/wholesale-sipeed-amigo.html)
 - [Seeed Studio](https://www.seeedstudio.com/Sipeed-Maix-Amigo-p-4689.html)
 - [Digi-Key](https://www.digikey.com/en/products/detail/seeed-technology-co-ltd/102110463/13168813)
 - [Mouser](https://www.mouser.com/c/?q=sipeed)
 - [Electromaker](https://www.electromaker.io/shop/search/sipeed)
-- [Switch Science](https://www.switch-science.com/search?q=maix+amigo)
+- [スイッチサイエンス](https://www.switch-science.com/search?q=maix+amigo)
 
 <div style="clear: both"></div>
 
 ### Yahboom k210 module
 <img src="../img/maixpy_yahboom/logo-312.png" align="right" style="width: 16%;">
 
-It comes with a compatible 32G card, an USB card reader, one PH2.0 4Pin male-to-male connector and one PH2.0 female adapter (to connect to a [thermal printer](#optional-ttl-serial-thermal-printer)). Below is a list of some distributors where you can find this device:
+Supported by Krux since March 2024, this device features a touchscreen and comes with a compatible 32 GB card, a USB card reader, one PH2.0 4-pin male-to-male connector, and a PH2.0 female adapter for connecting to a [thermal printer](#optional-ttl-serial-thermal-printer). Below is a list of distributors where it is available:
 
 - [AliExpress](https://www.aliexpress.com/w/wholesale-yahboom-k210-module.html)
 - [Amazon](https://www.amazon.com/s?k=Yahboom+k210+module)
@@ -81,7 +85,7 @@ It comes with a compatible 32G card, an USB card reader, one PH2.0 4Pin male-to-
 ### Maix Cube
 <img src="../img/maixpy_cube/logo-400.png" align="right" style="width: 18%;">
 
-Below is a list of some distributors where you can find this device:
+Supported by Krux since July 2024, this device features the second smallest screen size and resolution, a 3-way button, and a built-in battery. Below is a list of distributors where it is available:
 
 - [Seeed Studio](https://www.seeedstudio.com/Sipeed-Maix-Cube-p-4553.html)
 - [Mouser](https://www.mouser.com/c/?q=sipeed)
@@ -95,7 +99,7 @@ Below is a list of some distributors where you can find this device:
 ### WonderMV
 <img src="../img/maixpy_wonder_mv/logo-304.png" align="right" style="width: 16%;">
 
-It comes with a compatible 32G card, an USB card reader, and two Molex 51004 4-pin male-to-male cable (to connect to a [thermal printer](#optional-ttl-serial-thermal-printer)). Below is a list of some distributors where you can find this device:
+Supported by Krux since September 2024, this touchscreen device features a metal backplate and includes a compatible 32 GB card, a USB card reader, and two 5264 4-pin connector male-to-male cables for connecting to a [thermal printer](#optional-ttl-serial-thermal-printer). Refer to the [USB-C recognition warning <i style="font-size: 85%">:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info)</i> and the [SD card warning <i style="font-size: 85%">:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info)</i> above for important notes. The following distributors offer this device:
 
 - [AliExpress](https://www.aliexpress.com/w/wholesale-k210-wondermv.html)
 - [Amazon](https://www.amazon.com/s?k=k210+WonderMV)
@@ -108,14 +112,14 @@ It comes with a compatible 32G card, an USB card reader, and two Molex 51004 4-p
 ### Maix Dock and Maix Bit
 <img src="../img/maixpy_dock/logo-302.png" align="right" style="width: 16%;">
 
-For the DIYers, the Maix Dock and Maix Bit are also supported but will require sourcing the parts individually and building the device yourself.
+For DIY enthusiasts, Krux has supported the Maix Dock and Maix Bit since August 2022. These kits include a board and screen but require you to source a rotary encoder or buttons separately and assemble the device yourself. Some Maix Dock boards also include Wi-Fi.
 
-Below are example implementations with instructions on how to recreate them:
+Here are example builds with instructions on how to recreate them:
 
 - [https://github.com/selfcustody/DockEncoderCase](https://github.com/selfcustody/DockEncoderCase)
 - [https://github.com/selfcustody/MaixBitCase](https://github.com/selfcustody/MaixBitCase)
 
-Below is a list of some distributors where you can find these devices:
+Available from these distributors:
 
 - [Mouser](https://www.mouser.com/c/?q=sipeed)
 - [Electromaker](https://www.electromaker.io/shop/search/sipeed)
@@ -142,7 +146,7 @@ warning-printer.en.txt
 
 Krux has the capability to print all QR codes it generates, including those for mnemonics, xpubs, wallet backups, and signed PSBTs, using a locally-connected thermal printer via its serial port.
 
-Many TTL serial thermal printers may be compatible, but currently, the [Goojprt QR203](https://www.aliexpress.com/w/wholesale-Goojprt-QR203.html) has the best support (except this printer only supports ASCII or Chinese characters, non-ASCII characters will be printed as Chinese). The [Adafruit printer starter pack](https://www.adafruit.com/product/600) can also be a convenient option to get started, as it includes all the necessary components for printing (except the conversion cable). To ensure proper functionality, enable the printer driver in [settings](./getting-started/settings.md/#thermal), set the Tx pin and baud rate value to either 19200 or 9600 (depends on the printer), as explained in this [Adafruit printer tutorial](https://learn.adafruit.com/mini-thermal-receipt-printer/first-test). You will need to connect the device's Tx to the printer's Rx and device's ground to the printer's ground, do not connect any other pins because a wrong connection may damage your device. The printer requires a dedicated power supply, typically with an output of 5 to 9V (or 12V) and capable of supplying at least 2A. For more information, [see this discussion](https://github.com/selfcustody/krux/discussions/312).
+Many TTL serial thermal printers may be compatible, but currently, the [Goojprt QR203](https://www.aliexpress.com/w/wholesale-Goojprt-QR203.html) has the best support (except this printer only supports ASCII or Chinese characters, non-ASCII characters will be printed as Chinese). The [Adafruit printer starter pack](https://www.adafruit.com/product/600) can also be a convenient option to get started, as it includes all the necessary components for printing (except the conversion cable). To ensure proper functionality, enable the printer driver in [settings](getting-started/settings.md/#thermal), set the Tx pin and baud rate value to either 19200 or 9600 (depends on the printer), as explained in this [Adafruit printer tutorial](https://learn.adafruit.com/mini-thermal-receipt-printer/first-test). You will need to connect the device's Tx to the printer's Rx and device's ground to the printer's ground, do not connect any other pins because a wrong connection may damage your device. The printer requires a dedicated power supply, typically with an output of 5 to 9V (or 12V) and capable of supplying at least 2A. For more information, [see this discussion](https://github.com/selfcustody/krux/discussions/312).
 
-#### (Optional) Conversion Cable for Thermal Printer
+#### Conversion Cable
 To connect the printer to M5StickV, Amigo or Cube, you will need a [grove conversion cable](https://store-usa.arduino.cc/products/grove-4-pin-male-to-grove-4-pin-cable-5-pcs) with a 4-pin male Grove connector on one end (to connect to the device) and 4-pin male jumpers on the other end (to connect to the printer). Check your device and printer model connection first, Yahboom comes with PH2.0 4Pin female connector; Dock and Bit doesn't have a connector; WonderMV comes with [Molex 51004 4-pin connector](https://www.digikey.ca/en/products/detail/molex/0530150410/1785079) (used with smart servo). For a more reliable connection, it is recommended to cut and solder the wires of your custom cables instead of using jumpers. Here we have a description of some [inter-integrated circuit (I2C) connector standards](https://www.cable-tester.com/i2c-pin-out/).

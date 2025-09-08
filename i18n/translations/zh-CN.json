@@ -1,9 +1,10 @@
 {
     "% of the amount.": "% 的金额.",
-    "%d bits (%s bits/px)": "%d位 (%s位/像素）",
     "%d of %d multisig": "%d/%d 多签",
     "%d to %d": "%d到%d",
+    "%s bits (%s bits/px)": "%s位 (%s位/像素）",
     "%s removed.": "已移除%s",
+    "%s: loaded!": "%s :已加载!",
     "(Experimental)": "（实验性）",
     "(watch-only)": "（仅观察）",
     "12 words": "12 单词",

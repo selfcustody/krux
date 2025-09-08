@@ -22,13 +22,14 @@
 import board
 import time
 from . import Page
-from ..display import FONT_HEIGHT, MINIMAL_PADDING
+from ..display import FONT_HEIGHT, MINIMAL_PADDING, BOTTOM_LINE
 from ..input import PRESSED
 from ..themes import theme
 from ..qr import QRPartParser, FORMAT_UR
 from ..wdt import wdt
 from ..krux_settings import t
 from ..camera import QR_SCAN_MODE, ANTI_GLARE_MODE, ZOOMED_MODE
+from ..kboard import kboard
 
 ANTI_GLARE_WAIT_TIME = 500
 MESSAGE_DISPLAY_PERIOD = 5000
@@ -61,7 +62,15 @@ class QRCodeCapture(Page):
         elif mode == ANTI_GLARE_MODE:
             self.ctx.display.draw_centered_text(t("Anti-glare mode"))
         elif mode == ZOOMED_MODE:
-            self.ctx.display.clear()
+            # We can't clear the screen because we may have a progress bar already in progress
+            # clear 6 lines above progress bar to erase bottom of previous camera img
+            self.ctx.display.fill_rectangle(
+                0,
+                self.progress_bar_offset_y - 6 * FONT_HEIGHT,
+                self.ctx.display.width(),
+                6 * FONT_HEIGHT,
+                theme.bg_color,
+            )
             self.ctx.display.draw_centered_text(t("Zoomed mode"))
         time.sleep_ms(ANTI_GLARE_WAIT_TIME)
         # Erase the message from the screen
@@ -131,8 +140,12 @@ class QRCodeCapture(Page):
         # Flush events ocurred while loading camera
         self.ctx.input.reset_ios_state()
         start_time = time.ticks_ms()
+        self.ctx.display.clear()
+        offset_y = (
+            MINIMAL_PADDING if not kboard.is_amigo else BOTTOM_LINE - FONT_HEIGHT * 2
+        )
         title_lines = self.ctx.display.draw_hcentered_text(
-            t("Press PAGE to toggle mode"), MINIMAL_PADDING
+            t("Press PAGE to toggle mode"), offset_y
         )
         self.ctx.display.to_landscape()
         while True:
@@ -143,7 +156,7 @@ class QRCodeCapture(Page):
             elif self.ctx.input.enter_event():
                 break
 
-            # Anti-glare mode
+            # Anti-glare / zoom / normal mode
             if self.ctx.input.page_event():
                 if self.ctx.camera.has_antiglare():
                     self.anti_glare_control()

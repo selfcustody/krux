@@ -22,10 +22,11 @@
 # pylint: disable=C0301
 translation_array = [
     "tutarın %'si.",
-    "%d bit (%s bit/piksel)",
     "%d / %d çoklu imza",
     "%d to %d",
+    "%s bit (%s bit/piksel)",
     "%s kaldırıldı.",
+    "%s: yüklendi!",
     "(Deneysel)",
     "(sadece izle)",
     "12 kelime",

@@ -52,6 +52,7 @@ def test_insufficient_variance(amigo, mocker):
         INSUFFICIENT_SHANNONS_ENTROPY_TH,
     )
     from krux.themes import RED
+    from krux.format import generate_thousands_separator
 
     # Mock snapshot to return a successful snapshot
     mocker.patch(
@@ -87,7 +88,9 @@ def test_insufficient_variance(amigo, mocker):
 
     # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
     call_message = mocker.call(
-        ENTROPY_INSUFFICIENT_MESSAGE_STR % (total_shannon, shannon_value, variance), RED
+        ENTROPY_INSUFFICIENT_MESSAGE_STR
+        % (generate_thousands_separator(total_shannon), shannon_value, variance),
+        RED,
     )
 
     ctx.display.draw_centered_text.assert_has_calls([call_message])
@@ -101,6 +104,7 @@ def test_insufficient_shannons_entropy(amigo, mocker):
         INSUFFICIENT_SHANNONS_ENTROPY_TH,
     )
     from krux.themes import RED
+    from krux.format import generate_thousands_separator
 
     # Mock snapshot to return a successful snapshot
     mocker.patch(
@@ -139,7 +143,9 @@ def test_insufficient_shannons_entropy(amigo, mocker):
 
     # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
     call_message = mocker.call(
-        ENTROPY_INSUFFICIENT_MESSAGE_STR % (total_shannon, shannon_value, variance), RED
+        ENTROPY_INSUFFICIENT_MESSAGE_STR
+        % (generate_thousands_separator(total_shannon), shannon_value, variance),
+        RED,
     )
 
     ctx.display.draw_centered_text.assert_has_calls([call_message])
@@ -155,6 +161,8 @@ def test_poor_variance(amigo, mocker):
         POOR_VARIANCE_TH,
         INSUFFICIENT_SHANNONS_ENTROPY_TH,
     )
+
+    from krux.format import generate_thousands_separator
 
     # Mock snapshot to return a successful snapshot
     mocker.patch(
@@ -196,7 +204,8 @@ def test_poor_variance(amigo, mocker):
 
     # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
     call_message = mocker.call(
-        ENTROPY_MESSAGE_STR % (total_shannon, shannon_value, variance),
+        ENTROPY_MESSAGE_STR
+        % (generate_thousands_separator(total_shannon), shannon_value, variance),
         highlight_prefix=":",
     )
 
@@ -213,6 +222,7 @@ def test_good_variance_good_shannons_entropy(amigo, mocker):
         POOR_VARIANCE_TH,
         INSUFFICIENT_SHANNONS_ENTROPY_TH,
     )
+    from krux.format import generate_thousands_separator
 
     # Mock snapshot to return a successful snapshot
     mocker.patch(
@@ -251,7 +261,8 @@ def test_good_variance_good_shannons_entropy(amigo, mocker):
 
     # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
     call_message = mocker.call(
-        ENTROPY_MESSAGE_STR % (total_shannon, shannon_value, variance),
+        ENTROPY_MESSAGE_STR
+        % (generate_thousands_separator(total_shannon), shannon_value, variance),
         highlight_prefix=":",
     )
 

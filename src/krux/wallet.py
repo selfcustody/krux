@@ -310,7 +310,7 @@ def parse_key_value_file(wallet_data):
             )
 
         script = key_vals[key_vals.index("Format") + 1].lower()
-        if script != P2WSH:
+        if script not in (P2SH, P2SH_P2WSH, P2WSH):
             raise ValueError("invalid script type: %s" % script)
 
         policy = key_vals[key_vals.index("Policy") + 1]
@@ -333,13 +333,22 @@ def parse_key_value_file(wallet_data):
 
         keys.sort()
         keys = ["[%s/%s]%s" % (key[1], derivation[2:], key[0]) for key in keys]
-        if len(keys) > 1:
+        descriptor = None
+        if script == P2SH:
+            descriptor = Descriptor.from_string(
+                ("sh(sortedmulti(%d," % m) + ",".join(keys) + "))"
+            )
+
+        if script == P2SH_P2WSH:
+            descriptor = Descriptor.from_string(
+                ("sh(wsh(sortedmulti(%d," % m) + ",".join(keys) + ")))"
+            )
+
+        if script == P2WSH:
             descriptor = Descriptor.from_string(
                 ("wsh(sortedmulti(%d," % m) + ",".join(keys) + "))"
             )
-        else:
-            # Single-sig - assuming Native Segwit
-            descriptor = Descriptor.from_string("wpkh(%s/<0;1>/*)" % keys[0])
+
         label = (
             key_vals[key_vals.index("Name") + 1]
             if key_vals.index("Name") >= 0

@@ -74,7 +74,7 @@ class SignMessage(Utils):
         try:
             parts = derivation_path.split("/")
             return parts[0] == "m" and all(
-                p[-1] in ("'hH") or p.isdecimal() for p in parts[1:]
+                p[-1] in ("'hH") or p.isdigit() for p in parts[1:]
             )
         except:
             return False
