@@ -26,6 +26,7 @@ translation_array = [
     "%d de %d multisig",
     "%d a %d",
     "%s eliminado.",
+    "%s: ¡cargado!",
     "(Experimental)",
     "(Solo para observación)",
     "12 palabras",

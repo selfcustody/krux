@@ -26,6 +26,7 @@ translation_array = [
     "%d của %d đa chữ kí",
     "%d đến %d",
     "%s Đã bỏ.",
+    "%s: đã tải!",
     "(Thực nghiệm)",
     "(chỉ xem)",
     "12 từ",

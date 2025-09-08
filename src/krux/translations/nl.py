@@ -26,6 +26,7 @@ translation_array = [
     "%d van %d multisig",
     "%d tot %d",
     "%s verwijderd.",
+    "%s: geladen!",
     "(Experimenteel)",
     "(alleen inzien)",
     "12 woorden",

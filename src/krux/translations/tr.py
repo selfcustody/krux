@@ -26,6 +26,7 @@ translation_array = [
     "%d / %d çoklu imza",
     "%d to %d",
     "%s kaldırıldı.",
+    "%s: yüklendi!",
     "(Deneysel)",
     "(sadece izle)",
     "12 kelime",

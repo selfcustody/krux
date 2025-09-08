@@ -23,9 +23,16 @@
 import binascii
 import sys
 import json
-from os import listdir, walk, mkdir, remove, rmdir
+from os import listdir, walk, mkdir, remove, rmdir, getcwd, chdir
 from os.path import isfile, isdir, exists, join, basename
 import re
+
+EXEC_FOLDER = "i18n"
+current_dir = getcwd()
+
+# check if is executing in exec_folder, if not, try to change to EXEC_FOLDER
+if not current_dir.endswith(EXEC_FOLDER):
+    chdir(EXEC_FOLDER)
 
 SRC_DIR = "../src"
 TRANSLATION_FILES_DIR = "translations"
@@ -128,6 +135,7 @@ def post_process_translation(slug, translation, verbose=False):
     translation = translation.replace("：", ":")
     translation = translation.replace("？", "?")
     translation = translation.replace("！", "!")
+    translation = translation.replace(" ", " ")  # non-breaking space to thin-space
 
     # fix poorly translated newlines
     if " \\ n" in translation:
@@ -247,8 +255,10 @@ def print_missing(save_to_file=False, merge_after=False):
                     print(
                         f"Removed translation {join(filled_dir, translation_filename)}"
                     )
-        rmdir(filled_dir)
         print("\n\n")
+
+    if merge_after:
+        rmdir(filled_dir)
 
 
 def remove_unnecessary():

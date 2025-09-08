@@ -68,8 +68,10 @@ def hextokff(filename=None, width=None, height=None, wide_glyphs=None):
         if not wide_glyphs or current_translation in wide_glyphs:
             file_path = os.path.join(TRANSLATIONS_DIR, translation_file)
 
-            with open(file_path, "r", encoding="utf-8") as file:
-                translations = json.load(file)
+            translations = {}
+            if os.path.isfile(file_path):
+                with open(file_path, "r", encoding="utf-8") as file:
+                    translations = json.load(file)
 
             for translation in translations.values():
                 for char in translation:
