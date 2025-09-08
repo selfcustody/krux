@@ -151,7 +151,13 @@ pg.display.set_caption("Krux Simulator")
 
 device_image = devices.load_image(args.device)
 
-# Scale screenshots for docs
+# Screenshots for docs
+SCREENSHOTS_DIR = "screenshots"
+
+if not os.path.exists(SCREENSHOTS_DIR):
+    os.makedirs(SCREENSHOTS_DIR)
+
+# scale imgs
 AMIGO_SIZE = (300, 504)
 M5STICKV_SIZE = (250, 494)
 DOCK_SIZE = (302, 516)
@@ -237,6 +243,16 @@ def update_screen():
 
     pg.display.flip()
 
+def screenshot(filename):
+    sub = screen.subsurface(devices.screenshot_rect(args.device)).convert_alpha()
+    sub.blit(mask_img, sub.get_rect(), None, pg.BLEND_RGBA_SUB)
+    if (args.screenshot_scale):
+        sub = pg.transform.smoothscale(sub, device_screenshot_size)
+    pg.image.save(
+        sub, os.path.join(SCREENSHOTS_DIR, filename.replace(".png", screenshot_suffix + ".png"))
+    )
+
+import time
 
 try:
     clock = pg.time.Clock()
@@ -253,17 +269,7 @@ try:
                 shutdown()
             elif event.type >= pg.USEREVENT:
                 if event.type == events.SCREENSHOT_EVENT:
-                    SCREENSHOTS_DIR = "screenshots"
-                    if not os.path.exists(SCREENSHOTS_DIR):
-                        os.makedirs(SCREENSHOTS_DIR)
-
-                    sub = screen.subsurface(devices.screenshot_rect(args.device)).convert_alpha()
-                    sub.blit(mask_img, sub.get_rect(), None, pg.BLEND_RGBA_SUB)
-                    if (args.screenshot_scale):
-                        sub = pg.transform.smoothscale(sub, device_screenshot_size)
-                    pg.image.save(
-                        sub, os.path.join(SCREENSHOTS_DIR, event.dict["filename"].replace(".png", screenshot_suffix + ".png"))
-                    )
+                    screenshot(event.dict["filename"])
                 else:
                     event.dict["f"]()
                     update_screen()
@@ -274,6 +280,9 @@ try:
                     buttons.buttons_control.page_event_flag = True
                 if event.key == pg.K_UP:
                     buttons.buttons_control.page_prev_event_flag = True
+                # Press key 's' or 'p' to instant screenshot
+                if event.key == pg.K_s or event.key == pg.K_p:
+                    screenshot("%s-%s.png" % (args.device, time.strftime('%d%m%y_%H_%M_%S')))
             if event.type == pg.MOUSEBUTTONDOWN:
                 ft6x36.touch_control.trigger_event()
             if event.type == pg.ACTIVEEVENT and event.gain:

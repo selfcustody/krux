@@ -22,9 +22,9 @@
 # pylint: disable=C0301
 translation_array = [
     "% du montant.",
-    "%d bits (%s bits/px)",
     "%d de %d multisignature",
     "%d à %d",
+    "%s bits (%s bits/px)",
     "%s supprimé.",
     "(Expérimental)",
     "(consultation)",

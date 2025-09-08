@@ -1,8 +1,8 @@
 {
     "% of the amount.": "% от суммы.",
-    "%d bits (%s bits/px)": "%d бит (%s бит/px)",
     "%d of %d multisig": "%d из %d мультиподпись",
     "%d to %d": "%d к %d",
+    "%s bits (%s bits/px)": "%s бит (%s бит/px)",
     "%s removed.": "%s удален.",
     "(Experimental)": "(Эксперементальный)",
     "(watch-only)": "(Только часы)",

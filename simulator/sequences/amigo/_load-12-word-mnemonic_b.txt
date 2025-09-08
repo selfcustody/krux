@@ -1,13 +1,1 @@
-include _wait-for-logo.txt
-
-# Navigate to via QR
-x3 press BUTTON_A
-
-qrcode 12-word-mnemonic_b.png
-wait 0.5
-
-# Confirm words
-press BUTTON_A
-
-# Confirm wallet
-press BUTTON_A
+/home/tudu/Documents/projects/tadeubas_krux/simulator/sequences/m5stickv/_load-12-word-mnemonic_b.txt

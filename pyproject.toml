@@ -58,15 +58,15 @@ qrcode = { version = "^8.2", optional = true }
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
 pylint = "^3.3.8"
-pytest = "^8.4.1"
+pytest = "^8.4.2"
 pytest-cov = "^5.0.0"
-pytest-mock = "^3.14.1"
+pytest-mock = "^3.15.0"
 PyQRCode = "^1.2.1"
 pycryptodome = "^3.23.0"
 poethepoet = "^0.37.0"
 
 [tool.poetry.extras]
-docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]
+docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions", "mkdocs-macros-plugin"]
 simulator = ["numpy", "opencv-python", "Pillow", "pygame", "pyzbar"]
 flash = ["pyserial"]
 sign = ["qrcode"]

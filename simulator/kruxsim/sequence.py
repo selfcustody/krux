@@ -64,6 +64,8 @@ class SequenceExecutor:
             self.command_params = params
             if cmd == "press":
                 self.command_fn = self.press_key
+                if BOARD_CONFIG["type"] in ("cube", "dock"):
+                    time.sleep(1)
             elif cmd == "press_amigo_only" and BOARD_CONFIG["type"] == "amigo":
                 self.command_fn = self.press_key
             elif cmd == "press_m5stickv_only" and BOARD_CONFIG["type"] == "m5stickv":
@@ -73,6 +75,8 @@ class SequenceExecutor:
             elif cmd == "qrcode":
                 self.command_fn = self.show_qrcode
             elif cmd == "screenshot":
+                if BOARD_CONFIG["type"] in ("cube", "dock"):
+                    time.sleep(0.5)
                 self.command_fn = self.request_screenshot
             elif cmd == "wait":
                 self.command_timer += float(params[0])

@@ -1,8 +1,8 @@
 {
     "% of the amount.": "% của số tiền.",
-    "%d bits (%s bits/px)": "%d bit (%s bit/px)",
     "%d of %d multisig": "%d của %d đa chữ kí",
     "%d to %d": "%d đến %d",
+    "%s bits (%s bits/px)": "%s bit (%s bit/px)",
     "%s removed.": "%s Đã bỏ.",
     "(Experimental)": "(Thực nghiệm)",
     "(watch-only)": "(chỉ xem)",
