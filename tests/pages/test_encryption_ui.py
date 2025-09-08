@@ -843,6 +843,35 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     ctx.display.to_lines.assert_not_called()
 
 
+def test_decrypt_kef_with_fail_improbable(m5stickv, mocker):
+    from krux.pages.encryption_ui import decrypt_kef
+    from krux.input import BUTTON_PAGE_PREV
+
+    # if fail_improbable: avoids decryption if cipherpayload is ascii
+    false_kef = s = b"\x07not KEF\x05\x00\x00\x01I am NOT ciphertext"
+    ctx = create_ctx(mocker, [])
+    with pytest.raises(ValueError, match="Payload is ascii"):
+        decrypt_kef(ctx, false_kef, fail_improbable=True)
+    assert ctx.input.wait_for_button.call_count == 0
+
+    # ...also fails if less than 10% of payload bytes are above 0x7f
+    false_kef = false_kef[:-1] + b"\x80"
+    ctx = create_ctx(mocker, [])
+    with pytest.raises(ValueError, match="Distribution of payload hardly uniform"):
+        decrypt_kef(ctx, false_kef, fail_improbable=True)
+    assert ctx.input.wait_for_button.call_count == 0
+
+    # but will prompt "Decrypt?" if >10% of payload bytes are above 0x7f
+    false_kef = false_kef[:-2] + b"\x80\xff"
+    ctx = create_ctx(mocker, [BUTTON_PAGE_PREV])
+    with pytest.raises(ValueError, match="Not decrypted"):
+        decrypt_kef(ctx, false_kef, fail_improbable=True)
+    assert ctx.input.wait_for_button.call_count == 1
+    ctx.display.to_lines.assert_called_with(
+        "KEF Encrypted (19 B)\nID: not KEF\nVersion: AES-ECB\nPBKDF2 iter.: 10000\n\nDecrypt?"
+    )
+
+
 def test_prompt_for_text_update_dflt_via_yes(m5stickv, mocker):
     from krux.pages.encryption_ui import prompt_for_text_update
     from krux.input import BUTTON_ENTER

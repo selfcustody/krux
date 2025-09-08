@@ -935,7 +935,7 @@ def test_wrapper_interpretation_of_iterations(m5stickv):
     # mock values so that iterations will be at bytes[6:9]
     id_ = b"test"
     version = 0
-    ciphertext = bytes([x*8 for x in range(32)])
+    ciphertext = bytes([x * 8 for x in range(32)])
 
     # if (iterations % 10000 == 0) they are serialized divided by 10000
     for iterations in (ten_k, ten_k * 10, ten_k * 50, ten_k * ten_k):

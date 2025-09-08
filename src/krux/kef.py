@@ -502,15 +502,6 @@ def unwrap(kef_bytes):
             raise ValueError("Ciphertext is not aligned")
     if len(payload) < extra + 1:
         raise ValueError("Ciphertext is too short")
-    
-    # TODO: consider better probabilistic strategies to rule-out KEF identification
-    # cipher payload should appear random
-    if len(payload) > 32:
-        upper128 = len([x for x in payload if x > 127])
-        if upper128 == 0:
-            raise ValueError("Payload is ascii")
-        if upper128 < len(payload) * 0.001:
-            raise ValueError("Distribution of payload not uniform")
 
     return (id_, version, iterations, payload)
 

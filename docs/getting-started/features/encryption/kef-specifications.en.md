@@ -3,7 +3,7 @@
 ...`The K stands for "KEF"` --anon
 
 
-## Motivation
+## 1. Motivation
 
 In the autumn of 2023, during the lead-up to **krux release 23.09.0**, contributors proposed a method of encrypting bip39 mnemonics that could be stored in SPI-flash, on sdcard, and/or exported to QR. Regarding the encrypted-mnemonic QR format: the layout proposed was interesting as an extensible, lite-weight, self-describing envelope that has been appreciated by users ever since.
 
@@ -13,7 +13,7 @@ This specification, and its accompanying implementation and test-suite are the r
 
 Above all, this specification aims to be supported by as many projects as would consider adopting it, so that users are not "locked" into a particular project when recovering their secrets. Corrections and refinement to, and scrutiny of this specification are appreciated. Proposals for more `versions` are welcome, provided they offer "value" to the user and fit within the scope of this system. Once released, because it cannot be known how many KEF envelopes may exist in-the-wild, changes to any particular version must remain backwards compatible for decryption. Adopting implementations are free to support any KEF versions they wish to support, for decryption-only or for both encryption and decryption -- with the expectation that claims-of-support made are clear and precise about what is supported.
 
-## Overview
+## 2. Overview
 
 This system encrypts arbitrary plaintext into a versioned, self-describing, **KEF envelope** which includes:
 
@@ -54,7 +54,7 @@ Authentication has three forms:
     * if `auth` will be encrypted with plaintext, hidden, it is `sha256(plaintext)`
     * if `auth` will be appended to ciphertext, exposed, it is `sha256(version || IV || plaintext || derived-k)`
 
-## Generalizations Regarding Implementation
+## 3. Generalizations Regarding Implementation
 
 It is expected that any implementation can decrypt a KEF envelope that was created by itself on the same device. Implementations are asked to make their "best-effort" to be capable of decrypting KEF envelopes for versions they support which were created by other implementations or on other devices -- but this will not always be possible. Decrypting large KEF envelopes on severely constrained devices, or ones created with flawed implementations is unrealistic. Therefore, in such cases it is the responsibility of the user to find an implementation and device capable of decrypting their KEF envelope, or to have a non-KEF form of recovery.
 
@@ -75,66 +75,11 @@ It is expected that any implementation can decrypt a KEF envelope that was creat
 
 * **On modes that require IV or Nonce** Take precautions to ensure that this value is random and not reused. ie: Natural entropy captured from camera sensor (user validated and/or analyzed to ensure sensor is working / high entropy).
 
-* **On common `bytes` encodings** Outside the strict scope that **KEF envelopes are a format of bytes** but related to this topic: implementations may be presented with encoded strings that are likely to represent bytes. For instance: base64, base43 (from electrum), base32, or hex might be representations of a KEF envelope that was previously encoded for transport. As you continue reading, it will become clear that with any bytestring, one may recognize a KEF envelope by:
-    1. reading the first byte as an integer `len_id`,
-    2. jumping that many bytes, over the `id`, to read the next byte as an integer `version`,
-    3. if that version represents a known and supported KEF version, then the rest of the envelope may be parsed via that version's KEF rules.
-    4. if parsing succeeds without errors, it is likely to be a KEF envelope and a decryption user-interface should be offered to the user.
-    While the user likely knows, the process instance of a KEF implementation will learn definitively, only AFTER a successful decryption, that a bytestring was indeed a KEF envelope. If at any point along this process, an implementation finds that `version` is unknown/disabled, or if parsing fails, the expected action is NOT TO RAISE SPECIFIC ERRORS regarding this inspection. Rather, the appropriate action is to assume it was not a KEF envelope and to treat the data under another context: ie: "Unknown". Similarly, as mentioned above, being vague about errors during decryption implies that "Failed!" may be a sufficient response for any error, instead of leaking to a potential attacker specific details about the failure.
-
 * **On Iterations** Consider that users may want to decrypt KEF envelopes on various resource-constrained devices. There is a minimum 10,000 iterations imposed in any KEF envelope (a value of 1 would be 10,000 pbkdf2_hmac iterations), and the maximum could be as high as 100,000,000 (a value of 10,000), but depending on the device used, 500,000 might be too high. Also, since the user-supplied `key` is stretched by this value, consider offering a range to users -- then adding a small `delta` as extra bits of entropy to derive different AES-256 keys that would otherwise be the same in the event the user re-uses the same `key`, `id` and `iterations` when creating many KEF envelopes.
 
 * **On truncated Authentication** At first glance it may be concerning that `auth` bytes for many versions have been truncated and are trivially "weak". Note that KEF's use-case for authentication is to validate that the user has correctly entered their decryption `key`. In the worse case, "false-authenticated" success will occur at a rate of 1:16M (or 1:4B for others) if using an incorrect decryption `key`; similar if an attacker has modified the KEF envelope. In these "false-authenticated" success cases, data will result from decryption, but that data will NOT be the original secret or plaintext; it will be of no value.
 
-
-### On Identifying a KEF Envelope
-
-  As noted previously, only the owner of a KEF envelope, having the correct decryption key, can be certain that any string of bytes is indeed a KEF envelope.  Because "auth" bytes are truncated, even a KEF implementation that successfully parses and decrypts an envelope without errors may not know if the plaintext was the original secret or "useless" bytes which resulted in validated decryption under another key for the same truncated `auth` bytes.
-
-  This trait, whether deemed a desirable "feature" or an undesirable "bug" should be carefully considered by implementations that deal with KEF envelopes.  In particular, deciding "when" to offer a "Decrypt?" user-interface may be troublesome for larger byte-strings that can be confused as KEF envelopes. There are three obvious strategies to approach any datum in the context that it might be a KEF envelope:
-
-  * **Explicitely as KEF**: where the user has been offered to open a KEF envelope and then the data is loaded -- the application can parse and decrypt assuming that the data is a KEF envelope and would fail if something goes wrong in parsing or decryption.
-
-  * **Fall-back to KEF**: where the user has been offered to load data in a particular context -- the application can treat the data within context and if an error occurs, then fallback to checking if the data might be KEF, offer to "Decrypt?" and then treat the resulting plaintext in the original context.
-
-  * **KEF in Priority**: where the user has been offered to load data in a particular context -- the application can try to parse as a KEF envelope, offering to "Decrypt?" and treating the resulting plaintext in the original context, or if parsing fails (not KEF), treating the original data in context.
-
-NOTE: in the latter two strategies, each application may consider the context of data which is about to be loaded. If an application is expecting ascii or unicode data, it may be appropriate to use either one since ruling-out KEF could quickly be done via a successful decoding step. When the application is expecting to load binary data, then it is most likely a better strategy to use **Fall-back to KEF** whenever parsing data in context would fail early and efficiently, so that the loosely defined KEF envelope is parsed after plaintext parsing fails.
-
-In all above cases, because KEF is loosely defined, random byte-strings and even ascii or unicode byte-strings, may be mistaken as KEF envelopes. Probabilities for false-identification of a KEF evelope, and mitigation thereof will be discussed below.
-
-Because the first byte of a KEF envelope is the `len_id` byte -- defining the length of the user-defined ID (also the PBKDF2 salt), any byte value between 0 and 252 is valid(253, 254, and 255 are reserved for future use). There is a 252:256 probability, 98.44% that any byte-string will require further processing for KEF identification by jumping `len_id` +1 bytes to look for a valid `version` byte.
-
-Because there are currently 12 KEF versions, certainly more in the future, there is currently a 12:256 probability, or 4.69% chance that this byte-string will require further processing -- by parsing the rest of the envelope.
-
-Because iterations are the next 3 bytes and there is no explicit maximum limitation on the iterations value (besides what can fit in 3 bytes and what is reasonably useful on any particular device -- likely in the 100s of thousands) any values between 1 and 16M would be a valid KEF iterations value. An implementation, knowing that it runs on devices that can reasonably stretch a key no-more than 600K PBKDF2 iterations may decide that a byte-string with iterations values above that limit is NOT a KEF envelope worth further processing. Still, because KEF envelopes may be created or decrypted on various devices capable of higher PBKDF2 iterations, it is not recommended that an iterations maximum is used for ruling-out a KEF envelope (besides the invalid 0 iterations value); 100% of non-zero KEF iterations values are valid.
-
-Less than 5% percent of most byte-strings will require further processing to rule-out that they are KEF envelopes, and some that are not may still be identified as plausibly KEF, requiring to prompt the user to "Decrypt?". For block modes (ECB and CBC) the length of the ciphertext (apart from IV and `auth`) may be checked for alignment to 16 bytes, but for stream modes (GCM and CTR) only a minimum length may be checked (IV/Nonce + `auth` + at least 1 byte of ciphertext). Further Strategies for mitigating false-identification as a KEF envelope follow:
-
-Note in cases where processing has continued this far, that what remains of the remaining byte-string is the cipher payload. This field contains: the optional random IV or nonce, the AES ciphertext, and truncated auth bytes (either sha256 hash digest or internal MAC digest for mode GCM). These bytes should resemble a pseudo-random uniform distribution. It should be rare that they are ASCII or UTF-8 decodable; if so, vanishingly KEF-plausible as the size of the payload increases.
-
-Below, we'll consider decoding probabilities for the smallest of KEF payloads (for GCM and CTR) which may be no smaller than 17 bytes (12 bytes of random IV/nonce + 1 byte of ciphertext + 4 bytes of truncated auth), as well as larger payloads up to 32 bytes.
-
-ASCII and UTF-8 decodable for 1-Billion random samples
-
-| len_cpl |   Prob. ASCII |   Prob. UTF-8 |
-|---------|---------------|---------------|
-|     17  |   0.00075990% |   0.00532110% |
-|     18  |   0.00037160% |   0.00300620% |
-|     19  |   0.00018340% |   0.00168700% |
-|     20  |   0.00008920% |   0.00094590% |
-|     21  |   0.00004550% |   0.00053940% |
-|     22  |   0.00002030% |   0.00029950% |
-|     23  |   0.00001010% |   0.00017110% |
-|     24  |   0.00000460% |   0.00009360% |
-|     25  |   0.00000210% |   0.00005190% |
-|     26  |   0.00000090% |   0.00002860% |
-|     27  |   0.00000050% |   0.00001530% |
-|     28  |   0.00000050% |   0.00001020% |
-|     29  |   0.00000040% |   0.00000580% |
-|     30  |   0.00000010% |   0.00000320% |
-|     31  |   0.00000000% |   0.00000160% |
-|     32  |   0.00000000% |   0.00000100% |
+* **On common `bytes` encodings** KEF does not explicitely define how a KEF envelope is encoded for storage or transport, however each implementation will need to deal with encodings. This topic is further discussed below in the section **On Identifying a KEF envelope**.
 
 ---
 
@@ -470,7 +415,7 @@ k: pbkdf2_hmac_sha256(K, id, i)
 
 ---
 
-#### Summary Table
+## 5. KEF Versions Summary Table
 
 | Ver | Name       | Mode | IV | Padding | Compress | Authentication Method  | Auth        | Intended Use Case       |
 |-----|------------|------|----|---------|----------|------------------------|-------------|-------------------------|
@@ -489,7 +434,7 @@ k: pbkdf2_hmac_sha256(K, id, i)
 
 ---
 
-## KEF Implementation Concepts
+## 6. KEF Implementation Concepts
 
 Using examples from, and as an introduction to the reference [KEF implementation](https://github.com/selfcustody/krux/blob/develop/src/krux/kef.py), we'll quickly cover some basic concepts that may be helpful in getting started with your own KEF implementation.
 
@@ -514,3 +459,61 @@ After encryption, you'll need to **wrap** the `id`, `version`, `iterations` and 
 ### On Further Encoding KEF Envelopes
 Outside the scope of this specification on KEF envelopes, which are strings of bytes, implementations will surely need to make choices about encoding/decoding schemes. Whether for QR transport, copy-pasting into messages, embedding into json documents, in-plain-sight within other document formats, or persisted in binary files, these choices are left to implementors.
 
+
+## 7. On Identifying a KEF Envelope
+
+Outside the strict scope that **KEF envelopes are a format of bytes** but related to this topic: implementations may be presented with encoded strings that are likely to represent bytes. For instance: base64, base43 (from electrum), base32, or hex might be representations of a KEF envelope that was previously encoded for transport. As you continue reading, it will become clear that with any bytestring, one may recognize a KEF envelope by:
+
+1. reading the first byte as an integer `len_id`,
+2. jumping that many bytes, over the `id`, to read the next byte as an integer `version`,
+3. if that version represents a known and supported KEF version, then the rest of the envelope may be parsed via that version's KEF rules.
+4. if parsing succeeds without errors, it is likely to be a KEF envelope and a decryption user-interface should be offered to the user.
+
+    While the user likely knows, the process instance of a KEF implementation will learn definitively -- only AFTER a successful decryption, that a bytestring was likely a KEF envelope. If at any point along this process, an implementation finds that `version` is unknown/disabled, or if parsing fails, the expected action is NOT TO RAISE SPECIFIC ERRORS regarding this inspection. Rather, the appropriate action is to assume it was not a KEF envelope and to treat the data under another context: ie: "Unknown". Similarly, as mentioned previously, being vague about errors during decryption implies that "Failed!" may be a sufficient response for any error, instead of leaking to a potential attacker specific details about the failure.
+
+Because "auth" bytes are truncated, even a KEF implementation that successfully parses and decrypts an envelope without errors may not know if the plaintext was the original secret or "useless" bytes which resulted in validated decryption under another key for the same truncated `auth` bytes. The most valuable "authentication" of a KEF envelope often exists outside of KEF, because the decrypted secret is of some value ot the owner: ie: a mnemonic, or passphrase, or descriptor which recovers their wallet.
+
+This trait, whether deemed a desirable "feature" or an undesirable "bug" should be carefully considered by implementations that deal with KEF envelopes. In particular, deciding "when" to offer a "Decrypt?" user-interface may be troublesome for larger byte-strings that can be confused as KEF envelopes. There are three obvious strategies to approach any datum in the context that it might be a KEF envelope:
+
+* **Explicitely as KEF**: where the user has been offered to open a KEF envelope and then the data is loaded -- the application can parse and decrypt assuming that the data is a KEF envelope and would fail if something goes wrong in parsing or decryption.
+
+* **Fall-back to KEF**: where the user has been offered to load data in a particular context -- the application can treat the data within context and if an error occurs, then fallback to checking if the data might be KEF, offer to "Decrypt?" and then treat the resulting plaintext in the original context.
+
+* **KEF in Priority**: where the user has been offered to load data in a particular context -- the application can try to parse as a KEF envelope, offering to "Decrypt?" and treating the resulting plaintext in the original context, or if parsing fails (not KEF), treating the original data in context.
+
+NOTE: in the latter two strategies, each application may consider the context of data which is about to be loaded. If an application is expecting ascii or unicode data, it may be appropriate to use either one since ruling-out KEF could quickly be done via a successful decoding step. When the application is expecting to load binary data, then it is most likely a better strategy to use **Fall-back to KEF** whenever parsing data in context would fail early and efficiently, so that the loosely defined KEF envelope is parsed after plaintext parsing fails.
+
+In all above cases, because KEF is loosely defined, random byte-strings and even ascii or unicode byte-strings, may be mistaken as KEF envelopes. Probabilities for false-identification of a KEF envelope, and mitigation thereof will be discussed below.
+
+Because the first byte of a KEF envelope is the `len_id` byte -- defining the length of the user-defined ID (also the PBKDF2 salt), any byte value between 0 and 252 is valid(253, 254, and 255 are reserved for future use). There is a 252:256 probability, 98.44% that any byte-string will require further processing for KEF identification by jumping `len_id` +1 bytes to look for a valid `version` byte.
+
+Because there are currently 12 KEF versions, certainly more in the future, there is currently a 12:256 probability, or 4.69% chance that this byte-string will require further processing -- by parsing the rest of the envelope.
+
+Because iterations are the next 3 bytes and there is no explicit maximum limitation on the iterations value (besides what can fit in 3 bytes and what is reasonably useful on any particular device -- likely in the 100s of thousands) any values between 1 and 16M would be a valid KEF iterations value. An implementation, knowing that it runs on devices that can reasonably stretch a key no-more than 600K PBKDF2 iterations may decide that a byte-string with iterations values above that limit is NOT a KEF envelope worth further processing. Still, because KEF envelopes may be created or decrypted on various devices capable of higher PBKDF2 iterations, it is not recommended that an iterations maximum is used for ruling-out a KEF envelope (besides the invalid 0 iterations value); 100% of non-zero KEF iterations values are valid.
+
+Less than 5% percent of most byte-strings will require further processing to rule-out that they are KEF envelopes, and some that are not may still be identified as plausibly KEF, requiring to prompt the user to "Decrypt?". For block modes (ECB and CBC) the length of the ciphertext (apart from IV and `auth`) may be checked for alignment to 16 bytes, but for stream modes (GCM and CTR) only a minimum length may be checked (IV/Nonce + `auth` + at least 1 byte of ciphertext). Further Strategies for mitigating false-identification as a KEF envelope follow:
+
+Note in cases where processing has continued this far, that what remains of the remaining byte-string is the cipher payload. This field contains: the optional random IV or nonce, the AES ciphertext, and truncated auth bytes (either sha256 hash digest or internal MAC digest for mode GCM). These bytes should resemble a pseudo-random uniform distribution. It should be rare that they are ASCII or UTF-8 decodable; if so, vanishingly KEF-plausible as the size of the payload increases.
+
+Below, we'll consider decoding probabilities for the smallest of KEF payloads (for GCM and CTR) which may be no smaller than 17 bytes (12 bytes of random IV/nonce + 1 byte of ciphertext + 4 bytes of truncated auth), as well as larger payloads up to 32 bytes.
+
+ASCII and UTF-8 decodable for 1-Billion random samples
+
+| len_cpl |   Prob. ASCII |   Prob. UTF-8 |
+|---------|---------------|---------------|
+|     17  |   0.00075990% |   0.00532110% |
+|     18  |   0.00037160% |   0.00300620% |
+|     19  |   0.00018340% |   0.00168700% |
+|     20  |   0.00008920% |   0.00094590% |
+|     21  |   0.00004550% |   0.00053940% |
+|     22  |   0.00002030% |   0.00029950% |
+|     23  |   0.00001010% |   0.00017110% |
+|     24  |   0.00000460% |   0.00009360% |
+|     25  |   0.00000210% |   0.00005190% |
+|     26  |   0.00000090% |   0.00002860% |
+|     27  |   0.00000050% |   0.00001530% |
+|     28  |   0.00000050% |   0.00001020% |
+|     29  |   0.00000040% |   0.00000580% |
+|     30  |   0.00000010% |   0.00000320% |
+|     31  |   0.00000000% |   0.00000160% |
+|     32  |   0.00000000% |   0.00000100% |
