@@ -127,13 +127,18 @@ class Addresses(Page):
             submenu = Menu(self.ctx, items)
             stay_on_this_addr_menu = True
             while stay_on_this_addr_menu:
-                index, _ = submenu.run_loop()
+                next_index = len(submenu.menu) - 2
+                prev_index = 0 if address_index > max_addresses else -1
+                index, _ = submenu.run_loop(
+                    swipe_up_fnc=lambda: (next_index, MENU_EXIT),
+                    swipe_down_fnc=lambda: (prev_index, MENU_EXIT),
+                )
 
                 if index == submenu.back_index:  # Back
                     del submenu, items
                     gc.collect()
                     return MENU_CONTINUE
-                if index == len(submenu.menu) - 2:  # Next
+                if index == next_index:  # Next
                     stay_on_this_addr_menu = False
                 if index == 0 and address_index > max_addresses:  # Prev
                     stay_on_this_addr_menu = False

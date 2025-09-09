@@ -1,5 +1,8 @@
 # Changelog 25.XX.X - XXX 2025
 
+### Button Turbo
+Hold the NEXT or PREVIOUS button to move faster through menus and screens.
+
 ### 2x Faster TC Flash Hash
 SHA-256 and PBKDF2-HMAC now leverage hardware-accelerated hashing, doubling the execution speed of TC Flash.
 
@@ -52,6 +55,7 @@ We added support for BIP45 (Legacy multisig `P2SH`) and complete BIP48 (Nested-S
 - Passphrase and key now display their length after entry to reduce user mistakes.
 - Saving encrypted mnemonic now prompts whether to use the fingerprint as ID.
 - Optimized device's board value checks.
+- Ellipsis now use a single character to save text space.
 - Added QR Code to About screen.
 - Fixed camera zoom mode clearing the QR codes progress bar.
 - Fixed camera not rotating on Yahboom or WonderMV with flipped orientation.

@@ -49,6 +49,8 @@ from ..input import (
     BUTTON_PAGE_PREV,
     SWIPE_RIGHT,
     SWIPE_DOWN,
+    KEY_REPEAT_DELAY_MS,
+    PRESSED,
 )
 
 DATUM_DESCRIPTOR = "DESC"
@@ -577,6 +579,7 @@ class DatumTool(Page):
         from ..settings import THIN_SPACE
         from ..kboard import kboard
         import math
+        import time
 
         page_indicator = "p" + THIN_SPACE + "%d/%s"
         max_lines = 0
@@ -615,7 +618,14 @@ class DatumTool(Page):
                 self.ctx.display.draw_string(offset_x, offset_y, line)
                 offset_y += FONT_HEIGHT
 
-            btn = self.ctx.input.wait_for_button()
+            if self.ctx.input.page_value() == PRESSED:
+                btn = FAST_FORWARD
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            elif self.ctx.input.page_prev_value() == PRESSED:
+                btn = FAST_BACKWARD
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            else:
+                btn = self.ctx.input.wait_for_button()
             if btn in (BUTTON_PAGE, FAST_FORWARD, SWIPE_UP, SWIPE_LEFT):
                 curr_page = (curr_page + 1) % last_page
             elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD, SWIPE_DOWN, SWIPE_RIGHT):

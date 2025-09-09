@@ -26,9 +26,19 @@ from . import Page, ESC_KEY, LETTERS
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT
 from ..krux_settings import t
 from ..themes import theme
-from ..input import BUTTON_TOUCH, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+from ..input import (
+    BUTTON_TOUCH,
+    BUTTON_ENTER,
+    BUTTON_PAGE,
+    BUTTON_PAGE_PREV,
+    FAST_FORWARD,
+    FAST_BACKWARD,
+    PRESSED,
+    KEY_REPEAT_DELAY_MS,
+)
 from ..key import Key
 from ..kboard import kboard
+import time
 
 GO_INDEX = 25
 ESC_INDEX = 24
@@ -290,7 +300,14 @@ class MnemonicEditor(Page):
             self.ctx.display.clear()
             self._draw_header()
             self._map_words(button_index, page)
-            btn = self.ctx.input.wait_for_button()
+            if self.ctx.input.page_value() == PRESSED:
+                btn = FAST_FORWARD
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            elif self.ctx.input.page_prev_value() == PRESSED:
+                btn = FAST_BACKWARD
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            else:
+                btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
                 button_index = self.ctx.input.touch.current_index()
                 if button_index < ESC_INDEX:
@@ -324,7 +341,7 @@ class MnemonicEditor(Page):
                     ):
                         self.current_mnemonic[button_index + page * 12] = new_word
                         self.calculate_checksum()
-            elif btn == BUTTON_PAGE:
+            elif btn in (BUTTON_PAGE, FAST_FORWARD):
                 button_index += 1
                 if (
                     kboard.is_m5stickv
@@ -333,7 +350,7 @@ class MnemonicEditor(Page):
                 ) or (self.mnemonic_length == 12 and button_index == 12):
                     button_index += 12
                 button_index %= 26
-            elif btn == BUTTON_PAGE_PREV:
+            elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD):
                 button_index -= 1
                 if (
                     kboard.is_m5stickv

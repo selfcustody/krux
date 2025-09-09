@@ -33,9 +33,13 @@ from ..input import (
     BUTTON_TOUCH,
     SWIPE_DOWN,
     SWIPE_UP,
+    FAST_FORWARD,
+    FAST_BACKWARD,
     SWIPE_LEFT,
     SWIPE_RIGHT,
     ONE_MINUTE,
+    PRESSED,
+    KEY_REPEAT_DELAY_MS,
 )
 from ..display import (
     DEFAULT_PADDING,
@@ -541,10 +545,10 @@ class Page:
                 go_esc_y_offset - FONT_HEIGHT // 2,
                 self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
                 FONT_HEIGHT + FONT_HEIGHT,
-                theme.error_color,
+                theme.no_esc_color,
             )
         self.ctx.display.draw_string(
-            esc_x_offset, go_esc_y_offset, esc_txt, theme.error_color
+            esc_x_offset, go_esc_y_offset, esc_txt, theme.no_esc_color
         )
         if menu_index == 1 and self.ctx.input.buttons_active:
             self.ctx.display.outline(
@@ -653,7 +657,57 @@ class Menu:
 
         ScreenSaver(self.ctx).start()
 
-    def run_loop(self, start_from_index=None):
+    def _get_btn_input(self):
+        if self.ctx.input.page_value() == PRESSED:
+            time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            return FAST_FORWARD
+        if self.ctx.input.page_prev_value() == PRESSED:
+            time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            return FAST_BACKWARD
+        return self.ctx.input.wait_for_button(
+            # Block if screen saver not active
+            block=Settings().appearance.screensaver_time == 0,
+            wait_duration=Settings().appearance.screensaver_time * ONE_MINUTE,
+        )
+
+    def _process_page(self, selected_item_index):
+        selected_item_index = (selected_item_index + 1) % len(self.menu_view)
+        if selected_item_index == 0:
+            self.menu_view.move_forward()
+        return selected_item_index
+
+    def _move_back(self):
+        self.menu_view.move_backward()
+        # Update selected item index to be the last viewable item,
+        # which may be a different index than before we moved backward
+        return len(self.menu_view) - 1
+
+    def _process_page_prev(self, selected_item_index):
+        selected_item_index = (selected_item_index - 1) % len(self.menu_view)
+        if selected_item_index == len(self.menu_view) - 1:
+            selected_item_index = self._move_back()
+        return selected_item_index
+
+    def _process_swipe_up(self, selected_item_index, swipe_up_fnc=None):
+        if swipe_up_fnc:
+            index, status = swipe_up_fnc()
+            if status != MENU_CONTINUE:
+                return (index, status)
+        else:
+            selected_item_index = 0
+            self.menu_view.move_forward()
+        return selected_item_index
+
+    def _process_swipe_down(self, selected_item_index, swipe_down_fnc=None):
+        if swipe_down_fnc:
+            index, status = swipe_down_fnc()
+            if status != MENU_CONTINUE:
+                return (index, status)
+        else:
+            selected_item_index = self._move_back()
+        return selected_item_index
+
+    def run_loop(self, start_from_index=None, swipe_up_fnc=None, swipe_down_fnc=None):
         """Runs the menu loop until one of the menu items returns either a MENU_EXIT
         or MENU_SHUTDOWN status
         """
@@ -687,11 +741,7 @@ class Menu:
                     return (self.menu_view.index(selected_item_index), status)
                 start_from_submenu = False
             else:
-                btn = self.ctx.input.wait_for_button(
-                    # Block if screen saver not active
-                    block=Settings().appearance.screensaver_time == 0,
-                    wait_duration=Settings().appearance.screensaver_time * ONE_MINUTE,
-                )
+                btn = self._get_btn_input()
                 if self.ctx.input.touch is not None:
                     if btn == BUTTON_TOUCH:
                         selected_item_index = self.ctx.input.touch.current_index()
@@ -701,29 +751,21 @@ class Menu:
                     status = self._clicked_item(selected_item_index)
                     if status != MENU_CONTINUE:
                         return (self.menu_view.index(selected_item_index), status)
-                elif btn == BUTTON_PAGE:
-                    selected_item_index = (selected_item_index + 1) % len(
-                        self.menu_view
-                    )
-                    if selected_item_index == 0:
-                        self.menu_view.move_forward()
-                elif btn == BUTTON_PAGE_PREV:
-                    selected_item_index = (selected_item_index - 1) % len(
-                        self.menu_view
-                    )
-                    if selected_item_index == len(self.menu_view) - 1:
-                        self.menu_view.move_backward()
-                        # Update selected item index to be the last viewable item,
-                        # which may be a different index than before we moved backward
-                        selected_item_index = len(self.menu_view) - 1
-                elif btn == SWIPE_UP:
-                    selected_item_index = 0
-                    self.menu_view.move_forward()
-                elif btn == SWIPE_DOWN:
-                    self.menu_view.move_backward()
-                    # Update selected item index to be the last viewable item,
-                    # which may be a different index than before we moved backward
-                    selected_item_index = len(self.menu_view) - 1
+                elif btn in (BUTTON_PAGE, FAST_FORWARD):
+                    selected_item_index = self._process_page(selected_item_index)
+                elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD):
+                    selected_item_index = self._process_page_prev(selected_item_index)
+                elif btn in (SWIPE_UP, SWIPE_DOWN):
+                    if btn == SWIPE_UP:
+                        selected_item_index = self._process_swipe_up(
+                            selected_item_index, swipe_up_fnc
+                        )
+                    else:
+                        selected_item_index = self._process_swipe_down(
+                            selected_item_index, swipe_down_fnc
+                        )
+                    if isinstance(selected_item_index, tuple):
+                        return selected_item_index
                 elif btn is None and self.menu_offset == STATUS_BAR_HEIGHT:
                     # Activates screensaver if there's no info_box(other things draw on the screen)
                     self.screensaver()
