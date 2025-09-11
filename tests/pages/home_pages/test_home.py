@@ -12,7 +12,9 @@ def tdata(mocker):
 
     from krux.key import (
         P2PKH,
+        P2SH,
         P2SH_P2WPKH,
+        P2SH_P2WSH,
         P2WSH,
         P2TR,
         TYPE_MINISCRIPT,
@@ -52,6 +54,13 @@ def tdata(mocker):
         account_index=1,
         script_type=P2PKH,
     )
+    LEGACY1_MULTISIG_KEY = Key(
+        TEST_12_WORD_MNEMONIC,
+        TYPE_MULTISIG,
+        NETWORKS["main"],
+        account_index=None,
+        script_type=P2SH,
+    )
     NESTEDSW1_KEY = Key(
         TEST_12_WORD_MNEMONIC,
         TYPE_SINGLESIG,
@@ -59,22 +68,35 @@ def tdata(mocker):
         account_index=1,
         script_type=P2SH_P2WPKH,
     )
+    NESTEDSW1_MULTISIG_KEY = Key(
+        TEST_12_WORD_MNEMONIC,
+        TYPE_MULTISIG,
+        NETWORKS["main"],
+        account_index=1,
+        script_type=P2SH_P2WSH,
+    )
+
     NATIVESW1_KEY = Key(
         TEST_12_WORD_MNEMONIC,
         TYPE_SINGLESIG,
         NETWORKS["main"],
         account_index=1,
     )
-    MINISCRIPT_SINGLE_INHERITANCE_KEY_P2WSH_144_BLOCKS = Key(
+
+    TAPROOT1_KEY = Key(
+        TEST_12_WORD_MNEMONIC,
+        TYPE_SINGLESIG,
+        NETWORKS["main"],
+        account_index=1,
+        script_type=P2TR,
+    )
+
+    MINISCRIPT_NATIVESW1_KEY = Key(
         TEST_12_WORD_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["main"]
     )
 
-    MINISCRIPT_EXPANDING_MULTISIG_KEY_P2WSH_144_BLOCKS = Key(
-        TEST_12_WORD_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["main"]
-    )
-
-    MINISCRIPT_3_KEY_JOINT_CUSTODY_KEY = Key(
-        TEST_12_WORD_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["main"]
+    MINISCRIPT_TAPROOT1_KEY = Key(
+        TEST_12_WORD_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["main"], script_type=P2TR
     )
 
     VAGUE_LEGACY1_XPUB = "xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE"
@@ -123,11 +145,13 @@ def tdata(mocker):
             "SINGLESIG_ACTION_KEY_TEST",
             "SINGLESIG_ACTION_KEY_TEST_P2WPKH",
             "LEGACY1_KEY",
+            "LEGACY1_MULTISIG_KEY",
             "NESTEDSW1_KEY",
+            "NESTEDSW1_MULTISIG_KEY",
             "NATIVESW1_KEY",
-            "MINISCRIPT_SINGLE_INHERITANCE_KEY_P2WSH_144_BLOCKS",
-            "MINISCRIPT_EXPANDING_MULTISIG_KEY_P2WSH_144_BLOCKS",
-            "MINISCRIPT_3_KEY_JOINT_CUSTODY_KEY",
+            "TAPROOT1_KEY",
+            "MINISCRIPT_NATIVESW1_KEY",
+            "MINISCRIPT_TAPROOT1_KEY",
             "VAGUE_LEGACY1_XPUB",
             "VAGUE_NESTEDSW1_YPUB",
             "VAGUE_NATIVESW1_ZPUB",
@@ -166,11 +190,13 @@ def tdata(mocker):
         SINGLESIG_ACTION_KEY_TEST,
         SINGLESIG_ACTION_KEY_TEST_P2WPKH,
         LEGACY1_KEY,
+        LEGACY1_MULTISIG_KEY,
         NESTEDSW1_KEY,
+        NESTEDSW1_MULTISIG_KEY,
         NATIVESW1_KEY,
-        MINISCRIPT_SINGLE_INHERITANCE_KEY_P2WSH_144_BLOCKS,
-        MINISCRIPT_EXPANDING_MULTISIG_KEY_P2WSH_144_BLOCKS,
-        MINISCRIPT_3_KEY_JOINT_CUSTODY_KEY,
+        TAPROOT1_KEY,
+        MINISCRIPT_NATIVESW1_KEY,
+        MINISCRIPT_TAPROOT1_KEY,
         VAGUE_LEGACY1_XPUB,
         VAGUE_NESTEDSW1_YPUB,
         VAGUE_NATIVESW1_ZPUB,

@@ -802,10 +802,10 @@ def test_list_receive_addresses(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Leave
             ],
         ),
-        # 5 - Miniscript (single inheritance), no descriptor, unloaded,
+        # 5 - Miniscript segwit v0, no descriptor, unloaded,
         # receive addr, No print prompt, flash error
         (
-            tdata.MINISCRIPT_SINGLE_INHERITANCE_KEY_P2WSH_144_BLOCKS,
+            tdata.MINISCRIPT_NATIVESW1_KEY,
             None,
             False,
             0,
@@ -814,10 +814,10 @@ def test_list_receive_addresses(mocker, m5stickv, tdata):
             None,
             [],  # since it will flash an error, no buttons will be pressed
         ),
-        # 6 - Miniscript (single inheritance), descriptor, loaded,
+        # 6 - Miniscript segwit v0, single inheritance, descriptor, loaded,
         # receive address, No print prompt, show address nº1
         (
-            tdata.MINISCRIPT_SINGLE_INHERITANCE_KEY_P2WSH_144_BLOCKS,
+            tdata.MINISCRIPT_NATIVESW1_KEY,
             tdata.SPECTER_MINISCRIPT_SINGLE_INHERITANCE_WALLET_DATA,
             True,
             0,
@@ -836,22 +836,10 @@ def test_list_receive_addresses(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Leave
             ],
         ),
-        # 7 - Minscript (expanded multisig), no descriptor, unloaded,
-        # receive address, No print prompt, flash error
-        (
-            tdata.MINISCRIPT_EXPANDING_MULTISIG_KEY_P2WSH_144_BLOCKS,
-            None,
-            False,
-            0,
-            "flash_error",
-            "Please load a wallet output descriptor",
-            None,
-            [],  # since it will flash an error, no buttons will be pressed
-        ),
-        # 8 - Minscript (expanded multisig), descriptor, loaded,
+        # 7 - Miniscript segwit v0 expanded multisig, descriptor, loaded,
         # receive address, No print prompt, show address nº1
         (
-            tdata.MINISCRIPT_EXPANDING_MULTISIG_KEY_P2WSH_144_BLOCKS,
+            tdata.MINISCRIPT_NATIVESW1_KEY,
             tdata.SPECTER_MINISCRIPT_EXPANDING_MULTISIG_WALLET_DATA,
             True,
             0,
@@ -870,22 +858,10 @@ def test_list_receive_addresses(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Leave
             ],
         ),
-        # 9 - Miniscript (3 joint keys), no descriptor, unloaded,
-        # receive address, No print prompt, flash error
-        (
-            tdata.MINISCRIPT_3_KEY_JOINT_CUSTODY_KEY,
-            None,
-            False,
-            0,
-            "flash_error",
-            "Please load a wallet output descriptor",
-            None,
-            [],  # since it will flash an error, no buttons will be pressed
-        ),
-        # 10 - Miniscript (3 joint keys), descriptor, loaded,
+        # 8 - Miniscript segwit v0 3 joint keys, descriptor, loaded,
         # receive address, No print prompt, show address nº1
         (
-            tdata.MINISCRIPT_3_KEY_JOINT_CUSTODY_KEY,
+            tdata.MINISCRIPT_NATIVESW1_KEY,
             tdata.SPECTER_MINISCRIPT_3_KEY_JOINT_CUSTODY_WALLET_DATA,
             True,
             0,
@@ -1045,7 +1021,7 @@ def test_list_change_addresses(mocker, m5stickv, tdata):
         # 5 - Miniscript (single inheritance), no descriptor, unloaded,
         # change addr, No print prompt, flash error
         (
-            tdata.MINISCRIPT_SINGLE_INHERITANCE_KEY_P2WSH_144_BLOCKS,
+            tdata.MINISCRIPT_NATIVESW1_KEY,
             None,
             False,
             1,
@@ -1054,10 +1030,10 @@ def test_list_change_addresses(mocker, m5stickv, tdata):
             None,
             [],  # since it will flash an error, no buttons will be pressed
         ),
-        # 6 - Miniscript (single inheritance), descriptor, loaded,
+        # 6 - Miniscript segwit v0 single inheritance, descriptor, loaded,
         # change address, No print prompt, show address nº1
         (
-            tdata.MINISCRIPT_SINGLE_INHERITANCE_KEY_P2WSH_144_BLOCKS,
+            tdata.MINISCRIPT_NATIVESW1_KEY,
             tdata.SPECTER_MINISCRIPT_SINGLE_INHERITANCE_WALLET_DATA,
             True,
             1,
@@ -1076,22 +1052,10 @@ def test_list_change_addresses(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Leave
             ],
         ),
-        # 7 - Minscript (expanded multisig), no descriptor, unloaded,
+        # 7 - Miniscript segwit v0 expanded multisig, descriptor, loaded,
         # change address, No print prompt, show address nº1
         (
-            tdata.MINISCRIPT_EXPANDING_MULTISIG_KEY_P2WSH_144_BLOCKS,
-            None,
-            False,
-            1,
-            "flash_error",
-            "Please load a wallet output descriptor",
-            None,
-            [],  # since it will flash an error, no buttons will be pressed
-        ),
-        # 8 - Minscript (expanded multisig), descriptor, loaded,
-        # change address, No print prompt, show address nº1
-        (
-            tdata.MINISCRIPT_EXPANDING_MULTISIG_KEY_P2WSH_144_BLOCKS,
+            tdata.MINISCRIPT_NATIVESW1_KEY,
             tdata.SPECTER_MINISCRIPT_EXPANDING_MULTISIG_WALLET_DATA,
             True,
             1,
@@ -1110,22 +1074,10 @@ def test_list_change_addresses(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Leave
             ],
         ),
-        # 9 - Miniscript (3 joint keys), no descriptor, unloaded,
-        # change address, No print prompt, flash error
-        (
-            tdata.MINISCRIPT_3_KEY_JOINT_CUSTODY_KEY,
-            None,
-            False,
-            1,
-            "flash_error",
-            "Please load a wallet output descriptor",
-            None,
-            [],  # since it will flash an error, no buttons will be pressed
-        ),
-        # 10 - Miniscript (3 joint keys), descriptor, loaded,
+        # 8 - Miniscript segwit v0 3 joint keys, descriptor, loaded,
         # change address, No print prompt, show address nº1
         (
-            tdata.MINISCRIPT_3_KEY_JOINT_CUSTODY_KEY,
+            tdata.MINISCRIPT_NATIVESW1_KEY,
             tdata.SPECTER_MINISCRIPT_3_KEY_JOINT_CUSTODY_WALLET_DATA,
             True,
             1,
