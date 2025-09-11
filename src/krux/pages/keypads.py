@@ -34,6 +34,7 @@ from ..input import (
     FAST_FORWARD,
     FAST_BACKWARD,
     PRESSED,
+    KEY_REPEAT_DELAY_MS,
 )
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
 
@@ -283,14 +284,14 @@ class Keypad:
                 self.get_valid_index()
                 self._clean_keypad_area()
                 self.draw_keys()
-                time.sleep_ms(100)
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
         elif btn == FAST_BACKWARD:
             while self.ctx.input.page_prev_value() == PRESSED:
                 self._previous_key()
                 self.get_valid_index()
                 self._clean_keypad_area()
                 self.draw_keys()
-                time.sleep_ms(100)
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
 
     def _clean_keypad_area(self):
         self.ctx.display.fill_rectangle(

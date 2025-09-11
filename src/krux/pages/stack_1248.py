@@ -30,8 +30,13 @@ from ..input import (
     BUTTON_PAGE,
     BUTTON_PAGE_PREV,
     BUTTON_TOUCH,
+    FAST_FORWARD,
+    FAST_BACKWARD,
+    PRESSED,
+    KEY_REPEAT_DELAY_MS,
 )
 from ..kboard import kboard
+import time
 
 STACKBIT_GO_INDEX = 38
 STACKBIT_ESC_INDEX = 35
@@ -275,12 +280,15 @@ class Stackbit(Page):
         y_position = index // 7
         y_position *= self.y_pad
         y_position += self.y_offset - 1
+        color = theme.fg_color
         if index >= STACKBIT_GO_INDEX:
             x_position = x_offset + 3 * self.x_pad
             y_position += 1
+            color = theme.go_color
         elif index >= STACKBIT_ESC_INDEX:
             x_position = x_offset
             y_position += 1
+            color = theme.no_esc_color
         else:
             x_position = index % 7
             x_position *= self.x_pad
@@ -291,7 +299,7 @@ class Stackbit(Page):
             y_position,
             width,
             self.y_pad,
-            theme.fg_color,
+            color,
         )
 
     def _draw_menu(self):
@@ -303,13 +311,13 @@ class Stackbit(Page):
             x_offset + 1 * self.x_pad,
             y_offset + label_y_offset,
             t("Esc"),
-            theme.fg_color,
+            theme.no_esc_color,
         )
         self.ctx.display.draw_string(
             round(x_offset + 4.2 * self.x_pad),
             y_offset + label_y_offset,
             t("Go"),
-            theme.fg_color,
+            theme.go_color,
         )
         # print border around buttons only on touch devices
         if self.ctx.input.touch is not None:
@@ -374,7 +382,7 @@ class Stackbit(Page):
         """Calculates new index according to button press"""
         page_move = [7, 2, 8, 4, 10, 6, 12, 1, 9, 3, 11, 5, 13]
         page_prev_move = [STACKBIT_GO_INDEX, 7, 1, 9, 3, 11, 5, 0, 2, 8, 4, 10, 6, 12]
-        if btn == BUTTON_PAGE:
+        if btn in (BUTTON_PAGE, FAST_FORWARD):
             if index >= STACKBIT_GO_INDEX:
                 return 0
             if index >= STACKBIT_ESC_INDEX:
@@ -382,7 +390,7 @@ class Stackbit(Page):
             if index >= STACKBIT_MAX_INDEX:
                 return STACKBIT_ESC_INDEX
             return page_move[index]
-        if btn == BUTTON_PAGE_PREV:
+        if btn in (BUTTON_PAGE_PREV, FAST_BACKWARD):
             if index <= 0:
                 return STACKBIT_GO_INDEX
             if index <= STACKBIT_MAX_INDEX:
@@ -418,7 +426,14 @@ class Stackbit(Page):
                 self._draw_index(index)
             self.preview_word(digits)
             self._draw_punched(digits, y_offset)
-            btn = self.ctx.input.wait_for_button()
+            if self.ctx.input.page_value() == PRESSED:
+                btn = FAST_FORWARD
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            elif self.ctx.input.page_prev_value() == PRESSED:
+                btn = FAST_BACKWARD
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            else:
+                btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
                 btn = BUTTON_ENTER
                 index = self.ctx.input.touch.current_index()

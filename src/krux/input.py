@@ -46,6 +46,7 @@ BUTTON_RELEASE_FILTER = 10 if kboard.need_release_filter else 1
 
 QR_ANIM_PERIOD = 300  # milliseconds
 LONG_PRESS_PERIOD = 1000  # milliseconds
+KEY_REPEAT_DELAY_MS = 100
 
 BUTTON_WAIT_PRESS_DELAY = 10
 ONE_MINUTE = 60000
@@ -270,6 +271,8 @@ class Input:
                     release_filter -= 1
                 self.wdt_feed_inc_entropy()
                 if time.ticks_ms() > press_start_time + LONG_PRESS_PERIOD:
+                    if not self.buttons_active:
+                        self.buttons_active = True
                     return _map_long_press(btn)
                 time.sleep_ms(BUTTON_WAIT_PRESS_DELAY)
 

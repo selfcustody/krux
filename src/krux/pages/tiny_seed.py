@@ -36,7 +36,16 @@ from ..display import (
     FONT_WIDTH,
 )
 from ..camera import BINARY_GRID_MODE
-from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+from ..input import (
+    BUTTON_ENTER,
+    BUTTON_PAGE,
+    BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
+    FAST_FORWARD,
+    FAST_BACKWARD,
+    PRESSED,
+    KEY_REPEAT_DELAY_MS,
+)
 from ..bip39 import entropy_checksum
 from ..kboard import kboard
 
@@ -310,7 +319,7 @@ class TinySeed(Page):
                 return TS_LAST_BIT_NO_CS if page == 0 else TS_LAST_BIT_24W_CS
             return TS_LAST_BIT_12W_CS
 
-        if btn == BUTTON_PAGE:
+        if btn in (BUTTON_PAGE, FAST_FORWARD):
             if index >= TS_GO_POSITION:
                 index = 0
             elif index >= TS_ESC_END_POSITION:
@@ -319,7 +328,7 @@ class TinySeed(Page):
                 index = TS_ESC_END_POSITION
             else:
                 index += 1
-        elif btn == BUTTON_PAGE_PREV:
+        elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD):
             if index <= 0:
                 index = TS_GO_POSITION
             elif index <= _last_editable_bit():
@@ -367,7 +376,15 @@ class TinySeed(Page):
             self.draw_proceed_menu(t("Go"), t("Esc"), menu_offset, menu_index)
             if self.ctx.input.buttons_active:
                 self._draw_index(index)
-            btn = self.ctx.input.wait_for_button()
+
+            if self.ctx.input.page_value() == PRESSED:
+                btn = FAST_FORWARD
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            elif self.ctx.input.page_prev_value() == PRESSED:
+                btn = FAST_BACKWARD
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            else:
+                btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
                 btn = BUTTON_ENTER
                 index = self.ctx.input.touch.current_index()
