@@ -128,18 +128,21 @@ class Input:
     def enter_value(self):
         """Intermediary method to pull button ENTER state"""
         if self.enter is not None:
+            self.wdt_feed_inc_entropy()
             return self.enter.value()
         return RELEASED
 
     def page_value(self):
         """Intermediary method to pull button PAGE state"""
         if self.page is not None:
+            self.wdt_feed_inc_entropy()
             return self.page.value()
         return RELEASED
 
     def page_prev_value(self):
         """Intermediary method to pull button PAGE_PREV state"""
         if self.page_prev is not None:
+            self.wdt_feed_inc_entropy()
             return self.page_prev.value()
         return RELEASED
 
