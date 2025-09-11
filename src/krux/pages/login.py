@@ -323,7 +323,7 @@ class Login(Page):
 
         # If miniscript, by default we use p2wsh
         # but respect the script type setting
-        # in default wallet settings            #
+        # in default wallet settings
         if policy_type == TYPE_MINISCRIPT:
             script_type = MINISCRIPT_SCRIPT_MAP.get(
                 Settings().wallet.script_type, P2WSH

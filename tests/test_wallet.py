@@ -95,6 +95,11 @@ def tdata(mocker):
     KRUX_LEGACY1_DESCRIPTOR = "pkh([55f8fc5d/44h/0h/1h]xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE)"
     KRUX_LEGACY1_XPUB = "[55f8fc5d/44h/0h/1h]xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE"
 
+    # This is a non-extended pubkey (the first-one) derived from KRUX_LEGACY1_DESCRIPTOR
+    KRUX_LEGACY1_RAW_PUBKEY = (
+        "021379cff11bbcf4ec0e3d4cd5abff0ab268471ef1991e680e20591d3d47312a74"
+    )
+
     KRUX_NESTEDSW1_DESCRIPTOR = "sh(wpkh([55f8fc5d/49h/0h/1h]xpub6Ca1JGnSFNZ7jjwturEn944t8B9kBgiTKtmr3maTbryEyDyYY9xycVSQaFxeUPjbHyX7MUvLUbdoDVK7XZ7Fib9We4BQRRk8bZjW2UPRjHV))"
     KRUX_NESTEDSW1_XPUB = "[55f8fc5d/49h/0h/1h]xpub6Ca1JGnSFNZ7jjwturEn944t8B9kBgiTKtmr3maTbryEyDyYY9xycVSQaFxeUPjbHyX7MUvLUbdoDVK7XZ7Fib9We4BQRRk8bZjW2UPRjHV"
     KRUX_NESTEDSW1_YPUB = "[55f8fc5d/49h/0h/1h]ypub6XQGbwTMQ46bb391kD2QM9APJ9JC8JhxF1J4qAULysM82Knmnp8YEZ6YbTvEUJPWhcdv6xWtwFzM6mvgFFXGWpq7WPsq1LZcsHo9R97uuE4"
@@ -297,6 +302,7 @@ def tdata(mocker):
             "TAP_MINISCRIPT_KEY",
             "KRUX_LEGACY1_DESCRIPTOR",
             "KRUX_LEGACY1_XPUB",
+            "KRUX_LEGACY1_RAW_PUBKEY",
             "KRUX_NESTEDSW1_DESCRIPTOR",
             "KRUX_NESTEDSW1_XPUB",
             "KRUX_NESTEDSW1_YPUB",
@@ -371,6 +377,7 @@ def tdata(mocker):
         TAP_MINISCRIPT_KEY,
         KRUX_LEGACY1_DESCRIPTOR,
         KRUX_LEGACY1_XPUB,
+        KRUX_LEGACY1_RAW_PUBKEY,
         KRUX_NESTEDSW1_DESCRIPTOR,
         KRUX_NESTEDSW1_XPUB,
         KRUX_NESTEDSW1_YPUB,
@@ -587,6 +594,11 @@ def test_is_multisig(mocker, m5stickv, tdata):
     assert wallet.has_change_addr()
     assert not wallet.is_multisig()
 
+    # Raise error on raw pubkeys
+    wallet = Wallet(None)
+    with pytest.raises(ValueError, match="invalid wallet format") as exc:
+        wallet.load(tdata.KRUX_LEGACY1_RAW_PUBKEY, FORMAT_NONE)
+
 
 def test_is_miniscript(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
@@ -737,6 +749,14 @@ def test_wallet_qr(mocker, m5stickv, tdata):
             assert wallet_data == case[1]
         assert wallet_qr_format == case[2]
         n += 1
+
+
+def test_fail_invalid_uppercase_address(mocker, m5stickv, tdata):
+    from krux.wallet import parse_address
+
+    data = "BC1QRHJQRZ2D9TDYM3P2R9M2VWZN2SN2YL6K5M357YABCDEFG"
+    with pytest.raises(ValueError, match="invalid address"):
+        parse_address(data)
 
 
 def test_receive_addresses(mocker, m5stickv, tdata):
