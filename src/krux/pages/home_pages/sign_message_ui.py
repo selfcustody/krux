@@ -70,14 +70,15 @@ class SignMessage(Utils):
         return (None, None, "")
 
     def _is_valid_derivation_path(self, derivation_path):
-        """Checks if the derivation path is valid"""
-        try:
-            parts = derivation_path.split("/")
-            return parts[0] == "m" and all(
-                p[-1] in ("'hH") or p.isdigit() for p in parts[1:]
-            )
-        except:
+        """Strictly checks if the derivation path is valid according to BIP32"""
+        parts = derivation_path.split("/")
+        if parts[0] != "m":
             return False
+
+        return all(
+            p and ((p[-1] in "'hH" and p[:-1].isdigit()) or p.isdigit())
+            for p in parts[1:]
+        )
 
     def get_network_from_path(self, derivation_path):
         """Gets the network from the derivation path"""

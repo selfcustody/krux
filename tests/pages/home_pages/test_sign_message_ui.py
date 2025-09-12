@@ -235,6 +235,110 @@ def test_sign_message(mocker, m5stickv, tdata):
         assert ctx.input.wait_for_button.call_count == len(case[3])
 
 
+def test_sign_message_invalid_derivations(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
+
+    # These edge cases will be treated as pure text and the
+    # stuff `signmessage <derivation> ascii:<message>` will
+    # not be parsed and be linked to the address on display
+    # (they will be treated as a whole message)
+    cases = [
+        (
+            [
+                BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_ENTER,  # Sign to QR code
+                BUTTON_ENTER,  # Check QR code
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ],
+            "signmessage m84h ascii:hello",
+            "m84h",
+            "MEQCIA7DCCFox6tQqC3GE9a5IMvm8cVu1Zh6OWcUE1gls77gAiAzLncevU9FFJRvG83ahSJ8hISimgtSSdRHye2rmijwlg==",
+            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+        ),
+        (
+            [
+                BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_ENTER,  # Sign to QR code
+                BUTTON_ENTER,  # Check QR code
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ],
+            "signmessage m/8xh/0/0 ascii:hello",
+            "m/8xh/0/0",
+            "MEQCIDL/XdIRF+v0wnN/JDOu2XYMTYqJaAyjuIDdSG4E/909AiASARSc1zfJsvUKC6MDQlM3E2lrkTx3iYfpJUWRZy/Vpg==",
+            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+        ),
+        (  # 2 - QR invalid (empty segment)
+            [
+                BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Confirm to sign message
+                BUTTON_ENTER,  # Check signature
+                BUTTON_ENTER,  # Sign to QR code
+                BUTTON_ENTER,  # Check QR code
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ],
+            "signmessage m//0 ascii:hello",
+            "m//0",
+            "MEQCIDx4K8atJhGiaFdCCsgaUqFv22ncJ3AFHczFsNLZmbcGAiBuQdB5/pztOHjyQt0DKmuMKo799raQuRrXMVKK69ELjQ==",
+            "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
+        ),
+    ]
+
+    n = 0
+    for case in cases:
+        print("Case: ", n)
+        n = 0
+
+        # A mainnet wallet
+        wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+        ctx = create_ctx(mocker, case[0], wallet)
+        mocker.patch.object(ctx.display, "width", new=lambda: 135)
+        message_signer = SignMessage(ctx)
+        mocker.spy(message_signer, "_is_valid_derivation_path")
+        mocker.spy(message_signer, "_display_and_export_pubkey")
+        mocker.spy(message_signer, "display_qr_codes")
+        mocker.patch.object(
+            QRCodeCapture,
+            "qr_capture_loop",
+            new=lambda self: (
+                case[1],
+                FORMAT_NONE,
+            ),
+        )
+
+        qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
+
+        message_signer.sign_message()
+        qr_capturer.assert_called_once()
+
+        # ensure _is_valid_derivation_path was called with expected derivation
+        message_signer._is_valid_derivation_path.assert_called_once_with(case[2])
+        message_signer.display_qr_codes.assert_has_calls(
+            [
+                mocker.call(case[3], FORMAT_NONE, "Signed Message"),
+                mocker.call(case[4], FORMAT_NONE, "Hex Public Key:"),
+            ]
+        )
+
+        # Address message should not be called, because our derivation is invalid
+        assert not any(
+            len(call.args) > 0 and call.args[0] == "Address:"
+            for call in ctx.display.draw_hcentered_text.call_args_list
+        )
+
+        assert ctx.input.wait_for_button.call_count == len(case[0])
+
+
 def test_sign_message_at_address(mocker, m5stickv, tdata):
     from krux.pages.home_pages.sign_message_ui import SignMessage
     from krux.wallet import Wallet
