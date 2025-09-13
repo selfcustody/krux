@@ -349,6 +349,7 @@
     "from HEX": "16進数から",
     "from base32": "base 32から",
     "from base43": "base 43から",
+    "from base64": "base 64から",
     "from hex": "16進数から",
     "from utf8": "utf 8から",
     "is a valid address!": "有効なアドレスです！",

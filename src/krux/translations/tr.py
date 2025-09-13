@@ -371,6 +371,7 @@ translation_array = [
     "oNALTILIKTAN",
     "base32 'den",
     "tabandan43",
+    "base64 'ten",
     "onaltılıktan",
     "utf8 'den",
     "geçerli bir adres!",

@@ -349,6 +349,7 @@
     "from HEX": "from HEX",
     "from base32": "da base32",
     "from base43": "da base43",
+    "from base64": "da base64",
     "from hex": "from hex",
     "from utf8": "de utf8",
     "is a valid address!": "é um endereço válido!",

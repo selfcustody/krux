@@ -371,6 +371,7 @@ translation_array = [
     "from HEX",
     "da base32",
     "da base43",
+    "da base64",
     "from hex",
     "de utf8",
     "é um endereço válido!",

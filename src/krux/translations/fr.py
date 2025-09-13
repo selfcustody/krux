@@ -371,6 +371,7 @@ translation_array = [
     "à partir de l'HEXAD",
     "de base32",
     "de base43",
+    "de base64",
     "à partir de l'hexad",
     "de utf8",
     "Adresse non valide\u2009!",
