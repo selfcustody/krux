@@ -371,6 +371,7 @@ translation_array = [
     "van HEX",
     "vanaf base32",
     "vanaf basis43",
+    "vanaf base64",
     "van hex",
     "van utf8",
     "is geen geldig adres",

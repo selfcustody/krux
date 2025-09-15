@@ -371,6 +371,7 @@ translation_array = [
     "从十六进制",
     "从base32",
     "从base43",
+    "从base64",
     "从十六进制",
     "从utf8",
     " 非有效地址",

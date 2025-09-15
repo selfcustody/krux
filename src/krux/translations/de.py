@@ -371,6 +371,7 @@ translation_array = [
     "aus SECHSKANT",
     "von base32",
     "von base43",
+    "von base64",
     "aus Sechskant",
     "von utf8",
     "ist eine gültige Adresse!",

@@ -349,6 +349,7 @@
     "from HEX": "van HEX",
     "from base32": "vanaf base32",
     "from base43": "vanaf basis43",
+    "from base64": "vanaf base64",
     "from hex": "van hex",
     "from utf8": "van utf8",
     "is a valid address!": "is geen geldig adres",

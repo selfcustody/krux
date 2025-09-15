@@ -349,6 +349,7 @@
     "from HEX": "từ HEX",
     "from base32": "từ base32",
     "from base43": "từ base43",
+    "from base64": "từ base64",
     "from hex": "từ hex",
     "from utf8": "từ utf8",
     "is a valid address!": "là một địa chỉ hợp lệ!",

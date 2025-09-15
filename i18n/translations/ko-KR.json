@@ -349,6 +349,7 @@
     "from HEX": "16진수부터",
     "from base32": "base32에서",
     "from base43": "base43에서",
+    "from base64": "base64에서",
     "from hex": "16진수부터",
     "from utf8": "utf8에서",
     "is a valid address!": "는 유효한 주소입니다!",

@@ -349,6 +349,7 @@
     "from HEX": "desde HEXADECIMAL",
     "from base32": "desde base32",
     "from base43": "desde base43",
+    "from base64": "desde base64",
     "from hex": "desde hexadecimal",
     "from utf8": "desde utf8",
     "is a valid address!": "es una dirección válida!",
