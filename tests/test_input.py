@@ -932,3 +932,14 @@ def test_touch_damaged(mocker, amigo):
 
     # Should return False since touch is damaged, sowy!
     assert not input.touch_event()
+
+
+def test_amigo_fast_forward_from_start(mocker, amigo):
+    from krux.input import Input, BUTTON_PAGE, ACTIVATING_BUTTONS
+
+    mocker.patch("time.ticks_ms", return_value=10)
+
+    input = Input()
+    # input.page_value = lambda: PRESSED
+    value = input._detect_press_type(BUTTON_PAGE)
+    assert value == ACTIVATING_BUTTONS

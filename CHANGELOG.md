@@ -22,7 +22,7 @@ SHA-256 and PBKDF2-HMAC now use hardware-accelerated hashing, doubling the speed
 We added support for BIP45 (Legacy multisig `P2SH`) and complete BIP48 (Nested-Segwit `P2SH-P2WSH`).
 
 ### Button Turbo
-Hold the NEXT or PREVIOUS button to move faster through menus and more keypads.
+Hold the NEXT or PREVIOUS button to move faster through menus and other keypads (Tinyseed, Stackbit, Mnemonic Editor, Show Datum).
 
 ### 'New Mnemonic' Menu Disabled with 'Hide Mnemonic'
 When 'Hide Mnemonic' setting is enabled, the 'New Mnemonic' menu is automatically disabled.
@@ -40,21 +40,21 @@ To facilitate comparison, addresses are displayed in space-separated groups of 4
 Export *receive or change* addresses to a CSV file on the SD card.
 
 ### New CNC Printer Support and Fixes (OpenBuilds GRBL 1.1)
-- Fixed CNC/FilePrinter compatibility with optimized QR codes from v24.0.3.0;
-- Introduced CNC/GRBLPrinter for direct serial printing to CNC machines;
-- Added support to choose between router/laser head engravers.
+- Fixed CNC/FilePrinter compatibility with optimized QR codes from v24.0.3.0
+- Introduced CNC/GRBLPrinter for direct serial printing to CNC machines
+- Added support to choose between router/laser head engravers
 
 ### Export QR Codes as SVG
 Exported QR codes can now be saved as SVG images.
 
 ### Improved Tests
-- Code coverage: 10,000+ lines (96%) with 682 tests, improving stability and reliability
+- Code coverage: 10,000+ lines (96%) with 680+ tests, improving stability and reliability
 - Added in-device tests focusing on hardware-accelerated features in Tools
 
 ### Other Bug Fixes and Improvements
 - Numbers are no longer printed as words in "Backup Mnemonic > Other formats > Numbers"
 - Expanded keypad touch area to screen edges
-- "Tools > Print Test QR" now asks for confirmation before printing
+- Tools > Print Test QR now asks for confirmation before printing
 - Tools > Check SD Card now allows deleting files
 - Load mnemonic > Via Manual Input > Word Numbers now shows the double mnemonic indicator (*) if applicable
 - Added fingerprint to mnemonic preview and editor
@@ -74,6 +74,7 @@ Exported QR codes can now be saved as SVG images.
 - Added confirmation prompt before exiting after showing signed PSBT QR code
 - Sign message now supports all binary file types
 - Change Addresses menu hidden when descriptor cannot provide them
+- List Addresses now allows swiping up or down to navigate to move between pages
 - Hide Mnemonic now skips confirmation when loading via word numbers
 - Text improvements for clarity and easier translation
 - Fixed mixed ASCII/Asian fonts not using full display width

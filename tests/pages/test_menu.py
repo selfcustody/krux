@@ -219,3 +219,92 @@ def test_two_screens_menu(mocker, amigo):
     assert index == menu.back_index
     assert status == MENU_EXIT
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_fast_forward(mocker, m5stickv):
+    from krux.input import PRESSED, FAST_FORWARD, FAST_BACKWARD
+    from krux.pages import Menu
+
+    ctx = mock_context(mocker)
+    ctx.input.page_value = mocker.MagicMock(return_value=PRESSED)
+    menu = Menu(ctx, [])
+
+    assert menu._get_btn_input() == FAST_FORWARD
+
+    ctx.input.page_value = mocker.MagicMock(return_value=None)
+
+    ctx.input.page_prev_value = mocker.MagicMock(return_value=PRESSED)
+
+    assert menu._get_btn_input() == FAST_BACKWARD
+
+
+def test_swipe_up(mocker, amigo):
+    from krux.pages import Menu, MENU_EXIT, MENU_CONTINUE
+    from krux.input import SWIPE_UP
+
+    ctx = mock_context(mocker)
+    menu = Menu(ctx, [])
+
+    def swipe_fnc():
+        return (1, MENU_EXIT)
+
+    assert menu._process_swipe_up(0, swipe_up_fnc=swipe_fnc) == (1, MENU_EXIT)
+    assert menu._process_swipe_down(0, swipe_down_fnc=swipe_fnc) == (1, MENU_EXIT)
+
+    BTN_SEQUENCE = [
+        SWIPE_UP,
+    ]
+    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
+    index, status = menu.run_loop(swipe_up_fnc=swipe_fnc)
+    assert index == 1
+    assert status == MENU_EXIT
+
+    def swipe_fnc_continue():
+        return (2, MENU_CONTINUE)
+
+    assert menu._process_swipe_up(0, swipe_up_fnc=swipe_fnc_continue) == 0
+    assert menu._process_swipe_down(0, swipe_down_fnc=swipe_fnc_continue) == 0
+
+
+def test_start_from(mocker, m5stickv):
+    from krux.pages import Menu, MENU_EXIT, MENU_CONTINUE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    ctx = mock_context(mocker)
+
+    mock_fnc = mocker.MagicMock(return_value=MENU_CONTINUE)
+    menu_items = [
+        ("1", mock_fnc),
+        ("2", lambda: MENU_EXIT),
+    ]
+    menu = Menu(ctx, menu_items)
+    # test start menu clicking on index 1 that will exit
+    index, status = menu.run_loop(start_from_index=1)
+    assert index == 1
+    assert status == MENU_EXIT
+
+    # test start menu clicking on index 0 that will NOT exit
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV] + [BUTTON_ENTER]  # go to back  # click back
+    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
+    index, status = menu.run_loop(start_from_index=0)
+    assert index == menu.back_index
+    assert status == MENU_EXIT
+    mock_fnc.assert_called()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_disabled_entry(mocker, m5stickv):
+    from krux.pages import Menu, MENU_EXIT
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    ctx = mock_context(mocker)
+    menu_items = [("Disabled", None)]
+    BTN_SEQUENCE = (
+        [BUTTON_ENTER] + [BUTTON_PAGE] + [BUTTON_ENTER]  # click disabled  # click back
+    )
+    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
+    menu = Menu(ctx, menu_items)
+    index, status = menu.run_loop()
+    assert index == menu.back_index
+    assert status == MENU_EXIT
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)

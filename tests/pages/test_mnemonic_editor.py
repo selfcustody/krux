@@ -41,6 +41,43 @@ def test_loop_through_words(mocker, cube):
         assert ctx.input.wait_for_button.call_count == len(btn_sequence)
 
 
+def test_button_turbo(mocker, m5stickv):
+    from krux.pages.mnemonic_editor import MnemonicEditor
+    from krux.input import PRESSED
+    import pytest
+
+    ctx = create_ctx(mocker, [])
+    mnemonic_editor = MnemonicEditor(ctx, TEST_12_WORD_MNEMONIC)
+    mnemonic_editor._map_words = mocker.MagicMock(
+        side_effect=[True, ValueError, True, ValueError]
+    )
+
+    # fast forward
+    ctx.input.page_value = mocker.MagicMock(return_value=PRESSED)
+    with pytest.raises(ValueError):
+        edited_mnemonic = mnemonic_editor.edit()
+
+    mnemonic_editor._map_words.assert_has_calls(
+        [
+            mocker.call(25, 0),
+            mocker.call(0, 0),
+        ]
+    )
+
+    # fast backward
+    ctx.input.page_value = mocker.MagicMock(return_value=None)
+    ctx.input.page_prev_value = mocker.MagicMock(return_value=PRESSED)
+    with pytest.raises(ValueError):
+        edited_mnemonic = mnemonic_editor.edit()
+
+    mnemonic_editor._map_words.assert_has_calls(
+        [
+            mocker.call(25, 0),
+            mocker.call(24, 0),
+        ]
+    )
+
+
 def test_edit_new_mnemonic_using_buttons(mocker, cube):
     from krux.pages.mnemonic_editor import MnemonicEditor
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
