@@ -1,16 +1,28 @@
-# Changelog 25.XX.X - XXX 2025
+# Changelog 25.09.0 - September 2025
 
-### Button Turbo
-Hold the NEXT or PREVIOUS button to move faster through menus and screens.
+### Extended Encryption Options
+The KEF encryption format now supports additional modes (CTR and the new default, GCM) and can hide strings of arbitrary length. This enables secure handling of passphrases, wallet descriptors, PSBTs, addresses, and other messages.
 
-### 2x Faster TC Flash Hash
-SHA-256 and PBKDF2-HMAC now leverage hardware-accelerated hashing, doubling the execution speed of TC Flash.
+### Datum Tool
+A new advanced utility for working with files, QR codes, and manual text input. It supports:
+- Conversion between binary and common string encodings
+- Encryption/decryption of KEF envelopes
+- Exporting contents to QR or SD
+
+### 2x Faster TC Flash Hash and Key Stretching
+SHA-256 and PBKDF2-HMAC now use hardware-accelerated hashing, doubling the speed of TC Flash Hash tampering detection tool, encryption, and decryption.
 
 ### SD Card Airgapped Firmware Upgrade Optimizations
-- Verifies firmware signature authenticity before prompting the user to update.
-- Ensures that only compatible firmware can be installed on the device.
-- Displays the firmware version being installed for user confirmation.
-- Hardware-accelerated SHA-256 hashing and other optimizations speeds up checks.
+- Verifies firmware signature authenticity before prompting for update
+- Ensures only compatible firmware can be installed
+- Displays the firmware version being installed for confirmation
+- Hardware-accelerated SHA-256 hashing and other optimizations speed up checks
+
+### Support for "Old" Multisig Policies and Scripts
+We added support for BIP45 (Legacy multisig `P2SH`) and complete BIP48 (Nested-Segwit `P2SH-P2WSH`).
+
+### Button Turbo
+Hold the NEXT or PREVIOUS button to move faster through menus and more keypads.
 
 ### 'New Mnemonic' Menu Disabled with 'Hide Mnemonic'
 When 'Hide Mnemonic' setting is enabled, the 'New Mnemonic' menu is automatically disabled.
@@ -21,8 +33,8 @@ Wallet fingerprint, network, keypad titles, settings categories, and prefix text
 ### Enhanced Settings Category Colors
 Boolean settings (True/False) are now displayed with color (Green/Red) for improved visibility.
 
-### More Readable Address 
-To facilitate comparison, addresses are displayed in space-separated groups of 4 characters, with alternating groups highlighted.
+### Enhanced Address Verification 
+To facilitate comparison, addresses are displayed in space-separated groups of 4 characters with alternating colors.
 
 ### Export Wallet Addresses
 Export *receive or change* addresses to a CSV file on the SD card.
@@ -35,45 +47,41 @@ Export *receive or change* addresses to a CSV file on the SD card.
 ### Export QR Codes as SVG
 Exported QR codes can now be saved as SVG images.
 
-### Extended Encryption Options
-The KEF encryption format now supports additional modes (CTR and the new default, GCM) and can hide strings of arbitrary length. This enables secure handling of passphrases, wallet descriptors, PSBTs, addresses, and other messages.
-
-### Datum Tool
-A new advanced utility for working with files, QRs, and manual text input. It supports conversion between binary and common string encodings, encryption/decryption of KEF envelopes, and exporting contents to QR or SD.
-
-### Support for "old" multisig policies and scripts
-We added support for BIP45 (Legacy multisig `P2SH`) and complete BIP48 (Nested-Segwit `P2SH-P2WSH`).
+### Improved Tests
+- Code coverage: 10,000+ lines (96%) with 682 tests, improving stability and reliability
+- Added in-device tests focusing on hardware-accelerated features in Tools
 
 ### Other Bug Fixes and Improvements
-- Numbers are no longer printed as words in "Backup Mnemonic > Other formats > Numbers".
-- Keypad touch area has been expanded to the screen edges.
-- "Tools > Print Test QR" now asks for user confirmation before printing.
-- "Tools > Check SD Card" now allows deleting files.
-- "Load mnemonic > Via Manual Input > Word Numbers" now shows the double mnemonic indicator (*) if it is a double mnemonic.
-- Added fingerprint to mnemonic preview and editor.
-- Fingerprint preview now shown when changing wallet passphrase.
-- Passphrase and key now display their length after entry to reduce user mistakes.
-- Saving encrypted mnemonic now prompts whether to use the fingerprint as ID.
-- Optimized device's board value checks.
-- Ellipsis now use a single character to save text space.
-- Added QR Code to About screen.
-- Fixed camera zoom mode clearing the QR codes progress bar.
-- Fixed camera not rotating on Yahboom or WonderMV with flipped orientation.
-- Restart prompt for theme settings now appears only when changes are made.
-- Wallet Descriptor now validates and warns if change addresses cannot be determined.
-- Wallet customization prompt now warns about Descriptor unloading, but does nothing if no changes are made.
-- Fixed issues with long wallet derivation path.
-- Added a PSBT Review button to the sign menu, enabling users to verify PSBT details without reloading.
-- Added a confirmation prompt before exiting after displaying the PSBT signed QR code.
-- Sign message now supports all binary file types.
-- Hide the "Change Addresses" menu option when cannot be determined by the wallet descriptor.
-- The hide mnemonic setting now ignores user confirmation when loading a mnemonic via word numbers.
-- Minor text improvements for clarity and easier translation.
-- Fixed an issue where mixed ASCII and Asian fonts fail to use the full available width.
-- Fixed an issue where menu entries were cut off when translations spanned two lines instead of one.
-- Fixed a selected entry update bug when switching between PAGE and swipe in large menus.
-- Maixpy Fix: Increase glyphs indexing capacity affecting Amigo's translations
-- Fixed an issue that allowed choose incompatible script types from choosen policies (e.g., `P2WPKH` for a `Multisig`).
+- Numbers are no longer printed as words in "Backup Mnemonic > Other formats > Numbers"
+- Expanded keypad touch area to screen edges
+- "Tools > Print Test QR" now asks for confirmation before printing
+- Tools > Check SD Card now allows deleting files
+- Load mnemonic > Via Manual Input > Word Numbers now shows the double mnemonic indicator (*) if applicable
+- Added fingerprint to mnemonic preview and editor
+- Fingerprint preview shown when changing wallet passphrase
+- Passphrase and key entry now display length to reduce mistakes
+- Saving encrypted mnemonic prompts to use fingerprint as ID
+- Optimized board value checks
+- Ellipsis now use a single character to save space
+- Added QR code to About screen
+- Fixed camera zoom mode clearing the QR progress bar
+- Fixed camera orientation, when settings changed on Yahboom and WonderMV without requiring reboot
+- Theme restart prompt appears only when changes are made
+- Wallet Descriptor validation now warns if change addresses cannot be determined
+- Wallet customization prompt now warns about descriptor unloading when something is changed
+- Fixed long wallet derivation path displaying issues
+- Added PSBT Review Again button to sign menu for verifying details muiltiple times without reloading the PSBT
+- Added confirmation prompt before exiting after showing signed PSBT QR code
+- Sign message now supports all binary file types
+- Change Addresses menu hidden when descriptor cannot provide them
+- Hide Mnemonic now skips confirmation when loading via word numbers
+- Text improvements for clarity and easier translation
+- Fixed mixed ASCII/Asian fonts not using full display width
+- Fixed menu entries cut off when translations span two lines
+- Fixed entry update bug when switching between PAGE and swipe in large menus
+- MaixPy Fix: Increased glyph indexing capacity for Amigo translations
+- Fixed issue allowing incompatible script types from policies in Default Wallet settings
+
 
 # Changelog 25.03.0 - March 2025
 
