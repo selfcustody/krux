@@ -1,7 +1,7 @@
 # Changelog 25.XX.X - XXX 2025
 
 ### Button Turbo
-Hold the NEXT or PREVIOUS button to move faster through menus and screens.
+Hold the NEXT or PREVIOUS button to move faster through menus and other screens (Tinyseed, Stackbit, Mnemonic Editor, Show Datum).
 
 ### 2x Faster TC Flash Hash
 SHA-256 and PBKDF2-HMAC now leverage hardware-accelerated hashing, doubling the execution speed of TC Flash.
@@ -67,6 +67,7 @@ We added support for BIP45 (Legacy multisig `P2SH`) and complete BIP48 (Nested-S
 - Added a confirmation prompt before exiting after displaying the PSBT signed QR code.
 - Sign message now supports all binary file types.
 - Hide the "Change Addresses" menu option when cannot be determined by the wallet descriptor.
+- "List Addresses" now allows swiping up or down to navigate to the next or previous page.
 - The hide mnemonic setting now ignores user confirmation when loading a mnemonic via word numbers.
 - Minor text improvements for clarity and easier translation.
 - Fixed an issue where mixed ASCII and Asian fonts fail to use the full available width.

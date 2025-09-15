@@ -94,6 +94,31 @@ def test_enter_tiny_seed_12w_m5stickv(m5stickv, mocker):
     assert " ".join(words) == TEST_12_WORDS
 
 
+def test_enter_tiny_seed_button_turbo(mocker, m5stickv):
+    from krux.pages.tiny_seed import TinySeed
+    from krux.input import PRESSED, FAST_FORWARD, FAST_BACKWARD
+    import pytest
+
+    ctx = create_ctx(mocker, [])
+    tiny_seed = TinySeed(ctx)
+
+    # fast forward
+    ctx.input.page_value = mocker.MagicMock(return_value=PRESSED)
+    tiny_seed._new_index = mocker.MagicMock(side_effect=ValueError)
+    with pytest.raises(ValueError):
+        tiny_seed.enter_tiny_seed()
+
+    tiny_seed._new_index.assert_called_with(0, FAST_FORWARD, False, 0)
+
+    # fast backward
+    ctx.input.page_value = mocker.MagicMock(return_value=None)
+    ctx.input.page_prev_value = mocker.MagicMock(return_value=PRESSED)
+    with pytest.raises(ValueError):
+        tiny_seed.enter_tiny_seed()
+
+    tiny_seed._new_index.assert_called_with(0, FAST_BACKWARD, False, 0)
+
+
 def test_enter_tiny_seed_24w_m5stickv(m5stickv, mocker):
     from krux.pages.tiny_seed import TinySeed
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
