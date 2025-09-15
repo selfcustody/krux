@@ -48,8 +48,10 @@ def test_button_turbo(mocker, m5stickv):
 
     ctx = create_ctx(mocker, [])
     mnemonic_editor = MnemonicEditor(ctx, TEST_12_WORD_MNEMONIC)
-    mnemonic_editor._map_words = mocker.MagicMock(side_effect=[True, ValueError, True, ValueError])
-    
+    mnemonic_editor._map_words = mocker.MagicMock(
+        side_effect=[True, ValueError, True, ValueError]
+    )
+
     # fast forward
     ctx.input.page_value = mocker.MagicMock(return_value=PRESSED)
     with pytest.raises(ValueError):
@@ -57,8 +59,8 @@ def test_button_turbo(mocker, m5stickv):
 
     mnemonic_editor._map_words.assert_has_calls(
         [
-            mocker.call(25,0),
-            mocker.call(0,0),
+            mocker.call(25, 0),
+            mocker.call(0, 0),
         ]
     )
 
@@ -70,8 +72,8 @@ def test_button_turbo(mocker, m5stickv):
 
     mnemonic_editor._map_words.assert_has_calls(
         [
-            mocker.call(25,0),
-            mocker.call(24,0),
+            mocker.call(25, 0),
+            mocker.call(24, 0),
         ]
     )
 
