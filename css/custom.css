@@ -28,3 +28,50 @@ img.m5stickv {
 img.m5stickv.big {
   width: 17%;
 }
+
+/* Default state: no alignment */
+.align-right {
+  float: none;
+}
+
+/* Media query for screens larger than 768px */
+@media (min-width: 768px) {
+  .align-right {
+    float: right;
+  }
+}
+
+div.group-2 {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+div.group-2 div.video:first-child {
+  margin-right: auto;
+}
+
+div.video {
+  max-width: 480px;
+  margin-bottom: 2em;
+}
+
+div.video p {
+  margin-top: 0;
+  margin-bottom: 5px;
+}
+
+div.video img {
+  margin: 0 !important;
+}
+
+div.video p {
+  font-weight: 700;
+}
+
+div.clear {
+  clear: both;
+}
+
+.margin-left {
+  margin-left: 0.8em;
+}
