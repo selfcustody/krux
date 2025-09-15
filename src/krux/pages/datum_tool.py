@@ -759,7 +759,7 @@ class DatumTool(Page):
                 if 43 in self.encodings:
                     menu.append((t("from base43"), lambda: 43))
                 if 64 in self.encodings:
-                    menu.append(("from base64", lambda: 64))
+                    menu.append((t("from base64"), lambda: 64))
                 if "utf8" in self.encodings:
                     menu.append((t("from utf8"), lambda: "utf8"))
 

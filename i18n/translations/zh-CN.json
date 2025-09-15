@@ -349,6 +349,7 @@
     "from HEX": "从十六进制",
     "from base32": "从base32",
     "from base43": "从base43",
+    "from base64": "从base64",
     "from hex": "从十六进制",
     "from utf8": "从utf8",
     "is a valid address!": " 非有效地址",

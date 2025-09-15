@@ -371,6 +371,7 @@ translation_array = [
     "từ HEX",
     "từ base32",
     "từ base43",
+    "từ base64",
     "từ hex",
     "từ utf8",
     "là một địa chỉ hợp lệ!",
