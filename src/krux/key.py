@@ -22,10 +22,7 @@
 # pylint: disable=W0102
 import time
 
-try:
-    import urandom as random
-except:
-    import random
+import urandom as random
 from binascii import hexlify
 from hashlib import sha256
 from embit import bip32, bip39
@@ -34,13 +31,13 @@ from embit.networks import NETWORKS
 from .settings import (
     TEST_TXT,
     THIN_SPACE,
-    NAME_SINGLE_SIG,
-    NAME_MULTISIG,
-    NAME_MINISCRIPT,
 )
 
 DER_SINGLE = "m/%dh/%dh/%dh"
-DER_MULTI = "m/%dh/%dh/%dh/2h"
+DER_MULTI_LEGACY_NO_PATHS = "m/45h"
+DER_MULTI_LEGACY = "m/%dh/%d"
+DER_MULTI_SEGWIT_NESTED = "m/%dh/%dh/%dh/1h"
+DER_MULTI_SEGWIT_NATIVE = "m/%dh/%dh/%dh/2h"
 DER_MINISCRIPT = "m/%dh/%dh/%dh/2h"
 
 # Pay To Public Key Hash - 44h Legacy single-sig
@@ -71,12 +68,43 @@ P2WSH = "p2wsh"
 # address starts with bc1p (mainnet) or tb1p (testnet)
 P2TR = "p2tr"
 
-SCRIPT_LONG_NAMES = {
-    "Legacy - 44": P2PKH,
-    "Nested Segwit - 49": P2SH_P2WPKH,
-    "Native Segwit - 84": P2WPKH,
-    "Taproot - 86": P2TR,
-}
+# Policy types
+NAME_SINGLE_SIG = "Single-sig"
+NAME_MULTISIG = "Multisig"
+NAME_MINISCRIPT = "Miniscript"
+
+# Policy types names
+POLICY_TYPE_NAMES = [
+    NAME_SINGLE_SIG,
+    NAME_MULTISIG,
+    NAME_MINISCRIPT,
+]
+
+SINGLESIG_SCRIPT_NAMES = [
+    "Legacy - 44",
+    "Nested Segwit - 49",
+    "Native Segwit - 84",
+    "Taproot - 86",
+]
+
+MULTISIG_SCRIPT_NAMES = ["Legacy - 45", "Nested Segwit - 48", "Native Segwit - 48"]
+
+MINISCRIPT_SCRIPT_NAMES = ["Native Segwit - 48", "Taproot - 48"]
+
+
+# Single-sig script types supported by Krux
+# P2PKH, P2SH-P2WPKH, P2WPKH, P2TR
+SINGLESIG_SCRIPT_MAP = dict(
+    zip(SINGLESIG_SCRIPT_NAMES, [P2PKH, P2SH_P2WPKH, P2WPKH, P2TR])
+)
+
+# Multisig script types supported by Krux
+# P2SH, P2SH-P2WSH, P2WSH
+MULTISIG_SCRIPT_MAP = dict(zip(MULTISIG_SCRIPT_NAMES, [P2SH, P2SH_P2WSH, P2WSH]))
+
+# Miniscript script types supported by Krux
+# P2WSH, P2TR
+MINISCRIPT_SCRIPT_MAP = dict(zip(MINISCRIPT_SCRIPT_NAMES, [P2WSH, P2TR]))
 
 SINGLESIG_SCRIPT_PURPOSE = {
     P2PKH: 44,
@@ -84,6 +112,14 @@ SINGLESIG_SCRIPT_PURPOSE = {
     P2WPKH: 84,
     P2TR: 86,
 }
+
+MULTISIG_SCRIPT_PURPOSE = {
+    P2SH: 45,
+    P2SH_P2WSH: 48,
+    P2WSH: 48,
+}
+
+MINISCRIPT_PURPOSE = 48
 
 TYPE_SINGLESIG = 0
 TYPE_MULTISIG = 1
@@ -95,8 +131,6 @@ POLICY_TYPE_IDS = {
     NAME_MINISCRIPT: TYPE_MINISCRIPT,
 }
 
-MULTISIG_SCRIPT_PURPOSE = 48
-MINISCRIPT_PURPOSE = 48
 
 FINGERPRINT_SYMBOL = "⊚"
 DERIVATION_PATH_SYMBOL = "↳"
@@ -120,14 +154,21 @@ class Key:
         self.network = network
         self.passphrase = passphrase
         self.account_index = account_index
-        if policy_type == TYPE_MULTISIG and script_type != P2WSH:
+
+        # Validate script type based on policy type
+        # and set default script type if necessary
+        # for multisig policies.
+        if policy_type == TYPE_MULTISIG and script_type not in MULTISIG_SCRIPT_PURPOSE:
             script_type = P2WSH
+
+        # Validate script type based on policy type
+        # and set default script type if necessary
+        # for miniscript policies.
         if policy_type == TYPE_MINISCRIPT and script_type not in (P2WSH, P2TR):
             script_type = P2WSH
+
         self.script_type = script_type
-        self.root = bip32.HDKey.from_seed(
-            bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
-        )
+        self.root = Key.extract_root(mnemonic, passphrase, network)
         self.fingerprint = self.root.child(0).fingerprint
         if not derivation:
             self.derivation = self.get_default_derivation(
@@ -137,9 +178,33 @@ class Key:
             self.derivation = derivation
         self.account = self.root.derive(self.derivation).to_public()
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def xpub(self, version=None):
         """Returns the xpub representation of the extended master public key"""
         return self.account.to_base58(version)
+
+    @classmethod
+    def extract_fingerprint(
+        cls, mnemonic, passphrase="", network=NETWORKS[TEST_TXT], pretty=True
+    ):
+        """Calculate and return the fingerprint based on mnemonic"""
+        try:
+            return Key.format_fingerprint(
+                Key.extract_root(mnemonic, passphrase, network).child(0).fingerprint,
+                pretty,
+            )
+        except:
+            pass
+        return ""
+
+    @classmethod
+    def extract_root(cls, mnemonic, passphrase, network):
+        """Calculate and return the BIP32 root key based on mnemonic"""
+        return bip32.HDKey.from_seed(
+            bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
+        )
 
     def get_xpub(self, path):
         """Returns the xpub for the provided path"""
@@ -212,10 +277,37 @@ class Key:
                 account,
             )
         if policy_type == TYPE_MULTISIG:
-            return DER_MULTI % (MULTISIG_SCRIPT_PURPOSE, network["bip32"], account)
+            if script_type == P2SH:
+                # As defined in BIP-45, there is no account but instead an
+                # cosigner index. But the majority of old implementations,
+                # or even recent ones like Sparrow, use without cosigner index.
+                if account is None:
+                    return DER_MULTI_LEGACY_NO_PATHS
+                return DER_MULTI_LEGACY % (MULTISIG_SCRIPT_PURPOSE[P2SH], account)
+            if script_type == P2SH_P2WSH:
+                # As defined in BIP-48, there is account.
+                # (m / 48' / coin_type' / account' / 1' / change / address_index)
+                return DER_MULTI_SEGWIT_NESTED % (
+                    MULTISIG_SCRIPT_PURPOSE[P2SH_P2WSH],
+                    network["bip32"],
+                    0 if account is None else account,
+                )
+            if script_type == P2WSH:
+                # As defined in BIP-48, there is account.
+                # (m / 48' / coin_type' / account' / 2' / change / address_index)
+                return DER_MULTI_SEGWIT_NATIVE % (
+                    MULTISIG_SCRIPT_PURPOSE[P2WSH],
+                    network["bip32"],
+                    0 if account is None else account,
+                )
         if policy_type == TYPE_MINISCRIPT:
-            return DER_MINISCRIPT % (MINISCRIPT_PURPOSE, network["bip32"], account)
-        raise ValueError("Invalid policy type")
+            return DER_MINISCRIPT % (
+                MINISCRIPT_PURPOSE,
+                network["bip32"],
+                0 if account is None else account,
+            )
+
+        raise ValueError("Invalid policy type: %s" % policy_type)
 
     @staticmethod
     def format_derivation(derivation, pretty=False):

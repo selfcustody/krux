@@ -34,8 +34,8 @@ from ...display import (
     FONT_HEIGHT,
     TOTAL_LINES,
     BOTTOM_PROMPT_LINE,
-    MINIMAL_DISPLAY,
 )
+from ...kboard import kboard
 
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
@@ -134,7 +134,9 @@ class DiceEntropy(Page):
         It's intended for users interested in the quality and distribution of their entropy source.
         """
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(t("Rolls distribution:"), FONT_HEIGHT)
+        self.ctx.display.draw_hcentered_text(
+            t("Rolls distribution:"), FONT_HEIGHT, theme.highlight_color
+        )
         shannon_entropy = self.calculate_entropy()
         max_count = max(self.roll_counts) or 1  # Prevent division by zero
 
@@ -163,7 +165,7 @@ class DiceEntropy(Page):
             offset_x += bar_pad
 
         # Draw Shannon's entropy below the graph
-        suffix = " bits" if not MINIMAL_DISPLAY else "b"
+        suffix = " bits" if not kboard.has_minimal_display else "b"
         self.ctx.display.draw_hcentered_text(
             t("Shannon's entropy:") + " " + str(shannon_entropy) + suffix,
             offset_y + FONT_HEIGHT,
@@ -225,6 +227,8 @@ class DiceEntropy(Page):
 
     def new_key(self):
         """Create a new key from dice rolls"""
+        from ...settings import ELLIPSIS
+
         len_mnemonic = choose_len_mnemonic(self.ctx)
         if not len_mnemonic:
             return None
@@ -251,22 +255,22 @@ class DiceEntropy(Page):
             while True:
                 roll = ""
                 while True:
-                    dice_title = t("Rolls:") + " %d\n" % len(self.rolls)
+                    dice_title = t("Rolls:") + " %d" % len(self.rolls)
                     entropy = (
                         "".join(self.rolls)
                         if self.num_sides < 10
                         else "-".join(self.rolls)
                     )
-                    if len(entropy) <= 10:
-                        dice_title += entropy
-                    else:
-                        dice_title += "..." + entropy[-10:]
+                    buffer_title = entropy
+                    if len(entropy) > 10:
+                        buffer_title = ELLIPSIS + entropy[-10:]
                     roll = self.capture_from_keypad(
                         dice_title,
                         [self.roll_states],
                         delete_key_fn=delete_roll,
                         progress_bar_fn=self.draw_progress_bar,
                         go_on_change=True,
+                        buffer_title="\n" + buffer_title,
                     )
                     if roll == ESC_KEY:
                         return None
@@ -294,7 +298,9 @@ class DiceEntropy(Page):
                             warning_txt += t("Pattern detected!")
                         if warning_txt:
                             self.ctx.display.clear()
-                            self.ctx.display.draw_centered_text(warning_txt)
+                            self.ctx.display.draw_centered_text(
+                                warning_txt, theme.error_color
+                            )
                             if self.prompt(t("Proceed anyway?"), BOTTOM_PROMPT_LINE):
                                 break
                         else:
@@ -304,10 +310,13 @@ class DiceEntropy(Page):
                 "".join(self.rolls) if self.num_sides < 10 else "-".join(self.rolls)
             )
             self.ctx.display.clear()
-            rolls_str = t("Rolls:") + "\n\n%s" % entropy
+            rolls_str = "\n\n%s" % entropy
             max_lines = TOTAL_LINES - 6  # room for menu
             menu_offset = self.ctx.display.draw_hcentered_text(
                 rolls_str, info_box=True, max_lines=max_lines
+            )
+            self.ctx.display.draw_hcentered_text(
+                t("Rolls:"), color=theme.highlight_color, bg_color=theme.info_bg_color
             )
             menu_offset *= FONT_HEIGHT
             menu_offset += DEFAULT_PADDING
@@ -333,7 +342,7 @@ class DiceEntropy(Page):
             ).decode()
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("SHA256 of rolls:") + "\n\n%s" % entropy_hash
+                t("SHA256 of rolls:") + "\n\n%s" % entropy_hash, highlight_prefix=":"
             )
             self.ctx.input.wait_for_button()
             num_bytes = 32 if len_mnemonic == 24 else 16

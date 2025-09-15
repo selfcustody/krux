@@ -1,6 +1,20 @@
 # Tests for krux.settings
 
 
+def test_setting_get_method_return_self_when_obj_is_none(mocker, m5stickv):
+    from krux.settings import Setting
+
+    # this will test __get__ method
+    # of Setting class. When the given
+    # object is None, it must return
+    # the same instance of Setting.
+    s = Setting("krux_has_no_owner", "default")
+    result = s.__get__(None)
+
+    assert isinstance(result, Setting)
+    assert result is s
+
+
 def test_init(mocker, m5stickv):
     from krux.krux_settings import Settings, SettingsNamespace
     import pytest
@@ -343,6 +357,57 @@ def test_setting(mocker, m5stickv):
     assert t.some_setting == 1
     t.some_setting = 2
     assert t.some_setting == 2
+
+
+def test_linked_settings(mocker, m5stickv):
+    from krux.krux_settings import SettingsNamespace
+    from krux.settings import CategorySetting
+    from krux.settings import LinkedCategorySetting
+
+    FRUITS = ["apple", "banana"]
+    VEGETABLES = ["arugula", "cabbage"]
+    MEATS = ["beef", "pork"]
+    ALL = FRUITS + VEGETABLES + MEATS
+
+    class DefaultFoods(SettingsNamespace):
+        namespace = "test"
+        food_type = CategorySetting(
+            "some_setting", "fruit", ["fruit", "vegetable", "meat"]
+        )
+        food = LinkedCategorySetting(
+            "linked_setting",
+            FRUITS[0],
+            ALL,
+            food_type,
+            [
+                lambda x, y: (
+                    x == (FRUITS, FRUITS[0])
+                    if x == "fruit"
+                    else (y.categories, y.default_value)
+                ),
+                lambda x, y: (
+                    x == (VEGETABLES, VEGETABLES[0])
+                    if x == "vegetable"
+                    else (y.categories, y.default_value)
+                ),
+                lambda x, y: (
+                    x == (MEATS, MEATS[0])
+                    if x == "meat"
+                    else (y.categories, y.default_value)
+                ),
+            ],
+        )
+
+    a = DefaultFoods()
+
+    assert a.food_type == "fruit"
+    assert a.food == "apple"
+
+    # try setting valid linked value
+    a.food = "juice"
+
+    # since juice is not in fruits, food becomes default
+    assert a.food == "apple"
 
 
 def test_all_labels(mocker, m5stickv):

@@ -41,32 +41,38 @@ UR_BYTEWORDS_CRC_LEN = 4  # 32 bits CRC used on Bytewords encoding
 
 UR_MIN_FRAGMENT_LENGTH = 10
 
+# https://www.qrcode.com/en/about/version.html
 # List of capacities, based on versions
-# Version 1(index 0)=21x21px = 17 bytes, version 2=25x25px = 32 bytes ...
-# Limited to version 20
-QR_CAPACITY_BYTE = [
-    17,
-    32,
-    53,
-    78,
-    106,
-    134,
-    154,
-    192,
-    230,
-    271,
-    321,
-    367,
-    425,
-    458,
-    520,
-    586,
-    644,
-    718,
-    792,
-    858,
+# Tables below are limited to version 20 and we use L (Low) ECC (Error Correction Code) Level
+
+# [0-9] = 10 chars
+# Version 1(index 0)=21x21px = 41 chars, version 2=25x25px = 77 chars ...
+QR_CAPACITY_NUMERIC = [
+    41,
+    77,
+    127,
+    187,
+    255,
+    322,
+    370,
+    461,
+    552,
+    652,
+    772,
+    883,
+    1022,
+    1101,
+    1250,
+    1408,
+    1548,
+    1725,
+    1903,
+    2061,
 ]
 
+
+# [A-Z0-9 $%*+\-./:] = 45 chars (no lowercase!)
+# Version 1(index 0)=21x21px = 25 chars, version 2=25x25px = 47 chars ...
 QR_CAPACITY_ALPHANUMERIC = [
     25,
     47,
@@ -88,6 +94,33 @@ QR_CAPACITY_ALPHANUMERIC = [
     1046,
     1153,
     1249,
+]
+
+
+# ASCII, UTF-8 (any 8-bit / 1 byte sequence)
+# Requires more pixels to show information
+# Version 1(index 0)=21x21px = 17 bytes, version 2=25x25px = 32 bytes ...
+QR_CAPACITY_BYTE = [
+    17,
+    32,
+    53,
+    78,
+    106,
+    134,
+    154,
+    192,
+    230,
+    271,
+    321,
+    367,
+    425,
+    458,
+    520,
+    586,
+    644,
+    718,
+    792,
+    858,
 ]
 
 
@@ -209,6 +242,8 @@ def to_qr_codes(data, max_width, qr_format):
             part_index = 0
             while True:
                 part_number = "p%dof%d " % (part_index + 1, num_parts)
+                if isinstance(data, bytes):
+                    part_number = part_number.encode()
                 part = None
                 if part_index == num_parts - 1:
                     part = part_number + data[part_index * part_size :]

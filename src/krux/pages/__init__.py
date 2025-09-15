@@ -33,31 +33,34 @@ from ..input import (
     BUTTON_TOUCH,
     SWIPE_DOWN,
     SWIPE_UP,
+    FAST_FORWARD,
+    FAST_BACKWARD,
     SWIPE_LEFT,
     SWIPE_RIGHT,
     ONE_MINUTE,
+    PRESSED,
+    KEY_REPEAT_DELAY_MS,
 )
 from ..display import (
     DEFAULT_PADDING,
     MINIMAL_PADDING,
-    MINIMAL_DISPLAY,
     FLASH_MSG_TIME,
     FONT_HEIGHT,
     FONT_WIDTH,
-    NARROW_SCREEN_WITH,
     STATUS_BAR_HEIGHT,
     BOTTOM_LINE,
 )
-from ..qr import to_qr_codes
+from ..qr import to_qr_codes, FORMAT_NONE
 from ..krux_settings import t, Settings
 from ..sd_card import SDHandler
+from ..kboard import kboard
 
 MENU_CONTINUE = 0
 MENU_EXIT = 1
 MENU_SHUTDOWN = 2
+MENU_RESTART = 3
 
 ESC_KEY = 1
-FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets
 
 SHUTDOWN_WAIT_TIME = 300
 
@@ -77,6 +80,9 @@ LOAD_FROM_CAMERA = 0
 LOAD_FROM_SD = 1
 
 EXTRA_MNEMONIC_LENGTH_FLAG = 48
+
+SWIPE_R_CHAR = "»"
+SWIPE_L_CHAR = "«"
 
 
 class Page:
@@ -117,9 +123,13 @@ class Page:
         index, _ = load_menu.run_loop()
         return index
 
-    def flash_text(self, text, color=theme.fg_color, duration=FLASH_MSG_TIME):
+    def flash_text(
+        self, text, color=theme.fg_color, duration=FLASH_MSG_TIME, highlight_prefix=""
+    ):
         """Flashes text centered on the display for duration ms"""
-        self.ctx.display.flash_text(text, color, duration)
+        self.ctx.display.flash_text(
+            text, color, duration, highlight_prefix=highlight_prefix
+        )
         # Discard button presses that occurred during the message
         self.ctx.input.reset_ios_state()
 
@@ -127,6 +137,7 @@ class Page:
         """Flashes text centered on the display for duration ms"""
         self.flash_text(text, theme.error_color)
 
+    # pylint: disable=too-many-arguments
     def capture_from_keypad(
         self,
         title,
@@ -138,24 +149,18 @@ class Page:
         go_on_change=False,
         starting_buffer="",
         esc_prompt=True,
+        buffer_title="",
     ):
         """Displays a key pad and captures a series of keys until the user returns.
         Returns a string.
         """
         buffer = starting_buffer
         pad = Keypad(self.ctx, keysets, possible_keys_fn)
-        big_title = len(self.ctx.display.to_lines(title)) > 1
         swipe_has_not_been_used = True
-        swipe_hint = "« " + t("swipe") + " »"
         show_swipe_hint = False
         while True:
             self.ctx.display.clear()
-            offset_y = MINIMAL_PADDING if big_title else DEFAULT_PADDING
-            if lcd.string_width_px(buffer) < self.ctx.display.width():
-                text_to_show = title if not show_swipe_hint else swipe_hint
-                self.ctx.display.draw_hcentered_text(text_to_show, offset_y)
-                offset_y += 2 * FONT_HEIGHT if big_title else (FONT_HEIGHT * 3 // 2)
-            self.ctx.display.draw_hcentered_text(buffer, offset_y)
+            self._print_keypad_header(title, show_swipe_hint, buffer, buffer_title)
             if progress_bar_fn:
                 progress_bar_fn()
             pad.compute_possible_keys(buffer)
@@ -211,18 +216,40 @@ class Page:
             self.ctx.input.touch.clear_regions()
         return buffer
 
-    def display_qr_codes(self, data, qr_format, title=""):
+    def _print_keypad_header(self, title, show_swipe_hint, buffer, buffer_title):
+        big_title = len(self.ctx.display.to_lines(title)) > 1
+        swipe_hint = SWIPE_L_CHAR + " " + t("swipe") + " " + SWIPE_R_CHAR
+        offset_y = MINIMAL_PADDING if big_title else DEFAULT_PADDING
+        if buffer_title:
+            self.ctx.display.draw_hcentered_text(buffer_title, offset_y)
+        if lcd.string_width_px(buffer) < self.ctx.display.width():
+            text_to_show = title if not show_swipe_hint else swipe_hint
+            self.ctx.display.draw_hcentered_text(
+                text_to_show, offset_y, color=theme.highlight_color, max_lines=1
+            )
+            offset_y += 2 * FONT_HEIGHT if big_title else (FONT_HEIGHT * 3 // 2)
+        if not buffer_title:
+            self.ctx.display.draw_hcentered_text(buffer, offset_y)
+
+    def display_qr_codes(
+        self,
+        data,
+        qr_format=FORMAT_NONE,
+        title="",
+        offset_x=0,
+        offset_y=0,
+        width=0,
+        highlight_prefix="",
+    ):
         """Displays a QR code or an animated series of QR codes to the user, encoding them
         in the specified format
         """
-        done = False
-        i = 0
 
         # Precompute display-related values
         display_width = self.ctx.display.width()
         display_height = self.ctx.display.height()
-        is_portrait = display_height > display_width
-        qr_offset_val = self.ctx.display.qr_offset()
+        is_portrait = width != 0 or display_height > display_width
+        qr_offset_val = self.ctx.display.qr_offset(offset_y + width)
         qr_data_width = self.ctx.display.qr_data_width()
 
         self.ctx.display.clear()
@@ -236,7 +263,9 @@ class Page:
             tit_len = 1
         else:
             # Draws permanent title
-            tit_len = self.ctx.display.draw_hcentered_text(title, qr_offset_val)
+            tit_len = self.ctx.display.draw_hcentered_text(
+                title, qr_offset_val, highlight_prefix=highlight_prefix
+            )
         cursor_y = qr_offset_val + tit_len * FONT_HEIGHT
         if cursor_y < BOTTOM_LINE and is_portrait:
             cursor_y += BOTTOM_LINE
@@ -252,20 +281,22 @@ class Page:
         code = None
         num_parts = 0
         btn = None
+        i = 0
+        done = False
         while not done:
             try:
                 code, num_parts = next(code_generator)
             except:
-                code_generator = to_qr_codes(
-                    data, self.ctx.display.qr_data_width(), qr_format
-                )
+                code_generator = to_qr_codes(data, qr_data_width, qr_format)
                 code, num_parts = next(code_generator)
 
             # Draw QR code
             if qr_foreground:
-                self.ctx.display.draw_qr_code(0, code, light_color=qr_foreground)
+                self.ctx.display.draw_qr_code(
+                    code, offset_x, offset_y, width, light_color=qr_foreground
+                )
             else:
-                self.ctx.display.draw_qr_code(0, code)
+                self.ctx.display.draw_qr_code(code, offset_x, offset_y, width)
 
             # Handle subtitle
             if subtitle_template and is_portrait:
@@ -317,6 +348,10 @@ class Page:
         header = "BIP39 {}{}".format(suffix, fingerprint)
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(header)
+        if fingerprint:
+            self.ctx.display.draw_hcentered_text(
+                fingerprint, color=theme.highlight_color
+            )
         lines = self.ctx.display.to_lines(header)
         starting_y_offset = DEFAULT_PADDING // 4 + (
             len(lines) * FONT_HEIGHT + FONT_HEIGHT
@@ -326,10 +361,14 @@ class Page:
                 DEFAULT_PADDING, starting_y_offset + (i * FONT_HEIGHT), word
             )
         if len(word_list) > 12:
-            if board.config["type"] == "m5stickv":
+            if kboard.is_m5stickv:
                 self.ctx.input.wait_for_button()
                 self.ctx.display.clear()
                 self.ctx.display.draw_hcentered_text(header)
+                if fingerprint:
+                    self.ctx.display.draw_hcentered_text(
+                        fingerprint, color=theme.highlight_color
+                    )
                 for i, word in enumerate(word_list[12:]):
                     self.ctx.display.draw_string(
                         DEFAULT_PADDING, starting_y_offset + (i * FONT_HEIGHT), word
@@ -342,26 +381,30 @@ class Page:
                         word,
                     )
 
-    def print_prompt(self, text):
+    def print_prompt(self, text, check_printer=True):
         """Prompts the user to print a QR code in the specified format
         if a printer is connected
         """
-        if not self.has_printer():
+        if not self.has_printer() and check_printer:
             return False
         self.ctx.display.clear()
         prompt_text = (text + "\n\n%s\n\n") % Settings().hardware.printer.driver
         return self.prompt(prompt_text, self.ctx.display.height() // 2)
 
-    def prompt(self, text, offset_y=0):
+    def prompt(self, text, offset_y=0, highlight_prefix=""):
         """Prompts user to answer Yes or No"""
         lines = self.ctx.display.to_lines(text)
         offset_y -= (len(lines) - 1) * FONT_HEIGHT
         self.ctx.display.draw_hcentered_text(
-            text, offset_y, theme.fg_color, theme.bg_color
+            text,
+            offset_y,
+            theme.fg_color,
+            theme.bg_color,
+            highlight_prefix=highlight_prefix,
         )
         self.y_keypad_map = []
         self.x_keypad_map = []
-        if MINIMAL_DISPLAY:
+        if kboard.has_minimal_display:
             return self.ctx.input.wait_for_button() == BUTTON_ENTER
         offset_y += (len(lines) + 1) * FONT_HEIGHT
         self.x_keypad_map.extend(
@@ -438,14 +481,21 @@ class Page:
     def fit_to_line(self, text, prefix="", fixed_chars=0, crop_middle=True):
         """Fits text with prefix plus fixed_chars at the beginning into one line,
         removing the central content and leaving the ends"""
-        usable_chars = self.ctx.display.usable_width() // FONT_WIDTH
-        if len(text) + len(prefix) <= usable_chars:
+        usable_chars = self.ctx.display.ascii_chars_per_line()
+        if len(prefix) + len(text) <= usable_chars:
             return prefix + text
+
+        if len(prefix) >= usable_chars - 4:
+            if len(prefix) <= usable_chars:
+                return prefix
+            text = prefix
+            prefix = ""
+            fixed_chars = 0
         if not crop_middle:
-            return "{}{}..".format(prefix, text[: usable_chars - 2])
-        usable_chars -= len(prefix) + fixed_chars + 2
+            return "{}{}…".format(prefix, text[: usable_chars - len(prefix) - 1])
+        usable_chars -= len(prefix) + fixed_chars + 1
         half = usable_chars // 2
-        return "{}{}..{}".format(prefix, text[: half + fixed_chars], text[-half:])
+        return "{}{}…{}".format(prefix, text[: half + fixed_chars], text[-half:])
 
     def has_printer(self):
         """Checks if the device has a printer setup"""
@@ -454,7 +504,7 @@ class Page:
     def has_sd_card(self):
         """Checks if the device has an SD card inserted"""
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Checking for SD card.."))
+        self.ctx.display.draw_centered_text(t("Checking for SD card…"))
         try:
             # Check for SD hot-plug
             with SDHandler():
@@ -466,7 +516,7 @@ class Page:
         """Handler for the 'shutdown' menu item"""
         if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Shutting down.."))
+            self.ctx.display.draw_centered_text(t("Shutting down…"))
             time.sleep_ms(SHUTDOWN_WAIT_TIME)
             return MENU_SHUTDOWN
         return MENU_CONTINUE
@@ -475,6 +525,48 @@ class Page:
         """Runs the page's menu loop"""
         _, status = self.menu.run_loop(start_from_index)
         return status != MENU_SHUTDOWN
+
+    def draw_proceed_menu(
+        self, go_txt, esc_txt, y_offset=0, menu_index=None, go_enabled=True
+    ):
+        """Reusable 'Esc' and 'Go' menu choice"""
+        go_x_offset = (
+            self.ctx.display.width() // 2 - lcd.string_width_px(go_txt)
+        ) // 2 + self.ctx.display.width() // 2
+        esc_x_offset = (
+            self.ctx.display.width() // 2 - lcd.string_width_px(esc_txt)
+        ) // 2
+        go_esc_y_offset = (
+            self.ctx.display.height() - (y_offset + FONT_HEIGHT + MINIMAL_PADDING)
+        ) // 2 + y_offset
+        if menu_index == 0 and self.ctx.input.buttons_active:
+            self.ctx.display.outline(
+                DEFAULT_PADDING,
+                go_esc_y_offset - FONT_HEIGHT // 2,
+                self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
+                FONT_HEIGHT + FONT_HEIGHT,
+                theme.no_esc_color,
+            )
+        self.ctx.display.draw_string(
+            esc_x_offset, go_esc_y_offset, esc_txt, theme.no_esc_color
+        )
+        if menu_index == 1 and self.ctx.input.buttons_active:
+            self.ctx.display.outline(
+                self.ctx.display.width() // 2 + DEFAULT_PADDING,
+                go_esc_y_offset - FONT_HEIGHT // 2,
+                self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
+                FONT_HEIGHT + FONT_HEIGHT,
+                theme.go_color,
+            )
+        go_color = theme.go_color if go_enabled else theme.disabled_color
+        self.ctx.display.draw_string(go_x_offset, go_esc_y_offset, go_txt, go_color)
+        if not self.ctx.input.buttons_active:
+            self.ctx.display.draw_vline(
+                self.ctx.display.width() // 2,
+                go_esc_y_offset,
+                FONT_HEIGHT,
+                theme.frame_color,
+            )
 
 
 class ListView:
@@ -550,9 +642,14 @@ class Menu:
             self.disable_statusbar = True
             self.menu_offset = offset
         max_viewable = min(
-            self.ctx.display.max_menu_lines(self.menu_offset), len(self.menu)
+            self.ctx.display.max_menu_lines(self.menu_offset, self.menu), len(self.menu)
         )
         self.menu_view = ListView(self.menu, max_viewable)
+
+    @property
+    def back_index(self):
+        """returns the menu last entry index"""
+        return len(self.menu) - 1
 
     def screensaver(self):
         """Loads and starts screensaver"""
@@ -560,7 +657,57 @@ class Menu:
 
         ScreenSaver(self.ctx).start()
 
-    def run_loop(self, start_from_index=None):
+    def _get_btn_input(self):
+        if self.ctx.input.page_value() == PRESSED:
+            time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            return FAST_FORWARD
+        if self.ctx.input.page_prev_value() == PRESSED:
+            time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            return FAST_BACKWARD
+        return self.ctx.input.wait_for_button(
+            # Block if screen saver not active
+            block=Settings().appearance.screensaver_time == 0,
+            wait_duration=Settings().appearance.screensaver_time * ONE_MINUTE,
+        )
+
+    def _process_page(self, selected_item_index):
+        selected_item_index = (selected_item_index + 1) % len(self.menu_view)
+        if selected_item_index == 0:
+            self.menu_view.move_forward()
+        return selected_item_index
+
+    def _move_back(self):
+        self.menu_view.move_backward()
+        # Update selected item index to be the last viewable item,
+        # which may be a different index than before we moved backward
+        return len(self.menu_view) - 1
+
+    def _process_page_prev(self, selected_item_index):
+        selected_item_index = (selected_item_index - 1) % len(self.menu_view)
+        if selected_item_index == len(self.menu_view) - 1:
+            selected_item_index = self._move_back()
+        return selected_item_index
+
+    def _process_swipe_up(self, selected_item_index, swipe_up_fnc=None):
+        if swipe_up_fnc:
+            index, status = swipe_up_fnc()
+            if status != MENU_CONTINUE:
+                return (index, status)
+        else:
+            selected_item_index = 0
+            self.menu_view.move_forward()
+        return selected_item_index
+
+    def _process_swipe_down(self, selected_item_index, swipe_down_fnc=None):
+        if swipe_down_fnc:
+            index, status = swipe_down_fnc()
+            if status != MENU_CONTINUE:
+                return (index, status)
+        else:
+            selected_item_index = self._move_back()
+        return selected_item_index
+
+    def run_loop(self, start_from_index=None, swipe_up_fnc=None, swipe_down_fnc=None):
         """Runs the menu loop until one of the menu items returns either a MENU_EXIT
         or MENU_SHUTDOWN status
         """
@@ -594,11 +741,7 @@ class Menu:
                     return (self.menu_view.index(selected_item_index), status)
                 start_from_submenu = False
             else:
-                btn = self.ctx.input.wait_for_button(
-                    # Block if screen saver not active
-                    block=Settings().appearance.screensaver_time == 0,
-                    wait_duration=Settings().appearance.screensaver_time * ONE_MINUTE,
-                )
+                btn = self._get_btn_input()
                 if self.ctx.input.touch is not None:
                     if btn == BUTTON_TOUCH:
                         selected_item_index = self.ctx.input.touch.current_index()
@@ -608,25 +751,21 @@ class Menu:
                     status = self._clicked_item(selected_item_index)
                     if status != MENU_CONTINUE:
                         return (self.menu_view.index(selected_item_index), status)
-                elif btn == BUTTON_PAGE:
-                    selected_item_index = (selected_item_index + 1) % len(
-                        self.menu_view
-                    )
-                    if selected_item_index == 0:
-                        self.menu_view.move_forward()
-                elif btn == BUTTON_PAGE_PREV:
-                    selected_item_index = (selected_item_index - 1) % len(
-                        self.menu_view
-                    )
-                    if selected_item_index == len(self.menu_view) - 1:
-                        self.menu_view.move_backward()
-                        # Update selected item index to be the last viewable item,
-                        # which may be a different index than before we moved backward
-                        selected_item_index = len(self.menu_view) - 1
-                elif btn == SWIPE_UP:
-                    self.menu_view.move_forward()
-                elif btn == SWIPE_DOWN:
-                    self.menu_view.move_backward()
+                elif btn in (BUTTON_PAGE, FAST_FORWARD):
+                    selected_item_index = self._process_page(selected_item_index)
+                elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD):
+                    selected_item_index = self._process_page_prev(selected_item_index)
+                elif btn in (SWIPE_UP, SWIPE_DOWN):
+                    if btn == SWIPE_UP:
+                        selected_item_index = self._process_swipe_up(
+                            selected_item_index, swipe_up_fnc
+                        )
+                    else:
+                        selected_item_index = self._process_swipe_down(
+                            selected_item_index, swipe_down_fnc
+                        )
+                    if isinstance(selected_item_index, tuple):
+                        return selected_item_index
                 elif btn is None and self.menu_offset == STATUS_BAR_HEIGHT:
                     # Activates screensaver if there's no info_box(other things draw on the screen)
                     self.screensaver()
@@ -731,7 +870,7 @@ class Menu:
         """Draws wallet fingerprint or BIP85 child at top if wallet is loaded"""
         if self.ctx.is_logged_in():
             fingerprint = self.ctx.wallet.key.fingerprint_hex_str(True)
-            if self.ctx.display.width() > NARROW_SCREEN_WITH:
+            if not kboard.is_m5stickv:
                 self.ctx.display.draw_hcentered_text(
                     fingerprint,
                     STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
@@ -750,7 +889,7 @@ class Menu:
     def draw_network_indicator(self):
         """Draws test at top if testnet is enabled"""
         if self.ctx.is_logged_in() and self.ctx.wallet.key.network["name"] == "Testnet":
-            if self.ctx.display.width() > NARROW_SCREEN_WITH:
+            if not kboard.is_m5stickv:
                 self.ctx.display.draw_string(
                     12,
                     STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
@@ -832,7 +971,9 @@ class Menu:
             )
             offset_y //= 2
             offset_y += FONT_HEIGHT // 2
-        offset_y = max(offset_y, STATUS_BAR_HEIGHT)
+        offset_y = (
+            max(offset_y, STATUS_BAR_HEIGHT) + 2
+        )  # add 2 because of small devices
         items_pad = max(
             self.ctx.display.height()
             - STATUS_BAR_HEIGHT
@@ -879,42 +1020,3 @@ def choose_len_mnemonic(ctx, extra_option=""):
     _, num_words = submenu.run_loop()
     ctx.display.clear()
     return num_words
-
-
-def proceed_menu(
-    ctx, y_offset=0, menu_index=None, proceed_txt="Go", esc_txt="Esc", go_enabled=True
-):
-    """Reusable 'Esc' and 'Go' menu choice"""
-    go_x_offset = (
-        ctx.display.width() // 2 - lcd.string_width_px(proceed_txt)
-    ) // 2 + ctx.display.width() // 2
-    esc_x_offset = (ctx.display.width() // 2 - lcd.string_width_px(esc_txt)) // 2
-    go_esc_y_offset = (
-        ctx.display.height() - (y_offset + FONT_HEIGHT + MINIMAL_PADDING)
-    ) // 2 + y_offset
-    if menu_index == 0 and ctx.input.buttons_active:
-        ctx.display.outline(
-            DEFAULT_PADDING,
-            go_esc_y_offset - FONT_HEIGHT // 2,
-            ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
-            FONT_HEIGHT + FONT_HEIGHT,
-            theme.error_color,
-        )
-    ctx.display.draw_string(esc_x_offset, go_esc_y_offset, esc_txt, theme.error_color)
-    if menu_index == 1 and ctx.input.buttons_active:
-        ctx.display.outline(
-            ctx.display.width() // 2 + DEFAULT_PADDING,
-            go_esc_y_offset - FONT_HEIGHT // 2,
-            ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
-            FONT_HEIGHT + FONT_HEIGHT,
-            theme.go_color,
-        )
-    go_color = theme.go_color if go_enabled else theme.disabled_color
-    ctx.display.draw_string(go_x_offset, go_esc_y_offset, proceed_txt, go_color)
-    if not ctx.input.buttons_active:
-        ctx.display.draw_vline(
-            ctx.display.width() // 2,
-            go_esc_y_offset,
-            FONT_HEIGHT,
-            theme.frame_color,
-        )

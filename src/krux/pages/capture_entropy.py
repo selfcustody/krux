@@ -20,12 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import board
 import math
 from . import Page
 from ..display import FONT_HEIGHT, BOTTOM_LINE, BOTTOM_PROMPT_LINE
 from ..krux_settings import t
 from ..themes import theme
+from ..kboard import kboard
 
 POOR_VARIANCE_TH = 10  # RMS value of L, A, B channels considered poor
 INSUFFICIENT_VARIANCE_TH = 5  # RMS value of L, A, B channels considered insufficient
@@ -54,7 +54,7 @@ class CameraEntropy(Page):
         self.previous_measurement = UNKNOWN_ENTROPY
         self.stdev_index = 0
         self.y_label_offset = BOTTOM_LINE
-        if board.config["type"] == "amigo":
+        if kboard.is_amigo:
             self.y_label_offset = BOTTOM_PROMPT_LINE
 
     def _callback(self):
@@ -72,8 +72,6 @@ class CameraEntropy(Page):
 
     def rms_value(self, data):
         """Calculates the RMS value of a list of numbers"""
-        if not data:
-            return 0
         square_sum = sum(x**2 for x in data)
         mean_square = square_sum / len(data)
         rms = math.sqrt(mean_square)
@@ -143,6 +141,7 @@ class CameraEntropy(Page):
         import shannon
         from ..wdt import wdt
         from ..camera import ENTROPY_MODE
+        from ..format import replace_decimal_separator, generate_thousands_separator
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("TOUCH or ENTER to capture"))
@@ -175,7 +174,7 @@ class CameraEntropy(Page):
             self.flash_text(t("Capture cancelled"))
             return None
 
-        self.ctx.display.draw_centered_text(t("Processing.."))
+        self.ctx.display.draw_centered_text(t("Processing…"))
 
         self.entropy_measurement_update(img, all_at_once=True, show_measurement=False)
 
@@ -188,10 +187,11 @@ class CameraEntropy(Page):
         shannon_16b_total = shannon_16b * img_pixels
 
         entropy_msg = t("Shannon's entropy:") + "\n"
-        entropy_msg += str(round(shannon_16b, 2)) + " " + "bits/px" + "\n"
-        entropy_msg += t("(%d total)") % int(shannon_16b_total) + "\n\n"
-        entropy_msg += t("Pixels deviation index:") + " "
-        entropy_msg += str(self.stdev_index)
+        entropy_msg += (t("%s bits (%s bits/px)") + "\n\n") % (
+            generate_thousands_separator(int(shannon_16b_total)),
+            replace_decimal_separator("%.2g" % shannon_16b),
+        )
+        entropy_msg += "%s %s" % (t("Pixels deviation index:"), str(self.stdev_index))
         self.ctx.display.clear()
         self.ctx.input.reset_ios_state()
         if (
@@ -205,7 +205,7 @@ class CameraEntropy(Page):
             self.ctx.input.wait_for_button()
             return None
         if show_entropy_details:
-            self.ctx.display.draw_centered_text(entropy_msg)
+            self.ctx.display.draw_centered_text(entropy_msg, highlight_prefix=":")
             self.ctx.input.wait_for_button()
         hasher = hashlib.sha256()
         image_len = len(img_bytes)

@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 from . import Page
-from ..krux_settings import t, Settings
+from ..krux_settings import t, Settings, CNC_FILE_DRIVER
 from ..qr import to_qr_codes, FORMAT_NONE
 from ..printers import create_printer
 
@@ -33,16 +33,20 @@ class PrintPage(Page):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Loading printer.."))
+        self.ctx.display.draw_centered_text(t("Loading printer…"))
         self.printer = create_printer()
 
     def _send_qr_to_printer(self, qr_code, i=0, count=1):
         self.ctx.display.clear()
-        if Settings().hardware.printer.driver == "cnc/file":
-            self.ctx.display.draw_centered_text(t("Exporting to SD card.."))
+        if Settings().hardware.printer.driver == CNC_FILE_DRIVER:
+            from ..printers.cnc import FilePrinter
+
+            self.ctx.display.draw_centered_text(
+                t("Exporting %s to SD card…") % FilePrinter.CNC_FILENAME
+            )
         else:
             self.ctx.display.draw_centered_text(
-                t("Printing..") + "\n%d / %d" % (i + 1, count)
+                t("Printing…") + "\n%d / %d" % (i + 1, count)
             )
 
         self.printer.print_qr_code(qr_code)
@@ -71,7 +75,7 @@ class PrintPage(Page):
         """Prints Mnemonics words as text"""
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
-            t("Printing.."), self.ctx.display.height() // 2
+            t("Printing…"), self.ctx.display.height() // 2
         )
         self.printer.print_string("BIP39" + " " + suffix + "\n\n")
         words = mnemonic.split(" ")

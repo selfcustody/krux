@@ -75,6 +75,53 @@ GOOD_ROLLS_SEQUENCE = [
 ]
 
 
+def test_entropy_but_not_proceed(m5stickv, mocker):
+    """
+    Test a situation where the user begin the creation of an entropy on m5stickv but, in the middle
+    time, stop the procedure (when krux ask "proceed" and the user choose "No")
+    """
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        # 1 press to proceed to 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press to cancel the proceed
+        [BUTTON_PAGE_PREV]
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    dice_entropy = DiceEntropy(ctx)
+    entropy = dice_entropy.new_key()
+
+    assert entropy is None
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_entropy_on_amigo_device_but_not_proceed(amigo, mocker):
+    """
+    Test a situation where the user begin the creation of an entropy in Amigo but, in the
+    middle time, stop the procedure (when krux ask "proceed" and the user choose "No")
+    """
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        # 1 press to proceed to 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press to cancel the proceed and then confirm the cancelation
+        [BUTTON_PAGE, BUTTON_ENTER]
+    )
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    dice_entropy = DiceEntropy(ctx)
+    entropy = dice_entropy.new_key()
+
+    assert entropy is None
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
 def test_new_12w_from_d6(m5stickv, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -351,6 +398,7 @@ def test_cancel_new_12w_from_d20(m5stickv, mocker):
 def test_low_shannon_entropy_warning(amigo, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+    from krux.themes import theme
 
     BTN_SEQUENCE = (
         # 1 press to proceed to 12 words
@@ -379,7 +427,7 @@ def test_low_shannon_entropy_warning(amigo, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
     # Assert ctx.display.draw_centered_text was called with poor entropy warning"
-    call_message = mocker.call("Poor entropy!\nPattern detected!")
+    call_message = mocker.call("Poor entropy!\nPattern detected!", theme.error_color)
     ctx.display.draw_centered_text.assert_has_calls([call_message])
 
 

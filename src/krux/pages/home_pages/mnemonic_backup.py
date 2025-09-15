@@ -20,14 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ...display import FONT_HEIGHT, SMALLEST_HEIGHT
-from ...qr import FORMAT_NONE
+from ...display import FONT_HEIGHT
 from ...krux_settings import t, Settings, THERMAL_ADAFRUIT_TXT
 from .. import (
     Page,
     Menu,
     MENU_CONTINUE,
 )
+from ...kboard import kboard
 
 
 class MnemonicsView(Page):
@@ -73,7 +73,7 @@ class MnemonicsView(Page):
                 ),
                 (t("Numbers"), self.display_mnemonic_numbers),
                 ("Stackbit 1248", self.stackbit),
-                ("Tiny Seed", self.tiny_seed),
+                ("Tinyseed", self.tiny_seed),
             ],
         )
         submenu.run_loop()
@@ -108,6 +108,7 @@ class MnemonicsView(Page):
                 from ..print_page import PrintPage
 
                 print_page = PrintPage(self.ctx)
+                mnemonic = display_mnemonic or mnemonic
                 print_page.print_mnemonic_text(mnemonic, suffix)
         return MENU_CONTINUE
 
@@ -157,12 +158,12 @@ class MnemonicsView(Page):
         """Displays regular words QR code"""
         title = t("Plaintext QR")
         data = self.ctx.wallet.key.mnemonic
-        self.display_qr_codes(data, FORMAT_NONE, title)
+        self.display_qr_codes(data, title=title)
 
         from ..utils import Utils
 
         utils = Utils(self.ctx)
-        utils.print_standard_qr(data, FORMAT_NONE, title)
+        utils.print_standard_qr(data, title=title)
         return MENU_CONTINUE
 
     def display_seed_qr(self, binary=False):
@@ -185,7 +186,7 @@ class MnemonicsView(Page):
             y_offset = 2 * FONT_HEIGHT
             for _ in range(6):
                 stackbit.export_1248(word_index, y_offset, words[word_index - 1])
-                if self.ctx.display.height() > SMALLEST_HEIGHT:
+                if not kboard.has_minimal_display:
                     y_offset += 3 * FONT_HEIGHT
                 else:
                     y_offset += 5 + 2 * FONT_HEIGHT
@@ -195,7 +196,7 @@ class MnemonicsView(Page):
         return MENU_CONTINUE
 
     def tiny_seed(self):
-        """Displays the seed in Tiny Seed format"""
+        """Displays the seed in Tinyseed format"""
         from ..tiny_seed import TinySeed
 
         tiny_seed = TinySeed(self.ctx)
@@ -207,6 +208,6 @@ class MnemonicsView(Page):
             and self.ctx.camera.mode is not None
         ):
             # TinySeed printing requires a camera frame buffer to draw in.
-            if self.print_prompt(t("Print Tiny Seed?")):
+            if self.print_prompt(t("Print Tinyseed?")):
                 tiny_seed.print_tiny_seed()
         return MENU_CONTINUE

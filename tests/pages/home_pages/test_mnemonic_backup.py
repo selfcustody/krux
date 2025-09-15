@@ -199,7 +199,7 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
 
         title = "Plaintext QR"
         mnemonics.display_qr_codes.assert_called_with(
-            ctx.wallet.key.mnemonic, FORMAT_NONE, title
+            ctx.wallet.key.mnemonic, title=title
         )
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
@@ -453,7 +453,391 @@ def test_mnemonic_standard_qr_touch(mocker, amigo, tdata):
 
         title = "Plaintext QR"
         mnemonics.display_qr_codes.assert_called_with(
-            ctx.wallet.key.mnemonic, FORMAT_NONE, title
+            ctx.wallet.key.mnemonic, title=title
         )
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
+
+
+def test_mnemonic_encrypted_qr(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.mnemonic_backup import MnemonicsView
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    cases = [
+        # 0 - 12W
+        (
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
+            None,
+            [
+                BUTTON_ENTER,  # QR Code
+                *([BUTTON_PAGE] * 3),  # Move to Encrypted QR code
+                BUTTON_ENTER,  # Select Encrypted QR code
+                BUTTON_ENTER,  # Select Type key
+                BUTTON_ENTER,  # type key 'a'
+                BUTTON_PAGE_PREV,  # Move to 'Go' key
+                BUTTON_ENTER,  # Select 'Go' key
+                BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
+                BUTTON_ENTER,  # Confirm to use fingerprint as ID
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_ENTER,  # Select 'Return to QR Viewer'
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_PAGE_PREV,  # Move 'Back to menu'
+                BUTTON_ENTER,  # Select 'Back to menu'
+                BUTTON_PAGE_PREV,  # Move to 'Back'
+                BUTTON_ENTER,  # Select 'Back'
+            ],
+        ),
+        # 1 - 24W
+        (
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            None,
+            [
+                BUTTON_ENTER,  # QR Code
+                *([BUTTON_PAGE] * 3),  # Move to Encrypted QR code
+                BUTTON_ENTER,  # Select Encrypted QR code
+                BUTTON_ENTER,  # Select Type key
+                BUTTON_ENTER,  # type key 'a'
+                BUTTON_PAGE_PREV,  # Move to 'Go' key
+                BUTTON_ENTER,  # Select 'Go' key
+                BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
+                BUTTON_ENTER,  # Confirm to use fingerprint as ID
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_ENTER,  # Select 'Return to QR Viewer'
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_PAGE_PREV,  # Move 'Back to menu'
+                BUTTON_ENTER,  # Select 'Back to menu'
+                BUTTON_PAGE_PREV,  # Move to 'Back'
+                BUTTON_ENTER,  # Select 'Back'
+            ],
+        ),
+        # 2 - 12W print
+        (
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_ENTER,  # QR Code
+                *([BUTTON_PAGE] * 3),  # Move to Encrypted QR code
+                BUTTON_ENTER,  # Select Encrypted QR code
+                BUTTON_ENTER,  # Select Type key
+                BUTTON_ENTER,  # type key 'a'
+                BUTTON_PAGE_PREV,  # Move to 'Go' key
+                BUTTON_ENTER,  # Select 'Go' key
+                BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
+                BUTTON_ENTER,  # Confirm to use fingerprint as ID
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_ENTER,  # Select 'Return to QR Viewer'
+                BUTTON_ENTER,  # See QrCode and exit
+                *([BUTTON_PAGE] * 3),  # Move 'Print as QR'
+                BUTTON_ENTER,  # Select 'Print as QR'
+                BUTTON_ENTER,  # Confirm 'Print as QR thermal/adafruit'
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_PAGE_PREV,  # Move 'Back to menu'
+                BUTTON_ENTER,  # Select 'Back to menu'
+                BUTTON_PAGE_PREV,  # Move to 'Back'
+                BUTTON_ENTER,  # Select 'Back'
+            ],
+        ),
+        # 3 - 24W print
+        (
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_ENTER,  # QR Code
+                *([BUTTON_PAGE] * 3),  # Move to Encrypted QR code
+                BUTTON_ENTER,  # Select Encrypted QR code
+                BUTTON_ENTER,  # Select Type key
+                BUTTON_ENTER,  # type key 'a'
+                BUTTON_PAGE_PREV,  # Move to 'Go' key
+                BUTTON_ENTER,  # Select 'Go' key
+                BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
+                BUTTON_ENTER,  # Confirm to use fingerprint as ID
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_ENTER,  # Select 'Return to QR Viewer'
+                BUTTON_ENTER,  # See QrCode and exit
+                *([BUTTON_PAGE] * 3),  # Move 'Print as QR'
+                BUTTON_ENTER,  # Select 'Print as QR'
+                BUTTON_ENTER,  # Confirm 'Print as QR thermal/adafruit'
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_PAGE_PREV,  # Move 'Back to menu'
+                BUTTON_ENTER,  # Select 'Back to menu'
+                BUTTON_PAGE_PREV,  # Move to 'Back'
+                BUTTON_ENTER,  # Select 'Back'
+            ],
+        ),
+        # 4 - 12W decline print
+        (
+            Wallet(tdata.SINGLESIG_12_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_ENTER,  # QR Code
+                *([BUTTON_PAGE] * 3),  # Move to Encrypted QR code
+                BUTTON_ENTER,  # Select Encrypted QR code
+                BUTTON_ENTER,  # Select Type key
+                BUTTON_ENTER,  # Type key 'a'
+                BUTTON_PAGE_PREV,  # Move to 'Go' key
+                BUTTON_ENTER,  # Select 'Go' key
+                BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
+                BUTTON_ENTER,  # Confirm to use fingerprint as ID
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_ENTER,  # Select 'Return to QR Viewer'
+                BUTTON_ENTER,  # See QrCode and exit
+                *([BUTTON_PAGE] * 3),  # Move to 'Print as QR'
+                BUTTON_ENTER,  # Select 'Print as QR'
+                BUTTON_PAGE_PREV,  # decline print
+                BUTTON_ENTER,  # See qrcode and exit
+                BUTTON_PAGE_PREV,  # Move to 'Back'
+                BUTTON_ENTER,  # Select 'Back'
+                BUTTON_PAGE_PREV,  # Move to back
+                BUTTON_ENTER,  # Select 'Back'
+            ],
+        ),
+        # 5 - 24W decline print
+        (
+            Wallet(tdata.SINGLESIG_24_WORD_KEY),
+            MockPrinter(),
+            [
+                BUTTON_ENTER,  # QR Code
+                *([BUTTON_PAGE] * 3),  # Move to Encrypted QR code
+                BUTTON_ENTER,  # Select Encrypted QR code
+                BUTTON_ENTER,  # Select Type key
+                BUTTON_ENTER,  # Type key 'a'
+                BUTTON_PAGE_PREV,  # Move to 'Go' key
+                BUTTON_ENTER,  # Select 'Go' key
+                BUTTON_ENTER,  # Confirm to proceed
+                BUTTON_ENTER,  # Confirm to add GCM cam entropy
+                BUTTON_ENTER,  # Confirm to use fingerprint as ID
+                BUTTON_ENTER,  # See QrCode and exit
+                BUTTON_ENTER,  # Select 'Return to QR Viewer'
+                BUTTON_ENTER,  # See QrCode and exit
+                *([BUTTON_PAGE] * 3),  # Move to 'Print as QR'
+                BUTTON_ENTER,  # Select 'Print as QR'
+                BUTTON_PAGE_PREV,  # decline print
+                BUTTON_ENTER,  # See qrcode and exit
+                BUTTON_PAGE_PREV,  # Move to 'Back'
+                BUTTON_ENTER,  # Select 'Back'
+                BUTTON_PAGE_PREV,  # Move to back
+                BUTTON_ENTER,  # Select 'Back'
+            ],
+        ),
+    ]
+
+    I_VECTOR = b"OR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e"
+    mocker.patch(
+        "krux.pages.capture_entropy.CameraEntropy.capture",
+        mocker.MagicMock(return_value=I_VECTOR),
+    )
+
+    case_count = 0
+    for case in cases:
+        print(case_count)
+        case_count += 1
+        ctx = create_ctx(mocker, case[2], case[0], case[1])
+        mnemonics = MnemonicsView(ctx)
+
+        mocker.spy(mnemonics, "encrypt_qr_code")
+        mnemonics.mnemonic()
+
+        mnemonics.encrypt_qr_code.assert_called_once()
+        assert ctx.input.wait_for_button.call_count == len(case[2])
+
+
+def test_print_mnemonic_other_words(mocker, amigo, tdata):
+    from krux.pages.home_pages.mnemonic_backup import MnemonicsView
+    from krux.input import BUTTON_PAGE_PREV, BUTTON_ENTER
+    from krux.wallet import Wallet
+
+    BTN_SEQ = [
+        BUTTON_ENTER,  # WORDS
+        BUTTON_ENTER,  # Exit view
+        BUTTON_ENTER,  # Print
+        BUTTON_PAGE_PREV,  # Move back
+        BUTTON_ENTER,  # Exit
+    ]
+
+    printer = MockPrinter()
+
+    def custom_create_printer():
+        return printer
+
+    ctx = create_ctx(mocker, BTN_SEQ, printer=printer)
+    ctx.wallet = Wallet(tdata.SINGLESIG_24_WORD_KEY)
+
+    mocker.patch("krux.printers.create_printer", new=custom_create_printer)
+    mnemonics = MnemonicsView(ctx)
+
+    mocker.spy(printer, "print_string")
+    mocker.spy(mnemonics, "show_mnemonic")
+
+    mnemonics.other_backup_formats()
+
+    mnemonics.show_mnemonic.assert_called()
+
+    # brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
+    printer.print_string.assert_has_calls(
+        [
+            mocker.call("1:brush   9:help     17:human\n"),
+            mocker.call("2:badge   10:panel   18:once\n"),
+            mocker.call("3:sing    11:bundle  19:effort\n"),
+            mocker.call("4:still   12:excess  20:candy\n"),
+            mocker.call("5:venue   13:sign    21:goat\n"),
+            mocker.call("6:panther 14:couch   22:top\n"),
+            mocker.call("7:kitchen 15:stove   23:tiny\n"),
+            mocker.call("8:please  16:increase 24:major\n"),
+        ]
+    )
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQ)
+
+
+def test_print_mnemonic_numbers_decimal(mocker, amigo, tdata):
+    from krux.pages.home_pages.mnemonic_backup import MnemonicsView
+    from krux.input import BUTTON_PAGE_PREV, BUTTON_ENTER
+    from krux.wallet import Wallet
+
+    BTN_SEQ = [
+        BUTTON_ENTER,  # DECIMAL
+        BUTTON_ENTER,  # Exit view
+        BUTTON_ENTER,  # Print
+        BUTTON_PAGE_PREV,  # Move back
+        BUTTON_ENTER,  # Exit
+    ]
+
+    printer = MockPrinter()
+
+    def custom_create_printer():
+        return printer
+
+    ctx = create_ctx(mocker, BTN_SEQ, printer=printer)
+    ctx.wallet = Wallet(tdata.SINGLESIG_24_WORD_KEY)
+
+    mocker.patch("krux.printers.create_printer", new=custom_create_printer)
+    mnemonics = MnemonicsView(ctx)
+
+    mocker.spy(printer, "print_string")
+    mocker.spy(mnemonics, "show_mnemonic")
+
+    mnemonics.display_mnemonic_numbers()
+
+    mnemonics.show_mnemonic.assert_called()
+
+    # brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
+    printer.print_string.assert_has_calls(
+        [
+            mocker.call("1:234     9:857      17:887\n"),
+            mocker.call("2:140     10:1277    18:1237\n"),
+            mocker.call("3:1611    11:243     19:566\n"),
+            mocker.call("4:1711    12:629     20:267\n"),
+            mocker.call("5:1940    13:1603    21:801\n"),
+            mocker.call("6:1279    14:392     22:1832\n"),
+            mocker.call("7:985     15:1718    23:1812\n"),
+            mocker.call("8:1332    16:918     24:1076\n"),
+        ]
+    )
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQ)
+
+
+def test_print_mnemonic_numbers_hex(mocker, amigo, tdata):
+    from krux.pages.home_pages.mnemonic_backup import MnemonicsView
+    from krux.input import BUTTON_PAGE_PREV, BUTTON_PAGE, BUTTON_ENTER
+    from krux.wallet import Wallet
+
+    BTN_SEQ = [
+        BUTTON_PAGE,  # HEX
+        BUTTON_ENTER,  # Confirm
+        BUTTON_ENTER,  # Exit view
+        BUTTON_ENTER,  # Print prompt
+        BUTTON_PAGE,  # Move to OCT
+        BUTTON_PAGE,  # Move to < back
+        BUTTON_ENTER,  # press < back
+    ]
+
+    printer = MockPrinter()
+
+    def custom_create_printer():
+        return printer
+
+    ctx = create_ctx(mocker, BTN_SEQ, printer=printer)
+    ctx.wallet = Wallet(tdata.SINGLESIG_24_WORD_KEY)
+
+    mocker.patch("krux.printers.create_printer", new=custom_create_printer)
+    mnemonics = MnemonicsView(ctx)
+
+    mocker.spy(printer, "print_string")
+    mocker.spy(mnemonics, "show_mnemonic")
+
+    mnemonics.display_mnemonic_numbers()
+
+    mnemonics.show_mnemonic.assert_called()
+
+    # brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
+    printer.print_string.assert_has_calls(
+        [
+            mocker.call("1:EA      9:359      17:377\n"),
+            mocker.call("2:8C      10:4FD     18:4D5\n"),
+            mocker.call("3:64B     11:F3      19:236\n"),
+            mocker.call("4:6AF     12:275     20:10B\n"),
+            mocker.call("5:794     13:643     21:321\n"),
+            mocker.call("6:4FF     14:188     22:728\n"),
+            mocker.call("7:3D9     15:6B6     23:714\n"),
+            mocker.call("8:534     16:396     24:434\n"),
+        ]
+    )
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQ)
+
+
+def test_print_mnemonic_numbers_oct(mocker, amigo, tdata):
+    from krux.pages.home_pages.mnemonic_backup import MnemonicsView
+    from krux.input import BUTTON_PAGE_PREV, BUTTON_PAGE, BUTTON_ENTER
+    from krux.wallet import Wallet
+
+    BTN_SEQ = [
+        BUTTON_PAGE,  # HEX
+        BUTTON_PAGE,  # OCT
+        BUTTON_ENTER,  # Confirm
+        BUTTON_ENTER,  # Exit view
+        BUTTON_ENTER,  # Print prompt
+        BUTTON_PAGE,  # Move to < back
+        BUTTON_ENTER,  # press < back
+    ]
+
+    printer = MockPrinter()
+
+    def custom_create_printer():
+        return printer
+
+    ctx = create_ctx(mocker, BTN_SEQ, printer=printer)
+    ctx.wallet = Wallet(tdata.SINGLESIG_24_WORD_KEY)
+
+    mocker.patch("krux.printers.create_printer", new=custom_create_printer)
+    mnemonics = MnemonicsView(ctx)
+
+    mocker.spy(printer, "print_string")
+    mocker.spy(mnemonics, "show_mnemonic")
+
+    mnemonics.display_mnemonic_numbers()
+
+    mnemonics.show_mnemonic.assert_called()
+
+    # brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
+    printer.print_string.assert_has_calls(
+        [
+            mocker.call("1:352     9:1531     17:1567\n"),
+            mocker.call("2:214     10:2375    18:2325\n"),
+            mocker.call("3:3113    11:363     19:1066\n"),
+            mocker.call("4:3257    12:1165    20:413\n"),
+            mocker.call("5:3624    13:3103    21:1441\n"),
+            mocker.call("6:2377    14:610     22:3450\n"),
+            mocker.call("7:1731    15:3266    23:3424\n"),
+            mocker.call("8:2464    16:1626    24:2064\n"),
+        ]
+    )
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQ)

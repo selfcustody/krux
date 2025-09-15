@@ -1,3 +1,4 @@
+import pytest
 from ...shared_mocks import MockPrinter
 from .test_home import tdata, create_ctx
 from ...test_wallet import tdata as wallet_tdata
@@ -13,11 +14,11 @@ def test_wallet(mocker, m5stickv, tdata):
     cases = [
         # 0 Don't load
         (
-            False,
-            tdata.SINGLESIG_12_WORD_KEY,
-            tdata.SPECTER_SINGLESIG_WALLET_DATA,
-            None,
-            [BUTTON_PAGE],
+            False,  # if descriptor will be automatically loaded
+            tdata.SINGLESIG_12_WORD_KEY,  # mnemonic for wallet
+            tdata.SPECTER_SINGLESIG_WALLET_DATA,  # wallet descriptor
+            None,  # Printer
+            [BUTTON_PAGE],  # btn_seq
         ),
         # 1 Load, from camera, good data - accept
         (
@@ -51,7 +52,7 @@ def test_wallet(mocker, m5stickv, tdata):
             tdata.SINGLESIG_12_WORD_KEY,
             tdata.SPECTER_SINGLESIG_WALLET_DATA,
             None,
-            [BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER],
         ),
         # 6 Print
         (
@@ -59,7 +60,7 @@ def test_wallet(mocker, m5stickv, tdata):
             tdata.SINGLESIG_12_WORD_KEY,
             tdata.SPECTER_SINGLESIG_WALLET_DATA,
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
         # 7 Decline to print
         (
@@ -67,7 +68,7 @@ def test_wallet(mocker, m5stickv, tdata):
             tdata.SINGLESIG_12_WORD_KEY,
             tdata.SPECTER_SINGLESIG_WALLET_DATA,
             MockPrinter(),
-            [BUTTON_ENTER, BUTTON_PAGE],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE],
         ),
         # 8 Multisig wallet, no print prompt
         (
@@ -75,7 +76,7 @@ def test_wallet(mocker, m5stickv, tdata):
             tdata.MULTISIG_12_WORD_KEY,
             tdata.SPECTER_MULTISIG_WALLET_DATA,
             None,
-            [BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER],
         ),
         # 9 vague BlueWallet-ish p2pkh, requires allow_assumption
         (
@@ -125,7 +126,7 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
-        # 1 Load, from SD card, good data, accept
+        # 15 Load, from SD card, good data, accept
         (
             False,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -142,6 +143,7 @@ def test_wallet(mocker, m5stickv, tdata):
         wallet = Wallet(case[1])
         if case[0]:
             wallet.load(case[2], FORMAT_PMOFN)
+            assert wallet.has_change_addr()
 
         ctx = create_ctx(mocker, case[4], wallet, case[3])
         wallet_descriptor = WalletDescriptor(ctx)
@@ -168,17 +170,162 @@ def test_wallet(mocker, m5stickv, tdata):
         if case[0]:
             # If wallet is already loaded
             wallet_descriptor.display_wallet.assert_called_once()
+            assert ctx.wallet.has_change_addr()
         else:
             # If accepted the message and choose to load from camera
             if case[4][:2] == [BUTTON_ENTER, BUTTON_ENTER]:
                 qr_capturer.assert_called_once()
                 if case[2] is not None and case[2] != "{}":
                     wallet_descriptor.display_loading_wallet.assert_called_once()
+                    assert ctx.wallet.has_change_addr()
             # If accepted the message and choose to load from SD
             elif case[4][:3] == [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER]:
                 if case[2] is not None and case[2] != "{}":
                     wallet_descriptor.display_loading_wallet.assert_called_once()
+                    assert ctx.wallet.has_change_addr()
         assert ctx.input.wait_for_button.call_count == len(case[4])
+
+
+def test_wallet_load_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages import MENU_CONTINUE
+
+    # nonsensical 0x8f byte encrypted w/ key="a" to test decryption failure
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x84\x2b\x2c",
+            0,
+        ),
+    )
+
+    btn_seq = [
+        BUTTON_ENTER,  # confirm load
+        BUTTON_ENTER,  # go load from camera
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # type key
+        BUTTON_PAGE,  # to "b"
+        BUTTON_ENTER,  # enter "b"
+        BUTTON_PAGE_PREV,  # back to "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key "b" (while "a" is correct key)
+    ]
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    walletdescriptor_ui = WalletDescriptor(ctx)
+    assert walletdescriptor_ui.wallet() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    ctx.display.flash_text.assert_called_with(
+        "Failed to decrypt", 248, 2000, highlight_prefix=""
+    )
+
+
+def test_load_desc_without_change(mocker, m5stickv, tdata):
+    import krux
+
+    mocker.patch("krux.krux_settings.t", side_effect=lambda slug: slug)
+
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.display import BOTTOM_PROMPT_LINE
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor?
+        BUTTON_ENTER,  # Load from camera menu item
+        BUTTON_ENTER,  # Could not determine change Proceed anyway?
+        BUTTON_ENTER,  # Load?
+    ]
+    wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.spy(wallet_descriptor, "prompt")
+
+    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt"
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (descriptor, FORMAT_PMOFN)
+    )
+
+    assert not ctx.wallet.is_loaded()
+
+    wallet_descriptor.wallet()
+
+    krux.krux_settings.t.assert_has_calls(
+        [
+            mocker.call("Could not determine change address."),
+        ]
+    )
+
+    wallet_descriptor.prompt.assert_has_calls(
+        [
+            mocker.call("Proceed anyway?", BOTTOM_PROMPT_LINE),
+        ]
+    )
+
+    assert ctx.wallet.is_loaded()
+    assert (
+        not ctx.wallet.has_change_addr()
+    )  # the loaded descriptor doesn't have change addr
+
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_cancel_load_desc_without_change(mocker, m5stickv, tdata):
+    import krux
+
+    mocker.patch("krux.krux_settings.t", side_effect=lambda slug: slug)
+
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.display import BOTTOM_PROMPT_LINE
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor?
+        BUTTON_ENTER,  # Load from camera menu item
+        BUTTON_PAGE,  # Could not determine change Proceed anyway?
+    ]
+    wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.spy(wallet_descriptor, "prompt")
+
+    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt"
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (descriptor, FORMAT_PMOFN)
+    )
+
+    assert not ctx.wallet.is_loaded()
+
+    wallet_descriptor.wallet()
+
+    krux.krux_settings.t.assert_has_calls(
+        [
+            mocker.call("Could not determine change address."),
+        ]
+    )
+
+    wallet_descriptor.prompt.assert_has_calls(
+        [
+            mocker.call("Proceed anyway?", BOTTOM_PROMPT_LINE),
+        ]
+    )
+
+    assert not ctx.wallet.is_loaded()  # continue unloaded
+    assert ctx.wallet.has_change_addr()  # single-sig per default has change addr
+
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
 
 def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
@@ -193,8 +340,8 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
 
     cases = [
         # 0 - Key
-        # 1 - Wallet
-        # 2 - Button presses
+        # 1 - Wallet descriptor
+        # 2 - Button sequence
         (  # Miniscript key, Liana miniscript descriptor
             wallet_tdata.MINISCRIPT_KEY,
             wallet_tdata.LIANA_MINISCRIPT_DESCRIPTOR,
@@ -260,4 +407,5 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
         mocker.spy(wallet_descriptor, "display_loading_wallet")
         wallet_descriptor.wallet()
         wallet_descriptor.display_loading_wallet.assert_called_once()
+        assert ctx.wallet.has_change_addr()
         assert ctx.input.wait_for_button.call_count == len(case[2])

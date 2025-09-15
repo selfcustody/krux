@@ -30,29 +30,64 @@ def string_width_px(string):
 
 
 def test_init(mocker, multiple_devices):
+    mocked_settings = mocker.MagicMock()
+    mocked_settings.hardware = mocker.MagicMock()
+    mocked_settings.hardware.display = mocker.MagicMock()
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+
     import krux
     from krux.display import Display
     import board
 
     mocker.spy(Display, "initialize_lcd")
+    mocker.spy(Display, "set_pmu_backlight")
 
-    d = Display()
-    d.initialize_lcd()
-
-    assert isinstance(d, Display)
-    d.initialize_lcd.assert_called()
-
-    krux.display.lcd.init.assert_called_once()
     if board.config["type"] == "m5stickv":
-        assert "type" in krux.display.lcd.init.call_args.kwargs
-        assert (
-            krux.display.lcd.init.call_args.kwargs["type"]
-            == board.config["lcd"]["lcd_type"]
-        )
+
+        # Test the pmu backlight brightness levels
+        # for m5stickv, 1 to 5 are valid brightness levels
+        # (1 inclusive and 6 exclusive)
+        for level in range(1, 6):
+            brightness = str(level)
+            mocked_settings.hardware.display.brightness = brightness
+            mocker.patch("krux.display.Settings", return_value=mocked_settings)
+
+            krux.display.lcd.init.reset_mock()
+            Display.set_pmu_backlight.reset_mock()
+
+            d = Display()
+            d.initialize_lcd()
+
+            assert isinstance(d, Display)
+            d.initialize_lcd.assert_called()
+            krux.display.lcd.init.assert_called_once()
+
+            Display.set_pmu_backlight.assert_called_once_with(d, str(level))
+
+            assert "type" in krux.display.lcd.init.call_args.kwargs
+            assert (
+                krux.display.lcd.init.call_args.kwargs["type"]
+                == board.config["lcd"]["lcd_type"]
+            )
+
     elif board.config["type"] == "amigo":
+        d = Display()
+        d.initialize_lcd()
+
+        assert isinstance(d, Display)
+        d.initialize_lcd.assert_called()
+        krux.display.lcd.init.assert_called_once()
+
         assert "invert" in krux.display.lcd.init.call_args.kwargs
         assert krux.display.lcd.init.call_args.kwargs["invert"] == True
+
+    else:
+        d = Display()
+        d.initialize_lcd()
+
+        assert isinstance(d, Display)
+        d.initialize_lcd.assert_called()
+        krux.display.lcd.init.assert_called_once()
 
 
 def test_width(mocker, m5stickv):
@@ -64,7 +99,6 @@ def test_width(mocker, m5stickv):
     d.initialize_lcd()
 
     d.to_portrait()
-
     assert d.width() == krux.display.lcd.width()
     krux.display.lcd.width.assert_called()
 
@@ -102,6 +136,11 @@ def test_qr_data_width(mocker, m5stickv):
     width = d.width()
     mocker.spy(d, "width")
     assert d.qr_data_width() == width // 4
+
+    mocker.patch.object(d, "width", new=lambda: 240)
+    width = d.width()
+    mocker.spy(d, "width")
+    assert d.qr_data_width() == width // 5
 
     mocker.patch.object(d, "width", new=lambda: 320)
     width = d.width()
@@ -145,13 +184,13 @@ def test_to_lines(mocker, m5stickv):
         (135, "Two  Words", ["Two  Words"]),
         (135, "Two   Words", ["Two   Words"]),
         (135, "Two        Words", ["Two        Words"]),
-        (135, "Two\nWords", ["Two", "Words"]),
+        (135, "Two\nWords", ["Two", "Words"]),  # case 4
         (135, "Two\n\nWords", ["Two", "", "Words"]),
         (135, "Two\n\n\nWords", ["Two", "", "", "Words"]),
         (135, "Two\n\n\n\nWords", ["Two", "", "", "", "Words"]),
         (135, "Two\n\n\n\n\nWords", ["Two", "", "", "", "", "Words"]),
-        (135, "\nTwo\nWords\n", ["", "Two", "Words"]),
-        (135, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),
+        (135, "\nTwo\nWords\n", ["", "Two", "Words"]),  # case 9
+        (135, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),  # case 10
         (135, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
         (135, "More Than Two Words", ["More Than Two", "Words"]),  # 13 + 5 chars
         (
@@ -185,7 +224,7 @@ def test_to_lines(mocker, m5stickv):
                 "Tcpm6nLxgFapCZyh",
                 "KgqwcEGv1BVpD7s",
             ],
-        ),
+        ),  # case 15
         (135, "Log Level\nNONE", ["Log Level", "NONE"]),
         (
             135,
@@ -208,12 +247,12 @@ def test_to_lines(mocker, m5stickv):
         # (240 - 2 * 10) // 8 = 27 chars
         (240, "Two Words", ["Two Words"]),
         (240, "Two\nWords", ["Two", "Words"]),
-        (240, "Two\n\nWords", ["Two", "", "Words"]),
+        (240, "Two\n\nWords", ["Two", "", "Words"]),  # case 20
         (240, "Two\n\n\nWords", ["Two", "", "", "Words"]),
         (240, "Two\n\n\n\nWords", ["Two", "", "", "", "Words"]),
         (240, "Two\n\n\n\n\nWords", ["Two", "", "", "", "", "Words"]),
         (240, "\nTwo\nWords\n", ["", "Two", "Words"]),
-        (240, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),  # 25
+        (240, "\n\nTwo\nWords\n\n", ["", "", "Two", "Words", ""]),  # case 25
         (240, "\n\n\nTwo\nWords\n\n\n", ["", "", "", "Two", "Words", "", ""]),
         (240, "More Than Two Words", ["More Than Two Words"]),
         (
@@ -243,7 +282,7 @@ def test_to_lines(mocker, m5stickv):
                 "cpm6nLxgFapCZyhKgqwcEGv1BVp",
                 "D7s",
             ],
-        ),  # 30
+        ),  # case 30
         (240, "Log Level\nNONE", ["Log Level", "NONE"]),
         (
             240,
@@ -269,6 +308,10 @@ def test_to_lines(mocker, m5stickv):
             new=mocker.MagicMock(width=mocker.MagicMock(return_value=case[0])),
         )
 
+        from krux.kboard import kboard
+
+        kboard.is_m5stickv = case[0] == 135
+
         d = Display()
         d.to_portrait()
 
@@ -292,7 +335,7 @@ def test_to_lines(mocker, m5stickv):
     cut_text = [
         "A really long text. A",
         "really long text. A really",
-        "long text. A really long...",
+        "long text. A really long…",
     ]
     assert lines == cut_text
 
@@ -348,6 +391,152 @@ def test_to_lines_exact_match_amigo(mocker, amigo):
         assert lines == case[2]
 
 
+def test_to_lines_korean(mocker, m5stickv):
+    from krux.display import Display, lcd
+
+    mock_settings = mocker.MagicMock()
+    mock_settings.i18n.locale = "ko-KR"
+
+    mocker.spy(lcd, "string_has_wide_glyph")
+    mocker.patch("krux.display.Settings", return_value=mock_settings)
+    mocker.patch("krux.display.lcd.width", return_value=135)
+
+    text = "안녕"
+    d = Display()
+    d.to_portrait()
+    result = d.to_lines(text)
+
+    lcd.string_has_wide_glyph.assert_called_once_with("안녕")
+    assert result == ["안녕"]
+
+
+def test_to_lines_japanese(mocker, m5stickv):
+    from krux.display import Display, lcd
+
+    mock_settings = mocker.MagicMock()
+    mock_settings.i18n.locale = "ja-JP"
+
+    mocker.spy(lcd, "string_has_wide_glyph")
+    mocker.patch("krux.display.Settings", return_value=mock_settings)
+    mocker.patch("krux.display.lcd.width", return_value=135)
+
+    text = "こんにちは"
+    d = Display()
+    d.to_portrait()
+    result = d.to_lines(text)
+
+    lcd.string_has_wide_glyph.assert_called_once_with("こんにちは")
+    assert result == ["こんにちは"]
+
+
+def test_to_lines_chinese(mocker, m5stickv):
+    from krux.display import Display, lcd
+
+    mock_settings = mocker.MagicMock()
+    mock_settings.i18n.locale = "zh-CN"
+
+    mocker.spy(lcd, "string_has_wide_glyph")
+    mocker.patch("krux.display.Settings", return_value=mock_settings)
+    mocker.patch("krux.display.lcd.width", return_value=135)
+
+    text = "你好"
+    d = Display()
+    d.to_portrait()
+    result = d.to_lines(text)
+
+    lcd.string_has_wide_glyph.assert_called_once_with("你好")
+    assert result == ["你好"]
+
+
+def test_to_lines_endpos(mocker, m5stickv):
+    from krux.display import Display, FONT_WIDTH, TOTAL_LINES
+
+    # m5stick has max 16 chars per line and 16 lines
+    max_lines = 16
+
+    mocker.patch("krux.display.lcd.width", return_value=135)
+    text = "I am a long line of text, and I will be repeated." * 30
+    d = Display()
+    d.to_portrait()
+    lines, endpos = d._to_lines_endpos(text, max_lines)
+    assert len(lines) == max_lines
+    assert endpos == 249
+
+    # test exactly enough to finish the page w/o ellipsis
+    for white in (" ", "\n"):
+        print("whitespace:", repr(white))
+        text = white.join(
+            ["line {:02d} 16 chars".format(x) for x in range(1, max_lines + 1)]
+        )
+        d = Display()
+        d.to_portrait()
+        lines, endpos = d._to_lines_endpos(text, max_lines)
+        assert len(lines) == max_lines
+        assert endpos == len(text)
+        assert lines[-1][-1] != "\u2026"  # no ellipsis
+
+        # ... and that one char too big would span a page w/ ellipsis
+        text += "+"
+        lines, endpos = d._to_lines_endpos(text, max_lines)
+        assert len(lines) == max_lines
+        assert endpos == len(text) - len("chars+")
+        assert lines[-1][-1] == "\u2026"  # has ellipsis
+        lines, endpos = d._to_lines_endpos(text[endpos:], max_lines)
+        assert len(lines) == 1
+        assert lines[-1] == "chars+"  # space gets stripped
+
+    # without anywhere convenient to break, force break
+    text = "".join(["line_{:02d}_16_chars".format(x) for x in range(1, max_lines + 1)])
+    d = Display()
+    d.to_portrait()
+    lines, endpos = d._to_lines_endpos(text, max_lines)
+    assert len(lines) == max_lines
+    assert endpos == len(text)
+    assert lines[-1][-1] != "\u2026"  # no ellipsis
+
+    # ... and that one char too big would span a page w/ ellipsis
+    text += "+"
+    lines, endpos = d._to_lines_endpos(text, max_lines)
+    old_end_pos = endpos
+    assert len(lines) == max_lines
+    assert endpos == len(text) - len("s+")
+    assert lines[-1][-1] == "\u2026"  # has ellipsis
+    lines, endpos = d._to_lines_endpos(text[endpos:], max_lines)
+    assert len(lines) == 1
+    assert lines[-1] == "s+"
+
+    # simple cases
+
+    chars_per_line = 10
+    display_width = FONT_WIDTH * chars_per_line
+    mocker.patch("krux.display.lcd.width", return_value=display_width)
+
+    d = Display()
+    d.to_portrait()
+
+    text = "0123456789abc"
+    max_lines = 1
+    lines, endpos = d._to_lines_endpos(text, max_lines)
+    print(lines, endpos, text[endpos:])
+    assert len(lines) == max_lines
+    assert len(lines[0]) == chars_per_line
+    assert "012345678…" == lines[0]
+    assert "9" not in lines[0]
+    assert text[endpos:] == "9abc"
+
+    text = "0123456789abc" * 13  # 13 * 13 = 169
+    text += "x"  # 169 + 1 = 170
+    max_lines = TOTAL_LINES  # 17
+    print(TOTAL_LINES)
+    lines, endpos = d._to_lines_endpos(text, max_lines)
+    print(lines, len(lines), endpos)
+    for i in range(max_lines):
+        assert len(lines[i]) == chars_per_line
+
+    lines, _ = d._to_lines_endpos(text[endpos:])
+    assert lines == [""]  # vazio
+
+
 def test_outline(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
@@ -360,6 +549,18 @@ def test_outline(mocker, m5stickv):
     krux.display.lcd.draw_outline.assert_called_with(
         0, 0, 100, 100, krux.display.lcd.WHITE
     )
+
+
+def test_outline_flipped(mocker, amigo):
+    mock_lcd = mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 480)
+    d.outline(0, 0, 100, 100, krux.display.lcd.WHITE)
+
+    mock_lcd.draw_outline.assert_called_with(379, 0, 100, 100, krux.display.lcd.WHITE)
 
 
 def test_draw_line(mocker, m5stickv):
@@ -391,21 +592,7 @@ def test_draw_line_on_inverted_display(mocker, amigo):
     )
 
 
-def test_fill_circle(mocker, m5stickv):
-    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
-    import krux
-    from krux.display import Display
-
-    d = Display()
-
-    d.fill_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
-
-    krux.display.lcd.draw_circle.assert_called_with(
-        100, 100, 50, 0, krux.display.lcd.WHITE
-    )
-
-
-def test_fill_circle_on_inverted_display(mocker, amigo):
+def test_hline(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
     from krux.display import Display
@@ -413,11 +600,20 @@ def test_fill_circle_on_inverted_display(mocker, amigo):
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 480)
 
-    d.fill_circle(100, 100, 50, 0, krux.display.lcd.WHITE)
+    d.draw_hline(0, 0, 100, krux.display.lcd.WHITE)
+    krux.display.lcd.draw_line.assert_called_with(0, 0, 100, 0, krux.display.lcd.WHITE)
 
-    krux.display.lcd.draw_circle.assert_called_with(
-        480 - 100, 100, 50, 0, krux.display.lcd.WHITE
-    )
+
+def test_vline(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 480)
+
+    d.draw_vline(0, 0, 100, krux.display.lcd.WHITE)
+    krux.display.lcd.draw_line.assert_called_with(0, 0, 0, 100, krux.display.lcd.WHITE)
 
 
 def test_fill_rectangle(mocker, m5stickv):
@@ -482,7 +678,8 @@ def test_draw_string_on_inverted_display(mocker, amigo):
 
 def test_draw_hcentered_text(mocker, m5stickv):
     import krux
-    from krux.display import Display
+    from krux.display import Display, DEFAULT_PADDING
+    from krux.themes import theme
 
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     mocker.patch("krux.display.lcd.string_width_px", side_effect=string_width_px)
@@ -497,6 +694,104 @@ def test_draw_hcentered_text(mocker, m5stickv):
 
     d.draw_string.assert_called_with(
         23, 50, "Hello world", krux.display.lcd.WHITE, krux.display.lcd.BLACK
+    )
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 135)
+    mocker.spy(d, "draw_string")
+
+    d.draw_hcentered_text("prefix: highlighted", highlight_prefix=":")
+
+    d.draw_string.assert_has_calls(
+        [
+            mocker.call(
+                39,
+                DEFAULT_PADDING,
+                "prefix:",
+                theme.highlight_color,
+                theme.bg_color,
+            ),
+            mocker.call(23, 24, "highlighted", theme.fg_color, theme.bg_color),
+        ]
+    )
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 135)
+    mocker.spy(d, "draw_string")
+
+    d.draw_hcentered_text(
+        "This is a very big prefix that don't fit one line: highlighted2",
+        highlight_prefix=":",
+    )
+
+    d.draw_string.assert_has_calls(
+        [
+            mocker.call(
+                47,
+                52,
+                "line:",
+                theme.highlight_color,
+                theme.bg_color,
+            ),
+            mocker.call(
+                15,
+                38,
+                "don't fit one",
+                theme.highlight_color,
+                theme.bg_color,
+            ),
+            mocker.call(
+                7,
+                24,
+                "big prefix that",
+                theme.highlight_color,
+                theme.bg_color,
+            ),
+            mocker.call(
+                11,
+                DEFAULT_PADDING,
+                "This is a very",
+                theme.highlight_color,
+                theme.bg_color,
+            ),
+            mocker.call(19, 66, "highlighted2", theme.fg_color, theme.bg_color),
+        ]
+    )
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 135)
+    mocker.spy(d, "draw_string")
+
+    d.draw_hcentered_text(
+        "This is\n\n a very\nbig prefix that don't fit one line: highlighted2",
+        highlight_prefix=":",
+    )
+
+    d.draw_string.assert_has_calls(
+        [
+            mocker.call(
+                47,
+                80,
+                "line:",
+                theme.highlight_color,
+                theme.bg_color,
+            ),
+            mocker.call(
+                15,
+                66,
+                "don't fit one",
+                theme.highlight_color,
+                theme.bg_color,
+            ),
+            mocker.call(
+                7,
+                52,
+                "big prefix that",
+                theme.highlight_color,
+                theme.bg_color,
+            ),
+            mocker.call(19, 94, "highlighted2", theme.fg_color, theme.bg_color),
+        ]
     )
 
 
@@ -566,7 +861,7 @@ def test_draw_centered_text(mocker, m5stickv):
     d.draw_centered_text("Hello world", krux.display.lcd.WHITE, 0)
 
     d.draw_hcentered_text.assert_called_with(
-        "Hello world", 113, krux.display.lcd.WHITE, 0
+        ["Hello world"], 113, krux.display.lcd.WHITE, 0, highlight_prefix=""
     )
 
 
@@ -578,10 +873,10 @@ def test_draw_qr_code(mocker, m5stickv):
     d = Display()
     mocker.patch.object(d, "width", new=lambda: 135)
 
-    d.draw_qr_code(0, TEST_QR)
+    d.draw_qr_code(TEST_QR)
 
     krux.display.lcd.draw_qr_code_binary.assert_called_with(
-        0, TEST_QR, 135, QR_DARK_COLOR, QR_LIGHT_COLOR, QR_LIGHT_COLOR
+        0, 0, TEST_QR, 135, QR_DARK_COLOR, QR_LIGHT_COLOR, QR_LIGHT_COLOR
     )
 
 
@@ -602,8 +897,46 @@ def test_flash_text(mocker, m5stickv):
     d.flash_text("test", WHITE)
 
     d.clear.assert_called()
-    d.draw_centered_text.assert_called_with("test", WHITE)
+    d.draw_centered_text.assert_called_with("test", WHITE, highlight_prefix="")
     time.sleep_ms.assert_called_with(FLASH_MSG_TIME)
+
+
+def test_max_menu_lines(mocker, m5stickv):
+    from krux.display import Display
+
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 135)
+    mocker.patch.object(d, "height", new=lambda: 240)
+
+    cases = (
+        [(i, 8) for i in range(0, 16)]
+        + [(i, 7) for i in range(17, 45)]
+        + [(i, 6) for i in range(45, 73)]
+        + [(i, 5) for i in range(73, 101)]
+        + [(i, 4) for i in range(101, 129)]
+        + [(i, 3) for i in range(129, 157)]
+        + [(i, 2) for i in range(157, 185)]
+    )
+    menu_lines = [
+        (
+            "Very big text menu item that spans multiple lines and occupy space of other menu item",
+            None,
+        ),
+        ("menu item", None),
+        ("menu item", None),
+        ("menu item", None),
+    ]
+    for line_offset, expected_lines in cases:
+        lines = d.max_menu_lines(line_offset=line_offset)
+        assert lines == expected_lines
+        lines = d.max_menu_lines(line_offset, menu_lines)
+        assert (
+            lines == expected_lines - 1
+        )  # reduce the number because the menu param has an entry with multiple lines
+        lines = d.max_menu_lines(line_offset, menu_lines[1:])
+        assert lines == expected_lines  # removed the entry that spans multiple lines
 
 
 def test_render_image(mocker, multiple_devices):
@@ -695,3 +1028,15 @@ def test_render_image_with_double_subtitle(mocker, multiple_devices):
         krux.display.lcd.display.assert_called_once_with(
             img, oft=(24, 0), roi=(72, 0, 186, 240)
         )
+
+
+def test_offset(mocker, multiple_devices):
+    from krux.display import Display, BOTTOM_LINE, MINIMAL_PADDING
+    from krux.kboard import kboard
+
+    d = Display()
+    if kboard.is_cube:
+        assert d.qr_offset() == BOTTOM_LINE
+    else:
+        assert d.qr_offset() == d.width() + MINIMAL_PADDING
+    assert d.qr_offset(10) == 10 + MINIMAL_PADDING

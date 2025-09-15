@@ -1,6 +1,9 @@
 include _wait-for-logo.txt
 
+screenshot login-options.png
+
 # Navigate to About
+press_amigo_only BUTTON_B
 press BUTTON_B
 press BUTTON_B
 press BUTTON_B

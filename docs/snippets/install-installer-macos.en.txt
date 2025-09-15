@@ -4,7 +4,7 @@ drag'n'drop the **Krux-Installer** to the **Applications** folder:
 <img width="450" src="/krux/img/krux-installer/dmg_volume.png" alt="krux-installer's DMG volume" />
 
 Before run, you'll need to remove the quarantine flag from application.
-This occurs because we  don't added the [Apple's code signing and notarization](https://support.apple.com/guide/security/app-code-signing-process-sec3ad8e6e53/web).
+This occurs because we have not added the [Apple's code signing and notarization](https://support.apple.com/guide/security/app-code-signing-process-sec3ad8e6e53/web).
 
 To fix this, open your terminal and execute the following command:
 

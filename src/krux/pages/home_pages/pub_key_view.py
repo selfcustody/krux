@@ -59,6 +59,8 @@ class PubkeyView(Page):
             )
 
         def _pub_key_text(version):
+            from ...themes import theme
+
             pub_text_menu_items = [
                 (
                     t("Save to SD card"),
@@ -70,18 +72,25 @@ class PubkeyView(Page):
                 ),
             ]
             full_pub_key = self.ctx.wallet.key.account_pubkey_str(version)
-            menu_offset = 5 + len(self.ctx.display.to_lines(full_pub_key))
-            menu_offset *= FONT_HEIGHT
+            info_text = (
+                "\n\n"
+                + self.ctx.wallet.key.derivation_str(pretty=True)
+                + "\n\n"
+                + full_pub_key
+            )
+            menu_offset = (len(self.ctx.display.to_lines(info_text)) + 1) * FONT_HEIGHT
             pub_key_menu = Menu(self.ctx, pub_text_menu_items, offset=menu_offset)
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(
-                self.ctx.wallet.key.fingerprint_hex_str(pretty=True)
-                + "\n\n"
-                + self.ctx.wallet.key.derivation_str(pretty=True)
-                + "\n\n"
-                + full_pub_key,
+                info_text,
                 offset_y=FONT_HEIGHT,
                 info_box=True,
+            )
+            self.ctx.display.draw_hcentered_text(
+                self.ctx.wallet.key.fingerprint_hex_str(pretty=True),
+                offset_y=FONT_HEIGHT,
+                color=theme.highlight_color,
+                bg_color=theme.info_bg_color,
             )
             pub_key_menu.run_loop()
 

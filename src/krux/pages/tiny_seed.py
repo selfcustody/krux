@@ -20,30 +20,36 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import board
 import lcd
 import image
 import sensor
 import time
 from embit.wordlists.bip39 import WORDLIST
-from . import Page, FLASH_MSG_TIME, proceed_menu
+from . import Page, FLASH_MSG_TIME
 from ..themes import theme
 from ..wdt import wdt
 from ..krux_settings import t
 from ..display import (
     DEFAULT_PADDING,
     MINIMAL_PADDING,
-    MINIMAL_DISPLAY,
     FONT_HEIGHT,
     FONT_WIDTH,
-    NARROW_SCREEN_WITH,
-    SMALLEST_HEIGHT,
 )
 from ..camera import BINARY_GRID_MODE
-from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+from ..input import (
+    BUTTON_ENTER,
+    BUTTON_PAGE,
+    BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
+    FAST_FORWARD,
+    FAST_BACKWARD,
+    PRESSED,
+    KEY_REPEAT_DELAY_MS,
+)
 from ..bip39 import entropy_checksum
+from ..kboard import kboard
 
-# Tiny Seed last bit index positions according to checksums
+# Tinyseed last bit index positions according to checksums
 TS_LAST_BIT_NO_CS = 143
 TS_LAST_BIT_12W_CS = 139
 TS_LAST_BIT_24W_CS = 135
@@ -56,19 +62,19 @@ TS_GO_POSITION = TS_ESC_START_POSITION + 11
 class TinySeed(Page):
     """Class for handling Tinyseed format"""
 
-    def __init__(self, ctx, label="Tiny Seed"):
+    def __init__(self, ctx, label="Tinyseed"):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.label = label
         self.x_offset = MINIMAL_PADDING + 2 * FONT_WIDTH
         self.printer = None
-        if self.ctx.display.width() > NARROW_SCREEN_WITH:
+        if not kboard.is_m5stickv:
             self.x_pad = self.ctx.display.width() * 2 // 27
             self.y_pad = self.ctx.display.height() // 17
         else:
             self.x_pad = FONT_WIDTH + 1
             self.y_pad = FONT_HEIGHT
-        if self.ctx.display.height() > SMALLEST_HEIGHT:
+        if not kboard.has_minimal_display:
             self.y_offset = DEFAULT_PADDING + 3 * FONT_HEIGHT
         else:
             self.y_offset = 2 * FONT_HEIGHT
@@ -91,7 +97,7 @@ class TinySeed(Page):
         """Draws labels for import and export Tinyseed UI"""
         self.ctx.display.draw_hcentered_text(self.label)
         # For non‑minimal displays, show extra bit numbers (rotate to landscape temporarily)
-        if not MINIMAL_DISPLAY:
+        if not kboard.has_minimal_display:
             self.ctx.display.to_landscape()
             bit_number = 2048
             bit_offset = MINIMAL_PADDING + 2 * FONT_HEIGHT
@@ -145,7 +151,7 @@ class TinySeed(Page):
             y += self.y_pad
 
     def export(self):
-        """Shows seed as a punch pattern for Tiny Seed layout"""
+        """Shows seed as a punch pattern for Tinyseed layout"""
         words = self.ctx.wallet.key.mnemonic.split(" ")
         num_pages = len(words) // 12
         for page in range(num_pages):
@@ -156,7 +162,7 @@ class TinySeed(Page):
             self.ctx.display.clear()
 
     def print_tiny_seed(self):
-        """Creates a bitmap image of a punched Tiny Seed and sends it to a thermal printer"""
+        """Creates a bitmap image of a punched Tinyseed and sends it to a thermal printer"""
         from ..printers import create_printer
 
         self.printer = create_printer()
@@ -170,9 +176,9 @@ class TinySeed(Page):
         pad_y = 8  # grid cell height in px
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
-            t("Printing.."), self.ctx.display.height() // 2
+            t("Printing…"), self.ctx.display.height() // 2
         )
-        self.printer.print_string("Tiny Seed\n\n")
+        self.printer.print_string("Tinyseed\n\n")
         num_pages = len(words) // 12
         for page in range(num_pages):
             ts_image = image.Image(size=(image_size, image_size), copy_to_fb=True)
@@ -313,7 +319,7 @@ class TinySeed(Page):
                 return TS_LAST_BIT_NO_CS if page == 0 else TS_LAST_BIT_24W_CS
             return TS_LAST_BIT_12W_CS
 
-        if btn == BUTTON_PAGE:
+        if btn in (BUTTON_PAGE, FAST_FORWARD):
             if index >= TS_GO_POSITION:
                 index = 0
             elif index >= TS_ESC_END_POSITION:
@@ -322,7 +328,7 @@ class TinySeed(Page):
                 index = TS_ESC_END_POSITION
             else:
                 index += 1
-        elif btn == BUTTON_PAGE_PREV:
+        elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD):
             if index <= 0:
                 index = TS_GO_POSITION
             elif index <= _last_editable_bit():
@@ -338,7 +344,7 @@ class TinySeed(Page):
         return index
 
     def enter_tiny_seed(self, w24=False, seed_numbers=None, scanning_24=False):
-        """UI to manually enter a Tiny Seed"""
+        """UI to manually enter a Tinyseed"""
 
         def _editable_bit():
             if w24:
@@ -367,10 +373,18 @@ class TinySeed(Page):
                 if index >= TS_GO_POSITION
                 else (0 if index >= TS_ESC_START_POSITION else None)
             )
-            proceed_menu(self.ctx, menu_offset, menu_index, t("Go"), t("Esc"))
+            self.draw_proceed_menu(t("Go"), t("Esc"), menu_offset, menu_index)
             if self.ctx.input.buttons_active:
                 self._draw_index(index)
-            btn = self.ctx.input.wait_for_button()
+
+            if self.ctx.input.page_value() == PRESSED:
+                btn = FAST_FORWARD
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            elif self.ctx.input.page_prev_value() == PRESSED:
+                btn = FAST_BACKWARD
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            else:
+                btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
                 btn = BUTTON_ENTER
                 index = self.ctx.input.touch.current_index()
@@ -402,11 +416,11 @@ class TinySeed(Page):
 
 
 class TinyScanner(Page):
-    """Uses camera sensor to detect punch pattern on a Tiny Seed, in metal or paper"""
+    """Uses camera sensor to detect punch pattern on a Tinyseed, in metal or paper"""
 
     # Settings for different binary grid types
     binary_grid_settings = {
-        "Tiny Seed": {
+        "Tinyseed": {
             "xpad_factor": (240 / (12 * 345)),
             "ypad_factor": (210 / (12 * 272)),
             "x_offset_factor_amigo_p0": 39 / 345,
@@ -452,7 +466,7 @@ class TinyScanner(Page):
 
     grid_settings = None
 
-    def __init__(self, ctx, grid_type="Tiny Seed"):
+    def __init__(self, ctx, grid_type="Tinyseed"):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.capturing = False  # Flag used for first page of 24-word seed
@@ -464,14 +478,12 @@ class TinyScanner(Page):
         self.label = t("Binary Grid") if grid_type == "Binary Grid" else grid_type
         self.g_corners = (0x80, 0x80, 0x80, 0x80)
         self.blob_otsu = 0x80
-        # Cache board type to avoid repeated lookups.
-        self.board_type = board.config.get("type", "")
 
     def _map_punches_region(self, rect_size, page=0):
         """Calculate x and y coordinates for punched grid regions."""
         self.x_regions = []
         self.y_regions = []
-        if self.board_type == "amigo":
+        if kboard.is_amigo:
             offset_key_x = "x_offset_factor_amigo_p{}".format(page)
             offset_key_y = "y_offset_factor_amigo_p{}".format(page)
         else:
@@ -496,8 +508,8 @@ class TinyScanner(Page):
         return True
 
     def _gradient_corners(self, rect, img):
-        """Compute histogram thresholds from four corners of the Tiny Seed region."""
-        if self.board_type != "amigo":
+        """Compute histogram thresholds from four corners of the Tinyseed region."""
+        if not kboard.is_amigo:
             region_ul = (
                 rect[0] + rect[2] // 8,
                 rect[1] + rect[3] // 30,
@@ -587,7 +599,7 @@ class TinyScanner(Page):
         return filtered
 
     def _detect_tiny_seed(self, img):
-        """Detect the Tiny Seed region as a bright blob."""
+        """Detect the Tinyseed region as a bright blob."""
         aspect_low = self.grid_settings["aspect_low"]
         aspect_high = self.grid_settings["aspect_high"]
 
@@ -631,7 +643,7 @@ class TinyScanner(Page):
         return rect
 
     def _draw_grid(self, img):
-        if self.ctx.display.height() > SMALLEST_HEIGHT:
+        if not kboard.has_minimal_display:
             for i in range(13):
                 img.draw_line(
                     self.x_regions[i],
@@ -660,11 +672,11 @@ class TinyScanner(Page):
         # Prepare mapping (reverse one axis based on board type)
         y_map = self.y_regions[:-1][:]
         x_map = self.x_regions[:-1][:]
-        if self.board_type == "amigo":
+        if kboard.is_amigo:
             x_map.reverse()
         else:
             y_map.reverse()
-        # Think in portrait mode, with Tiny Seed tilted 90 degrees
+        # Think in portrait mode, with Tinyseed tilted 90 degrees
         # Loop ahead will sweep TinySeed bits/dots and evaluate its luminosity
         for x in x_map:
             for y in y_map:
@@ -683,9 +695,7 @@ class TinyScanner(Page):
 
                 # Defines a threshold to evaluate if the dot is considered punched
                 punch_threshold = self._gradient_value(index)
-                punch_thickness = (
-                    1 if self.ctx.display.height() > SMALLEST_HEIGHT else 2
-                )
+                punch_thickness = 1 if not kboard.has_minimal_display else 2
                 if dot_l < punch_threshold:
                     img.draw_rectangle(
                         eval_rect, thickness=punch_thickness, color=lcd.WHITE
@@ -777,7 +787,7 @@ class TinyScanner(Page):
         return None
 
     def scanner(self, w24=False):
-        """Scans the Tiny Seed using the camera sensor."""
+        """Scans the Tinyseed using the camera sensor."""
         page = 0
         if w24:
             w24_seed_numbers = [0] * 24
@@ -811,9 +821,9 @@ class TinyScanner(Page):
                 self._map_punches_region(rect, page)
                 page_seed_numbers = self._detect_and_draw_punches(img)
                 self._draw_grid(img)
-            if self.board_type == "m5stickv":
+            if kboard.is_m5stickv:
                 img.lens_corr(strength=1.0, zoom=0.56)
-            if self.board_type == "amigo":
+            if kboard.is_amigo:
                 lcd.display(img, oft=(80, 40))
             else:
                 lcd.display(img)

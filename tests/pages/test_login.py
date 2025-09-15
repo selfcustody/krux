@@ -7,12 +7,31 @@ def mocker_printer(mocker):
     mocker.patch("krux.printers.thermal.AdafruitPrinter", new=mocker.MagicMock())
 
 
+@pytest.fixture
+def mock_retro_compatibility(mocker, amigo):
+    from krux.settings import CategorySetting
+
+    class MockDefaultWallet:
+        namespace = "settings.wallet"
+        network = CategorySetting("network", "main", ["main", "test"])
+        script_type = CategorySetting("script_type", "test", ["test"])
+        multisig = CategorySetting("multisig", True, [True, False])
+
+        def label(self, _):
+            pass
+
+    mocker.patch(
+        "krux.krux_settings.DefaultWallet",
+        mocker.MagicMock(return_value=MockDefaultWallet()),
+    )
+
+
 ################### Test menus
 
 
 def test_menu_load_from_camera(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER
 
     BTN_SEQUENCE = (
         # Load Key from Camera
@@ -36,7 +55,7 @@ def test_menu_load_from_camera(m5stickv, mocker):
 
 def test_menu_load_from_manual(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     BTN_SEQUENCE = (
         # Load Key from Manual
@@ -136,7 +155,7 @@ def test_load_setting_menu(m5stickv, mocker):
 
 def test_load_from_storage(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     BTN_SEQUENCE = (
         # Load Key from Storage
@@ -164,7 +183,7 @@ def test_load_from_storage(m5stickv, mocker):
 
 def test_new_12w_from_snapshot(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER
 
     # mocks a result of a hashed image
     mocker.patch(
@@ -235,6 +254,8 @@ def test_new_double_mnemonic_from_snapshot(m5stickv, mocker):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.wallet import is_double_mnemonic
     from embit.bip39 import mnemonic_from_bytes
+    from krux.display import THIN_SPACE
+    from krux.key import FINGERPRINT_SYMBOL
 
     ORIGINAL_ENTROPY = b"\x01" * 32
 
@@ -269,7 +290,11 @@ def test_new_double_mnemonic_from_snapshot(m5stickv, mocker):
     assert ctx.wallet.key.mnemonic == MNEMONIC
     assert is_double_mnemonic(MNEMONIC) == True
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("BIP39 Mnemonic*", 5)]
+        [
+            mocker.call(
+                "BIP39 Mnemonic*\n" + FINGERPRINT_SYMBOL + THIN_SPACE + "5d4342d2", 5
+            )
+        ]
     )
     original_mnemonic_words = mnemonic_from_bytes(ORIGINAL_ENTROPY).split(" ")
     converted_mnemonic_words = ctx.wallet.key.mnemonic.split(" ")
@@ -311,6 +336,7 @@ def test_load_12w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
     login.load_key_from_qr_code()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_12w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
@@ -340,6 +366,7 @@ def test_load_12w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
     login.load_key_from_qr_code()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
@@ -380,6 +407,7 @@ def test_load_12w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
         login.load_key_from_qr_code()
 
         assert ctx.wallet.key.mnemonic == c_seed_qr[1]
+        assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_24w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
@@ -409,6 +437,7 @@ def test_load_24w_camera_qrcode_words(m5stickv, mocker, mocker_printer):
     login.load_key_from_qr_code()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_24w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
@@ -439,6 +468,7 @@ def test_load_24w_camera_qrcode_numbers(m5stickv, mocker, mocker_printer):
     login.load_key_from_qr_code()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_24w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
@@ -469,6 +499,7 @@ def test_load_24w_camera_qrcode_binary(m5stickv, mocker, mocker_printer):
     login.load_key_from_qr_code()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
@@ -505,6 +536,42 @@ def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
     login.load_key_from_qr_code()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_load_camera_fails_on_decrypt_kef_key_error(mocker, m5stickv):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages import MENU_CONTINUE
+
+    # nonsensical 0x8f byte encrypted w/ key="a" to test decryption failure
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x84\x2b\x2c",
+            0,
+        ),
+    )
+
+    btn_seq = [
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # type key
+        BUTTON_PAGE,  # to "b"
+        BUTTON_ENTER,  # enter "b"
+        BUTTON_PAGE_PREV,  # back to "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key "b" (while "a" is correct key)
+    ]
+    ctx = create_ctx(mocker, btn_seq)
+    login = Login(ctx)
+    assert login.load_key_from_qr_code() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    ctx.display.flash_text.assert_called_with(
+        "Failed to decrypt", 248, 2000, highlight_prefix=""
+    )
 
 
 ############### load words from text tests
@@ -601,7 +668,7 @@ def test_load_key_from_text(m5stickv, mocker):
 
 def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printer):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+    from krux.input import BUTTON_ENTER, BUTTON_TOUCH
 
     cases = [
         (
@@ -664,9 +731,6 @@ def test_load_key_from_text_on_amigo_tft_with_touch(amigo, mocker, mocker_printe
 
 
 def test_create_key_from_text(m5stickv, mocker):
-    from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
-
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
@@ -822,6 +886,103 @@ def test_load_key_from_digits(m5stickv, mocker, mocker_printer):
         assert ctx.wallet.key.mnemonic == case[1]
 
 
+def test_cancel_load_key_from_digits(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    case = [
+        [BUTTON_ENTER]  # 1 press confirm msg
+        + (
+            # 1 press change to number "2" and 1 press to select
+            [BUTTON_PAGE, BUTTON_ENTER]
+            +
+            # 2 press to place on btn Go
+            [BUTTON_PAGE_PREV] * 2
+            + [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ]  # 1 press to select and 1 press to confirm
+        )
+        * 11  # repeat selection of word=2 (ability) eleven times
+        + (
+            # 1
+            [BUTTON_ENTER]
+            +
+            # 6
+            [BUTTON_PAGE] * 5
+            + [BUTTON_ENTER]
+            +
+            # Go
+            [BUTTON_PAGE] * 7
+            + [BUTTON_ENTER]
+            # Confirm
+            + [BUTTON_ENTER]
+        )
+        + [
+            BUTTON_ENTER,  # Done? - no confirmation (hide mnemonic enabled)
+            BUTTON_PAGE,  # Cancel 12w confirmation
+        ]
+    ]
+
+    ctx = create_ctx(mocker, case[0])
+    login = Login(ctx)
+    login.load_key_from_digits()
+
+    assert ctx.input.wait_for_button.call_count == len(case[0])
+    assert ctx.wallet is None
+
+
+def test_load_key_from_digits_hide_mnemonic(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.krux_settings import Settings
+
+    case = (
+        [BUTTON_ENTER]  # 1 press confirm msg
+        + (
+            # 1 press change to number "2" and 1 press to select
+            [BUTTON_PAGE, BUTTON_ENTER]
+            +
+            # 10 press to place on btn Go
+            [BUTTON_PAGE] * 11
+            + [
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+            ]  # 1 press to select and 1 press to confirm
+        )
+        * 11  # repeat selection of word=2 (ability) eleven times
+        + (
+            # 1
+            [BUTTON_ENTER]
+            +
+            # 6
+            [BUTTON_PAGE] * 5
+            + [BUTTON_ENTER]
+            +
+            # Go
+            [BUTTON_PAGE] * 7
+            + [BUTTON_ENTER]
+            # Confirm
+            + [BUTTON_ENTER]
+        )
+        + [
+            BUTTON_ENTER,  # Done? - no confirmation (hide mnemonic enabled)
+            BUTTON_ENTER,  # Load wallet
+        ],
+        "ability ability ability ability ability ability ability ability ability ability ability acid",
+    )
+
+    # Test with hidden mnemonic setting enabled
+    Settings().security.hide_mnemonic = True
+
+    ctx = create_ctx(mocker, case[0])
+    login = Login(ctx)
+    login.load_key_from_digits()
+
+    assert ctx.input.wait_for_button.call_count == len(case[0])
+    assert ctx.wallet.key.mnemonic == case[1]
+
+
 def test_load_12w_from_hexadecimal(m5stickv, mocker, mocker_printer):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -860,6 +1021,7 @@ def test_load_12w_from_hexadecimal(m5stickv, mocker, mocker_printer):
     login.load_key_from_hexadecimal()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_possible_letters_from_hexadecimal(m5stickv, mocker, mocker_printer):
@@ -926,6 +1088,7 @@ def test_possible_letters_from_hexadecimal(m5stickv, mocker, mocker_printer):
     login.load_key_from_hexadecimal()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_12w_from_octal(m5stickv, mocker, mocker_printer):
@@ -970,6 +1133,7 @@ def test_load_12w_from_octal(m5stickv, mocker, mocker_printer):
     login.load_key_from_octal()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
@@ -1020,7 +1184,6 @@ def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
             BUTTON_ENTER,  # 12 numbers confirm
             BUTTON_ENTER,  # 12 word confirm
             BUTTON_ENTER,  # Load wallet
-            BUTTON_ENTER,  # Load wallet
         ]
     )
     MNEMONIC = (
@@ -1033,11 +1196,12 @@ def test_possible_letters_from_octal(m5stickv, mocker, mocker_printer):
     login.load_key_from_octal()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_leaving_keypad(mocker, amigo):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # Proceed
@@ -1055,7 +1219,7 @@ def test_leaving_keypad(mocker, amigo):
 
 def test_no_passphrase_on_amigo(mocker, amigo):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     case = (
         [BUTTON_ENTER]
@@ -1148,7 +1312,7 @@ def test_passphrase(amigo, mocker, mocker_printer):
 
 def test_load_12w_from_tiny_seed(amigo, mocker, mocker_printer):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
         [BUTTON_ENTER]  # 1 press 12w
@@ -1167,6 +1331,7 @@ def test_load_12w_from_tiny_seed(amigo, mocker, mocker_printer):
     login.load_key_from_tiny_seed()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_24w_from_tiny_seed(m5stickv, mocker, mocker_printer):
@@ -1195,11 +1360,12 @@ def test_load_24w_from_tiny_seed(m5stickv, mocker, mocker_printer):
     login.load_key_from_tiny_seed()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_key_from_tiny_seed_scanner_12w(m5stickv, mocker):
     from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER
 
     BTN_SEQUENCE = (
         [BUTTON_ENTER]  # 12 words
@@ -1222,6 +1388,7 @@ def test_load_key_from_tiny_seed_scanner_12w(m5stickv, mocker):
     login.load_key_from_tiny_seed_image()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_load_12w_from_1248(m5stickv, mocker, mocker_printer):
@@ -1257,6 +1424,7 @@ def test_load_12w_from_1248(m5stickv, mocker, mocker_printer):
     login.load_key_from_1248()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_customization_while_loading_wallet(amigo, mocker):
@@ -1286,28 +1454,67 @@ def test_customization_while_loading_wallet(amigo, mocker):
     assert "krux.pages.wallet_settings" in sys.modules
 
 
-def test_about(mocker, m5stickv):
-    import krux
+def test_about(mocker, multiple_devices):
     from krux.pages.login import Login
     import board
     from krux.metadata import VERSION
     from krux.input import BUTTON_ENTER
+    from krux.kboard import kboard
+    from krux.qr import FORMAT_NONE
 
-    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_ENTER]
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # past qr_code
+    ]
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
 
     login = Login(ctx)
+    mocker.spy(login, "display_qr_codes")
 
     login.about()
 
-    ctx.input.wait_for_button.assert_called_once()
-    ctx.display.draw_centered_text.assert_called_with(
-        "Krux\nselfcustody.github.io/krux\n\nHardware\n"
-        + board.config["type"]
-        + "\n\nVersion\n"
-        + VERSION
+    title = "selfcustody.github.io/krux"
+    msg = (
+        title
+        + "\n"
+        + ("Hardware")
+        + ": %s\n" % board.config["type"]
+        + ("Version")
+        + ": %s" % VERSION
     )
+    display_qr_codes_call = [
+        mocker.call(
+            title,
+            FORMAT_NONE,
+            msg,
+            offset_x=0,
+            width=0,
+            highlight_prefix=":",
+        ),
+    ]
+
+    if kboard.is_cube:
+        print(ctx.display.width())
+        display_qr_codes_call = [
+            mocker.call(
+                title,
+                FORMAT_NONE,
+                msg,
+                offset_x=ctx.display.width() // 4,
+                width=ctx.display.width() // 2,
+                highlight_prefix=":",
+            ),
+        ]
+    login.display_qr_codes.assert_has_calls(display_qr_codes_call)
+
+    ctx.display.draw_hcentered_text.assert_has_calls(
+        [
+            mocker.call(msg, 250, highlight_prefix=":"),
+        ]
+    )
+
+    ctx.input.wait_for_button.assert_called()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_auto_complete_qr_words(m5stickv, mocker):
@@ -1343,3 +1550,249 @@ def test_auto_complete_qr_words(m5stickv, mocker):
     expected_result = ["abandon", "ability", "able"] + ["abandon"] * 9
     result = login.auto_complete_qr_words(words)
     assert result == expected_result
+
+
+def test_retro_compatibility(mocker, amigo, mock_retro_compatibility):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.key import TYPE_MULTISIG, P2WSH
+
+    BTN_SEQUENCE = [BUTTON_PAGE] * 2 + [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER]
+    MNEMONIC = "diet glad hat rural panther lawsuit act drop gallery urge where fit"
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+
+    mocker.patch(
+        "krux.pages.encryption_ui.LoadEncryptedMnemonic.load_from_storage",
+        mocker.MagicMock(return_value=MNEMONIC.split(" ")),
+    )
+
+    login.load_key()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.key.mnemonic == MNEMONIC
+    assert ctx.wallet.key.policy_type == TYPE_MULTISIG
+    assert ctx.wallet.key.script_type == P2WSH
+
+
+def test_load_default_wallet(mocker, amigo):
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.settings import MAIN_TXT, TEST_TXT
+    from krux.key import (
+        NAME_SINGLE_SIG,
+        NAME_MULTISIG,
+        NAME_MINISCRIPT,
+        SINGLESIG_SCRIPT_NAMES,
+        MULTISIG_SCRIPT_NAMES,
+        MINISCRIPT_SCRIPT_NAMES,
+        TYPE_SINGLESIG,
+        TYPE_MULTISIG,
+        TYPE_MINISCRIPT,
+        P2PKH,
+        P2SH_P2WPKH,
+        P2WPKH,
+        P2SH,
+        P2SH_P2WSH,
+        P2WSH,
+        P2TR,
+    )
+    from krux.krux_settings import Settings
+
+    cases = [
+        # 1 - Mainnet, Single-sig, Legacy
+        (
+            MAIN_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[0],
+            TYPE_SINGLESIG,
+            P2PKH,
+            "m/44h/0h/0h",
+        ),
+        # 2 - Mainnet, Single-sig, Nested SegWit
+        (
+            MAIN_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[1],
+            TYPE_SINGLESIG,
+            P2SH_P2WPKH,
+            "m/49h/0h/0h",
+        ),
+        # 3 - Mainnet, Single-sig, Native SegWit
+        (
+            MAIN_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[2],
+            TYPE_SINGLESIG,
+            P2WPKH,
+            "m/84h/0h/0h",
+        ),
+        # 4 - Mainnet, Single-sig, Taproot
+        (
+            MAIN_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[3],
+            TYPE_SINGLESIG,
+            P2TR,
+            "m/86h/0h/0h",
+        ),
+        # 5 - Mainnet, Multisig, Legacy
+        (
+            MAIN_TXT,
+            NAME_MULTISIG,
+            MULTISIG_SCRIPT_NAMES[0],
+            TYPE_MULTISIG,
+            P2SH,
+            "m/45h",
+        ),
+        # 6 - Mainnet, Multisig, Nested SegWit
+        (
+            MAIN_TXT,
+            NAME_MULTISIG,
+            MULTISIG_SCRIPT_NAMES[1],
+            TYPE_MULTISIG,
+            P2SH_P2WSH,
+            "m/48h/0h/0h/1h",
+        ),
+        # 7 - Mainnet, Multisig, Native SegWit
+        (
+            MAIN_TXT,
+            NAME_MULTISIG,
+            MULTISIG_SCRIPT_NAMES[2],
+            TYPE_MULTISIG,
+            P2WSH,
+            "m/48h/0h/0h/2h",
+        ),
+        # 8 - Mainnet, Miniscript, Native SegWit
+        (
+            MAIN_TXT,
+            NAME_MINISCRIPT,
+            MINISCRIPT_SCRIPT_NAMES[0],
+            TYPE_MINISCRIPT,
+            P2WSH,
+            "m/48h/0h/0h/2h",
+        ),
+        # 9 - Mainnet, Miniscript, Taproot
+        (
+            MAIN_TXT,
+            NAME_MINISCRIPT,
+            MINISCRIPT_SCRIPT_NAMES[1],
+            TYPE_MINISCRIPT,
+            P2TR,
+            "m/48h/0h/0h/2h",
+        ),
+        # 10 - Testnet, Single-sig, Legacy
+        (
+            TEST_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[0],
+            TYPE_SINGLESIG,
+            P2PKH,
+            "m/44h/1h/0h",
+        ),
+        # 11 - Testnet, Single-sig, Nested SegWit
+        (
+            TEST_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[1],
+            TYPE_SINGLESIG,
+            P2SH_P2WPKH,
+            "m/49h/1h/0h",
+        ),
+        # 12 - Testnet, Single-sig, Native SegWit
+        (
+            TEST_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[2],
+            TYPE_SINGLESIG,
+            P2WPKH,
+            "m/84h/1h/0h",
+        ),
+        # 13 - Testnet, Single-sig, Taproot
+        (
+            TEST_TXT,
+            NAME_SINGLE_SIG,
+            SINGLESIG_SCRIPT_NAMES[3],
+            TYPE_SINGLESIG,
+            P2TR,
+            "m/86h/1h/0h",
+        ),
+        # 14 - Testnet, Multisig, Legacy
+        (
+            TEST_TXT,
+            NAME_MULTISIG,
+            MULTISIG_SCRIPT_NAMES[0],
+            TYPE_MULTISIG,
+            P2SH,
+            "m/45h",
+        ),
+        # 15 - Testnet, Multisig, Nested SegWit
+        (
+            TEST_TXT,
+            NAME_MULTISIG,
+            MULTISIG_SCRIPT_NAMES[1],
+            TYPE_MULTISIG,
+            P2SH_P2WSH,
+            "m/48h/1h/0h/1h",
+        ),
+        # 16 - Testnet, Multisig, Native SegWit
+        (
+            TEST_TXT,
+            NAME_MULTISIG,
+            MULTISIG_SCRIPT_NAMES[2],
+            TYPE_MULTISIG,
+            P2WSH,
+            "m/48h/1h/0h/2h",
+        ),
+        # 17 - Testnet, Miniscript, Native SegWit
+        (
+            TEST_TXT,
+            NAME_MINISCRIPT,
+            MINISCRIPT_SCRIPT_NAMES[0],
+            TYPE_MINISCRIPT,
+            P2WSH,
+            "m/48h/1h/0h/2h",
+        ),
+        # 18 - Testnet, Miniscript, Taproot
+        (
+            TEST_TXT,
+            NAME_MINISCRIPT,
+            MINISCRIPT_SCRIPT_NAMES[1],
+            TYPE_MINISCRIPT,
+            P2TR,
+            "m/48h/1h/0h/2h",
+        ),
+    ]
+
+    MNEMONIC = "diet glad hat rural panther lawsuit act drop gallery urge where fit"
+
+    for case in cases:
+        print(case)
+        BTN_SEQUENCE = (
+            # Load Key from Storage
+            [BUTTON_PAGE] * 2
+            + [BUTTON_ENTER]
+            + [
+                BUTTON_ENTER,  # 1 press to continue loading key
+                BUTTON_ENTER,  # 1 press to load wallet
+            ]
+        )
+
+        ctx = create_ctx(mocker, BTN_SEQUENCE)
+        Settings().wallet.network = case[0]
+        Settings().wallet.policy_type = case[1]
+        Settings().wallet.script_type = case[2]
+
+        login = Login(ctx)
+        mocker.patch(
+            "krux.pages.encryption_ui.LoadEncryptedMnemonic.load_from_storage",
+            mocker.MagicMock(return_value=MNEMONIC.split(" ")),
+        )
+        login.load_key()
+
+        assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+        assert ctx.wallet.key.mnemonic == MNEMONIC
+        assert ctx.wallet.key.policy_type == case[3]
+        assert ctx.wallet.key.script_type == case[4]
+        assert ctx.wallet.key.derivation == case[5]

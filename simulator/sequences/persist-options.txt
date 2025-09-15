@@ -15,4 +15,4 @@ press BUTTON_A
 x4 press BUTTON_B
 press BUTTON_A
 
-screenshot persist-options.png
+#screenshot persist-options.png

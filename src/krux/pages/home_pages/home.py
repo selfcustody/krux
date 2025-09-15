@@ -99,7 +99,9 @@ class Home(Page):
         from ...wallet import Wallet
 
         passphrase_editor = PassphraseEditor(self.ctx)
-        passphrase = passphrase_editor.load_passphrase_menu()
+        passphrase = passphrase_editor.load_passphrase_menu(
+            self.ctx.wallet.key.mnemonic
+        )
         if passphrase is None:
             return MENU_CONTINUE
 
@@ -119,7 +121,9 @@ class Home(Page):
         """Handler for the 'Customize' Wallet menu item"""
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
-            t("Customizing your wallet will generate a new Key.")
+            t(
+                "Customizing your wallet will generate a new Key and unload the Descriptor."
+            )
             + " "
             + t("Mnemonic and passphrase will be kept.")
         )
@@ -130,23 +134,23 @@ class Home(Page):
         from ...key import Key
         from ...wallet import Wallet
 
+        prev_key = self.ctx.wallet.key
+
         wallet_settings = WalletSettings(self.ctx)
         network, policy_type, script_type, account, derivation_path = (
             wallet_settings.customize_wallet(self.ctx.wallet.key)
         )
-        mnemonic = self.ctx.wallet.key.mnemonic
-        passphrase = self.ctx.wallet.key.passphrase
-        self.ctx.wallet = Wallet(
-            Key(
-                mnemonic,
-                policy_type,
-                network,
-                passphrase,
-                account,
-                script_type,
-                derivation_path,
-            )
+        new_key = Key(
+            prev_key.mnemonic,
+            policy_type,
+            network,
+            prev_key.passphrase,
+            account,
+            script_type,
+            derivation_path,
         )
+        if prev_key != new_key:
+            self.ctx.wallet = Wallet(new_key)
         return MENU_CONTINUE
 
     def bip85(self):
@@ -191,10 +195,8 @@ class Home(Page):
                 (t("Message"), self.sign_message),
             ],
         )
-        index, status = submenu.run_loop()
-        if index == len(submenu.menu) - 1:
-            return MENU_CONTINUE
-        return status
+        submenu.run_loop()
+        return MENU_CONTINUE
 
     def load_psbt(self):
         """Loads a PSBT from camera or SD card"""
@@ -223,10 +225,12 @@ class Home(Page):
         )
         return (None, FORMAT_NONE, psbt_filename)
 
-    def _sign_menu(self):
-        sign_menu = Menu(
+    def _sign_menu(self, signer, psbt_filename, outputs):
+
+        submenu = Menu(
             self.ctx,
             [
+                (t("Review Again"), lambda: None),
                 (t("Sign to QR code"), lambda: None),
                 (
                     t("Sign to SD card"),
@@ -235,8 +239,70 @@ class Home(Page):
             ],
             back_status=lambda: None,
         )
-        index, _ = sign_menu.run_loop()
-        return index
+        index, _ = submenu.run_loop()
+
+        while index == 0:  # Review PSBT
+            self._display_transaction_for_review(outputs)
+            index, _ = submenu.run_loop()
+
+        if index == submenu.back_index:  # Back
+            return MENU_CONTINUE
+
+        # memory management
+        del outputs
+        del submenu
+        gc.collect()
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Signing…"))
+
+        if index == 1:  # Sign to QR code
+            signer.sign()
+            signed_psbt, qr_format = signer.psbt_qr()
+
+            # memory management
+            del signer
+            gc.collect()
+
+            from ..utils import Utils
+
+            utils = Utils(self.ctx)
+
+            while True:
+                self.display_qr_codes(signed_psbt, qr_format)
+                utils.print_standard_qr(
+                    signed_psbt, qr_format, t("Signed PSBT"), width=45
+                )
+                self.ctx.display.clear()
+                if self.prompt(t("Done?"), self.ctx.display.height() // 2):
+                    return MENU_CONTINUE
+
+        # index == 2: Sign to SD card
+        signer.sign(trim=False)
+        psbt_filename = self._format_psbt_file_extension(psbt_filename)
+        gc.collect()
+
+        from ...sd_card import SDHandler
+
+        if psbt_filename and psbt_filename != ESC_KEY:
+            try:
+                with SDHandler() as sd:
+                    if signer.is_b64_file:
+                        signed_psbt, _ = signer.psbt_qr()
+                        sd.write(psbt_filename, signed_psbt)
+                    else:
+                        with open(SDHandler.PATH_STR % psbt_filename, "wb") as f:
+                            # Write PSBT data directly to the file
+                            signer.psbt.write_to(f)
+                    self.flash_text(
+                        t("Saved to SD card:") + "\n\n%s" % psbt_filename,
+                        highlight_prefix=":",
+                    )
+                    return MENU_CONTINUE
+            except OSError:
+                self.flash_error(t("SD card not detected."))
+
+        return MENU_CONTINUE
 
     def _format_psbt_file_extension(self, psbt_filename=""):
         """Formats the PSBT filename"""
@@ -265,44 +331,26 @@ class Home(Page):
         )
         return psbt_filename
 
-    def sign_psbt(self):
-        """Handler for the 'sign psbt' menu item"""
-
-        # Warns in case multisig or miniscript wallet descriptor is not loaded
+    def _pre_load_psbt_warn(self):
+        """Warns if descriptor is not loaded and wallet is multisig or miniscript"""
         if (
             not self.ctx.wallet.is_loaded()
             and self.ctx.wallet.key.policy_type != TYPE_SINGLESIG
         ):
             self.ctx.display.draw_centered_text(
                 t("Warning:")
-                + "\n"
+                + " "
                 + t("Wallet output descriptor not found.")
                 + "\n\n"
-                + t("Some checks cannot be performed.")
+                + t("Some checks cannot be performed."),
+                highlight_prefix=":",
             )
-            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-                return MENU_CONTINUE
+            return self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE)
 
-        # Load a PSBT
-        data, qr_format, psbt_filename = self.load_psbt()
+        return True
 
-        if data is None and psbt_filename == "":
-            # Both the camera and the file on SD card failed!
-            self.flash_error(t("Failed to load"))
-            return MENU_CONTINUE
-
-        # PSBT read OK! Will try to sign
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Loading.."))
-
-        qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
-        from ...psbt import PSBTSigner
-
-        signer = PSBTSigner(self.ctx.wallet, data, qr_format, psbt_filename)
-
-        del data
-        gc.collect()
-
+    def _post_load_psbt_warn(self, signer):
+        """Warns cases of incorrect / missing PSBT info"""
         # Warns in case of path mismatch
         path_mismatch = signer.path_mismatch()
         if path_mismatch:
@@ -316,10 +364,11 @@ class Home(Page):
                 + self.ctx.wallet.key.derivation_str()
                 + "\n"
                 + "PSBT: "
-                + path_mismatch
+                + path_mismatch,
+                highlight_prefix=":",
             )
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-                return MENU_CONTINUE
+                return False
 
         # Show the policy for multisig and miniscript PSBTs
         # in case the wallet descriptor is not loaded
@@ -331,20 +380,19 @@ class Home(Page):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(policy_str)
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-                return MENU_CONTINUE
+                return False
 
         # Fix zero fingerprint, it is necessary for the signing process on embit in a few cases
         if signer.fill_zero_fingerprint():
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Fingerprint unset in PSBT"))
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-                return MENU_CONTINUE
+                return False
 
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
-        outputs, fee_percent = signer.outputs()
+        return True
 
-        # Warn if fees greater than 10% of what is spent
+    def _fees_psbt_warn(self, fee_percent):
+        """Warn if fees greater than 10% of what is spent"""
         if fee_percent >= 10.0:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
@@ -353,64 +401,102 @@ class Home(Page):
                 + t("High fees!")
                 + "\n"
                 + replace_decimal_separator(("%.1f" % fee_percent))
-                + t("% of the amount.")
+                + t("% of the amount."),
+                highlight_prefix=":",
             )
 
-            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-                return MENU_CONTINUE
+            return self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE)
 
-        for message in outputs:
+        return True
+
+    def _display_transaction_for_review(self, outputs):
+        """Display all transaction info on screen for verification"""
+        from ..utils import Utils
+
+        utils = Utils(self.ctx)
+
+        # display summary (doesn't have addresses)
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(outputs[0], highlight_prefix=":")
+        self.ctx.input.wait_for_button()
+
+        # display Inputs, Self-transfer and Change (have addresses)
+        for message in outputs[1:]:
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(message)
+            self.ctx.display.draw_centered_text(message, highlight_prefix=":")
+
+            # highlight addresses
+            lines = self.ctx.display.to_lines(message)
+            y_offset = self.ctx.display.get_center_offset_y(len(lines))
+            highlight = True
+            count_empty = 0
+            for i, line in enumerate(lines):
+                if len(line) > 0:
+                    if count_empty == 1:
+                        x_offset = self.ctx.display.get_center_offset_x(line)
+                        highlight = utils.display_addr_highlighted(
+                            y_offset, x_offset, line, i, highlight
+                        )
+                else:
+                    count_empty += 1
+
             self.ctx.input.wait_for_button()
 
+    def sign_psbt(self):
+        """Handler for the 'sign psbt' menu item"""
+
+        # pre load warns
+        if not self._pre_load_psbt_warn():
+            return MENU_CONTINUE
+
+        # Load a PSBT
+        data, qr_format, psbt_filename = self.load_psbt()
+
+        if data is None and psbt_filename == "":
+            # Both the camera and the file on SD card failed!
+            self.flash_error(t("Failed to load"))
+            return MENU_CONTINUE
+
+        # DISABLED to avoid false "Decrypt?" on normal PSBTs as KEF
+        # try:
+        #     from ..encryption_ui import decrypt_kef
+        #
+        #     data = decrypt_kef(self.ctx, data)
+        # except KeyError:
+        #     self.flash_error(t("Failed to decrypt"))
+        #     return MENU_CONTINUE
+        # except ValueError:
+        #     # ValueError=not KEF or declined to decrypt
+        #     pass
+
+        # PSBT read OK! Will try to sign
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Loading…"))
+
+        qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
+        from ...psbt import PSBTSigner
+
+        signer = PSBTSigner(self.ctx.wallet, data, qr_format, psbt_filename)
+
         # memory management
-        del outputs
+        del data
         gc.collect()
 
-        index = self._sign_menu()
-
-        if index == 2:  # Back
+        # post load warns
+        if not self._post_load_psbt_warn(signer):
             return MENU_CONTINUE
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Signing.."))
+        self.ctx.display.draw_centered_text(t("Processing…"))
+        outputs, fee_percent = signer.outputs()
 
-        title = t("Signed PSBT")
-        if index == 0:
-            # Sign to QR code
-            signer.sign()
-            signed_psbt, qr_format = signer.psbt_qr()
-
-            # memory management
-            del signer
-            gc.collect()
-
-            self.display_qr_codes(signed_psbt, qr_format)
-
-            from ..utils import Utils
-
-            utils = Utils(self.ctx)
-            utils.print_standard_qr(signed_psbt, qr_format, title, width=45)
+        if not self._fees_psbt_warn(fee_percent):
             return MENU_CONTINUE
 
-        # index == 1: Sign to SD card
-        signer.sign(trim=False)
-        psbt_filename = self._format_psbt_file_extension(psbt_filename)
-        gc.collect()
+        self._display_transaction_for_review(outputs)
 
-        if psbt_filename and psbt_filename != ESC_KEY:
-            if signer.is_b64_file:
-                signed_psbt, _ = signer.psbt_qr()
-                with open("/sd/" + psbt_filename, "w") as f:
-                    f.write(signed_psbt)
-            else:
-                with open("/sd/" + psbt_filename, "wb") as f:
-                    # Write PSBT data directly to the file
-                    signer.psbt.write_to(f)
-            self.flash_text(t("Saved to SD card") + ":\n%s" % psbt_filename)
-
-        return MENU_CONTINUE
+        # sign menu
+        return self._sign_menu(signer, psbt_filename, outputs)
 
     def sign_message(self):
         """Handler for the 'sign message' menu item"""

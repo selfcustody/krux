@@ -144,7 +144,7 @@ class Touch:
         # Calculate x index if x regions are defined (2D array)
         if self.x_regions:
             for x_region in self.x_regions:
-                if data[0] > x_region:
+                if data[0] >= x_region:
                     x_index += 1
             x_index -= 1  # Adjust index to be zero-based
             # Combine y and x indices to get the final index
@@ -153,7 +153,6 @@ class Touch:
             index = y_index
 
         # self.highlight_region(x_index, y_index)
-
         return index
 
     def set_regions(self, x_list=None, y_list=None):
@@ -181,7 +180,11 @@ class Touch:
             hasattr(Settings().hardware.display, "flipped_orientation")
             and Settings().hardware.display.flipped_orientation
         ):
-            data = (self.height - data[0], self.width - data[1])
+            new_y = max(0, self.height - data[0])
+            new_y = min(new_y, self.height - 1)
+            new_x = max(0, self.width - data[1])
+            new_x = min(new_x, self.width - 1)
+            data = (new_y, new_x)
 
         if self.state == IDLE:
             self.state = PRESSED

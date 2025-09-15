@@ -1,8 +1,10 @@
-from krux import bip39 as kruxbip39
+import secrets
+
+import pytest
 from embit import bip39
 from embit.wordlists.bip39 import WORDLIST
-import secrets
-import pytest
+
+from krux import bip39 as kruxbip39
 
 
 def test_one_word_mnemonics():
@@ -57,6 +59,21 @@ def test_random_cases_custom_wordlist():
             assert (
                 kruxbip39.k_mnemonic_bytes(
                     bip39.mnemonic_from_bytes(token_bytes), wordlist=wordlist
+                )
+                == token_bytes
+            )
+
+
+def test_random_cases_custom_wordlist_without_checksum():
+    wordlist = tuple(kruxbip39.WORDLIST)
+    for _ in range(200):
+        for size in (16, 20, 24, 28, 32):
+            token_bytes = secrets.token_bytes(size)
+            assert (
+                kruxbip39.k_mnemonic_bytes(
+                    bip39.mnemonic_from_bytes(token_bytes),
+                    wordlist=wordlist,
+                    ignore_checksum=True,
                 )
                 == token_bytes
             )

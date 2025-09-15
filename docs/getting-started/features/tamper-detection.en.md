@@ -50,10 +50,11 @@ The *TC Flash Hash* tool enables you to verify if the device's internal flash me
 - **User's Region:** The area used to stored encrypted mnemonics, settings and TC Code. It generates the last set of two words.
 
 <div style="text-align: center;">
-    <img src="../../../img/flash_hash.png" alt="TC Flash Hash" width="200"/>
+    <img src="../../../img/maixpy_amigo/tc-flash-hash-300.png" class="amigo" alt="TC Flash Hash amigo">
+    <img src="../../../img/maixpy_m5stickv/tc-flash-hash-250.png" class="m5stickv" alt="TC Flash Hash m5stickv">
 </div>
 
-*Example: On the image, the blue symbol and words 'tail monkey' represent the firmware region, while 'wrestle over' user's region.*
+*Example: On the image, the red symbol and words 'debate lunar' represent the firmware region, while 'renew great' user's region.*
 
 Any change in the flash content results in a different image and words:
 
@@ -65,7 +66,9 @@ Any change in the flash content results in a different image and words:
 
 ### Filling Empty Flash Memory Blocks
 
-Use this to enhance tamper detection. Krux performs a memory sweep while capturing a live feed from the camera. Whenever an empty block is found in the flash memory, it uses the data from the image to fill these empty spaces with rich, random entropy. It estimates the image's entropy by evaluating its color variance waiting until a minimum threshold is met. 
+Use this to enhance tamper detection. Krux performs a memory sweep while capturing a live feed from the camera. Whenever an empty block is found in the flash memory, it uses the data from the image to fill these empty spaces when the entropy is good enough. It estimates the image's entropy by evaluating its color variance waiting until a minimum threshold is met.
+
+A progress bar is shown below, when the highlighted color appears, it means that this flash memory space is not empty and Krux will move on to the next one to fill any empty spaces. When you run it a second time, nothing will change because all the memory will be filled. You will see the progress bar move quickly, showing only the highlighted color, and a still image will be displayed on the camera during the process.
 
 ### Ensuring Tamper Detection
 

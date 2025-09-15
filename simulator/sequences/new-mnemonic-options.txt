@@ -20,7 +20,7 @@ qrcode arara.png
 qrcode arara.png
 qrcode arara.png
 
-screenshot new-mnemonic-via-snapshot-capturing.png
+#screenshot new-mnemonic-via-snapshot-capturing.png
 
 wait 0.3
 
@@ -331,7 +331,7 @@ press BUTTON_A
 # Skip low entropy warinng
 press BUTTON_A
 
-screenshot new-mnemonic-via-d20-roll-string.png
+#screenshot new-mnemonic-via-d20-roll-string.png
 
 press BUTTON_A
 
@@ -339,7 +339,7 @@ screenshot new-mnemonic-via-d20-roll-nerd-stats.png
 
 press BUTTON_A
 
-screenshot new-mnemonic-via-d20-roll-sha256.png
+#screenshot new-mnemonic-via-d20-roll-sha256.png
 
 press BUTTON_A
 

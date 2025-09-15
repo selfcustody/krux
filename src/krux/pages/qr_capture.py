@@ -22,13 +22,14 @@
 import board
 import time
 from . import Page
-from ..display import FONT_HEIGHT, MINIMAL_PADDING
+from ..display import FONT_HEIGHT, MINIMAL_PADDING, BOTTOM_LINE
 from ..input import PRESSED
 from ..themes import theme
 from ..qr import QRPartParser, FORMAT_UR
 from ..wdt import wdt
 from ..krux_settings import t
 from ..camera import QR_SCAN_MODE, ANTI_GLARE_MODE, ZOOMED_MODE
+from ..kboard import kboard
 
 ANTI_GLARE_WAIT_TIME = 500
 MESSAGE_DISPLAY_PERIOD = 5000
@@ -61,7 +62,15 @@ class QRCodeCapture(Page):
         elif mode == ANTI_GLARE_MODE:
             self.ctx.display.draw_centered_text(t("Anti-glare mode"))
         elif mode == ZOOMED_MODE:
-            self.ctx.display.clear()
+            # We can't clear the screen because we may have a progress bar already in progress
+            # clear 6 lines above progress bar to erase bottom of previous camera img
+            self.ctx.display.fill_rectangle(
+                0,
+                self.progress_bar_offset_y - 6 * FONT_HEIGHT,
+                self.ctx.display.width(),
+                6 * FONT_HEIGHT,
+                theme.bg_color,
+            )
             self.ctx.display.draw_centered_text(t("Zoomed mode"))
         time.sleep_ms(ANTI_GLARE_WAIT_TIME)
         # Erase the message from the screen
@@ -119,7 +128,7 @@ class QRCodeCapture(Page):
         """Captures either singular or animated QRs and parses their contents"""
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Loading Camera.."))
+        self.ctx.display.draw_centered_text(t("Loading Camera…"))
         self.ctx.camera.initialize_run()
 
         parser = QRPartParser()
@@ -131,8 +140,12 @@ class QRCodeCapture(Page):
         # Flush events ocurred while loading camera
         self.ctx.input.reset_ios_state()
         start_time = time.ticks_ms()
+        self.ctx.display.clear()
+        offset_y = (
+            MINIMAL_PADDING if not kboard.is_amigo else BOTTOM_LINE - FONT_HEIGHT * 2
+        )
         title_lines = self.ctx.display.draw_hcentered_text(
-            t("Press PAGE to toggle mode"), MINIMAL_PADDING
+            t("Press PAGE to toggle mode"), offset_y
         )
         self.ctx.display.to_landscape()
         while True:
@@ -143,7 +156,7 @@ class QRCodeCapture(Page):
             elif self.ctx.input.enter_event():
                 break
 
-            # Anti-glare mode
+            # Anti-glare / zoom / normal mode
             if self.ctx.input.page_event():
                 if self.ctx.camera.has_antiglare():
                     self.anti_glare_control()
@@ -194,5 +207,81 @@ class QRCodeCapture(Page):
         self.ctx.display.to_portrait()
 
         if parser.is_complete():
-            return parser.result(), parser.format
+            return qr_str_to_bytes(parser.result()), parser.format
         return None, None
+
+
+def qr_str_to_bytes(qr_result):
+    """
+    both simulator and MaixPy will return qrcode result as str,
+    even when the qr should be binary.  This function attempts
+    encodings to return bytes when binary.
+
+    # previously working -- mostly, but too complicated
+    # lots of playing here while dealing with binary qrcode
+    # and trying to understand differences between when reading
+    # from maixpy device vs simulator
+    if isinstance(qr_result, str):
+        as_bytes = qr_result.encode()
+        binary = bool(128 <= max(as_bytes) < 256)
+        try:
+            as_bytes.decode()
+            maixpy = False
+        except:
+            maixpy = True
+
+        if binary:
+            if maixpy:
+                qr_result = as_bytes
+            else:
+                maxord = max((ord(x) for x in qr_result))
+                if maxord < 256:
+                    # same as latin-1 on sim, except works in micropython
+                    qr_result = bytes((ord(x) for x in qr_result))
+                else:
+                    big5 = 0
+                    as_bytes = b""
+                    for i, char in enumerate(qr_result):
+                        if ord(char) < 256:
+                            as_bytes += bytes([ord(char)])
+                        else:
+                            as_bytes += char.encode("big5")
+                            big5 += 1
+                    qr_result = as_bytes
+    """
+
+    # TODO: get this working for partially encoded "big5" strings on simulator
+    # TODO: remove notes above in func-doc
+    # TODO: remove all print statements
+    # print(__name__, "called w/ qr_result", qr_result)
+
+    # if qr_result is not str, return early
+    if not isinstance(qr_result, str):
+        # print(__name__, "qr_result is not str, returning", type(qr_result))
+        return qr_result
+
+    # both simulator and maixpy can utf8 encode their str results to bytes
+    # but whenever maixpy cannot decode back to str, return those bytes
+    as_bytes = qr_result.encode()
+    try:
+        as_bytes.decode()
+        del as_bytes
+    except:
+        # print(__name__, "failed as_bytes.decode(), returning", type(as_bytes))
+        return as_bytes
+
+    max_ord = max((ord(x) for x in qr_result))
+
+    # if all chars are ascii, return early
+    if max_ord < 128:
+        # print(__name__, "qr_result is ascii, returning", type(qr_result))
+        return qr_result
+
+    # if all chars are latin-1, return those bytes early
+    if max_ord < 256:
+        # print(__name__, "qr_result is latin-1, returning bytes")
+        return bytes((ord(x) for x in qr_result))
+
+    # assume it's really a utf-8 str
+    # print(__name__, "falling off, returning", type(qr_result))
+    return qr_result

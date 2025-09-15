@@ -24,13 +24,14 @@ import lcd
 from . import Page, Menu, MENU_CONTINUE, DEFAULT_PADDING
 from ..themes import theme
 from ..krux_settings import t
-from ..display import FONT_HEIGHT, FONT_WIDTH, NARROW_SCREEN_WITH
+from ..display import FONT_HEIGHT, FONT_WIDTH
 from ..wdt import wdt
 from ..firmware import (
     FLASH_SIZE,
     SPIFFS_ADDR,
     ERASE_BLOCK_SIZE,
 )
+from ..kboard import kboard
 
 BLOCK_SIZE = 0x1000
 FLASH_ROWS = 64
@@ -81,7 +82,7 @@ class FlashTools(Page):
             "Firmware",
             theme.fg_color,
         )
-        if self.ctx.display.width() <= NARROW_SCREEN_WITH:
+        if kboard.is_m5stickv:
             l_y_text_offset += FONT_HEIGHT
             l_y_block_offset += FONT_HEIGHT
             l_x_offset = DEFAULT_PADDING
@@ -191,7 +192,7 @@ class FlashTools(Page):
         ):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
-                t("Erasing user's data..")
+                t("Erasing user's data…")
                 + "\n\n"
                 + t("Do not power off, it may take a while to complete.")
             )
@@ -212,7 +213,7 @@ class FlashHash(Page):
 
     def hash_pin_with_flash(self, spiffs_region=False):
         """Hashes the tamper check code, unique ID, and flash memory together."""
-        import hashlib
+        import uhashlib_hw
         import flash
         from machine import unique_id
 
@@ -224,14 +225,15 @@ class FlashHash(Page):
         )
         if self.ctx.display.width() < self.ctx.display.height():
             percentage_offset += FONT_HEIGHT
-        sha256 = hashlib.sha256()
+        uid = unique_id()
+        sha256 = uhashlib_hw.sha256()
         sha256.update(self.tc_code_hash)
-        sha256.update(unique_id())
+        sha256.update(uid)
         for address in range(range_begin, range_end, BLOCK_SIZE):
             counter += 1
             data = flash.read(address, BLOCK_SIZE)
             sha256.update(data)
-            if counter % 100 == 0:
+            if counter % 200 == 0:
                 # Update progress
                 self.ctx.display.draw_hcentered_text(
                     "%d%%" % (counter // 41), percentage_offset
@@ -298,7 +300,7 @@ class FlashHash(Page):
     def generate(self):
         """Generates the Tamper Check Flash Hash snapshot."""
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(t("Processing.."))
+        self.ctx.display.draw_hcentered_text(t("Processing…"))
         firmware_hash = self.hash_pin_with_flash()
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text("TC Flash Hash")

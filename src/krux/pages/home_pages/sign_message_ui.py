@@ -30,7 +30,6 @@ from ...key import SINGLESIG_SCRIPT_PURPOSE, P2PKH, P2WPKH, P2TR, P2SH_P2WPKH
 from ...themes import theme
 from ...display import (
     DEFAULT_PADDING,
-    MINIMAL_DISPLAY,
     FONT_HEIGHT,
     TOTAL_LINES,
     BOTTOM_PROMPT_LINE,
@@ -44,6 +43,7 @@ from ...sd_card import (
     PUBKEY_FILE_EXTENSION,
 )
 from ...settings import TEST_TXT, MAIN_TXT
+from ...kboard import kboard
 
 
 SD_MESSAGE_HEADER = "-----BEGIN BITCOIN SIGNED MESSAGE-----"
@@ -70,14 +70,15 @@ class SignMessage(Utils):
         return (None, None, "")
 
     def _is_valid_derivation_path(self, derivation_path):
-        """Checks if the derivation path is valid"""
-        try:
-            parts = derivation_path.split("/")
-            return parts[0] == "m" and all(
-                p[-1] in ("'hH") or p.isdigit() for p in parts[1:]
-            )
-        except:
+        """Strictly checks if the derivation path is valid according to BIP32"""
+        parts = derivation_path.split("/")
+        if parts[0] != "m":
             return False
+
+        return all(
+            p and ((p[-1] in "'hH" and p[:-1].isdigit()) or p.isdigit())
+            for p in parts[1:]
+        )
 
     def get_network_from_path(self, derivation_path):
         """Gets the network from the derivation path"""
@@ -152,12 +153,12 @@ class SignMessage(Utils):
         ).digest()
 
         sig = self.ctx.wallet.key.sign_at(derivation, message_hash)
-        self._display_signature(base_encode(sig, 64).strip().decode())
+        self._display_signature(base_encode(sig, 64))
         return sig
 
     def _display_message_sign_prompt(self, message, address):
         """Helper to display message and address for signing"""
-        max_lines = TOTAL_LINES - (7 if MINIMAL_DISPLAY else 10)
+        max_lines = TOTAL_LINES - (7 if kboard.has_minimal_display else 10)
         offset_y = DEFAULT_PADDING
         self.ctx.display.clear()
 
@@ -184,7 +185,9 @@ class SignMessage(Utils):
     def _display_signature(self, encoded_sig):
         """Helper to display the signature"""
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Signature") + ":\n\n%s" % encoded_sig)
+        self.ctx.display.draw_centered_text(
+            t("Signature:") + "\n\n%s" % encoded_sig, highlight_prefix=":"
+        )
         self.ctx.input.wait_for_button()
 
     def _sign_at_address_from_qr(self, data):
@@ -209,7 +212,12 @@ class SignMessage(Utils):
 
     def _sign_at_address_from_sd(self, data):
         """Message signed at a derived Bitcoin address - SD card"""
-        data = data.decode() if isinstance(data, bytes) else data
+
+        try:
+            data = data.decode()
+        except:
+            return None
+
         lines = [line.strip() for line in data.splitlines() if line.strip()]
         if len(lines) == 0:
             return None
@@ -233,13 +241,14 @@ class SignMessage(Utils):
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
-            "SHA256:\n%s" % binascii.hexlify(message_hash).decode()
+            "SHA256:\n\n%s" % binascii.hexlify(message_hash).decode(),
+            highlight_prefix=":",
         )
         if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
             return ""
 
         sig = self.ctx.wallet.key.sign(message_hash).serialize()
-        self._display_signature(base_encode(sig, 64).strip().decode())
+        self._display_signature(base_encode(sig, 64))
         return sig
 
     def _compute_message_hash(self, data):
@@ -262,7 +271,7 @@ class SignMessage(Utils):
         address="",
     ):
         """Exports the message signature to a QR code or SD card"""
-        sign_menu = Menu(
+        submenu = Menu(
             self.ctx,
             [
                 (t("Sign to QR code"), lambda: None),
@@ -273,23 +282,23 @@ class SignMessage(Utils):
             ],
             back_status=lambda: None,
         )
-        index, _ = sign_menu.run_loop()
+        index, _ = submenu.run_loop()
 
-        if index == 2:
+        if index == submenu.back_index:
             return MENU_CONTINUE
 
         pubkey = binascii.hexlify(self.ctx.wallet.key.account.sec()).decode()
 
-        if index == 0:
+        if index == 0:  # QR
             at_address = address != ""
             self._export_to_qr(sig, pubkey, qr_format, at_address)
-        elif self.has_sd_card():
+        elif self.has_sd_card():  # SD
             self._export_to_sd(sig, pubkey, message_filename, message, address)
         return MENU_CONTINUE
 
     def _export_to_qr(self, sig, pubkey, qr_format, at_address=False):
         """Exports the signature and public key to QR code"""
-        encoded_sig = base_encode(sig, 64).strip().decode()
+        encoded_sig = base_encode(sig, 64)
         title = t("Signed Message")
         self.display_qr_codes(encoded_sig, qr_format, title)
         self.print_standard_qr(encoded_sig, qr_format, title)
@@ -299,9 +308,11 @@ class SignMessage(Utils):
 
     def _display_and_export_pubkey(self, pubkey, qr_format):
         """Displays and exports the public key as QR code"""
-        title = t("Hex Public Key")
+        title = t("Hex Public Key:")
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(title + ":\n\n%s" % pubkey)
+        self.ctx.display.draw_centered_text(
+            title + "\n\n%s" % pubkey, highlight_prefix=":"
+        )
         self.ctx.input.wait_for_button()
 
         self.display_qr_codes(pubkey, qr_format, title)
@@ -318,7 +329,7 @@ class SignMessage(Utils):
             file_content += message + "\n"
             file_content += SD_SIGNATURE_HEADER + "\n"
             file_content += address + "\n"
-            file_content += base_encode(sig, 64).strip().decode() + "\n"
+            file_content += base_encode(sig, 64) + "\n"
             file_content += SD_SIGNATURE_FOOTER
         else:
             file_content = sig
@@ -327,16 +338,22 @@ class SignMessage(Utils):
             file_content,
             "message",
             message_filename,
-            t("Signature") + ":",
+            t("Signature:"),
             extension,
             SIGNED_FILE_SUFFIX,
             prompt=False,
         )
 
         if not address:
-            title = t("Hex Public Key")
+            title = t("Hex Public Key:")
             save_page.save_file(
-                pubkey, "pubkey", "", title + ":", PUBKEY_FILE_EXTENSION, "", False
+                pubkey,
+                "pubkey",
+                "",
+                title + "\n\n%s" % pubkey + "\n",
+                PUBKEY_FILE_EXTENSION,
+                "",
+                False,
             )
 
     def sign_message(self):

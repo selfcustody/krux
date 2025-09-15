@@ -21,10 +21,12 @@
 # THE SOFTWARE.
 # pylint: disable=W0231
 import math
-from ..krux_settings import Settings
+import time
+
+from ..krux_settings import Settings, CNC_HEAD_LASER, CNC_HEAD_ROUTER
+from ..sd_card import SDHandler
 from ..wdt import wdt
 from . import Printer
-from ..sd_card import SDHandler
 
 G0_XY = "G0 X%.4f Y%.4f"
 G0_Z = "G0 Z%.4f"
@@ -49,14 +51,44 @@ class GCodeGenerator(Printer):
         self.invert = Settings().hardware.printer.cnc.invert
 
         if self.plunge_rate > self.feed_rate / 2:
-            raise ValueError("plunge rate must be less than half of feed rate")
+            raise ValueError("Plunge rate must be less than half of feed rate")
 
         if self.pass_depth > self.cut_depth:
-            raise ValueError("depth per pass must be less than or equal to cut depth")
+            raise ValueError("Depth per pass must be less than or equal to cut depth")
 
     def on_gcode(self, gcode):
         """Receives gcode"""
-        raise NotImplementedError()
+        raise NotImplementedError(
+            "Must implement 'on_gcode' method for {}".format(self.__class__.__name__)
+        )
+
+    def print_string(self, text):
+        """Print a text string. Avoided on CNC"""
+        raise NotImplementedError(
+            "Must implement 'print_string' method for {}".format(
+                self.__class__.__name__
+            )
+        )
+
+    def on_xy_gcode(self, gcode):
+        """Handle xy gcode preprocessing"""
+        if Settings().hardware.printer.cnc.head_type == CNC_HEAD_LASER:
+            self.on_gcode(
+                (gcode + " S{}").format(Settings().hardware.printer.cnc.head_power)
+            )
+        else:
+            self.on_gcode(gcode)
+
+    def clear(self):
+        """Clears the printer's memory, resetting it"""
+        raise NotImplementedError(
+            "Must implement 'clear' method for {}".format(self.__class__.__name__)
+        )
+
+    def on_z_gcode(self, gcode):
+        """Handle z gcode preprocessing"""
+        if Settings().hardware.printer.cnc.head_type == CNC_HEAD_ROUTER:
+            self.on_gcode(gcode)
 
     def qr_data_width(self):
         """Returns a smaller width for the QR to be generated
@@ -68,9 +100,15 @@ class GCodeGenerator(Printer):
 
     def print_qr_code(self, qr_code):
         """Prints a QR code, scaling it up as large as possible"""
+        from ..qr import get_size
+
         size = 0
-        while qr_code[size] != "\n":
-            size += 1
+
+        size = get_size(qr_code)
+
+        # If inverted we add two columns and two rows to cut a border.
+        if self.invert:
+            size += 2
 
         cell_size = (self.part_size - (self.border_padding * 2)) / size
 
@@ -82,25 +120,40 @@ class GCodeGenerator(Printer):
         self.on_gcode("G54")  # coord system 1
         self.on_gcode("G90")  # non-incremental motion
         self.on_gcode("G94")  # feed/minute mode
+        if Settings().hardware.printer.cnc.head_type == CNC_HEAD_LASER:
+            self.on_gcode("$32=1")  # enable laser mode
+            self.on_gcode("M4")  # enable Dynamic Laser Power Mode
 
         num_passes = math.ceil(self.cut_depth / self.pass_depth)
-        for i in range(num_passes):
-            plunge_depth = min((i + 1) * self.pass_depth, self.cut_depth)
-            for y in range(size):
-                for x in range(size):
-                    # To reduce travel and avoid zig-zagging, continue cutting on the next row from
-                    # the same y
-                    x_index = x
-                    if y % 2 == 0:
-                        x_index = size - 1 - x
-                    cell = qr_code[y * (size + 1) + x_index]
-                    cut = (cell == "1" and not self.invert) or (
-                        cell == "0" and self.invert
-                    )
-                    if cut:
-                        # Flip the y coord
-                        self.cut_cell(x_index, size - 1 - y, cell_size, plunge_depth)
+        for p in range(num_passes):
+            for row in range(size):
+                for col in range(size):
+                    plunge_depth = min((p + 1) * self.pass_depth, self.cut_depth)
+                    # Reversing row so milling goes from top to bottom
+                    reversed_row = size - 1 - row
+                    if self.invert and row == 0:
+                        self.cut_cell(col, reversed_row, cell_size, plunge_depth)
+                    elif self.invert and row == (size - 1):
+                        self.cut_cell(col, 0, cell_size, plunge_depth)
+                    elif self.invert and col == 0:
+                        self.cut_cell(0, reversed_row, cell_size, plunge_depth)
+                    elif self.invert and col == (size - 1):
+                        self.cut_cell(size - 1, reversed_row, cell_size, plunge_depth)
+                    else:
+                        # If inverted we need to calculate based on original qr code array size.
+                        if self.invert:
+                            bit_index = (row - 1) * (size - 2) + (col - 1)
+                        else:
+                            bit_index = row * size + col
+                        bit = qr_code[bit_index >> 3] & (1 << (bit_index % 8))
+                        cut = (bit > 0 and not self.invert) or (
+                            bit == 0 and self.invert
+                        )
+                        if cut:
+                            self.cut_cell(col, reversed_row, cell_size, plunge_depth)
 
+    # We could optimize by milling rows instead of cell by cell,
+    # but this would not allow the use of drill bits
     def cut_cell(self, x, y, cell_size, plunge_depth):
         """Hollows out the specified cell using a cutting method defined in settings"""
         if Settings().hardware.printer.cnc.cut_method == "spiral":
@@ -118,17 +171,17 @@ class GCodeGenerator(Printer):
         corner_y = self.border_padding + (y * cell_size) + flute_radius
 
         # Lift the bit
-        self.on_gcode(G0_Z % self.pass_depth)
+        self.on_z_gcode(G0_Z % self.pass_depth)
 
         # Rapid position to top-left cell corner
         self.on_gcode(G0_XY % (corner_x, corner_y))
 
         # Smoothly descend to zero
-        self.on_gcode(G1_Z % (0, self.plunge_rate))
+        self.on_z_gcode(G1_Z % (0, self.plunge_rate))
 
         # Go to starting position and smoothly plunge
-        self.on_gcode(G1_XY % (corner_x, corner_y, self.feed_rate))
-        self.on_gcode(G1_Z % (-plunge_depth, self.plunge_rate))
+        self.on_xy_gcode(G1_XY % (corner_x, corner_y, self.feed_rate))
+        self.on_z_gcode(G1_Z % (-plunge_depth, self.plunge_rate))
 
         # Cut row by row
         num_rows = math.floor(cell_size / flute_radius)
@@ -141,11 +194,11 @@ class GCodeGenerator(Printer):
             )
             if j % 2 != 0:
                 cut_start, cut_end = cut_end, cut_start
-            self.on_gcode(G1_XY % cut_start)
-            self.on_gcode(G1_XY % cut_end)
+            self.on_xy_gcode(G1_XY % cut_start)
+            self.on_xy_gcode(G1_XY % cut_end)
 
         # Smoothly lift the bit
-        self.on_gcode(G1_Z % (self.pass_depth, self.plunge_rate))
+        self.on_z_gcode(G1_Z % (self.pass_depth, self.plunge_rate))
 
     def spiral_cut_cell(self, x, y, cell_size, plunge_depth):
         """Hollows out the specified cell by starting at the edge of the cell and
@@ -171,19 +224,19 @@ class GCodeGenerator(Printer):
         origin_bottom_left = (origin_top_left[x_idx], origin_bottom_right[y_idx])
 
         # Lift the bit
-        self.on_gcode(G0_Z % self.pass_depth)
+        self.on_z_gcode(G0_Z % self.pass_depth)
 
         # Rapid position to top-left cell corner
         self.on_gcode(G0_XY % (origin_top_left[x_idx], origin_top_left[y_idx]))
 
         # Smoothly descend to zero
-        self.on_gcode(G1_Z % (0, self.plunge_rate))
+        self.on_z_gcode(G1_Z % (0, self.plunge_rate))
 
         # Go to starting position and smoothly plunge
-        self.on_gcode(
+        self.on_xy_gcode(
             G1_XY % (origin_top_left[x_idx], origin_top_left[y_idx], self.feed_rate)
         )
-        self.on_gcode(G1_Z % (-plunge_depth, self.plunge_rate))
+        self.on_z_gcode(G1_Z % (-plunge_depth, self.plunge_rate))
 
         # Cut in a spiral moving inwards
         j = 0
@@ -215,28 +268,32 @@ class GCodeGenerator(Printer):
             if done:
                 break
 
-            self.on_gcode(G1_XY % (top_left[x_idx], top_left[y_idx], self.feed_rate))
-            self.on_gcode(G1_XY % (top_right[x_idx], top_right[y_idx], self.feed_rate))
-            self.on_gcode(
+            self.on_xy_gcode(G1_XY % (top_left[x_idx], top_left[y_idx], self.feed_rate))
+            self.on_xy_gcode(
+                G1_XY % (top_right[x_idx], top_right[y_idx], self.feed_rate)
+            )
+            self.on_xy_gcode(
                 G1_XY % (bottom_right[x_idx], bottom_right[y_idx], self.feed_rate)
             )
-            self.on_gcode(
+            self.on_xy_gcode(
                 G1_XY % (bottom_left[x_idx], bottom_left[y_idx], self.feed_rate)
             )
-            self.on_gcode(
+            self.on_xy_gcode(
                 G1_XY % (top_left[x_idx], top_left[y_idx] - j * incr, self.feed_rate)
             )
 
             j += 1
 
         # Smoothly lift the bit
-        self.on_gcode(G1_Z % (self.pass_depth, self.plunge_rate))
+        self.on_z_gcode(G1_Z % (self.pass_depth, self.plunge_rate))
 
 
 class FilePrinter(GCodeGenerator):
     """FilePrinter is an implementation of the GCodeGenerator that writes generated
     gcode to a file on an attached SD card.
     """
+
+    CNC_FILENAME = "qr.nc"
 
     def __init__(self):
         super().__init__()
@@ -251,10 +308,10 @@ class FilePrinter(GCodeGenerator):
         """Creates an nc file on the SD card with commands to cut out the specified QR code"""
         try:
             with SDHandler():
-                self.file = open("/sd/qr.nc", "w")
+                self.file = open(SDHandler.PATH_STR % FilePrinter.CNC_FILENAME, "w")
                 super().print_qr_code(qr_code)
-        except OSError:
-            pass
+        except:
+            raise ValueError("SD card not detected.")
         finally:
             if self.file:
                 self.file.flush()
@@ -268,54 +325,128 @@ class FilePrinter(GCodeGenerator):
         self.file = None
 
 
-# TODO: Didn't have the time or resources to test this, so it's commented out for now.
-#       If anyone is brave enough, you should be able to uncomment this block and uncomment the line
-#       in ./__init__.py to display 'cnc/grbl' as a selectable option to test.
-# import time
-# from fpioa_manager import fm
-# from machine import UART
-# class GRBLPrinter(GCodeGenerator):
-#     """GRBLPrinter is an implementation of the GCodeGenerator that sends generated
-#     gcode as commands to a GRBL controller over a serial connection.
-#     """
+# Tested on openbuilds 1515 with openbuilds blackbox x4 grbl
+# controller,openbuilds interface serial remote controller,
+# and wondermv. An adapter was made to use the same cable
+# that connect to interface, with rx and tx reversed.
+# The machine need be homed first before the krux software
+# send the commands. On krux device, the grbl/cnc printer
+# driver need to be selected, here is the settings
+# tested on :
+#
+# {
+#   "settings": {
+#     "persist": {"location": "sd"},
+#     "printer": {
+#       "driver": "cnc/file",
+#       "cnc": {
+#         "unit": "mm",
+#         "part_size": 70.675,
+#         "flute_diameter": 3.175,
+#         "depth_per_pass": 1.0,
+#         "cut_depth": 2.0,
+#         "border_padding": 2.0,
+#         "plunge_rate":300,
+#         "feed_rate":650,
+#         "cut_method": "spiral"
+#       }
+#   }
+# }
+#
+# It seems the wondermv device can be powered by the blackbox
+# controller only but sometimes it doesn't start. With it's usb
+# powered it always start. Testing scenario : power the cnc,
+# use the interface to home everything and start the router,
+# unplug the interface and plug the krux device instead, start print.
+class GRBLPrinter(GCodeGenerator):
+    """
+    GRBLPrinter is an implementation of GCodeGenerator that writes generated
+    G-code commands to a file intended for use with GRBL-based CNC controllers.
+    """
 
-#     def __init__(self):
-#         super().__init__()
-#         fm.register(Settings().hardware.printer.cnc.grbl.tx_pin, fm.fpioa.UART2_TX, force=False)
-#         fm.register(Settings().hardware.printer.cnc.grbl.rx_pin, fm.fpioa.UART2_RX, force=False)
-#         self.uart_conn = UART(UART.UART2, Settings().hardware.printer.cnc.grbl.baudrate)
-#         self.byte_time = 11.0 / float(Settings().hardware.printer.cnc.grbl.baudrate)
-#         res = self.uart_conn.readline()
-#         if res is None or not res.decode().lower().startswith("grbl"):
-#             raise ValueError("not connected")
+    def __init__(self):
+        super().__init__()
 
-#     def write_bytes(self, *args):
-#         """Writes bytes to the controller at a stable speed"""
-#         for arg in args:
-#             wdt.feed()
-#             self.uart_conn.write(arg if isinstance(arg, bytes) else bytes([arg]))
-#             # Calculate time to issue one byte to the controller.
-#             # 11 bits (not 8) to accommodate idle, start and
-#             # stop bits.  Idle time might be unnecessary, but
-#             # erring on side of caution here.
-#             time.sleep_ms(math.floor(self.byte_time * 1000))
+        from fpioa_manager import fm
+        from machine import UART
 
-#     def on_gcode(self, gcode):
-#         """Sends the gcode command to GRBL"""
-#         wdt.feed()
+        fm.register(
+            Settings().hardware.printer.cnc.grbl.tx_pin,
+            fm.fpioa.UART2_TX,
+            force=False,
+        )
+        fm.register(
+            Settings().hardware.printer.cnc.grbl.rx_pin,
+            fm.fpioa.UART2_RX,
+            force=False,
+        )
 
-#         # Send the gcode command to GRBL as bytes
-#         self.write_bytes(*((gcode + "\n").encode()))
+        self.uart_conn = UART(UART.UART2, Settings().hardware.printer.cnc.grbl.baudrate)
 
-#         # Wait for an 'ok' response
-#         res = self.uart_conn.readline()
-#         if res is None:
-#             raise ValueError("gcode send failed: timed out")
+        self.byte_time = 11.0 / float(Settings().hardware.printer.cnc.grbl.baudrate)
 
-#         status = res.decode().split("\n")[0]
-#         if status != "ok":
-#             err_msg = status if status.startswith("error") else "unknown error"
-#             raise ValueError("gcode send failed: %s" % err_msg)
+    def print_qr_code(self, qr_code):
 
-#     def clear(self):
-#         """Clears the printer's memory, resetting it"""
+        res = self.uart_conn.read()
+
+        gcode = "$I"
+        self.write_bytes(*((gcode + "\n").encode()))
+
+        res = self.uart_conn.read()
+        if res is None:
+            raise ConnectionError("Cannot read from UART connection")
+
+        statuses = res.decode().split("\n")
+        if len(statuses) < 2:
+            raise IOError("Cannot read, expected at least 2 lines of data")
+
+        handshaked = statuses[0].startswith("[VER:1.1")
+        if not handshaked:
+            raise ValueError(
+                "Cannot handshake, version mismatch. Expected [VER:1.1, got {}".format(
+                    statuses[0]
+                )
+            )
+
+        super().print_qr_code(qr_code)
+
+    def transmit(self, gcode):
+        """Sometimes a command is send but seems ignored, we wait 1s and retry in that case"""
+        timeout = 10
+        for _ in range(timeout):
+            self.write_bytes(*((gcode + "\n").encode()))
+            res = self.uart_conn.read()
+            if res is not None:
+                return res
+            time.sleep_ms(1000)
+
+        raise TimeoutError("Timeout while waiting for response from GRBL")
+
+    def write_bytes(self, *args):
+        """Writes bytes to the controller at a stable speed"""
+        for arg in args:
+            wdt.feed()
+            self.uart_conn.write(arg if isinstance(arg, bytes) else bytes([arg]))
+            # Calculate time to issue one byte to the controller.
+            # 11 bits (not 8) to accommodate idle, start and
+            # stop bits.  Idle time might be unnecessary, but
+            # erring on side of caution here.
+            time.sleep_ms(math.floor(self.byte_time * 1000))
+
+    def on_gcode(self, gcode):
+        """Sends the gcode command to GRBL"""
+        wdt.feed()
+
+        res = self.transmit(gcode)
+
+        return res.decode().split("\n")[0]
+
+    def print_string(self, text):
+        """Print a text string. Avoided on CNC"""
+        raise NotImplementedError(
+            "Must implement 'print_string' method for GRBLPrinter"
+        )
+
+    def clear(self):
+        """Clears the printer's memory, resetting it"""
+        raise NotImplementedError("Must implement 'clear' method for GRBLPrinter")

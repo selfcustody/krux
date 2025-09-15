@@ -27,20 +27,6 @@ def test_clear(mocker, m5stickv):
     assert c.wallet is None
 
 
-def test_clear_clears_printer(mocker, m5stickv):
-    mock_modules(mocker)
-    from krux.context import Context
-    from krux.printers import Printer
-
-    c = Context()
-    c.printer = mocker.MagicMock(clear=mocker.MagicMock())
-
-    c.clear()
-
-    assert c.wallet is None
-    c.printer.clear.assert_called()
-
-
 def test_is_logged_in(mocker, m5stickv):
     from krux.key import TYPE_SINGLESIG
 

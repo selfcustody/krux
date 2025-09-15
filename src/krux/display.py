@@ -24,20 +24,18 @@ import board
 import time
 from .themes import theme
 from .krux_settings import Settings
-from .settings import THIN_SPACE
+from .settings import THIN_SPACE, ELLIPSIS
+from .kboard import kboard
 
 DEFAULT_PADDING = 10
 MINIMAL_PADDING = 5
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
 FONT_WIDTH_WIDE, FONT_HEIGHT_WIDE = board.config["krux"]["display"]["font_wide"]
-PORTRAIT, LANDSCAPE = [2, 3] if board.config["type"] == "cube" else [1, 2]
-QR_DARK_COLOR, QR_LIGHT_COLOR = (
-    [16904, 61307] if board.config["type"] == "m5stickv" else [0, 6342]
-)
+PORTRAIT, LANDSCAPE = [2, 3] if kboard.is_cube else [1, 2]
+QR_DARK_COLOR, QR_LIGHT_COLOR = [16904, 61307] if kboard.is_m5stickv else [0, 6342]
 TOTAL_LINES = board.config["lcd"]["width"] // FONT_HEIGHT
 BOTTOM_LINE = (TOTAL_LINES - 1) * FONT_HEIGHT
-MINIMAL_DISPLAY = board.config["type"] in ("m5stickv", "cube")
-if MINIMAL_DISPLAY:
+if kboard.has_minimal_display:
     BOTTOM_PROMPT_LINE = BOTTOM_LINE - DEFAULT_PADDING
 else:
     # room left for no/yes buttons
@@ -45,13 +43,14 @@ else:
 
 # Status bar dimensions
 STATUS_BAR_HEIGHT = (
-    FONT_HEIGHT + 1 if MINIMAL_DISPLAY else FONT_HEIGHT + MINIMAL_PADDING
+    FONT_HEIGHT + 1 if kboard.has_minimal_display else FONT_HEIGHT + MINIMAL_PADDING
 )
 
 FLASH_MSG_TIME = 2000
 
-NARROW_SCREEN_WITH = 135
-SMALLEST_HEIGHT = 240
+M5STICKV_WIDTH = 135
+
+ASIAN_MIN_CODEPOINT = 12288
 
 # Splash will use horizontally-centered text plots. Uses Thin spaces to help with alignment
 SPLASH = [
@@ -74,14 +73,14 @@ class Display:
 
     def __init__(self):
         self.portrait = False
-        if board.config["type"] == "amigo":
+        if kboard.is_amigo:
             self.flipped_x_coordinates = (
                 Settings().hardware.display.flipped_x_coordinates
             )
         else:
             self.flipped_x_coordinates = False
         self.blk_ctrl = None
-        if "BACKLIGHT" in board.config["krux"]["pins"]:
+        if kboard.has_backlight:
             self.gpio_backlight_ctrl(Settings().hardware.display.brightness)
 
     def initialize_lcd(self):
@@ -139,7 +138,7 @@ class Display:
                 ],
             )
             self.set_pmu_backlight(Settings().hardware.display.brightness)
-        elif board.config["type"] in ["yahboom", "wonder_mv"]:
+        elif kboard.is_yahboom or kboard.is_wonder_mv:
             lcd.init(
                 invert=True,
                 rst=board.config["lcd"]["rst"],
@@ -147,12 +146,12 @@ class Display:
                 ss=board.config["lcd"]["ss"],
                 clk=board.config["lcd"]["clk"],
             )
-        elif board.config["type"] == "cube":
+        elif kboard.is_cube:
             lcd.init(
                 invert=True,
                 offset_h0=80,
             )
-        elif board.config["type"] == "amigo":
+        elif kboard.is_amigo:
             lcd_type = Settings().hardware.display.lcd_type
             invert = Settings().hardware.display.inverted_colors
             bgr_to_rgb = Settings().hardware.display.bgr_colors
@@ -180,7 +179,7 @@ class Display:
                 enable=True,
             )
         # Calculate duty cycle
-        if board.config["type"] == "cube":
+        if kboard.is_cube:
             # Ranges from 80% to 0% duty cycle
             # 100 is 0% duty cycle (off, not used here)
             pwm_value = 5 - int(brightness)
@@ -190,11 +189,13 @@ class Display:
         pwm_value *= 20
         self.blk_ctrl.duty(pwm_value)
 
-    def qr_offset(self):
+    def qr_offset(self, y_offset=0):
         """Retuns y offset to subtitle QR codes"""
-        if board.config["type"] == "cube":
-            return BOTTOM_LINE
-        return self.width() + MINIMAL_PADDING
+        if y_offset == 0:
+            if kboard.is_cube:
+                return BOTTOM_LINE
+            return self.width() + MINIMAL_PADDING
+        return y_offset + MINIMAL_PADDING
 
     def width(self):
         """Returns the width of the display, taking into account rotation"""
@@ -246,68 +247,107 @@ class Display:
             )
             self.portrait = True
 
-    def to_lines(self, text, max_lines=None):
-        """Takes a string of text and converts it to lines to display on
-        the screen
+    def _usable_pixels_in_line(self):
+        """Returns qtd of usable pixels in a line"""
+
+        return self.usable_width() if not kboard.is_m5stickv else self.width()
+
+    def to_lines(self, text, max_lines=TOTAL_LINES):
+        """Maintains original API while using ._to_lines_endpos()"""
+
+        return self._to_lines_endpos(text, max_lines)[0]
+
+    def ascii_chars_per_line(self):
+        """Returns the qtd of non wide chars that fit on one line (columns)"""
+        return self._usable_pixels_in_line() // FONT_WIDTH
+
+    def _asian_chars_per_line(self):
+        """Returns the qtd of wide chars that fit on one line (columns)"""
+        return self._usable_pixels_in_line() // FONT_WIDTH_WIDE
+
+    def _to_lines_endpos(self, text, max_lines=TOTAL_LINES):
+        """Takes a string of text and returns tuple(lines, end) to display on
+        the screen and know how far into text it read; next page starts there.
         """
-        lines = []
-        start = 0
-        line_count = 0
-        columns = (
-            self.usable_width() if self.width() > NARROW_SCREEN_WITH else self.width()
-        )
+        if isinstance(text, list):
+            return (text, sum((len(x) for x in text)))
+
+        columns = self.ascii_chars_per_line()
         if Settings().i18n.locale in [
             "ko-KR",
             "zh-CN",
             "ja-JP",
         ] and lcd.string_has_wide_glyph(text):
-            columns //= FONT_WIDTH_WIDE
-        else:
-            columns //= FONT_WIDTH
+            columns = self._asian_chars_per_line()
 
         # Quick return if content fits in one line
         if len(text) <= columns and "\n" not in text:
-            return [text]
+            return ([text], len(text))
 
-        if not max_lines:
-            max_lines = TOTAL_LINES
+        usable_pixels = self._usable_pixels_in_line()
+        total_chars = len(text)
 
-        while start < len(text) and line_count < max_lines:
-            # Find the next line break, if any
-            line_break = text.find("\n", start)
-            if line_break == -1:
-                next_break = len(text)
-            else:
-                next_break = min(line_break, len(text))
+        lines = []
+        start = 0
+        end = 0
+        last_space = -1
+        line_pixels = 0
+        line_count = 0
 
-            end = start + columns
-            # If next segment fits on one line, add it and continue
-            if end >= next_break:
-                lines.append(text[start:next_break].rstrip())
-                start = next_break + 1
+        while end < total_chars and line_count < max_lines:
+            c = text[end]
+
+            # handle explicit newline
+            if c == "\n":
+                lines.append(text[start:end])
+                end += 1
+                start = end
+                last_space = -1
+                line_pixels = 0
                 line_count += 1
                 continue
 
-            # If the end of the line is in the middle of a word,
-            # move the end back to the end of the previous word
-            if text[end] != " " and text[end] != "\n":
-                end = text.rfind(" ", start, end)
+            if c == " ":
+                last_space = end
 
-            # If there is no space, force break the word
-            if end == -1 or end < start:
-                end = start + columns
+            line_pixels += (
+                FONT_WIDTH_WIDE if ord(c) >= ASIAN_MIN_CODEPOINT else FONT_WIDTH
+            )
 
-            lines.append(text[start:end].rstrip())
-            # don't jump space if we're breaking a word
-            jump_space = 1 if text[end] == " " else 0
-            start = end + jump_space
+            if line_pixels <= usable_pixels:
+                end += 1
+                continue
+
+            # line overflow -> break
+            if last_space >= 0:
+                lines.append(text[start:last_space])
+                end = last_space + 1
+                last_space = -1
+            else:
+                lines.append(text[start:end])
+            start = end
+            line_pixels = 0
             line_count += 1
 
-        # Replace last line with ellipsis if we didn't finish the text
-        if line_count == max_lines and start < len(text):
-            lines[-1] = lines[-1][: columns - 3] + "..."
+        # flush remaining text
+        if end > start:
+            lines.append(text[start:end])
+            line_count += 1
 
-        return lines
+        if line_count == max_lines and end < total_chars:
+            char_count = 0
+            for c in lines[-1]:
+                line_pixels += (
+                    FONT_WIDTH_WIDE if ord(c) >= ASIAN_MIN_CODEPOINT else FONT_WIDTH
+                )
+                char_count += 1
+            if line_pixels + FONT_WIDTH >= usable_pixels:
+                lines[-1] = lines[-1][: char_count - 1] + ELLIPSIS
+                end -= 1
+            else:
+                lines[-1] += ELLIPSIS
+
+        return lines, end
 
     def clear(self):
         """Clears the display"""
@@ -349,16 +389,6 @@ class Display:
         """Draws a vertical line to the screen"""
         self.draw_line(x, y, x, y + height, color)
 
-    def fill_circle(self, x, y, radius, quadrant=0, color=theme.fg_color):
-        """
-        Fills a circle to the screen.
-        quadrant=0 will draw all 4 quadrants.
-        1 is top right, 2 is top left, 3 is bottom left, 4 is bottom right.
-        """
-        if self.flipped_x_coordinates:
-            x = self.width() - x
-        lcd.draw_circle(x, y, radius, quadrant, color)
-
     def draw_string(self, x, y, text, color=theme.fg_color, bg_color=theme.bg_color):
         """Draws a string to the screen"""
         if self.flipped_x_coordinates:
@@ -367,6 +397,10 @@ class Display:
             x = max(0, x)
         lcd.draw_string(x, y, text, color, bg_color)
 
+    def get_center_offset_x(self, line):
+        """Returns the ammount of offset_x to be at center"""
+        return max(0, (self.width() - lcd.string_width_px(line)) // 2)
+
     def draw_hcentered_text(
         self,
         text,
@@ -374,19 +408,14 @@ class Display:
         color=theme.fg_color,
         bg_color=theme.bg_color,
         info_box=False,
-        max_lines=None,
+        max_lines=TOTAL_LINES,
+        highlight_prefix="",
     ) -> int:
         """Draws text horizontally-centered on the display, at the given offset_y"""
-        lines = (
-            text if isinstance(text, list) else self.to_lines(text, max_lines=max_lines)
-        )
+        lines = self.to_lines(text, max_lines)
         if info_box:
             bg_color = theme.info_bg_color
-            padding = (
-                DEFAULT_PADDING
-                if self.width() > NARROW_SCREEN_WITH
-                else MINIMAL_PADDING
-            )
+            padding = DEFAULT_PADDING if not kboard.is_m5stickv else MINIMAL_PADDING
             self.fill_rectangle(
                 padding - 3,
                 offset_y - 1,
@@ -398,7 +427,7 @@ class Display:
 
         for i, line in enumerate(lines):
             if len(line) > 0:
-                offset_x = max(0, (self.width() - lcd.string_width_px(line)) // 2)
+                offset_x = self.get_center_offset_x(line)
                 self.draw_string(
                     offset_x,
                     offset_y + (i * (FONT_HEIGHT)),
@@ -406,28 +435,85 @@ class Display:
                     color,
                     bg_color,
                 )
+                if highlight_prefix:
+                    prefix_index = line.find(highlight_prefix)
+                    if prefix_index > -1:
+                        self.draw_string(
+                            offset_x,
+                            offset_y + (i * (FONT_HEIGHT)),
+                            line[: prefix_index + len(highlight_prefix)],
+                            theme.highlight_color,
+                            bg_color,
+                        )
+
+                        # check if lines before highlight_prefix also needs to be highlighted
+                        i -= 1
+                        while i > -1:
+                            line = lines[i]
+                            prefix_index = line.find(highlight_prefix)
+                            # content may need highlight
+                            if (
+                                line
+                                and prefix_index == -1
+                                and isinstance(text, str)
+                                and text[text.find(line) + len(line)] != "\n"
+                            ):
+                                offset_x = max(
+                                    0,
+                                    (self.width() - lcd.string_width_px(line)) // 2,
+                                )
+                                self.draw_string(
+                                    offset_x,
+                                    offset_y + (i * (FONT_HEIGHT)),
+                                    line,
+                                    theme.highlight_color,
+                                    bg_color,
+                                )
+                            else:
+                                break
+                            i -= 1
+
         return len(lines)  # return number of lines drawn
 
-    def draw_centered_text(self, text, color=theme.fg_color, bg_color=theme.bg_color):
-        """Draws text horizontally and vertically centered on the display"""
-        lines = text if isinstance(text, list) else self.to_lines(text)
-        lines_height = len(lines) * FONT_HEIGHT
-        offset_y = max(0, (self.height() - lines_height) // 2)
-        self.draw_hcentered_text(text, offset_y, color, bg_color)
+    def get_center_offset_y(self, lines_qtd):
+        """Returns the ammount of offset_y to be at center"""
+        return max(0, (self.height() - lines_qtd * FONT_HEIGHT) // 2)
 
-    def flash_text(self, text, color=theme.fg_color, duration=FLASH_MSG_TIME):
+    def draw_centered_text(
+        self, text, color=theme.fg_color, bg_color=theme.bg_color, highlight_prefix=""
+    ):
+        """Draws text horizontally and vertically centered on the display"""
+        lines = self.to_lines(text)
+        offset_y = self.get_center_offset_y(len(lines))
+
+        if highlight_prefix == "":
+            text = lines
+        return self.draw_hcentered_text(
+            text, offset_y, color, bg_color, highlight_prefix=highlight_prefix
+        )
+
+    def flash_text(
+        self, text, color=theme.fg_color, duration=FLASH_MSG_TIME, highlight_prefix=""
+    ):
         """Flashes text centered on the display for duration ms"""
         self.clear()
-        self.draw_centered_text(text, color)
+        self.draw_centered_text(text, color, highlight_prefix=highlight_prefix)
         time.sleep_ms(duration)
         self.clear()
 
     def draw_qr_code(
-        self, offset_y, qr_code, dark_color=QR_DARK_COLOR, light_color=QR_LIGHT_COLOR
+        self,
+        qr_code,
+        offset_x=0,
+        offset_y=0,
+        width=0,
+        dark_color=QR_DARK_COLOR,
+        light_color=QR_LIGHT_COLOR,
     ):
         """Draws a QR code on the screen"""
+        width = self.width() if width == 0 else width
         lcd.draw_qr_code_binary(
-            offset_y, qr_code, self.width(), dark_color, light_color, light_color
+            offset_x, offset_y, qr_code, width, dark_color, light_color, light_color
         )
 
     def set_pmu_backlight(self, level):
@@ -443,37 +529,43 @@ class Display:
             translated_level = 8
         power_manager.set_screen_brightness(translated_level)
 
-    def max_menu_lines(self, line_offset=STATUS_BAR_HEIGHT):
+    def max_menu_lines(self, line_offset=STATUS_BAR_HEIGHT, menu_lines=None):
         """Maximum menu items the display can fit"""
-        return (self.height() - line_offset) // (2 * FONT_HEIGHT)
+        one_line_fit_value = (self.height() - line_offset) // (2 * FONT_HEIGHT)
+
+        # avoid edge cases where exist menu items with two lines
+        if menu_lines:
+            total_lines = sum(len(self.to_lines(line[0])) for line in menu_lines)
+            if total_lines > len(menu_lines):
+                one_line_fit_value -= 1
+        return one_line_fit_value
 
     def render_image(self, img, title_lines=0, double_subtitle=False):
         """Renders the image based on the board type."""
-        board_type = board.config["type"]
 
         # Initialize offset and region components
         offset_x, offset_y = 0, 0
         region_x, region_y, region_w, region_h = 8, 0, 304, 240
 
-        if board_type == "amigo":
+        if kboard.is_amigo:
             offset_x = 40 if self.flipped_x_coordinates else 120
             offset_y = 40
             region_x, region_y, region_w, region_h = 0, 0, 320, 240
-        elif board_type == "m5stickv":
+        elif kboard.is_m5stickv:
             # Apply lens correction and update img reference
             img = img.lens_corr(strength=1.0, zoom=0.56)
             region_x, region_y, region_w, region_h = 68, 52, 185, 135
-        elif board_type == "cube":
+        elif kboard.is_cube:
             region_x, region_y, region_w, region_h = 48, 0, 224, 240
 
         # Adjust for title if needed for boards with height < 320px
-        if title_lines and board_type != "amigo":
+        if title_lines and not kboard.is_amigo:
             message_height = DEFAULT_PADDING + FONT_HEIGHT * title_lines
             offset_x += message_height
             region_x += message_height
             region_w -= message_height
             # Adjust bottom padding for double subtitle
-            if double_subtitle and board_type != "m5stickv":
+            if double_subtitle and not kboard.is_m5stickv:
                 # Extra cut on Cube to fit progress bar
                 # and entropy measurement on flash filling
                 region_w -= FONT_HEIGHT

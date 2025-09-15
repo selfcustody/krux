@@ -1,4 +1,4 @@
-from ..shared_mocks import mock_context
+from ..shared_mocks import mock_context, MockPrinter
 
 
 def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
@@ -15,9 +15,10 @@ def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
     ctx.is_logged_in.return_value = False
 
     ctx.wallet = wallet
-    ctx.printer = printer
     if printer is not None:
-        mocker.patch("krux.printers.create_printer", new=mocker.MagicMock())
+        mocker.patch(
+            "krux.printers.create_printer", new=mocker.MagicMock(spec=MockPrinter)
+        )
         Settings().hardware.printer.driver = THERMAL_ADAFRUIT_TXT
     elif Settings().hardware.printer.driver != "none":
         Settings().hardware.printer.driver = "none"

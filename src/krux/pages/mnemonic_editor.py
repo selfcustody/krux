@@ -22,11 +22,23 @@
 
 from embit import bip39
 from embit.wordlists.bip39 import WORDLIST
-from . import Page, ESC_KEY, LETTERS, proceed_menu
-from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, NARROW_SCREEN_WITH
+from . import Page, ESC_KEY, LETTERS
+from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT
 from ..krux_settings import t
 from ..themes import theme
-from ..input import BUTTON_TOUCH, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+from ..input import (
+    BUTTON_TOUCH,
+    BUTTON_ENTER,
+    BUTTON_PAGE,
+    BUTTON_PAGE_PREV,
+    FAST_FORWARD,
+    FAST_BACKWARD,
+    PRESSED,
+    KEY_REPEAT_DELAY_MS,
+)
+from ..key import Key
+from ..kboard import kboard
+import time
 
 GO_INDEX = 25
 ESC_INDEX = 24
@@ -48,7 +60,6 @@ class MnemonicEditor(Page):
         self.mnemonic_length = len(self.current_mnemonic)
         self.header_offset = DEFAULT_PADDING
         self.search_ranges = {}
-        self.narrow_screen = self.ctx.display.width() <= NARROW_SCREEN_WITH
 
     def compute_search_ranges(self, alt_wordlist=None):
         """Compute search ranges for the autocomplete and possible_letters functions"""
@@ -84,8 +95,6 @@ class MnemonicEditor(Page):
             wordlist = WORDLIST
         if len(prefix) > 0:
             letter = prefix[0]
-            if letter not in self.search_ranges:
-                return None
             start, stop = self.search_ranges[letter]
             matching_words = list(
                 filter(
@@ -107,8 +116,6 @@ class MnemonicEditor(Page):
         if len(prefix) == 0:
             return self.search_ranges.keys()
         letter = prefix[0]
-        if letter not in self.search_ranges:
-            return ""
         start, stop = self.search_ranges[letter]
         return {
             word[len(prefix)]
@@ -134,13 +141,26 @@ class MnemonicEditor(Page):
         from ..wallet import is_double_mnemonic
 
         header = "BIP39" + " " + t("Mnemonic")
-        if is_double_mnemonic(" ".join(self.current_mnemonic)):
+        mnemonic = " ".join(self.current_mnemonic)
+        fingerprint = ""
+        if is_double_mnemonic(mnemonic):
             header += "*"
+        if self.valid_checksum:
+            fingerprint = Key.extract_fingerprint(mnemonic)
+            if fingerprint:
+                fingerprint = "\n" + fingerprint
+                header += fingerprint
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(header, MINIMAL_PADDING)
+        if fingerprint:
+            self.ctx.display.draw_hcentered_text(
+                fingerprint, MINIMAL_PADDING, theme.highlight_color
+            )
         self.header_offset = MINIMAL_PADDING * 2 + (
             len(self.ctx.display.to_lines(header)) * FONT_HEIGHT
         )
+        if kboard.has_minimal_display:
+            self.header_offset -= MINIMAL_PADDING
 
     def _map_words(self, button_index=0, page=0):
         """Map words to the screen"""
@@ -187,7 +207,7 @@ class MnemonicEditor(Page):
         y_region = self.header_offset
         y_region += (word_v_padding - FONT_HEIGHT) // 2
         word_index = 0
-        if self.narrow_screen or self.mnemonic_length == 12:
+        if kboard.is_m5stickv or self.mnemonic_length == 12:
             x_padding = DEFAULT_PADDING
         else:
             x_padding = MINIMAL_PADDING
@@ -208,7 +228,7 @@ class MnemonicEditor(Page):
                     str(paged_index + 1) + "." + self.current_mnemonic[paged_index],
                     word_color(paged_index),
                 )
-            if self.mnemonic_length == 24 and not self.narrow_screen:
+            if self.mnemonic_length == 24 and not kboard.is_m5stickv:
                 if word_index + 12 == button_index and self.ctx.input.buttons_active:
                     self.ctx.display.draw_string(
                         MINIMAL_PADDING + self.ctx.display.width() // 2,
@@ -231,7 +251,7 @@ class MnemonicEditor(Page):
             word_index += 1
             y_region += word_v_padding
 
-        if self.mnemonic_length == 24 and self.narrow_screen and page == 0:
+        if self.mnemonic_length == 24 and kboard.is_m5stickv and page == 0:
             go_txt = "13-24"
         else:
             go_txt = t("Go")
@@ -239,8 +259,8 @@ class MnemonicEditor(Page):
         menu_index = None
         if self.ctx.input.buttons_active and button_index >= ESC_INDEX:
             menu_index = button_index - ESC_INDEX
-        proceed_menu(
-            self.ctx, y_region, menu_index, go_txt, esc_txt, self.valid_checksum
+        self.draw_proceed_menu(
+            go_txt, esc_txt, y_region, menu_index, self.valid_checksum
         )
 
     def edit_word(self, index):
@@ -251,8 +271,6 @@ class MnemonicEditor(Page):
             self.compute_search_ranges()
             # if new and last word, lead input to a valid mnemonic
             if self.new_mnemonic and index == self.mnemonic_length - 1:
-                from ..key import Key
-
                 final_words = Key.get_final_word_candidates(self.current_mnemonic[:-1])
                 word = self.capture_from_keypad(
                     t("Word %d") % (index + 1),
@@ -282,7 +300,14 @@ class MnemonicEditor(Page):
             self.ctx.display.clear()
             self._draw_header()
             self._map_words(button_index, page)
-            btn = self.ctx.input.wait_for_button()
+            if self.ctx.input.page_value() == PRESSED:
+                btn = FAST_FORWARD
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            elif self.ctx.input.page_prev_value() == PRESSED:
+                btn = FAST_BACKWARD
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            else:
+                btn = self.ctx.input.wait_for_button()
             if btn == BUTTON_TOUCH:
                 button_index = self.ctx.input.touch.current_index()
                 if button_index < ESC_INDEX:
@@ -294,7 +319,7 @@ class MnemonicEditor(Page):
                 btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if button_index == GO_INDEX:
-                    if self.mnemonic_length == 24 and self.narrow_screen and page == 0:
+                    if self.mnemonic_length == 24 and kboard.is_m5stickv and page == 0:
                         page = 1
                         continue
                     # Done
@@ -316,19 +341,19 @@ class MnemonicEditor(Page):
                     ):
                         self.current_mnemonic[button_index + page * 12] = new_word
                         self.calculate_checksum()
-            elif btn == BUTTON_PAGE:
+            elif btn in (BUTTON_PAGE, FAST_FORWARD):
                 button_index += 1
                 if (
-                    self.narrow_screen
+                    kboard.is_m5stickv
                     and self.mnemonic_length == 24
                     and button_index == 12
                 ) or (self.mnemonic_length == 12 and button_index == 12):
                     button_index += 12
                 button_index %= 26
-            elif btn == BUTTON_PAGE_PREV:
+            elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD):
                 button_index -= 1
                 if (
-                    self.narrow_screen
+                    kboard.is_m5stickv
                     and self.mnemonic_length == 24
                     and button_index == 23
                 ) or (self.mnemonic_length == 12 and button_index == 23):

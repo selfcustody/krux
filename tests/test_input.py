@@ -34,7 +34,7 @@ def reset_input_states(mocker, input):
     return input
 
 
-def test_init(mocker, m5stickv):
+def test_init_m5stickv(mocker, m5stickv):
     mocker.patch("krux.buttons.fm.register", new=mocker.MagicMock())
     mocker.patch("krux.buttons.GPIO", new=mocker.MagicMock())
     import krux
@@ -72,7 +72,7 @@ def test_init(mocker, m5stickv):
     )
 
 
-def test_init_amigo_tft(mocker, amigo):
+def test_init_amigo(mocker, amigo):
     mocker.patch("krux.buttons.fm.register", new=mocker.MagicMock())
     mocker.patch("krux.buttons.GPIO", new=mocker.MagicMock())
     import krux
@@ -170,6 +170,142 @@ def test_init_dock(mocker, dock):
     assert (
         krux.rotary.GPIO.call_args_list[1].args[0]._extract_mock_name()
         == "mock.GPIO.GPIOHS0"
+    )
+
+
+def test_init_cube(mocker, cube):
+    mocker.patch("krux.buttons.fm.register", new=mocker.MagicMock())
+    mocker.patch("krux.buttons.GPIO", new=mocker.MagicMock())
+    from krux import buttons
+    from krux.input import Input
+    import board
+
+    input = Input()
+
+    assert isinstance(input, Input)
+
+    for button in buttons.fm.register.call_args_list:
+        print(button)
+
+    buttons.fm.register.assert_has_calls(
+        [
+            mocker.call(board.config["krux"]["pins"]["BUTTON_A"], mocker.ANY),
+            mocker.call(board.config["krux"]["pins"]["BUTTON_B"], mocker.ANY),
+            mocker.call(board.config["krux"]["pins"]["BUTTON_C"], mocker.ANY),
+        ]
+    )
+
+    assert (
+        buttons.fm.register.call_args_list[0].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS21"
+    )
+    assert (
+        buttons.fm.register.call_args_list[1].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS22"
+    )
+    assert (
+        buttons.fm.register.call_args_list[2].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS0"
+    )
+
+    assert input.enter is not None
+    assert input.page is not None
+    assert input.page_prev is not None
+
+    assert buttons.GPIO.call_count == 3
+    assert (
+        buttons.GPIO.call_args_list[0].args[0]._extract_mock_name() == "mock.GPIOHS21"
+    )
+    assert (
+        buttons.GPIO.call_args_list[1].args[0]._extract_mock_name() == "mock.GPIOHS22"
+    )
+
+
+def test_init_yahboom(mocker, yahboom):
+    mocker.patch("krux.buttons.fm.register", new=mocker.MagicMock())
+    mocker.patch("krux.buttons.GPIO", new=mocker.MagicMock())
+    from krux import buttons
+    from krux.input import Input
+    import board
+
+    input = Input()
+
+    assert isinstance(input, Input)
+
+    buttons.fm.register.assert_has_calls(
+        [
+            mocker.call(board.config["krux"]["pins"]["BUTTON_B"], mocker.ANY),
+            mocker.call(board.config["krux"]["pins"]["BUTTON_C"], mocker.ANY),
+            mocker.call(board.config["krux"]["pins"]["TOUCH_IRQ"], mocker.ANY),
+        ]
+    )
+
+    assert (
+        buttons.fm.register.call_args_list[0].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS22"
+    )
+    assert (
+        buttons.fm.register.call_args_list[1].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS0"
+    )
+    assert (
+        buttons.fm.register.call_args_list[2].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS1"
+    )
+
+    assert input.enter is None
+    assert input.page is not None
+    assert input.page_prev is not None
+
+    assert buttons.GPIO.call_count == 2
+    assert (
+        buttons.GPIO.call_args_list[0].args[0]._extract_mock_name() == "mock.GPIOHS22"
+    )
+    assert buttons.GPIO.call_args_list[1].args[0]._extract_mock_name() == "mock.GPIOHS0"
+
+
+def test_init_wonder_mv(mocker, wonder_mv):
+    mocker.patch("krux.buttons.fm.register", new=mocker.MagicMock())
+    mocker.patch("krux.buttons.GPIO", new=mocker.MagicMock())
+    from krux import buttons
+    from krux.input import Input
+    import board
+
+    input = Input()
+
+    assert isinstance(input, Input)
+
+    buttons.fm.register.assert_has_calls(
+        [
+            mocker.call(board.config["krux"]["pins"]["BUTTON_A"], mocker.ANY),
+            mocker.call(board.config["krux"]["pins"]["BUTTON_B"], mocker.ANY),
+            mocker.call(board.config["krux"]["pins"]["TOUCH_IRQ"], mocker.ANY),
+        ]
+    )
+
+    assert (
+        buttons.fm.register.call_args_list[0].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS21"
+    )
+    assert (
+        buttons.fm.register.call_args_list[1].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS22"
+    )
+    assert (
+        buttons.fm.register.call_args_list[2].args[1]._extract_mock_name()
+        == "mock.fm.fpioa.GPIOHS1"
+    )
+
+    assert input.enter is not None
+    assert input.page is not None
+    assert input.page_prev is None
+
+    assert buttons.GPIO.call_count == 2
+    assert (
+        buttons.GPIO.call_args_list[0].args[0]._extract_mock_name() == "mock.GPIOHS21"
+    )
+    assert (
+        buttons.GPIO.call_args_list[1].args[0]._extract_mock_name() == "mock.GPIOHS22"
     )
 
 
@@ -558,6 +694,36 @@ def test_invalid_touch_delimiter(mocker, amigo):
         input.touch.add_y_delimiter(250)
 
 
+def test_rotary_encoder_handler(mocker, dock):
+    from src.krux.rotary import RotaryEncoder, __handler__
+
+    # Mock the encoder instance
+    mock_encoder = mocker.MagicMock(spec=RotaryEncoder)
+    mock_encoder.pin_1 = mocker.MagicMock()
+    mock_encoder.pin_2 = mocker.MagicMock()
+
+    for case in [
+        (0, 0),
+        (0, 1),
+        (1, 0),
+        (1, 1),
+    ]:
+
+        mock_encoder.pin_1.value.return_value = case[0]
+        mock_encoder.pin_2.value.return_value = case[1]
+        mocker.patch("src.krux.rotary.encoder", mock_encoder)
+        __handler__()
+
+    mock_encoder.process.assert_has_calls(
+        [
+            mocker.call((0, 0)),
+            mocker.call((0, 1)),
+            mocker.call((1, 0)),
+            mocker.call((1, 1)),
+        ]
+    )
+
+
 def test_encoder_spin_right(mocker, dock):
     import threading
     import krux
@@ -694,3 +860,86 @@ def test_page_prev_button_press_when_buttons_not_active(mocker, amigo):
     assert btn is ACTIVATING_BUTTONS
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()
+
+
+def test_enter_button_damaged(mocker, m5stickv):
+    from krux.input import Input, PRESSED
+
+    mocker.patch("krux.input.Input.enter_value", return_value=PRESSED)
+    mocker.spy(Input, "button_integrity_check")
+
+    input = Input()
+
+    # Button enter is damaged, so the input.enter should be None
+    # (but assert the button_integrity_check and enter_value was called too)
+    input.button_integrity_check.assert_called_once()
+    input.enter_value.assert_called_once()
+    assert input.enter is None
+
+    # Should return False since button is damaged
+    assert not input.enter_event()
+
+
+def test_page_button_damaged(mocker, m5stickv):
+    from krux.input import Input, PRESSED
+
+    mocker.patch("krux.input.Input.page_value", return_value=PRESSED)
+    mocker.spy(Input, "button_integrity_check")
+
+    input = Input()
+
+    # Button page is damaged, so the input.page should be None
+    # (but assert the button_integrity_check and page_value was called too)
+    input.button_integrity_check.assert_called_once()
+    input.page_value.assert_called_once()
+    assert input.page is None
+
+    # Should return False since button is damaged
+    assert not input.page_event()
+
+
+def test_page_prev_button_damaged(mocker, m5stickv):
+    from krux.input import Input, PRESSED
+
+    mocker.patch("krux.input.Input.page_prev_value", return_value=PRESSED)
+    mocker.spy(Input, "button_integrity_check")
+
+    input = Input()
+
+    # Button page_prev is damaged, so the input.page_prev should be None
+    # (but assert the button_integrity_check and page_prev_value was called too)
+    input.button_integrity_check.assert_called_once()
+    input.page_prev_value.assert_called_once()
+    assert input.page_prev is None
+
+    # Should return False since button is damaged
+    assert not input.page_prev_event()
+
+
+def test_touch_damaged(mocker, amigo):
+    from krux.input import Input, PRESSED
+
+    mocker.patch("krux.input.Input.touch_value", return_value=PRESSED)
+    mocker.spy(Input, "button_integrity_check")
+
+    input = Input()
+
+    # Touch is damaged, so the input.touch should be None
+    # (but assert the button_integrity_check and touch_value was called too)
+    input.button_integrity_check.assert_called_once()
+    input.touch_value.assert_called_once()
+    assert input.touch is None
+
+    # Should return False since touch is damaged, sowy!
+    assert not input.touch_event()
+
+
+def test_amigo_fast_forward_from_start(mocker, amigo):
+    from krux.input import Input, BUTTON_PAGE, ACTIVATING_BUTTONS
+
+    mocker.patch("time.ticks_ms", return_value=10)
+
+    input = Input()
+    # input.page_value = lambda: PRESSED
+    value = input._detect_press_type(BUTTON_PAGE)
+    assert value == ACTIVATING_BUTTONS

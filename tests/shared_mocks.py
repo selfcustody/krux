@@ -3,6 +3,7 @@ from unittest import mock
 from unittest.mock import MagicMock
 import pyqrcode
 import zlib
+import base64
 
 
 class MockFile:
@@ -149,7 +150,7 @@ def get_mock_open(files: dict[str, str]):
                 if content == "Exception":
                     raise Exception()
                 return mock.mock_open(read_data=content).return_value
-        raise OSError("(mock) Unable to open {filename}")
+        raise OSError("(mock) Unable to open " + filename)
 
     return mock.MagicMock(side_effect=open_mock)
 
@@ -322,6 +323,42 @@ def snapshot_generator(outcome=SNAP_SUCCESS, animated_qr=[]):
     return snapshot
 
 
+def pbkdf2_hmac_sha256_wrapper(secret, salt, iterations):
+    import hashlib
+
+    return hashlib.pbkdf2_hmac("sha256", secret, salt, iterations)
+
+
+def base32_decode(encoded_str):
+    """Decodes a Base32 string."""
+    try:
+        len_pad = (8 - len(encoded_str) % 8) % 8
+        decoded = base64.b32decode(encoded_str + "=" * len_pad)
+    except ValueError as e:
+        raise ValueError("Invalid Base32 string: %s" % e)
+
+    return decoded
+
+
+def base32_encode(data, add_padding=False):
+    encoded = base64.b32encode(data).decode("utf-8")
+    if not add_padding:
+        encoded = encoded.rstrip("=")
+    return encoded
+
+
+def base43_encode(data, ignored=None):
+    from krux.baseconv import pure_python_base_encode
+
+    return pure_python_base_encode(data, 43)
+
+
+def base43_decode(data):
+    from krux.baseconv import pure_python_base_decode
+
+    return pure_python_base_decode(data, 43)
+
+
 def board_m5stickv():
     return mock.MagicMock(
         config={
@@ -483,6 +520,56 @@ def board_cube():
     )
 
 
+def board_yahboom():
+    return mock.MagicMock(
+        config={
+            "type": "yahboom",
+            "lcd": {
+                "dcx": 31,
+                "ss": 30,
+                "rst": 23,
+                "clk": 28,
+                "height": 240,
+                "width": 320,
+                "invert": 1,
+                "dir": 96,
+                "lcd_type": 0,
+            },
+            "sdcard": {
+                "sclk": 32,
+                "mosi": 35,
+                "miso": 33,
+                "cs": 34,
+            },
+            "board_info": {
+                "BOOT_KEY": 16,
+                "CONNEXT_A": 8,
+                "CONNEXT_B": 6,
+                "I2C_SDA": 25,
+                "I2C_SCL": 24,
+                "SPI_SCLK": 32,
+                "SPI_MOSI": 35,
+                "SPI_MISO": 33,
+                "SPI_CS": 34,
+            },
+            "krux": {
+                "pins": {
+                    "BUTTON_B": 16,
+                    "BUTTON_C": 17,
+                    "TOUCH_IRQ": 22,
+                    "I2C_SDA": 25,
+                    "I2C_SCL": 24,
+                },
+                "display": {
+                    "touch": True,
+                    "font": [8, 16],
+                    "font_wide": [16, 16],
+                },
+            },
+        }
+    )
+
+
 def board_wonder_mv():
     return mock.MagicMock(
         config={
@@ -562,6 +649,8 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=135),
                 height=mocker.MagicMock(return_value=240),
                 usable_width=mocker.MagicMock(return_value=(135 - 2 * 10)),
+                usable_pixels_in_line=mocker.MagicMock(return_value=135),
+                ascii_chars_per_line=mocker.MagicMock(return_value=135 // 8),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=7),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
@@ -583,6 +672,8 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=240),
                 height=mocker.MagicMock(return_value=320),
                 usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                usable_pixels_in_line=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                ascii_chars_per_line=mocker.MagicMock(return_value=(240 - 2 * 10) // 8),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
@@ -605,6 +696,10 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=320),
                 height=mocker.MagicMock(return_value=480),
                 usable_width=mocker.MagicMock(return_value=(320 - 2 * 10)),
+                usable_pixels_in_line=mocker.MagicMock(return_value=(320 - 2 * 10)),
+                ascii_chars_per_line=mocker.MagicMock(
+                    return_value=(320 - 2 * 10) // 12
+                ),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
@@ -626,11 +721,36 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=240),
                 height=mocker.MagicMock(return_value=240),
                 usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                usable_pixels_in_line=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                ascii_chars_per_line=mocker.MagicMock(return_value=(240 - 2 * 10) // 8),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=7),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
             light=None,
+        )
+    elif board.config["type"] == "yahboom":
+        return mocker.MagicMock(
+            input=mocker.MagicMock(
+                touch=mocker.MagicMock(),
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
+            display=mocker.MagicMock(
+                font_width=8,
+                font_height=16,
+                total_lines=20,  # 320 / 16
+                width=mocker.MagicMock(return_value=240),
+                height=mocker.MagicMock(return_value=320),
+                usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                usable_pixels_in_line=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                ascii_chars_per_line=mocker.MagicMock(return_value=(240 - 2 * 10) // 8),
+                to_lines=mocker.MagicMock(return_value=[""]),
+                max_menu_lines=mocker.MagicMock(return_value=9),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
+            ),
         )
     elif board.config["type"] == "wonder_mv":
         return mocker.MagicMock(
@@ -648,6 +768,8 @@ def mock_context(mocker):
                 width=mocker.MagicMock(return_value=240),
                 height=mocker.MagicMock(return_value=320),
                 usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                usable_pixels_in_line=mocker.MagicMock(return_value=(240 - 2 * 10)),
+                ascii_chars_per_line=mocker.MagicMock(return_value=(240 - 2 * 10) // 8),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 max_menu_lines=mocker.MagicMock(return_value=9),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),

@@ -22,6 +22,7 @@
 
 from .. import (
     Page,
+    Menu,
     MENU_CONTINUE,
     LOAD_FROM_CAMERA,
     LOAD_FROM_SD,
@@ -31,14 +32,17 @@ from ...display import (
     BOTTOM_PROMPT_LINE,
     FONT_HEIGHT,
     FONT_WIDTH,
-    MINIMAL_DISPLAY,
     MINIMAL_PADDING,
 )
 from ...krux_settings import t
 from ...qr import FORMAT_NONE, FORMAT_PMOFN
-from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
+from ...sd_card import (
+    DESCRIPTOR_FILE_EXTENSION,
+    JSON_FILE_EXTENSION,
+)
 from ...themes import theme
 from ...key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL, P2TR
+from ...kboard import kboard
 
 
 class WalletDescriptor(Page):
@@ -61,11 +65,38 @@ class WalletDescriptor(Page):
         elif not self.ctx.wallet.is_loaded():
             text = t("Wallet output descriptor not found.")
             self.ctx.display.draw_centered_text(text)
-            if self.prompt(t("Load one?"), BOTTOM_PROMPT_LINE):
+            if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
                 return self._load_wallet()
         else:
-            self.display_wallet(self.ctx.wallet)
-            wallet_data, qr_format = self.ctx.wallet.wallet_qr()
+            qr_type_menu = [
+                ("Plaintext", lambda: "P"),
+                ("Encrypted", lambda: "E"),
+            ]
+            idx, qr_type = Menu(self.ctx, qr_type_menu).run_loop()
+            if idx == len(qr_type_menu) - 1:
+                return MENU_CONTINUE
+
+            is_encrypted = qr_type == "E"
+            if is_encrypted:
+                from krux.pages.encryption_ui import KEFEnvelope
+                from krux.pages.qr_view import SeedQRView
+
+                # simple descriptor string encoded to bytes, rather than what was loaded
+                wallet_data = self.ctx.wallet.descriptor.to_string().encode()
+
+                kef = KEFEnvelope(self.ctx)
+                kef.label = self.ctx.wallet.label
+                wallet_data = kef.seal_ui(wallet_data)
+                if not wallet_data:
+                    # User cancelled the encryption
+                    return MENU_CONTINUE
+                qr_format = "binary"
+                title = "KEF " + kef.label
+                sqr = SeedQRView(self.ctx, binary=True, data=wallet_data, title=title)
+                sqr.display_qr(allow_export=True, transcript_tools=False)
+            else:
+                self.display_wallet(self.ctx.wallet)
+                wallet_data, qr_format = self.ctx.wallet.wallet_qr()
             from ..utils import Utils
 
             utils = Utils(self.ctx)
@@ -76,13 +107,17 @@ class WalletDescriptor(Page):
                 from ..file_operations import SaveFile
 
                 save_page = SaveFile(self.ctx)
+                if is_encrypted:
+                    file_content = wallet_data
+                else:
+                    file_content = self.ctx.wallet.descriptor.to_string()
                 self.ctx.wallet.persisted = save_page.save_file(
-                    self.ctx.wallet.descriptor.to_string(),
+                    file_content,
                     self.ctx.wallet.label,
                     self.ctx.wallet.label,
                     title + ":",
                     DESCRIPTOR_FILE_EXTENSION,
-                    save_as_binary=False,
+                    save_as_binary=is_encrypted,
                 )
 
         return MENU_CONTINUE
@@ -105,7 +140,11 @@ class WalletDescriptor(Page):
 
                 utils = Utils(self.ctx)
                 _, wallet_data = utils.load_file(
-                    (DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION), prompt=False
+                    (
+                        DESCRIPTOR_FILE_EXTENSION,
+                        JSON_FILE_EXTENSION,
+                    ),
+                    prompt=False,
                 )
                 persisted = True
             except OSError:
@@ -114,11 +153,22 @@ class WalletDescriptor(Page):
             return MENU_CONTINUE
 
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
+        self.ctx.display.draw_centered_text(t("Processing…"))
         if wallet_data is None:
             # Camera or SD card loading failed!
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
+
+        from ..encryption_ui import decrypt_kef
+
+        try:
+            wallet_data = decrypt_kef(self.ctx, wallet_data).decode()
+        except KeyError:
+            self.flash_error(t("Failed to decrypt"))
+            return MENU_CONTINUE
+        except ValueError:
+            # ValueError=not KEF or declined to decrypt
+            pass
 
         from ...wallet import Wallet, AssumptionWarning
 
@@ -146,6 +196,14 @@ class WalletDescriptor(Page):
             self.ctx.input.wait_for_button()
 
         if wallet.is_loaded():
+            if not wallet.has_change_addr():
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    t("Could not determine change address."), theme.error_color
+                )
+                if not self.prompt(t("Proceed anyway?"), BOTTOM_PROMPT_LINE):
+                    return MENU_CONTINUE
+
             self.ctx.display.clear()
             self.display_loading_wallet(wallet)
             if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
@@ -171,6 +229,7 @@ class WalletDescriptor(Page):
 
     def display_loading_wallet(self, wallet):
         """Displays wallet descriptor attributes while loading"""
+        from ...settings import THIN_SPACE, ELLIPSIS
 
         def draw_header():
             nonlocal offset_y
@@ -185,13 +244,15 @@ class WalletDescriptor(Page):
         unused_key_index = None
         for i, key in enumerate(wallet.descriptor.keys):
             label_color = theme.fg_color
-            padding = DEFAULT_PADDING if not MINIMAL_DISPLAY else MINIMAL_PADDING
+            padding = (
+                DEFAULT_PADDING if not kboard.has_minimal_display else MINIMAL_PADDING
+            )
             key_label = (
                 "{}: ".format(chr(65 + i))
                 if (wallet.is_multisig() or wallet.is_miniscript())
-                else (" " * 3 if not MINIMAL_DISPLAY else "")
+                else (" " * 3 if not kboard.has_minimal_display else "")
             )
-            key_fingerprint = FINGERPRINT_SYMBOL + " "
+            key_fingerprint = FINGERPRINT_SYMBOL + THIN_SPACE
             if key.origin:
                 key_origin_str = str(key.origin)
                 key_fingerprint += key_origin_str[:8]
@@ -219,7 +280,9 @@ class WalletDescriptor(Page):
                 self.ctx.display.draw_string(padding, offset_y, line, label_color)
                 offset_y += FONT_HEIGHT
 
-            sub_padding = padding + (0 if MINIMAL_DISPLAY else 3 * FONT_WIDTH)
+            sub_padding = padding + (
+                0 if kboard.has_minimal_display else 3 * FONT_WIDTH
+            )
 
             if key.origin:
                 key_derivation_str = "{} m{}".format(
@@ -239,7 +302,7 @@ class WalletDescriptor(Page):
                     offset_y += FONT_HEIGHT
 
             xpub_text = self.fit_to_line(
-                ("" if MINIMAL_DISPLAY else " " * 3) + key.key.to_base58()
+                ("" if kboard.has_minimal_display else " " * 3) + key.key.to_base58()
             )
             self.ctx.display.draw_string(padding, offset_y, xpub_text, label_color)
             offset_y += (FONT_HEIGHT * 3) // 2
@@ -280,6 +343,6 @@ class WalletDescriptor(Page):
                         )
                 offset_y += FONT_HEIGHT
                 if offset_y >= BOTTOM_PROMPT_LINE:
-                    self.ctx.display.draw_hcentered_text("...", offset_y)
+                    self.ctx.display.draw_hcentered_text(ELLIPSIS, offset_y)
                     self.ctx.input.wait_for_button()
                     draw_header()

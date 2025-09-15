@@ -1,4 +1,4 @@
-In Krux first menu, there is a `Settings` entry. Some submenu entries have too many options to fit on one screen, swipe up :material-gesture-swipe-up: or down :material-gesture-swipe-down: to navigate between the screens if your device has a touchscreen. Below is a breakdown of the options you can change:
+In Krux first menu, there is a `Settings` entry. Some submenu entries have too many options to fit on a single screen, swipe up :material-gesture-swipe-up: or down :material-gesture-swipe-down: to navigate between the screens - if your device has a touchscreen. Below is a breakdown of the options you can change:
 
 <img src="../../img/maixpy_amigo/settings-options-300.png" class="amigo">
 <img src="../../img/maixpy_m5stickv/settings-options-250.png" class="m5stickv">
@@ -37,7 +37,7 @@ As with `Policy Type`, pre-select the most commonly used script type so that you
 <img src="../../img/maixpy_m5stickv/encryption-options-250.png" align="right" class="m5stickv">
 <img src="../../img/maixpy_amigo/encryption-options-300.png" align="right" class="amigo">
 
-Modify the encryption method and parameters to fit your needs. This will be used when storing encrypted mnemonics or creating encrypted QR codes. For more info see [Krux Encrypted Mnemonics](./features/encrypted-mnemonics.md).
+Modify the encryption method and parameters to fit your needs. This will be used when storing encrypted mnemonics or creating encrypted QR codes. For more info see [Krux Encryption - Regarding BIP39 Mnemonics](features/encryption/encryption.md/#regarding-bip39-mnemonics).
 
 <div style="clear: both"></div>
 
@@ -58,12 +58,12 @@ When you enter the encryption key, it is not directly used to encrypt your data.
 Choose between well known and widely used AES (Advanced Encryption Standard) modes:
 
 ##### AES-ECB
-ECB (Electronic Codebook) is a simpler method where data blocks are encrypted individually. Compared to CBC, it will be faster and simpler to encrypt, QR codes will have a lower density and will be easier to [transcribe](./features/QR-transcript-tools.md).
+ECB (Electronic Codebook) is a simpler method where data blocks are encrypted individually. Compared to CBC, it will be faster and simpler to encrypt, QR codes will have a lower density and will be easier to [transcribe](features/QR-transcript-tools.md).
 
 ##### AES-CBC
-CBC (Cipher-block Chaining) is considered more secure than ECB.  The first data block, an initialization vector (IV), is used to add random data to the encryption. The encryption of subsequent blocks depends on the data from previous blocks, ensuring chaining.
+CBC (Cipher-block Chaining) is considered more secure than ECB. The first data block, an initialization vector (IV), is used to add random data to the encryption. The encryption of subsequent blocks depends on the data from previous blocks, ensuring chaining.
 
-Encryption will take longer because a snapshot will be needed to generate the IV. This IV will be stored together with the encrypted data, making encrypted QR codes denser and harder to [transcribe](./features/QR-transcript-tools.md).
+Encryption will take longer because a snapshot will be needed to generate the IV. This IV will be stored together with the encrypted data, making encrypted QR codes denser and harder to [transcribe](features/QR-transcript-tools.md).
 
 <div style="clear: both"></div>
 
@@ -89,7 +89,7 @@ The caveat is low values can cause issues, such as double click and unexpected m
 <img src="../../img/maixpy_m5stickv/settings-options-hardware-display-250.png" align="right" class="m5stickv">
 <img src="../../img/maixpy_amigo/settings-options-hardware-display-300.png" align="right" class="amigo">
 
-Available display settings vary based on your device’s hardware. For example, some devices will allow to change screen brightness, others don't.
+Available display settings vary based on your device. Amigo has several options detailed below, Yahboom and WonderMV have an option for flipped orientation, others will have brightness control and Dock does not have this submenu.
 
 Few Maix Amigo screens are different, here you can customize the `BGR Colors`, `Flipped X Coordinates`, `Inverted Colors` and `LCD Type`. For more info see [Troubleshooting](../troubleshooting.md/#troubleshooting-lcd-settings-on-maix-amigo)
 
@@ -99,18 +99,23 @@ Few Maix Amigo screens are different, here you can customize the `BGR Colors`, `
 <img src="../../img/maixpy_m5stickv/printer-options-250.png" align="right" class="m5stickv">
 <img src="../../img/maixpy_amigo/printer-options-300.png" align="right" class="amigo">
 
-You can set up a TTL serial thermal printer or tell Krux to store a GRBL CNC instructions file on an SD card to machine QR codes.
+You can set up a TTL serial thermal printer or GRBL. It is also possible to store a GRBL g-code CNC instructions file on an SD card to engrave QR codes.
 
 #### CNC
-Define several machining parameters according to the desired size, material you'll use, and your CNC characteristics and capabilities.
+Define several machining parameters according to the desired size, material you'll use, and your CNC characteristics and capabilities. See [CNC Engraving](features/printing/cnc.md) for more details.
 
 #### Thermal
 Printers can come with different baudrates from the manufacturer. By default, Krux assumes the connected printer will have a baudrate of `9600`. If yours is different, you can change it here.
 
-Also setup the TX Pin you'll use (i.e., 35 on M5StickV, 7 on Maix Amigo, 8 on Yahboom, 25 on Cube, 28 on WonderMV) and tweak other parameters according to your printer recommendations. For most printers you will only need to connect 2 cables, the device TX to the printer RX and ground. Current uses of printing are listed [here](features/printing.md). Consult the [parts list](../parts.md/#optional-ttl-serial-thermal-printer) for supported printers.
+Also setup the TX Pin you'll use (i.e., 35 on M5StickV, 7 on Maix Amigo, 8 on Yahboom, 25 on Cube, 28 on WonderMV) and tweak other parameters according to your printer recommendations. For most printers you will only need to connect 2 cables, the device TX to the printer RX and ground. Current uses of printing are listed [here](features/printing/printing.md). Consult the [parts list](../parts.md/#optional-ttl-serial-thermal-printer) for supported printers.
+
+<div style="clear: both"></div>
 
 #### Driver
-Here you choose between `Thermal`, `CNC` or `none` (default). Leave this setting to `none` if you won't use a printer and don't want to be bothered by print prompts.
+<img src="../../img/maixpy_m5stickv/settings-printer-driver-250.png" align="right" class="m5stickv">
+<img src="../../img/maixpy_amigo/settings-printer-driver-300.png" align="right" class="amigo">
+
+Here you choose between `thermal/adafruit`, `cnc/file`, `cnc/grbl` or `none` (default). Leave this setting to `none` if you won't use a printer and don't want to be bothered by print prompts.
 
 <div style="clear: both"></div>
 
@@ -150,13 +155,23 @@ Set the time it takes for Krux to automatically shut down. This feature not only
 
 **Note**: Devices without batteries and power management will not shut down but reboot, which will also unload keys.
 
+<div style="clear: both"></div>
+
 #### TC Flash Hash at Boot
+<img src="../../img/maixpy_m5stickv/settings-tc-boot-250.png" align="right" class="m5stickv">
+<img src="../../img/maixpy_amigo/settings-tc-boot-300.png" align="right" class="amigo">
+
 Chose if you would like to run [Tamper Check Flash Hash](features/tamper-detection.md) every time the device is powered on.
 
 Activating *TC Flash Hash* at boot helps prevent unauthorized use by requiring the *TC Code*. But is important to note, unlike a PIN, the *TC Code* does not provide access control over USB. This means that the device's memory remains accessible via USB, allowing it to be flashed with firmware that does not require the *TC Code*.
 
+<div style="clear: both"></div>
+
 #### Hide Mnemonics
-When `True`, your device will not display private key data or backup tools when a key is loaded. It will only show public key information and allow signing operations.
+<img src="../../img/maixpy_m5stickv/settings-hide-mnemonic-250.png" align="right" class="m5stickv">
+<img src="../../img/maixpy_amigo/settings-hide-mnemonic-300.png" align="right" class="amigo">
+
+When `True`, Krux will disable the [New Mnemonic](./usage/generating-a-mnemonic.md) menu and hide the words when [Loading a Mnemonic](./usage/loading-a-mnemonic.md). It will also hide the words when using [BIP85 to create a BIP39 Mnemonic](./usage/navigating-the-main-menu.md#bip85) and disable the [Backup Mnemonic](./usage/navigating-the-main-menu.md#backup-mnemonic) menu.
 
 <div style="clear: both"></div>
 

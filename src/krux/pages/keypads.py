@@ -34,6 +34,7 @@ from ..input import (
     FAST_FORWARD,
     FAST_BACKWARD,
     PRESSED,
+    KEY_REPEAT_DELAY_MS,
 )
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
 
@@ -62,9 +63,10 @@ class KeypadLayout:
             y * key_v_spacing + (DEFAULT_PADDING + FONT_HEIGHT * 3)
             for y in range(self.height + 1)
         ]
-        self.x_keypad_map = [
-            x * key_h_spacing + MINIMAL_PADDING for x in range(self.width + 1)
-        ]
+        self.x_keypad_map = [0]
+        for x in range(1, self.width):
+            self.x_keypad_map.append(x * key_h_spacing + MINIMAL_PADDING)
+        self.x_keypad_map.append(ctx.display.width())
         if ctx.input.touch is not None:
             ctx.input.touch.set_regions(self.x_keypad_map, self.y_keypad_map)
 
@@ -149,6 +151,7 @@ class Keypad:
         for y in self.layout.y_keypad_map[:-1]:
             offset_y = y + (self.layout.key_v_spacing - FONT_HEIGHT) // 2
             for x in self.layout.x_keypad_map[:-1]:
+                x = MINIMAL_PADDING if x == 0 else x
                 key = None
                 custom_color = None
                 if key_index < len(self.keys):
@@ -215,7 +218,7 @@ class Keypad:
                 key_index += 1
 
     def draw_keyset_index(self):
-        """Indicates the current keyset index with a small circle"""
+        """Indicates the current keyset index with a small rectangle"""
         if not self.has_more_key():
             return
         bar_height = FONT_HEIGHT // 6
@@ -281,14 +284,14 @@ class Keypad:
                 self.get_valid_index()
                 self._clean_keypad_area()
                 self.draw_keys()
-                time.sleep_ms(100)
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
         elif btn == FAST_BACKWARD:
             while self.ctx.input.page_prev_value() == PRESSED:
                 self._previous_key()
                 self.get_valid_index()
                 self._clean_keypad_area()
                 self.draw_keys()
-                time.sleep_ms(100)
+                time.sleep_ms(KEY_REPEAT_DELAY_MS)
 
     def _clean_keypad_area(self):
         self.ctx.display.fill_rectangle(

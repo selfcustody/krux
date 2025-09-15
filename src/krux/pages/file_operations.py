@@ -28,6 +28,7 @@ from . import (
 )
 from ..krux_settings import t
 from ..sd_card import SDHandler
+from ..display import BOTTOM_PROMPT_LINE
 
 FILE_SPECIAL = "1234567890[]-._()~"
 
@@ -56,9 +57,14 @@ class SaveFile(Page):
                 # Wait until user defines a filename or select NO on the prompt
                 while True:
                     self.ctx.display.clear()
+                    if prompt:
+                        self.ctx.display.draw_centered_text(
+                            file_description,
+                            highlight_prefix=":",
+                        )
                     if not prompt or self.prompt(
-                        file_description + "\n" + t("Save to SD card?") + "\n\n",
-                        self.ctx.display.height() // 2,
+                        t("Save to SD card?"),
+                        BOTTOM_PROMPT_LINE,
                     ):
                         new_filename = self.set_filename(
                             filename,
@@ -72,12 +78,20 @@ class SaveFile(Page):
 
                         # if user defined a filename and it is ok, save!
                         if new_filename:
+                            # clear and say something to the user
+                            self.ctx.display.clear()
+                            self.ctx.display.draw_centered_text(t("Processing…"))
+
+                            # Now save the file
                             if save_as_binary:
                                 sd.write_binary(new_filename, data)
                             else:
                                 sd.write(new_filename, data)
+
+                            # Show the user the filename
                             self.flash_text(
-                                t("Saved to SD card") + ":\n%s" % new_filename
+                                t("Saved to SD card:") + "\n\n%s" % new_filename,
+                                highlight_prefix=":",
                             )
                             persisted = True
                             break
@@ -133,12 +147,14 @@ class SaveFile(Page):
                 final_filename += file_extension
 
             # Check for existing file and prompt for overwrite if necessary
-            if SDHandler.file_exists("/sd/" + final_filename):
+            if SDHandler.file_exists(SDHandler.PATH_STR % final_filename):
                 self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(
+                    t("Filename %s exists on SD card.") % final_filename
+                )
                 if not self.prompt(
-                    t("Filename %s exists on SD card, overwrite?") % final_filename
-                    + "\n\n",
-                    self.ctx.display.height() // 2,
+                    t("Overwrite?"),
+                    BOTTOM_PROMPT_LINE,
                 ):
                     continue
 

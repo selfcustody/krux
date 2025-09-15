@@ -22,7 +22,28 @@
 import sys
 from unittest import mock
 import pygame as pg
-from krux.krux_settings import Settings, PrinterSettings
+from krux.krux_settings import Settings, THERMAL_ADAFRUIT_TXT, CNC_FILE_DRIVER
+from krux.printers import create_printer
+import krux
+
+UID = bytes([0x00] * 32)
+
+old_create_printer = create_printer
+
+
+def new_create_printer():
+    printer = old_create_printer()
+    if printer:
+        def new_print_qr_code(qr_code):
+            print("QR Code sent to printer:", qr_code)
+            return old_print_qr_code(qr_code)
+        
+        old_print_qr_code = printer.print_qr_code
+        printer.print_qr_code = new_print_qr_code
+    return printer
+
+
+setattr(krux.printers, "create_printer", new_create_printer)
 
 simulating_printer = False
 
@@ -30,11 +51,15 @@ simulating_printer = False
 def simulate_printer():
     global simulating_printer
     simulating_printer = True
-    Settings().hardware.printer.driver = "thermal/adafruit"
+    Settings().hardware.printer.driver = THERMAL_ADAFRUIT_TXT
 
 
 def reset():
     pg.event.post(pg.event.Event(pg.QUIT))
+
+
+def unique_id():
+    return UID
 
 
 class UART:
@@ -47,22 +72,20 @@ class UART:
     def __init__(self, pin, baudrate):
         pass
 
-    def read(self, num_bytes):
-        if simulating_printer:
-            module, cls = PrinterSettings.PRINTERS[Settings().hardware.printer.driver]
-            if module == "thermal" and cls == "AdafruitPrinter":
-                return chr(0b00000000)
+    def read(self):
+        if (simulating_printer or
+            Settings().hardware.printer.driver != THERMAL_ADAFRUIT_TXT):
+            return chr(0b00000000)
         return None
 
     def readline(self):
-        if simulating_printer:
-            module, cls = PrinterSettings.PRINTERS[Settings().hardware.printer.driver]
-            if module == "cnc" and cls == "FilePrinter":
-                return "ok\n".encode()
+        if simulating_printer and Settings().hardware.printer.driver == CNC_FILE_DRIVER:
+            return "ok\n".encode()
         return None
 
     def write(self, data):
-        pass
+        if type(data) == str:
+            print("String sent to printer:", data)
 
 
 class SDCard:
@@ -70,7 +93,11 @@ class SDCard:
         pass
 
 
+def unique_id():
+    return b'\xbc\x8d{%\x8e^\xc5Q\xb3N\x07f\x9f\xde\xbbG7\xddFK^\xdc\xdb\xbc\xb4E\x14A~3\x91\x12'
+
+
 if "machine" not in sys.modules:
     sys.modules["machine"] = mock.MagicMock(
-        reset=reset, UART=mock.MagicMock(wraps=UART), SDCard=SDCard
+        reset=reset, UART=mock.MagicMock(wraps=UART), SDCard=SDCard, unique_id=unique_id
     )

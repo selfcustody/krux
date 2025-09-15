@@ -22,50 +22,54 @@
 
 [tool.poetry]
 name = "krux"
-version = "25.03.0"
+version = "25.09.0"
 description = "Open-source signing device firmware for Bitcoin"
 authors = ["Jeff S <jeffreesun@protonmail.com>"]
+readme = "README.md"
+license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.9.1"
+python = "^3.12.3"
 translate = "^3.6.1"
 embit = { path = "./vendor/embit/", develop = true }
 ur = { path = "./vendor/foundation-ur-py/", develop = true }
 urtypes = { path = "./vendor/urtypes/", develop = true }
 
 # Docs site dependencies. Optional extras
-mkdocs = "^1.6.0"
-mkdocs-material = "^9.5.28"
-mkdocs-static-i18n = "^1.2.3"
-pymdown-extensions = "^10.8.1"
-mkdocs-macros-plugin = "^1.0.5"
+mkdocs = { version = "^1.6.1", optional = true }
+mkdocs-material = { version = "^9.6.18", optional = true }
+mkdocs-static-i18n = { version = "^1.3.0", optional = true }
+pymdown-extensions = { version = "^10.16.1", optional = true }
+mkdocs-macros-plugin = { version = "^1.3.9", optional = true }
 
 # Simulator dependencies. Optional extras
-numpy = { version = "^1.25.2", optional = true }
-opencv-python = { version = "^4.8.0.74", optional = true }
-Pillow = { version = "^10.0.1", optional = true }
-pygame = { version = "^2.5.0", optional = true }
+numpy = { version = "^2.3.2", optional = true }
+opencv-python = { version = "^4.11.0.86", optional = true }
+Pillow = { version = "^11.3.0", optional = true }
+pygame = { version = "^2.6.1", optional = true }
 pyzbar = { version = "^0.1.9", optional = true }
 
 # Flash dependencies. Optional extras
 pyserial = { version = "^3.5", optional = true }
-qrcode = "^7.4.2"
+
+# Sign release script via QR Codes. Optional extras
+qrcode = { version = "^8.2", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
-pylint = "^3.2.5"
-pytest = "^8.2.2"
+pylint = "^3.3.8"
+pytest = "^8.4.2"
 pytest-cov = "^5.0.0"
-pytest-mock = "^3.14.0"
+pytest-mock = "^3.15.0"
 PyQRCode = "^1.2.1"
-pycryptodome = "^3.17.0"
-poethepoet = "^0.24.4"
-dill = "^0.3.8"
+pycryptodome = "^3.23.0"
+poethepoet = "^0.37.0"
 
 [tool.poetry.extras]
-docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions"]
+docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions", "mkdocs-macros-plugin"]
 simulator = ["numpy", "opencv-python", "Pillow", "pygame", "pyzbar"]
 flash = ["pyserial"]
+sign = ["qrcode"]
 
 [tool.poe.tasks]
 # format tasks
@@ -96,6 +100,7 @@ pytest.ref = "tests"
 
 # pre commit task (do formatting, linting and tests)
 pre-commit = ["format", "lint", "i18n validate", "test-simple"]
+pre-release = ["format", "lint", "i18n validate", "i18n-build", "update-glyphs", "test-simple"]
 
 # run docs locally
 docs = "poetry run mkdocs serve"
@@ -120,6 +125,8 @@ simulator-wonder-mv = "python simulator/simulator.py --device maixpy_wonder_mv"
 simulator.ref = "simulator-amigo"
 simulator-m5.ref = "simulator-m5stickv"
 simulator-mv.ref = "simulator-wonder-mv"
+simulator-wonder.ref = "simulator-wonder-mv"
+simulator-wondermv.ref = "simulator-wonder-mv"
 
 # git tasks
 git-update = "git submodule update --init --recursive"
@@ -127,12 +134,19 @@ git-pull = "git pull git@github.com:selfcustody/krux.git"
 git-pull-https = "git pull https://github.com/selfcustody/krux.git"
 
 # flash tasks
-flash-cmd = "python firmware/Kboot/build/ktool.py -b 1500000 build/kboot.kfpkg"
+flash-cmd = "python firmware/Kboot/build/ktool.py -b 2000000 build/kboot.kfpkg"
 flash.ref = "flash-cmd -B goE"
 flash-dock.ref = "flash-cmd -B dan"
 
-# task for bdftokff?
-# python bdftokff.py True
+# task for bdftokff font glyphs update
+update-glyphs = "python ./firmware/font/bdftokff.py True"
+glyphs.ref = "update-glyphs"
+fonts.ref = "update-glyphs"
 
 # task for sign_release?
 # python sign_release.py
+
+# task for missing glyphs
+missing-glyphs = "python ./firmware/font/missing_glyphs.py"
+fonts-missing.ref = "missing-glyphs"
+missing.ref = "missing-glyphs"

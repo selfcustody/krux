@@ -25,14 +25,24 @@ from .settings import (
     SettingsNamespace,
     CategorySetting,
     NumberSetting,
+    LinkedCategorySetting,
     SD_PATH,
     FLASH_PATH,
     MAIN_TXT,
     TEST_TXT,
-    NAME_SINGLE_SIG,
-    POLICY_TYPE_NAMES,
 )
-from .key import SCRIPT_LONG_NAMES
+
+from .key import (
+    NAME_SINGLE_SIG,
+    NAME_MULTISIG,
+    NAME_MINISCRIPT,
+    POLICY_TYPE_NAMES,
+    SINGLESIG_SCRIPT_NAMES,
+    MULTISIG_SCRIPT_NAMES,
+    MINISCRIPT_SCRIPT_NAMES,
+)
+
+from .kboard import kboard
 
 BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
 
@@ -52,11 +62,11 @@ DEFAULT_RX_PIN = (
     else 34
 )
 
-# Encription Versions
-PBKDF2_HMAC_ECB = 0
-PBKDF2_HMAC_CBC = 1
-
 THERMAL_ADAFRUIT_TXT = "thermal/adafruit"
+CNC_FILE_DRIVER = "cnc/file"
+CNC_GRBL_DRIVER = "cnc/grbl"
+CNC_HEAD_ROUTER = "router"
+CNC_HEAD_LASER = "laser"
 
 
 def t(slug):
@@ -129,9 +139,31 @@ class DefaultWallet(SettingsNamespace):
 
     namespace = "settings.wallet"
     network = CategorySetting("network", MAIN_TXT, [MAIN_TXT, TEST_TXT])
-    policy_type = CategorySetting("policy_type", NAME_SINGLE_SIG, POLICY_TYPE_NAMES)
     script_type = CategorySetting(
-        "script_type", "Native Segwit - 84", list(SCRIPT_LONG_NAMES.keys())
+        "script_type", "Native Segwit - 84", SINGLESIG_SCRIPT_NAMES
+    )
+    policy_type = LinkedCategorySetting(
+        "policy_type",
+        NAME_SINGLE_SIG,
+        POLICY_TYPE_NAMES,
+        script_type,
+        # On condition, apply the tuple (categories, default_value)
+        # else, keep the current (categories, default_value)
+        lambda input, l_set: (
+            (SINGLESIG_SCRIPT_NAMES, SINGLESIG_SCRIPT_NAMES[2])
+            if input == NAME_SINGLE_SIG
+            else (l_set.categories, l_set.default_value)
+        ),
+        lambda input, l_set: (
+            (MULTISIG_SCRIPT_NAMES, MULTISIG_SCRIPT_NAMES[2])
+            if input == NAME_MULTISIG
+            else (l_set.categories, l_set.default_value)
+        ),
+        lambda input, l_set: (
+            (MINISCRIPT_SCRIPT_NAMES, MINISCRIPT_SCRIPT_NAMES[0])
+            if input == NAME_MINISCRIPT
+            else (l_set.categories, l_set.default_value)
+        ),
     )
 
     def label(self, attr):
@@ -195,6 +227,10 @@ class CNCSettings(SettingsNamespace):
     depth_per_pass = NumberSetting(float, "depth_per_pass", 0.03125, [0.0001, 10000])
     part_size = NumberSetting(float, "part_size", 3.5, [0.0001, 10000])
     border_padding = NumberSetting(float, "border_padding", 0.0625, [0.0001, 10000])
+    head_type = CategorySetting(
+        "head_type", CNC_HEAD_ROUTER, [CNC_HEAD_ROUTER, CNC_HEAD_LASER]
+    )
+    head_power = NumberSetting(int, "head_power", 1000, [0, 1000])
 
     def __init__(self):
         self.grbl = GRBLSettings()
@@ -212,6 +248,8 @@ class CNCSettings(SettingsNamespace):
             "depth_per_pass": t("Depth Per Pass"),
             "part_size": t("Part Size"),
             "border_padding": t("Border Padding"),
+            "head_type": t("Head type"),
+            "head_power": t("Power"),
             "grbl": "GRBL",
         }[attr]
 
@@ -239,7 +277,8 @@ class PrinterSettings(SettingsNamespace):
     PRINTERS = {
         "none": ("none", None),
         THERMAL_ADAFRUIT_TXT: ("thermal", "AdafruitPrinter"),
-        "cnc/file": ("cnc", "FilePrinter"),
+        CNC_FILE_DRIVER: ("cnc", "FilePrinter"),
+        CNC_GRBL_DRIVER: ("cnc", "GRBLPrinter"),
     }
     namespace = "settings.printer"
     driver = CategorySetting("driver", "none", list(PRINTERS.keys()))
@@ -295,7 +334,7 @@ class DisplayAmgSettings(SettingsNamespace):
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
-            "flipped_x": t("Flipped X Coordinates"),
+            "flipped_x": t("Mirror X Coordinates"),
             "inverted_colors": t("Inverted Colors"),
             "bgr_colors": t("BGR Colors"),
             "lcd_type": t("LCD Type"),
@@ -306,12 +345,12 @@ class DisplaySettings(SettingsNamespace):
     """Custom display settings for Maix Cube"""
 
     namespace = "settings.display"
-    if board.config["type"] in ["cube", "m5stickv", "wonder_mv"]:
-        default_brightness = "1" if board.config["type"] == "m5stickv" else "3"
+    if kboard.can_control_brightness:
+        default_brightness = "1" if kboard.is_m5stickv else "3"
         brightness = CategorySetting(
             "brightness", default_brightness, ["1", "2", "3", "4", "5"]
         )
-    if board.config["type"] in ["yahboom", "wonder_mv"]:
+    if kboard.can_flip_orientation:
         flipped_orientation = CategorySetting(
             "flipped_orientation", False, [False, True]
         )
@@ -319,10 +358,10 @@ class DisplaySettings(SettingsNamespace):
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         options = {}
-        if board.config["type"] in ["wonder_mv", "cube", "m5stickv"]:
+        if kboard.can_control_brightness:
             options["brightness"] = t("Brightness")
-        if board.config["type"] in ["wonder_mv", "yahboom"]:
-            options["flipped_orientation"] = t("Flipped Orientation")
+        if kboard.can_flip_orientation:
+            options["flipped_orientation"] = t("Rotate 180°")
 
         return options[attr]
 
@@ -335,11 +374,11 @@ class HardwareSettings(SettingsNamespace):
     def __init__(self):
         self.printer = PrinterSettings()
         self.buttons = ButtonsSettings()
-        if board.config["type"] in ["amigo", "yahboom", "wonder_mv"]:
+        if kboard.has_touchscreen:
             self.touch = TouchSettings()
-        if board.config["type"] == "amigo":
+        if kboard.is_amigo:
             self.display = DisplayAmgSettings()
-        elif board.config["type"] in ["cube", "m5stickv", "wonder_mv", "yahboom"]:
+        elif kboard.can_flip_orientation or kboard.can_control_brightness:
             self.display = DisplaySettings()
 
     def label(self, attr):
@@ -349,11 +388,11 @@ class HardwareSettings(SettingsNamespace):
             "printer": t("Printer"),
         }
         hardware_menu["buttons"] = t("Buttons")
-        if board.config["type"] in ["amigo", "yahboom", "wonder_mv"]:
+        if kboard.has_touchscreen:
             hardware_menu["touchscreen"] = t("Touchscreen")
-        if board.config["type"] == "amigo":
+        if kboard.is_amigo:
             hardware_menu["display_amg"] = t("Display")
-        elif board.config["type"] in ["cube", "m5stickv", "wonder_mv", "yahboom"]:
+        elif kboard.can_flip_orientation or kboard.can_control_brightness:
             hardware_menu["display"] = t("Display")
 
         return hardware_menu[attr]
@@ -375,21 +414,24 @@ class PersistSettings(SettingsNamespace):
 class EncryptionSettings(SettingsNamespace):
     """Encryption settings"""
 
-    AES_ECB_NAME = "AES-ECB"
-    AES_CBC_NAME = "AES-CBC"
-    VERSION_NAMES = {
-        PBKDF2_HMAC_ECB: AES_ECB_NAME,
-        PBKDF2_HMAC_CBC: AES_CBC_NAME,
+    import ucryptolib
+
+    # defined in krux.encryption.VERSIONS
+    MODE_NAMES = {
+        ucryptolib.MODE_ECB: "AES-ECB",
+        ucryptolib.MODE_CBC: "AES-CBC",
+        ucryptolib.MODE_CTR: "AES-CTR",
+        ucryptolib.MODE_GCM: "AES-GCM",
     }
     namespace = "settings.encryption"
-    version = CategorySetting("version", AES_ECB_NAME, list(VERSION_NAMES.values()))
-    pbkdf2_iterations = NumberSetting(int, "pbkdf2_iterations", 100000, [1, 500000])
+    version = CategorySetting("version", "AES-GCM", list(MODE_NAMES.values()))
+    pbkdf2_iterations = NumberSetting(int, "pbkdf2_iterations", 100000, [10000, 500000])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "version": t("Encryption Mode"),
-            "pbkdf2_iterations": t("PBKDF2 Iter."),
+            "pbkdf2_iterations": t("PBKDF2 iter."),
         }[attr]
 
 

@@ -20,18 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import board
 import gc
-from . import Page, Menu, MENU_EXIT, MENU_CONTINUE
+from . import Page, Menu, MENU_EXIT, MENU_CONTINUE, MENU_RESTART
 from ..sd_card import SDHandler
 from ..krux_settings import t
 from ..format import generate_thousands_separator, render_decimal_separator
 from ..display import BOTTOM_PROMPT_LINE
+from ..settings import SD_PATH, SETTINGS_FILENAME, MNEMONICS_FILE
 
-LIST_FILE_DIGITS = 9  # len on large devices per menu item
-LIST_FILE_DIGITS_SMALL = 5  # len on small devices per menu item
-
-SD_ROOT_PATH = "/sd"
+SD_ROOT_PATH = "/" + SD_PATH
 
 
 class FileManager(Page):
@@ -46,12 +43,6 @@ class FileManager(Page):
     ):
         """Starts a file explorer on the SD folder and returns the file selected"""
         import os
-
-        custom_start_digits = LIST_FILE_DIGITS
-        custom_end_digts = LIST_FILE_DIGITS + 4  # 3 more because of file type
-        if board.config["type"] == "m5stickv":
-            custom_start_digits = LIST_FILE_DIGITS_SMALL
-            custom_end_digts = LIST_FILE_DIGITS_SMALL + 4  # 3 more because of file type
 
         path = SD_ROOT_PATH
         while True:
@@ -97,21 +88,9 @@ class FileManager(Page):
                     if extension_match or is_directory:
                         items.append(filename)
                         display_filename = filename + "/" if is_directory else filename
-
-                        if (
-                            len(display_filename)
-                            >= custom_start_digits + 2 + custom_end_digts
-                        ):
-                            display_filename = (
-                                display_filename[:custom_start_digits]
-                                + ".."
-                                + display_filename[
-                                    len(display_filename) - custom_end_digts :
-                                ]
-                            )
                         menu_items.append(
                             (
-                                display_filename,
+                                self.fit_to_line(display_filename),
                                 (
                                     (lambda: MENU_EXIT)
                                     if is_directory
@@ -128,30 +107,43 @@ class FileManager(Page):
                 items.append("Back")
 
                 submenu = Menu(self.ctx, menu_items)
-                index, _ = submenu.run_loop()
+                index, status = submenu.run_loop()
 
                 # selected "Back"
-                if index == len(items) - 1:
+                if index == submenu.back_index:
                     return ""
                 # selected ".."
                 if index == 0 and path != SD_ROOT_PATH:
-                    path = path.split("/")
-                    path.pop()
-                    path = "/".join(path)
+                    path = self._up_one_path(path)
                 else:
                     path += "/" + items[index]
             # it is a file!
             else:
-                submenu, menu_items, items = (None, None, None)
-                del submenu, menu_items, items
-                gc.collect()
-                return path
+                if status == MENU_RESTART:
+                    path = self._up_one_path(path)
+                else:
+                    submenu, menu_items, items = (None, None, None)
+                    del submenu, menu_items, items
+                    gc.collect()
+                    return path
+
+    def _up_one_path(self, path):
+        path = path.split("/")
+        path.pop()
+        return "/".join(path)
 
     def show_file_details(self, file):
         """Handler to print file info when selecting a file in the file explorer"""
 
-        self.display_file(file)
-        self.ctx.input.wait_for_button()
+        file = self.display_file(file)
+        if file in (SETTINGS_FILENAME, MNEMONICS_FILE):
+            self.ctx.input.wait_for_button()
+        elif self.prompt(t("Delete this file?"), BOTTOM_PROMPT_LINE):
+            self.ctx.display.clear()
+            if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+                with SDHandler() as sd:
+                    sd.delete(file)
+                return MENU_RESTART
         return MENU_CONTINUE
 
     def load_file(self, file):
@@ -166,31 +158,50 @@ class FileManager(Page):
         """Display the file details on the device's screen"""
         import uos
         import time
+        from ..display import DEFAULT_PADDING, FONT_HEIGHT
+        from ..themes import theme
 
         stats = uos.stat(file)
         size_KB = stats[6] / 1024
         size_KB_fraction = str(int(size_KB * 100))[-2:]
         created = time.localtime(stats[9])
         modified = time.localtime(stats[8])
-        format_datetime = " %s-%02d-%02d %02d:%02d"
+        format_datetime = "%s-%02d-%02d %02d:%02d"
         file = file[4:]  # remove "/sd/" prefix
 
         self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(
-            file
-            + "\n\n"
-            + t("Size:")
-            + " "
-            + generate_thousands_separator(int(size_KB))
-            + render_decimal_separator()
-            + size_KB_fraction
-            + " KB"
-            + "\n\n"
-            + t("Created:")
-            + format_datetime % created[:5]
-            + "\n\n"
-            + t("Modified:")
-            + format_datetime % modified[:5]
+        offset_y = DEFAULT_PADDING
+        offset_y += (
+            self.ctx.display.draw_hcentered_text(
+                file
+                + "\n\n"
+                + t("Size:")
+                + " "
+                + generate_thousands_separator(int(size_KB))
+                + render_decimal_separator()
+                + size_KB_fraction
+                + " KB",
+                offset_y,
+                highlight_prefix=":",
+            )
+            + 1
+        ) * FONT_HEIGHT
+        offset_y += (
+            self.ctx.display.draw_hcentered_text(
+                t("Created:"), offset_y, color=theme.highlight_color
+            )
+        ) * FONT_HEIGHT
+        offset_y += (
+            self.ctx.display.draw_hcentered_text(
+                format_datetime % created[:5] + "\n\n", offset_y
+            )
+            * FONT_HEIGHT
         )
+        offset_y += (
+            self.ctx.display.draw_hcentered_text(
+                t("Modified:"), offset_y, color=theme.highlight_color
+            )
+        ) * FONT_HEIGHT
+        self.ctx.display.draw_hcentered_text(format_datetime % modified[:5], offset_y)
 
         return file

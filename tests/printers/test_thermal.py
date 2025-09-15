@@ -89,3 +89,26 @@ def test_print_string(mocker, m5stickv, mock_uart_cls):
     p.print_string("Hello, World!")
 
     mock_write.assert_called_with("Hello, World!")
+
+
+def test_qr_data_width(mocker, m5stickv, mock_uart_cls):
+    mocker.patch("krux.printers.thermal.UART", new=mock_uart_cls)
+    from krux.printers.thermal import AdafruitPrinter
+
+    p = AdafruitPrinter()
+    assert p.qr_data_width() == 33
+
+
+def test_print_bitmap_line(mocker, m5stickv, mock_uart_cls):
+    mocker.patch("krux.printers.thermal.UART", new=mock_uart_cls)
+    mock_sleep = mocker.patch("krux.printers.thermal.time.sleep_ms")
+    from krux.printers.thermal import AdafruitPrinter
+
+    p = AdafruitPrinter()
+    mock_write = mocker.patch.object(p.uart_conn, "write")
+
+    test_data = b"\xff\x00\xff\x00"
+    p.print_bitmap_line(test_data)
+
+    mock_write.assert_called_once_with(test_data)
+    mock_sleep.assert_called_once_with(p.dot_print_time)

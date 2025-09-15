@@ -19,11 +19,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from .krux_settings import Settings
+from .krux_settings import Settings, DEFAULT_LOCALE
+from .settings import THIN_SPACE
 
 SATS_PER_BTC = 100000000
 BTC_SATS_LEN = "8"
-THOUSANDS_SEPARATOR = " "
+THOUSANDS_SEPARATOR = THIN_SPACE
 
 
 def format_btc(amount):
@@ -50,7 +51,7 @@ def format_btc(amount):
 def render_decimal_separator():
     """Return decimal separator depending on locale"""
     decimal_separator = ","
-    if Settings().i18n.locale == "en-US":
+    if Settings().i18n.locale in (DEFAULT_LOCALE, "ko-KR", "zh-CN", "ja-JP"):
         decimal_separator = "."
 
     return decimal_separator
@@ -64,3 +65,8 @@ def replace_decimal_separator(text):
 def generate_thousands_separator(number_without_decimal):
     """Generate thousands separator in number_without_decimal"""
     return "{:,}".format(number_without_decimal).replace(",", THOUSANDS_SEPARATOR)
+
+
+def format_address(address, length=4):
+    """Format addresses by adding spaces after each length"""
+    return " ".join(address[i : i + length] for i in range(0, len(address), length))

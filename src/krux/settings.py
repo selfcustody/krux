@@ -24,35 +24,23 @@
 # the settings view
 # from .sd_card import SDHandler
 
-try:
-    import ujson as json
-except ImportError:
-    import json
-
+import ujson as json
 import os
 
 # Settings storage
-SETTINGS_FILENAME = "settings.json"
 SD_PATH = "sd"
 FLASH_PATH = "flash"
+
+# Specific storage filenames
+SETTINGS_FILENAME = "settings.json"
+MNEMONICS_FILE = "seeds.json"
 
 # Network settings
 MAIN_TXT = "main"
 TEST_TXT = "test"
 
-# Policy types
-NAME_SINGLE_SIG = "Single-sig"
-NAME_MULTISIG = "Multisig"
-NAME_MINISCRIPT = "Miniscript"
-
-# Policy types names
-POLICY_TYPE_NAMES = [
-    NAME_SINGLE_SIG,
-    NAME_MULTISIG,
-    NAME_MINISCRIPT,
-]
-
-THIN_SPACE = " "
+THIN_SPACE = " "  # "\u2009"
+ELLIPSIS = "…"  # "\u2026"
 
 
 class SettingsNamespace:
@@ -114,6 +102,30 @@ class CategorySetting(Setting):
             return self
 
         stored_val = store.get(obj.namespace, self.attr, self.default_value)
+        if stored_val not in self.categories:
+            return self.default_value
+        return stored_val
+
+
+class LinkedCategorySetting(CategorySetting):
+    """CategorySetting that can be linked to another CategorySetting to limit options"""
+
+    def __init__(self, attr, default_value, categories, linked_setting, *args):
+        super().__init__(attr, default_value, categories)
+        self.linked_setting = linked_setting
+        self.conditions = [fn for fn in args if callable(fn)]
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+
+        stored_val = store.get(obj.namespace, self.attr, self.default_value)
+
+        for condition in self.conditions:
+            categories, default_value = condition(stored_val, self.linked_setting)
+            self.linked_setting.categories = categories
+            self.linked_setting.default_value = default_value
+
         if stored_val not in self.categories:
             return self.default_value
         return stored_val

@@ -23,12 +23,22 @@
 import binascii
 import sys
 import json
-from os import listdir, walk, mkdir
+from os import listdir, walk, mkdir, remove, rmdir, getcwd, chdir
 from os.path import isfile, isdir, exists, join, basename
 import re
 
+EXEC_FOLDER = "i18n"
+current_dir = getcwd()
+
+# check if is executing in exec_folder, if not, try to change to EXEC_FOLDER
+if not current_dir.endswith(EXEC_FOLDER):
+    chdir(EXEC_FOLDER)
+
 SRC_DIR = "../src"
 TRANSLATION_FILES_DIR = "translations"
+
+ELLIPSIS_UNICODE = "\u2026"
+ELLIPSIS_ASCII = "..."
 
 KRUX_LICENSE = """# The MIT License (MIT)
 
@@ -88,7 +98,7 @@ def validate_translation_files():
         for f in listdir(TRANSLATION_FILES_DIR)
         if isfile(join(TRANSLATION_FILES_DIR, f))
     ]
-    for translation_filename in translation_filenames:
+    for translation_filename in sorted(translation_filenames):
         print("Validating %s..." % translation_filename)
         valid = True
         with open(
@@ -110,7 +120,52 @@ def validate_translation_files():
         sys.exit(1)
 
 
-def print_missing(save_to_file=False):
+def post_process_translation(slug, translation, verbose=False):
+    """
+    A place for post-translation fixes of poor translations per slug/translation
+    returns original -- or corrected translation
+    """
+    err = None
+
+    translation = translation.replace(ELLIPSIS_ASCII, ELLIPSIS_UNICODE)
+    translation = translation.replace("（", "(")
+    translation = translation.replace("）", ")")
+    translation = translation.replace("。", ".")
+    translation = translation.replace("，", ",")
+    translation = translation.replace("：", ":")
+    translation = translation.replace("？", "?")
+    translation = translation.replace("！", "!")
+    translation = translation.replace(" ", " ")  # non-breaking space to thin-space
+
+    # fix poorly translated newlines
+    if " \\ n" in translation:
+        err = "Poor newline translation: {}, {}".format(repr(slug), repr(translation))
+        translation = translation.replace(" \\ n", "\\n")
+
+    # fix poorly translated unicode ellipsis
+    ellipsis = ELLIPSIS_UNICODE
+    if slug[-1] == ellipsis:
+        err = "Poor ellipsis translation: {}, {}".format(repr(slug), repr(translation))
+        if translation[-2:] == ellipsis * 2:
+            translation = translation[:-1]
+        elif translation[-4:] == "." * 4:
+            translation = translation[:-4] + ellipsis
+        elif translation[-3:] == "." * 3:
+            translation = translation[:-3] + ellipsis
+        elif translation[-1:] in (".", " "):
+            translation = translation[:-1] + ellipsis
+        elif translation[-1] != ellipsis:
+            translation = translation + ellipsis
+        else:
+            err = None  # translation was fine
+
+    if verbose and err:
+        print(err, file=sys.stderr)
+
+    return translation
+
+
+def print_missing(save_to_file=False, merge_after=False):
     """
     Uses translate 3.6.1 to automatically print missing translations
     and optionally save them to files
@@ -132,7 +187,7 @@ def print_missing(save_to_file=False):
     if save_to_file and not exists(filled_dir):
         mkdir(filled_dir)
 
-    for translation_filename in translation_filenames:
+    for translation_filename in sorted(translation_filenames):
         target = translation_filename[:5]
         if force_target:
             if not force_target in translation_filename:
@@ -148,9 +203,15 @@ def print_missing(save_to_file=False):
             for slug in slugs:
                 if slug not in translations or translations[slug] == "":
                     try:
-                        translated = translator.translate(slug).replace(" \ n", "\\n")
+                        slug = slug.replace(ELLIPSIS_UNICODE, ELLIPSIS_ASCII)
+                        translated = translator.translate(slug)
+                        slug = slug.replace(ELLIPSIS_ASCII, ELLIPSIS_UNICODE)
+                        translated = post_process_translation(
+                            slug, translated, verbose=(save_to_file or merge_after)
+                        )
                         print('"%s":' % slug, '"%s",' % translated)
                         new_translations[slug] = translated
+
                     except Exception as e:
                         print("Error:", e)
                         print("Failed to translate:", slug)
@@ -171,7 +232,33 @@ def print_missing(save_to_file=False):
                         new_translations, filled_file, ensure_ascii=False, indent=4
                     )
                 print(f"Saved translations to {join(filled_dir, translation_filename)}")
+                if merge_after:
+                    translations.update(new_translations)
+                    with open(
+                        join(TRANSLATION_FILES_DIR, translation_filename),
+                        "w",
+                        encoding="utf8",
+                        newline="\n",
+                    ) as file:
+                        json.dump(
+                            translations,
+                            file,
+                            ensure_ascii=False,
+                            indent=4,
+                            sort_keys=True,
+                        )
+                    print(
+                        f"Saved translations to {join(TRANSLATION_FILES_DIR, translation_filename)}"
+                    )
+
+                    remove(join(filled_dir, translation_filename))
+                    print(
+                        f"Removed translation {join(filled_dir, translation_filename)}"
+                    )
         print("\n\n")
+
+    if merge_after:
+        rmdir(filled_dir)
 
 
 def remove_unnecessary():
@@ -182,7 +269,7 @@ def remove_unnecessary():
         for f in listdir(TRANSLATION_FILES_DIR)
         if isfile(join(TRANSLATION_FILES_DIR, f))
     ]
-    for translation_filename in translation_filenames:
+    for translation_filename in sorted(translation_filenames):
         print("Cleaning %s..." % translation_filename)
         clean = True
         with open(
@@ -228,7 +315,7 @@ def bake_translations():
     translation_filenames.sort()
     code_slugs = find_translation_slugs()
     code_slugs = sorted(code_slugs)
-    for translation_filename in translation_filenames:
+    for translation_filename in sorted(translation_filenames):
         with open(
             join(TRANSLATION_FILES_DIR, translation_filename), "r", encoding="utf8"
         ) as translation_file:
@@ -319,7 +406,8 @@ def prettify_translation_files():
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         raise ValueError(
-            "ERROR: Provide one action as argument (validate, new, fill, clean, prettify, bake)"
+            "ERROR: Provide one action as argument"
+            + " (validate, new, fill, fill_merge, clean, prettify, bake)"
         )
 
     if not exists(SRC_DIR):
@@ -345,8 +433,28 @@ if __name__ == "__main__":
                 validate_translation_files()
             elif arg == "fill":
                 print_missing()
-            elif arg == "fill_to_files":
+            elif [
+                True
+                for text in (
+                    "fill_to_files",
+                    "fill-to-files",
+                    "fill_files",
+                    "fill-files",
+                )
+                if arg in text
+            ]:
                 print_missing(save_to_file=True)
+            elif [
+                True
+                for text in (
+                    "fill_and_merge",
+                    "fill-and-merge",
+                    "fill_merge",
+                    "fill-merge",
+                )
+                if arg in text
+            ]:
+                print_missing(save_to_file=True, merge_after=True)
             elif arg == "clean":
                 remove_unnecessary()
             elif arg == "prettify":

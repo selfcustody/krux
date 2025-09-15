@@ -26,7 +26,7 @@ import urtypes
 from urtypes.crypto import CRYPTO_PSBT
 from .baseconv import base_decode
 from .krux_settings import t
-from .settings import THIN_SPACE
+from .settings import THIN_SPACE, ELLIPSIS
 from .qr import FORMAT_PMOFN, FORMAT_BBQR
 from .key import Key, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 from .sats_vb import SatsVB
@@ -64,7 +64,7 @@ class PSBTSigner:
         # Parse the PSBT
         if psbt_filename:
             gc.collect()
-            from .sd_card import SD_PATH
+            from .settings import SD_PATH
 
             file_path = "/%s/%s" % (SD_PATH, psbt_filename)
             try:
@@ -101,8 +101,6 @@ class PSBTSigner:
             except:
                 raise ValueError("invalid PSBT")
         else:
-            # Process as bytes
-            psbt_data = psbt_data.encode() if isinstance(psbt_data, str) else psbt_data
             try:
                 self.psbt = PSBT.parse(psbt_data)
                 if self.qr_format == FORMAT_PMOFN:
@@ -119,7 +117,9 @@ class PSBTSigner:
                         self.base_encoding = 58
                     except:
                         try:
-                            self.psbt = PSBT.parse(base_decode(psbt_data, 43))
+                            import base43
+
+                            self.psbt = PSBT.parse(base43.decode(psbt_data))
                             self.base_encoding = 43
                         except:
                             raise ValueError("invalid PSBT")
@@ -141,7 +141,7 @@ class PSBTSigner:
                 return False
             try:
                 # Try to decode the chunk as base64
-                base_decode(chunk, 64)
+                base_decode(chunk.decode(), 64)
                 return True
             except Exception:
                 return False
@@ -275,9 +275,53 @@ class PSBTSigner:
             return SELF_TRANSFER
         return SPEND
 
+    def _btc_render(self, amount, prefix=" "):
+        from .format import format_btc
+
+        return prefix + BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(amount)
+
+    def _get_resume_fee(self, inp_amount, out_amount, output_policy_count):
+        from .format import replace_decimal_separator
+
+        fee = inp_amount - out_amount
+
+        # fee percent with 1 decimal precision using math.ceil (minimum of 0.1)
+        fee_percent = max(
+            0.1,
+            (((fee * 10000 // (out_amount)) + 9) // 10) / 10,
+        )
+
+        resume_fee_str = (
+            t("Fee:")
+            + self._btc_render(fee)
+            + " ("
+            + replace_decimal_separator("%.1f" % fee_percent)
+            + "%)"
+        )
+        if not self.wallet.is_miniscript():
+            satvb = fee / SatsVB.get_vbytes(
+                self.policy,
+                output_policy_count,
+                len(self.psbt.inputs),
+                len(self.psbt.outputs),
+            )
+            resume_fee_str += (" ~%.1f" % satvb) + " sat/vB"
+
+        return resume_fee_str, fee_percent
+
+    def _sequence_render(self, title, elements):
+        from .format import format_address
+
+        message_seq = []
+        for i, out in enumerate(elements):
+            message_seq.append(
+                (("%d. " + title + " \n\n%s\n\n") % (i + 1, format_address(out[0])))
+                + self._btc_render(out[1], prefix="")
+            )
+        return message_seq
+
     def outputs(self):
         """Returns a list of messages describing where amounts are going"""
-        from .format import format_btc, replace_decimal_separator
 
         inp_amount = 0
         for inp in self.psbt.inputs:
@@ -288,7 +332,7 @@ class PSBTSigner:
                 inp_amount += inp.non_witness_utxo.vout[inp.vout].value
         resume_inputs_str = (
             (t("Inputs (%d):") % len(self.psbt.inputs))
-            + (" " + BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(inp_amount))
+            + self._btc_render(inp_amount)
             + "\n\n"
         )
 
@@ -352,7 +396,7 @@ class PSBTSigner:
         if len(spend_list) > 0:
             resume_spend_str = (
                 (t("Spend (%d):") % len(spend_list))
-                + (" " + BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(spend_amount))
+                + self._btc_render(spend_amount)
                 + "\n\n"
             )
 
@@ -362,41 +406,13 @@ class PSBTSigner:
                     t("Self-transfer or Change (%d):")
                     % (len(self_transfer_list) + len(change_list))
                 )
-                + (
-                    " "
-                    + BTC_SYMBOL
-                    + THIN_SPACE
-                    + "%s" % format_btc(self_amount + change_amount)
-                )
+                + self._btc_render(self_amount + change_amount)
                 + "\n\n"
             )
-        fee = inp_amount - spend_amount - self_amount - change_amount
-        if not self.wallet.is_miniscript():
-            satvb = fee / SatsVB.get_vbytes(
-                self.policy,
-                output_policy_count,
-                len(self.psbt.inputs),
-                len(self.psbt.outputs),
-            )
-        else:
-            satvb = 0
 
-        # fee percent with 1 decimal precision using math.ceil (minimum of 0.1)
-        fee_percent = max(
-            0.1,
-            (((fee * 10000 // (spend_amount + self_amount + change_amount)) + 9) // 10)
-            / 10,
+        resume_fee_str, fee_percent = self._get_resume_fee(
+            inp_amount, self_amount + change_amount + spend_amount, output_policy_count
         )
-
-        resume_fee_str = (
-            t("Fee:")
-            + (" " + BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(fee))
-            + " ("
-            + replace_decimal_separator("%.1f" % fee_percent)
-            + "%)"
-        )
-        if satvb > 0:
-            resume_fee_str += (" ~%.1f" % satvb) + " sat/vB"
 
         messages = []
         # first screen - resume
@@ -408,25 +424,13 @@ class PSBTSigner:
         )
 
         # sequence of spend
-        for i, out in enumerate(spend_list):
-            messages.append(
-                (("%d. " + t("Spend:") + " \n\n%s\n\n") % (i + 1, out[0]))
-                + (BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(out[1]))
-            )
+        messages.extend(self._sequence_render(t("Spend:"), spend_list))
 
         # sequence of self_transfer
-        for i, out in enumerate(self_transfer_list):
-            messages.append(
-                (("%d. " + t("Self-transfer:") + " \n\n%s\n\n") % (i + 1, out[0]))
-                + (BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(out[1]))
-            )
+        messages.extend(self._sequence_render(t("Self-transfer:"), self_transfer_list))
 
         # sequence of change
-        for i, out in enumerate(change_list):
-            messages.append(
-                (("%d. " + t("Change:") + " \n\n%s\n\n") % (i + 1, out[0]))
-                + (BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(out[1]))
-            )
+        messages.extend(self._sequence_render(t("Change:"), change_list))
 
         return messages, fee_percent
 
@@ -528,7 +532,7 @@ class PSBTSigner:
         if self.base_encoding is not None:
             from .baseconv import base_encode
 
-            psbt_data = base_encode(psbt_data, self.base_encoding).decode()
+            psbt_data = base_encode(psbt_data, self.base_encoding)
 
         if self.ur_type == CRYPTO_PSBT:
             return (
@@ -589,7 +593,7 @@ class PSBTSigner:
                     )
                     if fingerprint_srt not in fingerprints:
                         if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:
-                            fingerprints[-1] = "..."
+                            fingerprints[-1] = ELLIPSIS
                             break
                         fingerprints.append(fingerprint_srt)
             elif self.policy["type"] == P2TR:
@@ -600,7 +604,7 @@ class PSBTSigner:
                     )
                     if fingerprint_srt not in fingerprints:
                         if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:
-                            fingerprints[-1] = "..."
+                            fingerprints[-1] = ELLIPSIS
                             break
                         fingerprints.append(fingerprint_srt)
 
@@ -612,7 +616,7 @@ def is_multisig(policy):
     """Returns a boolean indicating if the policy is a multisig"""
     return (
         "type" in policy
-        and P2WSH in policy["type"]
+        and policy["type"] in (P2SH, P2SH_P2WSH, P2WSH)
         and "m" in policy
         and "n" in policy
         # and "cosigners" in policy
@@ -715,14 +719,18 @@ def get_cosigners_taproot_miniscript(taproot_derivations, xpubs, origin_less_xpu
 
 
 # Modified from: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L64
+# and https://github.com/SeedSigner/seedsigner/blob/dev/src/seedsigner/models/psbt_parser.py
 def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
     """Parse scope and get policy"""
     from embit.finalizer import parse_multisig
 
     # we don't know the policy yet, let's parse it
     script_type = scriptpubkey.script_type()
-    # p2sh can be either legacy multisig, or nested segwit multisig
-    # or nested segwit singlesig
+
+    # p2sh can be either:
+    # - legacy multisig (p2sh);
+    # - nested segwit singlesig (p2sh-p2wpkh);
+    # - nested segwit multisig (p2sh-p2wsh).
     if script_type == P2SH:
         if scope.witness_script is not None:
             script_type = P2SH_P2WSH
@@ -731,14 +739,32 @@ def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
             and scope.redeem_script.script_type() == P2WPKH
         ):
             script_type = P2SH_P2WPKH
+
     policy = {"type": script_type}
+
+    if P2SH == script_type:
+        try:
+            # Try to parse as multisig
+            if scope.redeem_script is None:
+                raise ValueError("Missing redeem script")
+            m, pubkeys = parse_multisig(scope.redeem_script)
+            policy.update({"m": m, "n": len(pubkeys)})
+
+            # check pubkeys are derived from cosigners
+            cosigners = get_cosigners(pubkeys, scope.bip32_derivations, xpubs)
+            policy.update({"cosigners": cosigners})
+        except:
+            pass
+
     if P2WSH in script_type:
         try:
             # Try to parse as multisig
             if scope.witness_script is None:
                 raise ValueError("Missing witness script")
+
             m, pubkeys = parse_multisig(scope.witness_script)
             policy.update({"m": m, "n": len(pubkeys)})
+
             # check pubkeys are derived from cosigners
             cosigners = get_cosigners(pubkeys, scope.bip32_derivations, xpubs)
             policy.update({"cosigners": cosigners})
@@ -746,15 +772,18 @@ def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
             try:
                 # Try to parse as miniscript
                 policy.update({"miniscript": P2WSH})
+
                 # Will succeed to verify cosigners only if the descriptor is loaded
                 cosigners = get_cosigners_miniscript(scope.bip32_derivations, xpubs)
                 policy.update({"cosigners": cosigners})
             except:
                 pass
-    elif script_type == P2TR:
+
+    if script_type == P2TR:
         try:
             # Try to parse as taproot miniscript
             if len(scope.taproot_bip32_derivations) > 1:
+
                 # Assume is miniscript if there are multiple cosigners
                 policy.update({"miniscript": P2TR})
 
@@ -766,7 +795,7 @@ def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
             # otherwise it probably is single-sig taproot
             if len(cosigners) > 1:
                 policy.update({"cosigners": cosigners})
-        except Exception as e:
-            print(e)
+        except:
+            pass
 
     return policy

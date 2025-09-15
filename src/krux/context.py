@@ -20,11 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import gc
-import board
 from .display import display
 from .input import Input
 from .camera import Camera
 from .light import Light
+from .kboard import kboard
 
 
 class Context:
@@ -36,17 +36,14 @@ class Context:
         self.display = display
         self.input = Input()
         self.camera = Camera()
-        self.light = Light() if "LED_W" in board.config["krux"]["pins"] else None
+        self.light = Light() if kboard.has_light else None
         self.power_manager = None
-        self.printer = None
         self.wallet = None
         self.tc_code_enabled = False
 
     def clear(self):
         """Clears all sensitive data from the context, resetting it"""
         self.wallet = None
-        if self.printer is not None:
-            self.printer.clear()
         gc.collect()
 
     def is_logged_in(self):

@@ -7,8 +7,22 @@ from ...test_psbt import tdata as psbt_tdata
 @pytest.fixture
 def tdata(mocker):
     from collections import namedtuple
-    from krux.key import Key, P2PKH, P2SH_P2WPKH, P2TR, TYPE_SINGLESIG, TYPE_MULTISIG
+
     from embit.networks import NETWORKS
+
+    from krux.key import (
+        P2PKH,
+        P2SH,
+        P2SH_P2WPKH,
+        P2SH_P2WSH,
+        P2WSH,
+        P2TR,
+        TYPE_MINISCRIPT,
+        TYPE_MULTISIG,
+        TYPE_SINGLESIG,
+        Key,
+        P2WPKH,
+    )
 
     TEST_12_WORD_MNEMONIC = (
         "olympic term tissue route sense program under choose bean emerge velvet absurd"
@@ -19,12 +33,19 @@ def tdata(mocker):
 
     SINGLESIG_12_WORD_KEY = Key(TEST_12_WORD_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"])
     SINGLESIG_24_WORD_KEY = Key(TEST_24_WORD_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"])
-    MULTISIG_12_WORD_KEY = Key(TEST_12_WORD_MNEMONIC, TYPE_MULTISIG, NETWORKS["main"])
+    MULTISIG_12_WORD_KEY = Key(
+        TEST_12_WORD_MNEMONIC, TYPE_MULTISIG, NETWORKS["main"], "", 0, P2WSH
+    )
     SINGLESIG_SIGNING_KEY = Key(SIGNING_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"])
-    MULTISIG_SIGNING_KEY = Key(SIGNING_MNEMONIC, TYPE_MULTISIG, NETWORKS["main"])
+    MULTISIG_SIGNING_KEY = Key(
+        SIGNING_MNEMONIC, TYPE_MULTISIG, NETWORKS["main"], "", 0, P2WSH
+    )
     SINGLESIG_ACTION_KEY = Key(ACTION_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"])
     SINGLESIG_ACTION_KEY_TEST = Key(
         ACTION_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"], script_type=P2TR
+    )
+    SINGLESIG_ACTION_KEY_TEST_P2WPKH = Key(
+        ACTION_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"], script_type=P2WPKH
     )
     LEGACY1_KEY = Key(
         TEST_12_WORD_MNEMONIC,
@@ -33,6 +54,13 @@ def tdata(mocker):
         account_index=1,
         script_type=P2PKH,
     )
+    LEGACY1_MULTISIG_KEY = Key(
+        TEST_12_WORD_MNEMONIC,
+        TYPE_MULTISIG,
+        NETWORKS["main"],
+        account_index=None,
+        script_type=P2SH,
+    )
     NESTEDSW1_KEY = Key(
         TEST_12_WORD_MNEMONIC,
         TYPE_SINGLESIG,
@@ -40,6 +68,14 @@ def tdata(mocker):
         account_index=1,
         script_type=P2SH_P2WPKH,
     )
+    NESTEDSW1_MULTISIG_KEY = Key(
+        TEST_12_WORD_MNEMONIC,
+        TYPE_MULTISIG,
+        NETWORKS["main"],
+        account_index=1,
+        script_type=P2SH_P2WSH,
+    )
+
     NATIVESW1_KEY = Key(
         TEST_12_WORD_MNEMONIC,
         TYPE_SINGLESIG,
@@ -47,12 +83,31 @@ def tdata(mocker):
         account_index=1,
     )
 
+    TAPROOT1_KEY = Key(
+        TEST_12_WORD_MNEMONIC,
+        TYPE_SINGLESIG,
+        NETWORKS["main"],
+        account_index=1,
+        script_type=P2TR,
+    )
+
+    MINISCRIPT_NATIVESW1_KEY = Key(
+        TEST_12_WORD_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["main"]
+    )
+
+    MINISCRIPT_TAPROOT1_KEY = Key(
+        TEST_12_WORD_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["main"], script_type=P2TR
+    )
+
     VAGUE_LEGACY1_XPUB = "xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE"
     VAGUE_NESTEDSW1_YPUB = "ypub6XQGbwTMQ46bb391kD2QM9APJ9JC8JhxF1J4qAULysM82Knmnp8YEZ6YbTvEUJPWhcdv6xWtwFzM6mvgFFXGWpq7WPsq1LZcsHo9R97uuE4"
     VAGUE_NATIVESW1_ZPUB = "zpub6s3t4jJ6fCirkdeAcGCSWpUCjEoWdSjwr5Nja522s2puPB8riPi8MdVJrDrZ9G8FSUNRBoxebGNuMa9nXrUAUQGAFNTKdm6pWskYrMahu1i"
 
     SPECTER_SINGLESIG_WALLET_DATA = '{"label": "Specter Singlesig Wallet", "blockheight": 0, "descriptor": "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)#sfewjq8q"}'
-    SPECTER_MULTISIG_WALLET_DATA = '{"label": "Specter Multisig Wallet", "blockheight": 0, "descriptor": "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/0/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))#3nfc6jdy", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
+    SPECTER_MULTISIG_WALLET_DATA = '{"label": "Specter Multisig Wallet", "blockheight": 0, "descriptor": "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*))#6kfykuzf", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
+    SPECTER_MINISCRIPT_SINGLE_INHERITANCE_WALLET_DATA = '{"label": "Specter Miniscript Singles Inheritance Wallet 144 blocks", "blockheight": 0, "descriptor": "wsh(or_d(pk([55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*),and_v(v:pkh([73c5da0a/48h/0h/0h/2h]xpub6DkFAXWQ2dHxq2vatrt9qyA3bXYU4ToWQwCHbf5XB2mSTexcHZCeKS1VZYcPoBd5X8yVcbXFHJR9R8UCVpt82VX1VhR28mCyxUFL4r6KFrf/<0;1>/*),older(144))))#7zusggcg"}'
+    SPECTER_MINISCRIPT_EXPANDING_MULTISIG_WALLET_DATA = '{"label": "Specter Miniscript Expanding Multisig Wallet 144 blocks", "blockheight": 0, "descriptor": "wsh(or_d(multi(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*),and_v(v:thresh(2,pkh([55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<2;3>/*),a:pkh([3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<2;3>/*),a:pkh([d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*)),older(144))))#tx2awx9h", "devices": [{"type": "other", "label": "Key1"}, {"type": "other", "label": "Key2"}, {"type": "other", "label": "Key3"}]}'
+    SPECTER_MINISCRIPT_3_KEY_JOINT_CUSTODY_WALLET_DATA = '{"label": "Specter Miniscript 3 Key Joint Custody Wallet", "blockheight": 0, "descriptor": "wsh(andor(multi(2,[55f8fc5d/48h/0h/0h/379h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,[3e15470d/48h/0h/0h/379h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*,[d3a80c8b/48h/0h/0h/379h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*),or_i(and_v(v:pkh([d3a80c8b/48h/0h/0h/380h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*),after(288)),thresh(2,pk([55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*),s:pk([3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*),s:pk([d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*),snl:after(144))),and_v(v:thresh(2,pkh([55f8fc5d/48h/0h/0h/758h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*),a:pkh([3e15470d/48h/0h/0h/758h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*),a:pkh([d3a80c8b/48h/0h/0h/758h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*)),after(432))))", "devices": [{"type": "other", "label": "PK1"}, {"type": "other", "label": "PK2"}, {"type": "other", "label": "PK3"}, {"type": "other", "label": "PAK1"}, {"type": "other", "label": "PAK2"}, {"type": "other", "label": "PAK3"}, {"type": "other", "label": "SAK"}, {"type": "other", "label": "RK1"}, {"type": "other", "label": "RK2"}, {"type": "other", "label": "RK3"}]}'
 
     P2WPKH_PSBT = b'psbt\xff\x01\x00q\x02\x00\x00\x00\x01\xcf<X\xc3)\x82\xae P\x88\xd9\xbdI\xeb\x9b\x02\xac\xdfM=\xaev\xa5\x16\xc6\xb3\x06\xb1]\xe3\xa1N\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x02|?]\x05\x00\x00\x00\x00\x16\x00\x14/4\xaa\x1c\xf0\nS\xb0U\xa2\x91\xa0:}E\xf0\xa6\x98\x8bR\x80\x96\x98\x00\x00\x00\x00\x00\x16\x00\x14\xe6j\xfe\xff\xc3\x83\x8eq\xf0\xa2{\x07\xe3\xb0\x0e\xdej\xe8\xe1`\x00\x00\x00\x00\x00\x01\x01\x1f\x00\xe1\xf5\x05\x00\x00\x00\x00\x16\x00\x14\xd0\xc4\xa3\xef\t\xe9\x97\xb6\xe9\x9e9~Q\x8f\xe3\xe4\x1a\x11\x8c\xa1"\x06\x02\xe7\xab%7\xb5\xd4\x9e\x97\x03\t\xaa\xe0n\x9eI\xf3l\xe1\xc9\xfe\xbb\xd4N\xc8\xe0\xd1\xcc\xa0\xb4\xf9\xc3\x19\x18s\xc5\xda\nT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00"\x02\x03]I\xec\xcdT\xd0\t\x9eCgbw\xc7\xa6\xd4b]a\x1d\xa8\x8a]\xf4\x9b\xf9Qzw\x91\xa7w\xa5\x18s\xc5\xda\nT\x00\x00\x80\x01\x00\x00\x80\x00\x00\x00\x80\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00'
     SIGNED_P2WPKH_PSBT = b'psbt\xff\x01\x00q\x02\x00\x00\x00\x01\xcf<X\xc3)\x82\xae P\x88\xd9\xbdI\xeb\x9b\x02\xac\xdfM=\xaev\xa5\x16\xc6\xb3\x06\xb1]\xe3\xa1N\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x02|?]\x05\x00\x00\x00\x00\x16\x00\x14/4\xaa\x1c\xf0\nS\xb0U\xa2\x91\xa0:}E\xf0\xa6\x98\x8bR\x80\x96\x98\x00\x00\x00\x00\x00\x16\x00\x14\xe6j\xfe\xff\xc3\x83\x8eq\xf0\xa2{\x07\xe3\xb0\x0e\xdej\xe8\xe1`\x00\x00\x00\x00\x00\x01\x01\x1f\x00\xe1\xf5\x05\x00\x00\x00\x00\x16\x00\x14\xd0\xc4\xa3\xef\t\xe9\x97\xb6\xe9\x9e9~Q\x8f\xe3\xe4\x1a\x11\x8c\xa1"\x02\x02\xe7\xab%7\xb5\xd4\x9e\x97\x03\t\xaa\xe0n\x9eI\xf3l\xe1\xc9\xfe\xbb\xd4N\xc8\xe0\xd1\xcc\xa0\xb4\xf9\xc3\x19G0D\x02 >e\xff;L\xd4\x7f\x12\x1f\xa7\xc9\x82(F\x18\xdb\x801G\xb0V\xd3\x93\x94\xd4\xecB\x0e\xfd\xfck\xa1\x02 l\xbd\xd8\x8a\xc5\x18l?.\xfd$%1\xedy\x17uvQ\xac&#t\xf3\xd3\x1d\x85\xd6\x16\xcdj\x81\x01\x00\x00\x00'
@@ -88,14 +143,23 @@ def tdata(mocker):
             "MULTISIG_SIGNING_KEY",
             "SINGLESIG_ACTION_KEY",
             "SINGLESIG_ACTION_KEY_TEST",
+            "SINGLESIG_ACTION_KEY_TEST_P2WPKH",
             "LEGACY1_KEY",
+            "LEGACY1_MULTISIG_KEY",
             "NESTEDSW1_KEY",
+            "NESTEDSW1_MULTISIG_KEY",
             "NATIVESW1_KEY",
+            "TAPROOT1_KEY",
+            "MINISCRIPT_NATIVESW1_KEY",
+            "MINISCRIPT_TAPROOT1_KEY",
             "VAGUE_LEGACY1_XPUB",
             "VAGUE_NESTEDSW1_YPUB",
             "VAGUE_NATIVESW1_ZPUB",
             "SPECTER_SINGLESIG_WALLET_DATA",
             "SPECTER_MULTISIG_WALLET_DATA",
+            "SPECTER_MINISCRIPT_SINGLE_INHERITANCE_WALLET_DATA",
+            "SPECTER_MINISCRIPT_EXPANDING_MULTISIG_WALLET_DATA",
+            "SPECTER_MINISCRIPT_3_KEY_JOINT_CUSTODY_WALLET_DATA",
             "P2WPKH_PSBT",
             "SIGNED_P2WPKH_PSBT",
             "SIGNED_P2WPKH_PSBT_SD",
@@ -124,14 +188,23 @@ def tdata(mocker):
         MULTISIG_SIGNING_KEY,
         SINGLESIG_ACTION_KEY,
         SINGLESIG_ACTION_KEY_TEST,
+        SINGLESIG_ACTION_KEY_TEST_P2WPKH,
         LEGACY1_KEY,
+        LEGACY1_MULTISIG_KEY,
         NESTEDSW1_KEY,
+        NESTEDSW1_MULTISIG_KEY,
         NATIVESW1_KEY,
+        TAPROOT1_KEY,
+        MINISCRIPT_NATIVESW1_KEY,
+        MINISCRIPT_TAPROOT1_KEY,
         VAGUE_LEGACY1_XPUB,
         VAGUE_NESTEDSW1_YPUB,
         VAGUE_NATIVESW1_ZPUB,
         SPECTER_SINGLESIG_WALLET_DATA,
         SPECTER_MULTISIG_WALLET_DATA,
+        SPECTER_MINISCRIPT_SINGLE_INHERITANCE_WALLET_DATA,
+        SPECTER_MINISCRIPT_EXPANDING_MULTISIG_WALLET_DATA,
+        SPECTER_MINISCRIPT_3_KEY_JOINT_CUSTODY_WALLET_DATA,
         P2WPKH_PSBT,
         SIGNED_P2WPKH_PSBT,
         SIGNED_P2WPKH_PSBT_SD,
@@ -178,6 +251,7 @@ def test_load_pub_key_view(mocker, amigo, tdata):
     ]
 
     wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    assert wallet.has_change_addr()
     ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
     home = Home(ctx)
     home.public_key()
@@ -201,6 +275,69 @@ def test_load_wallet_descritor_manager(mocker, amigo, tdata):
     home.wallet_descriptor()
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_no_change_passphrase_menu(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    FINGERPRINT_NO_PASSPHRASE = "73c5da0a"
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Move to No
+        BUTTON_ENTER,  # Confirm No
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+
+    assert wallet.key.fingerprint == ctx.wallet.key.fingerprint
+
+    home = Home(ctx)
+    mocker.spy(home, "prompt")
+    home.passphrase()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert wallet.key.fingerprint == ctx.wallet.key.fingerprint
+    assert ctx.wallet.key.fingerprint_hex_str() == FINGERPRINT_NO_PASSPHRASE
+    home.prompt.assert_called_once_with(
+        "Add or change wallet passphrase?", ctx.display.height() // 2
+    )
+
+
+def test_cancel_passphrase_menu(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.pages.wallet_settings import PassphraseEditor
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Proceed on message
+        BUTTON_ENTER,  # Type passphrase
+        *([BUTTON_PAGE_PREV] * 2),  # Move to esc
+        BUTTON_ENTER,  # Press esc
+        BUTTON_ENTER,  # Confirm no passphrase
+    ]
+
+    FINGERPRINT_NO_PASSPHRASE = "73c5da0a"
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+    assert wallet.key.fingerprint == ctx.wallet.key.fingerprint
+
+    home = Home(ctx)
+    mocker.spy(home, "prompt")
+    mocker.spy(PassphraseEditor, "load_passphrase_menu")
+    home.passphrase()
+
+    assert ctx.wallet.key.fingerprint_hex_str() == FINGERPRINT_NO_PASSPHRASE
+    home.prompt.assert_called_once_with(
+        "Add or change wallet passphrase?", ctx.display.height() // 2
+    )
+    PassphraseEditor.load_passphrase_menu.assert_called_once_with(
+        mocker.ANY, ctx.wallet.key.mnemonic
+    )
 
 
 def test_change_passphrase_menu(mocker, amigo, tdata):
@@ -232,6 +369,30 @@ def test_change_passphrase_menu(mocker, amigo, tdata):
     assert ctx.wallet.key.fingerprint_hex_str() == FINGERPRINT_WITH_PASSPHRASE
 
 
+def test_cancel_customize_wallet_menu(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Move to No
+        BUTTON_ENTER,  # Press No
+    ]
+
+    # Wallet before customization
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    assert wallet.key.network["name"] == "Mainnet"
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+    home = Home(ctx)
+    home.customize()
+
+    # Wallet after cancel customization
+    # should remain the same as before
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.key.network["name"] == "Mainnet"
+
+
 def test_customize_wallet_menu(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
@@ -256,6 +417,36 @@ def test_customize_wallet_menu(mocker, amigo, tdata):
     assert ctx.wallet.key.network["name"] == "Testnet"
 
 
+def test_cancel_load_bip85_menu(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.pages.home_pages.bip85 import Bip85
+
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Move to No
+        BUTTON_ENTER,  # Confirm No
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+
+    # Wallet before loading BIP85
+    assert ctx.wallet.key.fingerprint_hex_str() == wallet.key.fingerprint_hex_str()
+
+    home = Home(ctx)
+    mocker.spy(Bip85, "export")
+    home.bip85()
+
+    # Wallet after cancel loading BIP85
+    # should remain the same as before
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.key.fingerprint_hex_str() == wallet.key.fingerprint_hex_str()
+
+    Bip85.export.assert_not_called()
+
+
 def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
@@ -273,6 +464,8 @@ def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
         BUTTON_PAGE_PREV,  # Move to "Go"
         BUTTON_ENTER,  # Go
         BUTTON_ENTER,  # Load words
+        BUTTON_PAGE_PREV,  # Move to "< Back"
+        BUTTON_ENTER,  # Leave BIP85
         BUTTON_PAGE,  # Move to "Back"
         BUTTON_ENTER,  # Exit
     ]
@@ -291,15 +484,38 @@ def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
 def test_load_address_view(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_PAGE
 
     BTN_SEQUENCE = [
-        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_PAGE,  # Go to List addr
+        BUTTON_ENTER,  # Enter list addr
+        BUTTON_ENTER,  # List receive addr
+        BUTTON_ENTER,  # See first receive addr in QR
+        BUTTON_ENTER,  # Exit QR display - will go to QR viewer menu options
+        BUTTON_PAGE_PREV,  # Go to Back to Menu
+        BUTTON_ENTER,  # Exit QR viewer
+        BUTTON_PAGE_PREV,  # Go to Back list addr
+        BUTTON_ENTER,  # Exit list Addr menu
+        BUTTON_PAGE,  # Go to change
+        BUTTON_PAGE,  # Go to Back
+        BUTTON_ENTER,  # Exit menu
+        BUTTON_PAGE,  # Go to export
+        BUTTON_PAGE,  # Go to Back
         BUTTON_ENTER,  # Exit
     ]
 
+    # To use as display.to_lines
+    def _to_lines(text):
+        if isinstance(text, list):
+            return text
+        return text.split("\n")
+
     wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
     ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+
+    # custom display.to_lines instead of mock to increase coverage
+    ctx.display.to_lines = _to_lines
+
     home = Home(ctx)
     home.addresses_menu()
 
@@ -338,6 +554,84 @@ def test_load_sign_message_menu(mocker, amigo):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_load_sign_psbt_menu(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
+    home = Home(ctx)
+    for _method in [
+        "_pre_load_psbt_warn",
+        "load_psbt",
+        "_post_load_psbt_warn",
+        "_fees_psbt_warn",
+        "_display_transaction_for_review",
+        "_sign_menu",
+    ]:
+        mocker.spy(home, _method)
+
+    home.sign_psbt()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # assert that some methods where called, but not all
+    for _method in [
+        ("_pre_load_psbt_warn", "assert_called_once"),
+        ("load_psbt", "assert_called_once"),
+        ("_post_load_psbt_warn", "assert_not_called"),
+        ("_fees_psbt_warn", "assert_not_called"),
+        ("_display_transaction_for_review", "assert_not_called"),
+        ("_sign_menu", "assert_not_called"),
+    ]:
+        home_method = getattr(home, _method[0])
+        getattr(home_method, _method[1])()
+
+
+def DISABLEDtest_sign_psbt_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages import MENU_CONTINUE
+
+    # nonsensical 0x8f byte encrypted w/ key="a" to test decryption failure
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x84\x2b\x2c",
+            0,
+        ),
+    )
+
+    btn_seq = [
+        BUTTON_ENTER,  # go load from camera
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # type key
+        BUTTON_PAGE,  # to "b"
+        BUTTON_ENTER,  # enter "b"
+        BUTTON_PAGE_PREV,  # back to "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key "b" (while "a" is correct key)
+    ]
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    home_ui = Home(ctx)
+    assert home_ui.sign_psbt() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    ctx.display.flash_text.assert_called_with(
+        "Failed to decrypt", 248, 2000, highlight_prefix=""
+    )
+
+
 def test_sign_psbt(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
@@ -352,9 +646,26 @@ def test_sign_psbt(mocker, m5stickv, tdata):
     from ...shared_mocks import MockFile, mock_open
 
     cases = [
-        # Single-sig, not loaded, no format => pmofn, sign, No print prompt
+        # Single-sig, not loaded, NO sign, Path mismatch, No print prompt
         (
             # Case 0
+            tdata.SINGLESIG_SIGNING_KEY,  # 0 wallet
+            None,  # 1 wallet
+            tdata.P2WPKH_PSBT_B64,  # 2 capture_qr_code return 1
+            FORMAT_NONE,  # 3 capture_qr_code return 2
+            False,  # 4 if was NOT signed
+            tdata.SIGNED_P2WPKH_PSBT_B64,  # 5
+            None,  # 6 printer
+            # 7 btn_seq
+            [
+                BUTTON_ENTER,  # Load from QR code
+                BUTTON_PAGE,  # Path mismatch exit
+            ],
+            None,  # 8 SD avaiable
+        ),
+        # Single-sig, not loaded, no format => pmofn, sign, No print prompt
+        (
+            # Case 1
             tdata.SINGLESIG_SIGNING_KEY,  # 0 wallet
             None,  # 1 wallet
             tdata.P2WPKH_PSBT_B64,  # 2 capture_qr_code return 1
@@ -364,39 +675,19 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             None,  # 6 printer
             # 7 btn_seq
             [
-                # BUTTON_ENTER,  # Wallet not loaded, proceed?
                 BUTTON_ENTER,  # Load from QR code
                 BUTTON_ENTER,  # Path mismatch ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
+                BUTTON_PAGE,  # move to Sign to QR
                 BUTTON_ENTER,  # Sign to QR code
-                BUTTON_ENTER,  # Leave
+                BUTTON_ENTER,  # Dismiss QR
+                BUTTON_ENTER,  # Done?
             ],
             None,  # 8 SD avaiable
         ),
         # Single-sig, not loaded, pmofn, sign, No print prompt
-        (
-            # Case 1
-            tdata.SINGLESIG_SIGNING_KEY,
-            None,
-            tdata.P2WPKH_PSBT_B64,
-            FORMAT_PMOFN,
-            True,
-            tdata.SIGNED_P2WPKH_PSBT_B64,
-            None,
-            [
-                BUTTON_ENTER,  # Load frm QR code
-                BUTTON_ENTER,  # Path mismatch ACK
-                BUTTON_ENTER,  # PSBT resume
-                BUTTON_ENTER,  # output 1
-                BUTTON_ENTER,  # output 2
-                BUTTON_ENTER,  # Sign to QR code
-                BUTTON_ENTER,  # Leave
-            ],
-            None,
-        ),
-        # Single-sig, not loaded, pmofn, sign, Print
         (
             # Case 2
             tdata.SINGLESIG_SIGNING_KEY,
@@ -405,20 +696,21 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             FORMAT_PMOFN,
             True,
             tdata.SIGNED_P2WPKH_PSBT_B64,
-            MockPrinter(),
+            None,
             [
                 BUTTON_ENTER,  # Load frm QR code
                 BUTTON_ENTER,  # Path mismatch ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
+                BUTTON_PAGE,  # move to Sign to QR
                 BUTTON_ENTER,  # Sign to QR code
-                BUTTON_ENTER,  # Jump QR signed
-                BUTTON_ENTER,  # Print Yes
+                BUTTON_ENTER,  # Dismiss QR
+                BUTTON_ENTER,  # Done?
             ],
             None,
         ),
-        # Single-sig, not loaded, pmofn, sign, Decline to print
+        # Single-sig, not loaded, pmofn, sign, Print
         (
             # Case 3
             tdata.SINGLESIG_SIGNING_KEY,
@@ -434,15 +726,41 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
+                BUTTON_PAGE,  # move to Sign to QR
                 BUTTON_ENTER,  # Sign to QR code
-                BUTTON_ENTER,  # Jump QR signed
+                BUTTON_ENTER,  # Dismiss QR
+                BUTTON_ENTER,  # Print Yes
+                BUTTON_ENTER,  # Done?
+            ],
+            None,
+        ),
+        # Single-sig, not loaded, pmofn, sign, Decline to print
+        (
+            # Case 4
+            tdata.SINGLESIG_SIGNING_KEY,
+            None,
+            tdata.P2WPKH_PSBT_B64,
+            FORMAT_PMOFN,
+            True,
+            tdata.SIGNED_P2WPKH_PSBT_B64,
+            MockPrinter(),
+            [
+                BUTTON_ENTER,  # Load frm QR code
+                BUTTON_ENTER,  # Path mismatch ACK
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_PAGE,  # move to Sign to QR
+                BUTTON_ENTER,  # Sign to QR code
+                BUTTON_ENTER,  # Dismiss QR
                 BUTTON_PAGE,  # Print No
+                BUTTON_ENTER,  # Done?
             ],
             None,
         ),
         # Single-sig, not loaded, pmofn, decline to sign
         (
-            # Case 4
+            # Case 5
             tdata.SINGLESIG_SIGNING_KEY,
             None,
             tdata.P2WPKH_PSBT_B64,
@@ -456,7 +774,8 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
-                BUTTON_PAGE,  # Move to Sign to QR SD card
+                BUTTON_PAGE,  # move to Sign to QR
+                BUTTON_PAGE,  # Move to Sign to SD card
                 BUTTON_PAGE,  # Move to Back
                 BUTTON_ENTER,  # Leave
             ],
@@ -464,7 +783,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ),
         # Single-sig, not loaded, failed to capture PSBT QR
         (
-            # Case 5
+            # Case 6
             tdata.SINGLESIG_SIGNING_KEY,
             None,
             None,
@@ -475,9 +794,27 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             [BUTTON_ENTER],  # Load from QR code - failed
             None,
         ),
+        # Multisig, not loaded, NO sign, Policy decline, No print prompt
+        (
+            # Case 7
+            tdata.MULTISIG_SIGNING_KEY,
+            None,
+            tdata.P2WSH_PSBT_B64,
+            FORMAT_PMOFN,
+            False,
+            tdata.SIGNED_P2WSH_PSBT_B64,
+            None,
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # Load from QR code
+                BUTTON_ENTER,  # Path mismatch ACK
+                BUTTON_PAGE,  # PSBT Policy Exit
+            ],
+            None,
+        ),
         # Multisig, not loaded, decline to proceed after warning
         (
-            # Case 6
+            # Case 8
             tdata.MULTISIG_SIGNING_KEY,
             None,
             None,
@@ -490,53 +827,6 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ),
         # Multisig, not loaded, pmofn, sign, No print prompt
         (
-            # Case 7
-            tdata.MULTISIG_SIGNING_KEY,
-            None,
-            tdata.P2WSH_PSBT_B64,
-            FORMAT_PMOFN,
-            True,
-            tdata.SIGNED_P2WSH_PSBT_B64,
-            None,
-            [
-                BUTTON_ENTER,  # Wallet not loaded, proceed?
-                BUTTON_ENTER,  # Load from QR code
-                BUTTON_ENTER,  # Path mismatch ACK
-                BUTTON_ENTER,  # PSBT Policy ACK
-                BUTTON_ENTER,  # PSBT resume
-                BUTTON_ENTER,  # output 1
-                BUTTON_ENTER,  # output 2
-                BUTTON_ENTER,  # Sign to QR code
-                BUTTON_ENTER,  # Jump QR signed
-            ],
-            None,
-        ),
-        # Multisig, not loaded, pmofn, sign, Print
-        (
-            # Case 8
-            tdata.MULTISIG_SIGNING_KEY,
-            None,
-            tdata.P2WSH_PSBT_B64,
-            FORMAT_PMOFN,
-            True,
-            tdata.SIGNED_P2WSH_PSBT_B64,
-            MockPrinter(),
-            [
-                BUTTON_ENTER,  # Wallet not loaded, proceed?
-                BUTTON_ENTER,  # Load from QR code
-                BUTTON_ENTER,  # Path mismatch ACK
-                BUTTON_ENTER,  # PSBT Policy ACK
-                BUTTON_ENTER,  # PSBT resume
-                BUTTON_ENTER,  # output 1
-                BUTTON_ENTER,  # output 2
-                BUTTON_ENTER,  # Sign to QR code
-                BUTTON_ENTER,  # Jump QR signed
-                BUTTON_ENTER,  # Print Yes
-            ],
-            None,
-        ),
-        # Multisig, not loaded, pmofn, sign, Decline to print
-        (
             # Case 9
             tdata.MULTISIG_SIGNING_KEY,
             None,
@@ -544,6 +834,31 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             FORMAT_PMOFN,
             True,
             tdata.SIGNED_P2WSH_PSBT_B64,
+            None,
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # Load from QR code
+                BUTTON_ENTER,  # Path mismatch ACK
+                BUTTON_ENTER,  # PSBT Policy ACK
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_PAGE,  # move to Sign to QR
+                BUTTON_ENTER,  # Sign to QR code
+                BUTTON_ENTER,  # Dismiss QR
+                BUTTON_ENTER,  # Done?
+            ],
+            None,
+        ),
+        # Multisig, not loaded, pmofn, sign, Print
+        (
+            # Case 10
+            tdata.MULTISIG_SIGNING_KEY,
+            None,
+            tdata.P2WSH_PSBT_B64,
+            FORMAT_PMOFN,
+            True,
+            tdata.SIGNED_P2WSH_PSBT_B64,
             MockPrinter(),
             [
                 BUTTON_ENTER,  # Wallet not loaded, proceed?
@@ -553,15 +868,43 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
+                BUTTON_PAGE,  # move to Sign to QR
                 BUTTON_ENTER,  # Sign to QR code
-                BUTTON_ENTER,  # Jump QR signed
+                BUTTON_ENTER,  # Dismiss QR
+                BUTTON_ENTER,  # Print Yes
+                BUTTON_ENTER,  # Done?
+            ],
+            None,
+        ),
+        # Multisig, not loaded, pmofn, sign, Decline to print
+        (
+            # Case 11
+            tdata.MULTISIG_SIGNING_KEY,
+            None,
+            tdata.P2WSH_PSBT_B64,
+            FORMAT_PMOFN,
+            True,
+            tdata.SIGNED_P2WSH_PSBT_B64,
+            MockPrinter(),
+            [
+                BUTTON_ENTER,  # Wallet not loaded, proceed?
+                BUTTON_ENTER,  # Load from QR code
+                BUTTON_ENTER,  # Path mismatch ACK
+                BUTTON_ENTER,  # PSBT Policy ACK
+                BUTTON_ENTER,  # PSBT resume
+                BUTTON_ENTER,  # output 1
+                BUTTON_ENTER,  # output 2
+                BUTTON_PAGE,  # move to Sign to QR
+                BUTTON_ENTER,  # Sign to QR code
+                BUTTON_ENTER,  # Dismiss QR
                 BUTTON_PAGE,  # Print No
+                BUTTON_ENTER,  # Done?
             ],
             None,
         ),
         # Single-sig, not loaded, load from microSD, sign to microSD
         (
-            # Case 10
+            # Case 12
             tdata.SINGLESIG_SIGNING_KEY,  # 0 wallet
             None,
             tdata.P2WPKH_PSBT,
@@ -576,14 +919,15 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
-                BUTTON_PAGE,  # Move to "Sign to QR SD card"
+                BUTTON_PAGE,  # move to Sign to QR
+                BUTTON_PAGE,  # Move to "Sign to SD card"
                 BUTTON_ENTER,  # Sign to SD card
             ],
             tdata.SIGNED_P2WPKH_PSBT_SD,  # 8 SD avaiable
         ),
         # Multisig, not loaded, load from microSD, sign, save to microSD, No print prompt
         (
-            # Case 11
+            # Case 13
             tdata.MULTISIG_SIGNING_KEY,
             None,
             tdata.P2WSH_PSBT,
@@ -600,6 +944,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
+                BUTTON_PAGE,  # move to Sign to QR
                 BUTTON_PAGE,  # Move to "Sign to QR SD card"
                 BUTTON_ENTER,  # Sign to SD card
             ],
@@ -607,7 +952,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         ),
         # Single-sig base64, not loaded, load from microSD, sign to microSD
         (
-            # Case 12
+            # Case 14
             tdata.SINGLESIG_SIGNING_KEY,
             None,
             tdata.P2WPKH_PSBT_B64,
@@ -622,6 +967,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
+                BUTTON_PAGE,  # move to Sign to QR
                 BUTTON_PAGE,  # Move to "Sign to QR SD card"
                 BUTTON_ENTER,  # Sign to SD card
             ],
@@ -649,14 +995,30 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         PSBT_FILE_NAME_NO_EXT + "-signed" + PSBT_FILE_EXTENSION + B64_FILE_EXTENSION
     )
 
+    # To use as display.to_lines
+    def _to_lines(text):
+        if isinstance(text, list):
+            return text
+        return text.split("\n")
+
+    # Mock for SDHandler
+    mocker.patch(
+        "os.listdir",
+        return_value=["somefile", "otherfile"],
+    )
+
     num = 0
     for case in cases:
         print("test_sign_psbt", num)
         wallet = Wallet(case[0])
         if case[1] is not None:
             wallet.load(case[1], FORMAT_PMOFN)
+            assert wallet.has_change_addr()
 
         ctx = create_ctx(mocker, case[7], wallet, case[6])
+
+        # custom display.to_lines to increase coverage
+        ctx.display.to_lines = _to_lines
         home = Home(ctx)
         mocker.patch.object(
             QRCodeCapture, "qr_capture_loop", new=lambda self: (case[2], case[3])
@@ -733,10 +1095,11 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             home.display_qr_codes.assert_not_called()
 
         if case[6] is not None:  # if has printer
-            if case[7][-1] == BUTTON_ENTER:  # if printed
+            if case[7][-2] == BUTTON_ENTER:  # if printed
                 mock_send_to_printer.assert_called()
             else:  # if declined to print
                 mock_send_to_printer.assert_not_called()
+
         num += 1
 
     # TODO: Create cross test cases: Load from QR code, sign, save to SD card and vice versa
@@ -753,6 +1116,7 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
         SIGNED_FILE_SUFFIX,
     )
     from krux.settings import THIN_SPACE
+    from krux.key import FINGERPRINT_SYMBOL
 
     PSBT_FILE_NAME = "test.psbt"
     SIGNED_PSBT_FILE_NAME = "test-signed.psbt"
@@ -768,6 +1132,7 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
         BUTTON_ENTER,  # PSBT resume
         BUTTON_ENTER,  # output 1
         BUTTON_ENTER,  # output 2
+        BUTTON_PAGE,  # move to Sign to QR
         BUTTON_PAGE,  # Move to "Sign to QR SD card"
         BUTTON_ENTER,  # Sign to SD card
     ]
@@ -809,22 +1174,31 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
     # Multisig with wallet output descriptor not loaded had to show a warning
-    ctx.display.draw_centered_text.assert_any_call(
-        "Warning:\nWallet output descriptor not found.\n\nSome checks cannot be performed."
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Warning: Wallet output descriptor not found.\n\nSome checks cannot be performed.",
+                highlight_prefix=":",
+            )
+        ]
     )
 
     # These two calls must have occured in sequence
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Warning: Path mismatch\nWallet: m/48h/0h/0h/2h\nPSBT: m/48h/1h/0h/2h"
+                "Warning: Path mismatch\nWallet: m/48h/0h/0h/2h\nPSBT: m/48h/1h/0h/2h",
+                highlight_prefix=":",
             ),
             mocker.call(
-                "PSBT policy:\np2wsh\n2 of 3\n⊚"
+                "PSBT policy:\np2wsh\n2 of 3\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
-                + "26bb83c4\n⊚"
+                + "26bb83c4\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
-                + "0208cb77\n⊚"
+                + "0208cb77\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
                 + "73c5da0a"
             ),
@@ -851,7 +1225,7 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
 def test_psbt_warnings_taproot_miniscript(mocker, m5stickv, psbt_tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
-    from krux.key import Key, NETWORKS, TYPE_MINISCRIPT, P2TR
+    from krux.key import Key, NETWORKS, TYPE_MINISCRIPT, P2TR, FINGERPRINT_SYMBOL
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.sd_card import (
         PSBT_FILE_EXTENSION,
@@ -881,6 +1255,7 @@ def test_psbt_warnings_taproot_miniscript(mocker, m5stickv, psbt_tdata):
         BUTTON_ENTER,  # PSBT Policy ACK
         BUTTON_ENTER,  # PSBT resume
         BUTTON_ENTER,  # output 1
+        BUTTON_PAGE,  # move to Sign to QR
         BUTTON_PAGE,  # Move to "Sign to QR SD card"
         BUTTON_ENTER,  # Sign to SD card
     ]
@@ -923,22 +1298,31 @@ def test_psbt_warnings_taproot_miniscript(mocker, m5stickv, psbt_tdata):
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
     # Wallet output descriptor not loaded had to show a warning
-    ctx.display.draw_centered_text.assert_any_call(
-        "Warning:\nWallet output descriptor not found.\n\nSome checks cannot be performed."
+    print(ctx.display.draw_centered_text.mock_calls)
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Warning: Wallet output descriptor not found.\n\nSome checks cannot be performed.",
+                highlight_prefix=":",
+            )
+        ]
     )
 
     # These two calls must have occured in sequence
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Warning: Path mismatch\nWallet: m/48h/0h/0h/2h\nPSBT: m/48h/1h/0h/2h"
+                "Warning: Path mismatch\nWallet: m/48h/0h/0h/2h\nPSBT: m/48h/1h/0h/2h",
+                highlight_prefix=":",
             ),
             mocker.call(
                 "PSBT policy:\np2tr"
-                + "\n⊚"
+                + "\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
                 + "02e8bff2"
-                + "\n⊚"
+                + "\n"
+                + FINGERPRINT_SYMBOL
                 + THIN_SPACE
                 + "73c5da0a"
             ),
@@ -965,7 +1349,7 @@ def test_psbt_warnings_taproot_miniscript(mocker, m5stickv, psbt_tdata):
 def test_sign_wrong_key(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_NONE
     from krux.pages.qr_capture import QRCodeCapture
 
@@ -974,6 +1358,7 @@ def test_sign_wrong_key(mocker, m5stickv, tdata):
         BUTTON_ENTER,  # PSBT resume
         BUTTON_ENTER,  # output 1
         BUTTON_ENTER,  # output 2
+        BUTTON_PAGE,  # move to Sign to QR
         BUTTON_ENTER,  # Sign to QR code
     ]
     wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
@@ -1003,21 +1388,66 @@ def test_sign_wrong_key(mocker, m5stickv, tdata):
     home.display_qr_codes.assert_not_called()
 
 
-def test_sign_zeroes_fingerprint(mocker, m5stickv, tdata):
+def test_sign_review_3_times(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load from QR code
+        BUTTON_ENTER,  # PSBT resume
+        BUTTON_ENTER,  # output 1
+        BUTTON_ENTER,  # output 2
+        BUTTON_ENTER,  # REVIEW
+        BUTTON_ENTER,  # PSBT resume
+        BUTTON_ENTER,  # output 1
+        BUTTON_ENTER,  # output 2
+        BUTTON_ENTER,  # REVIEW
+        BUTTON_ENTER,  # PSBT resume
+        BUTTON_ENTER,  # output 1
+        BUTTON_ENTER,  # output 2
+        BUTTON_PAGE,  # move to Sign to QR
+        BUTTON_ENTER,  # Sign to QR code
+    ]
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    home = Home(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (tdata.P2WPKH_PSBT_B64, FORMAT_NONE),
+    )
+    qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
+    mocker.patch.object(
+        home,
+        "display_qr_codes",
+        new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+    )
+    mocker.spy(home, "display_qr_codes")
+
+    # Wrong key, will raise error "cannot sign"
+    with pytest.raises(ValueError):
+        home.sign_psbt()
+
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    qr_capturer.assert_called_once()
+
+    # ERROR raised: no qrcode
+    home.display_qr_codes.assert_not_called()
+
+
+def test_sign_cancel_zeroes_fingerprint(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
     from krux.pages.qr_capture import QRCodeCapture
 
     btn_seq = [
         BUTTON_ENTER,  # Load from QR code
-        BUTTON_ENTER,  # Confirm fingerprint missing
-        BUTTON_ENTER,  # PSBT resume
-        BUTTON_ENTER,  # output 1
-        BUTTON_ENTER,  # output 2
-        BUTTON_ENTER,  # Sign to QR code
-        BUTTON_ENTER,  # Jump QR signed
+        BUTTON_PAGE,  # Cancel fingerprint missing
     ]
     wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
     ctx = create_ctx(mocker, btn_seq, wallet)
@@ -1039,8 +1469,53 @@ def test_sign_zeroes_fingerprint(mocker, m5stickv, tdata):
 
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
-    # Signed normally even with zeroes in fingerprint
     qr_capturer.assert_called_once()
+
+    # NOT Signed
+    home.display_qr_codes.assert_not_called()
+
+
+def test_sign_zeroes_fingerprint(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_PMOFN, FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load from QR code
+        BUTTON_ENTER,  # Confirm fingerprint missing
+        BUTTON_ENTER,  # PSBT resume
+        BUTTON_ENTER,  # output 1
+        BUTTON_ENTER,  # output 2
+        BUTTON_PAGE,  # move to Sign to QR
+        BUTTON_ENTER,  # Sign to QR code
+        BUTTON_ENTER,  # Dismiss QR
+        BUTTON_ENTER,  # Done?
+    ]
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    home = Home(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (tdata.P2WPKH_PSBT_B64_ZEROES_FINGERPRINT, FORMAT_NONE),
+    )
+    qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
+    mocker.patch.object(
+        home,
+        "display_qr_codes",
+        new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+    )
+    mocker.spy(home, "display_qr_codes")
+
+    home.sign_psbt()
+
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+    qr_capturer.assert_called_once()
+
+    # Signed normally even with zeroes in fingerprint
     home.display_qr_codes.assert_called_once_with(
         tdata.SIGNED_P2WPKH_PSBT_B64, FORMAT_PMOFN
     )
@@ -1065,9 +1540,16 @@ def test_sign_p2tr_zeroes_fingerprint(mocker, m5stickv, tdata):
         BUTTON_ENTER,  # Confirm fingerprint missing
         BUTTON_ENTER,  # PSBT resume
         BUTTON_ENTER,  # output 1
+        BUTTON_PAGE,  # move to Sign to QR
         BUTTON_PAGE,  # Move to "Sign to QR SD card"
         BUTTON_ENTER,  # Sign to SD card
     ]
+
+    # Mock for SDHandler
+    mocker.patch(
+        "os.listdir",
+        return_value=["somefile", "otherfile"],
+    )
 
     wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST)
     ctx = create_ctx(mocker, btn_seq, wallet)
@@ -1120,21 +1602,17 @@ def test_sign_p2tr_zeroes_fingerprint(mocker, m5stickv, tdata):
     assert written_data == tdata.SIGNED_P2TR_PSBT_BIN_SD
 
 
-def test_sign_high_fee(mocker, m5stickv, tdata):
+def test_cancel_sign_high_fee(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_NONE
     from krux.pages.qr_capture import QRCodeCapture
 
     btn_seq = [
         BUTTON_ENTER,  # Load from QR code
         BUTTON_ENTER,  # Path mismatch ACK
-        BUTTON_ENTER,  # High fees ACK
-        BUTTON_ENTER,  # PSBT resume
-        BUTTON_ENTER,  # output 1
-        BUTTON_ENTER,  # Sign to QR code
-        BUTTON_ENTER,  # Jump QR signed
+        BUTTON_PAGE,  # High fees EXIT
     ]
     wallet = Wallet(tdata.SINGLESIG_ACTION_KEY)
     ctx = create_ctx(mocker, btn_seq, wallet)
@@ -1160,10 +1638,66 @@ def test_sign_high_fee(mocker, m5stickv, tdata):
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h"
+                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h",
+                highlight_prefix=":",
             ),
-            mocker.call("Processing.."),
-            mocker.call("Warning: High fees!\n799.7% of the amount."),
+            mocker.call("Processing…"),
+            mocker.call(
+                "Warning: High fees!\n799.7% of the amount.", highlight_prefix=":"
+            ),
+        ]
+    )
+
+
+def test_sign_high_fee(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load from QR code
+        BUTTON_ENTER,  # Path mismatch ACK
+        BUTTON_ENTER,  # High fees ACK
+        BUTTON_ENTER,  # PSBT resume
+        BUTTON_ENTER,  # output 1
+        BUTTON_PAGE,  # move to Sign to QR
+        BUTTON_ENTER,  # Sign to QR code
+        BUTTON_ENTER,  # Dismiss QR
+        BUTTON_ENTER,  # Done?
+    ]
+    wallet = Wallet(tdata.SINGLESIG_ACTION_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    home = Home(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (tdata.P2WPKH_HIGH_FEE_PSBT, FORMAT_NONE),
+    )
+    qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
+    mocker.patch.object(
+        home,
+        "display_qr_codes",
+        new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+    )
+
+    home.sign_psbt()
+
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    qr_capturer.assert_called_once()
+
+    # These three calls must have occured in sequence
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h",
+                highlight_prefix=":",
+            ),
+            mocker.call("Processing…"),
+            mocker.call(
+                "Warning: High fees!\n799.7% of the amount.", highlight_prefix=":"
+            ),
         ]
     )
 
@@ -1171,7 +1705,7 @@ def test_sign_high_fee(mocker, m5stickv, tdata):
 def test_sign_self(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_NONE
     from krux.pages.qr_capture import QRCodeCapture
 
@@ -1183,8 +1717,10 @@ def test_sign_self(mocker, m5stickv, tdata):
         BUTTON_ENTER,  # High fees ACK
         BUTTON_ENTER,  # PSBT resume
         BUTTON_ENTER,  # output 1
+        BUTTON_PAGE,  # move to Sign to QR
         BUTTON_ENTER,  # Sign to QR code
-        BUTTON_ENTER,  # Jump QR signed
+        BUTTON_ENTER,  # Dismiss QR
+        BUTTON_ENTER,  # Done?
     ]
     wallet = Wallet(tdata.SINGLESIG_ACTION_KEY)
     ctx = create_ctx(mocker, btn_seq, wallet)
@@ -1210,10 +1746,13 @@ def test_sign_self(mocker, m5stickv, tdata):
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h"
+                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h",
+                highlight_prefix=":",
             ),
-            mocker.call("Processing.."),
-            mocker.call("Warning: High fees!\n799.7% of the amount."),
+            mocker.call("Processing…"),
+            mocker.call(
+                "Warning: High fees!\n799.7% of the amount.", highlight_prefix=":"
+            ),
         ]
     )
 
@@ -1221,7 +1760,7 @@ def test_sign_self(mocker, m5stickv, tdata):
 def test_sign_spent_and_self(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_NONE
     from krux.pages.qr_capture import QRCodeCapture
 
@@ -1234,8 +1773,10 @@ def test_sign_spent_and_self(mocker, m5stickv, tdata):
         BUTTON_ENTER,  # PSBT resume
         BUTTON_ENTER,  # output 1 spend
         BUTTON_ENTER,  # output 2 self
+        BUTTON_PAGE,  # move to Sign to QR
         BUTTON_ENTER,  # Sign to QR code
-        BUTTON_ENTER,  # Jump QR signed
+        BUTTON_ENTER,  # Dismiss QR
+        BUTTON_ENTER,  # Done?
     ]
     wallet = Wallet(tdata.SINGLESIG_ACTION_KEY)
     ctx = create_ctx(mocker, btn_seq, wallet)
@@ -1261,9 +1802,12 @@ def test_sign_spent_and_self(mocker, m5stickv, tdata):
     ctx.display.draw_centered_text.assert_has_calls(
         [
             mocker.call(
-                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h"
+                "Warning: Path mismatch\nWallet: m/84h/0h/0h\nPSBT: m/84h/1h/0h",
+                highlight_prefix=":",
             ),
-            mocker.call("Processing.."),
-            mocker.call("Warning: High fees!\n235.9% of the amount."),
+            mocker.call("Processing…"),
+            mocker.call(
+                "Warning: High fees!\n235.9% of the amount.", highlight_prefix=":"
+            ),
         ]
     )

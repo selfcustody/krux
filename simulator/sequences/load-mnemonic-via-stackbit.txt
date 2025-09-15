@@ -23,4 +23,4 @@ press BUTTON_A
 x5 press BUTTON_B
 press BUTTON_A
 
-screenshot load-mnemonic-via-stackbit-filled.png
+#screenshot load-mnemonic-via-stackbit-filled.png

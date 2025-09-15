@@ -21,10 +21,9 @@
 # THE SOFTWARE.
 # pylint: disable=C2801
 
-import board
 import lcd
 from ..display import FONT_HEIGHT, FONT_WIDTH, PORTRAIT
-from ..themes import theme, GREEN, ORANGE
+from ..themes import theme, MAIN_TXT_COLOR, TEST_TXT_COLOR
 from ..settings import (
     CategorySetting,
     NumberSetting,
@@ -44,7 +43,6 @@ from ..krux_settings import (
 )
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..sd_card import SDHandler
-from ..encryption import QR_CODE_ITER_MULTIPLE
 from . import (
     Page,
     Menu,
@@ -59,13 +57,16 @@ from . import (
     DEFAULT_PADDING,
 )
 import os
+from ..kboard import kboard
 
 PERSIST_MSG_TIME = 2500
 DISPLAY_TEST_TIME = 5000  # 5 seconds
 
 CATEGORY_SETTING_COLOR_DICT = {
-    MAIN_TXT: ORANGE,
-    TEST_TXT: GREEN,
+    MAIN_TXT: MAIN_TXT_COLOR,
+    TEST_TXT: TEST_TXT_COLOR,
+    True: theme.go_color,
+    False: theme.no_esc_color,
 }
 
 
@@ -137,7 +138,7 @@ class SettingsPage(Page):
 
     def enter_modify_tc_code(self):
         """Handler for the 'Tamper Check Code' menu item"""
-        import hashlib
+        import uhashlib_hw
         from machine import unique_id
         from ..krux_settings import TC_CODE_PATH, TC_CODE_PBKDF2_ITERATIONS
 
@@ -174,13 +175,13 @@ class SettingsPage(Page):
             self.flash_error(t("Tamper check codes do not match"))
             return MENU_CONTINUE
         self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Processing.."))
+        self.ctx.display.draw_centered_text(t("Processing…"))
         # Hashes the Tamper Check Code once
         tc_code_bytes = tamper_check_code.encode()
-        tc_code_hash = hashlib.sha256(tc_code_bytes).digest()
+        tc_code_hash = uhashlib_hw.sha256(tc_code_bytes).digest()
         # Than uses hash to generate a stretched secret, with unique_id as salt
-        secret = hashlib.pbkdf2_hmac(
-            "sha256", tc_code_hash, unique_id(), TC_CODE_PBKDF2_ITERATIONS
+        secret = uhashlib_hw.pbkdf2_hmac_sha256(
+            tc_code_hash, unique_id(), TC_CODE_PBKDF2_ITERATIONS
         )
         # Saves the stretched Tamper Check Code in a file
         with open(TC_CODE_PATH, "wb") as f:
@@ -207,7 +208,7 @@ class SettingsPage(Page):
 
         tc_code_bytes = tamper_check_code.encode()
         # Tamper Check Code hash will be used in "TC Flash Hash"
-        tc_code_hash = hashlib.sha256(tc_code_bytes).digest()
+        tc_code_hash = uhashlib_hw.sha256(tc_code_bytes).digest()
         flash_hash = FlashHash(self.ctx, tc_code_hash)
         flash_hash.generate()
 
@@ -220,7 +221,7 @@ class SettingsPage(Page):
         # flash is always mounted, so settings is always persisted
         if Settings().persist.location == SD_PATH:
             self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(t("Checking for SD card.."))
+            self.ctx.display.draw_centered_text(t("Checking for SD card…"))
             try:
                 # Check for SD hot-plug
                 with SDHandler():
@@ -286,7 +287,7 @@ class SettingsPage(Page):
 
             submenu = Menu(self.ctx, items, back_status=back_status)
             index, status = submenu.run_loop()
-            if index == len(submenu.menu) - 1:
+            if index == submenu.back_index:
                 return MENU_CONTINUE
             return status
 
@@ -324,7 +325,7 @@ class SettingsPage(Page):
 
         # Update buttons debounce time
         self.ctx.input.debounce_value = Settings().hardware.buttons.debounce
-        if "ENCODER" in board.config["krux"]["pins"]:
+        if kboard.has_encoder:
             from ..rotary import encoder
 
             encoder.debounce = Settings().hardware.buttons.debounce
@@ -355,8 +356,20 @@ class SettingsPage(Page):
                     DEFAULT_PADDING,
                     t("Right"),
                 )
-            self.ctx.display.draw_centered_text(
-                settings_namespace.label(setting.attr) + "\n" + str(current_category),
+            title = self.ctx.display.to_lines(settings_namespace.label(setting.attr))
+            title_lines = len(title) + 1
+            offset_y = self.ctx.display.get_center_offset_y(title_lines + 2)
+            # Print title highlighted
+            self.ctx.display.draw_hcentered_text(
+                title,
+                offset_y,
+                theme.highlight_color,
+                theme.bg_color,
+            )
+            # Print value
+            self.ctx.display.draw_hcentered_text(
+                str(current_category),
+                offset_y + title_lines * FONT_HEIGHT,
                 color,
                 theme.bg_color,
             )
@@ -366,6 +379,7 @@ class SettingsPage(Page):
                 btn = self._touch_to_physical(self.ctx.input.touch.current_index())
             if btn == BUTTON_ENTER:
                 break
+
             new_category = current_category
             for i, category in enumerate(categories):
                 if current_category == category:
@@ -375,30 +389,42 @@ class SettingsPage(Page):
                         new_category = categories[(i - 1) % len(categories)]
                     setting.__set__(settings_namespace, new_category)
                     break
-            if setting.attr == "locale":
-                locale_control.load_locale(new_category)
-            if setting.attr == "theme":
-                theme.update()
-            # Update screen in case orientation has changed
-            if setting.attr == "flipped_orientation":
-                self.ctx.display.to_landscape()
-                self.ctx.display.to_portrait()
-            if setting.attr == "brightness":
-                if board.config["type"] in ["cube", "wonder_mv"]:
-                    self.ctx.display.gpio_backlight_ctrl(new_category)
-                elif board.config["type"] == "m5stickv":
-                    self.ctx.display.set_pmu_backlight(new_category)
-            if setting.attr == "flipped_x" and new_category is not None:
+
+            self._category_change_special_cases(setting, new_category)
+
+        return self._category_change_exit_check(
+            settings_namespace, setting, starting_category
+        )
+
+    def _category_change_special_cases(self, setting, new_category):
+        if setting.attr == "locale":
+            locale_control.load_locale(new_category)
+        elif setting.attr == "theme":
+            theme.update()
+        # Update screen in case orientation has changed
+        elif setting.attr == "flipped_orientation":
+            self.ctx.display.to_landscape()
+            self.ctx.display.to_portrait()
+        elif setting.attr == "brightness":
+            if kboard.is_cube or kboard.is_wonder_mv:
+                self.ctx.display.gpio_backlight_ctrl(new_category)
+            elif kboard.is_m5stickv:
+                self.ctx.display.set_pmu_backlight(new_category)
+        elif setting.attr == "flipped_x":
+            if new_category is not None:
                 self.ctx.display.flipped_x_coordinates = new_category
-            if setting.attr == "bgr_colors" and new_category is not None:
+        elif setting.attr == "bgr_colors":
+            if new_category is not None:
                 lcd.bgr_to_rgb(new_category)
-            if setting.attr == "inverted_colors" and new_category is not None:
+        elif setting.attr == "inverted_colors":
+            if new_category is not None:
                 lcd.init(
-                    invert=new_category, lcd_type=Settings().hardware.display.lcd_type
+                    invert=new_category,
+                    lcd_type=Settings().hardware.display.lcd_type,
                 )
                 self._amigo_lcd_reconfigure()
-
-            if setting.attr == "lcd_type" and new_category is not None:
+        elif setting.attr == "lcd_type":
+            if new_category is not None:
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(
                     t(
@@ -423,24 +449,34 @@ class SettingsPage(Page):
                 if btn != BUTTON_PAGE_PREV:
                     self.ctx.power_manager.reboot()
 
-        # When changing locale, exit Login to force recreate with new locale
-        if (
-            setting.attr == "locale"
-            and setting.__get__(settings_namespace) != starting_category
-        ):
-            return MENU_EXIT
-        if setting.attr == "theme":
-            self.ctx.display.clear()
-            if self.prompt(
-                t("Change theme and reboot?"), self.ctx.display.height() // 2
-            ):
-                self._settings_exit_check()
+    def _category_change_exit_check(
+        self, settings_namespace, setting, starting_category
+    ):
+        # Check if category changed
+        if setting.__get__(settings_namespace) != starting_category:
+            if setting.attr in ("locale", "hide_mnemonic"):
+                # If locale or hide changed, needs to recreate Login
+                return MENU_EXIT
+            if setting.attr == "theme":
                 self.ctx.display.clear()
-                self.ctx.power_manager.reboot()
-                return MENU_EXIT  # In case reboot fails
-            # Restore previous theme
-            setting.__set__(settings_namespace, starting_category)
-            theme.update()
+                if self.prompt(
+                    t("Change theme and reboot?"), self.ctx.display.height() // 2
+                ):
+                    self._settings_exit_check()
+                    self.ctx.display.clear()
+                    self.ctx.power_manager.reboot()
+                    return MENU_EXIT  # In case reboot fails
+                # Restore previous theme
+                setting.__set__(settings_namespace, starting_category)
+                theme.update()
+            if setting.attr == "flipped_orientation":
+                # need to recreate camera singleton
+                from ..camera import Camera
+
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(t("Processing…"))
+
+                self.ctx.camera = Camera()
 
         return MENU_CONTINUE
 
@@ -465,15 +501,7 @@ class SettingsPage(Page):
 
         new_value = setting.numtype(new_value)
         if setting.value_range[0] <= new_value <= setting.value_range[1]:
-            if (
-                setting.attr == "pbkdf2_iterations"
-                and (new_value % QR_CODE_ITER_MULTIPLE) != 0
-            ):
-                self.flash_error(
-                    t("Value must be multiple of %s") % QR_CODE_ITER_MULTIPLE
-                )
-            else:
-                setting.__set__(settings_namespace, new_value)
+            setting.__set__(settings_namespace, new_value)
         else:
             self.flash_error(
                 t("Value %s out of range: [%s, %s]")
