@@ -138,9 +138,14 @@ class Display:
                 ],
             )
             self.set_pmu_backlight(Settings().hardware.display.brightness)
-        elif kboard.is_yahboom or kboard.is_wonder_mv or kboard.is_tzt:
+        elif (
+            kboard.is_yahboom
+            or kboard.is_wonder_mv
+            or kboard.is_tzt
+            or kboard.is_wonder_k
+        ):
             lcd.init(
-                invert=True,
+                invert=not kboard.is_wonder_k,
                 rst=board.config["lcd"]["rst"],
                 dcx=board.config["lcd"]["dcx"],
                 ss=board.config["lcd"]["ss"],

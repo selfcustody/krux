@@ -406,7 +406,7 @@ class SettingsPage(Page):
             self.ctx.display.to_landscape()
             self.ctx.display.to_portrait()
         elif setting.attr == "brightness":
-            if kboard.is_cube or kboard.is_wonder_mv:
+            if kboard.is_cube or kboard.is_wonder_mv or kboard.is_wonder_k:
                 self.ctx.display.gpio_backlight_ctrl(new_category)
             elif kboard.is_m5stickv:
                 self.ctx.display.set_pmu_backlight(new_category)

@@ -313,7 +313,8 @@ class TouchSettings(SettingsNamespace):
     """Touch sensitivity settings"""
 
     namespace = "settings.touchscreen"
-    threshold = NumberSetting(int, "threshold", 22, [10, 200])
+    default_th = 40 if kboard.is_wonder_k else 22
+    threshold = NumberSetting(int, "threshold", default_th, [10, 200])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -497,6 +498,12 @@ class Settings(SettingsNamespace):
         self.encryption = EncryptionSettings()
         self.persist = PersistSettings()
         self.appearance = ThemeSettings()
+
+    def is_flipped_orientation(self):
+        """Returns flipped orientation setting"""
+        return hasattr(Settings().hardware, "display") and getattr(
+            Settings().hardware.display, "flipped_orientation", False
+        )
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
