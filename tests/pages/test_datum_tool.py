@@ -1047,3 +1047,30 @@ def test_datumtool_view_contents(m5stickv, mocker, mock_file_operations):
     page.contents = some_bytes
     page.view_contents()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_datumtool_show_contents_button_turbo(mocker, m5stickv):
+    from krux.pages.datum_tool import DatumTool
+    from krux.input import PRESSED, BUTTON_ENTER, KEY_REPEAT_DELAY_MS
+    import time
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER, BUTTON_ENTER])
+    datum = DatumTool(ctx)
+    datum.contents = "testing 123 " * 250
+
+    mocker.patch("time.sleep_ms", new=mocker.MagicMock())
+
+    # fast forward
+    ctx.input.page_value = mocker.MagicMock(side_effect=[PRESSED, None])
+
+    datum._show_contents()
+
+    time.sleep_ms.assert_called_with(KEY_REPEAT_DELAY_MS)
+
+    # fast backward
+    ctx.input.page_value = mocker.MagicMock(return_value=None)
+    ctx.input.page_prev_value = mocker.MagicMock(side_effect=[PRESSED, None])
+
+    datum._show_contents()
+
+    time.sleep_ms.assert_called_with(KEY_REPEAT_DELAY_MS)
