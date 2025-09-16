@@ -1,1 +1,1 @@
-/home/tudu/Documents/projects/tadeubas_krux/simulator/sequences/m5stickv/_load-12-word-mnemonic.txt
+../m5stickv/_load-12-word-mnemonic.txt
