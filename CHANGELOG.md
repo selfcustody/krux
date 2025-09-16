@@ -3,6 +3,9 @@
 ### New Device Support: TZT
 The TZT CanMV is similar to the WonderMV but includes five buttons and a premium milled aluminum housing.
 
+### Code optimization
+Reduced firmware size by 25% and lowered RAM usage through code cleanup and optimizations.
+
 # Changelog 25.09.0 - September 2025
 
 ### Extended Encryption Options

@@ -96,7 +96,7 @@ class Camera:
             sensor.set_hmirror(1)
             sensor.set_vflip(1)
         self.mode = mode
-        if mode == BINARY_GRID_MODE and self.cam_id != GC2145_ID:
+        if mode == BINARY_GRID_MODE:
             # Binary grid mode uses grayscale except for GC2145
             sensor.set_pixformat(sensor.GRAYSCALE)
         else:
