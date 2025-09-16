@@ -86,11 +86,13 @@ if [ "$1" == "build" ]; then
             echo "Wrong or unsupported device name, use maixpy_devicename"
         fi
     fi
-elif [ "$1" == "flash" -o "$1" == "boot" ]; then
+elif [ "$1" == "flash" -o "$1" == "boot" -o "$1" == "erase" ]; then
     if [ "$1" == "flash" ]; then
         CMD_SUFFIX="kboot.kfpkg"
-    else
+    elif [ "$1" == "boot" ]; then
         CMD_SUFFIX="-s firmware.bin"
+    else
+        CMD_SUFFIX="-E"
     fi
     device="$2"
     if [ -z "$device" ]; then

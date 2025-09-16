@@ -101,10 +101,10 @@ def test_enter_tiny_seed_button_turbo(mocker, m5stickv):
 
     ctx = create_ctx(mocker, [])
     tiny_seed = TinySeed(ctx)
+    tiny_seed._new_index = mocker.MagicMock(side_effect=ValueError)
 
     # fast forward
     ctx.input.page_value = mocker.MagicMock(return_value=PRESSED)
-    tiny_seed._new_index = mocker.MagicMock(side_effect=ValueError)
     with pytest.raises(ValueError):
         tiny_seed.enter_tiny_seed()
 
