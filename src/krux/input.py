@@ -107,6 +107,7 @@ class Input:
                 board.config["lcd"]["width"],
                 board.config["lcd"]["height"],
                 board.config["krux"]["pins"]["TOUCH_IRQ"],
+                board.config["krux"]["pins"].get("TOUCH_RESET", None),
             )
             self.buttons_active = False
         self.button_integrity_check()

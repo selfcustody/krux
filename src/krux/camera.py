@@ -30,7 +30,7 @@ OV2640_ID = 0x2642  # Lenses, vertical flip - Bit
 OV5642_ID = 0x5642  # Lenses, horizontal flip - Bit
 OV7740_ID = 0x7742  # No lenses, no Flip - M5sitckV, Amigo
 GC0328_ID = 0x9D  # Dock
-GC2145_ID = 0x45  # Yahboom
+GC2145_ID = 0x45  # Yahboom, WonderK
 
 QR_SCAN_MODE = 0
 ANTI_GLARE_MODE = 1
@@ -83,14 +83,22 @@ class Camera:
         except Exception as e:
             print("Camera not found:", e)
 
+    def _rotate_yaboom_or_wondermv(self):
+        return (
+            kboard.is_yahboom or kboard.is_wonder_mv
+        ) and Settings().is_flipped_orientation()
+
+    def _rotate_wonderk(self):
+        return kboard.is_wonder_k and not Settings().is_flipped_orientation()
+
     def initialize_sensor(self, mode=QR_SCAN_MODE):
         """Initializes the camera"""
         sensor.reset(freq=18200000)
         self.cam_id = sensor.get_id()
-        if kboard.is_cube or (
-            kboard.can_flip_orientation
-            and hasattr(Settings().hardware, "display")
-            and getattr(Settings().hardware.display, "flipped_orientation", False)
+        if (
+            kboard.is_cube
+            or self._rotate_yaboom_or_wondermv()
+            or self._rotate_wonderk()
         ):
             # Rotate camera 180 degrees on Cube
             sensor.set_hmirror(1)

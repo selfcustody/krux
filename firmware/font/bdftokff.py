@@ -49,7 +49,14 @@ BIG_FONT_REF = "amigo"
 REF_DEVICES = [SMALL_FONT_REF, MID_FONT_REF, BIG_FONT_REF]
 
 SMALL_FONT_DEVICES_TO_COPY = ["cube"]
-MID_FONT_DEVICES_TO_COPY = ["bit", "yahboom", "wonder_mv", "yahboom_devkit"]
+MID_FONT_DEVICES_TO_COPY = [
+    "bit",
+    "yahboom",
+    "wonder_mv",
+    "tzt",
+    "wonder_k",
+    "yahboom_devkit",
+]
 BIG_FONT_DEVICES_TO_COPY = []
 
 ALL_DEVICES = REF_DEVICES + SMALL_FONT_DEVICES_TO_COPY + MID_FONT_DEVICES_TO_COPY
