@@ -281,7 +281,7 @@ elif [ "$1" == "build-release" ]; then
     cp -f ktool-win.exe ../$release_dir/ktool-win.exe
     cd ..
 
-    devices=("maixpy_m5stickv" "maixpy_amigo" "maixpy_bit" "maixpy_dock" "maixpy_yahboom" "maixpy_cube" "maixpy_wonder_mv" "maixpy_tzt")
+    devices=("maixpy_m5stickv" "maixpy_amigo" "maixpy_dock" "maixpy_yahboom" "maixpy_cube" "maixpy_wonder_mv" "maixpy_tzt")
     for device in ${devices[@]}; do
         ./krux build $device
         mkdir -p $release_dir/$device
