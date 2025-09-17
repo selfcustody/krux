@@ -67,6 +67,7 @@ if [ "$1" == "build" ]; then
         [ "$device" == "maixpy_yahboom" ]||
         [ "$device" == "maixpy_cube" ]||
         [ "$device" == "maixpy_wonder_mv" ]||
+        [ "$device" == "maixpy_yahboom_devkit" ]||
         [ "$device" == "maixpy_tzt" ]||
         [ "$device" == "maixpy_wonder_k" ]||
         [ "$allow_unsupported" ]; then
@@ -114,6 +115,7 @@ elif [ "$1" == "flash" -o "$1" == "boot" -o "$1" == "erase" ]; then
         elif [ "$device" == "maixpy_dock" ]||
         [ "$device" == "maixpy_yahboom" ]||
         [ "$device" == "maixpy_wonder_mv" ]||
+        [ "$device" == "maixpy_yahboom_devkit" ]||
         [ "$device" == "maixpy_wonder_k" ]; then
             # https://devicehunt.com/view/type/usb/vendor/1a86/device/7523
             device_vendor_product_id="1a86:7523"
