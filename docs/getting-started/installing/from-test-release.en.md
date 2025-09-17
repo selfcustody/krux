@@ -50,24 +50,6 @@ To Flash Maix Amigo run the following.
 amigo-more-info-faq.en.txt
 ----8<----
 
-#### Sipeed Maix Bit
-To Flash Maix Bit run the following.
-
-##### Linux
-```bash
-./ktool-linux -B goE -b 1500000 maixpy_bit/kboot.kfpkg
-```
-
-##### Mac
-```bash
-./ktool-mac -B goE -b 1500000 maixpy_bit/kboot.kfpkg
-```
-
-##### Windows
-```pwsh
-.\ktool-win.exe -B goE -b 1500000 maixpy_bit\kboot.kfpkg
-```
-
 #### Sipeed Maix Cube
 To Flash Maix Cube run the following.
 
