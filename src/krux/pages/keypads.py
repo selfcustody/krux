@@ -33,9 +33,9 @@ from ..input import (
     SWIPE_LEFT,
     FAST_FORWARD,
     FAST_BACKWARD,
-    PRESSED,
     KEY_REPEAT_DELAY_MS,
 )
+from ..buttons import PRESSED
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
 
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets.

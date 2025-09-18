@@ -28,6 +28,7 @@ from numpy import zeros_like
 from kruxsim import events
 from kruxsim.mocks.board import BOARD_CONFIG
 from krux.krux_settings import Settings
+import time
 
 COLOR_BLACK = (0, 0, 0)
 COLOR_WHITE = (255, 255, 255)
@@ -411,6 +412,7 @@ def fill_rectangle(x, y, w, h, color, radius=0):
         x = width() - w - x
     radius = min(radius, min(w, h) // 2)
     pg.event.post(pg.event.Event(events.LCD_FILL_RECTANGLE_EVENT, {"f": run}))
+    time.sleep(0.001)
 
 
 def draw_circle(x, y, radious, quadrant, color):

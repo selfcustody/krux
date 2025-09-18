@@ -50,8 +50,8 @@ from ..input import (
     SWIPE_RIGHT,
     SWIPE_DOWN,
     KEY_REPEAT_DELAY_MS,
-    PRESSED,
 )
+from ..buttons import PRESSED
 
 DATUM_DESCRIPTOR = "DESC"
 DATUM_PSBT = "PSBT"

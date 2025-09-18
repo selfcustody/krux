@@ -23,7 +23,7 @@ import board
 import time
 from . import Page
 from ..display import FONT_HEIGHT, MINIMAL_PADDING, BOTTOM_LINE
-from ..input import PRESSED
+from ..buttons import PRESSED
 from ..themes import theme
 from ..qr import QRPartParser, FORMAT_UR
 from ..wdt import wdt

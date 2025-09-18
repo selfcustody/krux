@@ -24,20 +24,24 @@ from . import Page, Menu, MENU_CONTINUE
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
 from ..krux_settings import t
 from ..wdt import wdt
+from ..kboard import kboard
 
 
 class DeviceTests(Page):
     """On-Device test-suite"""
 
     def __init__(self, ctx):
+        menu_items = [
+            (t("Print Test QR"), self.print_test),
+            (t("Test Suite"), self.test_suite),
+        ]
+        if kboard.has_touchscreen:
+            menu_items += [(t("Touchscreen"), self.test_touch)]
         super().__init__(
             ctx,
             Menu(
                 ctx,
-                [
-                    (t("Print Test QR"), self.print_test),
-                    (t("Test Suite"), self.test_suite),
-                ],
+                menu_items,
             ),
         )
         self.results = []
@@ -152,6 +156,32 @@ class DeviceTests(Page):
         if idx == len(self.results):
             return MENU_CONTINUE
         return self.run_one_test(self.results[idx][0])
+
+    def test_touch(self):
+        """Check touch detection across the entire screen"""
+        from ..buttons import PRESSED
+        from ..themes import theme
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Touchscreen"))
+        while True:
+            wdt.feed()
+            if self.ctx.input.touch_value() == PRESSED:
+                x, y = self.ctx.input.touch.release_point
+                self.ctx.display.fill_rectangle(x, y, 10, 10, theme.fg_color)
+            elif (
+                self.ctx.input.enter_value() == PRESSED
+                or self.ctx.input.page_value() == PRESSED
+                or self.ctx.input.page_prev_value() == PRESSED
+            ):
+                break
+
+        # Prevent release capture when exiting
+        self.ctx.input.wait_for_release()
+        # Prevent the next touch from being mistakenly detected as a swipe
+        self.ctx.input.touch.gesture = None
+
+        return MENU_CONTINUE
 
     def run_one_test(self, test):
         """run a single test w/ interactive=True, display success/fail and results"""

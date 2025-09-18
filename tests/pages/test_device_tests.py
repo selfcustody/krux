@@ -662,3 +662,18 @@ def test_run_one_test_without_touch_gestures(m5stickv, mocker):
     assert page.results == [(page.touch_gestures, True)]
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_test_touch(mocker, amigo):
+    from krux.pages.device_tests import DeviceTests
+    from krux.buttons import PRESSED
+
+    ctx = create_ctx(mocker, [])
+    ctx.input.touch.release_point = (1, 1)
+    ctx.input.touch_value = mocker.MagicMock(side_effect=[PRESSED, None])
+    ctx.input.page_value = mocker.MagicMock(side_effect=[PRESSED, None])
+    DeviceTests(ctx).test_touch()
+
+    ctx.display.fill_rectangle.assert_called()
+    ctx.input.wait_for_release.assert_called()
+    assert ctx.input.touch.gesture == None

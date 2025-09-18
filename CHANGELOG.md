@@ -12,6 +12,9 @@ Reduced firmware size by 25% and lowered RAM usage through code cleanup and opti
 ### Discontinued Support for Maix Bit Device
 The Maix Bit device has long been discouraged due to its poor-quality camera. Starting with this release, we are discontinuing support and it will no longer be included in future builds. The support and parameters for building its firmware from source, however, will be kept.
 
+### Other Bug Fixes and Improvements
+- Touchscreen test added in Tools for detection check
+
 # Changelog 25.09.0 - September 2025
 
 ### Extended Encryption Options

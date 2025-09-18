@@ -32,9 +32,9 @@ from ..input import (
     BUTTON_TOUCH,
     FAST_FORWARD,
     FAST_BACKWARD,
-    PRESSED,
     KEY_REPEAT_DELAY_MS,
 )
+from ..buttons import PRESSED
 from ..kboard import kboard
 import time
 
