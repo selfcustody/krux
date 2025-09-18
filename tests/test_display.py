@@ -458,7 +458,7 @@ def test_to_lines_endpos(mocker, m5stickv):
     text = "I am a long line of text, and I will be repeated." * 30
     d = Display()
     d.to_portrait()
-    lines, endpos = d._to_lines_endpos(text, max_lines)
+    lines, endpos = d.to_lines_endpos(text, max_lines)
     assert len(lines) == max_lines
     assert endpos == 249
 
@@ -470,18 +470,18 @@ def test_to_lines_endpos(mocker, m5stickv):
         )
         d = Display()
         d.to_portrait()
-        lines, endpos = d._to_lines_endpos(text, max_lines)
+        lines, endpos = d.to_lines_endpos(text, max_lines)
         assert len(lines) == max_lines
         assert endpos == len(text)
         assert lines[-1][-1] != "\u2026"  # no ellipsis
 
         # ... and that one char too big would span a page w/ ellipsis
         text += "+"
-        lines, endpos = d._to_lines_endpos(text, max_lines)
+        lines, endpos = d.to_lines_endpos(text, max_lines)
         assert len(lines) == max_lines
         assert endpos == len(text) - len("chars+")
         assert lines[-1][-1] == "\u2026"  # has ellipsis
-        lines, endpos = d._to_lines_endpos(text[endpos:], max_lines)
+        lines, endpos = d.to_lines_endpos(text[endpos:], max_lines)
         assert len(lines) == 1
         assert lines[-1] == "chars+"  # space gets stripped
 
@@ -489,19 +489,19 @@ def test_to_lines_endpos(mocker, m5stickv):
     text = "".join(["line_{:02d}_16_chars".format(x) for x in range(1, max_lines + 1)])
     d = Display()
     d.to_portrait()
-    lines, endpos = d._to_lines_endpos(text, max_lines)
+    lines, endpos = d.to_lines_endpos(text, max_lines)
     assert len(lines) == max_lines
     assert endpos == len(text)
     assert lines[-1][-1] != "\u2026"  # no ellipsis
 
     # ... and that one char too big would span a page w/ ellipsis
     text += "+"
-    lines, endpos = d._to_lines_endpos(text, max_lines)
+    lines, endpos = d.to_lines_endpos(text, max_lines)
     old_end_pos = endpos
     assert len(lines) == max_lines
     assert endpos == len(text) - len("s+")
     assert lines[-1][-1] == "\u2026"  # has ellipsis
-    lines, endpos = d._to_lines_endpos(text[endpos:], max_lines)
+    lines, endpos = d.to_lines_endpos(text[endpos:], max_lines)
     assert len(lines) == 1
     assert lines[-1] == "s+"
 
@@ -516,7 +516,7 @@ def test_to_lines_endpos(mocker, m5stickv):
 
     text = "0123456789abc"
     max_lines = 1
-    lines, endpos = d._to_lines_endpos(text, max_lines)
+    lines, endpos = d.to_lines_endpos(text, max_lines)
     print(lines, endpos, text[endpos:])
     assert len(lines) == max_lines
     assert len(lines[0]) == chars_per_line
@@ -528,12 +528,12 @@ def test_to_lines_endpos(mocker, m5stickv):
     text += "x"  # 169 + 1 = 170
     max_lines = TOTAL_LINES  # 17
     print(TOTAL_LINES)
-    lines, endpos = d._to_lines_endpos(text, max_lines)
+    lines, endpos = d.to_lines_endpos(text, max_lines)
     print(lines, len(lines), endpos)
     for i in range(max_lines):
         assert len(lines[i]) == chars_per_line
 
-    lines, _ = d._to_lines_endpos(text[endpos:])
+    lines, _ = d.to_lines_endpos(text[endpos:])
     assert lines == [""]  # vazio
 
 

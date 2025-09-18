@@ -576,12 +576,10 @@ class DatumTool(Page):
     def _show_contents(self):
         """Displays infobox and contents"""
         from binascii import hexlify
-        from ..settings import THIN_SPACE
         from ..kboard import kboard
-        import math
         import time
 
-        page_indicator = "p" + THIN_SPACE + "%d/%s"
+        page_indicator = "p.%d"
         max_lines = 0
         offset_x = (
             DEFAULT_PADDING
@@ -595,23 +593,25 @@ class DatumTool(Page):
         )
         content_len = len(contents)
 
-        def _update_infobox(curr_page, total="?"):
+        def _update_infobox(curr_page):
             info_len = self._info_box(
-                preview=False, about_suffix=page_indicator % (curr_page, total)
+                preview=False, about_suffix=page_indicator % (curr_page)
             )
             max_lines = TOTAL_LINES - (info_len + 1)
-            total = math.ceil(
-                content_len / (self.ctx.display.ascii_chars_per_line() * max_lines)
-            )
-            return info_len, total, max_lines
+            return info_len, max_lines
 
-        curr_page = 0
+        curr_page, pages = 0, [0]
         start_index = 0
-        info_len, last_page, max_lines = _update_infobox(curr_page + 1)
+        info_len, max_lines = _update_infobox(curr_page + 1)
 
         while True:
-            info_len, last_page, max_lines = _update_infobox(curr_page + 1, last_page)
-            lines = self.ctx.display.to_lines(contents[start_index:], max_lines)
+            info_len, max_lines = _update_infobox(curr_page + 1)
+            lines, endpos = self.ctx.display.to_lines_endpos(
+                contents[start_index:], max_lines
+            )
+            endpos += start_index
+            if pages[-1] < endpos < content_len:
+                pages.append(endpos)
 
             offset_y = DEFAULT_PADDING + (info_len) * FONT_HEIGHT + 1
             for line in lines:
@@ -627,16 +627,14 @@ class DatumTool(Page):
             else:
                 btn = self.ctx.input.wait_for_button()
             if btn in (BUTTON_PAGE, FAST_FORWARD, SWIPE_UP, SWIPE_LEFT):
-                curr_page = (curr_page + 1) % last_page
+                if curr_page + 1 < len(pages):
+                    curr_page += 1
             elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD, SWIPE_DOWN, SWIPE_RIGHT):
-                curr_page = (curr_page - 1) % last_page
+                if curr_page > 0:
+                    curr_page -= 1
             elif btn in (BUTTON_ENTER, BUTTON_TOUCH):
                 break
-            start_index = (
-                0
-                if curr_page == 0
-                else curr_page * self.ctx.display.ascii_chars_per_line() * max_lines - 1
-            )
+            start_index = pages[curr_page]
 
     def _analyze_contents(self):
         """
