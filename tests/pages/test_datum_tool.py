@@ -1048,6 +1048,35 @@ def test_datumtool_view_contents(m5stickv, mocker, mock_file_operations):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_datumtool_view_contents_multi_page(m5stickv, mocker):
+    """simply to cover building of `pages` index, moving to `next page`, and `prev page`"""
+    from krux.pages.datum_tool import DatumTool
+    from krux.input import PRESSED, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    # call with text that will span more than one page
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # go Show Datum
+        BUTTON_PAGE,  # page
+        BUTTON_PAGE_PREV,  # page_prev
+        BUTTON_ENTER,  # escape Show Datum
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx.display.to_lines_endpos = mocker.MagicMock(
+        side_effect=[
+            ([str(x) for x in range(15)] + ["15…"], 22),
+            ([str(x) for x in range(16, 26)], 20),
+            ([str(x) for x in range(15)] + ["15…"], 22),
+        ]
+    )
+    page = DatumTool(ctx)
+    page.contents = "\n".join([str(x) for x in range(26)])
+    page.title = "title"
+    page.view_contents()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
 def test_datumtool_show_contents_button_turbo(mocker, m5stickv):
     from krux.pages.datum_tool import DatumTool
     from krux.input import PRESSED, BUTTON_ENTER, KEY_REPEAT_DELAY_MS
