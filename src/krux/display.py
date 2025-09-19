@@ -346,7 +346,7 @@ class Display:
                     FONT_WIDTH_WIDE if ord(c) >= ASIAN_MIN_CODEPOINT else FONT_WIDTH
                 )
                 char_count += 1
-            if line_pixels + FONT_WIDTH >= usable_pixels:
+            if line_pixels + FONT_WIDTH > usable_pixels:
                 lines[-1] = lines[-1][: char_count - 1] + ELLIPSIS
                 end -= 1
             else:

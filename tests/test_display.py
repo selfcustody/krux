@@ -377,6 +377,32 @@ def test_to_lines_exact_match_amigo(mocker, amigo):
             "01 345 0123456789012345678\n01234 0123456789012345678",
             ["01 345", "0123456789012345678", "01234 0123456789012345678"],
         ),
+        (
+            320,
+            "events witnessed and proof that it came from the largest pool of CPU power. As long as a majority of CPU power is controlled by nodes that are not cooperating to attack the network, they'll generate the longest chain and outpace attackers. The network itself requires minimal structure, with messages broadcast on a best effort basis and nodes able to leave and rejoin at will, accepting the longest proof-of-work chain as proof of what happened while they were gone.",
+            [
+                "events witnessed and",
+                "proof that it came from",
+                "the largest pool of CPU",
+                "power. As long as a",
+                "majority of CPU power is",
+                "controlled by nodes that",
+                "are not cooperating to",
+                "attack the network,",
+                "they'll generate the",
+                "longest chain and outpace",
+                "attackers. The network",
+                "itself requires minimal",
+                "structure, with messages",
+                "broadcast on a best",
+                "effort basis and nodes",
+                "able to leave and rejoin",
+                "at will, accepting the",
+                "longest proof-of-work",
+                "chain as proof of what",
+                "happened while they were…",
+            ],
+        ),
     ]
     for i, case in enumerate(cases):
         print("case:", i)
