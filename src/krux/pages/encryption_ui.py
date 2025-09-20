@@ -396,15 +396,17 @@ class EncryptionKey(Page):
         if len(key_string) < 8:
             return t("Weak")
 
-        # Helper function to check if character is alphanumeric
-        def is_alnum(c):
-            return ("a" <= c <= "z") or ("A" <= c <= "Z") or ("0" <= c <= "9")
+        has_upper = has_lower = has_digit = has_special = False
 
-        # Check for presence of character types
-        has_upper = any(c.isupper() for c in key_string)
-        has_lower = any(c.islower() for c in key_string)
-        has_digit = any(c.isdigit() for c in key_string)
-        has_special = any(not is_alnum(c) for c in key_string)
+        for c in key_string:
+            if "a" <= c <= "z":
+                has_lower = True
+            elif "A" <= c <= "Z":
+                has_upper = True
+            elif "0" <= c <= "9":
+                has_digit = True
+            else:
+                has_special = True
 
         # Count how many character types are present
         score = sum([has_upper, has_lower, has_digit, has_special])
