@@ -165,9 +165,11 @@ DOCK_SIZE = (302, 516)
 YAHBOOM_SIZE = (312, 440)
 CUBE_SIZE = (400, 424)
 WONDER_MV_SIZE = (304, 440)
+TZT_SIZE = (314, 442)
 
 # Handle screenshots scale and alpha bg
 # When exporting the mask from GIMP uncheck "Save info about transparent pixels color"
+# Use --no-screenshot-scale until fix mask size and devices.screenshot_rect()
 device_screenshot_size = AMIGO_SIZE
 mask_img = pg.image.load(
     os.path.join("assets", "maixpy_amigo_mask.png")
@@ -196,6 +198,11 @@ elif (args.device == devices.WONDER_MV):
     device_screenshot_size = WONDER_MV_SIZE
     mask_img = pg.image.load(
         os.path.join("assets", "maixpy_wonder_mv_mask.png")
+        ).convert_alpha()
+elif (args.device == devices.TZT):
+    device_screenshot_size = TZT_SIZE
+    mask_img = pg.image.load(
+        os.path.join("assets", "maixpy_tzt_mask.png")
         ).convert_alpha()
 # TODO: WONDER_K IMG
 # elif (args.device == devices.WONDER_K):

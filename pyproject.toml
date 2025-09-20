@@ -121,6 +121,7 @@ simulator-dock = "python simulator/simulator.py --device maixpy_dock"
 simulator-yahboom = "python simulator/simulator.py --device maixpy_yahboom"
 simulator-cube = "python simulator/simulator.py --device maixpy_cube"
 simulator-wonder-mv = "python simulator/simulator.py --device maixpy_wonder_mv"
+simulator-tzt = "python simulator/simulator.py --device maixpy_tzt"
 simulator-wonder-k = "python simulator/simulator.py --device maixpy_wonder_k"
 # aliases
 simulator.ref = "simulator-amigo"
