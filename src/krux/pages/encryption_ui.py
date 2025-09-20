@@ -408,6 +408,10 @@ class EncryptionKey(Page):
             else:
                 has_special = True
 
+            # small optimization: stop if all found
+            if has_upper and has_lower and has_digit and has_special:
+                break
+
         # Count how many character types are present
         score = sum([has_upper, has_lower, has_digit, has_special])
 
