@@ -328,7 +328,12 @@ class Page:
                 done = True
 
     def display_mnemonic(
-        self, mnemonic: str, suffix="", display_mnemonic: str = None, fingerprint=""
+        self,
+        mnemonic: str,
+        title=None,
+        suffix="",
+        display_mnemonic: str = None,
+        fingerprint="",
     ):
         """Displays the 12 or 24-word list of words to the user"""
         from ..wallet import is_double_mnemonic
@@ -343,7 +348,11 @@ class Page:
             suffix += "*"
         if fingerprint:
             fingerprint = "\n" + fingerprint
-        header = "BIP39 {}{}".format(suffix, fingerprint)
+        header = (
+            "BIP39 {}{}".format(suffix, fingerprint)
+            if not title
+            else "{} {}{}".format(title, suffix, fingerprint)
+        )
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(header)
         if fingerprint:
