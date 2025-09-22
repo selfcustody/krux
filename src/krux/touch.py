@@ -291,5 +291,5 @@ class Touch:
         return 1
 
     def current_index(self):
-        """Returns current intex of last touched point"""
+        """Returns current index of last touched point"""
         return self.index

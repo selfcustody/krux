@@ -43,9 +43,9 @@ from ..input import (
     BUTTON_TOUCH,
     FAST_FORWARD,
     FAST_BACKWARD,
-    PRESSED,
     KEY_REPEAT_DELAY_MS,
 )
+from ..buttons import PRESSED
 from ..bip39 import entropy_checksum
 from ..kboard import kboard
 

@@ -38,9 +38,9 @@ from ..input import (
     SWIPE_LEFT,
     SWIPE_RIGHT,
     ONE_MINUTE,
-    PRESSED,
     KEY_REPEAT_DELAY_MS,
 )
+from ..buttons import PRESSED
 from ..display import (
     DEFAULT_PADDING,
     MINIMAL_PADDING,
