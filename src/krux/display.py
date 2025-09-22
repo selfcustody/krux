@@ -258,9 +258,9 @@ class Display:
         return self.usable_width() if not kboard.is_m5stickv else self.width()
 
     def to_lines(self, text, max_lines=TOTAL_LINES):
-        """Maintains original API while using ._to_lines_endpos()"""
+        """Maintains original API while using .to_lines_endpos()"""
 
-        return self._to_lines_endpos(text, max_lines)[0]
+        return self.to_lines_endpos(text, max_lines)[0]
 
     def ascii_chars_per_line(self):
         """Returns the qtd of non wide chars that fit on one line (columns)"""
@@ -270,7 +270,7 @@ class Display:
         """Returns the qtd of wide chars that fit on one line (columns)"""
         return self._usable_pixels_in_line() // FONT_WIDTH_WIDE
 
-    def _to_lines_endpos(self, text, max_lines=TOTAL_LINES):
+    def to_lines_endpos(self, text, max_lines=TOTAL_LINES):
         """Takes a string of text and returns tuple(lines, end) to display on
         the screen and know how far into text it read; next page starts there.
         """
@@ -346,7 +346,7 @@ class Display:
                     FONT_WIDTH_WIDE if ord(c) >= ASIAN_MIN_CODEPOINT else FONT_WIDTH
                 )
                 char_count += 1
-            if line_pixels + FONT_WIDTH >= usable_pixels:
+            if line_pixels + FONT_WIDTH > usable_pixels:
                 lines[-1] = lines[-1][: char_count - 1] + ELLIPSIS
                 end -= 1
             else:

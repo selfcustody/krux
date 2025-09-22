@@ -657,7 +657,6 @@ def test_datumtool__show_contents(m5stickv, mocker):
     """With DatumTool already initialized, test ._show_contents()"""
     from krux.pages.datum_tool import DatumTool
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.settings import THIN_SPACE
 
     # call with text
     ctx = create_ctx(mocker, [BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_ENTER])
@@ -669,7 +668,7 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 3
     ctx.display.draw_hcentered_text.assert_called_with(
-        "Text\nabout p" + THIN_SPACE + "1/1", info_box=True, highlight_prefix=":"
+        "Text\nabout p.1", info_box=True, highlight_prefix=":"
     )
 
     # call with bytes
@@ -682,7 +681,7 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 1
     ctx.display.draw_hcentered_text.assert_called_with(
-        "Bytes\nabout p" + THIN_SPACE + "1/1", info_box=True, highlight_prefix=":"
+        "Bytes\nabout p.1", info_box=True, highlight_prefix=":"
     )
 
 
@@ -1045,6 +1044,35 @@ def test_datumtool_view_contents(m5stickv, mocker, mock_file_operations):
     page = DatumTool(ctx)
     page.title = "title"
     page.contents = some_bytes
+    page.view_contents()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_datumtool_view_contents_multi_page(m5stickv, mocker):
+    """simply to cover building of `pages` index, moving to `next page`, and `prev page`"""
+    from krux.pages.datum_tool import DatumTool
+    from krux.input import PRESSED, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    # call with text that will span more than one page
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # go Show Datum
+        BUTTON_PAGE,  # page
+        BUTTON_PAGE_PREV,  # page_prev
+        BUTTON_ENTER,  # escape Show Datum
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx.display.to_lines_endpos = mocker.MagicMock(
+        side_effect=[
+            ([str(x) for x in range(15)] + ["15…"], 22),
+            ([str(x) for x in range(16, 26)], 20),
+            ([str(x) for x in range(15)] + ["15…"], 22),
+        ]
+    )
+    page = DatumTool(ctx)
+    page.contents = "\n".join([str(x) for x in range(26)])
+    page.title = "title"
     page.view_contents()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
