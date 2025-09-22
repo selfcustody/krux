@@ -419,7 +419,7 @@ class DeviceTests(Page):
         if not interactive:
             return "Cannot test non-interactively"
 
-        if self.ctx.input.touch is None:
+        if not kboard.has_touchscreen:
             return "Touch not available"
 
         results = []

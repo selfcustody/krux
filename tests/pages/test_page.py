@@ -184,6 +184,7 @@ def get_frame_titles_resulting_from_input(
 ):
     from krux.input import BUTTON_TOUCH, SWIPE_RIGHT, BUTTON_PAGE, BUTTON_ENTER
     from krux.pages.keypads import Keypad
+    from krux.kboard import kboard
 
     def get_button_seq(key_index):
         return [*([BUTTON_PAGE] * (key_index - 1))] + [BUTTON_ENTER]
@@ -220,6 +221,7 @@ def get_frame_titles_resulting_from_input(
     ctx = create_ctx(mocker, button_seq, None, None, touch_seq)
     if not has_touch:
         ctx.input.touch = None
+        kboard.has_touchscreen = False
     page = mock_page_cls(ctx)
     captured = page.capture_from_keypad(title, keysets)
     frame_titles = [

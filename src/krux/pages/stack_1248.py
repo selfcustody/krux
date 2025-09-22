@@ -320,7 +320,7 @@ class Stackbit(Page):
             theme.go_color,
         )
         # print border around buttons only on touch devices
-        if self.ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             self.ctx.display.draw_line(
                 x_offset,
                 y_offset,
@@ -367,7 +367,7 @@ class Stackbit(Page):
 
     def _map_keys_array(self):
         """Maps an array of regions for keys to be placed in"""
-        if self.ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
             x_region = self.x_offset + self.x_pad
             for _ in range(8):

@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 import gc
 import time
-import board
 import lcd
 import _thread
 from .keypads import Keypad
@@ -46,7 +45,6 @@ from ..display import (
     MINIMAL_PADDING,
     FLASH_MSG_TIME,
     FONT_HEIGHT,
-    FONT_WIDTH,
     STATUS_BAR_HEIGHT,
     BOTTOM_LINE,
 )
@@ -103,7 +101,7 @@ class Page:
         """Prompts user for leaving"""
         self.ctx.display.clear()
         answer = self.prompt(t("Are you sure?"), self.ctx.display.height() // 2)
-        if self.ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
         return ESC_KEY if answer else None
 
@@ -182,7 +180,7 @@ class Page:
                     if esc_prompt:
                         if self.esc_prompt() == ESC_KEY:
                             return ESC_KEY
-                        if self.ctx.input.touch is not None:
+                        if kboard.has_touchscreen:
                             self.ctx.input.touch.set_regions(
                                 pad.layout.x_keypad_map, pad.layout.y_keypad_map
                             )
@@ -191,7 +189,7 @@ class Page:
                 elif pad.cur_key_index == pad.go_index:
                     break
                 elif pad.cur_key_index == pad.more_index:
-                    swipeable = self.ctx.input.touch is not None
+                    swipeable = kboard.has_touchscreen
                     if swipeable and swipe_has_not_been_used:
                         show_swipe_hint = True
                     pad.next_keyset()
@@ -212,7 +210,7 @@ class Page:
                 if btn in (SWIPE_RIGHT, SWIPE_LEFT):
                     swipe_has_not_been_used = False
                 pad.navigate(btn)
-        if self.ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
         return buffer
 
@@ -325,7 +323,7 @@ class Page:
                     qr_foreground = None
                 extra_debounce_flag = True
             elif btn in PROCEED:
-                if self.ctx.input.touch is not None:
+                if kboard.has_touchscreen:
                     self.ctx.input.buttons_active = False
                 done = True
 
@@ -414,7 +412,7 @@ class Page:
         self.y_keypad_map.append(y_key_map)
         y_key_map += 4 * FONT_HEIGHT
         self.y_keypad_map.append(min(y_key_map, self.ctx.display.height()))
-        if self.ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             self.ctx.input.touch.set_regions(self.x_keypad_map, self.y_keypad_map)
         btn = None
         answer = True
@@ -450,7 +448,7 @@ class Page:
                         2 * FONT_HEIGHT - 2,
                         theme.no_esc_color,
                     )
-            elif self.ctx.input.touch is not None:
+            elif kboard.has_touchscreen:
                 self.ctx.display.draw_vline(
                     self.ctx.display.width() // 2,
                     self.y_keypad_map[0] + FONT_HEIGHT,
@@ -729,7 +727,7 @@ class Menu:
                 )
             else:
                 self.ctx.display.clear()
-            if self.ctx.input.touch is not None:
+            if kboard.has_touchscreen:
                 self._draw_touch_menu(selected_item_index)
             else:
                 self._draw_menu(selected_item_index)
@@ -742,7 +740,7 @@ class Menu:
                 start_from_submenu = False
             else:
                 btn = self._get_btn_input()
-                if self.ctx.input.touch is not None:
+                if kboard.has_touchscreen:
                     if btn == BUTTON_TOUCH:
                         selected_item_index = self.ctx.input.touch.current_index()
                         btn = BUTTON_ENTER
