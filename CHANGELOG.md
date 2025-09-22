@@ -14,6 +14,7 @@ The Maix Bit device has long been discouraged due to its poor-quality camera. St
 
 ### Other Bug Fixes and Improvements
 - Touchscreen test added in Tools for detection check
+- wbits for deflate-decompress window set to 10 bits to match KEF spec.
 
 # Changelog 25.09.0 - September 2025
 
