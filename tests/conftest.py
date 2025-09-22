@@ -8,6 +8,7 @@ from .shared_mocks import (
     board_m5stickv,
     board_wonder_mv,
     board_yahboom,
+    board_bit,
     encode_to_string,
     encode,
     statvfs,
@@ -153,6 +154,17 @@ def wonder_mv(monkeypatch, mp_modules):
     reset_krux_modules()
 
 
-@pytest.fixture(params=["amigo", "m5stickv", "dock", "cube", "yahboom", "wonder_mv"])
+@pytest.fixture
+def bit(monkeypatch, mp_modules):
+    import sys
+
+    monkeypatch.setitem(sys.modules, "board", board_bit())
+    monkeypatch.setitem(sys.modules, "pmu", None)
+    reset_krux_modules()
+
+
+@pytest.fixture(
+    params=["amigo", "m5stickv", "dock", "cube", "yahboom", "wonder_mv", "bit"]
+)
 def multiple_devices(request):
     return request.getfixturevalue(request.param)

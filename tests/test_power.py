@@ -15,7 +15,7 @@ def test_pmu(mocker, multiple_devices):
 
     manager = PowerManager()
 
-    if board.config["type"] in ("dock", "yahboom", "wonder_mv"):
+    if board.config["type"] in ("dock", "yahboom", "wonder_mv", "bit"):
         assert manager.pmu is None
         assert manager.has_battery() is False
     else:
