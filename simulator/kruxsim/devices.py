@@ -30,6 +30,7 @@ YAHBOOM = "maixpy_yahboom"
 CUBE = "maixpy_cube"
 WONDER_MV = "maixpy_wonder_mv"
 WONDER_K = "maixpy_wonder_k"
+TZT = "maixpy_tzt"
 
 WINDOW_SIZES = {
     M5STICKV: (320, 640),
@@ -40,6 +41,7 @@ WINDOW_SIZES = {
     CUBE: (484, 612),
     WONDER_MV: (410, 590),
     WONDER_K: (500, 650),
+    TZT: (410,580)
 }
 
 
@@ -77,7 +79,7 @@ def load_font(device):
                    os.path.join("..", "firmware", "font", "FusionPixel-14.bdf"),
                 ),
             ]
-        elif device in (DOCK, YAHBOOM, WONDER_MV, WONDER_K):
+        elif device in (DOCK, YAHBOOM, WONDER_MV, TZT, WONDER_K):
             fonts[device] = [
                 pg.freetype.Font(
                     os.path.join("..", "firmware", "font", "ter-u16n.bdf")
@@ -146,6 +148,13 @@ def screenshot_rect(device):
         rect.center = (
             screen.get_rect().center[0] - 0,
             screen.get_rect().center[1] + 10,
+        )
+    elif device == TZT:
+        rect.width -= 0
+        rect.height -= 57 #40
+        rect.center = (
+            screen.get_rect().center[0] - 0,
+            screen.get_rect().center[1] + 28, #36 #20
         )
     # TODO: fix after WONDER_K img is ready
     # elif device == WONDER_K:

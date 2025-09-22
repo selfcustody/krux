@@ -2,17 +2,17 @@
 
 ### Compatible Devices (comparative table)
 
-| Device | [M5StickV](#m5stickv) | [Maix Amigo](#maix-amigo) | [Maix Dock](#maix-dock) | [Yahboom k210 module](#yahboom-k210-module) | [Maix Cube](#maix-cube) | [WonderMV](#wondermv) |
-| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| Price range | US$ 50-55 | US$ 50-85 | US$ 27-35  | US$ 45-61 | US$ 34-49 | US$ 58-86 |
-| Screen size / resolution | 1.14" / 135*240 | 3.5" / 320*480 | 2.4" / 240*320 | 2" / 240*320 | 1.3" / 240*240 | 2" / 240*320 |
-| Brightness control | :white_check_mark: | :x: | :x: | :x: | :white_check_mark: | :white_check_mark: |
-| Device size | 48\*24\*22mm | 104\*63\*17mm | 98\*59\*18mm | 57\*41\*17mm | 40\*40\*16mm | 59\*41\*17mm |
-| Touchscreen | :x: | Capacitive | :x: | Capacitive | :x: | Capacitive |
-| Camera | `OV7740` | `OV7740` rear<br>`GC0328` front | `GC0328` | `OV2640` <i style="font-size: 85%">(VER:1.0)</i> or<br>`GC2145` <i style="font-size: 85%">(VER:1.1)</i> | `OV7740` | `GC2145` |
-| Battery  | 200mAh | 520mAh | :x: | :x: | 200mAh | :x: |
-| Requirements | None | None | [Rotary encoder](https://duckduckgo.com/?q=ky-040)<br> [3D printed case](https://github.com/selfcustody/DockEncoderCase)<br> Soldering<br>Assembly | None | None | None |
-| Warnings  | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) | [:material-numeric-2-circle:{ title="Maix Amigo screens" }](#amigo-info) | [:material-numeric-3-circle:{ title="Maix Dock and soldered pin" }](#dock-info) | Micro USB | 3-Way button | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) [:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info) |
+| Device | [M5StickV](#m5stickv) | [Maix Amigo](#maix-amigo) | [Maix Dock](#maix-dock) | [Yahboom k210 module](#yahboom-k210-module) | [Maix Cube](#maix-cube) | [WonderMV](#wondermv) | [TZT](#tzt) |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| Price range | US$ 50-55 | US$ 50-85 | US$ 27-35  | US$ 45-61 | US$ 34-49 | US$ 58-86 | US$ 48 |
+| Screen size / resolution | 1.14" / 135*240 | 3.5" / 320*480 | 2.4" / 240*320 | 2" / 240*320 | 1.3" / 240*240 | 2" / 240*320 | 2" / 240*320 |
+| Brightness control | :white_check_mark: | :x: | :x: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| Device size | 48\*24\*22mm | 104\*63\*17mm | 98\*59\*18mm | 57\*41\*17mm | 40\*40\*16mm | 59\*41\*17mm | 57\*41\*16mm |
+| Touchscreen | :x: | Capacitive | :x: | Capacitive | :x: | Capacitive | Capacitive |
+| Camera | `OV7740` | `OV7740` rear<br>`GC0328` front | `GC0328` | `OV2640` <i style="font-size: 85%">(VER:1.0)</i> or<br>`GC2145` <i style="font-size: 85%">(VER:1.1)</i> | `OV7740` | `GC2145` | `GC2145` or<br>`GC0328` |
+| Battery  | 200mAh | 520mAh | :x: | :x: | 200mAh | :x: | :x: |
+| Requirements | None | None | [Rotary encoder](https://duckduckgo.com/?q=ky-040)<br> [3D printed case](https://github.com/selfcustody/DockEncoderCase)<br> Soldering<br>Assembly | None | None | None | None |
+| Warnings  | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) | [:material-numeric-2-circle:{ title="Maix Amigo screens" }](#amigo-info) | [:material-numeric-3-circle:{ title="Maix Dock and soldered pin" }](#dock-info) | Micro USB | 3-Way button | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) [:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info) | None |
 
 <i style="font-size: 85%">:material-numeric-1-circle:{id="pull-up-resistor-info"}:
 ----8<----
@@ -108,6 +108,18 @@ Supported by Krux since September 2024, this touchscreen device features a metal
 - [飆機器人](https://shop.playrobot.com/products/veo0116)
 
 <div style="clear: both"></div>
+
+
+### TZT
+<img src="../img/maixpy_tzt/logo-314.png" align="right" style="width: 16%;">
+
+Supported by Krux since October 2025, this touchscreen device comes in a premium milled aluminum housing and features five buttons. Available through the following distributors:
+
+- [AliExpress](https://www.aliexpress.com/w/wholesale-tzt-canmv-k210.html)
+
+<div style="clear: both"></div>
+
+
 
 ### Maix Dock
 <img src="../img/maixpy_dock/logo-302.png" align="right" style="width: 16%;">

@@ -9,6 +9,7 @@
 
 <p align="center">
 <img src="docs/img/maixpy_yahboom/logo-312.en.png" alt="yahboom" style="width: 11%;">
+<img src="docs/img/maixpy_tzt/logo-314.en.png" alt="tzt" style="width: 11%;">
 <img src="docs/img/maixpy_amigo/logo-300.en.png"  alt="maixpy amigo" style="width: 16%;">
 <img src="docs/img/maixpy_dock/logo-302.en.png" alt="maixpy dock" style="width: 15%;">
 <img src="docs/img/maixpy_wonder_mv/logo-304.en.png" alt="wonder mv" style="width: 11%;">
@@ -161,6 +162,9 @@ poetry run poe simulator-cube
 
 # Run simulator with the touch device wonderMV, then use mouse to navigate
 poetry run poe simulator-wonder-mv
+
+# Run simulator with the touch device tzt, then use mouse to navigate
+poetry run poe simulator-tzt
 ```
 
 Note: With emulated SD card it is possible to store settings, encrypted mnemonics, also drop and sign PSBTs. After some time running, the simulator may become slow. If that happens, just close and open again!

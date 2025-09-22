@@ -124,3 +124,21 @@ To Flash WonderMV you need to pass the `-B dan` parameter.
 ```pwsh
 .\ktool-win.exe -B dan -b 1500000 maixpy_wonder_mv\kboot.kfpkg
 ```
+
+#### TZT
+To Flash TZT you need to pass the `-B dan` parameter.
+
+##### Linux
+```bash
+./ktool-linux -B dan -b 1500000 maixpy_tzt/kboot.kfpkg
+```
+
+##### Mac
+```bash
+./ktool-mac -B dan -b 1500000 maixpy_tzt/kboot.kfpkg
+```
+
+##### Windows
+```pwsh
+.\ktool-win.exe -B dan -b 1500000 maixpy_tzt\kboot.kfpkg
+```
