@@ -97,10 +97,7 @@ class Input:
         # This flag, used in selection outlines, is set if buttons are being used
         self.buttons_active = True
         self.touch = None
-        if (
-            "touch" in board.config["krux"]["display"]
-            and board.config["krux"]["display"]["touch"]
-        ):
+        if kboard.has_touchscreen:
             from .touch import Touch
 
             self.touch = Touch(
@@ -125,6 +122,7 @@ class Input:
             self.page_prev = None
         if self.touch and self.touch_value() == PRESSED:
             self.touch = None
+            kboard.has_touchscreen = None
 
     def enter_value(self):
         """Intermediary method to pull button ENTER state"""
@@ -149,7 +147,7 @@ class Input:
 
     def touch_value(self):
         """Intermediary method to pull touch state, if touch available"""
-        if self.touch is not None:
+        if kboard.has_touchscreen:
             return self.touch.value()
         return RELEASED
 
@@ -177,31 +175,31 @@ class Input:
 
     def touch_event(self, validate_position=True):
         """Intermediary method to pull button TOUCH event"""
-        if self.touch is not None:
+        if kboard.has_touchscreen:
             return self.touch.event(validate_position)
         return False
 
     def swipe_right_value(self):
         """Intermediary method to pull touch gesture, if touch available"""
-        if self.touch is not None:
+        if kboard.has_touchscreen:
             return self.touch.swipe_right_value()
         return RELEASED
 
     def swipe_left_value(self):
         """Intermediary method to pull touch gesture, if touch available"""
-        if self.touch is not None:
+        if kboard.has_touchscreen:
             return self.touch.swipe_left_value()
         return RELEASED
 
     def swipe_up_value(self):
         """Intermediary method to pull touch gesture, if touch available"""
-        if self.touch is not None:
+        if kboard.has_touchscreen:
             return self.touch.swipe_up_value()
         return RELEASED
 
     def swipe_down_value(self):
         """Intermediary method to pull touch gesture, if touch available"""
-        if self.touch is not None:
+        if kboard.has_touchscreen:
             return self.touch.swipe_down_value()
         return RELEASED
 

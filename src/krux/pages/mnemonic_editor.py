@@ -180,7 +180,7 @@ class MnemonicEditor(Page):
         word_v_padding = self.ctx.display.height() * 3 // 4
         word_v_padding //= 12
 
-        if self.ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
             self.ctx.input.touch.x_regions.append(0)
             self.ctx.input.touch.x_regions.append(self.ctx.display.width() // 2)

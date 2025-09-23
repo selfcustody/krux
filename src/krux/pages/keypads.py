@@ -37,6 +37,7 @@ from ..input import (
 )
 from ..buttons import PRESSED
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
+from ..kboard import kboard
 
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets.
 
@@ -67,7 +68,7 @@ class KeypadLayout:
         for x in range(1, self.width):
             self.x_keypad_map.append(x * key_h_spacing + MINIMAL_PADDING)
         self.x_keypad_map.append(ctx.display.width())
-        if ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             ctx.input.touch.set_regions(self.x_keypad_map, self.y_keypad_map)
 
 
@@ -183,7 +184,7 @@ class Keypad:
                             key_offset_x, offset_y, key, theme.disabled_color
                         )
                     else:
-                        if self.ctx.input.touch is not None:
+                        if kboard.has_touchscreen:
                             self.ctx.display.outline(
                                 offset_x + 1,
                                 y + 1,
@@ -201,7 +202,7 @@ class Keypad:
                         key_index == self.cur_key_index
                         and self.ctx.input.buttons_active
                     ):
-                        if self.ctx.input.touch is not None:
+                        if kboard.has_touchscreen:
                             self.ctx.display.outline(
                                 offset_x + 1,
                                 y + 1,

@@ -257,7 +257,7 @@ class TinySeed(Page):
 
     def _map_keys_array(self):
         """Maps an array of regions for keys to be placed in"""
-        if self.ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             self.ctx.input.touch.x_regions = [
                 self.x_offset + i * self.x_pad for i in range(13)
             ]
