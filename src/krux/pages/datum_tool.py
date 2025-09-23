@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import gc
+from krux.wdt import wdt
 from . import (
     Page,
     Menu,
@@ -70,10 +72,12 @@ DATUM_BBQR_TYPES = {
 }
 
 STATIC_QR_MAX_SIZE = 4  # version 5 - 37x37
+SLOW_ENCODING_MAX_SIZE = 2**13  # for base43,base58,bech32
 
 
 def urobj_to_data(ur_obj):
     """returns flatened data from a UR object. belongs in qr or qr_capture???"""
+    print("In urobj_to_data")
     import urtypes
 
     if ur_obj.type == "crypto-bip39":
@@ -92,11 +96,13 @@ def urobj_to_data(ur_obj):
         data = urtypes.bytes.Bytes.from_cbor(ur_obj.cbor).data
     else:
         data = None
+    print("...leaving urobj_to_data")
     return data
 
 
 def convert_encoding(contents, conversion):
     """encoding conversions to/from (hex/HEX/base43/base58/base64/shift_case/utf8)"""
+    print("In convert_encoding")
     from krux.baseconv import base_encode, base_decode
     from binascii import hexlify, unhexlify
 
@@ -129,17 +135,19 @@ def convert_encoding(contents, conversion):
     return None
 
 
-def identify_datum(data):
+def identify_datum(data, encodings=None):
     """Determine which "datum" type this is; ie: PSBT, XPUB, DESC, ADDR"""
 
     # TODO: more samples and fewer false-positives
+    print("In identify_datum")
 
     datum = None
     if isinstance(data, bytes):
         if data[:5] == b"psbt\xff":
             datum = DATUM_PSBT
     elif len(data) > 33:
-        encodings = detect_encodings(data)
+        if encodings is None:
+            encodings = detect_encodings(data)
 
         if data[:1] in "xyzYZtuvUV" and data[1:4] == "pub" and 58 in encodings:
             datum = DATUM_XPUB
@@ -153,10 +161,11 @@ def identify_datum(data):
             datum = DATUM_DESCRIPTOR
         elif (data[:1] in ("1", "3", "n", "2", "m") and 58 in encodings) or (
             data[:4].lower() in ("bc1p", "bc1q", "tb1p", "tb1q")
-            and "bech32" in [x.lower()[:6] for x in encodings]
+            and "bech32" in [x.lower()[:6] for x in encodings if isinstance(x, str)]
         ):
             datum = DATUM_ADDRESS
 
+    print("...leaving identify_datum")
     return datum
 
 
@@ -168,6 +177,7 @@ def detect_encodings(str_data, verify=True):
     remains/used here to identify potentially useful-but-missing encodings
     """
     # pylint: disable=R0912,R0915
+    print("In detect_encodings")
     from binascii import unhexlify
     from krux.baseconv import base_decode, base_encode
     from embit.bech32 import bech32_decode, Encoding
@@ -177,14 +187,16 @@ def detect_encodings(str_data, verify=True):
     if not isinstance(str_data, str):
         raise TypeError("detect_encodings() expected str")
 
-    # get min and max characters (sorted by ordinal value),
-    # check most restrictive encodings first
+    str_len = len(str_data)
 
-    min_chr = min(str_data)
-    max_chr = max(str_data)
+    # get min and max characters (sorted by ordinal value) for
+    # a small/sufficient substring of contents, otherwise too slow,
+    # then check most restrictive encodings first
+    min_chr = min(str_data[:512])
+    max_chr = max(str_data[:512])
 
     # might it be hex
-    if len(str_data) % 2 == 0 and "0" <= min_chr:
+    if str_len % 2 == 0 and "0" <= min_chr:
         if max_chr <= "F":
             if verify:
                 try:
@@ -216,11 +228,12 @@ def detect_encodings(str_data, verify=True):
             encodings.append(32)
 
     # might it be bech32
-    if "0" <= min_chr:
+    if str_len <= SLOW_ENCODING_MAX_SIZE and "0" <= min_chr:
         encoding = None
         if max_chr <= "Z":
             if verify:
                 encoding, _, _ = bech32_decode(str_data)
+                wdt.feed()
             if encoding == Encoding.BECH32:
                 encodings.append("BECH32")
             elif encoding == Encoding.BECH32M:
@@ -234,10 +247,11 @@ def detect_encodings(str_data, verify=True):
                 encodings.append("bech32m")
 
     # might it be base43
-    if "$" <= min_chr and max_chr <= "Z":
+    if str_len <= SLOW_ENCODING_MAX_SIZE and "$" <= min_chr and max_chr <= "Z":
         if verify:
             try:
                 base_decode(str_data, 43)
+                wdt.feed()
                 encodings.append(43)
             except:
                 pass
@@ -245,10 +259,11 @@ def detect_encodings(str_data, verify=True):
             encodings.append(43)
 
     # might it be base58
-    if "1" <= min_chr and max_chr <= "z":
+    if str_len <= SLOW_ENCODING_MAX_SIZE and "1" <= min_chr and max_chr <= "z":
         if verify:
             try:
                 base_decode(str_data, 58)
+                wdt.feed()
                 encodings.append(58)
             except:
                 pass
@@ -279,6 +294,8 @@ def detect_encodings(str_data, verify=True):
     # assume utf8
     encodings.append("utf8")
 
+    print("...leaving detect_encodings")
+
     return encodings
 
 
@@ -300,6 +317,7 @@ class DatumToolMenu(Page):
 
     def scan_qr(self):
         """Handler for the 'Scan a QR' menu item"""
+        print("In scan_qr")
 
         from .qr_capture import QRCodeCapture
 
@@ -316,10 +334,12 @@ class DatumToolMenu(Page):
 
         page = DatumTool(self.ctx)
         page.contents, page.title = contents, title
+        print("...leaving scan_qr")
         return page.view_contents()
 
     def text_entry(self):
         """Handler for the 'Text Entry' menu item"""
+        print("In text_entry")
         from .encryption_ui import prompt_for_text_update
 
         text = ""
@@ -346,10 +366,12 @@ class DatumToolMenu(Page):
 
         page = DatumTool(self.ctx)
         page.contents, page.title = text, t("Custom Text")
+        print("...leaving text_entry")
         return page.view_contents()
 
     def read_file(self):
         """Handler for the 'Read File' menu item"""
+        print("In read_file")
         from .utils import Utils
 
         if not self.has_sd_card():
@@ -400,6 +422,7 @@ class DatumTool(Page):
 
     def view_qr(self):
         """Reusable handler for viewing a QR code"""
+        print("In view_qr")
         from ..qr import QR_CAPACITY_BYTE, QR_CAPACITY_ALPHANUMERIC, QR_CAPACITY_NUMERIC
         from ..bbqr import encode_bbqr
         import urtypes
@@ -464,7 +487,7 @@ class DatumTool(Page):
                     ]
                 )
 
-            curr_datum = identify_datum(self.contents)
+            curr_datum = identify_datum(self.contents, self.encodings)
             if curr_datum:
                 if curr_datum in DATUM_UR_TYPES:
                     menu_opts.extend(
@@ -512,10 +535,12 @@ class DatumTool(Page):
                     )
                 )
 
+        print("...leaving view_qr")
         return MENU_CONTINUE
 
     def save_sd(self):
         """Reusable handler for saving to SD file"""
+        print("In save_sd")
         from .file_operations import SaveFile
 
         save_page = SaveFile(self.ctx)
@@ -525,9 +550,11 @@ class DatumTool(Page):
             save_as_binary=isinstance(self.contents, bytes),
             prompt=False,
         )
+        print("...leaving save_sd")
 
     def _info_box(self, preview=True, about_suffix=""):
         """clears screen, displays info_box, returns height-in-lines"""
+        print("In _info_box")
         from binascii import hexlify
 
         self.ctx.display.clear()
@@ -569,10 +596,12 @@ class DatumTool(Page):
             highlight_prefix=self.about_prefix,
         )
 
+        print("...leaving _info_box")
         return num_lines
 
     def _show_contents(self):
         """Displays infobox and contents"""
+        print("In _show_contents")
         from binascii import hexlify
         from ..kboard import kboard
 
@@ -626,6 +655,8 @@ class DatumTool(Page):
                 break
             start_index = pages[curr_page]
 
+        print("...leaving _show_contents")
+
     def _analyze_contents(self):
         """
         analyzes `.contents`, sets:
@@ -635,6 +666,7 @@ class DatumTool(Page):
         * .oneline_viewable (bool) if short enough for one-line display
         * .datum is the "recognized" datum_type, ie: xpub/psbt/descriptor/etc
         """
+        print("In _analyze_contents")
 
         if isinstance(self.contents, bytes):
             self.about_prefix = t("binary:")
@@ -642,6 +674,8 @@ class DatumTool(Page):
             try:
                 as_str = self.contents.decode()
                 suggestion = str(detect_encodings(as_str, False)[0])
+                del as_str
+                gc.collect()
                 if suggestion != "utf8":
                     suggestion = suggestion + "_via_utf8"
                 self.encodings = [suggestion + "?"]
@@ -664,12 +698,13 @@ class DatumTool(Page):
             self.encodings = detect_encodings(self.contents)
 
             # does it look like a 12 or 24 word mnemonic / Mnemonic QR?
-            if len(self.contents.split()) in (12, 24):
+            if len(self.contents[:256].split()) in (12, 24):
                 self.sensitive = True
 
             # does it look like a 12 or 24 word decimal mnemonic / StandadardSeedQR?
-            elif len(set((x in "0123456789" for x in self.contents))) == 1 and (
+            elif (
                 len(self.contents) in (12 * 4, 24 * 4)
+                and len(set((x in "0123456789" for x in self.contents))) == 1
             ):
                 self.sensitive = True
 
@@ -681,10 +716,12 @@ class DatumTool(Page):
 
         # datum
         if not self.datum:
-            self.datum = identify_datum(self.contents)
+            self.datum = identify_datum(self.contents, self.encodings)
+        print("...leaving _analyze_contents")
 
     def _decrypt_as_kef_envelope(self):
         """Assuming self.contents are encrypted, offer to decrypt"""
+        print("In _decrypt_as_kef_envelope")
         from .encryption_ui import KEFEnvelope
         from binascii import hexlify
 
@@ -702,9 +739,11 @@ class DatumTool(Page):
             self.decrypted = True
             self.contents = plaintext
             self.history = []
+        print("...leaving _decrypt_as_kef_envelope")
 
     def _build_options_menu(self, offer_convert=False, offer_show=True):
         """Build a menu list of what to do with contents, possibly w/ conversions"""
+        print("In _build_options_menu")
 
         menu = []
 
@@ -726,7 +765,8 @@ class DatumTool(Page):
                 else:
                     menu.append((t("to hex"), lambda: "hex"))
                 menu.append((t("to base32"), lambda: 32))
-                menu.append((t("to base43"), lambda: 43))
+                if len(self.contents) <= SLOW_ENCODING_MAX_SIZE:
+                    menu.append((t("to base43"), lambda: 43))
                 menu.append((t("to base64"), lambda: 64))
                 try:
                     self.contents.decode()
@@ -764,10 +804,12 @@ class DatumTool(Page):
 
             menu.append((t("Done Converting"), lambda: "convert_end"))
 
+        print("...leaving _build_options_menu")
         return menu
 
     def view_contents(self, try_decrypt=True, offer_convert=False):
         """allows to view, convert, encrypt/decrypt, and export short str/bytes contents"""
+        print("\nIn _view_contents")
         from .encryption_ui import KEFEnvelope
 
         kvargs = {
@@ -845,4 +887,5 @@ class DatumTool(Page):
             # user chose export_sd
             self.save_sd()
 
+        print("...leaving _view_contents")
         return self.view_contents(**kvargs)
