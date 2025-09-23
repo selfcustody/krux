@@ -121,6 +121,7 @@ translation_array = [
     "Öffentlicher Schlüssel",
     "Werkeinstellungen",
     "Fehler beim Sammeln der Kameraentropie",
+    "Daten konnten nicht umgewandelt werden.",
     "Entschlüsselung fehlgeschlagen",
     "Laden fehlgeschlagen.",
     "Mnemonic konnte nicht gespeichert werden",

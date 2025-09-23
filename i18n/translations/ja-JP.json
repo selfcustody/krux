@@ -99,6 +99,7 @@
     "Extended Public Key": "拡張公開キー",
     "Factory Settings": "初期設定",
     "Failed gathering camera entropy": "カメラエントロピーの収集に失敗しました",
+    "Failed to convert": "\"CRL変換に失敗\"",
     "Failed to decrypt": "復号化に失敗しました",
     "Failed to load": "ロードに失敗しました",
     "Failed to store mnemonic": "mnemonicの保存に失敗しました",

@@ -99,6 +99,7 @@
     "Extended Public Key": "扩展公钥",
     "Factory Settings": "出厂设置",
     "Failed gathering camera entropy": "收集摄像头熵失败",
+    "Failed to convert": "转换失败.",
     "Failed to decrypt": "解密失败",
     "Failed to load": "加载失败",
     "Failed to store mnemonic": "存储助记词失败",

@@ -121,6 +121,7 @@ translation_array = [
     "Khóa công cộng",
     "Cài đặt Gốc",
     "Không thể thu thập entropy của máy ảnh",
+    "Không thể chuyển đổi",
     "Không giải mã được",
     "Tải thất bại",
     "Không lưu trữ Mnemonic được",

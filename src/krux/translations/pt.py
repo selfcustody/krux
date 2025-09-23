@@ -121,6 +121,7 @@ translation_array = [
     "Chave Pública Estendida",
     "Configurações de Fábrica",
     "Falha ao capturar entropia da câmera",
+    "Falha ao converter",
     "Falha ao descriptografar",
     "Falha ao carregar",
     "Falha ao armazenar mnemônico",

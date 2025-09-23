@@ -121,6 +121,7 @@ translation_array = [
     "Uitgebreide publieke sleutel",
     "Fabrieksinstellingen",
     "Verzamelen van camera entropie mislukt",
+    "Kon niet geconverteerd worden",
     "Ontsleutelen is niet gelukt",
     "Laden mislukt",
     "Geheugensteun opslaan is niet gelukt",

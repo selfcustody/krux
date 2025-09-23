@@ -121,6 +121,7 @@ translation_array = [
     "Genişletilmiş Public Key",
     "Fabrika Ayarları",
     "Kamera entropisi toplanamadı",
+    "Veri dönüştürme başarısız.",
     "Şifre çözme başarısız",
     "Yüklenemedi",
     "Mnemonic depolama başarısız",
