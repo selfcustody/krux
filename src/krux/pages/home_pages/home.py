@@ -34,15 +34,14 @@ from ...qr import FORMAT_NONE, FORMAT_PMOFN
 from ...krux_settings import t, Settings
 from ...format import replace_decimal_separator
 from ...key import TYPE_SINGLESIG
+from ...kboard import kboard
 
 
 class Home(Page):
     """Home is the main menu page of the app"""
 
     def __init__(self, ctx):
-        shtn_reboot_label = (
-            t("Shutdown") if ctx.power_manager.has_battery() else t("Reboot")
-        )
+        shtn_reboot_label = t("Shutdown") if kboard.has_battery else t("Reboot")
         super().__init__(
             ctx,
             Menu(

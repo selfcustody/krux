@@ -53,6 +53,7 @@ from ..key import (
     NAME_MULTISIG,
 )
 from ..krux_settings import t
+from ..kboard import kboard
 
 
 DIGITS_HEX = "0123456789ABCDEF"
@@ -70,28 +71,24 @@ class Login(Page):
     SETTINGS_MENU_INDEX = 2
 
     def __init__(self, ctx):
-        shtn_reboot_label = (
-            t("Shutdown") if ctx.power_manager.has_battery() else t("Reboot")
-        )
+        login_menu_items = [
+            (t("Load Mnemonic"), self.load_key),
+            (
+                t("New Mnemonic"),
+                (self.new_key if not Settings().security.hide_mnemonic else None),
+            ),
+            (t("Settings"), self.settings),
+            (t("Tools"), self.tools),
+            (t("About"), self.about),
+        ]
+        if kboard.has_battery:
+            login_menu_items.append((t("Shutdown"), ctx.power_manager.shutdown))
+
         super().__init__(
             ctx,
             Menu(
                 ctx,
-                [
-                    (t("Load Mnemonic"), self.load_key),
-                    (
-                        t("New Mnemonic"),
-                        (
-                            self.new_key
-                            if not Settings().security.hide_mnemonic
-                            else None
-                        ),
-                    ),
-                    (t("Settings"), self.settings),
-                    (t("Tools"), self.tools),
-                    (t("About"), self.about),
-                    (shtn_reboot_label, self.shutdown),
-                ],
+                login_menu_items,
                 back_label=None,
             ),
         )
@@ -866,7 +863,6 @@ class Login(Page):
         """Handler for the 'about' menu item"""
 
         import board
-        from ..kboard import kboard
         from ..metadata import VERSION
         from ..qr import FORMAT_NONE
 
