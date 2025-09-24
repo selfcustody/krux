@@ -72,7 +72,8 @@ DATUM_BBQR_TYPES = {
 }
 
 STATIC_QR_MAX_SIZE = 4  # version 5 - 37x37
-SLOW_ENCODING_MAX_SIZE = 2**13  # for base43,base58,bech32
+SUFFICIENT_SAMPLE_SIZE = 512  # to truncate large contents for sampling
+SLOW_ENCODING_MAX_SIZE = 2**14  # base43,base58,bech32 not offered above this size
 
 
 def urobj_to_data(ur_obj):
@@ -182,11 +183,10 @@ def detect_encodings(str_data, verify=True):
 
     str_len = len(str_data)
 
-    # get min and max characters (sorted by ordinal value) for
-    # a small/sufficient substring of contents, otherwise too slow,
+    # get min and max characters (sorted by ordinal value)
     # then check most restrictive encodings first
-    min_chr = min(str_data[:512])
-    max_chr = max(str_data[:512])
+    min_chr = min(str_data[:SUFFICIENT_SAMPLE_SIZE])
+    max_chr = max(str_data[:SUFFICIENT_SAMPLE_SIZE])
 
     # might it be hex
     if str_len % 2 == 0 and "0" <= min_chr:
@@ -364,7 +364,6 @@ class DatumToolMenu(Page):
         from .utils import Utils
 
         if not self.has_sd_card():
-            self.ctx.display.clear()
             self.flash_error(t("SD card not detected."))
             return MENU_CONTINUE
 
@@ -376,6 +375,8 @@ class DatumToolMenu(Page):
 
         if not contents:
             return MENU_CONTINUE
+
+        self.ctx.display.draw_centered_text("\n\n" + t("Processing…") + "\n\n")
 
         # utils.load_file() always returns binary
         try:
@@ -422,9 +423,9 @@ class DatumTool(Page):
 
         seedqrview_thresh = QR_CAPACITY_BYTE[STATIC_QR_MAX_SIZE]
         if not isinstance(self.contents, bytes):
-            if all(c.isdigit() for c in self.contents):
+            if all(c.isdigit() for c in self.contents[:SUFFICIENT_SAMPLE_SIZE]):
                 seedqrview_thresh = QR_CAPACITY_NUMERIC[STATIC_QR_MAX_SIZE]
-            elif all(is_alnum(c) for c in self.contents):
+            elif all(is_alnum(c) for c in self.contents[:SUFFICIENT_SAMPLE_SIZE]):
                 seedqrview_thresh = QR_CAPACITY_ALPHANUMERIC[STATIC_QR_MAX_SIZE]
 
         if len(self.contents) <= seedqrview_thresh:
@@ -462,10 +463,10 @@ class DatumTool(Page):
         else:
             from ..qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_BBQR, FORMAT_UR
 
-            menu_opts = [
-                (t("Static"), (FORMAT_NONE,)),
-                (t("Part M of N"), (FORMAT_PMOFN,)),
-            ]
+            menu_opts = []
+            if len(self.contents) <= seedqrview_thresh * 4:
+                menu_opts.append((t("Static"), (FORMAT_NONE,)))
+            menu_opts.append((t("Part M of N"), (FORMAT_PMOFN,)))
 
             if self.datum in DATUM_BBQR_TYPES:
                 menu_opts.extend(
@@ -759,7 +760,8 @@ class DatumTool(Page):
                 else:
                     menu.append((t("to hex"), lambda: "hex"))
                 menu.append((t("to base32"), lambda: 32))
-                if len(self.contents) <= SLOW_ENCODING_MAX_SIZE:
+                if len(self.contents) <= SLOW_ENCODING_MAX_SIZE * 5.42 / 8:
+                    # 5.42 slightly less than log2(43); adjusts for base43 bloat
                     menu.append((t("to base43"), lambda: 43))
                 menu.append((t("to base64"), lambda: 64))
                 try:
@@ -842,6 +844,8 @@ class DatumTool(Page):
             # if user chose to exit
             return MENU_CONTINUE
 
+        self.ctx.display.draw_centered_text(t("Processing…"))
+
         if status == "show":
             # if user wants to view data
             self._show_contents()
@@ -867,7 +871,6 @@ class DatumTool(Page):
                 self.flash_error(t("Failed to convert"))
                 if undo:
                     self.history.append(status)
-
         elif status == "encrypt":
             # if user chose to encrypt
             kef = KEFEnvelope(self.ctx)
