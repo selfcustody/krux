@@ -288,7 +288,6 @@ class Addresses(Page):
     def scan_address(self, addr_type=0):
         """Handler for the 'receive' or 'change' menu item"""
         from ..qr_capture import QRCodeCapture
-        from ..encryption_ui import decrypt_kef
 
         qr_capture = QRCodeCapture(self.ctx)
         data, qr_format = qr_capture.qr_capture_loop()
@@ -296,21 +295,34 @@ class Addresses(Page):
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
 
-        try:
-            data = decrypt_kef(self.ctx, data).decode()
-        except KeyError:
-            self.flash_error(t("Failed to decrypt"))
-            return MENU_CONTINUE
-        except ValueError:
-            # ValueError=not KEF or declined to decrypt
-            pass
+        from ...wallet import parse_address
 
         addr = None
         try:
-            from ...wallet import parse_address
-
             addr = parse_address(data)
         except:
+            pass
+
+        if addr is None:
+            from ..encryption_ui import decrypt_kef
+
+            try:
+                data = decrypt_kef(self.ctx, data).decode()
+            except ValueError:
+                # ValueError=not KEF or declined to decrypt
+                data = None
+            except:
+                # KeyError or other exception during decryption
+                self.flash_error(t("Failed to decrypt"))
+                return MENU_CONTINUE
+
+            if data is not None:
+                try:
+                    addr = parse_address(data)
+                except:
+                    pass
+
+        if addr is None:
             self.flash_error(t("Invalid address"))
             return MENU_CONTINUE
 

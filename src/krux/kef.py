@@ -500,8 +500,8 @@ def unwrap(kef_bytes):
     if VERSIONS[version].get("pkcs_pad", False) in (True, False):
         if (len(payload) - extra) % 16 != 0:
             raise ValueError("Ciphertext is not aligned")
-        if (len(payload) - extra) // 16 < 1:
-            raise ValueError("Ciphertext is too short")
+    if len(payload) < extra + 1:
+        raise ValueError("Ciphertext is too short")
 
     return (id_, version, iterations, payload)
 

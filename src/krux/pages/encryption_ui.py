@@ -49,7 +49,7 @@ OVERRIDE_LABEL = 4
 ENCRYPTION_KEY_MAX_LEN = 200
 
 
-def decrypt_kef(ctx, data):
+def decrypt_kef(ctx, data, fail_improbable=False):
     """finds kef-envelope and returns data fully decrypted, else ValueError"""
     from binascii import unhexlify
     from krux.baseconv import base_decode, hint_encodings
@@ -103,6 +103,15 @@ def decrypt_kef(ctx, data):
         kef_envelope = KEFEnvelope(ctx)
         if not kef_envelope.parse(data):
             raise ValueError(err)
+
+    # TODO: consider better probabilistic strategies to rule-out KEF identification
+    # cipher payload should appear random
+    if fail_improbable:
+        upper128 = len([x for x in kef_envelope.ciphertext if x > 127])
+        if upper128 == 0:
+            raise ValueError("Payload is ascii")
+        if upper128 < len(kef_envelope.ciphertext) * 0.1:
+            raise ValueError("Distribution of payload hardly uniform")
 
     # unpack as many kef_envelopes as there may be
     while True:
