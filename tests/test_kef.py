@@ -1688,15 +1688,19 @@ def NOtest_find_optimal_compress_threshold(m5stickv):
 def test_brute_force_compression_checks(m5stickv):
     """
     It is expected that different implementations of deflate/zlib.compress will
-    result in different compressed bytes.
+    result in different compressed bytes.  KEF defines that compression MUST be done
+    with a 10-bits window -- so that others on restricted hardware may decompress.
+    However, implementations may safely decompress using a larger window.
 
     This test verifies that `reinflate(deflate(original)) == original`.
     By default it will run external to krux devices but can be used to create a file
     for sdcard externally, then read on device, or created on device and read externally
 
-    To see problems, hack tests.shared_mocks.DeflateIO to:
-    * compress/write() using wrong wbits=-15, -14, -13, or -12,
-    * while leaving decompress/read() using wbits=-10, as KEF Specificiations demand.
+    To play, hack tests.shared_mocks.DeflateIO to:
+    * FAILURES: compress/write() using wrong wbits=-15, -14, -13, or -12,
+      while leaving decompress/read() using wbits=-10, as KEF Specificiations demand.
+    * OKAY: decompress/read() using non-standard wbits=-11 through -15,
+      while restricting compress/write() using wbits=-10
     """
     from hashlib import sha256
     from binascii import hexlify

@@ -86,6 +86,10 @@ It is expected that any implementation can decrypt a KEF envelope that was creat
 
 * **On truncated Authentication** At first glance it may be concerning that `auth` bytes for many versions have been truncated and are trivially "weak". Note that KEF's use-case for authentication is to validate that the user has correctly entered their decryption `key`. In the worse case, "false-authenticated" success will occur at a rate of 1:16M (or 1:4B for others) if using an incorrect decryption `key`; similar if an attacker has modified the KEF envelope. In these "false-authenticated" success cases, data will result from decryption, but that data will NOT be the original secret or plaintext; it will be of no value.
 
+* **On compressed versions** KEF is strict about compressing via "raw headerless deflate()" with a "wbits" window
+of **10 bits (1024B)** so that other implementations on restricted hardware are capable to decompress and recover
+any KEF envelope.  However, implementations may choose to use a higher wbits window for decompression.
+
 ## Common Structure of a KEF Envelope
 
 All KEF versions' encrypted outputs follow this layout:
