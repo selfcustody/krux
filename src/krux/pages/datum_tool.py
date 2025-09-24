@@ -553,23 +553,22 @@ class DatumTool(Page):
                 ]
             ),
         ]
+        if preview:
+            parts.append(
+                self.fit_to_line(
+                    (
+                        '"' + self.contents + '"'
+                        if isinstance(self.contents, str)
+                        else "0x" + hexlify(self.contents).decode()
+                    ),
+                    crop_middle=False,
+                )
+            )
         num_lines = self.ctx.display.draw_hcentered_text(
             "\n".join(p for p in parts if p),
             info_box=True,
             highlight_prefix=":",
         )
-        if preview:
-            self.ctx.display.draw_hcentered_text(
-                (
-                    '"' + self.contents + '"'
-                    if isinstance(self.contents, str)
-                    else "0x" + hexlify(self.contents).decode()
-                ),
-                offset_y=DEFAULT_PADDING + num_lines * FONT_HEIGHT + 2,
-                max_lines=1,
-                info_box=True,
-            )
-            num_lines += 1
 
         return num_lines
 
