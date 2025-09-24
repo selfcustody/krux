@@ -631,14 +631,17 @@ class Menu:
         if back_label:
             back_label = t("Back") if back_label == "Back" else back_label
             self.menu += [("< " + back_label, back_status)]
-        self.disable_statusbar = disable_statusbar
+        self.disable_statusbar = disable_statusbar or (
+            self.ctx.wallet is None and not kboard.has_battery
+        )
         if offset is None:
-            # Default offset for status bar
-            self.menu_offset = STATUS_BAR_HEIGHT
+            self.menu_offset = (
+                STATUS_BAR_HEIGHT if not self.disable_statusbar else DEFAULT_PADDING
+            )
         else:
-            # Always diasble status bar if menu has non standard offset
+            # Always disable status bar if menu has non standard offset
             self.disable_statusbar = True
-            self.menu_offset = offset
+            self.menu_offset = offset if offset >= 0 else DEFAULT_PADDING
         max_viewable = min(
             self.ctx.display.max_menu_lines(self.menu_offset, self.menu), len(self.menu)
         )
@@ -794,7 +797,7 @@ class Menu:
             )
             self.draw_network_indicator()
             self.draw_wallet_indicator()
-            if self.ctx.power_manager.has_battery():
+            if kboard.has_battery:
                 _thread.start_new_thread(self.draw_battery_indicator, ())
 
     #     self.draw_ram_indicator()
@@ -918,6 +921,9 @@ class Menu:
         y_keypad_map = [
             int(n * height_multiplier) + self.menu_offset for n in y_keypad_map
         ]
+        # Expand first region to fill the screen if there's nothing above it
+        if y_keypad_map[0] < STATUS_BAR_HEIGHT:
+            y_keypad_map[0] = 0
         # Expand last region to fill the screen
         y_keypad_map[-1] = self.ctx.display.height()
         self.ctx.input.touch.y_regions = y_keypad_map
