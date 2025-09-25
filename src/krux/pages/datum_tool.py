@@ -567,7 +567,6 @@ class DatumTool(Page):
         num_lines = self.ctx.display.draw_hcentered_text(
             "\n".join(p for p in parts if p),
             info_box=True,
-            highlight_prefix=":",
         )
 
         return num_lines

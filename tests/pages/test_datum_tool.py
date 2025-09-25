@@ -636,7 +636,11 @@ def test_datumtool__info_box(m5stickv, mocker):
     page._info_box()
     assert ctx.input.wait_for_button.call_count == 0
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call('Text\nabout\n"Loaded string …', info_box=True, highlight_prefix=':')]
+        [
+            mocker.call(
+                'Text\nabout\n"Loaded string …', info_box=True, highlight_prefix=":"
+            )
+        ]
     )
 
     # call with bytes
@@ -649,7 +653,7 @@ def test_datumtool__info_box(m5stickv, mocker):
     page._info_box()
     assert ctx.input.wait_for_button.call_count == 0
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call('Bytes\nabout\n0xdeadbeef', info_box=True, highlight_prefix=':')]
+        [mocker.call("Bytes\nabout\n0xdeadbeef", info_box=True, highlight_prefix=":")]
     )
 
 
