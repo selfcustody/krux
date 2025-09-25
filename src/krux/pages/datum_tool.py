@@ -49,9 +49,7 @@ from ..input import (
     BUTTON_PAGE_PREV,
     SWIPE_RIGHT,
     SWIPE_DOWN,
-    KEY_REPEAT_DELAY_MS,
 )
-from ..buttons import PRESSED
 
 DATUM_DESCRIPTOR = "DESC"
 DATUM_PSBT = "PSBT"
@@ -577,7 +575,6 @@ class DatumTool(Page):
         """Displays infobox and contents"""
         from binascii import hexlify
         from ..kboard import kboard
-        import time
 
         page_indicator = "p.%d"
         max_lines = 0
@@ -618,14 +615,7 @@ class DatumTool(Page):
                 self.ctx.display.draw_string(offset_x, offset_y, line)
                 offset_y += FONT_HEIGHT
 
-            if self.ctx.input.page_value() == PRESSED:
-                btn = FAST_FORWARD
-                time.sleep_ms(KEY_REPEAT_DELAY_MS)
-            elif self.ctx.input.page_prev_value() == PRESSED:
-                btn = FAST_BACKWARD
-                time.sleep_ms(KEY_REPEAT_DELAY_MS)
-            else:
-                btn = self.ctx.input.wait_for_button()
+            btn = self.ctx.input.wait_for_fastnav_button()
             if btn in (BUTTON_PAGE, FAST_FORWARD, SWIPE_UP, SWIPE_LEFT):
                 if curr_page + 1 < len(pages):
                     curr_page += 1

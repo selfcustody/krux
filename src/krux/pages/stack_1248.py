@@ -32,11 +32,8 @@ from ..input import (
     BUTTON_TOUCH,
     FAST_FORWARD,
     FAST_BACKWARD,
-    KEY_REPEAT_DELAY_MS,
 )
-from ..buttons import PRESSED
 from ..kboard import kboard
-import time
 
 STACKBIT_GO_INDEX = 38
 STACKBIT_ESC_INDEX = 35
@@ -426,14 +423,7 @@ class Stackbit(Page):
                 self._draw_index(index)
             self.preview_word(digits)
             self._draw_punched(digits, y_offset)
-            if self.ctx.input.page_value() == PRESSED:
-                btn = FAST_FORWARD
-                time.sleep_ms(KEY_REPEAT_DELAY_MS)
-            elif self.ctx.input.page_prev_value() == PRESSED:
-                btn = FAST_BACKWARD
-                time.sleep_ms(KEY_REPEAT_DELAY_MS)
-            else:
-                btn = self.ctx.input.wait_for_button()
+            btn = self.ctx.input.wait_for_fastnav_button()
             if btn == BUTTON_TOUCH:
                 btn = BUTTON_ENTER
                 index = self.ctx.input.touch.current_index()

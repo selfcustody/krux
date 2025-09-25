@@ -343,12 +343,13 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
     ]
     case_num = 0
     for case in cases:
-        print("test_settings_on_amigo_tft cases[" + str(case_num) + "]")
+        print("test_settings_on_amigo_tft cases[" + str(case_num) + "]", case[0])
         case_num = case_num + 1
 
         ctx = mock_context(mocker)
         ctx.power_manager.battery_charge_remaining.return_value = 1
         ctx.input.wait_for_button = mocker.MagicMock(return_value=BUTTON_TOUCH)
+        ctx.input.wait_for_fastnav_button = ctx.input.wait_for_button
         ctx.input.touch = mocker.MagicMock(
             current_index=mocker.MagicMock(side_effect=case[0])
         )

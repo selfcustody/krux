@@ -943,3 +943,18 @@ def test_amigo_fast_forward_from_start(mocker, amigo):
     # input.page_value = lambda: PRESSED
     value = input._detect_press_type(BUTTON_PAGE)
     assert value == ACTIVATING_BUTTONS
+
+
+def test_fast_forward(mocker, m5stickv):
+    from krux.input import Input, PRESSED, FAST_FORWARD, FAST_BACKWARD
+
+    input = Input()
+    input.page_value = mocker.MagicMock(return_value=PRESSED)
+
+    assert input.wait_for_fastnav_button() == FAST_FORWARD
+
+    input.page_value = mocker.MagicMock(return_value=None)
+
+    input.page_prev_value = mocker.MagicMock(return_value=PRESSED)
+
+    assert input.wait_for_fastnav_button() == FAST_BACKWARD

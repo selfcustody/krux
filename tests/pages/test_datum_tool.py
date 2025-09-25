@@ -1079,25 +1079,28 @@ def test_datumtool_view_contents_multi_page(m5stickv, mocker):
 
 def test_datumtool_show_contents_button_turbo(mocker, m5stickv):
     from krux.pages.datum_tool import DatumTool
-    from krux.input import PRESSED, BUTTON_ENTER, KEY_REPEAT_DELAY_MS
+    from krux.input import Input, PRESSED, BUTTON_ENTER, KEY_REPEAT_DELAY_MS
     import time
 
     ctx = create_ctx(mocker, [BUTTON_ENTER, BUTTON_ENTER])
+    input = Input()
+    input.wait_for_button = ctx.input.wait_for_button
+    ctx.input.wait_for_fastnav_button = input.wait_for_fastnav_button
     datum = DatumTool(ctx)
     datum.contents = "testing 123 " * 250
 
     mocker.patch("time.sleep_ms", new=mocker.MagicMock())
 
     # fast forward
-    ctx.input.page_value = mocker.MagicMock(side_effect=[PRESSED, None])
+    input.page_value = mocker.MagicMock(side_effect=[PRESSED, None])
 
     datum._show_contents()
 
     time.sleep_ms.assert_called_with(KEY_REPEAT_DELAY_MS)
 
     # fast backward
-    ctx.input.page_value = mocker.MagicMock(return_value=None)
-    ctx.input.page_prev_value = mocker.MagicMock(side_effect=[PRESSED, None])
+    input.page_value = mocker.MagicMock(return_value=None)
+    input.page_prev_value = mocker.MagicMock(side_effect=[PRESSED, None])
 
     datum._show_contents()
 

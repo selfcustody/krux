@@ -23,6 +23,7 @@ import gc
 import time
 import lcd
 import _thread
+from ..context import Context
 from .keypads import Keypad
 from ..themes import theme, WHITE, GREEN, DARKGREY
 from ..input import (
@@ -37,9 +38,7 @@ from ..input import (
     SWIPE_LEFT,
     SWIPE_RIGHT,
     ONE_MINUTE,
-    KEY_REPEAT_DELAY_MS,
 )
-from ..buttons import PRESSED
 from ..display import (
     DEFAULT_PADDING,
     MINIMAL_PADDING,
@@ -90,7 +89,7 @@ class Page:
     Must be subclassed.
     """
 
-    def __init__(self, ctx, menu=None):
+    def __init__(self, ctx: Context, menu=None):
         self.ctx = ctx
         self.menu = menu
         # context has its own keypad mapping in case touch is not used
@@ -165,9 +164,10 @@ class Page:
             pad.get_valid_index()
             pad.draw_keys()
             pad.draw_keyset_index()
-            btn = self.ctx.input.wait_for_button()
             show_swipe_hint = False  # unless overridden by a particular key,
             # don't show the swipe hint after a key press
+
+            btn = self.ctx.input.wait_for_fastnav_button()
             if btn == BUTTON_TOUCH:
                 btn = pad.touch_to_physical()
             if btn == BUTTON_ENTER:
@@ -207,7 +207,7 @@ class Page:
                 if changed and go_on_change:
                     break
             else:
-                if btn in (SWIPE_RIGHT, SWIPE_LEFT):
+                if btn in (SWIPE_UP, SWIPE_LEFT, SWIPE_DOWN, SWIPE_RIGHT):
                     swipe_has_not_been_used = False
                 pad.navigate(btn)
         if kboard.has_touchscreen:
@@ -619,7 +619,7 @@ class Menu:
 
     def __init__(
         self,
-        ctx,
+        ctx: Context,
         menu,
         offset=None,
         disable_statusbar=False,
@@ -657,19 +657,6 @@ class Menu:
         from .screensaver import ScreenSaver
 
         ScreenSaver(self.ctx).start()
-
-    def _get_btn_input(self):
-        if self.ctx.input.page_value() == PRESSED:
-            time.sleep_ms(KEY_REPEAT_DELAY_MS)
-            return FAST_FORWARD
-        if self.ctx.input.page_prev_value() == PRESSED:
-            time.sleep_ms(KEY_REPEAT_DELAY_MS)
-            return FAST_BACKWARD
-        return self.ctx.input.wait_for_button(
-            # Block if screen saver not active
-            block=Settings().appearance.screensaver_time == 0,
-            wait_duration=Settings().appearance.screensaver_time * ONE_MINUTE,
-        )
 
     def _process_page(self, selected_item_index):
         selected_item_index = (selected_item_index + 1) % len(self.menu_view)
@@ -742,7 +729,12 @@ class Menu:
                     return (self.menu_view.index(selected_item_index), status)
                 start_from_submenu = False
             else:
-                btn = self._get_btn_input()
+                screensaver_time = Settings().appearance.screensaver_time
+                btn = self.ctx.input.wait_for_fastnav_button(
+                    # Block if screen saver not active
+                    screensaver_time == 0,
+                    screensaver_time * ONE_MINUTE,
+                )
                 if kboard.has_touchscreen:
                     if btn == BUTTON_TOUCH:
                         selected_item_index = self.ctx.input.touch.current_index()
@@ -756,8 +748,8 @@ class Menu:
                     selected_item_index = self._process_page(selected_item_index)
                 elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD):
                     selected_item_index = self._process_page_prev(selected_item_index)
-                elif btn in (SWIPE_UP, SWIPE_DOWN):
-                    if btn == SWIPE_UP:
+                elif btn in (SWIPE_UP, SWIPE_DOWN, SWIPE_LEFT, SWIPE_RIGHT):
+                    if btn in (SWIPE_UP, SWIPE_LEFT):
                         selected_item_index = self._process_swipe_up(
                             selected_item_index, swipe_up_fnc
                         )

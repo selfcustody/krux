@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 
 import math
-import time
 import lcd
 from ..krux_settings import t
 from ..themes import theme
@@ -31,11 +30,11 @@ from ..input import (
     BUTTON_PAGE_PREV,
     SWIPE_RIGHT,
     SWIPE_LEFT,
+    SWIPE_UP,
+    SWIPE_DOWN,
     FAST_FORWARD,
     FAST_BACKWARD,
-    KEY_REPEAT_DELAY_MS,
 )
-from ..buttons import PRESSED
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
 from ..kboard import kboard
 
@@ -271,28 +270,14 @@ class Keypad:
 
     def navigate(self, btn):
         """Groups navigation methods in one place"""
-        if btn == BUTTON_PAGE:
+        if btn in (BUTTON_PAGE, FAST_FORWARD):
             self._next_key()
-        elif btn == BUTTON_PAGE_PREV:
+        elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD):
             self._previous_key()
-        elif btn == SWIPE_LEFT:
+        elif btn in (SWIPE_UP, SWIPE_LEFT):
             self.next_keyset()
-        elif btn == SWIPE_RIGHT:
+        elif btn in (SWIPE_DOWN, SWIPE_RIGHT):
             self.previous_keyset()
-        elif btn == FAST_FORWARD:
-            while self.ctx.input.page_value() == PRESSED:
-                self._next_key()
-                self.get_valid_index()
-                self._clean_keypad_area()
-                self.draw_keys()
-                time.sleep_ms(KEY_REPEAT_DELAY_MS)
-        elif btn == FAST_BACKWARD:
-            while self.ctx.input.page_prev_value() == PRESSED:
-                self._previous_key()
-                self.get_valid_index()
-                self._clean_keypad_area()
-                self.draw_keys()
-                time.sleep_ms(KEY_REPEAT_DELAY_MS)
 
     def _clean_keypad_area(self):
         self.ctx.display.fill_rectangle(
