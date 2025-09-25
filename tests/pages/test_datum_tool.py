@@ -636,11 +636,7 @@ def test_datumtool__info_box(m5stickv, mocker):
     page._info_box()
     assert ctx.input.wait_for_button.call_count == 0
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [
-            mocker.call(
-                'Text\nabout\n"Loaded string …', info_box=True, highlight_prefix=":"
-            )
-        ]
+        [mocker.call('Text\nabout\n"Loaded string …', info_box=True)]
     )
 
     # call with bytes
@@ -653,7 +649,7 @@ def test_datumtool__info_box(m5stickv, mocker):
     page._info_box()
     assert ctx.input.wait_for_button.call_count == 0
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("Bytes\nabout\n0xdeadbeef", info_box=True, highlight_prefix=":")]
+        [mocker.call("Bytes\nabout\n0xdeadbeef", info_box=True)]
     )
 
 
@@ -671,9 +667,7 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page.about = "about"
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 3
-    ctx.display.draw_hcentered_text.assert_called_with(
-        "Text\nabout p.1", info_box=True, highlight_prefix=":"
-    )
+    ctx.display.draw_hcentered_text.assert_called_with("Text\nabout p.1", info_box=True)
 
     # call with bytes
     ctx = create_ctx(mocker, [BUTTON_ENTER])
@@ -685,7 +679,7 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 1
     ctx.display.draw_hcentered_text.assert_called_with(
-        "Bytes\nabout p.1", info_box=True, highlight_prefix=":"
+        "Bytes\nabout p.1", info_box=True
     )
 
 
