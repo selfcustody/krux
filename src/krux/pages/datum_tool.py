@@ -565,12 +565,13 @@ class DatumTool(Page):
             ),
         ]
         if preview:
+            preview_contents = self.contents[:SUFFICIENT_SAMPLE_SIZE]
             parts.append(
                 self.fit_to_line(
                     (
-                        '"' + self.contents + '"'
-                        if isinstance(self.contents, str)
-                        else "0x" + hexlify(self.contents).decode()
+                        '"' + preview_contents + '"'
+                        if isinstance(preview_contents, str)
+                        else "0x" + hexlify(preview_contents).decode()
                     ),
                     crop_middle=False,
                 )
@@ -580,21 +581,6 @@ class DatumTool(Page):
             info_box=True,
             highlight_prefix=self.about_prefix,
         )
-
-        if preview:
-            # sufficient for oneline, less than big contents
-            prefix_contents = self.contents[:50]
-            self.ctx.display.draw_hcentered_text(
-                (
-                    '"' + prefix_contents + '"'
-                    if isinstance(prefix_contents, str)
-                    else "0x" + hexlify(prefix_contents).decode()
-                ),
-                offset_y=DEFAULT_PADDING + num_lines * FONT_HEIGHT + 2,
-                max_lines=1,
-                info_box=True,
-            )
-            num_lines += 1
 
         return num_lines
 
@@ -868,9 +854,10 @@ class DatumTool(Page):
                     self.history.append(status)
                 del new_contents
             else:
-                self.flash_error(t("Failed to convert"))
                 if undo:
                     self.history.append(status)
+                self.flash_error(t("Failed to convert"))
+
         elif status == "encrypt":
             # if user chose to encrypt
             kef = KEFEnvelope(self.ctx)
