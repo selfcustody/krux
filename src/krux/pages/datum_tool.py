@@ -391,6 +391,7 @@ class DatumTool(Page):
         self.ctx = ctx
         self.contents = None
         self.encodings = []
+        self.about_prefix = None
         self.about = None
         self.title = None
         self.datum = None
@@ -553,23 +554,22 @@ class DatumTool(Page):
                 ]
             ),
         ]
+        if preview:
+            parts.append(
+                self.fit_to_line(
+                    (
+                        '"' + self.contents + '"'
+                        if isinstance(self.contents, str)
+                        else "0x" + hexlify(self.contents).decode()
+                    ),
+                    crop_middle=False,
+                )
+            )
         num_lines = self.ctx.display.draw_hcentered_text(
             "\n".join(p for p in parts if p),
             info_box=True,
-            highlight_prefix=":",
+            highlight_prefix=self.about_prefix,
         )
-        if preview:
-            self.ctx.display.draw_hcentered_text(
-                (
-                    '"' + self.contents + '"'
-                    if isinstance(self.contents, str)
-                    else "0x" + hexlify(self.contents).decode()
-                ),
-                offset_y=DEFAULT_PADDING + num_lines * FONT_HEIGHT + 2,
-                max_lines=1,
-                info_box=True,
-            )
-            num_lines += 1
 
         return num_lines
 
@@ -647,7 +647,8 @@ class DatumTool(Page):
         """
 
         if isinstance(self.contents, bytes):
-            self.about = t("binary: {} bytes").format(len(self.contents))
+            self.about_prefix = t("binary:")
+            self.about = self.about_prefix + " " + t("%s bytes") % len(self.contents)
             try:
                 as_str = self.contents.decode()
                 suggestion = str(detect_encodings(as_str, False)[0])
@@ -668,7 +669,8 @@ class DatumTool(Page):
                 self.oneline_viewable = False
 
         elif isinstance(self.contents, str):
-            self.about = t("text: {} chars").format(len(self.contents))
+            self.about_prefix = t("text:")
+            self.about = self.about_prefix + " " + t("%s chars") % len(self.contents)
             self.encodings = detect_encodings(self.contents)
 
             # does it look like a 12 or 24 word mnemonic / Mnemonic QR?

@@ -632,11 +632,18 @@ def test_datumtool__info_box(m5stickv, mocker):
     page.contents = "Loaded string contents in DatumTool"
     page.title = "Text"
     page.datum = ""
-    page.about = "about"
+    page.about_prefix = "t:"
+    page.about = page.about_prefix + " about"
     page._info_box()
     assert ctx.input.wait_for_button.call_count == 0
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("Text\nabout", info_box=True, highlight_prefix=":")]
+        [
+            mocker.call(
+                'Text\nt: about\n"Loaded string …',
+                info_box=True,
+                highlight_prefix=page.about_prefix,
+            )
+        ]
     )
 
     # call with bytes
@@ -645,11 +652,18 @@ def test_datumtool__info_box(m5stickv, mocker):
     page.contents = b"\xde\xad\xbe\xef"
     page.title = "Bytes"
     page.datum = ""
-    page.about = "about"
+    page.about_prefix = "t:"
+    page.about = page.about_prefix + " about"
     page._info_box()
     assert ctx.input.wait_for_button.call_count == 0
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("Bytes\nabout", info_box=True, highlight_prefix=":")]
+        [
+            mocker.call(
+                "Bytes\nt: about\n0xdeadbeef",
+                info_box=True,
+                highlight_prefix=page.about_prefix,
+            )
+        ]
     )
 
 
@@ -664,11 +678,12 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page.contents = "Loaded string contents in DatumTool"
     page.title = "Text"
     page.datum = ""
-    page.about = "about"
+    page.about_prefix = "t:"
+    page.about = page.about_prefix + " about"
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 3
     ctx.display.draw_hcentered_text.assert_called_with(
-        "Text\nabout p.1", info_box=True, highlight_prefix=":"
+        "Text\nt: about p.1", info_box=True, highlight_prefix=page.about_prefix
     )
 
     # call with bytes
@@ -677,11 +692,12 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page.contents = b"\xde\xad\xbe\xef"
     page.title = "Bytes"
     page.datum = ""
-    page.about = "about"
+    page.about_prefix = "t:"
+    page.about = page.about_prefix + " about"
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 1
     ctx.display.draw_hcentered_text.assert_called_with(
-        "Bytes\nabout p.1", info_box=True, highlight_prefix=":"
+        "Bytes\nt: about p.1", info_box=True, highlight_prefix=page.about_prefix
     )
 
 
