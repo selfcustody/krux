@@ -613,9 +613,9 @@ class DatumTool(Page):
         while True:
             info_len, max_lines = _update_infobox(curr_page + 1)
             chars_per_page = self.ctx.display.width() // FONT_WIDTH * max_lines
-            contents = self.contents[start_index : start_index + chars_per_page]
+            contents = self.contents[start_index : start_index + chars_per_page + 1]
             if isinstance(contents, bytes):
-                contents = hexlify(contents).decode()[:chars_per_page]
+                contents = hexlify(contents).decode()[: chars_per_page + 1]
             lines, endpos = self.ctx.display.to_lines_endpos(contents, max_lines)
             if isinstance(self.contents, bytes):
                 if endpos % 2:
