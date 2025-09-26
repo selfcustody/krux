@@ -34,23 +34,23 @@ def test_run_loop(mocker, m5stickv):
 
     BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER]
     call_count = len(BTN_SEQUENCE)
-    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
+    ctx.input.wait_for_fastnav_button.side_effect = BTN_SEQUENCE
     ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 1
     assert status == MENU_EXIT
-    assert ctx.input.wait_for_button.call_count == call_count
+    assert ctx.input.wait_for_fastnav_button.call_count == call_count
 
     BTN_SEQUENCE = [BUTTON_PAGE, BUTTON_PAGE, BUTTON_ENTER]
     call_count += len(BTN_SEQUENCE)
-    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
+    ctx.input.wait_for_fastnav_button.side_effect = BTN_SEQUENCE
     ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 2
     assert status == MENU_SHUTDOWN
-    assert ctx.input.wait_for_button.call_count == call_count
+    assert ctx.input.wait_for_fastnav_button.call_count == call_count
 
     BTN_SEQUENCE = [
         BUTTON_PAGE,
@@ -63,13 +63,13 @@ def test_run_loop(mocker, m5stickv):
         BUTTON_ENTER,
     ]
     call_count += len(BTN_SEQUENCE)
-    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
+    ctx.input.wait_for_fastnav_button.side_effect = BTN_SEQUENCE
     ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 1
     assert status == MENU_EXIT
-    assert ctx.input.wait_for_button.call_count == call_count
+    assert ctx.input.wait_for_fastnav_button.call_count == call_count
 
 
 def test_run_loop_on_amigo_tft(mocker, amigo):
@@ -100,13 +100,13 @@ def test_run_loop_on_amigo_tft(mocker, amigo):
         BUTTON_ENTER,
     ]
     call_count = len(BTN_SEQUENCE)
-    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
+    ctx.input.wait_for_fastnav_button.side_effect = BTN_SEQUENCE
     ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 1
     assert status == MENU_EXIT
-    assert ctx.input.wait_for_button.call_count == call_count
+    assert ctx.input.wait_for_fastnav_button.call_count == call_count
 
     BTN_SEQUENCE = [
         BUTTON_PAGE_PREV,
@@ -114,24 +114,24 @@ def test_run_loop_on_amigo_tft(mocker, amigo):
         BUTTON_ENTER,
     ]
     call_count += len(BTN_SEQUENCE)
-    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
+    ctx.input.wait_for_fastnav_button.side_effect = BTN_SEQUENCE
     ctx.power_manager.battery_charge_remaining.return_value = 1
 
     index, status = menu.run_loop()
     assert index == 2
     assert status == MENU_SHUTDOWN
-    assert ctx.input.wait_for_button.call_count == call_count
+    assert ctx.input.wait_for_fastnav_button.call_count == call_count
 
     mocker.patch.object(ctx.input.touch, "current_index", new=lambda: 1)
     mocker.patch.object(ctx.input, "buttons_active", False)
 
     BTN_SEQUENCE = [BUTTON_TOUCH]
     call_count += len(BTN_SEQUENCE)
-    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
+    ctx.input.wait_for_fastnav_button.side_effect = BTN_SEQUENCE
     index, status = menu.run_loop()
     assert index == 1
     assert status == MENU_EXIT
-    assert ctx.input.wait_for_button.call_count == call_count
+    assert ctx.input.wait_for_fastnav_button.call_count == call_count
 
 
 def test_two_screens_menu(mocker, amigo):
@@ -159,7 +159,7 @@ def test_two_screens_menu(mocker, amigo):
         + [BUTTON_ENTER]  # click back
     )
     ctx = mock_context(mocker)
-    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
+    ctx.input.wait_for_fastnav_button.side_effect = BTN_SEQUENCE
     # each menu page has 3 items
     ctx.display.max_menu_lines.return_value = 3
     print(ctx.display.max_menu_lines())
@@ -185,14 +185,14 @@ def test_two_screens_menu(mocker, amigo):
     assert seq_clicked == first_seq_clicked
     assert index == menu.back_index
     assert status == MENU_EXIT
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.input.wait_for_fastnav_button.call_count == len(BTN_SEQUENCE)
 
     BTN_SEQUENCE = (
         [BUTTON_ENTER]  # click index 0
         + [BUTTON_PAGE]
         + [BUTTON_ENTER]  # click index 1
         + [BUTTON_ENTER]  # click index 1
-        + [SWIPE_DOWN]  # go to last index on new menu page
+        + [SWIPE_DOWN]  # go to last index on new menu page #5
         + [BUTTON_PAGE_PREV]  # go to one before back
         + [BUTTON_ENTER]  # click index 4
         + [SWIPE_UP]  # go to first index on new menu page
@@ -203,8 +203,11 @@ def test_two_screens_menu(mocker, amigo):
         + [BUTTON_ENTER]  # click back
     )
 
-    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
-    ctx.input.wait_for_button.call_count = 0
+    ctx.input.wait_for_fastnav_button.side_effect = BTN_SEQUENCE
+    ctx.input.wait_for_fastnav_button.call_count = 0
+    ctx.input.wait_for_button = (
+        ctx.input.wait_for_fastnav_button
+    )  # screensaver will call for wait_for_button
     seq_clicked = []
 
     menu_items = []
@@ -214,28 +217,12 @@ def test_two_screens_menu(mocker, amigo):
         ctx,
         menu_items,
     )
+    print(menu_items)
     index, status = menu.run_loop()
     assert seq_clicked == [0, 1, 1, 4, 0]
     assert index == menu.back_index
     assert status == MENU_EXIT
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-
-
-def test_fast_forward(mocker, m5stickv):
-    from krux.input import PRESSED, FAST_FORWARD, FAST_BACKWARD
-    from krux.pages import Menu
-
-    ctx = mock_context(mocker)
-    ctx.input.page_value = mocker.MagicMock(return_value=PRESSED)
-    menu = Menu(ctx, [])
-
-    assert menu._get_btn_input() == FAST_FORWARD
-
-    ctx.input.page_value = mocker.MagicMock(return_value=None)
-
-    ctx.input.page_prev_value = mocker.MagicMock(return_value=PRESSED)
-
-    assert menu._get_btn_input() == FAST_BACKWARD
+    assert ctx.input.wait_for_fastnav_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_swipe_up(mocker, amigo):
@@ -254,7 +241,7 @@ def test_swipe_up(mocker, amigo):
     BTN_SEQUENCE = [
         SWIPE_UP,
     ]
-    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
+    ctx.input.wait_for_fastnav_button.side_effect = BTN_SEQUENCE
     index, status = menu.run_loop(swipe_up_fnc=swipe_fnc)
     assert index == 1
     assert status == MENU_EXIT
@@ -285,12 +272,12 @@ def test_start_from(mocker, m5stickv):
 
     # test start menu clicking on index 0 that will NOT exit
     BTN_SEQUENCE = [BUTTON_PAGE_PREV] + [BUTTON_ENTER]  # go to back  # click back
-    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
+    ctx.input.wait_for_fastnav_button.side_effect = BTN_SEQUENCE
     index, status = menu.run_loop(start_from_index=0)
     assert index == menu.back_index
     assert status == MENU_EXIT
     mock_fnc.assert_called()
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.input.wait_for_fastnav_button.call_count == len(BTN_SEQUENCE)
 
 
 def test_disabled_entry(mocker, m5stickv):
@@ -302,9 +289,9 @@ def test_disabled_entry(mocker, m5stickv):
     BTN_SEQUENCE = (
         [BUTTON_ENTER] + [BUTTON_PAGE] + [BUTTON_ENTER]  # click disabled  # click back
     )
-    ctx.input.wait_for_button.side_effect = BTN_SEQUENCE
+    ctx.input.wait_for_fastnav_button.side_effect = BTN_SEQUENCE
     menu = Menu(ctx, menu_items)
     index, status = menu.run_loop()
     assert index == menu.back_index
     assert status == MENU_EXIT
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.input.wait_for_fastnav_button.call_count == len(BTN_SEQUENCE)

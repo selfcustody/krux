@@ -375,7 +375,7 @@ def test_swipe_down_value_released_when_none(mocker, m5stickv):
 
 def test_wait_for_release(mocker, m5stickv):
     import krux
-    from krux.input import Input, RELEASED, PRESSED
+    from krux.input import Input, RELEASED, PRESSED, BUTTON_ENTER
 
     input = Input()
     input = reset_input_states(mocker, input)
@@ -386,7 +386,45 @@ def test_wait_for_release(mocker, m5stickv):
     )
 
     assert input.entropy == 0
-    input.wait_for_button()
+    assert input.wait_for_button() == BUTTON_ENTER
+    assert input.entropy > 0
+    krux.input.wdt.feed.assert_called()
+
+
+def test_wait_for_release_page_yahboom(mocker, yahboom):
+    import krux
+    from krux.input import Input, RELEASED, PRESSED, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    input = Input()
+    input = reset_input_states(mocker, input)
+    mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks())
+    mocker.patch.object(input, "page_event", side_effect=[False, True, False])
+    mocker.patch.object(
+        input, "page_value", side_effect=[RELEASED, PRESSED, PRESSED, RELEASED]
+    )
+
+    assert input.entropy == 0
+    input.wait_for_button() == BUTTON_PAGE
+    assert input.entropy > 0
+    krux.input.wdt.feed.assert_called()
+
+
+def test_wait_for_release_page_prev_yahboom(mocker, yahboom):
+    import krux
+    from krux.input import Input, RELEASED, PRESSED, BUTTON_PAGE
+
+    input = Input()
+    input = reset_input_states(mocker, input)
+    mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks())
+    mocker.patch.object(input, "page_prev_event", side_effect=[False, True, False])
+    mocker.patch.object(
+        input, "page_prev_value", side_effect=[RELEASED, PRESSED, PRESSED, RELEASED]
+    )
+
+    assert input.entropy == 0
+
+    # Test with BUTTON_PAGE_PREV, expect it to be PAGE on yahboom
+    input.wait_for_button() == BUTTON_PAGE
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()
 
@@ -943,3 +981,42 @@ def test_amigo_fast_forward_from_start(mocker, amigo):
     # input.page_value = lambda: PRESSED
     value = input._detect_press_type(BUTTON_PAGE)
     assert value == ACTIVATING_BUTTONS
+
+
+def test_fast_forward(mocker, m5stickv):
+    from krux.input import Input, PRESSED, FAST_FORWARD, FAST_BACKWARD
+
+    input = Input()
+    input.page_value = mocker.MagicMock(return_value=PRESSED)
+
+    assert input.wait_for_fastnav_button() == FAST_FORWARD
+
+    input.page_value = mocker.MagicMock(return_value=None)
+
+    input.page_prev_value = mocker.MagicMock(return_value=PRESSED)
+
+    assert input.wait_for_fastnav_button() == FAST_BACKWARD
+
+
+def test_fast_forward_yahboom(mocker, yahboom):
+    from krux.input import Input, PRESSED, FAST_FORWARD
+
+    input = Input()
+    input.page_value = mocker.MagicMock(return_value=PRESSED)
+
+    assert input.wait_for_fastnav_button() == FAST_FORWARD
+
+    input.page_value = mocker.MagicMock(return_value=None)
+    input.page_prev_value = mocker.MagicMock(return_value=PRESSED)
+
+    # Test with BUTTON_PAGE_PREV PRESSED expect it to be FAST_FORWARD on yahboom
+    assert input.wait_for_fastnav_button() == FAST_FORWARD
+
+
+def test_fast_forward_no_pressed(mocker, m5stickv):
+    from krux.input import Input, BUTTON_ENTER
+
+    input = Input()
+    input.wait_for_button = mocker.MagicMock(return_value=BUTTON_ENTER)
+
+    assert input.wait_for_fastnav_button() == BUTTON_ENTER

@@ -33,12 +33,9 @@ from ..input import (
     BUTTON_PAGE_PREV,
     FAST_FORWARD,
     FAST_BACKWARD,
-    KEY_REPEAT_DELAY_MS,
 )
-from ..buttons import PRESSED
 from ..key import Key
 from ..kboard import kboard
-import time
 
 GO_INDEX = 25
 ESC_INDEX = 24
@@ -300,14 +297,7 @@ class MnemonicEditor(Page):
             self.ctx.display.clear()
             self._draw_header()
             self._map_words(button_index, page)
-            if self.ctx.input.page_value() == PRESSED:
-                btn = FAST_FORWARD
-                time.sleep_ms(KEY_REPEAT_DELAY_MS)
-            elif self.ctx.input.page_prev_value() == PRESSED:
-                btn = FAST_BACKWARD
-                time.sleep_ms(KEY_REPEAT_DELAY_MS)
-            else:
-                btn = self.ctx.input.wait_for_button()
+            btn = self.ctx.input.wait_for_fastnav_button()
             if btn == BUTTON_TOUCH:
                 button_index = self.ctx.input.touch.current_index()
                 if button_index < ESC_INDEX:

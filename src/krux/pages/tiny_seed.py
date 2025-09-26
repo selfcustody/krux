@@ -43,9 +43,7 @@ from ..input import (
     BUTTON_TOUCH,
     FAST_FORWARD,
     FAST_BACKWARD,
-    KEY_REPEAT_DELAY_MS,
 )
-from ..buttons import PRESSED
 from ..bip39 import entropy_checksum
 from ..kboard import kboard
 
@@ -377,14 +375,7 @@ class TinySeed(Page):
             if self.ctx.input.buttons_active:
                 self._draw_index(index)
 
-            if self.ctx.input.page_value() == PRESSED:
-                btn = FAST_FORWARD
-                time.sleep_ms(KEY_REPEAT_DELAY_MS)
-            elif self.ctx.input.page_prev_value() == PRESSED:
-                btn = FAST_BACKWARD
-                time.sleep_ms(KEY_REPEAT_DELAY_MS)
-            else:
-                btn = self.ctx.input.wait_for_button()
+            btn = self.ctx.input.wait_for_fastnav_button()
             if btn == BUTTON_TOUCH:
                 btn = BUTTON_ENTER
                 index = self.ctx.input.touch.current_index()

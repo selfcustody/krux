@@ -1,10 +1,10 @@
 # Changelog 25.XX.X - XXX 2025
 
 ### New Device Support: TZT
-The TZT CanMV is similar to the WonderMV but includes five buttons and a premium milled aluminum housing.
+The TZT CanMV is similar to the WonderMV but includes five buttons and a premium milled aluminum housing. Computer simulator for the TZT device is also included.
 
 ### New Device Support: WonderK PRO
-From the wonderful land of Korea, a new creation arrives: the WonderK PRO. Created by an entrepreneur who loves the Krux project, the WonderK follows in the footsteps of the WonderMV, but boasts a larger 2.8" display!
+From the wonderful land of Korea, a new creation arrives: the WonderK PRO. Created by an entrepreneur who loves the Krux project, the WonderK follows in the footsteps of the WonderMV, but boasts a larger 2.8" display! Computer simulator for the WonderK device is also included.
 
 ### Code optimization
 Reduced firmware size by 25% and lowered RAM usage through code cleanup and optimizations.
@@ -19,6 +19,8 @@ The Maix Bit device has long been discouraged due to its poor-quality camera. St
 - Touchscreen test added in Tools for detection check
 - wbits for deflate-decompress window set to 10 bits to match KEF spec.
 - Remove "Reboot" option and status bar, when empty, from Login menu
+- Optimized Datum show: total pages are no longer visible, and navigation no longer wraps from the first page to the last or vice versa
+- Enabled swipe up/down gestures on keypads, menus, and QR transcribe
 
 # Changelog 25.09.0 - September 2025
 

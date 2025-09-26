@@ -157,14 +157,17 @@ class QRCodeCapture(Page):
                 break
 
             # Anti-glare / zoom / normal mode
-            if self.ctx.input.page_event():
+            page_prev_event = self.ctx.input.page_prev_event()
+            if self.ctx.input.page_event() or (kboard.is_yahboom and page_prev_event):
                 if self.ctx.camera.has_antiglare():
                     self.anti_glare_control()
                 else:
                     break
 
-            # Exit the capture loop with PAGE_PREV or TOUCH
-            if self.ctx.input.page_prev_event() or self.ctx.input.touch_event():
+            # Exit the capture loop with TOUCH or PAGE_PREV (except yahboom)
+            if self.ctx.input.touch_event() or (
+                not kboard.is_yahboom and page_prev_event
+            ):
                 break
 
             if new_part is not None and new_part != previous_part:

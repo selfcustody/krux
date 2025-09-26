@@ -159,18 +159,14 @@ class Input:
 
     def page_event(self):
         """Intermediary method to pull button PAGE event"""
-        event_val = False
         if self.page is not None:
-            event_val = self.page.event()
-        if kboard.is_yahboom:
-            event_val = event_val or self.page_prev_event(check_yahboom=True)
-        return event_val
+            return self.page.event()
+        return False
 
-    def page_prev_event(self, check_yahboom=False):
+    def page_prev_event(self):
         """Intermediary method to pull button PAGE_PREV event"""
-        if not kboard.is_yahboom or check_yahboom:
-            if self.page_prev is not None:
-                return self.page_prev.event()
+        if self.page_prev is not None:
+            return self.page_prev.event()
         return False
 
     def touch_event(self, validate_position=True):
@@ -236,6 +232,8 @@ class Input:
             if self.page_event():
                 return BUTTON_PAGE
             if self.page_prev_event():
+                if kboard.is_yahboom:
+                    return BUTTON_PAGE
                 return BUTTON_PAGE_PREV
             if self.touch_event():
                 return BUTTON_TOUCH
@@ -293,7 +291,10 @@ class Input:
             if btn == BUTTON_ENTER:
                 return self.enter_value() == PRESSED
             if btn == BUTTON_PAGE:
-                return self.page_value() == PRESSED
+                val = self.page_value() == PRESSED
+                if kboard.is_yahboom and self.page_prev_value() == PRESSED:
+                    return True
+                return val
             # if btn == BUTTON_PAGE_PREV:
             return self.page_prev_value() == PRESSED
 
@@ -337,6 +338,18 @@ class Input:
         btn = self._detect_press_type(btn)
         self.debounce_time = time.ticks_ms()
         return btn
+
+    def wait_for_fastnav_button(self, block=True, wait_duration=QR_ANIM_PERIOD):
+        """Wait for a button press, with support for fast navigation."""
+        if self.page_value() == PRESSED:
+            time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            return FAST_FORWARD
+        if self.page_prev_value() == PRESSED:
+            time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            if kboard.is_yahboom:
+                return FAST_FORWARD
+            return FAST_BACKWARD
+        return self.wait_for_button(block, wait_duration)
 
     def flush_events(self):
         """Clean eventual event flags unintentionally collected"""
