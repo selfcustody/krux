@@ -376,7 +376,8 @@ class DatumToolMenu(Page):
         if not contents:
             return MENU_CONTINUE
 
-        self.ctx.display.draw_centered_text("\n\n" + t("Processing…") + "\n\n")
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing…"))
 
         # utils.load_file() always returns binary
         try:
@@ -830,6 +831,7 @@ class DatumTool(Page):
             # if user chose to exit
             return MENU_CONTINUE
 
+        self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing…"))
 
         if status == "show":
