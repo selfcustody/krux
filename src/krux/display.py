@@ -151,6 +151,16 @@ class Display:
                 ss=board.config["lcd"]["ss"],
                 clk=board.config["lcd"]["clk"],
             )
+        elif kboard.is_embed_fire:
+            lcd.init(
+                type=6,  # DEV_EMBED_FIRE
+                invert=False,
+                rst=board.config["lcd"]["rst"],
+                dcx=board.config["lcd"]["dcx"],
+                ss=board.config["lcd"]["ss"],
+                clk=board.config["lcd"]["clk"],
+                lcd_type=6,  # ST7789V
+            )
         elif kboard.is_cube:
             lcd.init(
                 invert=True,

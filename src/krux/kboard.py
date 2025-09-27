@@ -30,6 +30,7 @@ class KBoard:
         self.is_amigo = board.config["type"] == "amigo"
         self.is_bit = board.config["type"] == "bit"
         self.is_cube = board.config["type"] == "cube"
+        self.is_embed_fire = board.config["type"] == "embed_fire"
         self.is_yahboom = board.config["type"] == "yahboom"
         self.is_wonder_mv = board.config["type"] == "wonder_mv"
         self.is_tzt = board.config["type"] == "tzt"
