@@ -101,7 +101,7 @@ def test_init_qr_view_background_white(amigo, mocker, mocker_theme_background_wh
 
 
 def test_load_qr_no_title(mocker, amigo):
-    from krux.input import BUTTON_TOUCH
+    from krux.input import SWIPE_DOWN
     from krux.pages import MENU_CONTINUE
     from krux.pages.qr_view import SeedQRView
 
@@ -116,7 +116,7 @@ def test_load_qr_no_title(mocker, amigo):
     # UI methods like wait_for_button,
     # draw_hcentered_text, draw_grided_qr, etc..
     mocker.patch.object(qr_view, "draw_grided_qr")
-    mocker.patch.object(qr_view.ctx.input, "wait_for_button", return_value=BUTTON_TOUCH)
+    mocker.patch.object(qr_view.ctx.input, "wait_for_button", return_value=SWIPE_DOWN)
     mocker.patch.object(qr_view.ctx.display, "height", return_value=240)
     mocker.patch.object(qr_view.ctx.display, "width", return_value=240)
     mocker.patch.object(qr_view.ctx.display, "qr_offset", return_value=10)
@@ -130,7 +130,7 @@ def test_load_qr_no_title(mocker, amigo):
 
 
 def test_display_qr_toggle_brightness(amigo, mocker):
-    from krux.input import BUTTON_PAGE, BUTTON_TOUCH
+    from krux.input import BUTTON_PAGE, SWIPE_DOWN
     from krux.pages import MENU_CONTINUE
     from krux.pages.qr_view import SeedQRView
     from krux.themes import DARKGREY, WHITE
@@ -143,7 +143,7 @@ def test_display_qr_toggle_brightness(amigo, mocker):
     ctx.input = mocker.Mock()
     ctx.input.wait_for_button.side_effect = [
         BUTTON_PAGE,
-        BUTTON_TOUCH,
+        SWIPE_DOWN,
     ]
 
     ctx.display = mocker.Mock()

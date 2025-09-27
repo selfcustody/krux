@@ -518,7 +518,7 @@ class SeedQRView(Page):
         mode = 0
         while True:
             button = None
-            while True:
+            while button not in (SWIPE_DOWN, SWIPE_UP):
 
                 def toggle_brightness():
                     if self.qr_foreground == WHITE:
@@ -539,15 +539,11 @@ class SeedQRView(Page):
                         highlight_function(label, y_offset)
                 button = self.ctx.input.wait_for_button()
                 if transcript_tools:
-                    if button in (BUTTON_PAGE, SWIPE_UP, SWIPE_LEFT):  # page, swipe
+                    if button in (BUTTON_PAGE, SWIPE_LEFT):  # page, swipe
                         mode += 1
                         mode %= 5
                         self.lr_index = 0
-                    elif button in (
-                        BUTTON_PAGE_PREV,
-                        SWIPE_DOWN,
-                        SWIPE_RIGHT,
-                    ):  # page, swipe
+                    elif button in (BUTTON_PAGE_PREV, SWIPE_RIGHT):  # page, swipe
                         mode -= 1
                         mode %= 5
                         self.lr_index = 0
