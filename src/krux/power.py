@@ -42,7 +42,6 @@ class PowerManager:
             self.pmu.enable_adcs(True)
             if kboard.is_m5stickv:
                 self.pmu.enable_pek_button_monitor()
-            kboard.has_battery = self.has_battery()
         except Exception as e:
             print(e)
 

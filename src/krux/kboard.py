@@ -35,7 +35,7 @@ class KBoard:
         self.is_tzt = board.config["type"] == "tzt"
         self.is_wonder_k = board.config["type"] == "wonder_k"
         self.is_m5stickv = board.config["type"] == "m5stickv"
-        self.has_battery = False  # Varible to be set by PowerManager
+        self.has_battery = False  # Variable to be set in Login Page
         self.has_touchscreen = board.config["krux"]["display"].get("touch", False)
         self.has_minimal_display = self.is_m5stickv or self.is_cube
         self.can_control_brightness = any(
