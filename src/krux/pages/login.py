@@ -81,7 +81,7 @@ class Login(Page):
             (t("Tools"), self.tools),
             (t("About"), self.about),
         ]
-        if kboard.has_battery is None and ctx.power_manager is not None:
+        if ctx.power_manager is not None:
             kboard.has_battery = ctx.power_manager.has_battery()
         if kboard.has_battery:
             login_menu_items.append((t("Shutdown"), self.shutdown))
