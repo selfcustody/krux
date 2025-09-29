@@ -194,7 +194,7 @@ class DeviceTests(Page):
             success = bool(result)
         except Exception as err:
             result = err
-        idx = [i for i, (t, r) in enumerate(self.results) if t == test][0]
+        idx = [i for i, (t, _) in enumerate(self.results) if t == test][0]
         self.results[idx] = (test, success)
 
         self.ctx.display.clear()

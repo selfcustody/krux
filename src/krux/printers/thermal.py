@@ -46,8 +46,6 @@ from ..krux_settings import Settings
 from ..wdt import wdt
 from . import Printer
 
-INITIALIZE_WAIT_TIME = 500
-
 
 class AdafruitPrinter(Printer):
     """AdafruitPrinter is a minimal wrapper around a serial connection to

@@ -223,7 +223,7 @@ class KEFEnvelope(Page):
         idx, _ = Menu(
             self.ctx, [(x[0], lambda: None) for x in menu_items], back_label=None
         ).run_loop()
-        self.version = [v for i, (name, v) in enumerate(menu_items) if i == idx][0]
+        self.version = [v for i, (_, v) in enumerate(menu_items) if i == idx][0]
         self.version_name = kef.VERSIONS[self.version]["name"]
         self.mode = kef.VERSIONS[self.version]["mode"]
         self.mode_name = [k for k, v in kef.MODE_NUMBERS.items() if v == self.mode][0]
