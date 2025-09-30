@@ -1066,6 +1066,7 @@ def test_datumtool_view_contents(m5stickv, mocker, mock_file_operations):
 
 def test_datumtool_view_contents_multi_page(m5stickv, mocker):
     """simply to cover building of `pages` index, moving to `next page`, and `prev page`"""
+    from binascii import hexlify
     from krux.pages.datum_tool import DatumTool
     from krux.input import PRESSED, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
@@ -1091,6 +1092,71 @@ def test_datumtool_view_contents_multi_page(m5stickv, mocker):
     page.title = "title"
     page.view_contents()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # call with bytes that will span more than one page
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # go Show Datum
+        BUTTON_ENTER,  # escape Show Datum
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx.display.to_lines_endpos = mocker.MagicMock(
+        side_effect=[
+            (
+                [hexlify(b"8 bytes.").decode() for _ in range(15)]
+                + ["382062797465732…"],
+                127,
+            ),
+            ([hexlify(b".8 bytes").decode() for _ in range(4)] + ["2e"], 33),
+        ]
+    )
+    page = DatumTool(ctx)
+    page.contents = b"8 bytes." * 20
+    page.title = "title"
+    page.view_contents()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_datumtool_view_contents_convert_failure(mocker, m5stickv):
+    """Contents cannot always be converted (ie: mem-alloc-err); flash_error"""
+    from krux.pages.datum_tool import DatumTool
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    # mock failure in convert_encoding so it returns None
+    mocker.patch(
+        "binascii.unhexlify",
+        new=mocker.MagicMock(
+            side_effect=[
+                b"\xde\xad\xbe\xef",  # first call to unhexlify works, during detect_encoding()
+                Exception(
+                    "mocked failure"
+                ),  # second call fails, during convert_encoding()
+            ]
+        ),
+    )
+    from binascii import unhexlify
+
+    # call with bytes to be hexlified that will fail to convert via mocked unhexlify
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # go Convert
+        BUTTON_ENTER,  # go "to hex"
+        BUTTON_ENTER,  # go "from hex", mocked failure
+        BUTTON_PAGE_PREV,  # to Done Converting
+        BUTTON_ENTER,  # go Done Converting
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = b"\xde\xad\xbe\xef"
+    page.title = "title"
+    page.view_contents()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.display.flash_text.call_count == 1
+    ctx.display.flash_text.assert_called_with(
+        "Failed to convert", 248, 2000, highlight_prefix=""
+    )
 
 
 def test_datumtool_show_contents_button_turbo(mocker, m5stickv):

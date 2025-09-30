@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import gc
+from krux.wdt import wdt
 from . import (
     Page,
     Menu,
@@ -70,6 +72,8 @@ DATUM_BBQR_TYPES = {
 }
 
 STATIC_QR_MAX_SIZE = 4  # version 5 - 37x37
+SUFFICIENT_SAMPLE_SIZE = 512  # to truncate large contents for sampling
+SLOW_ENCODING_MAX_SIZE = 2**14  # base43,base58,bech32 not offered above this size
 
 
 def urobj_to_data(ur_obj):
@@ -129,17 +133,17 @@ def convert_encoding(contents, conversion):
     return None
 
 
-def identify_datum(data):
+def identify_datum(data, encodings=None):
     """Determine which "datum" type this is; ie: PSBT, XPUB, DESC, ADDR"""
 
     # TODO: more samples and fewer false-positives
-
     datum = None
     if isinstance(data, bytes):
         if data[:5] == b"psbt\xff":
             datum = DATUM_PSBT
     elif len(data) > 33:
-        encodings = detect_encodings(data)
+        if encodings is None:
+            encodings = detect_encodings(data)
 
         if data[:1] in "xyzYZtuvUV" and data[1:4] == "pub" and 58 in encodings:
             datum = DATUM_XPUB
@@ -153,7 +157,7 @@ def identify_datum(data):
             datum = DATUM_DESCRIPTOR
         elif (data[:1] in ("1", "3", "n", "2", "m") and 58 in encodings) or (
             data[:4].lower() in ("bc1p", "bc1q", "tb1p", "tb1q")
-            and "bech32" in [x.lower()[:6] for x in encodings]
+            and "bech32" in [x.lower()[:6] for x in encodings if isinstance(x, str)]
         ):
             datum = DATUM_ADDRESS
 
@@ -177,14 +181,15 @@ def detect_encodings(str_data, verify=True):
     if not isinstance(str_data, str):
         raise TypeError("detect_encodings() expected str")
 
-    # get min and max characters (sorted by ordinal value),
-    # check most restrictive encodings first
+    str_len = len(str_data)
 
-    min_chr = min(str_data)
-    max_chr = max(str_data)
+    # get min and max characters (sorted by ordinal value)
+    # then check most restrictive encodings first
+    min_chr = min(str_data[:SUFFICIENT_SAMPLE_SIZE])
+    max_chr = max(str_data[:SUFFICIENT_SAMPLE_SIZE])
 
     # might it be hex
-    if len(str_data) % 2 == 0 and "0" <= min_chr:
+    if str_len % 2 == 0 and "0" <= min_chr:
         if max_chr <= "F":
             if verify:
                 try:
@@ -216,11 +221,12 @@ def detect_encodings(str_data, verify=True):
             encodings.append(32)
 
     # might it be bech32
-    if "0" <= min_chr:
+    if str_len <= SLOW_ENCODING_MAX_SIZE and "0" <= min_chr:
         encoding = None
         if max_chr <= "Z":
             if verify:
                 encoding, _, _ = bech32_decode(str_data)
+                wdt.feed()
             if encoding == Encoding.BECH32:
                 encodings.append("BECH32")
             elif encoding == Encoding.BECH32M:
@@ -234,10 +240,11 @@ def detect_encodings(str_data, verify=True):
                 encodings.append("bech32m")
 
     # might it be base43
-    if "$" <= min_chr and max_chr <= "Z":
+    if str_len <= SLOW_ENCODING_MAX_SIZE and "$" <= min_chr and max_chr <= "Z":
         if verify:
             try:
                 base_decode(str_data, 43)
+                wdt.feed()
                 encodings.append(43)
             except:
                 pass
@@ -245,10 +252,11 @@ def detect_encodings(str_data, verify=True):
             encodings.append(43)
 
     # might it be base58
-    if "1" <= min_chr and max_chr <= "z":
+    if str_len <= SLOW_ENCODING_MAX_SIZE and "1" <= min_chr and max_chr <= "z":
         if verify:
             try:
                 base_decode(str_data, 58)
+                wdt.feed()
                 encodings.append(58)
             except:
                 pass
@@ -263,6 +271,7 @@ def detect_encodings(str_data, verify=True):
                 as_bytes = base_decode(str_data, 64)
                 if base_encode(as_bytes, 64) == str_data:
                     encodings.append(64)
+                del as_bytes
             except:
                 pass
         else:
@@ -278,6 +287,8 @@ def detect_encodings(str_data, verify=True):
 
     # assume utf8
     encodings.append("utf8")
+
+    gc.collect()
 
     return encodings
 
@@ -353,7 +364,6 @@ class DatumToolMenu(Page):
         from .utils import Utils
 
         if not self.has_sd_card():
-            self.ctx.display.clear()
             self.flash_error(t("SD card not detected."))
             return MENU_CONTINUE
 
@@ -365,6 +375,9 @@ class DatumToolMenu(Page):
 
         if not contents:
             return MENU_CONTINUE
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing…"))
 
         # utils.load_file() always returns binary
         try:
@@ -411,9 +424,9 @@ class DatumTool(Page):
 
         seedqrview_thresh = QR_CAPACITY_BYTE[STATIC_QR_MAX_SIZE]
         if not isinstance(self.contents, bytes):
-            if all(c.isdigit() for c in self.contents):
+            if all(c.isdigit() for c in self.contents[:SUFFICIENT_SAMPLE_SIZE]):
                 seedqrview_thresh = QR_CAPACITY_NUMERIC[STATIC_QR_MAX_SIZE]
-            elif all(is_alnum(c) for c in self.contents):
+            elif all(is_alnum(c) for c in self.contents[:SUFFICIENT_SAMPLE_SIZE]):
                 seedqrview_thresh = QR_CAPACITY_ALPHANUMERIC[STATIC_QR_MAX_SIZE]
 
         if len(self.contents) <= seedqrview_thresh:
@@ -451,10 +464,10 @@ class DatumTool(Page):
         else:
             from ..qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_BBQR, FORMAT_UR
 
-            menu_opts = [
-                (t("Static"), (FORMAT_NONE,)),
-                (t("Part M of N"), (FORMAT_PMOFN,)),
-            ]
+            menu_opts = []
+            if len(self.contents) <= seedqrview_thresh * 4:
+                menu_opts.append((t("Static"), (FORMAT_NONE,)))
+            menu_opts.append((t("Part M of N"), (FORMAT_PMOFN,)))
 
             if self.datum in DATUM_BBQR_TYPES:
                 menu_opts.extend(
@@ -464,7 +477,7 @@ class DatumTool(Page):
                     ]
                 )
 
-            curr_datum = identify_datum(self.contents)
+            curr_datum = identify_datum(self.contents, self.encodings)
             if curr_datum:
                 if curr_datum in DATUM_UR_TYPES:
                     menu_opts.extend(
@@ -553,12 +566,13 @@ class DatumTool(Page):
             ),
         ]
         if preview:
+            preview_contents = self.contents[:SUFFICIENT_SAMPLE_SIZE]
             parts.append(
                 self.fit_to_line(
                     (
-                        '"' + self.contents + '"'
-                        if isinstance(self.contents, str)
-                        else "0x" + hexlify(self.contents).decode()
+                        '"' + preview_contents + '"'
+                        if isinstance(preview_contents, str)
+                        else "0x" + hexlify(preview_contents).decode()
                     ),
                     crop_middle=False,
                 )
@@ -574,6 +588,7 @@ class DatumTool(Page):
     def _show_contents(self):
         """Displays infobox and contents"""
         from binascii import hexlify
+        from ..settings import ELLIPSIS
         from ..kboard import kboard
 
         page_indicator = "p.%d"
@@ -583,12 +598,7 @@ class DatumTool(Page):
             if not kboard.is_m5stickv
             else (self.ctx.display.width() % FONT_WIDTH) // 2
         )
-        contents = (
-            self.contents
-            if isinstance(self.contents, str)
-            else hexlify(self.contents).decode()
-        )
-        content_len = len(contents)
+        content_len = len(self.contents)
 
         def _update_infobox(curr_page):
             info_len = self._info_box(
@@ -603,9 +613,17 @@ class DatumTool(Page):
 
         while True:
             info_len, max_lines = _update_infobox(curr_page + 1)
-            lines, endpos = self.ctx.display.to_lines_endpos(
-                contents[start_index:], max_lines
-            )
+            chars_per_page = self.ctx.display.width() // FONT_WIDTH * max_lines
+            contents = self.contents[start_index : start_index + chars_per_page + 1]
+            if isinstance(contents, bytes):
+                contents = hexlify(contents).decode()[: chars_per_page + 1]
+            lines, endpos = self.ctx.display.to_lines_endpos(contents, max_lines)
+            if isinstance(self.contents, bytes):
+                if endpos % 2:
+                    endpos -= 1
+                    if lines[-1][-1] == ELLIPSIS:
+                        lines[-1] = lines[-1][:-2] + ELLIPSIS * 2
+                endpos = endpos // 2
             endpos += start_index
             if pages[-1] < endpos < content_len:
                 pages.append(endpos)
@@ -642,6 +660,8 @@ class DatumTool(Page):
             try:
                 as_str = self.contents.decode()
                 suggestion = str(detect_encodings(as_str, False)[0])
+                del as_str
+                gc.collect()
                 if suggestion != "utf8":
                     suggestion = suggestion + "_via_utf8"
                 self.encodings = [suggestion + "?"]
@@ -664,12 +684,13 @@ class DatumTool(Page):
             self.encodings = detect_encodings(self.contents)
 
             # does it look like a 12 or 24 word mnemonic / Mnemonic QR?
-            if len(self.contents.split()) in (12, 24):
+            if len(self.contents[:256].split()) in (12, 24):
                 self.sensitive = True
 
             # does it look like a 12 or 24 word decimal mnemonic / StandadardSeedQR?
-            elif len(set((x in "0123456789" for x in self.contents))) == 1 and (
+            elif (
                 len(self.contents) in (12 * 4, 24 * 4)
+                and len(set((x in "0123456789" for x in self.contents))) == 1
             ):
                 self.sensitive = True
 
@@ -681,7 +702,7 @@ class DatumTool(Page):
 
         # datum
         if not self.datum:
-            self.datum = identify_datum(self.contents)
+            self.datum = identify_datum(self.contents, self.encodings)
 
     def _decrypt_as_kef_envelope(self):
         """Assuming self.contents are encrypted, offer to decrypt"""
@@ -726,7 +747,9 @@ class DatumTool(Page):
                 else:
                     menu.append((t("to hex"), lambda: "hex"))
                 menu.append((t("to base32"), lambda: 32))
-                menu.append((t("to base43"), lambda: 43))
+                if len(self.contents) <= SLOW_ENCODING_MAX_SIZE * 5.42 / 8:
+                    # 5.42 slightly less than log2(43); adjusts for base43 bloat
+                    menu.append((t("to base43"), lambda: 43))
                 menu.append((t("to base64"), lambda: 64))
                 try:
                     self.contents.decode()
@@ -770,6 +793,8 @@ class DatumTool(Page):
         """allows to view, convert, encrypt/decrypt, and export short str/bytes contents"""
         from .encryption_ui import KEFEnvelope
 
+        gc.collect()
+
         kvargs = {
             "try_decrypt": try_decrypt,
             "offer_convert": offer_convert,
@@ -806,6 +831,9 @@ class DatumTool(Page):
             # if user chose to exit
             return MENU_CONTINUE
 
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing…"))
+
         if status == "show":
             # if user wants to view data
             self._show_contents()
@@ -817,11 +845,21 @@ class DatumTool(Page):
             kvargs["offer_convert"] = False
         elif status in ("undo", "hex", "HEX", 32, 43, 64, "utf8", "shift_case"):
             # if user chose a particular conversion
+            undo = False
             if status == "undo":
+                undo = True
                 status = self.history.pop()
+            new_contents = convert_encoding(self.contents, status)
+            if new_contents is not None:
+                self.contents = new_contents
+                if not undo:
+                    self.history.append(status)
+                del new_contents
             else:
-                self.history.append(status)
-            self.contents = convert_encoding(self.contents, status)
+                if undo:
+                    self.history.append(status)
+                self.flash_error(t("Failed to convert"))
+
         elif status == "encrypt":
             # if user chose to encrypt
             kef = KEFEnvelope(self.ctx)

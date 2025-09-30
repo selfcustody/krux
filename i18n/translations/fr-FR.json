@@ -99,6 +99,7 @@
     "Extended Public Key": "Clé publique",
     "Factory Settings": "Paramètres d'usine",
     "Failed gathering camera entropy": "Échec de la collecte de l'entropie de la caméra",
+    "Failed to convert": "Échec de la conversion",
     "Failed to decrypt": "Échec du déchiffrement",
     "Failed to load": "Échec lors du chargement",
     "Failed to store mnemonic": "Échec du stockage mnémonique",

@@ -99,6 +99,7 @@
     "Extended Public Key": "Genişletilmiş Public Key",
     "Factory Settings": "Fabrika Ayarları",
     "Failed gathering camera entropy": "Kamera entropisi toplanamadı",
+    "Failed to convert": "Veri dönüştürme başarısız.",
     "Failed to decrypt": "Şifre çözme başarısız",
     "Failed to load": "Yüklenemedi",
     "Failed to store mnemonic": "Mnemonic depolama başarısız",

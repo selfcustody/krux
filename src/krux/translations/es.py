@@ -121,6 +121,7 @@ translation_array = [
     "Clave Pública Extendida",
     "Ajustes de Fábrica",
     "Error al recopilar la entropía de la cámara",
+    "Error al convertir:",
     "Error al descifrar",
     "Error al cargar",
     "No pudo almacenar mnemónico",

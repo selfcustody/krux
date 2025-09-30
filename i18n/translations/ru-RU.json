@@ -99,6 +99,7 @@
     "Extended Public Key": "Расширенный Публичный Ключ",
     "Factory Settings": "Заводские Настройки",
     "Failed gathering camera entropy": "Не удалось собрать энтропию камеры",
+    "Failed to convert": "Преобразование не выполнено.",
     "Failed to decrypt": "Не удалось расшифровать",
     "Failed to load": "Не удалось ничего загрузить",
     "Failed to store mnemonic": "Не удалось сохранить мнемонику",

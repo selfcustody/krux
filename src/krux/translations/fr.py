@@ -121,6 +121,7 @@ translation_array = [
     "Clé publique",
     "Paramètres d'usine",
     "Échec de la collecte de l'entropie de la caméra",
+    "Échec de la conversion",
     "Échec du déchiffrement",
     "Échec lors du chargement",
     "Échec du stockage mnémonique",

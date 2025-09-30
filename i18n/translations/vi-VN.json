@@ -99,6 +99,7 @@
     "Extended Public Key": "Khóa công cộng",
     "Factory Settings": "Cài đặt Gốc",
     "Failed gathering camera entropy": "Không thể thu thập entropy của máy ảnh",
+    "Failed to convert": "Không thể chuyển đổi",
     "Failed to decrypt": "Không giải mã được",
     "Failed to load": "Tải thất bại",
     "Failed to store mnemonic": "Không lưu trữ Mnemonic được",
