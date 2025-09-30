@@ -23,8 +23,6 @@
 from .krux_settings import Settings, ThemeSettings
 from .kboard import kboard
 
-DEFAULT_THEME = ThemeSettings.DARK_THEME_NAME
-
 # To create new colors from RGB values use firmware/scripts/rgbconv.py script
 
 BLACK = 0x0000
@@ -34,7 +32,6 @@ GREY = 0x14A5
 LIGHTGREY = 0x38C6
 DARKWHITE = 0x1CE7
 WHITE = 0xFFFF
-LIGHT_GREEN = 0xEC9F
 GREEN = 0xE007
 DARKGREEN = 0x8005
 RED = 0x00F8

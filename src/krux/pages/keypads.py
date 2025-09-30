@@ -40,8 +40,6 @@ from ..kboard import kboard
 
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets.
 
-KEYPAD_OFFSET = DEFAULT_PADDING + FONT_HEIGHT * 3
-
 
 class KeypadLayout:
     """Groups layout-related attributes for Keypad."""
@@ -278,15 +276,6 @@ class Keypad:
             self.next_keyset()
         elif btn in (SWIPE_DOWN, SWIPE_RIGHT):
             self.previous_keyset()
-
-    def _clean_keypad_area(self):
-        self.ctx.display.fill_rectangle(
-            0,
-            KEYPAD_OFFSET,
-            self.ctx.display.width(),
-            self.ctx.display.height() - KEYPAD_OFFSET,
-            theme.bg_color,
-        )
 
     def _next_key(self):
         """Increments cursor when page button is pressed"""

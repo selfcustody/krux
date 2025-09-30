@@ -25,7 +25,6 @@ import hashlib
 from krux import kef
 from .baseconv import base_encode, base_decode
 from .sd_card import SDHandler
-from .krux_settings import Settings
 from embit import bip39
 from .settings import FLASH_PATH, MNEMONICS_FILE
 
@@ -165,51 +164,3 @@ class MnemonicStorage:
             self.stored.pop(mnemonic_id)
             with open(FLASH_PATH_STR % MNEMONICS_FILE, "w") as f:
                 f.write(json.dumps(self.stored))
-
-
-class EncryptedQRCode:
-    """Creates and decrypts encrypted mnemonic QR codes"""
-
-    def __init__(self) -> None:
-        self.mnemonic_id = None
-        self.version = None
-        self.iterations = Settings().encryption.pbkdf2_iterations
-        self.encrypted_data = None
-
-    def create(self, key, mnemonic_id, mnemonic, i_vector=None):
-        """encrypted mnemonic QR codes"""
-        mode_name = Settings().encryption.version
-        encryptor = kef.Cipher(key, mnemonic_id, self.iterations)
-        bytes_to_encrypt = bip39.mnemonic_to_bytes(mnemonic)
-        self.version = kef.suggest_versions(bytes_to_encrypt, mode_name)[0]
-        bytes_encrypted = encryptor.encrypt(bytes_to_encrypt, self.version, i_vector)
-        return kef.wrap(mnemonic_id, self.version, self.iterations, bytes_encrypted)
-
-    def public_data(self, data):
-        """Parse and returns encrypted mnemonic QR codes public data"""
-        try:
-            (self.mnemonic_id, self.version, self.iterations, self.encrypted_data) = (
-                kef.unwrap(data)
-            )
-            version_name = kef.VERSIONS[self.version]["name"]
-        except:
-            return None
-
-        try:
-            displayable_id = self.mnemonic_id.decode()
-        except UnicodeDecodeError:
-            displayable_id = repr(self.mnemonic_id)  # id_ could be any bytes
-        return "\n".join(
-            [
-                "Encrypted QR Code:",
-                "ID: " + displayable_id,
-                "Version: " + version_name,
-                "PBKDF2 iter.: " + str(self.iterations),
-            ]
-        )
-
-    def decrypt(self, key):
-        """Decrypts encrypted mnemonic QR codes"""
-        decryptor = kef.Cipher(key, self.mnemonic_id, self.iterations)
-        decrypted_data = decryptor.decrypt(self.encrypted_data, self.version)
-        return decrypted_data

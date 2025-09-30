@@ -64,6 +64,7 @@ pytest-mock = "^3.15.0"
 PyQRCode = "^1.2.1"
 pycryptodome = "^3.23.0"
 poethepoet = "^0.37.0"
+vulture = "^2.14"
 
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions", "mkdocs-macros-plugin"]
@@ -88,6 +89,12 @@ lint = ["lint-src", "lint-scripts"]
 # aliases
 pylint.ref = "lint"
 
+# vulture tasks
+vulture-src = "vulture src"
+vulture.ref = "vulture-src vulture_whitelist.py"
+vulture-make = { shell = "vulture src --make-whitelist > vulture_whitelist.py" }
+vulture-whitelist.ref = "vulture-make"
+
 # test tasks
 test-clean = """python -c 'import shutil, os; os.path.exists("htmlcov") and shutil.rmtree("htmlcov")'"""
 test-cov = "pytest --cache-clear --cov src/krux --cov-report html ./tests --cov-context=test --cov-report term-missing"
@@ -99,8 +106,8 @@ test.ref = "tests"
 pytest.ref = "tests"
 
 # pre commit task (do formatting, linting and tests)
-pre-commit = ["format", "lint", "i18n validate", "test-simple"]
-pre-release = ["format", "lint", "i18n validate", "i18n-build", "update-glyphs", "test-simple"]
+pre-commit = ["format", "lint", "i18n validate", "vulture", "test-simple"]
+pre-release = ["format", "lint", "i18n validate", "i18n-build", "update-glyphs", "vulture", "test-simple"]
 
 # run docs locally
 docs = "poetry run mkdocs serve"
