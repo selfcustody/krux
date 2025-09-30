@@ -219,7 +219,6 @@ class Login(Page):
 
                 # Checks if user wants to create a double mnemonic
                 if len_mnemonic == EXTRA_MNEMONIC_LENGTH_FLAG:
-
                     # import time  # Debug
                     # pre_t = time.ticks_ms()  # Debug
 
@@ -277,7 +276,6 @@ class Login(Page):
 
         # Don't show word list confirmation or the mnemonic editor if hide mnemonic is enabled
         if not Settings().security.hide_mnemonic:
-
             if charset != LETTERS:
                 if self._confirm_key_from_digits(mnemonic, charset) is not None:
                     return MENU_CONTINUE
@@ -439,42 +437,6 @@ class Login(Page):
             return MENU_CONTINUE
         self.ctx.display.clear()
 
-        return None
-
-    def _encrypted_qr_code(self, data):
-        from ..encryption import EncryptedQRCode
-        from ..baseconv import base_decode
-
-        encrypted_qr = EncryptedQRCode()
-        public_data = None
-        try:  # Try to decode base43 data
-            data = base_decode(data, 43)
-            public_data = encrypted_qr.public_data(data)
-        except:
-            pass
-        if not public_data:  # Failed to decode and parse base43
-            public_data = encrypted_qr.public_data(data)
-        if public_data:
-            self.ctx.display.clear()
-            if self.prompt(
-                public_data + "\n\n" + t("Decrypt?"), self.ctx.display.height() // 2
-            ):
-                from .encryption_ui import EncryptionKey
-                from embit.bip39 import mnemonic_from_bytes
-
-                key_capture = EncryptionKey(self.ctx)
-                key = key_capture.encryption_key()
-                if key in (None, "", ESC_KEY):
-                    self.flash_error(t("Key was not provided"))
-                    return MENU_CONTINUE
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(t("Processing…"))
-                word_bytes = encrypted_qr.decrypt(key)
-                if word_bytes is None:
-                    self.flash_error(t("Failed to decrypt"))
-                    return MENU_CONTINUE
-                return mnemonic_from_bytes(word_bytes).split()
-            return MENU_CONTINUE  # prompt NO
         return None
 
     def auto_complete_qr_words(self, words):
