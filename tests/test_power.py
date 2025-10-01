@@ -15,7 +15,7 @@ def test_pmu(mocker, multiple_devices):
 
     manager = PowerManager()
 
-    if board.config["type"] in ("dock", "yahboom", "wonder_mv", "bit"):
+    if board.config["type"] in ("dock", "yahboom", "wonder_mv", "bit", "wonder_k"):
         assert manager.pmu is None
         assert manager.has_battery() is False
     else:
@@ -51,7 +51,7 @@ def test_charge_has_no_battery(mocker, multiple_devices):
         assert not manager.has_battery()
         manager.pmu.get_battery_voltage.assert_called_once()
 
-    # Dock, Yahboom and WonderMV do not have battery
+    # Dock, Yahboom, WonderMV and WonderK do not have battery
     # it just raises an exception and returns False
     else:
         with pytest.raises(AttributeError) as exc_info:

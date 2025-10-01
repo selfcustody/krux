@@ -1,4 +1,5 @@
 import pytest
+from tests.conftest import wonder_k
 
 
 def test_init(mocker, m5stickv):
@@ -42,14 +43,14 @@ def test_initialize_sensors(mocker, multiple_devices):
         if config_method:
             getattr(c, config_method).assert_called()
 
-        if board.config["type"] == "cube" or c.cam_id == OV2640_ID:
+        if board.config["type"] in ("cube", "wonder_k") or c.cam_id == OV2640_ID:
             krux.camera.sensor.set_vflip.assert_called_with(1)
         else:
             krux.camera.sensor.set_vflip.assert_not_called()
 
         krux.camera.sensor.set_vflip.reset_mock()
 
-        if board.config["type"] == "cube" or c.cam_id == OV5642_ID:
+        if board.config["type"] in ("cube", "wonder_k") or c.cam_id == OV5642_ID:
             krux.camera.sensor.set_hmirror.assert_called_with(1)
         else:
             krux.camera.sensor.set_hmirror.assert_not_called()
