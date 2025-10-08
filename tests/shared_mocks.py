@@ -1,9 +1,28 @@
-import pytest
 from unittest import mock
 from unittest.mock import MagicMock
 import pyqrcode
 import zlib
 import base64
+
+M5STICKV_WIDTH = 135
+M5STICKV_HEIGHT = 240
+M5STICKV_USABLE_WIDTH = M5STICKV_WIDTH - 2 * 10
+M5STICKV_IN_LINE = M5STICKV_WIDTH // 8
+
+DOCK_WIDTH = 240
+DOCK_HEIGHT = 320
+DOCK_USABLE_WIDTH = DOCK_WIDTH - 2 * 10
+DOCK_IN_LINE = DOCK_USABLE_WIDTH // 8
+
+AMIGO_WIDTH = 320
+AMIGO_HEIGHT = 480
+AMIGO_USABLE_WIDTH = AMIGO_WIDTH - 2 * 10
+AMIGO_IN_LINE = AMIGO_USABLE_WIDTH // 12
+
+CUBE_WIDTH = 240
+CUBE_HEIGHT = 240
+CUBE_USABLE_WIDTH = DOCK_WIDTH - 2 * 10
+CUBE_IN_LINE = DOCK_USABLE_WIDTH // 8
 
 
 class MockFile:
@@ -653,6 +672,61 @@ def board_bit():
     )
 
 
+def board_wonder_k():
+    return mock.MagicMock(
+        config={
+            "type": "wonder_k",
+            "lcd": {
+                "dcx": 37,
+                "ss": 38,
+                "rst": 36,
+                "clk": 39,
+                "height": 240,
+                "width": 320,
+                "invert": 0,
+                "dir": 160,
+                "lcd_type": 0,
+            },
+            "sensor": {
+                "pin_sda": 40,
+                "cmos_href": 45,
+                "cmos_pclk": 47,
+                "cmos_xclk": 46,
+                "cmos_pwdn": 44,
+                "cmos_vsync": 43,
+                "reg_width": 16,
+                "i2c_num": 2,
+                "pin_clk": 41,
+                "cmos_rst": 42,
+            },
+            "sdcard": {"sclk": 32, "mosi": 33, "miso": 35, "cs": 30},
+            "board_info": {
+                "BOOT_KEY": 16,
+                "CONNEXT_A": 6,
+                "CONNEXT_B": 8,
+                "I2C_SDA": 27,
+                "I2C_SCL": 24,
+                "SPI_SCLK": 32,
+                "SPI_MOSI": 33,
+                "SPI_MISO": 35,
+                "SPI_CS": 30,
+            },
+            "krux": {
+                "pins": {
+                    "BUTTON_A": 25,
+                    "BUTTON_B": 31,
+                    "TOUCH_IRQ": 26,
+                    "TOUCH_RESET": 29,
+                    "I2C_SDA": 27,
+                    "I2C_SCL": 24,
+                    "BACKLIGHT": 22,
+                },
+                "display": {"touch": True, "font": [8, 16], "font_wide": [16, 16]},
+            },
+        }
+    )
+
+
 def mock_context(mocker):
     import board
 
@@ -669,17 +743,18 @@ def mock_context(mocker):
                 font_width=8,
                 font_height=14,
                 total_lines=17,  # 240 / 14
-                width=mocker.MagicMock(return_value=135),
-                height=mocker.MagicMock(return_value=240),
-                usable_width=mocker.MagicMock(return_value=(135 - 2 * 10)),
-                usable_pixels_in_line=mocker.MagicMock(return_value=135),
-                ascii_chars_per_line=mocker.MagicMock(return_value=135 // 8),
+                width=mocker.MagicMock(return_value=M5STICKV_WIDTH),
+                height=mocker.MagicMock(return_value=M5STICKV_HEIGHT),
+                usable_width=mocker.MagicMock(return_value=M5STICKV_USABLE_WIDTH),
+                usable_pixels_in_line=mocker.MagicMock(return_value=M5STICKV_WIDTH),
+                ascii_chars_per_line=mocker.MagicMock(return_value=M5STICKV_IN_LINE),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 to_lines_endpos=mocker.MagicMock(return_value=([""], 0)),
                 max_menu_lines=mocker.MagicMock(return_value=7),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
         )
+
     elif board.config["type"] == "dock":
         return mocker.MagicMock(
             input=mocker.MagicMock(
@@ -693,11 +768,11 @@ def mock_context(mocker):
                 font_width=8,
                 font_height=16,
                 total_lines=20,  # 320 / 16
-                width=mocker.MagicMock(return_value=240),
-                height=mocker.MagicMock(return_value=320),
-                usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
-                usable_pixels_in_line=mocker.MagicMock(return_value=(240 - 2 * 10)),
-                ascii_chars_per_line=mocker.MagicMock(return_value=(240 - 2 * 10) // 8),
+                width=mocker.MagicMock(return_value=DOCK_WIDTH),
+                height=mocker.MagicMock(return_value=DOCK_HEIGHT),
+                usable_width=mocker.MagicMock(return_value=DOCK_USABLE_WIDTH),
+                usable_pixels_in_line=mocker.MagicMock(return_value=DOCK_USABLE_WIDTH),
+                ascii_chars_per_line=mocker.MagicMock(return_value=DOCK_IN_LINE),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 to_lines_endpos=mocker.MagicMock(return_value=([""], 0)),
                 max_menu_lines=mocker.MagicMock(return_value=9),
@@ -705,6 +780,7 @@ def mock_context(mocker):
             ),
             light=None,
         )
+
     elif board.config["type"] == "amigo":
         return mocker.MagicMock(
             input=mocker.MagicMock(
@@ -718,19 +794,18 @@ def mock_context(mocker):
                 font_width=12,
                 font_height=24,
                 total_lines=20,  # 480 / 24
-                width=mocker.MagicMock(return_value=320),
-                height=mocker.MagicMock(return_value=480),
-                usable_width=mocker.MagicMock(return_value=(320 - 2 * 10)),
-                usable_pixels_in_line=mocker.MagicMock(return_value=(320 - 2 * 10)),
-                ascii_chars_per_line=mocker.MagicMock(
-                    return_value=(320 - 2 * 10) // 12
-                ),
+                width=mocker.MagicMock(return_value=AMIGO_WIDTH),
+                height=mocker.MagicMock(return_value=AMIGO_HEIGHT),
+                usable_width=mocker.MagicMock(return_value=AMIGO_USABLE_WIDTH),
+                usable_pixels_in_line=mocker.MagicMock(return_value=AMIGO_USABLE_WIDTH),
+                ascii_chars_per_line=mocker.MagicMock(return_value=AMIGO_IN_LINE),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 to_lines_endpos=mocker.MagicMock(return_value=([""], 0)),
                 max_menu_lines=mocker.MagicMock(return_value=9),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
         )
+
     elif board.config["type"] == "cube":
         return mocker.MagicMock(
             input=mocker.MagicMock(
@@ -744,11 +819,11 @@ def mock_context(mocker):
                 font_width=8,
                 font_height=14,
                 total_lines=17,  # 240 / 14
-                width=mocker.MagicMock(return_value=240),
-                height=mocker.MagicMock(return_value=240),
-                usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
-                usable_pixels_in_line=mocker.MagicMock(return_value=(240 - 2 * 10)),
-                ascii_chars_per_line=mocker.MagicMock(return_value=(240 - 2 * 10) // 8),
+                width=mocker.MagicMock(return_value=CUBE_WIDTH),
+                height=mocker.MagicMock(return_value=CUBE_HEIGHT),
+                usable_width=mocker.MagicMock(return_value=CUBE_USABLE_WIDTH),
+                usable_pixels_in_line=mocker.MagicMock(return_value=CUBE_USABLE_WIDTH),
+                ascii_chars_per_line=mocker.MagicMock(return_value=CUBE_IN_LINE),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 to_lines_endpos=mocker.MagicMock(return_value=([""], 0)),
                 max_menu_lines=mocker.MagicMock(return_value=7),
@@ -756,6 +831,7 @@ def mock_context(mocker):
             ),
             light=None,
         )
+
     elif board.config["type"] == "yahboom":
         return mocker.MagicMock(
             input=mocker.MagicMock(
@@ -769,17 +845,18 @@ def mock_context(mocker):
                 font_width=8,
                 font_height=16,
                 total_lines=20,  # 320 / 16
-                width=mocker.MagicMock(return_value=240),
-                height=mocker.MagicMock(return_value=320),
-                usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
-                usable_pixels_in_line=mocker.MagicMock(return_value=(240 - 2 * 10)),
-                ascii_chars_per_line=mocker.MagicMock(return_value=(240 - 2 * 10) // 8),
+                width=mocker.MagicMock(return_value=DOCK_WIDTH),
+                height=mocker.MagicMock(return_value=DOCK_HEIGHT),
+                usable_width=mocker.MagicMock(return_value=DOCK_USABLE_WIDTH),
+                usable_pixels_in_line=mocker.MagicMock(return_value=DOCK_USABLE_WIDTH),
+                ascii_chars_per_line=mocker.MagicMock(return_value=DOCK_IN_LINE),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 to_lines_endpos=mocker.MagicMock(return_value=([""], 0)),
                 max_menu_lines=mocker.MagicMock(return_value=9),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),
         )
+
     elif board.config["type"] == "wonder_mv":
         return mocker.MagicMock(
             input=mocker.MagicMock(
@@ -793,11 +870,11 @@ def mock_context(mocker):
                 font_width=8,
                 font_height=16,
                 total_lines=20,  # 320 / 16
-                width=mocker.MagicMock(return_value=240),
-                height=mocker.MagicMock(return_value=320),
-                usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
-                usable_pixels_in_line=mocker.MagicMock(return_value=(240 - 2 * 10)),
-                ascii_chars_per_line=mocker.MagicMock(return_value=(240 - 2 * 10) // 8),
+                width=mocker.MagicMock(return_value=DOCK_WIDTH),
+                height=mocker.MagicMock(return_value=DOCK_HEIGHT),
+                usable_width=mocker.MagicMock(return_value=DOCK_USABLE_WIDTH),
+                usable_pixels_in_line=mocker.MagicMock(return_value=DOCK_USABLE_WIDTH),
+                ascii_chars_per_line=mocker.MagicMock(return_value=DOCK_IN_LINE),
                 to_lines=mocker.MagicMock(return_value=[""]),
                 to_lines_endpos=mocker.MagicMock(return_value=([""], 0)),
                 max_menu_lines=mocker.MagicMock(return_value=9),
@@ -818,12 +895,37 @@ def mock_context(mocker):
                 font_width=8,
                 font_height=16,
                 total_lines=20,  # 320 / 16
-                width=mocker.MagicMock(return_value=240),
-                height=mocker.MagicMock(return_value=320),
-                usable_width=mocker.MagicMock(return_value=(240 - 2 * 10)),
-                usable_pixels_in_line=mocker.MagicMock(return_value=(240 - 2 * 10)),
-                ascii_chars_per_line=mocker.MagicMock(return_value=(240 - 2 * 10) // 8),
+                width=mocker.MagicMock(return_value=DOCK_WIDTH),
+                height=mocker.MagicMock(return_value=DOCK_HEIGHT),
+                usable_width=mocker.MagicMock(return_value=DOCK_USABLE_WIDTH),
+                usable_pixels_in_line=mocker.MagicMock(return_value=DOCK_USABLE_WIDTH),
+                ascii_chars_per_line=mocker.MagicMock(return_value=DOCK_IN_LINE),
                 to_lines=mocker.MagicMock(return_value=[""]),
+                max_menu_lines=mocker.MagicMock(return_value=9),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
+            ),
+        )
+
+    elif board.config["type"] == "wonder_k":
+        return mocker.MagicMock(
+            input=mocker.MagicMock(
+                touch=mocker.MagicMock(),
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
+            display=mocker.MagicMock(
+                font_width=8,
+                font_height=16,
+                total_lines=20,  # 320 / 16
+                width=mocker.MagicMock(return_value=DOCK_WIDTH),
+                height=mocker.MagicMock(return_value=DOCK_HEIGHT),
+                usable_width=mocker.MagicMock(return_value=DOCK_USABLE_WIDTH),
+                usable_pixels_in_line=mocker.MagicMock(return_value=DOCK_USABLE_WIDTH),
+                ascii_chars_per_line=mocker.MagicMock(return_value=DOCK_IN_LINE),
+                to_lines=mocker.MagicMock(return_value=[""]),
+                to_lines_endpos=mocker.MagicMock(return_value=([""], 0)),
                 max_menu_lines=mocker.MagicMock(return_value=9),
                 draw_hcentered_text=mocker.MagicMock(return_value=1),
             ),

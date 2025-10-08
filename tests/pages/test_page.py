@@ -327,7 +327,6 @@ def test_keypad_swipe_hint_is_not_shown_on_nontouch_device(
 
 def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
     import board
-    from krux.display import FONT_WIDTH
 
     ctx = mock_context(mocker)
     page = mock_page_cls(ctx)
@@ -336,6 +335,11 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
     AMIGO = "amigo"
     M5 = "m5stickv"
     DOCK = "dock"
+    BIT = "bit"
+    CUBE = "cube"
+    YAHBOOM = "yahboom"
+    WONDER_MV = "wonder_mv"
+    WONDER_K = "wonder_k"
 
     cases = [
         {
@@ -343,96 +347,167 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789ab…opqrstuvwxyz",
             M5: "0123456…tuvwxyz",
             DOCK: "0123456789abc…nopqrstuvwxyz",
+            BIT: "0123456789abc…nopqrstuvwxyz",
+            CUBE: "0123456789abc…nopqrstuvwxyz",
+            YAHBOOM: "0123456789abc…nopqrstuvwxyz",
+            WONDER_MV: "0123456789abc…nopqrstuvwxyz",
+            WONDER_K: "0123456789abc…nopqrstuvwxyz",
         },
         {
             TXT: "0123456789abcdefghijklmnopqrstuvwxy",
             AMIGO: "0123456789ab…nopqrstuvwxy",
             M5: "0123456…stuvwxy",
             DOCK: "0123456789abc…mnopqrstuvwxy",
+            BIT: "0123456789abc…mnopqrstuvwxy",
+            CUBE: "0123456789abc…mnopqrstuvwxy",
+            YAHBOOM: "0123456789abc…mnopqrstuvwxy",
+            WONDER_MV: "0123456789abc…mnopqrstuvwxy",
+            WONDER_K: "0123456789abc…mnopqrstuvwxy",
         },
         {
             TXT: "0123456789abcdefghijklmnopqrstuvwx",
             AMIGO: "0123456789ab…mnopqrstuvwx",
             M5: "0123456…rstuvwx",
             DOCK: "0123456789abc…lmnopqrstuvwx",
+            BIT: "0123456789abc…lmnopqrstuvwx",
+            CUBE: "0123456789abc…lmnopqrstuvwx",
+            YAHBOOM: "0123456789abc…lmnopqrstuvwx",
+            WONDER_MV: "0123456789abc…lmnopqrstuvwx",
+            WONDER_K: "0123456789abc…lmnopqrstuvwx",
         },
         {
             TXT: "0123456789abcdefghijklmnopqrstuvw",
             AMIGO: "0123456789ab…lmnopqrstuvw",
             M5: "0123456…qrstuvw",
             DOCK: "0123456789abc…klmnopqrstuvw",
+            BIT: "0123456789abc…klmnopqrstuvw",
+            CUBE: "0123456789abc…klmnopqrstuvw",
+            YAHBOOM: "0123456789abc…klmnopqrstuvw",
+            WONDER_MV: "0123456789abc…klmnopqrstuvw",
+            WONDER_K: "0123456789abc…klmnopqrstuvw",
         },
         {
             TXT: "0123456789abcdefghijklmnopqr",
             AMIGO: "0123456789ab…ghijklmnopqr",
             M5: "0123456…lmnopqr",
             DOCK: "0123456789abc…fghijklmnopqr",
+            BIT: "0123456789abc…fghijklmnopqr",
+            CUBE: "0123456789abc…fghijklmnopqr",
+            YAHBOOM: "0123456789abc…fghijklmnopqr",
+            WONDER_MV: "0123456789abc…fghijklmnopqr",
+            WONDER_K: "0123456789abc…fghijklmnopqr",
         },
         {
             TXT: "0123456789abcdefghijklmnopq",
             AMIGO: "0123456789ab…fghijklmnopq",
             M5: "0123456…klmnopq",
             DOCK: "0123456789abcdefghijklmnopq",
+            BIT: "0123456789abcdefghijklmnopq",
+            CUBE: "0123456789abcdefghijklmnopq",
+            YAHBOOM: "0123456789abcdefghijklmnopq",
+            WONDER_MV: "0123456789abcdefghijklmnopq",
+            WONDER_K: "0123456789abcdefghijklmnopq",
         },
         {
             TXT: "0123456789abcdefghijklmnop",
             AMIGO: "0123456789ab…efghijklmnop",
             M5: "0123456…jklmnop",
             DOCK: "0123456789abcdefghijklmnop",
+            BIT: "0123456789abcdefghijklmnop",
+            CUBE: "0123456789abcdefghijklmnop",
+            YAHBOOM: "0123456789abcdefghijklmnop",
+            WONDER_MV: "0123456789abcdefghijklmnop",
+            WONDER_K: "0123456789abcdefghijklmnop",
         },
         {
             TXT: "0123456789abcdefghijklmno",
             AMIGO: "0123456789abcdefghijklmno",
             M5: "0123456…ijklmno",
             DOCK: "0123456789abcdefghijklmno",
+            BIT: "0123456789abcdefghijklmno",
+            CUBE: "0123456789abcdefghijklmno",
+            YAHBOOM: "0123456789abcdefghijklmno",
+            WONDER_MV: "0123456789abcdefghijklmno",
+            WONDER_K: "0123456789abcdefghijklmno",
         },
         {
             TXT: "0123456789abcdefghijklmn",
             AMIGO: "0123456789abcdefghijklmn",
             M5: "0123456…hijklmn",
             DOCK: "0123456789abcdefghijklmn",
+            BIT: "0123456789abcdefghijklmn",
+            CUBE: "0123456789abcdefghijklmn",
+            YAHBOOM: "0123456789abcdefghijklmn",
+            WONDER_MV: "0123456789abcdefghijklmn",
+            WONDER_K: "0123456789abcdefghijklmn",
         },
         {
             TXT: "0123456789abcdefghijklm",
             AMIGO: "0123456789abcdefghijklm",
             M5: "0123456…ghijklm",
             DOCK: "0123456789abcdefghijklm",
+            BIT: "0123456789abcdefghijklm",
+            CUBE: "0123456789abcdefghijklm",
+            YAHBOOM: "0123456789abcdefghijklm",
+            WONDER_MV: "0123456789abcdefghijklm",
+            WONDER_K: "0123456789abcdefghijklm",
         },
         {
             TXT: "0123456789abcdefghij",
             AMIGO: "0123456789abcdefghij",
             M5: "0123456…defghij",
             DOCK: "0123456789abcdefghij",
+            BIT: "0123456789abcdefghij",
+            CUBE: "0123456789abcdefghij",
+            YAHBOOM: "0123456789abcdefghij",
+            WONDER_MV: "0123456789abcdefghij",
+            WONDER_K: "0123456789abcdefghij",
         },
         {
             TXT: "0123456789abcdefg",
             AMIGO: "0123456789abcdefg",
             M5: "0123456…abcdefg",
             DOCK: "0123456789abcdefg",
+            BIT: "0123456789abcdefg",
+            CUBE: "0123456789abcdefg",
+            YAHBOOM: "0123456789abcdefg",
+            WONDER_MV: "0123456789abcdefg",
+            WONDER_K: "0123456789abcdefg",
         },
         {
             TXT: "0123456789abcdef",
             AMIGO: "0123456789abcdef",
             M5: "0123456789abcdef",
             DOCK: "0123456789abcdef",
+            BIT: "0123456789abcdef",
+            CUBE: "0123456789abcdef",
+            YAHBOOM: "0123456789abcdef",
+            WONDER_MV: "0123456789abcdef",
+            WONDER_K: "0123456789abcdef",
         },
         {
             TXT: "0123456789abcde",
             AMIGO: "0123456789abcde",
             M5: "0123456789abcde",
             DOCK: "0123456789abcde",
+            BIT: "0123456789abcde",
+            CUBE: "0123456789abcde",
+            YAHBOOM: "0123456789abcde",
+            WONDER_MV: "0123456789abcde",
+            WONDER_K: "0123456789abcde",
         },
     ]
 
     curr_device = board.config["type"]
-    device_type = curr_device if curr_device in (AMIGO, M5) else DOCK
     max_chars_in_line = ctx.display.ascii_chars_per_line()
 
+    n = 0
     for i, case in enumerate(cases):
-        print(i)
+        print(n)
         formatted_text = page.fit_to_line(case[TXT])
         assert len(formatted_text) <= max_chars_in_line
-        assert formatted_text == case[device_type]
+        assert formatted_text == case[curr_device]
+        n += 1
 
 
 def test_fit_to_line_prefix(mocker, multiple_devices, mock_page_cls):

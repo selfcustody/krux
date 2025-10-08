@@ -90,6 +90,7 @@ def test_tc_flash_hash(multiple_devices, mocker):
         "yahboom": DOCK_FW_POS,
         "wonder_mv": DOCK_FW_POS,
         "bit": DOCK_FW_POS,
+        "wonder_k": DOCK_FW_POS,
     }
     users_data_words_positions = {
         "amigo": 331,
@@ -99,6 +100,7 @@ def test_tc_flash_hash(multiple_devices, mocker):
         "yahboom": DOCK_USER_POS,
         "wonder_mv": DOCK_USER_POS,
         "bit": DOCK_USER_POS,
+        "wonder_k": DOCK_USER_POS,
     }
     fw_words_pos = fw_words_positions[board.config["type"]]
     u_data_words_pos = users_data_words_positions[board.config["type"]]
