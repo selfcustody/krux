@@ -375,7 +375,6 @@ class HardwareSettings(SettingsNamespace):
     def __init__(self):
         self.printer = PrinterSettings()
         self.buttons = ButtonsSettings()
-        # Allow touch settings even if input.touch is disabled
         if board.config["krux"]["display"].get("touch", False):
             self.touch = TouchSettings()
         if kboard.is_amigo:
@@ -390,7 +389,6 @@ class HardwareSettings(SettingsNamespace):
             "printer": t("Printer"),
         }
         hardware_menu["buttons"] = t("Buttons")
-        # Allow touch settings even if input.touch is disabled
         if board.config["krux"]["display"].get("touch", False):
             hardware_menu["touchscreen"] = t("Touchscreen")
         if kboard.is_amigo:
