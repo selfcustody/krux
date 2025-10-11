@@ -15,6 +15,9 @@ Krux can now recognize and work with a wider range of SD cards that were previou
 ### Discontinued Support for Maix Bit Device
 The Maix Bit device has long been discouraged due to its poor-quality camera. Starting with this release, we are discontinuing support and it will no longer be included in future builds. The support and parameters for building its firmware from source, however, will be kept.
 
+### Mnemonic XOR
+Krux can now apply XOR operations on entropy bytes between a loaded mnemonic and another chosen one, similar to the Coinkite's `SeedXOR` protocol.
+
 ### Other Bug Fixes and Improvements
 - Touchscreen test added in Tools for detection check
 - wbits for deflate-decompress window set to 10 bits to match KEF spec.
