@@ -29,7 +29,7 @@ The Convert Datum menu allows access to common encodings for conversion between 
 <img src="../../../img/maixpy_m5stickv/device-tests-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/device-tests-options-300.png" align="right" class="amigo">
 
-Simple tests to verify correct functioning of your Krux device.
+Run these quick checks to ensure your Krux device is functioning properly.
 
 <div style="clear: both"></div>
 
@@ -56,6 +56,13 @@ Quickly print a test QR code to check and optimize your printer setup.
 <img src="../../../img/maixpy_amigo/device-tests-test-suite-300.png" align="right" class="amigo">
 
 A suite of automated tests to verify important features on your device.
+
+<div style="clear: both"></div>
+
+#### Touchscreen (Maix Amigo, Yahboom, WonderMV and TZT only)
+<img src="../../../img/maixpy_amigo/touch-test-300.png" align="right" class="amigo">
+
+Confirm that touch input is accurately detected across the entire display surface.
 
 <div style="clear: both"></div>
 
