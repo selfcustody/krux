@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import math
 from .. import Menu, LETTERS, MENU_CONTINUE, MENU_EXIT
 from ..login import MnemonicLoader
 from ...krux_settings import Settings, t
@@ -27,6 +28,15 @@ from ...display import BOTTOM_PROMPT_LINE, FONT_HEIGHT
 from ...themes import theme
 from ...key import Key
 from ...wallet import Wallet
+
+ENTROPY_THRESHOLD = 3.418296
+"""Calibrated in :py:func:`test_export_xor_fail_low_entropy` extremes
+(0x00 / 0xFF), a flat distribution (~2.29 bits/word), and a
+borderline-acceptable mnemonic (~3.42).
+
+This measures histogram spread of derived 11-bit word indices (ENT||checksum),
+not general cryptographic quality.
+"""
 
 
 class MnemonicXOR(MnemonicLoader):
@@ -38,8 +48,13 @@ class MnemonicXOR(MnemonicLoader):
     # See implementation reference at
     # https://github.com/Coldcard/firmware/blob/2445b4d4350d0aad0f4ef8f966697a67ab9ecbdc/shared/utils.py#L752
     @staticmethod
-    def _xor_bytes(a: bytes, b: bytes) -> bytearray:
+    def _xor_bytes(a, b):
         """XOR two byte sequences of equal length"""
+
+        if not isinstance(a, (bytes, bytearray)) or not isinstance(
+            b, (bytes, bytearray)
+        ):
+            raise TypeError("Sequences should be bytes or bytearray")
 
         # All sequences should have same length because it would
         # reveal the last bytes from the longer bytestring as they are.
@@ -54,26 +69,80 @@ class MnemonicXOR(MnemonicLoader):
         return out
 
     @staticmethod
-    def _validate_entropy(entropy: bytes | bytearray) -> None:
-        """Check for low entropy (all zeros or all ones)"""
-        # TODO: apply a shannon low entropy check for XOR
-        all_zeros = bytes(len(entropy))
-        all_ones = b"\xff" * len(entropy)
-        if entropy in (all_zeros, all_ones):
-            raise ValueError("Low entropy mnemonic")
+    def _shannon_sum(distribution, sample_size):
+        """Calculates Shannon's entropy of a given distribution."""
+        unit_entropy = 0
+        for count in distribution:
+            probability = count / sample_size
+            unit_entropy -= probability * (probability and math.log2(probability))
+        return unit_entropy
 
     @staticmethod
-    def _check_last_word(words):
-        _words = words.split(" ")
-        main_words = _words[:-1]
-        last_word = _words[-1:][0]
+    def _bits_of_bytes(data):
+        """MSB-first bitstring; used to form 11-bit tokens."""
+        if not isinstance(data, (bytes, bytearray)):
+            raise TypeError("Data should be bytes or bytearray")
+        return "".join("{:08b}".format(b) for b in data)
 
-        if last_word not in Key.get_final_word_candidates(main_words):
-            raise ValueError("Invalid checksum word: %s" % last_word)
+    @staticmethod
+    def _word11_histogram(entropy):
+        """
+        2048-bucket histogram of BIP-39 11-bit word indices derived from
+        entropy||checksum.
+        """
+        import uhashlib_hw
 
-    def xor_with_current_mnemonic(self, mnemonic_to_xor: str) -> str:
-        """XOR current mnemonic with a new one following SeedXOR implementation"""
+        if not isinstance(entropy, (bytes, bytearray)):
+            raise TypeError("Entropy should be bytes or bytearray")
+
+        # length of the bitstream
+        ent_bits = len(entropy) * 8
+
+        # length of the checksum
+        cs_len = ent_bits // 32
+
+        # ENT: entropy
+        s = MnemonicXOR._bits_of_bytes(entropy)
+
+        # CS: checksum
+        sha_s = uhashlib_hw.sha256(entropy).digest()
+        cs_bits = MnemonicXOR._bits_of_bytes(sha_s)
+        checksum = cs_bits[:cs_len]
+
+        # A full bitstream is the concatenation of ENT || CS
+        bitstream = s + checksum
+
+        # 11 bit word (parts of 11 bits of ENT || CS) histogram
+        m = (ent_bits + cs_len) // 11
+        counts = [0] * 2048
+        for i in range(m):
+            idx = int(bitstream[i * 11 : (i + 1) * 11], 2)
+            counts[idx] += 1
+        return counts
+
+    @staticmethod
+    def _validate_entropy(entropy):
+        """Raise ValueError if entropy is degenerate or below the threshold."""
+
+        if not isinstance(entropy, (bytes, bytearray)):
+            raise TypeError("Entropy should be bytes or bytearray")
+
+        if entropy == bytearray(len(entropy)) or entropy == bytearray(
+            [0xFF] * len(entropy)
+        ):
+            raise ValueError("Low entropy")
+
+        w11c = MnemonicXOR._word11_histogram(entropy)
+        if MnemonicXOR._shannon_sum(w11c, sum(w11c)) < ENTROPY_THRESHOLD:
+            raise ValueError("Low entropy")
+
+    def _xor_with_current_mnemonic(self, mnemonic_to_xor):
+        """XOR current mnemonic with a new one following
+        SeedXOR implementation"""
         from embit.bip39 import mnemonic_from_bytes, mnemonic_to_bytes
+
+        if not isinstance(mnemonic_to_xor, str):
+            raise TypeError("Mnemonic should be str")
 
         # Validate same word count
         current_word_count = len(self.ctx.wallet.key.mnemonic.split())
@@ -84,17 +153,27 @@ class MnemonicXOR(MnemonicLoader):
         # Convert and validate entropies
         entropy_a = mnemonic_to_bytes(self.ctx.wallet.key.mnemonic)
         entropy_b = mnemonic_to_bytes(mnemonic_to_xor)
-        self._validate_entropy(entropy_a)
+
+        # The A is the current entropy, so no need to validate
+        # (we assume that user followed the guidelines and
+        # already validated the entropy).
+        # B and the XOR result are still checked below.
         self._validate_entropy(entropy_b)
 
-        # XOR and validate result
         new_entropy = self._xor_bytes(entropy_a, entropy_b)
         self._validate_entropy(new_entropy)
 
         return mnemonic_from_bytes(new_entropy)
 
-    def _display_key_info(self, mnemonic: str, fingerprint: str, title: str) -> None:
+    def _display_key_info(self, mnemonic, fingerprint, title):
         """Display mnemonic or fingerprint based on hide_mnemonic setting"""
+
+        if (
+            not isinstance(mnemonic, str)
+            or not isinstance(fingerprint, str)
+            or not isinstance(title, str)
+        ):
+            raise TypeError("Mnemonic, fingerprint and title should be str")
 
         if not Settings().security.hide_mnemonic:
             self.display_mnemonic(
@@ -109,28 +188,8 @@ class MnemonicXOR(MnemonicLoader):
                 color=theme.highlight_color,
             )
 
-    def _load_key_from_words(self, words, charset=LETTERS, new=False):
-        """
-        Similar method from krux.pages.login.Login without loading a key,
-        instead, it add the bytes from a mnemonic's entropy to the list of entropies
-        """
-
-        mnemonic_to_xor = " ".join(words)
-        fingerprint_to_xor = Key.extract_fingerprint(mnemonic_to_xor)
-
-        # Show the mnemonic to XOR with
-        self._display_key_info(
-            mnemonic_to_xor,
-            fingerprint_to_xor,
-            t("XOR With") + ":",
-        )
-
-        if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-            return MENU_CONTINUE
-
-        self.ctx.display.clear()
-
-        xored_mnemonic = self.xor_with_current_mnemonic(mnemonic_to_xor)
+    def _load_xored_mnemonic(self, fingerprint_to_xor, xored_mnemonic):
+        """Load and display the xored mnemonic and its made operations"""
         xored_fingerprint = Key.extract_fingerprint(xored_mnemonic)
 
         # Display XOR operation and resulting fingerprint:
@@ -151,30 +210,68 @@ class MnemonicXOR(MnemonicLoader):
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
 
-        # If last word do not match, raise an error
-        MnemonicXOR._check_last_word(xored_mnemonic)
-
         # Show the XOR result
+        if xored_mnemonic is not None:
+            self._display_key_info(
+                xored_mnemonic,
+                xored_fingerprint,
+                t("XOR Result") + ":",
+            )
+
+            if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
+                xored_key = Key(
+                    xored_mnemonic,
+                    self.ctx.wallet.key.policy_type,
+                    self.ctx.wallet.key.network,
+                    "",
+                    self.ctx.wallet.key.account_index,
+                    self.ctx.wallet.key.script_type,
+                )
+                self.ctx.wallet = Wallet(xored_key)
+                self.flash_text(
+                    t("%s: loaded!") % xored_fingerprint,
+                    highlight_prefix=":",
+                )
+
+        return MENU_EXIT
+
+    def _load_key_from_words(self, words, charset=LETTERS, new=False):
+        """
+        Similar method from krux.pages.login.Login without loading a key,
+        instead, it add the bytes from a mnemonic's entropy to the list of
+        entropies.
+        """
+        import time
+
+        # This method could be used in a custom manner since it is the "final"
+        # step between choosing and loading.
+        mnemonic_to_xor = " ".join(words)
+        fingerprint_to_xor = Key.extract_fingerprint(mnemonic_to_xor)
+
+        # Show the mnemonic to XOR with
         self._display_key_info(
-            xored_mnemonic,
-            xored_fingerprint,
-            t("XOR Result") + ":",
+            mnemonic_to_xor,
+            fingerprint_to_xor,
+            t("XOR With") + ":",
         )
 
-        if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
-            xored_key = Key(
-                xored_mnemonic,
-                self.ctx.wallet.key.policy_type,
-                self.ctx.wallet.key.network,
-                "",
-                self.ctx.wallet.key.account_index,
-                self.ctx.wallet.key.script_type,
+        if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+            return MENU_CONTINUE
+
+        self.ctx.display.clear()
+
+        # XOR the mnemonic entropy and if we receive any error, just warn the user.
+        try:
+            xored_mnemonic = self._xor_with_current_mnemonic(mnemonic_to_xor)
+            return self._load_xored_mnemonic(fingerprint_to_xor, xored_mnemonic)
+        except Exception as e:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                "%s:\n%s" % (fingerprint_to_xor, str(e)),
+                color=theme.error_color,
             )
-            self.ctx.wallet = Wallet(xored_key)
-            self.flash_text(
-                t("%s: loaded!") % xored_fingerprint,
-                highlight_prefix=":",
-            )
+            time.sleep(3)
+            self.ctx.display.clear()
 
         return MENU_EXIT
 
