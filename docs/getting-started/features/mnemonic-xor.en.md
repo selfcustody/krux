@@ -1,21 +1,22 @@
-# What's the Mnemonic XOR?
+# What is the Mnemonic XOR?
 
-It's a implementation of [XOR logical gate](https://www.geeksforgeeks.org/digital-logic/xor-gate/) to operate, indefinitely, an [exclusive OR](https://en.wikipedia.org/wiki/Exclusive_or) upon a loaded mnemonic, based on [Coinkite's SeedXOR](https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md).
+It is an implementation of XOR ([exclusive OR](https://en.wikipedia.org/wiki/Exclusive_or)) logical operation executed upon entropy of 2 or more mnemonics to combine their entropy, based on [Coinkite's SeedXOR](https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md).
 
 # How it works
 
-To derive a new mnemonic (and thus, a new seed) from other mnemonics, an operation occurs with the **mnemonic's entropy bytes**.
-Operate a XOR between them will derive a new **entropy bytes** that will be converted to a new mnemonic and then, to a new seed:
+To derive a new mnemonic (and thus, a new seed) from other mnemonics, Krux performs an XOR operation on the **mnemonic's entropy bytes**.
+An XOR operation between them results in new **entropy bytes** that will be converted to a new mnemonic and then to a new seed:
 
 <img src="../../../img/mnemonic_xor.png" align="center">
 
-- We get two different mnemonics (A and B), extract their *entropy bytes*;
+- We get two different mnemonics (A and B), extract their **entropy bytes**;
 - validate the input entropies to avoid useless or dangerous operations:
-  - `A XOR B = A`: it will not change the XORed mnemonic;
-  - `A XOR B = A'` where `A'` is a "inverse" version of `A`;
-- once the inputs are checked, krux will apply a XOR between the *entropy bytes*;
+  - `A XOR B = A`: this means B is all zeros (useless operation - it will not change the XORed mnemonic);
+  - `A XOR B = A'` where `A'` is the bitwise complement of `A`: this means B is all ones (dangerous - creates a predictable inverse);
+- Krux will also ensure that the mnemonics to be XORed have the same length;
+- once the inputs are checked, Krux will apply an XOR operation between the **entropy bytes**;
 - validate the output entropy (same as above);
-- "convert" the valid *entropy bytes* output to a new mnemonic (C);
+- convert the valid **entropy bytes** output to a new mnemonic (C);
 - the user then can apply a password (optional) and get a new **master seed**.
 
 # Split and recover shares
@@ -24,7 +25,8 @@ You can split a mnemonic into two separate mnemonics (or "shares") using the XOR
 
 ### Core Principle
 
-Now we show a basic step
+We make use of a XOR property:
+
 If `A XOR B = C`, then `B XOR C = A`.
 
 - **A**: Your original mnemonic (the secret to protect);
@@ -53,7 +55,7 @@ If `A XOR B = C`, then `B XOR C = A`.
 
 #### Step 4: Back Up Mnemonic C
 
-1. Go to **Backup** and choose your favorite secure method to backup mnemonic C
+1. Go to **Backup** and choose your favorite secure method to backup mnemonic C.
 ---
 
 ### Phase 2: Verification & Finalization
