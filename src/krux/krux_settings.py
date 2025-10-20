@@ -475,6 +475,7 @@ class SecuritySettings(SettingsNamespace):
     namespace = "settings.security"
     auto_shutdown = NumberSetting(int, "auto_shutdown", 10, [0, 60])
     hide_mnemonic = CategorySetting("hide_mnemonic", False, [False, True])
+    entropy_threshold = NumberSetting(float, "entropy_threshold", 3.42, [0.01, 9.99])
     boot_flash_hash = CategorySetting("boot_flash_hash", False, [False, True])
 
     def label(self, attr):
@@ -483,6 +484,7 @@ class SecuritySettings(SettingsNamespace):
             "auto_shutdown": t("Shutdown Time"),
             "hide_mnemonic": t("Hide Mnemonics"),
             "boot_flash_hash": t("TC Flash Hash at Boot"),
+            "entropy_threshold": t("Entropy Threshold"),
         }[attr]
 
 
