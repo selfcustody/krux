@@ -93,7 +93,7 @@ class FT6X36(Touchscreen):
                 y = ((data_buf[2] & 0x0F) << 8) | (data_buf[3])
                 return (x, y)
         except Exception as e:
-            return e  # debug
+            print("FT6X36 read error:", e)
         return None
 
     def trigger_event(self):
