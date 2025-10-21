@@ -94,8 +94,13 @@ def find_translation_slugs():
                 continue
             with open(join(dirpath, filename), "r", encoding="utf8") as src_file:
                 contents = src_file.read()
-                for match in re.findall(r"[^A-Za-z0-9]t\(\s*\"(.+?)\"\s*\)", contents):
-                    slugs[match] = True
+                for match in re.findall(
+                    r'[^A-Za-z0-9]t\(\s*((?:"[^"]*"\s*)+)\)', contents
+                ):
+                    # Extract all string pieces and join them
+                    parts = re.findall(r'"([^"]*)"', match)
+                    slug = "".join(parts)
+                    slugs[slug] = True
     return slugs
 
 
