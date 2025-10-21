@@ -1,84 +1,75 @@
 # What is the Mnemonic XOR?
 
-It is an implementation of XOR ([exclusive OR](https://en.wikipedia.org/wiki/Exclusive_or)) logical operation executed upon entropy of 2 or more mnemonics to combine their entropy, based on [Coinkite's SeedXOR](https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md).
+It is an implementation of XOR ([exclusive OR](https://en.wikipedia.org/wiki/Exclusive_or)) operation across the entropy values of two or more mnemonics to produce a combined result, based on [Coinkite's SeedXOR](https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md).
 
-# How it works
+## How it works
 
-To derive a new mnemonic (and thus, a new seed) from other mnemonics, Krux performs an XOR operation on the **mnemonic's entropy bytes**.
-An XOR operation between them results in new **entropy bytes** that will be converted to a new mnemonic and then to a new seed:
+Krux derives a new mnemonic (and therefore a new seed) by performing an XOR operation on the **entropy bytes** of the source mnemonics. The result of this XOR operation is a new set of **entropy bytes**, which are then converted into a new mnemonic - and subsequently, a new seed.
 
 <img src="../../../img/mnemonic_xor.png" align="center">
 
-- We get two different mnemonics (A and B), extract their **entropy bytes**;
-- validate the input entropies to avoid useless or dangerous operations:
-  - `A XOR B = A`: this means B is all zeros (useless operation - it will not change the XORed mnemonic);
-  - `A XOR B = A'` where `A'` is the bitwise complement of `A`: this means B is all ones (dangerous - creates a predictable inverse);
-- Krux will also ensure that the mnemonics to be XORed have the same length;
-- once the inputs are checked, Krux will apply an XOR operation between the **entropy bytes**;
-- validate the output entropy (same as above);
-- convert the valid **entropy bytes** output to a new mnemonic (C);
-- the user then can apply a password (optional) and get a new **master seed**.
+- Obtain two different mnemonics (A and B) and extract their **entropy bytes**.
+- Validate the input entropies to prevent redundant or unsafe operations:
 
-# Split and recover shares
+    - `A XOR B = A`: indicates that B consists entirely of zeros (useless - no change to the result).
+    - `A XOR B = A'`, where `A'` is the bitwise complement of `A`: indicates that B consists entirely of ones (dangerous - produces a predictable inverse).
 
-You can split a mnemonic into two separate mnemonics (or "shares") using the XOR operation. Neither share reveals any information about the original secret on its own. The original mnemonic can only be recovered when **both shares are combined**.
+- Ensure that both mnemonics have the same length before proceeding.
+- Perform the XOR operation between **entropy bytes** from `A` and `B`.
+- Validate the resulting entropy `C` (same checks as above).
+- Convert the valid **entropy bytes** `C` into a new mnemonic `C`.
+- Optionally, the user may apply a password to derive a new master seed.
+
+---
+
+## Split and Recover Parts (or "shares")
+
+A mnemonic can be split into two separate parts (or "shares") using the XOR operation. Each share by itself reveals nothing about the original secret. The original mnemonic can only be reconstructed when **both shares are combined**.
 
 ### Core Principle
 
-We make use of a XOR property:
+This method relies on a fundamental property of XOR:
 
 If `A XOR B = C`, then `B XOR C = A`.
 
-- **A**: Your original mnemonic (the secret to protect);
-- **B**: A newly generated, random mnemonic (Share 1);
-- **C**: The resulting mnemonic from the XOR operation (Share 2).
+- **A**: The original mnemonic (the secret to protect)
+- **B**: A newly generated random mnemonic (Share 1)
+- **C**: The mnemonic produced by the XOR operation (Share 2)
 
----
+### Step-by-Step Guide to Splitting Your Mnemonic
 
-## Step-by-Step Guide to Splitting Your Mnemonic
+#### Phase 1: Splitting Process
 
-### Phase 1: The Splitting Process
+##### Generate a Random Share (Mnemonic B)
 
-#### Step 1: Generate a Random Share (Mnemonic B)
+1. Generate a new random mnemonic using dice rolls or an image.
+2. **Important:** This mnemonic must have the same number of words (12 or 24) as your original mnemonic `A`.
 
-1. Generate a new, random mnemonic from dice rolls or an image;
-2. **CRITICAL**: This mnemonic must have the same number of words (12 or 24) as your original mnemonic (A).
+##### Back Up Mnemonic B
+- Use a reliable and secure method to back up mnemonic `B`.
 
-#### Step 2: Backup Mnemonic B
+##### Perform the XOR Operation
 
-- Use a safe method to backup mnemonic B.
+1. Load mnemonic `A`.
+2. Navigate to **Wallet -> Mnemonic XOR**.
+3. Load mnemonic `B` to be XORed with `A`.
+4. The resulting entropy from `A XOR B` will be used to generate the second share - mnemonic `C`.
 
-#### Step 3: Perform the XOR Operation
+##### Back Up Mnemonic C
+- Go to **Backup** and securely store mnemonic `C` using your preferred backup method.
 
-1. Load mnemonic A, go to **Wallet -> Mnemonic XOR** and load mnemonic B to be XORed with A;
-2. The resulting entropy of `A XOR B` will be used to create the second share, mnemonic C.
+#### Phase 2: Verification & Finalization
+Don't trust, verify!
 
-#### Step 4: Back Up Mnemonic C
+1. Retrieve your backups of mnemonics `B` and `C`.
+2. Load one of them and XOR it with the other.
+3. Confirm that the resulting mnemonic matches the original mnemonic `A`.
 
-1. Go to **Backup** and choose your favorite secure method to backup mnemonic C.
----
+⚠️ **Only after successful verification** should you securely destroy the original mnemonic `A`.
 
-### Phase 2: Verification & Finalization
+#### Important Notes
 
-> ⚠️ **DO NOT SKIP THIS PHASE**
-
-#### Step 5: Verify the Recovery Process
-
-**This is non-negotiable.** Before relying on the system or destroying the original mnemonic, perform a test:
-
-1. Retrieve mnemonic B and C backups;
-2. Load one of them and XOR it with the other;
-3. Verify that the resulting mnemonic matches the original mnemonic A.
-
-#### Step 6: Destroy the Original
-
-⚠️ **Only after you have successfully verified in Step 5** that the recovery works perfectly should you securely destroy the original mnemonic (A).
-
----
-
-## Important Notes
-
-- **Keep shares separate**: Store mnemonic B and mnemonic C in different secure locations;
-- **Both shares required**: Neither share alone provides any information about the original mnemonic;
-- **Always verify**: Test the recovery process before destroying the original;
-- **Same word count**: All three mnemonics (A, B, and C) must have the same number of words.
+- **Keep shares separate:** Store mnemonics `B` and `C` in different secure locations.
+- **Both shares required:** Neither share alone reveals any information about the original mnemonic.
+- **Always verify!:** Test the recovery process before destroying the original.
+- **Matching word count:** All three mnemonics (`A`, `B`, and `C`) must have the same number of words.

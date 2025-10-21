@@ -59,6 +59,7 @@ poetry run poe simulator --sequence sequences/wallet-descriptor-wsh.txt --sd --d
 # poetry run poe simulator --sequence sequences/wallet-descriptor-wpkh.txt --sd --device $device
 poetry run poe simulator --sequence sequences/wallet-descriptor-exp-tr-minis.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/bip85.txt --sd --device $device
+poetry run poe simulator --sequence sequences/mnemonic-xor.txt --sd --device $device
 poetry run poe simulator --sequence sequences/scan-address.txt --sd --device $device
 poetry run poe simulator --sequence sequences/list-address.txt --sd --device $device
 poetry run poe simulator --sequence sequences/export-address.txt --sd --device $device
