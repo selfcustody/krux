@@ -109,20 +109,6 @@ class MnemonicXOR(MnemonicLoader):
                 color=theme.highlight_color,
             )
 
-    def load(self):
-        """Menu for XOR the current mnemonic with a share"""
-        menu = Menu(
-            self.ctx,
-            [
-                (t("Via Camera"), self.load_key_from_camera),
-                (t("Via Manual Input"), self.load_key_from_manual_input),
-                (t("From Storage"), self.load_mnemonic_from_storage),
-            ],
-        )
-
-        menu.run_loop()
-        return MENU_EXIT
-
     def _load_key_from_words(self, words, charset=LETTERS, new=False):
         """
         Similar method from krux.pages.login.Login without loading a key,
@@ -155,6 +141,8 @@ class MnemonicXOR(MnemonicLoader):
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
 
+        self.ctx.display.clear()
+
         xored_mnemonic = self.xor_with_current_mnemonic(key_to_xor.mnemonic)
         xored_key = Key(
             xored_mnemonic,
@@ -166,14 +154,13 @@ class MnemonicXOR(MnemonicLoader):
         )
 
         # Display XOR operation and resulting fingerprint:
-        offset_y = self.ctx.display.height() // 2
-        offset_y -= FONT_HEIGHT * 3
-        self.ctx.display.clear()
-        for element in [current_fingerprint, "XOR", fingerprint_to_xor, "="]:
-            self.ctx.display.draw_hcentered_text(element, offset_y, theme.fg_color)
-            offset_y += FONT_HEIGHT
+        offset_y = (self.ctx.display.height() // 2) - FONT_HEIGHT * 3
+        lines = [current_fingerprint, "XOR", fingerprint_to_xor, "="]
+        self.ctx.display.draw_hcentered_text(lines, offset_y, theme.fg_color)
         self.ctx.display.draw_hcentered_text(
-            xored_key.fingerprint_hex_str(True), offset_y, theme.highlight_color
+            xored_key.fingerprint_hex_str(True),
+            offset_y + FONT_HEIGHT * len(lines),
+            theme.highlight_color,
         )
 
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
@@ -197,3 +184,15 @@ class MnemonicXOR(MnemonicLoader):
             )
 
         return MENU_EXIT
+
+    def choose_len_mnemonic(self, extra_option=""):
+        """XOR '12 or 24 words?" menu choice"""
+        items = []
+        if len(self.ctx.wallet.key.mnemonic.split(" ")) == 12:
+            items.append((t("12 words"), lambda: 12))
+        else:
+            items.append((t("24 words"), lambda: 24))
+        submenu = Menu(self.ctx, items, back_status=lambda: None)
+        _, num_words = submenu.run_loop()
+        self.ctx.display.clear()
+        return num_words

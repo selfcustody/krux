@@ -25,7 +25,6 @@ from .. import (
     Menu,
     MENU_EXIT,
     ESC_KEY,
-    choose_len_mnemonic,
 )
 from ...themes import theme
 from ...krux_settings import t
@@ -229,7 +228,7 @@ class DiceEntropy(Page):
         """Create a new key from dice rolls"""
         from ...settings import ELLIPSIS
 
-        len_mnemonic = choose_len_mnemonic(self.ctx)
+        len_mnemonic = self.choose_len_mnemonic()
         if not len_mnemonic:
             return None
 

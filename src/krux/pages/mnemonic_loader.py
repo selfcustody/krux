@@ -29,7 +29,6 @@ from . import (
     MENU_CONTINUE,
     ESC_KEY,
     LETTERS,
-    choose_len_mnemonic,
 )
 from ..display import BOTTOM_PROMPT_LINE
 from ..qr import FORMAT_UR
@@ -119,7 +118,7 @@ class MnemonicLoader(Page):
         from .mnemonic_editor import MnemonicEditor
 
         if new:
-            len_mnemonic = choose_len_mnemonic(self.ctx)
+            len_mnemonic = self.choose_len_mnemonic()
             if not len_mnemonic:
                 return MENU_CONTINUE
             title = t("Enter %d BIP39 words.") % len_mnemonic
@@ -269,7 +268,7 @@ class MnemonicLoader(Page):
         """Menu handler to manually load key from Tinyseed sheet metal storage method"""
         from .tiny_seed import TinySeed
 
-        len_mnemonic = choose_len_mnemonic(self.ctx)
+        len_mnemonic = self.choose_len_mnemonic()
         if not len_mnemonic:
             return MENU_CONTINUE
 
@@ -284,7 +283,7 @@ class MnemonicLoader(Page):
         """Menu handler to scan key from Tinyseed sheet metal storage method"""
         from .tiny_seed import TinyScanner
 
-        len_mnemonic = choose_len_mnemonic(self.ctx)
+        len_mnemonic = self.choose_len_mnemonic()
         if not len_mnemonic:
             return MENU_CONTINUE
 

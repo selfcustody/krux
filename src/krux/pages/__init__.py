@@ -575,6 +575,19 @@ class Page:
                 theme.frame_color,
             )
 
+    def choose_len_mnemonic(self, extra_option=""):
+        """Reusable '12 or 24 words?" menu choice"""
+        items = [
+            (t("12 words"), lambda: 12),
+            (t("24 words"), lambda: 24),
+        ]
+        if extra_option:
+            items.append((extra_option, lambda: EXTRA_MNEMONIC_LENGTH_FLAG))
+        submenu = Menu(self.ctx, items, back_status=lambda: None)
+        _, num_words = submenu.run_loop()
+        self.ctx.display.clear()
+        return num_words
+
 
 class ListView:
     """Acts as a fixed-size, sliding window over an underlying list"""
@@ -1011,17 +1024,3 @@ class Menu:
                         text, offset_y + FONT_HEIGHT * j, fg_color
                     )
             offset_y += delta_y
-
-
-def choose_len_mnemonic(ctx, extra_option=""):
-    """Reusable '12 or 24 words?" menu choice"""
-    items = [
-        (t("12 words"), lambda: 12),
-        (t("24 words"), lambda: 24),
-    ]
-    if extra_option:
-        items.append((extra_option, lambda: EXTRA_MNEMONIC_LENGTH_FLAG))
-    submenu = Menu(ctx, items, back_status=lambda: None)
-    _, num_words = submenu.run_loop()
-    ctx.display.clear()
-    return num_words

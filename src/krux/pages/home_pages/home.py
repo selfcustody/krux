@@ -174,7 +174,7 @@ class Home(Page):
         from .mnemonic_xor import MnemonicXOR
 
         mnemonic_xor = MnemonicXOR(self.ctx)
-        mnemonic_xor.load()
+        mnemonic_xor.load_key()
 
         return MENU_CONTINUE
 
