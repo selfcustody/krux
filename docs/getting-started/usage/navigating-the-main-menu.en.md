@@ -217,6 +217,16 @@ Choose between *12 or 24 words*, then type the desired *index* to export a *chil
 
 To create a *Base64 password*, which can be used in a variety of logins, from email to social media accounts, choose an index and then a length of at least 20 characters. The resulting password will be displayed on the screen and can also be exported to an SD Card or as a QR code.
 
+#### Mnemonic XOR
+<img src="../../../img/maixpy_m5stickv/xor-message-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/xor-message-300.png" align="right" class="amigo">
+
+Mnemonic XOR enables the **combination of two or more mnemonics** by applying an XOR (exclusive OR) operation to their entropy bytes, **resulting in a new mnemonic**. This functionality can be used to split a mnemonic into multiple parts (or "shares") or to merge existing ones.
+
+For detailed instructions on combining, splitting, and recovering mnemonics using XOR, see [Mnemonic XOR](../features/mnemonic-xor.md).
+
+<div style="clear: both"></div>
+
 ### Address
 <img src="../../../img/maixpy_m5stickv/address-menu-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/address-menu-300.png" align="right" class="amigo">

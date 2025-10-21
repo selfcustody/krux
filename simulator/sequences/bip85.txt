@@ -7,7 +7,7 @@ press BUTTON_A
 screenshot wallet_home_options.png
 
 # Navigate to BIP85
-x2 press BUTTON_C
+x3 press BUTTON_B
 x2 press BUTTON_A
 
 screenshot bip85-options.png
