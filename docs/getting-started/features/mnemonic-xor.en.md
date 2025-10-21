@@ -1,10 +1,10 @@
-# What is the Mnemonic XOR?
+# What is Mnemonic XOR?
 
-It is an implementation of XOR ([exclusive OR](https://en.wikipedia.org/wiki/Exclusive_or)) operation across the entropy values of two or more mnemonics to produce a combined result, based on [Coinkite's SeedXOR](https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md).
+It is an implementation of the XOR ([exclusive OR](https://en.wikipedia.org/wiki/Exclusive_or)) operation across the entropy values of two or more mnemonics to produce a combined result, based on [Coinkite's SeedXOR](https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md).
 
-## How it works
+## How It Works
 
-Krux derives a new mnemonic (and therefore a new seed) by performing an XOR operation on the **entropy bytes** of the source mnemonics. The result of this XOR operation is a new set of **entropy bytes**, which are then converted into a new mnemonic - and subsequently, a new seed.
+Krux derives a new mnemonic (and therefore a new seed) by performing an XOR operation on the **entropy bytes** of the source mnemonics. The result of this XOR operation is a new set of **entropy bytes**, which is then converted into a new mnemonic - and subsequently, a new seed.
 
 <img src="../../../img/mnemonic_xor.png" align="center">
 
