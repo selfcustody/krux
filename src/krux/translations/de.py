@@ -112,6 +112,7 @@ translation_array = [
     "Gib jedes Wort Deiner BIP39 Mnemonic als Hexadezimalzahl von 1 bis 800 ein.",
     "Gib jedes Wort Deiner BIP39 Mnemonic als Oktalzahl von 1 bis 4000 ein.",
     "Gib jedes Wort Deiner BIP39 Mnemonic ein.",
+    "Entropieschwelle",
     "Benutzerdaten löschen",
     "Benutzerdaten werden gelöscht…",
     "Fehler:",

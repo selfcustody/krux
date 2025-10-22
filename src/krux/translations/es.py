@@ -112,6 +112,7 @@ translation_array = [
     "Ingresa cada palabra de tu mnemónico BIP39 como un número en hexadecimal del 1 al 800.",
     "Ingresa cada palabra de tu mnemónico BIP39 como un número en octal del 1 al 4000.",
     "Ingresa cada palabra de tu mnemónico BIP39.",
+    "Umbral de entropía",
     "Borrar datos de usuario",
     "Borrando los datos del usuario…",
     "Error:",

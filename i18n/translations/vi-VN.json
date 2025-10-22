@@ -90,6 +90,7 @@
     "Enter each word of your BIP39 mnemonic as a number in hexadecimal from 1 to 800.": "Nhập từng từ trong Mnemonic BIP39 của bạn dưới dạng số thập lục phân từ 1 đến 800.",
     "Enter each word of your BIP39 mnemonic as a number in octal from 1 to 4000.": "Nhập từng từ trong Mnemonic BIP39 của bạn dưới dạng số bát phân từ 1 đến 4000.",
     "Enter each word of your BIP39 mnemonic.": "Nhập từng từ của Mnemonic BIP39 của bạn.",
+    "Entropy Threshold": "Ngưỡng Entropy",
     "Erase User's Data": "Xóa dữ liệu của người dùng",
     "Erasing user's data…": "Đang xóa dữ liệu của người dùng…",
     "Error:": "Lỗi:",

@@ -90,6 +90,7 @@
     "Enter each word of your BIP39 mnemonic as a number in hexadecimal from 1 to 800.": "将 BIP39 助记词的每个词作为 1 到 800 的十六进制数输入.",
     "Enter each word of your BIP39 mnemonic as a number in octal from 1 to 4000.": "将 BIP39 助记词的每个词作为 1 到 4000 的八进制数输入.",
     "Enter each word of your BIP39 mnemonic.": "输入每个 BIP39 助记词.",
+    "Entropy Threshold": "熵阈值",
     "Erase User's Data": "清除用户数据",
     "Erasing user's data…": "正在删除用户数据…",
     "Error:": "错误:",
