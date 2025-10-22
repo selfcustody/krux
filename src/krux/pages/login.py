@@ -29,7 +29,6 @@ from . import (
     MENU_EXIT,
     LETTERS,
     EXTRA_MNEMONIC_LENGTH_FLAG,
-    choose_len_mnemonic,
 )
 from .mnemonic_loader import MnemonicLoader
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
@@ -123,7 +122,7 @@ class Login(MnemonicLoader):
     def new_key_from_snapshot(self):
         """Use camera's entropy to create a new mnemonic"""
         extra_option = t("Double mnemonic")
-        len_mnemonic = choose_len_mnemonic(self.ctx, extra_option)
+        len_mnemonic = self.choose_len_mnemonic(extra_option)
         if not len_mnemonic:
             return MENU_CONTINUE
 

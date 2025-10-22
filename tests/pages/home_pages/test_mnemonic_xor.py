@@ -176,7 +176,7 @@ def test_menu_load_and_back(mocker, m5stickv, tdata):
         wallet = Wallet(key)
         ctx = create_ctx(mocker, case, wallet)
         m = MnemonicXOR(ctx)
-        m.load()
+        m.load_key()
 
         assert ctx.wallet.key.fingerprint.hex() == "a70e2c26"
         assert ctx.input.wait_for_button.call_count == len(case)
@@ -233,7 +233,7 @@ def test_menu_load_qrcode_and_back(mocker, amigo, tdata):
         )
 
         m = MnemonicXOR(ctx)
-        m.load()
+        m.load_key()
 
         assert ctx.wallet.key.fingerprint.hex() == "a70e2c26"
         assert ctx.input.wait_for_button.call_count == len(case)
@@ -336,7 +336,7 @@ def test_load_from_qrcode(mocker, amigo, tdata):
         )
 
         m = MnemonicXOR(ctx)
-        m.load()
+        m.load_key()
 
         assert ctx.wallet.key.mnemonic == case[1][2]
         assert ctx.wallet.key.fingerprint.hex() == case[2][1]
@@ -442,7 +442,7 @@ def test_load_from_qrcode_with_hide_mnemonic(mocker, amigo, tdata):
         )
 
         m = MnemonicXOR(ctx)
-        m.load()
+        m.load_key()
 
         assert ctx.wallet.key.mnemonic == case[1][2]
         assert ctx.wallet.key.fingerprint.hex() == case[2][1]
@@ -561,7 +561,7 @@ def test_export_from_words(mocker, amigo, tdata):
         m = MnemonicXOR(ctx)
         mocker.patch.object(m, "capture_from_keypad", side_effect=words)
         mocker.spy(m, "xor_with_current_mnemonic")
-        m.load()
+        m.load_key()
 
         m.xor_with_current_mnemonic.assert_called_once_with(case[1][1])
         assert ctx.wallet.key.mnemonic == case[1][2]
@@ -604,7 +604,7 @@ def test_export_xor_to_same_mnemonic_from_qrcode(mocker, amigo, tdata):
     )
 
     m = MnemonicXOR(ctx)
-    m.load()
+    m.load_key()
     ctx.display.draw_centered_text.assert_has_calls(
         [mocker.call("Error:\nValueError('Low entropy mnemonic')", 248)],
         any_order=True,
@@ -646,7 +646,7 @@ def test_export_xor_to_inverted_mnemonic_from_qrcode(mocker, amigo, tdata):
     )
 
     m = MnemonicXOR(ctx)
-    m.load()
+    m.load_key()
     ctx.display.draw_centered_text.assert_has_calls(
         [mocker.call("Error:\nValueError('Low entropy mnemonic')", 248)],
         any_order=True,
@@ -690,8 +690,26 @@ def test_export_xor_low_entropy_mnemonic_from_qrcode(mocker, amigo, tdata):
     )
 
     m = MnemonicXOR(ctx)
-    m.load()
+    m.load_key()
     ctx.display.draw_centered_text.assert_has_calls(
         [mocker.call("Error:\nValueError('Low entropy mnemonic')", 248)],
         any_order=True,
     )
+
+
+def test_mnemonic_len(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
+    from krux.input import BUTTON_ENTER
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from embit.networks import NETWORKS
+
+    key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
+    wallet = Wallet(key)
+    ctx = create_ctx(mocker, [BUTTON_ENTER, BUTTON_ENTER], wallet)
+    m = MnemonicXOR(ctx)
+    assert m.choose_len_mnemonic() == 12
+
+    key = Key(tdata.TEST_XOR_24_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
+    ctx.wallet = Wallet(key)
+    assert m.choose_len_mnemonic() == 24
