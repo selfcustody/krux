@@ -145,10 +145,10 @@ def test_sd_check_no_sd(m5stickv, mocker):
 
 def test_sd_check(m5stickv, mocker):
     from krux.pages.device_tests import DeviceTests
-    from krux.input import BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     BTN_SEQUENCE = [
-        BUTTON_PAGE,  # Leave
+        BUTTON_ENTER,  # explore files
     ]
     mocker.patch(
         "uos.statvfs",
