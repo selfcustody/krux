@@ -371,7 +371,7 @@ translation_array = [
     "Palavras",
     "Resultado XOR",
     "XOR com",
-    "XOR atual mnemônico com outro? (senha e descritor serão descartados)",
+    "XOR mnemônico atual com outro? (senha e descritor serão descartados)",
     "Sim",
     "Modo ampliado",
     "binário:",
