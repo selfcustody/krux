@@ -695,3 +695,21 @@ def test_export_xor_low_entropy_mnemonic_from_qrcode(mocker, amigo, tdata):
         [mocker.call("Error:\nValueError('Low entropy mnemonic')", 248)],
         any_order=True,
     )
+
+
+def test_mnemonic_len(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
+    from krux.input import BUTTON_ENTER
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from embit.networks import NETWORKS
+
+    key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
+    wallet = Wallet(key)
+    ctx = create_ctx(mocker, [BUTTON_ENTER, BUTTON_ENTER], wallet)
+    m = MnemonicXOR(ctx)
+    assert m.choose_len_mnemonic() == 12
+
+    key = Key(tdata.TEST_XOR_24_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
+    ctx.wallet = Wallet(key)
+    assert m.choose_len_mnemonic() == 24
