@@ -126,6 +126,7 @@ def mock_zlib_code(mocker):
         "krux.bbqr.deflate_decompress", side_effect=lambda _: b"wrong-output"
     )
 
+
 def test_sd_check_no_sd(m5stickv, mocker):
     from krux.pages.device_tests import DeviceTests
     from krux.input import BUTTON_PAGE
@@ -169,6 +170,7 @@ def test_sd_check(m5stickv, mocker):
         ]
     )
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
 
 def test_printer_test_tool(amigo, mocker, mocked_print_qr):
     """Test that the print tool is called with the correct text"""
