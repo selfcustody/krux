@@ -59,6 +59,24 @@ def test_fail_xor_bytes_different_lengths(mocker, m5stickv):
     assert str(exc.value) == "Sequences should have same length"
 
 
+def test_mnemonic_len(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
+    from krux.input import BUTTON_ENTER
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from embit.networks import NETWORKS
+
+    key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
+    wallet = Wallet(key)
+    ctx = create_ctx(mocker, [BUTTON_ENTER, BUTTON_ENTER], wallet)
+    m = MnemonicXOR(ctx)
+    assert m.choose_len_mnemonic() == 12
+
+    key = Key(tdata.TEST_XOR_24_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
+    ctx.wallet = Wallet(key)
+    assert m.choose_len_mnemonic() == 24
+
+
 def test_xor_with_current_mnemonic(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
@@ -97,7 +115,7 @@ def test_xor_with_current_mnemonic(mocker, m5stickv, tdata):
         wallet = Wallet(key)
         ctx = create_ctx(mocker, case, wallet)
         m = MnemonicXOR(ctx)
-        assert m.xor_with_current_mnemonic(case[1]) == case[2]
+        assert m._xor_with_current_mnemonic(case[1]) == case[2]
         n += 1
 
 
@@ -122,12 +140,12 @@ def test_fail_xor_mnemonics_different_lengths(mocker, m5stickv, tdata):
     ]
 
     for case in cases:
-        with pytest.raises(ValueError) as exc:
+        with pytest.raises(AttributeError) as exc:
             key = Key(case[0], TYPE_SINGLESIG, NETWORKS["test"])
             wallet = Wallet(key)
             ctx = create_ctx(mocker, case, wallet)
             m = MnemonicXOR(ctx)
-            m.xor_with_current_mnemonic(case[1])
+            m._xor_with_current_mnemonic(case[1])
 
             assert str(exc.value) == "Mnemonics should have same length"
 
@@ -560,17 +578,17 @@ def test_export_from_words(mocker, amigo, tdata):
 
         m = MnemonicXOR(ctx)
         mocker.patch.object(m, "capture_from_keypad", side_effect=words)
-        mocker.spy(m, "xor_with_current_mnemonic")
+        mocker.spy(m, "_xor_with_current_mnemonic")
         m.load_key()
 
-        m.xor_with_current_mnemonic.assert_called_once_with(case[1][1])
+        m._xor_with_current_mnemonic.assert_called_once_with(case[1][1])
         assert ctx.wallet.key.mnemonic == case[1][2]
         assert ctx.wallet.key.fingerprint.hex() == case[2][1]
         assert ctx.input.wait_for_button.call_count == len(case[0])
         n += 1
 
 
-def test_export_xor_to_same_mnemonic_from_qrcode(mocker, amigo, tdata):
+def test_export_xor_fail_low_entropy(mocker, amigo, tdata):
     from embit.networks import NETWORKS
     from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
     from krux.key import Key, TYPE_SINGLESIG
@@ -579,137 +597,87 @@ def test_export_xor_to_same_mnemonic_from_qrcode(mocker, amigo, tdata):
     from krux.qr import FORMAT_NONE
     from krux.pages.qr_capture import QRCodeCapture
 
-    BTN_SEQUENCE = [
-        BUTTON_ENTER,  # Press "Via camera"
-        BUTTON_ENTER,  # QRCode
-        BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
-        *([BUTTON_PAGE] * 5),  # Move to back
-        BUTTON_ENTER,  # Press back
-        *([BUTTON_PAGE] * 3),  # Move to back
-        BUTTON_ENTER,  # Press back
+    cases = [
+        (
+            (
+                BUTTON_ENTER,  # Press "Via camera"
+                BUTTON_ENTER,  # QRCode
+                BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
+                *([BUTTON_PAGE] * 5),  # Move to back
+                BUTTON_ENTER,  # Press back
+                *([BUTTON_PAGE] * 3),  # Move to back
+                BUTTON_ENTER,  # Press back
+            ),
+            tdata.SIGNING_MNEMONIC,
+            "⊚\u200973c5da0a:\nLow entropy (got [0x00; 32])",
+        ),
+        (
+            (
+                BUTTON_ENTER,  # Press "Via camera"
+                BUTTON_ENTER,  # QRCodeCapture
+                BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
+                *([BUTTON_PAGE] * 5),  # Move to back
+                BUTTON_ENTER,  # Press back
+                *([BUTTON_PAGE] * 3),  # Move to back
+                BUTTON_ENTER,  # Press back
+            ),
+            "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong",
+            "⊚\u20093f635a63:\nLow entropy (got [0xFF; 32])",
+        ),
+        # Shared with love by jaonoctus <3
+        # Preamble:
+        #           "you can barely avoid horror when you make seed word story mystery"
+        #           (tabconf 6)
+        #
+        # You can add more below:
+        (
+            (
+                BUTTON_ENTER,  # Press "Via camera"
+                BUTTON_ENTER,  # QRCodeCapture
+                BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
+                BUTTON_ENTER,  # Press "Yes to accept low entropy"
+                *([BUTTON_PAGE] * 5),  # Move to back
+                BUTTON_ENTER,  # Press back
+                *([BUTTON_PAGE] * 3),  # Move to back
+                BUTTON_ENTER,  # Press back
+            ),
+            "ghost spider ghost pumpkin ghost puzzle ghost spirit ghost scare ghost october",  # near 2.30
+            "⊚\u20096a9b363b:\nLow entropy (got 2.292481 bits/word)",
+        ),
+        (
+            (
+                BUTTON_ENTER,  # Press "Via camera"
+                BUTTON_ENTER,  # QRCodeCapture
+                BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
+                BUTTON_ENTER,  # Press "Yes to accept low entropy"
+                *([BUTTON_PAGE] * 5),  # Move to back
+                BUTTON_ENTER,  # Press back
+                *([BUTTON_PAGE] * 3),  # Move to back
+                BUTTON_ENTER,  # Press back
+            ),
+            "you can barely avoid horror when you make seed word story mystery",  # near 3.42
+            "⊚\u2009a856927b:\nLow entropy (got 3.418296 bits/word)",
+        ),
     ]
 
-    key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
-    wallet = Wallet(key)
-    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
+    n = 0
+    for case in cases:
+        print(f"Case {n}")
+        key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
+        wallet = Wallet(key)
+        ctx = create_ctx(mocker, case[0], wallet)
 
-    assert ctx.wallet.key.mnemonic == tdata.TEST_XOR_12_WORD_MNEMONIC_1
-    assert ctx.wallet.key.fingerprint.hex() == "a70e2c26"
+        assert ctx.wallet.key.mnemonic == tdata.TEST_XOR_12_WORD_MNEMONIC_1
+        assert ctx.wallet.key.fingerprint.hex() == "a70e2c26"
 
-    mocker.spy(ctx.display, "draw_centered_text")
-    mocker.patch.object(
-        QRCodeCapture,
-        "qr_capture_loop",
-        new=lambda self: (tdata.SIGNING_MNEMONIC, FORMAT_NONE),
-    )
+        mocker.spy(ctx.display, "draw_hcentered_text")
+        mocker.patch.object(
+            QRCodeCapture,
+            "qr_capture_loop",
+            new=lambda self: (case[1], FORMAT_NONE),
+        )
 
-    m = MnemonicXOR(ctx)
-    m.load_key()
-    ctx.display.draw_centered_text.assert_has_calls(
-        [mocker.call("Error:\nValueError('Low entropy mnemonic')", 248)],
-        any_order=True,
-    )
-
-
-def test_export_xor_to_inverted_mnemonic_from_qrcode(mocker, amigo, tdata):
-    from embit.networks import NETWORKS
-    from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
-    from krux.key import Key, TYPE_SINGLESIG
-    from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.qr import FORMAT_NONE
-    from krux.pages.qr_capture import QRCodeCapture
-
-    ZOO = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
-    BTN_SEQUENCE = [
-        BUTTON_ENTER,  # Press "Via camera"
-        BUTTON_ENTER,  # QRCodeCapture
-        BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
-        *([BUTTON_PAGE] * 5),  # Move to back
-        BUTTON_ENTER,  # Press back
-        *([BUTTON_PAGE] * 3),  # Move to back
-        BUTTON_ENTER,  # Press back
-    ]
-
-    key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
-    wallet = Wallet(key)
-    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
-
-    assert ctx.wallet.key.mnemonic == tdata.TEST_XOR_12_WORD_MNEMONIC_1
-    assert ctx.wallet.key.fingerprint.hex() == "a70e2c26"
-
-    mocker.spy(ctx.display, "draw_centered_text")
-    mocker.patch.object(
-        QRCodeCapture,
-        "qr_capture_loop",
-        new=lambda self: (ZOO, FORMAT_NONE),
-    )
-
-    m = MnemonicXOR(ctx)
-    m.load_key()
-    ctx.display.draw_centered_text.assert_has_calls(
-        [mocker.call("Error:\nValueError('Low entropy mnemonic')", 248)],
-        any_order=True,
-    )
-
-
-def test_export_xor_low_entropy_mnemonic_from_qrcode(mocker, amigo, tdata):
-    from embit.networks import NETWORKS
-    from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
-    from krux.key import Key, TYPE_SINGLESIG
-    from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.qr import FORMAT_NONE
-    from krux.pages.qr_capture import QRCodeCapture
-
-    DANGEROUS = (
-        "dutch aerobic know utility deer toilet siege breeze evolve sniff bike wrap"
-    )
-    BTN_SEQUENCE = [
-        BUTTON_ENTER,  # Press "Via camera"
-        BUTTON_ENTER,  # QRCodeCapture
-        BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
-        *([BUTTON_PAGE] * 5),  # Move to back
-        BUTTON_ENTER,  # Press back
-        *([BUTTON_PAGE] * 3),  # Move to back
-        BUTTON_ENTER,  # Press back
-    ]
-
-    key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
-    wallet = Wallet(key)
-    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
-
-    assert ctx.wallet.key.mnemonic == tdata.TEST_XOR_12_WORD_MNEMONIC_1
-    assert ctx.wallet.key.fingerprint.hex() == "a70e2c26"
-
-    mocker.spy(ctx.display, "draw_centered_text")
-    mocker.patch.object(
-        QRCodeCapture,
-        "qr_capture_loop",
-        new=lambda self: (DANGEROUS, FORMAT_NONE),
-    )
-
-    m = MnemonicXOR(ctx)
-    m.load_key()
-    ctx.display.draw_centered_text.assert_has_calls(
-        [mocker.call("Error:\nValueError('Low entropy mnemonic')", 248)],
-        any_order=True,
-    )
-
-
-def test_mnemonic_len(mocker, m5stickv, tdata):
-    from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
-    from krux.input import BUTTON_ENTER
-    from krux.key import Key, TYPE_SINGLESIG
-    from krux.wallet import Wallet
-    from embit.networks import NETWORKS
-
-    key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
-    wallet = Wallet(key)
-    ctx = create_ctx(mocker, [BUTTON_ENTER, BUTTON_ENTER], wallet)
-    m = MnemonicXOR(ctx)
-    assert m.choose_len_mnemonic() == 12
-
-    key = Key(tdata.TEST_XOR_24_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
-    ctx.wallet = Wallet(key)
-    assert m.choose_len_mnemonic() == 24
+        m = MnemonicXOR(ctx)
+        m.load_key()
+        assert mocker.call([case[2]]) in ctx.display.draw_hcentered_text.mock_calls
+        n += 1
