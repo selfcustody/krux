@@ -5,19 +5,24 @@ x3 press BUTTON_B
 press BUTTON_A
 
 # Datum Tool
-press BUTTON_B
 press BUTTON_A
-x2 press BUTTON_B
+
 
 screenshot tools-datum-tool-load.png
 
-# Load File
-x3 press BUTTON_A
+# Load QR
+press BUTTON_A
+qrcode datum-example-qr.png
 
+# had to place a button first because after QR the screenshot was taken without menu on screen
+press_amigo_only BUTTON_B
 screenshot tools-datum-tool-loaded.png
 
 # Convert
-x2 press BUTTON_A
-x4 press BUTTON_B
+press BUTTON_B
+press BUTTON_A
+press BUTTON_B
+press BUTTON_A
+x6 press BUTTON_B
 
 screenshot tools-datum-tool-convert.png

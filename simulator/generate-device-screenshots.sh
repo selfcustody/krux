@@ -68,6 +68,7 @@ poetry run poe simulator --sequence sequences/sign-message.txt --sd  --device $d
 poetry run poe simulator --sequence sequences/sign-message-at-address.txt  --device $device
 
 # Tools
+poetry run poe simulator --sequence sequences/tools-datum-tool.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/tools-check-sd.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/tools-create-QR.txt  --sd --device $device
 # poetry run poe simulator --sequence sequences/tools-mnemonic.txt  --sd --device $device

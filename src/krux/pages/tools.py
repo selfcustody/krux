@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import uos
 from . import (
     Page,
     Menu,
@@ -32,10 +31,6 @@ from . import (
     # NUM_SPECIAL_1,
     # NUM_SPECIAL_2,
 )
-from .file_manager import SD_ROOT_PATH
-from ..format import generate_thousands_separator
-from ..sd_card import SDHandler
-from ..display import BOTTOM_PROMPT_LINE
 from ..krux_settings import t
 
 
@@ -51,7 +46,6 @@ class Tools(Page):
             Menu(
                 ctx,
                 [
-                    (t("Check SD Card"), self.sd_check),
                     (t("Datum Tool"), self.datum_tool),
                     (t("Device Tests"), self.device_tests),
                     # (t("Create QR Code"), self.create_qr),
@@ -70,49 +64,6 @@ class Tools(Page):
 
         flash_tools = FlashTools(self.ctx)
         flash_tools.flash_tools_menu()
-        return MENU_CONTINUE
-
-    def sd_check(self):
-        """Handler for the 'SD Check' menu item"""
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(t("Checking for SD card…"))
-        try:
-            # Check for SD hot-plug
-            with SDHandler():
-                sd_status = uos.statvfs(SD_ROOT_PATH)
-                sd_total_MB = int(sd_status[2] * sd_status[1] / 1024 / 1024)
-                sd_free_MB = int(sd_status[4] * sd_status[1] / 1024 / 1024)
-
-                self.ctx.display.clear()
-                self.ctx.display.draw_hcentered_text(
-                    t("SD card")
-                    + "\n\n"
-                    + t("Size:")
-                    + " "
-                    + generate_thousands_separator(sd_total_MB)
-                    + " MB"
-                    + "\n\n"
-                    + t("Used:")
-                    + " "
-                    + generate_thousands_separator(sd_total_MB - sd_free_MB)
-                    + " MB"
-                    + "\n\n"
-                    + t("Free:")
-                    + " "
-                    + generate_thousands_separator(sd_free_MB)
-                    + " MB",
-                    highlight_prefix=":",
-                )
-                if self.prompt(t("Explore files?"), BOTTOM_PROMPT_LINE):
-                    from .file_manager import FileManager
-
-                    file_manager = FileManager(self.ctx)
-                    file_manager.select_file(
-                        select_file_handler=file_manager.show_file_details
-                    )
-        except OSError:
-            self.flash_error(t("SD card not detected."))
-
         return MENU_CONTINUE
 
     def rm_stored_mnemonic(self):
