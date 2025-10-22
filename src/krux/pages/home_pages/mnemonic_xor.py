@@ -115,26 +115,13 @@ class MnemonicXOR(MnemonicLoader):
         instead, it add the bytes from a mnemonic's entropy to the list of entropies
         """
 
-        # Memorize the current fingerprint to use it later
-        current_fingerprint = self.ctx.wallet.key.fingerprint_hex_str(True)
-
-        # Show mnemonic which will be used for XOR with current one
         mnemonic_to_xor = " ".join(words)
-        key_to_xor = Key(
-            mnemonic_to_xor,
-            self.ctx.wallet.key.policy_type,
-            self.ctx.wallet.key.network,
-            "",
-            self.ctx.wallet.key.account_index,
-            self.ctx.wallet.key.script_type,
-        )
-        # Memorize the fingerprint to XOR to use later
-        fingerprint_to_xor = key_to_xor.fingerprint_hex_str(True)
+        fingerprint_to_xor = Key.extract_fingerprint(mnemonic_to_xor)
 
         # Show the mnemonic to XOR with
         self._display_key_info(
             mnemonic_to_xor,
-            key_to_xor.fingerprint_hex_str(True),
+            fingerprint_to_xor,
             t("XOR With") + ":",
         )
 
@@ -143,22 +130,20 @@ class MnemonicXOR(MnemonicLoader):
 
         self.ctx.display.clear()
 
-        xored_mnemonic = self.xor_with_current_mnemonic(key_to_xor.mnemonic)
-        xored_key = Key(
-            xored_mnemonic,
-            self.ctx.wallet.key.policy_type,
-            self.ctx.wallet.key.network,
-            "",
-            self.ctx.wallet.key.account_index,
-            self.ctx.wallet.key.script_type,
-        )
+        xored_mnemonic = self.xor_with_current_mnemonic(mnemonic_to_xor)
+        xored_fingerprint = Key.extract_fingerprint(xored_mnemonic)
 
         # Display XOR operation and resulting fingerprint:
         offset_y = (self.ctx.display.height() // 2) - FONT_HEIGHT * 3
-        lines = [current_fingerprint, "XOR", fingerprint_to_xor, "="]
+        lines = [
+            Key.extract_fingerprint(self.ctx.wallet.key.mnemonic),
+            "XOR",
+            fingerprint_to_xor,
+            "=",
+        ]
         self.ctx.display.draw_hcentered_text(lines, offset_y, theme.fg_color)
         self.ctx.display.draw_hcentered_text(
-            xored_key.fingerprint_hex_str(True),
+            xored_fingerprint,
             offset_y + FONT_HEIGHT * len(lines),
             theme.highlight_color,
         )
@@ -172,14 +157,22 @@ class MnemonicXOR(MnemonicLoader):
         # Show the XOR result
         self._display_key_info(
             xored_mnemonic,
-            xored_key.fingerprint_hex_str(True),
+            xored_fingerprint,
             t("XOR Result") + ":",
         )
 
         if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
+            xored_key = Key(
+                xored_mnemonic,
+                self.ctx.wallet.key.policy_type,
+                self.ctx.wallet.key.network,
+                "",
+                self.ctx.wallet.key.account_index,
+                self.ctx.wallet.key.script_type,
+            )
             self.ctx.wallet = Wallet(xored_key)
             self.flash_text(
-                t("%s: loaded!") % xored_key.fingerprint_hex_str(True),
+                t("%s: loaded!") % xored_fingerprint,
                 highlight_prefix=":",
             )
 
