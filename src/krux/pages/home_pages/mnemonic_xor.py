@@ -109,71 +109,43 @@ class MnemonicXOR(MnemonicLoader):
                 color=theme.highlight_color,
             )
 
-    def load(self):
-        """Menu for XOR the current mnemonic with a share"""
-        menu = Menu(
-            self.ctx,
-            [
-                (t("Via Camera"), self.load_key_from_camera),
-                (t("Via Manual Input"), self.load_key_from_manual_input),
-                (t("From Storage"), self.load_mnemonic_from_storage),
-            ],
-        )
-
-        menu.run_loop()
-        return MENU_EXIT
-
     def _load_key_from_words(self, words, charset=LETTERS, new=False):
         """
         Similar method from krux.pages.login.Login without loading a key,
         instead, it add the bytes from a mnemonic's entropy to the list of entropies
         """
 
-        # Memorize the current fingerprint to use it later
-        current_fingerprint = self.ctx.wallet.key.fingerprint_hex_str(True)
-
-        # Show mnemonic which will be used for XOR with current one
         mnemonic_to_xor = " ".join(words)
-        key_to_xor = Key(
-            mnemonic_to_xor,
-            self.ctx.wallet.key.policy_type,
-            self.ctx.wallet.key.network,
-            "",
-            self.ctx.wallet.key.account_index,
-            self.ctx.wallet.key.script_type,
-        )
-        # Memorize the fingerprint to XOR to use later
-        fingerprint_to_xor = key_to_xor.fingerprint_hex_str(True)
+        fingerprint_to_xor = Key.extract_fingerprint(mnemonic_to_xor)
 
         # Show the mnemonic to XOR with
         self._display_key_info(
             mnemonic_to_xor,
-            key_to_xor.fingerprint_hex_str(True),
+            fingerprint_to_xor,
             t("XOR With") + ":",
         )
 
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
 
-        xored_mnemonic = self.xor_with_current_mnemonic(key_to_xor.mnemonic)
-        xored_key = Key(
-            xored_mnemonic,
-            self.ctx.wallet.key.policy_type,
-            self.ctx.wallet.key.network,
-            "",
-            self.ctx.wallet.key.account_index,
-            self.ctx.wallet.key.script_type,
-        )
+        self.ctx.display.clear()
+
+        xored_mnemonic = self.xor_with_current_mnemonic(mnemonic_to_xor)
+        xored_fingerprint = Key.extract_fingerprint(xored_mnemonic)
 
         # Display XOR operation and resulting fingerprint:
-        offset_y = self.ctx.display.height() // 2
-        offset_y -= FONT_HEIGHT * 3
-        self.ctx.display.clear()
-        for element in [current_fingerprint, "XOR", fingerprint_to_xor, "="]:
-            self.ctx.display.draw_hcentered_text(element, offset_y, theme.fg_color)
-            offset_y += FONT_HEIGHT
+        offset_y = (self.ctx.display.height() // 2) - FONT_HEIGHT * 3
+        lines = [
+            Key.extract_fingerprint(self.ctx.wallet.key.mnemonic),
+            "XOR",
+            fingerprint_to_xor,
+            "=",
+        ]
+        self.ctx.display.draw_hcentered_text(lines, offset_y, theme.fg_color)
         self.ctx.display.draw_hcentered_text(
-            xored_key.fingerprint_hex_str(True), offset_y, theme.highlight_color
+            xored_fingerprint,
+            offset_y + FONT_HEIGHT * len(lines),
+            theme.highlight_color,
         )
 
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
@@ -185,15 +157,35 @@ class MnemonicXOR(MnemonicLoader):
         # Show the XOR result
         self._display_key_info(
             xored_mnemonic,
-            xored_key.fingerprint_hex_str(True),
+            xored_fingerprint,
             t("XOR Result") + ":",
         )
 
         if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
+            xored_key = Key(
+                xored_mnemonic,
+                self.ctx.wallet.key.policy_type,
+                self.ctx.wallet.key.network,
+                "",
+                self.ctx.wallet.key.account_index,
+                self.ctx.wallet.key.script_type,
+            )
             self.ctx.wallet = Wallet(xored_key)
             self.flash_text(
-                t("%s: loaded!") % xored_key.fingerprint_hex_str(True),
+                t("%s: loaded!") % xored_fingerprint,
                 highlight_prefix=":",
             )
 
         return MENU_EXIT
+
+    def choose_len_mnemonic(self, extra_option=""):
+        """XOR '12 or 24 words?" menu choice"""
+        items = []
+        if len(self.ctx.wallet.key.mnemonic.split(" ")) == 12:
+            items.append((t("12 words"), lambda: 12))
+        else:
+            items.append((t("24 words"), lambda: 24))
+        submenu = Menu(self.ctx, items, back_status=lambda: None)
+        _, num_words = submenu.run_loop()
+        self.ctx.display.clear()
+        return num_words

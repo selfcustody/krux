@@ -30,7 +30,6 @@ from .. import (
     Menu,
     Page,
     MENU_CONTINUE,
-    choose_len_mnemonic,
 )
 
 BIP_PWD_APP_INDEX = 707764
@@ -44,7 +43,7 @@ class Bip85(Page):
 
     def _derive_mnemonic(self):
         """Derive a BIP85 mnemonic"""
-        num_words = choose_len_mnemonic(self.ctx)
+        num_words = self.choose_len_mnemonic()
         if not num_words:
             return MENU_CONTINUE
 

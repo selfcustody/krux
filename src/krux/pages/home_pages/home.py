@@ -166,7 +166,10 @@ class Home(Page):
     def mnemonic_xor(self):
         """Handler for the 'Mnemonic XOR' menu item"""
         if not self.prompt(
-            t("XOR current mnemonic with another one ?"),
+            t(
+                "XOR current mnemonic with another one? "
+                "(passphrase and descriptor will be discarded)"
+            ),
             self.ctx.display.height() // 2,
         ):
             return MENU_CONTINUE
@@ -174,7 +177,7 @@ class Home(Page):
         from .mnemonic_xor import MnemonicXOR
 
         mnemonic_xor = MnemonicXOR(self.ctx)
-        mnemonic_xor.load()
+        mnemonic_xor.load_key()
 
         return MENU_CONTINUE
 

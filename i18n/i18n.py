@@ -34,8 +34,27 @@ current_dir = getcwd()
 if not current_dir.endswith(EXEC_FOLDER):
     chdir(EXEC_FOLDER)
 
-SRC_DIR = "../src"
-TRANSLATION_FILES_DIR = "translations"
+
+def _get_src_dir():
+    """Get the source directory path, checking multiple possible locations."""
+    if exists("../src"):
+        return "../src"
+    if exists("src"):
+        return "src"
+    raise ValueError("ERROR: SRC_DIR 'src' not found!")
+
+
+def _get_translation_files_dir():
+    """Get the translation files directory path, checking multiple possible locations."""
+    if exists("translations"):
+        return "translations"
+    if exists("i18n/translations"):
+        return "i18n/translations"
+    raise ValueError("ERROR: TRANSLATION_FILES_DIR 'translations' not found!")
+
+
+SRC_DIR = _get_src_dir()
+TRANSLATION_FILES_DIR = _get_translation_files_dir()
 
 ELLIPSIS_UNICODE = "\u2026"
 ELLIPSIS_ASCII = "..."
@@ -75,8 +94,13 @@ def find_translation_slugs():
                 continue
             with open(join(dirpath, filename), "r", encoding="utf8") as src_file:
                 contents = src_file.read()
-                for match in re.findall(r"[^A-Za-z0-9]t\(\s*\"(.+?)\"\s*\)", contents):
-                    slugs[match] = True
+                for match in re.findall(
+                    r'[^A-Za-z0-9]t\(\s*((?:"[^"]*"\s*)+)\)', contents
+                ):
+                    # Extract all string pieces and join them
+                    parts = re.findall(r'"([^"]*)"', match)
+                    slug = "".join(parts)
+                    slugs[slug] = True
     return slugs
 
 
@@ -409,16 +433,6 @@ if __name__ == "__main__":
             "ERROR: Provide one action as argument"
             + " (validate, new, fill, fill_merge, clean, prettify, bake)"
         )
-
-    if not exists(SRC_DIR):
-        SRC_DIR = "src"
-        if not exists(SRC_DIR):
-            raise ValueError("ERROR: SRC_DIR 'src' not found!")
-
-    if not exists(TRANSLATION_FILES_DIR):
-        TRANSLATION_FILES_DIR = "i18n/translations"
-        if not exists(TRANSLATION_FILES_DIR):
-            raise ValueError("ERROR: TRANSLATION_FILES_DIR 'translations' not found!")
 
     if sys.argv[1] in ("new", "fill"):
         if sys.argv[1] == "new":
