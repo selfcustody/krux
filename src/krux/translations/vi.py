@@ -111,6 +111,7 @@ translation_array = [
     "Nhập từng từ trong Mnemonic BIP39 của bạn dưới dạng số thập lục phân từ 1 đến 800.",
     "Nhập từng từ trong Mnemonic BIP39 của bạn dưới dạng số bát phân từ 1 đến 4000.",
     "Nhập từng từ của Mnemonic BIP39 của bạn.",
+    "Ngưỡng Entropy",
     "Xóa dữ liệu của người dùng",
     "Đang xóa dữ liệu của người dùng…",
     "Lỗi:",
