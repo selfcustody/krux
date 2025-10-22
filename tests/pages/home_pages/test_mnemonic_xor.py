@@ -6,7 +6,6 @@ from .. import create_ctx
 def test_xor_bytes(mocker, m5stickv):
     from src.krux.pages.home_pages.mnemonic_xor import MnemonicXOR
 
-    # bytes_0 XOR bytest_1 = result_bytes
     cases = [
         # Basic cases for single bytes
         (b"\x00", b"\x00", b"\x00"),
@@ -42,6 +41,60 @@ def test_xor_bytes(mocker, m5stickv):
         n += 1
 
 
+def test_fail_private_functions(mocker, m5stickv):
+    from src.krux.pages.home_pages.mnemonic_xor import MnemonicXOR
+
+    a = b"\x05\xdc\x07\xde\x04\x20\x00\x7d\x06\x35\x00\xe1\x01\xbf\x07\x23\x05\x8e\x01\x94\x07\x4e\x00\x01"
+    b = b"\x04\x11\x04\x6d\x01\xff\x03\x7d\x03\xeb\x02\xcd\x01\x06\x00\x1f\x03\x88\x03\xe0\x05\x78\x07\x63\x02\x27\x02\xe8\x06\x3e\x01\x05\x06\x20\x04\xb0\x07\x33\x01\xa2\x03\xbd\x06\x1a\x01\xd9\x04\x22"
+
+    cases = [
+        ([a, "bytes"], "_xor_bytes", "Sequences should be bytes or bytearray"),
+        (["bytes", b], "_xor_bytes", "Sequences should be bytes or bytearray"),
+        (["bytes"], "_bits_of_bytes", "Data should be bytes or bytearray"),
+        (["bytes"], "_word11_histogram", "Entropy should be bytes or bytearray"),
+    ]
+
+    for args, fn, err in cases:
+        print(f"{args}: {fn}")
+        with pytest.raises(TypeError) as exc:
+            _method = getattr(MnemonicXOR, fn)
+            _method(*args)
+        assert str(exc.value) == err
+
+
+def test_fail_public_functions(mocker, m5stickv, tdata):
+    from src.krux.pages.home_pages.mnemonic_xor import MnemonicXOR
+    from krux.input import BUTTON_ENTER
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from embit.networks import NETWORKS
+
+    a = b"\x05\xdc\x07\xde\x04\x20\x00\x7d\x06\x35\x00\xe1\x01\xbf\x07\x23\x05\x8e\x01\x94\x07\x4e\x00\x01"
+    b = b"\x04\x11\x04\x6d\x01\xff\x03\x7d\x03\xeb\x02\xcd\x01\x06\x00\x1f\x03\x88\x03\xe0\x05\x78\x07\x63\x02\x27\x02\xe8\x06\x3e\x01\x05\x06\x20\x04\xb0\x07\x33\x01\xa2\x03\xbd\x06\x1a\x01\xd9\x04\x22"
+
+    key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
+    wallet = Wallet(key)
+    ctx = create_ctx(mocker, [BUTTON_ENTER, BUTTON_ENTER], wallet)
+    xor = MnemonicXOR(ctx)
+
+    cases = [
+        ([a], "_xor_with_current_mnemonic", "Mnemonic should be str"),
+        (["bytes"], "_validate_entropy", "Entropy should be bytes or bytearray"),
+        (
+            [a, "bytes", "bytes"],
+            "_display_key_info",
+            "Mnemonic, fingerprint and title should be str",
+        ),
+    ]
+
+    for args, fn, err in cases:
+        print(f"{args}: {fn}")
+        with pytest.raises(TypeError) as exc:
+            _method = getattr(xor, fn)
+            _method(*args)
+        assert str(exc.value) == err
+
+
 def test_fail_xor_bytes_different_lengths(mocker, m5stickv):
     from src.krux.pages.home_pages.mnemonic_xor import MnemonicXOR
 
@@ -59,6 +112,64 @@ def test_fail_xor_bytes_different_lengths(mocker, m5stickv):
     assert str(exc.value) == "Sequences should have same length"
 
 
+def test_word11_count_and_validate_entropy(m5stickv, tdata):
+    from embit.bip39 import mnemonic_to_bytes
+    from krux.pages.home_pages.mnemonic_xor import MnemonicXOR, ENTROPY_THRESHOLD
+
+    phrases = [
+        tdata.TEST_XOR_12_WORD_MNEMONIC_1,
+        tdata.TEST_XOR_12_WORD_MNEMONIC_2,
+        tdata.TEST_XOR_12_WORD_MNEMONIC_INTERMEDIARY_RESULT,
+        tdata.TEST_XOR_12_WORD_MNEMONIC_3,
+        tdata.TEST_XOR_12_WORD_MNEMONIC_RESULT,
+        tdata.TEST_XOR_24_WORD_MNEMONIC_1,
+        tdata.TEST_XOR_24_WORD_MNEMONIC_2,
+        tdata.TEST_XOR_24_WORD_MNEMONIC_INTERMEDIARY_RESULT,
+        tdata.TEST_XOR_24_WORD_MNEMONIC_3,
+        tdata.TEST_XOR_24_WORD_MNEMONIC_RESULT,
+        tdata.SIGNING_MNEMONIC,
+        "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong",
+        "ghost spider ghost pumpkin ghost puzzle ghost spirit ghost scare ghost october",
+        "you can barely avoid horror when you make seed word story mystery",
+    ]
+
+    for phrase in phrases:
+        ent = mnemonic_to_bytes(phrase)
+        ent_bits = len(ent) * 8
+        cs_len = ent_bits // 32
+        word11_count = (ent_bits + cs_len) // 11
+        w11c = MnemonicXOR._word11_histogram(ent)
+        assert sum(w11c) == word11_count
+
+        bits_per_word = MnemonicXOR._shannon_sum(w11c, sum(w11c))
+        is_zero = ent == bytes(len(ent))
+        is_full_ff = ent == bytes([0xFF]) * len(ent)
+
+        if is_zero or is_full_ff or bits_per_word < ENTROPY_THRESHOLD:
+            with pytest.raises(ValueError, match="Low entropy"):
+                MnemonicXOR._validate_entropy(ent)
+        else:
+            assert MnemonicXOR._validate_entropy(ent) is None
+
+
+def test_mnemonic_len(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
+    from krux.input import BUTTON_ENTER
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from embit.networks import NETWORKS
+
+    key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
+    wallet = Wallet(key)
+    ctx = create_ctx(mocker, [BUTTON_ENTER, BUTTON_ENTER], wallet)
+    m = MnemonicXOR(ctx)
+    assert m.choose_len_mnemonic() == 12
+
+    key = Key(tdata.TEST_XOR_24_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
+    ctx.wallet = Wallet(key)
+    assert m.choose_len_mnemonic() == 24
+
+
 def test_xor_with_current_mnemonic(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
@@ -66,7 +177,7 @@ def test_xor_with_current_mnemonic(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
 
     cases = [
-        # Case from https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#12-words-xor-seed-example-using-3-parts
+        # https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#12-words-xor-seed-example-using-3-parts
         (
             tdata.TEST_XOR_12_WORD_MNEMONIC_1,
             tdata.TEST_XOR_12_WORD_MNEMONIC_2,
@@ -77,7 +188,7 @@ def test_xor_with_current_mnemonic(mocker, m5stickv, tdata):
             tdata.TEST_XOR_12_WORD_MNEMONIC_3,
             tdata.TEST_XOR_12_WORD_MNEMONIC_RESULT,
         ),
-        # Case from https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#24-words-xor-seed-example-using-3-parts
+        # https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#24-words-xor-seed-example-using-3-parts
         (
             tdata.TEST_XOR_24_WORD_MNEMONIC_1,
             tdata.TEST_XOR_24_WORD_MNEMONIC_2,
@@ -97,7 +208,7 @@ def test_xor_with_current_mnemonic(mocker, m5stickv, tdata):
         wallet = Wallet(key)
         ctx = create_ctx(mocker, case, wallet)
         m = MnemonicXOR(ctx)
-        assert m.xor_with_current_mnemonic(case[1]) == case[2]
+        assert m._xor_with_current_mnemonic(case[1]) == case[2]
         n += 1
 
 
@@ -127,9 +238,9 @@ def test_fail_xor_mnemonics_different_lengths(mocker, m5stickv, tdata):
             wallet = Wallet(key)
             ctx = create_ctx(mocker, case, wallet)
             m = MnemonicXOR(ctx)
-            m.xor_with_current_mnemonic(case[1])
+            m._xor_with_current_mnemonic(case[1])
 
-            assert str(exc.value) == "Mnemonics should have same length"
+        assert str(exc.value) == "Mnemonics should have same length"
 
 
 def test_menu_load_and_back(mocker, m5stickv, tdata):
@@ -141,31 +252,31 @@ def test_menu_load_and_back(mocker, m5stickv, tdata):
 
     cases = [
         (
-            BUTTON_PAGE_PREV,  # Move to Back
-            BUTTON_ENTER,  # Press Back
+            BUTTON_PAGE_PREV,
+            BUTTON_ENTER,
         ),
         (
-            BUTTON_ENTER,  # Press "Via camera"
-            BUTTON_PAGE_PREV,  # Move to Back
-            BUTTON_ENTER,  # Press Back
-            BUTTON_PAGE_PREV,  # Move to "Back"
-            BUTTON_ENTER,  # Press "Back"
+            BUTTON_ENTER,
+            BUTTON_PAGE_PREV,
+            BUTTON_ENTER,
+            BUTTON_PAGE_PREV,
+            BUTTON_ENTER,
         ),
         (
-            BUTTON_PAGE,  # Move to "Via manual input"
-            BUTTON_ENTER,  # Press "Via manual input"
-            BUTTON_PAGE_PREV,  # Move to Back
-            BUTTON_ENTER,  # Press Back
-            *([BUTTON_PAGE_PREV] * 2),  # Move to "Back"
-            BUTTON_ENTER,  # Press "Back"
+            BUTTON_PAGE,
+            BUTTON_ENTER,
+            BUTTON_PAGE_PREV,
+            BUTTON_ENTER,
+            *([BUTTON_PAGE_PREV] * 2),
+            BUTTON_ENTER,
         ),
         (
-            *([BUTTON_PAGE] * 2),  # Move to "Via storage"
-            BUTTON_ENTER,  # Press "Via storage
-            BUTTON_PAGE_PREV,  # Move to Back
-            BUTTON_ENTER,  # Press Back
-            BUTTON_PAGE,  # Move to "Back"
-            BUTTON_ENTER,  # Press "Back"
+            *([BUTTON_PAGE] * 2),
+            BUTTON_ENTER,
+            BUTTON_PAGE_PREV,
+            BUTTON_ENTER,
+            BUTTON_PAGE,
+            BUTTON_ENTER,
         ),
     ]
 
@@ -193,28 +304,26 @@ def test_menu_load_qrcode_and_back(mocker, amigo, tdata):
     from krux.pages.qr_capture import QRCodeCapture
 
     cases = [
-        # Not accept the part
         (
-            BUTTON_ENTER,  # Press "Via camera"
-            BUTTON_ENTER,  # QRCode
-            BUTTON_PAGE_PREV,  # Move to "No"
-            BUTTON_ENTER,  # Press "No"
-            BUTTON_PAGE_PREV,  # Move to Back
-            BUTTON_ENTER,  # Press Back
-            BUTTON_PAGE_PREV,  # Move to Back
-            BUTTON_ENTER,  # Press Back
+            BUTTON_ENTER,
+            BUTTON_ENTER,
+            BUTTON_PAGE_PREV,
+            BUTTON_ENTER,
+            BUTTON_PAGE_PREV,
+            BUTTON_ENTER,
+            BUTTON_PAGE_PREV,
+            BUTTON_ENTER,
         ),
-        # Load the part, but not accept the fingerprint
         (
-            BUTTON_ENTER,  # Press "Via camera"
-            BUTTON_ENTER,  # QRCode
-            BUTTON_ENTER,  # Press "Yes"
-            BUTTON_PAGE_PREV,  # Move to "No"
-            BUTTON_ENTER,  # Press "No"
-            BUTTON_PAGE_PREV,  # Move to back
-            BUTTON_ENTER,  # Press back
-            BUTTON_PAGE_PREV,  # Move to back
-            BUTTON_ENTER,  # Press back
+            BUTTON_ENTER,
+            BUTTON_ENTER,
+            BUTTON_ENTER,
+            BUTTON_PAGE_PREV,
+            BUTTON_ENTER,
+            BUTTON_PAGE_PREV,
+            BUTTON_ENTER,
+            BUTTON_PAGE_PREV,
+            BUTTON_ENTER,
         ),
     ]
 
@@ -250,15 +359,14 @@ def test_load_from_qrcode(mocker, amigo, tdata):
     from krux.pages.qr_capture import QRCodeCapture
 
     cases = [
-        # Case from https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#12-words-xor-seed-example-using-3-parts
-        # Via camera, QRCode, XOR 12, 1st XOR 2nd shares
+        # https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#12-words-xor-seed-example-using-3-parts
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
-                BUTTON_ENTER,  # Press "Yes" to accept part words
-                BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
-                BUTTON_ENTER,  # Press "Yes" to accept XORed words
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
             ],
             (
                 tdata.TEST_XOR_12_WORD_MNEMONIC_1,
@@ -267,14 +375,13 @@ def test_load_from_qrcode(mocker, amigo, tdata):
             ),
             ("a70e2c26", "d9987b75"),
         ),
-        # Via camera, QRCode, XOR 12, (1st XOR 2nd) XOR 3rd shares
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
-                BUTTON_ENTER,  # Press "Yes" to accept part words
-                BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
-                BUTTON_ENTER,  # Press "Yes" to accept XORed words
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
             ],
             (
                 tdata.TEST_XOR_12_WORD_MNEMONIC_INTERMEDIARY_RESULT,
@@ -283,15 +390,14 @@ def test_load_from_qrcode(mocker, amigo, tdata):
             ),
             ("d9987b75", "60259e7d"),
         ),
-        # Case from https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#24-words-xor-seed-example-using-3-parts
-        # Via camera, QRCode, XOR 24, 1st XOR 2nd
+        # https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#24-words-xor-seed-example-using-3-parts
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
-                BUTTON_ENTER,  # Press "Yes" to accept part words
-                BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
-                BUTTON_ENTER,  # Press "Yes" to accept XORed words
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
             ],
             (
                 tdata.TEST_XOR_24_WORD_MNEMONIC_1,
@@ -300,14 +406,13 @@ def test_load_from_qrcode(mocker, amigo, tdata):
             ),
             ("e51c20a3", "0849dc5e"),
         ),
-        # Via camera, QRCode, XOR 24, (1st XOR 2nd) XOR 3rd
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
-                BUTTON_ENTER,  # Press "Yes" to accept part words
-                BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
-                BUTTON_ENTER,  # Press "Yes" to accept XORed words
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
             ],
             (
                 tdata.TEST_XOR_24_WORD_MNEMONIC_INTERMEDIARY_RESULT,
@@ -355,15 +460,14 @@ def test_load_from_qrcode_with_hide_mnemonic(mocker, amigo, tdata):
     from krux.krux_settings import Settings
 
     cases = [
-        # Case from https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#12-words-xor-seed-example-using-3-parts
-        # Via camera, QRCode, XOR 12, 1st XOR 2nd shares
+        # https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#12-words-xor-seed-example-using-3-parts
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
-                BUTTON_ENTER,  # Press "Yes" to accept part words
-                BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
-                BUTTON_ENTER,  # Press "Yes" to accept XORed words
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
             ],
             (
                 tdata.TEST_XOR_12_WORD_MNEMONIC_1,
@@ -372,14 +476,13 @@ def test_load_from_qrcode_with_hide_mnemonic(mocker, amigo, tdata):
             ),
             ("a70e2c26", "d9987b75"),
         ),
-        # Via camera, QRCode, XOR 12, (1st XOR 2nd) XOR 3rd shares
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
-                BUTTON_ENTER,  # Press "Yes" to accept part words
-                BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
-                BUTTON_ENTER,  # Press "Yes" to accept XORed words
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
             ],
             (
                 tdata.TEST_XOR_12_WORD_MNEMONIC_INTERMEDIARY_RESULT,
@@ -388,15 +491,14 @@ def test_load_from_qrcode_with_hide_mnemonic(mocker, amigo, tdata):
             ),
             ("d9987b75", "60259e7d"),
         ),
-        # Case from https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#24-words-xor-seed-example-using-3-parts
-        # Via camera, QRCode, XOR 24, 1st XOR 2nd
+        # https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#24-words-xor-seed-example-using-3-parts
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
-                BUTTON_ENTER,  # Press "Yes" to accept part words
-                BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
-                BUTTON_ENTER,  # Press "Yes" to accept XORed words
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
             ],
             (
                 tdata.TEST_XOR_24_WORD_MNEMONIC_1,
@@ -405,14 +507,13 @@ def test_load_from_qrcode_with_hide_mnemonic(mocker, amigo, tdata):
             ),
             ("e51c20a3", "0849dc5e"),
         ),
-        # Via camera, QRCode, XOR 24, (1st XOR 2nd) XOR 3rd
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
-                BUTTON_ENTER,  # Press "Yes" to accept part words
-                BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
-                BUTTON_ENTER,  # Press "Yes" to accept XORed words
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
             ],
             (
                 tdata.TEST_XOR_24_WORD_MNEMONIC_INTERMEDIARY_RESULT,
@@ -459,19 +560,18 @@ def test_export_from_words(mocker, amigo, tdata):
     from krux.qr import FORMAT_NONE
 
     cases = [
-        # Case from https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#12-words-xor-seed-example-using-3-parts
-        # Via manual input/words, QRCode, XOR 12, 1st XOR 2nd shares
+        # https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#12-words-xor-seed-example-using-3-parts
         (
             [
-                BUTTON_PAGE,  # Move to "Via Manual Input"
-                BUTTON_ENTER,  # Press "Via Manual Input"
-                BUTTON_ENTER,  # Words
-                BUTTON_ENTER,  # Press "Yes" for "Enter each word of your BIP39 mnemonic"
-                *([BUTTON_ENTER] * 12),  # Accept each word
-                BUTTON_ENTER,  # Done "Yes"
-                BUTTON_ENTER,  # Press "Yes" to accept part words
-                BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
-                BUTTON_ENTER,  # Press "Yes" to accept XORed words
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                *([BUTTON_ENTER] * 12),
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
             ],
             (
                 tdata.TEST_XOR_12_WORD_MNEMONIC_1,
@@ -480,18 +580,17 @@ def test_export_from_words(mocker, amigo, tdata):
             ),
             ("a70e2c26", "d9987b75"),
         ),
-        # Via manual input/words, QRCode, XOR 12, (1st XOR 2nd) XOR 3rd shares
         (
             [
-                BUTTON_PAGE,  # Move to "Via Manual Input"
-                BUTTON_ENTER,  # Press "Via Manual Input"
-                BUTTON_ENTER,  # Words
-                BUTTON_ENTER,  # Press "Yes" for "Enter each word of your BIP39 mnemonic"
-                *([BUTTON_ENTER] * 12),  # Accept each word
-                BUTTON_ENTER,  # Done "Yes"
-                BUTTON_ENTER,  # Press "Yes" to accept part words
-                BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
-                BUTTON_ENTER,  # Press "Yes" to accept XORed words
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                *([BUTTON_ENTER] * 12),
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
             ],
             (
                 tdata.TEST_XOR_12_WORD_MNEMONIC_INTERMEDIARY_RESULT,
@@ -500,21 +599,20 @@ def test_export_from_words(mocker, amigo, tdata):
             ),
             ("d9987b75", "60259e7d"),
         ),
-        # Case from https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#24-words-xor-seed-example-using-3-parts
-        # Via manual input/words, QRCode, XOR 24, 1st XOR 2nd shares
+        # https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#24-words-xor-seed-example-using-3-parts
         (
             [
-                BUTTON_PAGE,  # Move to "Via Manual Input"
-                BUTTON_ENTER,  # Press "Via Manual Input"
-                BUTTON_ENTER,  # Words
-                BUTTON_ENTER,  # Press "Yes" for "Enter each word of your BIP39 mnemonic"
-                *([BUTTON_ENTER] * 12),  # Accept each word
-                BUTTON_PAGE_PREV,  # Move to "No" (we do not finished)
-                BUTTON_ENTER,  # Press "No",
-                *([BUTTON_ENTER] * 12),  # Accept each word
-                BUTTON_ENTER,  # Press "Yes" to accept part words
-                BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
-                BUTTON_ENTER,  # Press "Yes" to accept XORed words
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                *([BUTTON_ENTER] * 12),
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,
+                *([BUTTON_ENTER] * 12),
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
             ],
             (
                 tdata.TEST_XOR_24_WORD_MNEMONIC_1,
@@ -523,20 +621,19 @@ def test_export_from_words(mocker, amigo, tdata):
             ),
             ("e51c20a3", "0849dc5e"),
         ),
-        # Via manual input/words, QRCode, XOR 24, (1st XOR 2nd) XOR 3rd shares
         (
             [
-                BUTTON_PAGE,  # Move to "Via Manual Input"
-                BUTTON_ENTER,  # Press "Via Manual Input"
-                BUTTON_ENTER,  # Words
-                BUTTON_ENTER,  # Press "Yes" for "Enter each word of your BIP39 mnemonic"
-                *([BUTTON_ENTER] * 12),  # Accept each word
-                BUTTON_PAGE_PREV,  # Move to "No" (we do not finished)
-                BUTTON_ENTER,  # Press "No",
-                *([BUTTON_ENTER] * 12),  # Accept each word
-                BUTTON_ENTER,  # Press "Yes" to accept part words
-                BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
-                BUTTON_ENTER,  # Press "Yes" to accept XORed words
+                BUTTON_PAGE,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                *([BUTTON_ENTER] * 12),
+                BUTTON_PAGE_PREV,
+                BUTTON_ENTER,
+                *([BUTTON_ENTER] * 12),
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
             ],
             (
                 tdata.TEST_XOR_24_WORD_MNEMONIC_INTERMEDIARY_RESULT,
@@ -560,17 +657,17 @@ def test_export_from_words(mocker, amigo, tdata):
 
         m = MnemonicXOR(ctx)
         mocker.patch.object(m, "capture_from_keypad", side_effect=words)
-        mocker.spy(m, "xor_with_current_mnemonic")
+        mocker.spy(m, "_xor_with_current_mnemonic")
         m.load_key()
 
-        m.xor_with_current_mnemonic.assert_called_once_with(case[1][1])
+        m._xor_with_current_mnemonic.assert_called_once_with(case[1][1])
         assert ctx.wallet.key.mnemonic == case[1][2]
         assert ctx.wallet.key.fingerprint.hex() == case[2][1]
         assert ctx.input.wait_for_button.call_count == len(case[0])
         n += 1
 
 
-def test_export_xor_to_same_mnemonic_from_qrcode(mocker, amigo, tdata):
+def test_export_xor_fail_low_entropy(mocker, amigo, tdata):
     from embit.networks import NETWORKS
     from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
     from krux.key import Key, TYPE_SINGLESIG
@@ -579,137 +676,81 @@ def test_export_xor_to_same_mnemonic_from_qrcode(mocker, amigo, tdata):
     from krux.qr import FORMAT_NONE
     from krux.pages.qr_capture import QRCodeCapture
 
-    BTN_SEQUENCE = [
-        BUTTON_ENTER,  # Press "Via camera"
-        BUTTON_ENTER,  # QRCode
-        BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
-        *([BUTTON_PAGE] * 5),  # Move to back
-        BUTTON_ENTER,  # Press back
-        *([BUTTON_PAGE] * 3),  # Move to back
-        BUTTON_ENTER,  # Press back
+    cases = [
+        (
+            (
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                *([BUTTON_PAGE] * 5),
+                BUTTON_ENTER,
+                *([BUTTON_PAGE] * 3),
+                BUTTON_ENTER,
+            ),
+            tdata.SIGNING_MNEMONIC,
+            "⊚\u200973c5da0a:\nLow entropy",
+        ),
+        (
+            (
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                *([BUTTON_PAGE] * 5),
+                BUTTON_ENTER,
+                *([BUTTON_PAGE] * 3),
+                BUTTON_ENTER,
+            ),
+            "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong",
+            "⊚\u20093f635a63:\nLow entropy",
+        ),
+        (
+            (
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                *([BUTTON_PAGE] * 5),
+                BUTTON_ENTER,
+                *([BUTTON_PAGE] * 3),
+                BUTTON_ENTER,
+            ),
+            "ghost spider ghost pumpkin ghost puzzle ghost spirit ghost scare ghost october",
+            "⊚\u20096a9b363b:\nLow entropy",
+        ),
+        (
+            (
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                BUTTON_ENTER,
+                *([BUTTON_PAGE] * 5),
+                BUTTON_ENTER,
+                *([BUTTON_PAGE] * 3),
+                BUTTON_ENTER,
+            ),
+            "you can barely avoid horror when you make seed word story mystery",
+            "⊚\u2009a856927b:\nLow entropy",
+        ),
     ]
 
-    key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
-    wallet = Wallet(key)
-    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
+    n = 0
+    for case in cases:
+        print(f"Case {n}")
+        key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
+        wallet = Wallet(key)
+        ctx = create_ctx(mocker, case[0], wallet)
 
-    assert ctx.wallet.key.mnemonic == tdata.TEST_XOR_12_WORD_MNEMONIC_1
-    assert ctx.wallet.key.fingerprint.hex() == "a70e2c26"
+        assert ctx.wallet.key.mnemonic == tdata.TEST_XOR_12_WORD_MNEMONIC_1
+        assert ctx.wallet.key.fingerprint.hex() == "a70e2c26"
 
-    mocker.spy(ctx.display, "draw_centered_text")
-    mocker.patch.object(
-        QRCodeCapture,
-        "qr_capture_loop",
-        new=lambda self: (tdata.SIGNING_MNEMONIC, FORMAT_NONE),
-    )
+        mocker.spy(ctx.display, "draw_hcentered_text")
+        mocker.patch.object(
+            QRCodeCapture,
+            "qr_capture_loop",
+            new=lambda self: (case[1], FORMAT_NONE),
+        )
 
-    m = MnemonicXOR(ctx)
-    m.load_key()
-    ctx.display.draw_centered_text.assert_has_calls(
-        [mocker.call("Error:\nValueError('Low entropy mnemonic')", 248)],
-        any_order=True,
-    )
-
-
-def test_export_xor_to_inverted_mnemonic_from_qrcode(mocker, amigo, tdata):
-    from embit.networks import NETWORKS
-    from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
-    from krux.key import Key, TYPE_SINGLESIG
-    from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.qr import FORMAT_NONE
-    from krux.pages.qr_capture import QRCodeCapture
-
-    ZOO = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
-    BTN_SEQUENCE = [
-        BUTTON_ENTER,  # Press "Via camera"
-        BUTTON_ENTER,  # QRCodeCapture
-        BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
-        *([BUTTON_PAGE] * 5),  # Move to back
-        BUTTON_ENTER,  # Press back
-        *([BUTTON_PAGE] * 3),  # Move to back
-        BUTTON_ENTER,  # Press back
-    ]
-
-    key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
-    wallet = Wallet(key)
-    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
-
-    assert ctx.wallet.key.mnemonic == tdata.TEST_XOR_12_WORD_MNEMONIC_1
-    assert ctx.wallet.key.fingerprint.hex() == "a70e2c26"
-
-    mocker.spy(ctx.display, "draw_centered_text")
-    mocker.patch.object(
-        QRCodeCapture,
-        "qr_capture_loop",
-        new=lambda self: (ZOO, FORMAT_NONE),
-    )
-
-    m = MnemonicXOR(ctx)
-    m.load_key()
-    ctx.display.draw_centered_text.assert_has_calls(
-        [mocker.call("Error:\nValueError('Low entropy mnemonic')", 248)],
-        any_order=True,
-    )
-
-
-def test_export_xor_low_entropy_mnemonic_from_qrcode(mocker, amigo, tdata):
-    from embit.networks import NETWORKS
-    from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
-    from krux.key import Key, TYPE_SINGLESIG
-    from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.qr import FORMAT_NONE
-    from krux.pages.qr_capture import QRCodeCapture
-
-    DANGEROUS = (
-        "dutch aerobic know utility deer toilet siege breeze evolve sniff bike wrap"
-    )
-    BTN_SEQUENCE = [
-        BUTTON_ENTER,  # Press "Via camera"
-        BUTTON_ENTER,  # QRCodeCapture
-        BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
-        *([BUTTON_PAGE] * 5),  # Move to back
-        BUTTON_ENTER,  # Press back
-        *([BUTTON_PAGE] * 3),  # Move to back
-        BUTTON_ENTER,  # Press back
-    ]
-
-    key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
-    wallet = Wallet(key)
-    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
-
-    assert ctx.wallet.key.mnemonic == tdata.TEST_XOR_12_WORD_MNEMONIC_1
-    assert ctx.wallet.key.fingerprint.hex() == "a70e2c26"
-
-    mocker.spy(ctx.display, "draw_centered_text")
-    mocker.patch.object(
-        QRCodeCapture,
-        "qr_capture_loop",
-        new=lambda self: (DANGEROUS, FORMAT_NONE),
-    )
-
-    m = MnemonicXOR(ctx)
-    m.load_key()
-    ctx.display.draw_centered_text.assert_has_calls(
-        [mocker.call("Error:\nValueError('Low entropy mnemonic')", 248)],
-        any_order=True,
-    )
-
-
-def test_mnemonic_len(mocker, m5stickv, tdata):
-    from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
-    from krux.input import BUTTON_ENTER
-    from krux.key import Key, TYPE_SINGLESIG
-    from krux.wallet import Wallet
-    from embit.networks import NETWORKS
-
-    key = Key(tdata.TEST_XOR_12_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
-    wallet = Wallet(key)
-    ctx = create_ctx(mocker, [BUTTON_ENTER, BUTTON_ENTER], wallet)
-    m = MnemonicXOR(ctx)
-    assert m.choose_len_mnemonic() == 12
-
-    key = Key(tdata.TEST_XOR_24_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
-    ctx.wallet = Wallet(key)
-    assert m.choose_len_mnemonic() == 24
+        m = MnemonicXOR(ctx)
+        m.load_key()
+        assert mocker.call([case[2]]) in ctx.display.draw_hcentered_text.mock_calls
+        n += 1
