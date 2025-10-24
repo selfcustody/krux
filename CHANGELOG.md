@@ -1,12 +1,12 @@
-# Changelog 25.XX.X - XXX 2025
+# Changelog 25.10.0 - October 2025
 
 ### New Device Support: TZT
 The TZT CanMV is similar to the WonderMV but includes five buttons and a premium milled aluminum housing. Computer simulator for the TZT device is also included.
 
-### New Device Support: WonderK PRO
-From the wonderful land of Korea, a new creation arrives: the WonderK PRO. Created by an entrepreneur who loves the Krux project, the WonderK follows in the footsteps of the WonderMV, but boasts a larger 2.8" display! Computer simulator for the WonderK device is also included.
+### Mnemonic XOR
+Krux can now apply XOR operations on entropy bytes between a loaded mnemonic and another chosen one, similar to Coinkite's `SeedXOR` protocol.
 
-### Code optimization
+### Code Optimization
 Reduced firmware size by 25% and lowered RAM usage through code cleanup and optimizations.
 
 ### Increased SD Card Compatibility
@@ -15,14 +15,11 @@ Krux can now recognize and work with a wider range of SD cards that were previou
 ### Discontinued Support for Maix Bit Device
 The Maix Bit device has long been discouraged due to its poor-quality camera. Starting with this release, we are discontinuing support and it will no longer be included in future builds. The support and parameters for building its firmware from source, however, will be kept.
 
-### Mnemonic XOR
-Krux can now apply XOR operations on entropy bytes between a loaded mnemonic and another chosen one, similar to the Coinkite's `SeedXOR` protocol.
-
 ### Other Bug Fixes and Improvements
 - Touchscreen test added in Tools for detection check
-- wbits for deflate-decompress window set to 10 bits to match KEF spec.
+- wbits for deflate-decompress window set to 10 bits to match KEF spec
 - Remove "Reboot" option and status bar, when empty, from Login menu
-- Optimized Datum show: total pages are no longer visible, and navigation no longer wraps from the first page to the last or vice versa; better memory management and handling for large (~100K) files.
+- Optimized Datum show: total pages are no longer visible, and navigation no longer wraps from the first page to the last or vice versa; better memory management and handling for large (~100K) files
 - Enabled swipe up/down gestures on keypads, menus, and QR transcribe
 
 # Changelog 25.09.0 - September 2025
