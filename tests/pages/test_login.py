@@ -118,11 +118,11 @@ def test_load_new_key_from_dice_module(m5stickv, mocker):
 
 def test_tools_menu(m5stickv, mocker):
     from krux.pages.login import Login, MENU_CONTINUE
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
         # Back
-        [BUTTON_PAGE] * 6
+        [BUTTON_PAGE_PREV]
         + [BUTTON_ENTER]
     )
 

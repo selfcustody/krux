@@ -197,7 +197,7 @@ Bitcoin *BIP85* (aka Deterministic Entropy From BIP32 Keychains) allows for the 
 
 <div style="clear: both"></div>
 
-**BIP39 Mnemonic**
+##### BIP39 Mnemonic
 
 <img src="../../../img/maixpy_amigo/bip85-child-index-300.png" class="amigo">
 <img src="../../../img/maixpy_amigo/bip85-load-child-300.png" class="amigo">
@@ -208,7 +208,7 @@ Choose between *12 or 24 words*, then type the desired *index* to export a *chil
 
 **Notice**: Any passphrase from the parent mnemonic will be removed when loading a BIP85 *child mnemonic*.
 
-**Base64 Password**
+##### Base64 Password
 
 <img src="../../../img/maixpy_amigo/bip85-password-len-300.png" class="amigo">
 <img src="../../../img/maixpy_amigo/bip85-password-created-300.png" class="amigo">

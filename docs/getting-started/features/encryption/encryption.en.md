@@ -48,11 +48,11 @@ Modes ECB, CBC, and GCM use an Initialization Vector (IV), where IV is better te
 
 ## Key Stretching (PBKDF2 Iterations)
 
-When you enter the encryption key, it is not directly used to encrypt your data. In order to protect against brute force attacks, the user supplied key is derived multiple times -- stretched to 256 bits via `pbkdf2_hmac_sha256`. PBKDF2 (Password-Based Key Derivation Function) Iterations refer to the number of derivations that will be performed over your key -- as the `password` -- `salted` with an ID, prior to encrypting/decrypting your secret. Users may set a preferred `PBKDF2 Iterations` value in `Encryption Settings`, then Krux will propose a slightly different value -- within a 10% delta, whenever encrypting.
+When you enter the encryption key, it is not directly used to encrypt your data. In order to protect against brute force attacks, the user supplied key is derived multiple times - stretched to 256 bits via `pbkdf2_hmac_sha256`. PBKDF2 (Password-Based Key Derivation Function) Iterations refer to the number of derivations that will be performed over your key - as the `password` - `salted` with an ID, prior to encrypting/decrypting your secret. Users may set a preferred `PBKDF2 Iterations` value in `Encryption Settings`, then Krux will propose a slightly different value - within a 10% delta, whenever encrypting.
 
 
 ## KEF Encryption Format
-When Krux encrypts a secret, the result is a `KEF Envelope` -- which is a series of bytes. Each envelope is constructed similarly, containing fixed-length and variable-length fields representing: a custom `ID` for the envelope, a `Version`, number of PBKDF2 `Iterations`, and a `Cipher PayLoad`, so that any devices or software supporting KEF may recognize the envelope and know how to decrypt it -- given the correct `key`. These fields, within each KEF envelope are:
+When Krux encrypts a secret, the result is a `KEF Envelope` - which is a series of bytes. Each envelope is constructed similarly, containing fixed-length and variable-length fields representing: a custom `ID` for the envelope, a `Version`, number of PBKDF2 `Iterations`, and a `Cipher PayLoad`, so that any devices or software supporting KEF may recognize the envelope and know how to decrypt it - given the correct `key`. These fields, within each KEF envelope are:
 
 | ID length (1) | ID (2) | Version (3) | Key Derivations (4) | Cipher PayLoad (5, 6, and 7) |
 | :---: | :---: | :---: | :---: | :---: |
@@ -69,7 +69,7 @@ When Krux encrypts a secret, the result is a `KEF Envelope` -- which is a series
     * **(7)** Authentication/validation data (3, 4, or 16 bytes).
 
 ### Version Details
-While all KEF envelopes share the above format, each version differs -- offering choices to the user, as trade-offs that may better fit a particular use-case. For technical details, see: [KEF specifications](kef-specifications.md)
+While all KEF envelopes share the above format, each version differs - offering choices to the user, as trade-offs that may better fit a particular use-case. For technical details, see: [KEF specifications](kef-specifications.md)
 
 | Version | Name       | Mode | IV | Compressed | Intended Use Case                      |
 |---------|------------|------|----|------------|----------------------------------------|

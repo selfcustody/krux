@@ -32,6 +32,7 @@ class DeviceTests(Page):
 
     def __init__(self, ctx):
         menu_items = [
+            (t("Check SD Card"), self.sd_check),
             (t("Print Test QR"), self.print_test),
             (t("Test Suite"), self.test_suite),
         ]
@@ -45,6 +46,55 @@ class DeviceTests(Page):
             ),
         )
         self.results = []
+
+    def sd_check(self):
+        """Handler for the 'SD Check' menu item"""
+        import uos
+        from ..format import generate_thousands_separator
+        from ..sd_card import SDHandler
+        from .file_manager import SD_ROOT_PATH
+        from ..display import BOTTOM_PROMPT_LINE
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Checking for SD card…"))
+        try:
+            # Check for SD hot-plug
+            with SDHandler():
+                sd_status = uos.statvfs(SD_ROOT_PATH)
+                sd_total_MB = int(sd_status[2] * sd_status[1] / 1024 / 1024)
+                sd_free_MB = int(sd_status[4] * sd_status[1] / 1024 / 1024)
+
+                self.ctx.display.clear()
+                self.ctx.display.draw_hcentered_text(
+                    t("SD card")
+                    + "\n\n"
+                    + t("Size:")
+                    + " "
+                    + generate_thousands_separator(sd_total_MB)
+                    + " MB"
+                    + "\n\n"
+                    + t("Used:")
+                    + " "
+                    + generate_thousands_separator(sd_total_MB - sd_free_MB)
+                    + " MB"
+                    + "\n\n"
+                    + t("Free:")
+                    + " "
+                    + generate_thousands_separator(sd_free_MB)
+                    + " MB",
+                    highlight_prefix=":",
+                )
+                if self.prompt(t("Explore files?"), BOTTOM_PROMPT_LINE):
+                    from .file_manager import FileManager
+
+                    file_manager = FileManager(self.ctx)
+                    file_manager.select_file(
+                        select_file_handler=file_manager.show_file_details
+                    )
+        except OSError:
+            self.flash_error(t("SD card not detected."))
+
+        return MENU_CONTINUE
 
     def print_test(self):
         """Handler for the 'Print Test QR' menu item"""
