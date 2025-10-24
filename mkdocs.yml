@@ -129,8 +129,28 @@ plugins:
  - macros
  - i18n:
     docs_structure: suffix
+    default_language: en
     languages:
       - locale: en
         default: true
         name: English
         build: true
+      - locale: es
+        name: Español
+        site_name: Krux - Programa de código abierto de equipos de firma para Bitcoin 
+    nav_translations:
+      es: 
+        Home: Inicio
+        Getting Started: Primeros Pasos
+        Devices and Part List: Dispositivos y Lista de Piezas
+        FAQ: Preguntas Frecuentes
+        Support the Project: Apoyar el Proyecto
+        About: Acerca de
+        Installing: Instalando 
+        Generating a Mnemonic: Generar una Mnemónica
+        Loading a Mnemonic: Cargar una Mnemónica
+        Navigating the Main Menu: Navegar el Menú Principal
+        Using a Single-sig Wallet: Usando una Billetera de Firma Única
+        Using a Multisig Wallet: Usando una Billetera Multifirma
+        Printing: Imprimiendo
+        Settings: Ajustes
