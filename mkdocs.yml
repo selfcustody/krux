@@ -51,7 +51,6 @@ theme:
     
   features:
     - navigation.tracking
-    - navigation.instant
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections

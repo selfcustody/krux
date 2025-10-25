@@ -5,7 +5,7 @@ x3 press BUTTON_B
 press BUTTON_A
 
 # Go to Flash Tools
-x4 press BUTTON_B
+x3 press BUTTON_B
 press BUTTON_A
 
 screenshot flash-tools.png

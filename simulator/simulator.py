@@ -48,10 +48,9 @@ parser.add_argument(
 )
 parser.add_argument(
     "--printer",
-    type=bool,
-    default=False,
+    type=str,
+    default="",
     required=False,
-    action=argparse.BooleanOptionalAction,
 )
 parser.add_argument(
     "--sd",
@@ -104,7 +103,13 @@ from kruxsim.mocks import pmu
 from kruxsim.mocks import deflate
 
 if args.printer:
-    machine.simulate_printer()
+    from krux.krux_settings import Settings, THERMAL_ADAFRUIT_TXT, CNC_FILE_DRIVER, CNC_GRBL_DRIVER
+    driver = THERMAL_ADAFRUIT_TXT
+    if args.printer == "file":
+        driver = CNC_FILE_DRIVER
+    elif args.printer == "grbl":
+        driver = CNC_GRBL_DRIVER
+    machine.simulate_printer(driver)
 
 from kruxsim.mocks import secp256k1
 from kruxsim.mocks import qrcode
