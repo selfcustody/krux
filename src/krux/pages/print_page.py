@@ -73,23 +73,24 @@ class PrintPage(Page):
 
     def print_mnemonic_text(self, mnemonic, suffix=""):
         """Prints Mnemonics words as text"""
+        from . import BASE_DEC_SUFFIX, BASE_HEX_SUFFIX, BASE_OCT_SUFFIX
+
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(
             t("Printing…"), self.ctx.display.height() // 2
         )
         self.printer.print_string("BIP39" + " " + suffix + "\n\n")
         words = mnemonic.split(" ")
-        lines = len(words) // 3
+        cols = 3 if suffix in (BASE_DEC_SUFFIX, BASE_HEX_SUFFIX, BASE_OCT_SUFFIX) else 2
+        lines = len(words) // cols
         for i in range(lines):
-            index = i + 1
-            string = str(index) + ":" + words[index - 1] + " "
-            while len(string) < 10:
-                string += " "
-            index += lines
-            string += str(index) + ":" + words[index - 1] + " "
-            while len(string) < 21:
-                string += " "
-            index += lines
-            string += str(index) + ":" + words[index - 1] + "\n"
-            self.printer.print_string(string)
+            parts = []
+            for c in range(cols):
+                index = i + 1 + c * lines
+                part = str(index) + ":" + words[index - 1]
+                # pad all but last column
+                if c < cols - 1:
+                    part = part + " " * (12 - len(part))  # fixed width of 12
+                parts.append(part)
+            self.printer.print_string("".join(parts) + "\n")
         self.printer.feed(4)

@@ -32,10 +32,6 @@ class Utils(Page):
     BASE_HEX = 16
     BASE_OCT = 8
 
-    BASE_DEC_SUFFIX = "DEC"
-    BASE_HEX_SUFFIX = "HEX"
-    BASE_OCT_SUFFIX = "OCT"
-
     def __init__(self, ctx):
         super().__init__(ctx, None)
 
