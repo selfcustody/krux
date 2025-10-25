@@ -478,8 +478,8 @@ class MnemonicLoader(Page):
         numbers_str = Utils.get_mnemonic_numbers(mnemonic, charset_type[charset])
         self.display_mnemonic(
             mnemonic,
-            suffix_dict[charset],
-            numbers_str,
+            suffix=suffix_dict[charset],
+            display_mnemonic=numbers_str,
             fingerprint=Key.extract_fingerprint(mnemonic),
         )
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):

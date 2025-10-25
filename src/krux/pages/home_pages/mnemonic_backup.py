@@ -95,7 +95,9 @@ class MnemonicsView(Page):
 
     def show_mnemonic(self, mnemonic, suffix="", display_mnemonic=None):
         """Displays only the mnemonic words or indexes"""
-        self.display_mnemonic(mnemonic, suffix, display_mnemonic)
+        self.display_mnemonic(
+            mnemonic, suffix=suffix, display_mnemonic=display_mnemonic
+        )
         self.ctx.input.wait_for_button()
 
         # Avoid printing text on a cnc
