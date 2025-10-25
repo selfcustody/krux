@@ -18,5 +18,5 @@ Equipos como el Maix Amigo, Yahboom, WonderVM o TZT vienen listos para usar, con
 
 Krux se integra fácilmente con las principales billeteras coordinadoras mediante códigos QR, tarjetas SD e incluso impresoras térmicas. Su software, sencillo de usar, ofrece funciones únicas para firmar transacciones y gestionar copias de seguridad de frases semilla en un entorno completamente desconectado de internet. 
 
-Para aprender más sobre Krux, visita [Getting Started](getting-started/index.md). 
+Para aprender más sobre Krux, visita [Primeros Pasos](getting-started/index.md). 
 

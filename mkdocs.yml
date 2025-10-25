@@ -181,7 +181,7 @@ plugins:
           FAQ: Preguntas Frecuentes
           Support the Project: Apoyar el Proyecto
           About: Acerca de
-          Installing: Instalando 
+          Installing: Instalación 
           Generating a Mnemonic: Generar una Mnemónica
           Loading a Mnemonic: Cargar una Mnemónica
           Navigating the Main Menu: Navegar el Menú Principal
@@ -189,3 +189,7 @@ plugins:
           Using a Multisig Wallet: Usando una Billetera Multifirma
           Printing: Imprimiendo
           Settings: Ajustes
+          From GUI application: Desde la interfaz gráfica de usuario
+          Exploring Features: Explorar Características
+          Video Tutorials: Video Tutoriales
+          Troubleshooting: Solución de problemas
