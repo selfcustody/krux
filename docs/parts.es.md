@@ -1,4 +1,4 @@
-<img src="../img/krux-devices.jpg" style="width: 60%; min-width: 300px;">
+<img src="../../img/krux-devices.jpg" style="width: 60%; min-width: 300px;">
 
 ### Dispositivos Compatibles (tabla comparativa)
 
