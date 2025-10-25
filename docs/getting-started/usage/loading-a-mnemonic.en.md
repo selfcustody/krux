@@ -8,7 +8,7 @@ Once you have either a 12 or 24-word [BIP39 mnemonic](https://github.com/bitcoin
 <img src="../../../img/maixpy_amigo/load-mnemonic-camera-options-300.png" align="right" class="amigo">
 
 ### Via Camera
-You can choose to use the camera to scan a `QR code`, `Tinyseed`, `OneKey KeyTag` or a `Binary Grid`. Learn more about these [metal backups here](../features/tinyseed.en.md).
+You can choose to use the camera to scan a `QR code`, `Tinyseed`, `OneKey KeyTag` or a `Binary Grid`. Learn more about these [metal backups here](../features/tinyseed.md).
 
 ----8<----
 camera-scan-tips.en.txt
