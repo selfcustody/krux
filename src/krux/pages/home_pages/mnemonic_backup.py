@@ -115,6 +115,7 @@ class MnemonicsView(Page):
     def display_mnemonic_numbers(self):
         """Handler for the 'numbers' menu item"""
         from ..utils import Utils
+        from .. import BASE_DEC_SUFFIX, BASE_HEX_SUFFIX, BASE_OCT_SUFFIX
 
         submenu = Menu(
             self.ctx,
@@ -123,7 +124,7 @@ class MnemonicsView(Page):
                     t("Decimal"),
                     lambda: self.show_mnemonic(
                         self.ctx.wallet.key.mnemonic,
-                        Utils.BASE_DEC_SUFFIX,
+                        BASE_DEC_SUFFIX,
                         Utils.get_mnemonic_numbers(
                             self.ctx.wallet.key.mnemonic, Utils.BASE_DEC
                         ),
@@ -133,7 +134,7 @@ class MnemonicsView(Page):
                     t("Hexadecimal"),
                     lambda: self.show_mnemonic(
                         self.ctx.wallet.key.mnemonic,
-                        Utils.BASE_HEX_SUFFIX,
+                        BASE_HEX_SUFFIX,
                         Utils.get_mnemonic_numbers(
                             self.ctx.wallet.key.mnemonic, Utils.BASE_HEX
                         ),
@@ -143,7 +144,7 @@ class MnemonicsView(Page):
                     t("Octal"),
                     lambda: self.show_mnemonic(
                         self.ctx.wallet.key.mnemonic,
-                        Utils.BASE_OCT_SUFFIX,
+                        BASE_OCT_SUFFIX,
                         Utils.get_mnemonic_numbers(
                             self.ctx.wallet.key.mnemonic, Utils.BASE_OCT
                         ),

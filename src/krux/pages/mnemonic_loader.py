@@ -29,6 +29,9 @@ from . import (
     MENU_CONTINUE,
     ESC_KEY,
     LETTERS,
+    BASE_DEC_SUFFIX,
+    BASE_HEX_SUFFIX,
+    BASE_OCT_SUFFIX,
 )
 from ..display import BOTTOM_PROMPT_LINE
 from ..qr import FORMAT_UR
@@ -468,9 +471,9 @@ class MnemonicLoader(Page):
             DIGITS_OCT: Utils.BASE_OCT,
         }
         suffix_dict = {
-            DIGITS: Utils.BASE_DEC_SUFFIX,
-            DIGITS_HEX: Utils.BASE_HEX_SUFFIX,
-            DIGITS_OCT: Utils.BASE_OCT_SUFFIX,
+            DIGITS: BASE_DEC_SUFFIX,
+            DIGITS_HEX: BASE_HEX_SUFFIX,
+            DIGITS_OCT: BASE_OCT_SUFFIX,
         }
         numbers_str = Utils.get_mnemonic_numbers(mnemonic, charset_type[charset])
         self.display_mnemonic(
