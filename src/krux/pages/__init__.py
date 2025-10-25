@@ -81,6 +81,10 @@ EXTRA_MNEMONIC_LENGTH_FLAG = 48
 SWIPE_R_CHAR = "»"
 SWIPE_L_CHAR = "«"
 
+BASE_DEC_SUFFIX = "DEC"
+BASE_HEX_SUFFIX = "HEX"
+BASE_OCT_SUFFIX = "OCT"
+
 
 class Page:
     """Represents a page in the app, with helper methods for common display and

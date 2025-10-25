@@ -21,6 +21,7 @@ The Maix Bit device has long been discouraged due to its poor-quality camera. St
 - Remove "Reboot" option and status bar, when empty, from Login menu
 - Optimized Datum show: total pages are no longer visible, and navigation no longer wraps from the first page to the last or vice versa; better memory management and handling for large (~100K) files
 - Enabled swipe up/down gestures on keypads, menus, and QR transcribe
+- Fix mnemonic thermal printing when long words span multiple lines
 
 # Changelog 25.09.0 - September 2025
 

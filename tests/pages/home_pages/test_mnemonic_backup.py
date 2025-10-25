@@ -89,7 +89,7 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
         mnemonics.mnemonic()
 
         mnemonics.display_mnemonic.assert_called_with(
-            ctx.wallet.key.mnemonic, "Mnemonic", None
+            ctx.wallet.key.mnemonic, suffix="Mnemonic", display_mnemonic=None
         )
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
@@ -681,14 +681,18 @@ def test_print_mnemonic_other_words(mocker, amigo, tdata):
     # brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     printer.print_string.assert_has_calls(
         [
-            mocker.call("1:brush   9:help     17:human\n"),
-            mocker.call("2:badge   10:panel   18:once\n"),
-            mocker.call("3:sing    11:bundle  19:effort\n"),
-            mocker.call("4:still   12:excess  20:candy\n"),
-            mocker.call("5:venue   13:sign    21:goat\n"),
-            mocker.call("6:panther 14:couch   22:top\n"),
-            mocker.call("7:kitchen 15:stove   23:tiny\n"),
-            mocker.call("8:please  16:increase 24:major\n"),
+            mocker.call("1:brush     13:sign\n"),
+            mocker.call("2:badge     14:couch\n"),
+            mocker.call("3:sing      15:stove\n"),
+            mocker.call("4:still     16:increase\n"),
+            mocker.call("5:venue     17:human\n"),
+            mocker.call("6:panther   18:once\n"),
+            mocker.call("7:kitchen   19:effort\n"),
+            mocker.call("8:please    20:candy\n"),
+            mocker.call("9:help      21:goat\n"),
+            mocker.call("10:panel    22:top\n"),
+            mocker.call("11:bundle   23:tiny\n"),
+            mocker.call("12:excess   24:major\n"),
         ]
     )
 
@@ -729,14 +733,14 @@ def test_print_mnemonic_numbers_decimal(mocker, amigo, tdata):
     # brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     printer.print_string.assert_has_calls(
         [
-            mocker.call("1:234     9:857      17:887\n"),
-            mocker.call("2:140     10:1277    18:1237\n"),
-            mocker.call("3:1611    11:243     19:566\n"),
-            mocker.call("4:1711    12:629     20:267\n"),
-            mocker.call("5:1940    13:1603    21:801\n"),
-            mocker.call("6:1279    14:392     22:1832\n"),
-            mocker.call("7:985     15:1718    23:1812\n"),
-            mocker.call("8:1332    16:918     24:1076\n"),
+            mocker.call("1:234       9:857       17:887\n"),
+            mocker.call("2:140       10:1277     18:1237\n"),
+            mocker.call("3:1611      11:243      19:566\n"),
+            mocker.call("4:1711      12:629      20:267\n"),
+            mocker.call("5:1940      13:1603     21:801\n"),
+            mocker.call("6:1279      14:392      22:1832\n"),
+            mocker.call("7:985       15:1718     23:1812\n"),
+            mocker.call("8:1332      16:918      24:1076\n"),
         ]
     )
 
@@ -779,14 +783,14 @@ def test_print_mnemonic_numbers_hex(mocker, amigo, tdata):
     # brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     printer.print_string.assert_has_calls(
         [
-            mocker.call("1:EA      9:359      17:377\n"),
-            mocker.call("2:8C      10:4FD     18:4D5\n"),
-            mocker.call("3:64B     11:F3      19:236\n"),
-            mocker.call("4:6AF     12:275     20:10B\n"),
-            mocker.call("5:794     13:643     21:321\n"),
-            mocker.call("6:4FF     14:188     22:728\n"),
-            mocker.call("7:3D9     15:6B6     23:714\n"),
-            mocker.call("8:534     16:396     24:434\n"),
+            mocker.call("1:EA        9:359       17:377\n"),
+            mocker.call("2:8C        10:4FD      18:4D5\n"),
+            mocker.call("3:64B       11:F3       19:236\n"),
+            mocker.call("4:6AF       12:275      20:10B\n"),
+            mocker.call("5:794       13:643      21:321\n"),
+            mocker.call("6:4FF       14:188      22:728\n"),
+            mocker.call("7:3D9       15:6B6      23:714\n"),
+            mocker.call("8:534       16:396      24:434\n"),
         ]
     )
 
@@ -829,14 +833,14 @@ def test_print_mnemonic_numbers_oct(mocker, amigo, tdata):
     # brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     printer.print_string.assert_has_calls(
         [
-            mocker.call("1:352     9:1531     17:1567\n"),
-            mocker.call("2:214     10:2375    18:2325\n"),
-            mocker.call("3:3113    11:363     19:1066\n"),
-            mocker.call("4:3257    12:1165    20:413\n"),
-            mocker.call("5:3624    13:3103    21:1441\n"),
-            mocker.call("6:2377    14:610     22:3450\n"),
-            mocker.call("7:1731    15:3266    23:3424\n"),
-            mocker.call("8:2464    16:1626    24:2064\n"),
+            mocker.call("1:352       9:1531      17:1567\n"),
+            mocker.call("2:214       10:2375     18:2325\n"),
+            mocker.call("3:3113      11:363      19:1066\n"),
+            mocker.call("4:3257      12:1165     20:413\n"),
+            mocker.call("5:3624      13:3103     21:1441\n"),
+            mocker.call("6:2377      14:610      22:3450\n"),
+            mocker.call("7:1731      15:3266     23:3424\n"),
+            mocker.call("8:2464      16:1626     24:2064\n"),
         ]
     )
 
