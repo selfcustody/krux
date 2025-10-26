@@ -49,7 +49,9 @@ parser.add_argument(
 parser.add_argument(
     "--printer",
     type=str,
-    default="",
+    nargs="?",          # means "argument optional"
+    const="thermal",    # used if --printer is given without a value
+    default=None,
     required=False,
 )
 parser.add_argument(
