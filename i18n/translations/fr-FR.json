@@ -128,7 +128,7 @@
     "High fees!": "Frais élevés !",
     "ID": "ID",
     "ID already exists": "Id existe déjà",
-    "If your device display does not work after this change, it will automatically reboot with previous settings after 5 seconds.": "Si l'affichage de votre appareil ne fonctionne pas après ce changement, il redémarrera automatiquement avec les paramètres précédents après 5 secondes.",
+    "If your device display does not work after this change, it will automatically reboot with previous settings after 5 seconds.": "En cas d'échec d'affichage, l'appareil redémarrera automatiquement après 5 secondes utilisant les paramètres précédents.",
     "Index": "Index",
     "Inputs (%d):": "Entrées (%d) :",
     "Insufficient entropy!": "Entropie insuffisante !",

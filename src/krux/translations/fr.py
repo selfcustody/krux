@@ -150,7 +150,7 @@ translation_array = [
     "Frais élevés\u2009!",
     "ID",
     "Id existe déjà",
-    "Si l'affichage de votre appareil ne fonctionne pas après ce changement, il redémarrera automatiquement avec les paramètres précédents après 5 secondes.",
+    "En cas d'échec d'affichage, l'appareil redémarrera automatiquement après 5 secondes utilisant les paramètres précédents.",
     "Index",
     "Entrées (%d)\u2009:",
     "Entropie insuffisante\u2009!",
