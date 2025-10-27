@@ -1,3 +1,9 @@
+# Changelog 25.XX.X - XXX 2025
+
+### New Device Support: WonderK PRO
+From the wonderful land of Korea, a new creation arrives: the WonderK PRO. Created by an entrepreneur who loves the Krux project, the WonderK follows in the footsteps of the WonderMV, but boasts a larger 2.8" display! Computer simulator for the WonderK device is also included.
+
+
 # Changelog 25.10.0 - October 2025
 
 ### New Device Support: TZT
@@ -22,6 +28,9 @@ The Maix Bit device has long been discouraged due to its poor-quality camera. St
 - Optimized Datum show: total pages are no longer visible, and navigation no longer wraps from the first page to the last or vice versa; better memory management and handling for large (~100K) files
 - Enabled swipe up/down gestures on keypads, menus, and QR transcribe
 - Fix mnemonic thermal printing when long words span multiple lines
+- Tools -> Check SD card is now in Tools -> Device Tests
+- All devices scan TinySeed and other binary grids in grayscale mode for better speed.
+- Button functionality reestablished on some pages for Yahboom with v1.1 hardware
 
 # Changelog 25.09.0 - September 2025
 
