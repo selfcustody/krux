@@ -36,14 +36,14 @@ Extract the latest version of Krux you downloaded and enter the folder:
 unzip {{latest_krux}}.zip && cd {{latest_krux}}
 ```
 
-Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `bit`, `cube` or `yahboom` (to Yahboom you may need to manually specify the port, for example `/dev/ttyUSB0` on Linux or `COM6` on Windows):
+Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `cube` or `yahboom` (to Yahboom you may need to manually specify the port, for example `/dev/ttyUSB0` on Linux or `COM6` on Windows):
 ```bash
 ./ktool -B goE -b 1500000 maixpy_DEVICE/kboot.kfpkg
 ```
 
-For `dock` or `wonder_mv` use the `-B dan` parameter:
+For `dock`, `wonder_mv` or `tzt` use the `-B dan` parameter:
 ```bash
-./ktool -B dan -b 1500000 maixpy_dock/kboot.kfpkg
+./ktool -B dan -b 1500000 maixpy_DEVICE/kboot.kfpkg
 ```
 
 ----8<----
@@ -59,7 +59,7 @@ If `ktool` fails to run, you may need to give it executable permissions with `ch
 
 If the flashing process fails midway through, check the connection, restart the device, and try the command again.
 
-Two serial ports are created when `Amigo` and `Bit` are connected to a PC. Sometimes Ktool will pick the wrong port and flashing will fail. Manually specify the serial port to overcome this issue using `-p` argument:
+Two serial ports are created when `Amigo` are connected to a PC. Sometimes Ktool will pick the wrong port and flashing will fail. Manually specify the serial port to overcome this issue using `-p` argument:
 
 ##### Linux
 See the correct port using `ls /dev/ttyUSB*`, in the example below we use `/dev/ttyUSB0`:

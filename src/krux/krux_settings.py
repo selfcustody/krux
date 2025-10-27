@@ -313,7 +313,8 @@ class TouchSettings(SettingsNamespace):
     """Touch sensitivity settings"""
 
     namespace = "settings.touchscreen"
-    threshold = NumberSetting(int, "threshold", 22, [10, 200])
+    default_th = 40 if kboard.is_wonder_k else 22
+    threshold = NumberSetting(int, "threshold", default_th, [10, 200])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -374,7 +375,7 @@ class HardwareSettings(SettingsNamespace):
     def __init__(self):
         self.printer = PrinterSettings()
         self.buttons = ButtonsSettings()
-        if kboard.has_touchscreen:
+        if board.config["krux"]["display"].get("touch", False):
             self.touch = TouchSettings()
         if kboard.is_amigo:
             self.display = DisplayAmgSettings()
@@ -388,7 +389,7 @@ class HardwareSettings(SettingsNamespace):
             "printer": t("Printer"),
         }
         hardware_menu["buttons"] = t("Buttons")
-        if kboard.has_touchscreen:
+        if board.config["krux"]["display"].get("touch", False):
             hardware_menu["touchscreen"] = t("Touchscreen")
         if kboard.is_amigo:
             hardware_menu["display_amg"] = t("Display")
@@ -497,6 +498,12 @@ class Settings(SettingsNamespace):
         self.encryption = EncryptionSettings()
         self.persist = PersistSettings()
         self.appearance = ThemeSettings()
+
+    def is_flipped_orientation(self):
+        """Returns flipped orientation setting"""
+        return hasattr(Settings().hardware, "display") and getattr(
+            Settings().hardware.display, "flipped_orientation", False
+        )
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""

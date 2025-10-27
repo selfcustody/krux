@@ -21,9 +21,9 @@
 # THE SOFTWARE.
 import gc
 import time
-import board
 import lcd
 import _thread
+from ..context import Context
 from .keypads import Keypad
 from ..themes import theme, WHITE, GREEN, DARKGREY
 from ..input import (
@@ -38,15 +38,12 @@ from ..input import (
     SWIPE_LEFT,
     SWIPE_RIGHT,
     ONE_MINUTE,
-    PRESSED,
-    KEY_REPEAT_DELAY_MS,
 )
 from ..display import (
     DEFAULT_PADDING,
     MINIMAL_PADDING,
     FLASH_MSG_TIME,
     FONT_HEIGHT,
-    FONT_WIDTH,
     STATUS_BAR_HEIGHT,
     BOTTOM_LINE,
 )
@@ -84,6 +81,10 @@ EXTRA_MNEMONIC_LENGTH_FLAG = 48
 SWIPE_R_CHAR = "»"
 SWIPE_L_CHAR = "«"
 
+BASE_DEC_SUFFIX = "DEC"
+BASE_HEX_SUFFIX = "HEX"
+BASE_OCT_SUFFIX = "OCT"
+
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
@@ -92,7 +93,7 @@ class Page:
     Must be subclassed.
     """
 
-    def __init__(self, ctx, menu=None):
+    def __init__(self, ctx: Context, menu=None):
         self.ctx = ctx
         self.menu = menu
         # context has its own keypad mapping in case touch is not used
@@ -103,7 +104,7 @@ class Page:
         """Prompts user for leaving"""
         self.ctx.display.clear()
         answer = self.prompt(t("Are you sure?"), self.ctx.display.height() // 2)
-        if self.ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
         return ESC_KEY if answer else None
 
@@ -167,9 +168,10 @@ class Page:
             pad.get_valid_index()
             pad.draw_keys()
             pad.draw_keyset_index()
-            btn = self.ctx.input.wait_for_button()
             show_swipe_hint = False  # unless overridden by a particular key,
             # don't show the swipe hint after a key press
+
+            btn = self.ctx.input.wait_for_fastnav_button()
             if btn == BUTTON_TOUCH:
                 btn = pad.touch_to_physical()
             if btn == BUTTON_ENTER:
@@ -182,7 +184,7 @@ class Page:
                     if esc_prompt:
                         if self.esc_prompt() == ESC_KEY:
                             return ESC_KEY
-                        if self.ctx.input.touch is not None:
+                        if kboard.has_touchscreen:
                             self.ctx.input.touch.set_regions(
                                 pad.layout.x_keypad_map, pad.layout.y_keypad_map
                             )
@@ -191,7 +193,7 @@ class Page:
                 elif pad.cur_key_index == pad.go_index:
                     break
                 elif pad.cur_key_index == pad.more_index:
-                    swipeable = self.ctx.input.touch is not None
+                    swipeable = kboard.has_touchscreen
                     if swipeable and swipe_has_not_been_used:
                         show_swipe_hint = True
                     pad.next_keyset()
@@ -209,10 +211,10 @@ class Page:
                 if changed and go_on_change:
                     break
             else:
-                if btn in (SWIPE_RIGHT, SWIPE_LEFT):
+                if btn in (SWIPE_UP, SWIPE_LEFT, SWIPE_DOWN, SWIPE_RIGHT):
                     swipe_has_not_been_used = False
                 pad.navigate(btn)
-        if self.ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
         return buffer
 
@@ -325,12 +327,17 @@ class Page:
                     qr_foreground = None
                 extra_debounce_flag = True
             elif btn in PROCEED:
-                if self.ctx.input.touch is not None:
+                if kboard.has_touchscreen:
                     self.ctx.input.buttons_active = False
                 done = True
 
     def display_mnemonic(
-        self, mnemonic: str, suffix="", display_mnemonic: str = None, fingerprint=""
+        self,
+        mnemonic: str,
+        title=None,
+        suffix="",
+        display_mnemonic: str = None,
+        fingerprint="",
     ):
         """Displays the 12 or 24-word list of words to the user"""
         from ..wallet import is_double_mnemonic
@@ -345,7 +352,11 @@ class Page:
             suffix += "*"
         if fingerprint:
             fingerprint = "\n" + fingerprint
-        header = "BIP39 {}{}".format(suffix, fingerprint)
+        header = (
+            "BIP39 {}{}".format(suffix, fingerprint)
+            if not title
+            else "{} {}{}".format(title, suffix, fingerprint)
+        )
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(header)
         if fingerprint:
@@ -414,7 +425,7 @@ class Page:
         self.y_keypad_map.append(y_key_map)
         y_key_map += 4 * FONT_HEIGHT
         self.y_keypad_map.append(min(y_key_map, self.ctx.display.height()))
-        if self.ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             self.ctx.input.touch.set_regions(self.x_keypad_map, self.y_keypad_map)
         btn = None
         answer = True
@@ -450,7 +461,7 @@ class Page:
                         2 * FONT_HEIGHT - 2,
                         theme.no_esc_color,
                     )
-            elif self.ctx.input.touch is not None:
+            elif kboard.has_touchscreen:
                 self.ctx.display.draw_vline(
                     self.ctx.display.width() // 2,
                     self.y_keypad_map[0] + FONT_HEIGHT,
@@ -568,6 +579,19 @@ class Page:
                 theme.frame_color,
             )
 
+    def choose_len_mnemonic(self, extra_option=""):
+        """Reusable '12 or 24 words?" menu choice"""
+        items = [
+            (t("12 words"), lambda: 12),
+            (t("24 words"), lambda: 24),
+        ]
+        if extra_option:
+            items.append((extra_option, lambda: EXTRA_MNEMONIC_LENGTH_FLAG))
+        submenu = Menu(self.ctx, items, back_status=lambda: None)
+        _, num_words = submenu.run_loop()
+        self.ctx.display.clear()
+        return num_words
+
 
 class ListView:
     """Acts as a fixed-size, sliding window over an underlying list"""
@@ -621,7 +645,7 @@ class Menu:
 
     def __init__(
         self,
-        ctx,
+        ctx: Context,
         menu,
         offset=None,
         disable_statusbar=False,
@@ -633,14 +657,17 @@ class Menu:
         if back_label:
             back_label = t("Back") if back_label == "Back" else back_label
             self.menu += [("< " + back_label, back_status)]
-        self.disable_statusbar = disable_statusbar
+        self.disable_statusbar = disable_statusbar or (
+            self.ctx.wallet is None and not kboard.has_battery
+        )
         if offset is None:
-            # Default offset for status bar
-            self.menu_offset = STATUS_BAR_HEIGHT
+            self.menu_offset = (
+                STATUS_BAR_HEIGHT if not self.disable_statusbar else DEFAULT_PADDING
+            )
         else:
-            # Always diasble status bar if menu has non standard offset
+            # Always disable status bar if menu has non standard offset
             self.disable_statusbar = True
-            self.menu_offset = offset
+            self.menu_offset = offset if offset >= 0 else DEFAULT_PADDING
         max_viewable = min(
             self.ctx.display.max_menu_lines(self.menu_offset, self.menu), len(self.menu)
         )
@@ -656,19 +683,6 @@ class Menu:
         from .screensaver import ScreenSaver
 
         ScreenSaver(self.ctx).start()
-
-    def _get_btn_input(self):
-        if self.ctx.input.page_value() == PRESSED:
-            time.sleep_ms(KEY_REPEAT_DELAY_MS)
-            return FAST_FORWARD
-        if self.ctx.input.page_prev_value() == PRESSED:
-            time.sleep_ms(KEY_REPEAT_DELAY_MS)
-            return FAST_BACKWARD
-        return self.ctx.input.wait_for_button(
-            # Block if screen saver not active
-            block=Settings().appearance.screensaver_time == 0,
-            wait_duration=Settings().appearance.screensaver_time * ONE_MINUTE,
-        )
 
     def _process_page(self, selected_item_index):
         selected_item_index = (selected_item_index + 1) % len(self.menu_view)
@@ -729,7 +743,7 @@ class Menu:
                 )
             else:
                 self.ctx.display.clear()
-            if self.ctx.input.touch is not None:
+            if kboard.has_touchscreen:
                 self._draw_touch_menu(selected_item_index)
             else:
                 self._draw_menu(selected_item_index)
@@ -741,8 +755,13 @@ class Menu:
                     return (self.menu_view.index(selected_item_index), status)
                 start_from_submenu = False
             else:
-                btn = self._get_btn_input()
-                if self.ctx.input.touch is not None:
+                screensaver_time = Settings().appearance.screensaver_time
+                btn = self.ctx.input.wait_for_fastnav_button(
+                    # Block if screen saver not active
+                    screensaver_time == 0,
+                    screensaver_time * ONE_MINUTE,
+                )
+                if kboard.has_touchscreen:
                     if btn == BUTTON_TOUCH:
                         selected_item_index = self.ctx.input.touch.current_index()
                         btn = BUTTON_ENTER
@@ -755,8 +774,8 @@ class Menu:
                     selected_item_index = self._process_page(selected_item_index)
                 elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD):
                     selected_item_index = self._process_page_prev(selected_item_index)
-                elif btn in (SWIPE_UP, SWIPE_DOWN):
-                    if btn == SWIPE_UP:
+                elif btn in (SWIPE_UP, SWIPE_DOWN, SWIPE_LEFT, SWIPE_RIGHT):
+                    if btn in (SWIPE_UP, SWIPE_LEFT):
                         selected_item_index = self._process_swipe_up(
                             selected_item_index, swipe_up_fnc
                         )
@@ -796,7 +815,7 @@ class Menu:
             )
             self.draw_network_indicator()
             self.draw_wallet_indicator()
-            if self.ctx.power_manager.has_battery():
+            if kboard.has_battery:
                 _thread.start_new_thread(self.draw_battery_indicator, ())
 
     #     self.draw_ram_indicator()
@@ -920,6 +939,9 @@ class Menu:
         y_keypad_map = [
             int(n * height_multiplier) + self.menu_offset for n in y_keypad_map
         ]
+        # Expand first region to fill the screen if there's nothing above it
+        if y_keypad_map[0] < STATUS_BAR_HEIGHT:
+            y_keypad_map[0] = 0
         # Expand last region to fill the screen
         y_keypad_map[-1] = self.ctx.display.height()
         self.ctx.input.touch.y_regions = y_keypad_map
@@ -1006,17 +1028,3 @@ class Menu:
                         text, offset_y + FONT_HEIGHT * j, fg_color
                     )
             offset_y += delta_y
-
-
-def choose_len_mnemonic(ctx, extra_option=""):
-    """Reusable '12 or 24 words?" menu choice"""
-    items = [
-        (t("12 words"), lambda: 12),
-        (t("24 words"), lambda: 24),
-    ]
-    if extra_option:
-        items.append((extra_option, lambda: EXTRA_MNEMONIC_LENGTH_FLAG))
-    submenu = Menu(ctx, items, back_status=lambda: None)
-    _, num_words = submenu.run_loop()
-    ctx.display.clear()
-    return num_words

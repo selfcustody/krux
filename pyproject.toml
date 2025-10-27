@@ -22,7 +22,7 @@
 
 [tool.poetry]
 name = "krux"
-version = "25.09.0"
+version = "25.10.0"
 description = "Open-source signing device firmware for Bitcoin"
 authors = ["Jeff S <jeffreesun@protonmail.com>"]
 readme = "README.md"
@@ -57,13 +57,14 @@ qrcode = { version = "^8.2", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
-pylint = "^3.3.8"
+pylint = "^4.0.2"
 pytest = "^8.4.2"
 pytest-cov = "^5.0.0"
 pytest-mock = "^3.15.0"
 PyQRCode = "^1.2.1"
 pycryptodome = "^3.23.0"
 poethepoet = "^0.37.0"
+vulture = "^2.14"
 
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions", "mkdocs-macros-plugin"]
@@ -88,6 +89,12 @@ lint = ["lint-src", "lint-scripts"]
 # aliases
 pylint.ref = "lint"
 
+# vulture tasks
+vulture-src = "vulture src"
+vulture.ref = "vulture-src vulture_whitelist.py"
+vulture-make = { shell = "vulture src --make-whitelist > vulture_whitelist.py" }
+vulture-whitelist.ref = "vulture-make"
+
 # test tasks
 test-clean = """python -c 'import shutil, os; os.path.exists("htmlcov") and shutil.rmtree("htmlcov")'"""
 test-cov = "pytest --cache-clear --cov src/krux --cov-report html ./tests --cov-context=test --cov-report term-missing"
@@ -99,8 +106,8 @@ test.ref = "tests"
 pytest.ref = "tests"
 
 # pre commit task (do formatting, linting and tests)
-pre-commit = ["format", "lint", "i18n validate", "test-simple"]
-pre-release = ["format", "lint", "i18n validate", "i18n-build", "update-glyphs", "test-simple"]
+pre-commit = ["format", "lint", "i18n validate", "vulture", "test-simple"]
+pre-release = ["format", "lint", "i18n validate", "i18n-build", "update-glyphs", "vulture", "test-simple"]
 
 # run docs locally
 docs = "poetry run mkdocs serve"
@@ -121,22 +128,33 @@ simulator-dock = "python simulator/simulator.py --device maixpy_dock"
 simulator-yahboom = "python simulator/simulator.py --device maixpy_yahboom"
 simulator-cube = "python simulator/simulator.py --device maixpy_cube"
 simulator-wonder-mv = "python simulator/simulator.py --device maixpy_wonder_mv"
+simulator-tzt = "python simulator/simulator.py --device maixpy_tzt"
+simulator-wonder-k = "python simulator/simulator.py --device maixpy_wonder_k"
 # aliases
 simulator.ref = "simulator-amigo"
 simulator-m5.ref = "simulator-m5stickv"
 simulator-mv.ref = "simulator-wonder-mv"
 simulator-wonder.ref = "simulator-wonder-mv"
 simulator-wondermv.ref = "simulator-wonder-mv"
+simulator-wonderk.ref = "simulator-wonder-k"
+simulator-k.ref = "simulator-wonder-k"
 
 # git tasks
 git-update = "git submodule update --init --recursive"
 git-pull = "git pull git@github.com:selfcustody/krux.git"
 git-pull-https = "git pull https://github.com/selfcustody/krux.git"
 
-# flash tasks
-flash-cmd = "python firmware/Kboot/build/ktool.py -b 2000000 build/kboot.kfpkg"
+# ktool tasks 
+ktool-cmd = "python firmware/Kboot/build/ktool.py -b 2000000"
+flash-cmd.ref = "ktool-cmd build/kboot.kfpkg"
 flash.ref = "flash-cmd -B goE"
 flash-dock.ref = "flash-cmd -B dan"
+boot-cmd.ref = "ktool-cmd -s build/firmware.bin"
+boot.ref = "boot-cmd -B goE"
+boot-dock.ref = "boot-cmd -B dan"
+terminal.ref = "ktool-cmd -T" # for yahboom add param: --reset
+erase.ref = "ktool-cmd -B goE -E"
+erase-dock.ref = "ktool-cmd -B dan -E"
 
 # task for bdftokff font glyphs update
 update-glyphs = "python ./firmware/font/bdftokff.py True"

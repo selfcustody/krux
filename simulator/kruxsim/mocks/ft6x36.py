@@ -21,53 +21,11 @@
 # THE SOFTWARE.
 import sys
 from unittest import mock
-import pygame as pg
-from . import lcd
-
-sequence_executor = None
+from kruxsim.mocks.touchscreen_common import TCOMMON, register_sequence_executor
 
 
-def register_sequence_executor(s):
-    global sequence_executor
-    sequence_executor = s
-
-
-class FT6X36:
-    def __init__(self):
-        self.event_flag = False
-
-    def to_screen_pos(self, pos):
-        if lcd.screen:
-            rect = lcd.screen.get_rect()
-            rect.center = pg.display.get_surface().get_rect().center
-            if rect.collidepoint(pos):
-                out = pos[0] - rect.left, pos[1] - rect.top
-                return out
-        return None
-
+class FT6X36(TCOMMON):
     def activate_irq(self, irq_pin):
-        pass
-
-    def current_point(self):
-        return (
-            self.to_screen_pos(pg.mouse.get_pos())
-            if pg.mouse.get_pressed()[0]
-            else None
-        )
-
-    def trigger_event(self):
-        self.event_flag = True
-        self.irq_point = self.current_point()
-
-    def event(self):
-        if sequence_executor and sequence_executor.touch_pos is not None:
-            sequence_executor.touch_pos = None
-            return True
-        flag = self.event_flag
-        self.event_flag = False  # Always clean event flag
-        return flag
-
-    def threshold(self, value):
         pass
 
 
@@ -77,4 +35,5 @@ touch_control = FT6X36()
 if "krux.touchscreens.ft6x36" not in sys.modules:
     sys.modules["krux.touchscreens.ft6x36"] = mock.MagicMock(
         touch_control=touch_control,
+        register_sequence_executor=register_sequence_executor,
     )

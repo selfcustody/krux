@@ -151,3 +151,33 @@ def test_esc_entering_stackbit(amigo, mocker):
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert words == None
+
+
+def test_entering_stackbit_buttons_turbo(mocker, m5stickv):
+    from krux.pages.stack_1248 import Stackbit
+    from krux.input import PRESSED, FAST_FORWARD, FAST_BACKWARD, Input
+    import pytest
+
+    ctx = create_ctx(mocker, [])
+    input = Input()
+    input.wait_for_button = ctx.input.wait_for_button
+    ctx.input.wait_for_fastnav_button = input.wait_for_fastnav_button
+    stackbit = Stackbit(ctx)
+    stackbit.index = mocker.MagicMock(side_effect=ValueError)
+
+    # fast forward
+    input.page_value = mocker.MagicMock(return_value=PRESSED)
+
+    with pytest.raises(ValueError):
+        stackbit.enter_1248()
+
+    stackbit.index.assert_called_with(0, FAST_FORWARD)
+
+    # fast backward
+    input.page_value = mocker.MagicMock(return_value=None)
+    input.page_prev_value = mocker.MagicMock(return_value=PRESSED)
+
+    with pytest.raises(ValueError):
+        stackbit.enter_1248()
+
+    stackbit.index.assert_called_with(0, FAST_BACKWARD)

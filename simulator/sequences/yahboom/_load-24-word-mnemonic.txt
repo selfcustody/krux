@@ -1,1 +1,1 @@
-/home/tudu/Documents/projects/tadeubas_krux/simulator/sequences/amigo/_load-24-word-mnemonic.txt
+../amigo/_load-24-word-mnemonic.txt

@@ -96,23 +96,26 @@ def test_enter_tiny_seed_12w_m5stickv(m5stickv, mocker):
 
 def test_enter_tiny_seed_button_turbo(mocker, m5stickv):
     from krux.pages.tiny_seed import TinySeed
-    from krux.input import PRESSED, FAST_FORWARD, FAST_BACKWARD
+    from krux.input import PRESSED, FAST_FORWARD, FAST_BACKWARD, Input
     import pytest
 
     ctx = create_ctx(mocker, [])
+    input = Input()
+    input.wait_for_button = ctx.input.wait_for_button
+    ctx.input.wait_for_fastnav_button = input.wait_for_fastnav_button
     tiny_seed = TinySeed(ctx)
+    tiny_seed._new_index = mocker.MagicMock(side_effect=ValueError)
 
     # fast forward
-    ctx.input.page_value = mocker.MagicMock(return_value=PRESSED)
-    tiny_seed._new_index = mocker.MagicMock(side_effect=ValueError)
+    input.page_value = mocker.MagicMock(return_value=PRESSED)
     with pytest.raises(ValueError):
         tiny_seed.enter_tiny_seed()
 
     tiny_seed._new_index.assert_called_with(0, FAST_FORWARD, False, 0)
 
     # fast backward
-    ctx.input.page_value = mocker.MagicMock(return_value=None)
-    ctx.input.page_prev_value = mocker.MagicMock(return_value=PRESSED)
+    input.page_value = mocker.MagicMock(return_value=None)
+    input.page_prev_value = mocker.MagicMock(return_value=PRESSED)
     with pytest.raises(ValueError):
         tiny_seed.enter_tiny_seed()
 

@@ -197,7 +197,7 @@ Bitcoin *BIP85* (aka Deterministic Entropy From BIP32 Keychains) allows for the 
 
 <div style="clear: both"></div>
 
-**BIP39 Mnemonic**
+##### BIP39 Mnemonic
 
 <img src="../../../img/maixpy_amigo/bip85-child-index-300.png" class="amigo">
 <img src="../../../img/maixpy_amigo/bip85-load-child-300.png" class="amigo">
@@ -208,7 +208,7 @@ Choose between *12 or 24 words*, then type the desired *index* to export a *chil
 
 **Notice**: Any passphrase from the parent mnemonic will be removed when loading a BIP85 *child mnemonic*.
 
-**Base64 Password**
+##### Base64 Password
 
 <img src="../../../img/maixpy_amigo/bip85-password-len-300.png" class="amigo">
 <img src="../../../img/maixpy_amigo/bip85-password-created-300.png" class="amigo">
@@ -216,6 +216,16 @@ Choose between *12 or 24 words*, then type the desired *index* to export a *chil
 <img src="../../../img/maixpy_m5stickv/bip85-password-created-250.png" class="m5stickv">
 
 To create a *Base64 password*, which can be used in a variety of logins, from email to social media accounts, choose an index and then a length of at least 20 characters. The resulting password will be displayed on the screen and can also be exported to an SD Card or as a QR code.
+
+#### Mnemonic XOR
+<img src="../../../img/maixpy_m5stickv/xor-message-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/xor-message-300.png" align="right" class="amigo">
+
+Mnemonic XOR enables the **combination of two or more mnemonics** by applying an XOR (exclusive OR) operation to their entropy bytes, **resulting in a new mnemonic**. This functionality can be used to split a mnemonic into multiple parts (or "shares") or to merge existing ones.
+
+For detailed instructions on combining, splitting, and recovering mnemonics using XOR, see [Mnemonic XOR](../features/mnemonic-xor.md).
+
+<div style="clear: both"></div>
 
 ### Address
 <img src="../../../img/maixpy_m5stickv/address-menu-250.png" align="right" class="m5stickv">

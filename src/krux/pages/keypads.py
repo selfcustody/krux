@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 
 import math
-import time
 import lcd
 from ..krux_settings import t
 from ..themes import theme
@@ -31,16 +30,15 @@ from ..input import (
     BUTTON_PAGE_PREV,
     SWIPE_RIGHT,
     SWIPE_LEFT,
+    SWIPE_UP,
+    SWIPE_DOWN,
     FAST_FORWARD,
     FAST_BACKWARD,
-    PRESSED,
-    KEY_REPEAT_DELAY_MS,
 )
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
+from ..kboard import kboard
 
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets.
-
-KEYPAD_OFFSET = DEFAULT_PADDING + FONT_HEIGHT * 3
 
 
 class KeypadLayout:
@@ -67,7 +65,7 @@ class KeypadLayout:
         for x in range(1, self.width):
             self.x_keypad_map.append(x * key_h_spacing + MINIMAL_PADDING)
         self.x_keypad_map.append(ctx.display.width())
-        if ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             ctx.input.touch.set_regions(self.x_keypad_map, self.y_keypad_map)
 
 
@@ -183,7 +181,7 @@ class Keypad:
                             key_offset_x, offset_y, key, theme.disabled_color
                         )
                     else:
-                        if self.ctx.input.touch is not None:
+                        if kboard.has_touchscreen:
                             self.ctx.display.outline(
                                 offset_x + 1,
                                 y + 1,
@@ -201,7 +199,7 @@ class Keypad:
                         key_index == self.cur_key_index
                         and self.ctx.input.buttons_active
                     ):
-                        if self.ctx.input.touch is not None:
+                        if kboard.has_touchscreen:
                             self.ctx.display.outline(
                                 offset_x + 1,
                                 y + 1,
@@ -270,37 +268,14 @@ class Keypad:
 
     def navigate(self, btn):
         """Groups navigation methods in one place"""
-        if btn == BUTTON_PAGE:
+        if btn in (BUTTON_PAGE, FAST_FORWARD):
             self._next_key()
-        elif btn == BUTTON_PAGE_PREV:
+        elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD):
             self._previous_key()
-        elif btn == SWIPE_LEFT:
+        elif btn in (SWIPE_UP, SWIPE_LEFT):
             self.next_keyset()
-        elif btn == SWIPE_RIGHT:
+        elif btn in (SWIPE_DOWN, SWIPE_RIGHT):
             self.previous_keyset()
-        elif btn == FAST_FORWARD:
-            while self.ctx.input.page_value() == PRESSED:
-                self._next_key()
-                self.get_valid_index()
-                self._clean_keypad_area()
-                self.draw_keys()
-                time.sleep_ms(KEY_REPEAT_DELAY_MS)
-        elif btn == FAST_BACKWARD:
-            while self.ctx.input.page_prev_value() == PRESSED:
-                self._previous_key()
-                self.get_valid_index()
-                self._clean_keypad_area()
-                self.draw_keys()
-                time.sleep_ms(KEY_REPEAT_DELAY_MS)
-
-    def _clean_keypad_area(self):
-        self.ctx.display.fill_rectangle(
-            0,
-            KEYPAD_OFFSET,
-            self.ctx.display.width(),
-            self.ctx.display.height() - KEYPAD_OFFSET,
-            theme.bg_color,
-        )
 
     def _next_key(self):
         """Increments cursor when page button is pressed"""

@@ -632,11 +632,18 @@ def test_datumtool__info_box(m5stickv, mocker):
     page.contents = "Loaded string contents in DatumTool"
     page.title = "Text"
     page.datum = ""
-    page.about = "about"
+    page.about_prefix = "t:"
+    page.about = page.about_prefix + " about"
     page._info_box()
     assert ctx.input.wait_for_button.call_count == 0
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("Text\nabout", info_box=True, highlight_prefix=":")]
+        [
+            mocker.call(
+                'Text\nt: about\n"Loaded string …',
+                info_box=True,
+                highlight_prefix=page.about_prefix,
+            )
+        ]
     )
 
     # call with bytes
@@ -645,11 +652,18 @@ def test_datumtool__info_box(m5stickv, mocker):
     page.contents = b"\xde\xad\xbe\xef"
     page.title = "Bytes"
     page.datum = ""
-    page.about = "about"
+    page.about_prefix = "t:"
+    page.about = page.about_prefix + " about"
     page._info_box()
     assert ctx.input.wait_for_button.call_count == 0
     ctx.display.draw_hcentered_text.assert_has_calls(
-        [mocker.call("Bytes\nabout", info_box=True, highlight_prefix=":")]
+        [
+            mocker.call(
+                "Bytes\nt: about\n0xdeadbeef",
+                info_box=True,
+                highlight_prefix=page.about_prefix,
+            )
+        ]
     )
 
 
@@ -657,7 +671,6 @@ def test_datumtool__show_contents(m5stickv, mocker):
     """With DatumTool already initialized, test ._show_contents()"""
     from krux.pages.datum_tool import DatumTool
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.settings import THIN_SPACE
 
     # call with text
     ctx = create_ctx(mocker, [BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_ENTER])
@@ -665,11 +678,12 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page.contents = "Loaded string contents in DatumTool"
     page.title = "Text"
     page.datum = ""
-    page.about = "about"
+    page.about_prefix = "t:"
+    page.about = page.about_prefix + " about"
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 3
     ctx.display.draw_hcentered_text.assert_called_with(
-        "Text\nabout p" + THIN_SPACE + "1/1", info_box=True, highlight_prefix=":"
+        "Text\nt: about p.1", info_box=True, highlight_prefix=page.about_prefix
     )
 
     # call with bytes
@@ -678,11 +692,12 @@ def test_datumtool__show_contents(m5stickv, mocker):
     page.contents = b"\xde\xad\xbe\xef"
     page.title = "Bytes"
     page.datum = ""
-    page.about = "about"
+    page.about_prefix = "t:"
+    page.about = page.about_prefix + " about"
     page._show_contents()
     assert ctx.input.wait_for_button.call_count == 1
     ctx.display.draw_hcentered_text.assert_called_with(
-        "Bytes\nabout p" + THIN_SPACE + "1/1", info_box=True, highlight_prefix=":"
+        "Bytes\nt: about p.1", info_box=True, highlight_prefix=page.about_prefix
     )
 
 
@@ -1047,3 +1062,128 @@ def test_datumtool_view_contents(m5stickv, mocker, mock_file_operations):
     page.contents = some_bytes
     page.view_contents()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_datumtool_view_contents_multi_page(m5stickv, mocker):
+    """simply to cover building of `pages` index, moving to `next page`, and `prev page`"""
+    from binascii import hexlify
+    from krux.pages.datum_tool import DatumTool
+    from krux.input import PRESSED, BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    # call with text that will span more than one page
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # go Show Datum
+        BUTTON_PAGE,  # page
+        BUTTON_PAGE_PREV,  # page_prev
+        BUTTON_ENTER,  # escape Show Datum
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx.display.to_lines_endpos = mocker.MagicMock(
+        side_effect=[
+            ([str(x) for x in range(15)] + ["15…"], 22),
+            ([str(x) for x in range(16, 26)], 20),
+            ([str(x) for x in range(15)] + ["15…"], 22),
+        ]
+    )
+    page = DatumTool(ctx)
+    page.contents = "\n".join([str(x) for x in range(26)])
+    page.title = "title"
+    page.view_contents()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # call with bytes that will span more than one page
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # go Show Datum
+        BUTTON_ENTER,  # escape Show Datum
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx.display.to_lines_endpos = mocker.MagicMock(
+        side_effect=[
+            (
+                [hexlify(b"8 bytes.").decode() for _ in range(15)]
+                + ["382062797465732…"],
+                127,
+            ),
+            ([hexlify(b".8 bytes").decode() for _ in range(4)] + ["2e"], 33),
+        ]
+    )
+    page = DatumTool(ctx)
+    page.contents = b"8 bytes." * 20
+    page.title = "title"
+    page.view_contents()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_datumtool_view_contents_convert_failure(mocker, m5stickv):
+    """Contents cannot always be converted (ie: mem-alloc-err); flash_error"""
+    from krux.pages.datum_tool import DatumTool
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    # mock failure in convert_encoding so it returns None
+    mocker.patch(
+        "binascii.unhexlify",
+        new=mocker.MagicMock(
+            side_effect=[
+                b"\xde\xad\xbe\xef",  # first call to unhexlify works, during detect_encoding()
+                Exception(
+                    "mocked failure"
+                ),  # second call fails, during convert_encoding()
+            ]
+        ),
+    )
+    from binascii import unhexlify
+
+    # call with bytes to be hexlified that will fail to convert via mocked unhexlify
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # go Convert
+        BUTTON_ENTER,  # go "to hex"
+        BUTTON_ENTER,  # go "from hex", mocked failure
+        BUTTON_PAGE_PREV,  # to Done Converting
+        BUTTON_ENTER,  # go Done Converting
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = b"\xde\xad\xbe\xef"
+    page.title = "title"
+    page.view_contents()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.display.flash_text.call_count == 1
+    ctx.display.flash_text.assert_called_with(
+        "Failed to convert", 248, 2000, highlight_prefix=""
+    )
+
+
+def test_datumtool_show_contents_button_turbo(mocker, m5stickv):
+    from krux.pages.datum_tool import DatumTool
+    from krux.input import Input, PRESSED, BUTTON_ENTER, KEY_REPEAT_DELAY_MS
+    import time
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER, BUTTON_ENTER])
+    input = Input()
+    input.wait_for_button = ctx.input.wait_for_button
+    ctx.input.wait_for_fastnav_button = input.wait_for_fastnav_button
+    datum = DatumTool(ctx)
+    datum.contents = "testing 123 " * 250
+
+    mocker.patch("time.sleep_ms", new=mocker.MagicMock())
+
+    # fast forward
+    input.page_value = mocker.MagicMock(side_effect=[PRESSED, None])
+
+    datum._show_contents()
+
+    time.sleep_ms.assert_called_with(KEY_REPEAT_DELAY_MS)
+
+    # fast backward
+    input.page_value = mocker.MagicMock(return_value=None)
+    input.page_prev_value = mocker.MagicMock(side_effect=[PRESSED, None])
+
+    datum._show_contents()
+
+    time.sleep_ms.assert_called_with(KEY_REPEAT_DELAY_MS)

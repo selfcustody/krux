@@ -24,15 +24,3 @@ From there, you can run the `hexfill.py` script which takes in a `.hex` file and
 The `hexmerge.py` script takes a list of `.hex` font files and merges them into one combined `.hex` file sorted by unicode codepoint. If multiple files refer to the same character, the earliest non-zero glyph will be used.
 
 Finally, the `hextokff.py` script takes a `.hex` font file and font width and height and converts it into the 1D sparse bitmap array format that Krux needs. Importantly, this script scans the `i18n/translations` folder and builds the set of unique codepoints used across all translations to drastically reduce the number of glyphs stored.
-
-To simplify this process, a `bdftokff.sh` bash script has been added that invokes the aforementioned scripts as needed to compile one `.kff` file given a list of fonts.
-
-### DEPRECATED shell script
-To rebuild the font for all devices, run:
-```
-./bdftokff.sh ter-u14n 8 14 > m5stickv.kff
-./bdftokff.sh ter-u16n 8 16 > bit_dock_yahboom.kff
-./bdftokff.sh ter-u24b 12 24 > amigo.kff
-```
-
-Once you have `.kff` files, for each project that you want to use the updated fonts, edit `../MaixPy/projects/*/compile/overrides/components/micropython/port/src/omv/img/include/font_device.h` (substituting `maixpy_amigo` for `*` if only for an amigo) and replace the array contents in the `unicode` variable with the byte array found within the appropriate `.kff` file, then rebuild the firmware.

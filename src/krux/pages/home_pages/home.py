@@ -34,15 +34,14 @@ from ...qr import FORMAT_NONE, FORMAT_PMOFN
 from ...krux_settings import t, Settings
 from ...format import replace_decimal_separator
 from ...key import TYPE_SINGLESIG
+from ...kboard import kboard
 
 
 class Home(Page):
     """Home is the main menu page of the app"""
 
     def __init__(self, ctx):
-        shtn_reboot_label = (
-            t("Shutdown") if ctx.power_manager.has_battery() else t("Reboot")
-        )
+        shtn_reboot_label = t("Shutdown") if kboard.has_battery else t("Reboot")
         super().__init__(
             ctx,
             Menu(
@@ -164,6 +163,24 @@ class Home(Page):
         bip85.export()
         return MENU_CONTINUE
 
+    def mnemonic_xor(self):
+        """Handler for the 'Mnemonic XOR' menu item"""
+        if not self.prompt(
+            t(
+                "XOR current mnemonic with another one? "
+                "(passphrase and descriptor will be discarded)"
+            ),
+            self.ctx.display.height() // 2,
+        ):
+            return MENU_CONTINUE
+
+        from .mnemonic_xor import MnemonicXOR
+
+        mnemonic_xor = MnemonicXOR(self.ctx)
+        mnemonic_xor.load_key()
+
+        return MENU_CONTINUE
+
     def wallet(self):
         """Handler for the 'wallet' menu item"""
 
@@ -174,6 +191,7 @@ class Home(Page):
                 (t("Passphrase"), self.passphrase),
                 (t("Customize"), self.customize),
                 ("BIP85", self.bip85),
+                (t("Mnemonic XOR"), self.mnemonic_xor),
             ],
         )
         submenu.run_loop()
@@ -226,7 +244,6 @@ class Home(Page):
         return (None, FORMAT_NONE, psbt_filename)
 
     def _sign_menu(self, signer, psbt_filename, outputs):
-
         submenu = Menu(
             self.ctx,
             [

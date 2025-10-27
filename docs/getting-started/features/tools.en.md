@@ -3,16 +3,6 @@ Here are some useful tools that are available as soon as Krux starts! These are 
 <img src="../../../img/maixpy_amigo/tools-options-300.png" class="amigo">
 <img src="../../../img/maixpy_m5stickv/tools-options-250.png" class="m5stickv">
 
-### Check SD Card
-<img src="../../../img/maixpy_m5stickv/check-sd-card-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/check-sd-card-300.png" align="right" class="amigo">
-
-Verify whether your device detects and reads the SD card, and browse its contents. Files can be deleted individually. If there are more files than can fit on a single screen, swipe up :material-gesture-swipe-up: or down :material-gesture-swipe-down: to navigate between the screens - if your device has a touchscreen.
-
-The SD card is optional, but can be used for firmware upgrades and for storing settings, encrypted mnemonics, XPUBs, QR codes, and CNC/files. It is also useful for saving and loading PSBTs, wallet output descriptors, and messages.
-
-<div style="clear: both"></div>
-
 ### Datum Tool
 <img src="../../../img/maixpy_m5stickv/tools-datum-tool-load-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/tools-datum-tool-load-300.png" align="right" class="amigo">
@@ -24,7 +14,7 @@ Datum Tool is an advanced, educational feature that treats all input as a simple
 <img src="../../../img/maixpy_m5stickv/tools-datum-tool-loaded-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/tools-datum-tool-loaded-300.png" align="right" class="amigo">
 
-Once datum has been loaded, it offers meta information about the contents and ability to View Datum -- whether text or binary. It also offers a menu to Convert Datum, Export to QR, and Export to SD.
+Once datum has been loaded, it offers meta information about the contents and ability to View Datum - whether text or binary. It also offers a menu to Convert Datum, Export to QR, and Export to SD.
 
 <div style="clear: both"></div>
 
@@ -39,7 +29,17 @@ The Convert Datum menu allows access to common encodings for conversion between 
 <img src="../../../img/maixpy_m5stickv/device-tests-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/device-tests-options-300.png" align="right" class="amigo">
 
-Simple tests to verify correct functioning of your Krux device.
+Run these quick checks to ensure your Krux device is functioning properly.
+
+<div style="clear: both"></div>
+
+#### Check SD Card
+<img src="../../../img/maixpy_m5stickv/check-sd-card-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/check-sd-card-300.png" align="right" class="amigo">
+
+Verify whether your device detects and reads the SD card, and browse its contents. Files can be deleted individually. If there are more files than can fit on a single screen, swipe up :material-gesture-swipe-up: or down :material-gesture-swipe-down: to navigate between the screens - if your device has a touchscreen.
+
+The SD card is optional, but can be used for firmware upgrades and for storing settings, encrypted mnemonics, XPUBs, QR codes, and CNC/files. It is also useful for saving and loading PSBTs, wallet output descriptors, and messages.
 
 <div style="clear: both"></div>
 
@@ -56,6 +56,13 @@ Quickly print a test QR code to check and optimize your printer setup.
 <img src="../../../img/maixpy_amigo/device-tests-test-suite-300.png" align="right" class="amigo">
 
 A suite of automated tests to verify important features on your device.
+
+<div style="clear: both"></div>
+
+#### Touchscreen (Maix Amigo, Yahboom, WonderMV and TZT only)
+<img src="../../../img/maixpy_amigo/touch-test-300.png" align="right" class="amigo">
+
+Confirm that touch input is accurately detected across the entire display surface.
 
 <div style="clear: both"></div>
 

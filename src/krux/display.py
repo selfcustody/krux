@@ -30,7 +30,7 @@ from .kboard import kboard
 DEFAULT_PADDING = 10
 MINIMAL_PADDING = 5
 FONT_WIDTH, FONT_HEIGHT = board.config["krux"]["display"]["font"]
-FONT_WIDTH_WIDE, FONT_HEIGHT_WIDE = board.config["krux"]["display"]["font_wide"]
+FONT_WIDTH_WIDE, _ = board.config["krux"]["display"]["font_wide"]
 PORTRAIT, LANDSCAPE = [2, 3] if kboard.is_cube else [1, 2]
 QR_DARK_COLOR, QR_LIGHT_COLOR = [16904, 61307] if kboard.is_m5stickv else [0, 6342]
 TOTAL_LINES = board.config["lcd"]["width"] // FONT_HEIGHT
@@ -138,9 +138,14 @@ class Display:
                 ],
             )
             self.set_pmu_backlight(Settings().hardware.display.brightness)
-        elif kboard.is_yahboom or kboard.is_wonder_mv:
+        elif (
+            kboard.is_yahboom
+            or kboard.is_wonder_mv
+            or kboard.is_tzt
+            or kboard.is_wonder_k
+        ):
             lcd.init(
-                invert=True,
+                invert=not kboard.is_wonder_k,
                 rst=board.config["lcd"]["rst"],
                 dcx=board.config["lcd"]["dcx"],
                 ss=board.config["lcd"]["ss"],
@@ -253,9 +258,9 @@ class Display:
         return self.usable_width() if not kboard.is_m5stickv else self.width()
 
     def to_lines(self, text, max_lines=TOTAL_LINES):
-        """Maintains original API while using ._to_lines_endpos()"""
+        """Maintains original API while using .to_lines_endpos()"""
 
-        return self._to_lines_endpos(text, max_lines)[0]
+        return self.to_lines_endpos(text, max_lines)[0]
 
     def ascii_chars_per_line(self):
         """Returns the qtd of non wide chars that fit on one line (columns)"""
@@ -265,7 +270,7 @@ class Display:
         """Returns the qtd of wide chars that fit on one line (columns)"""
         return self._usable_pixels_in_line() // FONT_WIDTH_WIDE
 
-    def _to_lines_endpos(self, text, max_lines=TOTAL_LINES):
+    def to_lines_endpos(self, text, max_lines=TOTAL_LINES):
         """Takes a string of text and returns tuple(lines, end) to display on
         the screen and know how far into text it read; next page starts there.
         """
@@ -341,7 +346,7 @@ class Display:
                     FONT_WIDTH_WIDE if ord(c) >= ASIAN_MIN_CODEPOINT else FONT_WIDTH
                 )
                 char_count += 1
-            if line_pixels + FONT_WIDTH >= usable_pixels:
+            if line_pixels + FONT_WIDTH > usable_pixels:
                 lines[-1] = lines[-1][: char_count - 1] + ELLIPSIS
                 end -= 1
             else:

@@ -67,47 +67,6 @@ def test_delete_mnemonic_from_flash(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_sd_check_no_sd(m5stickv, mocker):
-    from krux.pages.tools import Tools
-    from krux.input import BUTTON_PAGE
-    from unittest.mock import ANY
-
-    mocker.patch(
-        "uos.statvfs",
-        new=mocker.MagicMock(return_value=[0, 4096, 4096, 0, 1024]),
-    )
-    ctx = create_ctx(mocker, None)
-    tool = Tools(ctx)
-    tool.flash_text = mocker.MagicMock()
-    tool.sd_check()
-    tool.flash_text.assert_has_calls([mocker.call("SD card not detected.", ANY)])
-
-
-def test_sd_check(m5stickv, mocker, mock_file_operations):
-    from krux.pages.tools import Tools
-    from krux.input import BUTTON_PAGE
-
-    BTN_SEQUENCE = [
-        BUTTON_PAGE,  # Leave
-    ]
-    mocker.patch(
-        "uos.statvfs",
-        new=mocker.MagicMock(return_value=[0, 4096, 4096, 0, 1024]),
-    )
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
-    tool = Tools(ctx)
-    tool.sd_check()
-    ctx.display.draw_hcentered_text.assert_has_calls(
-        [
-            mocker.call(
-                "SD card\n\nSize: 16 MB\n\nUsed: 12 MB\n\nFree: 4 MB",
-                highlight_prefix=":",
-            )
-        ]
-    )
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-
-
 def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
     from krux.pages.tools import Tools
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV

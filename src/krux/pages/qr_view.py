@@ -513,7 +513,7 @@ class SeedQRView(Page):
             label = self.title
         else:
             label = ""
-        if transcript_tools and self.ctx.input.touch is not None:
+        if transcript_tools and kboard.has_touchscreen:
             label += "\n" + t("Swipe to change mode")
         mode = 0
         while True:
@@ -554,7 +554,7 @@ class SeedQRView(Page):
                         self.lr_index += 1
                     else:
                         if not (button == BUTTON_TOUCH and mode == TRANSCRIBE_MODE):
-                            button = SWIPE_DOWN  # leave
+                            break  # leave
                 if mode == LINE_MODE:
                     self.lr_index %= self.qr_size
                 elif mode in (REGION_MODE, ZOOMED_R_MODE):

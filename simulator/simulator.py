@@ -111,6 +111,7 @@ from kruxsim.mocks import qrcode
 from kruxsim.mocks import sensor
 from kruxsim.mocks import shannon
 from kruxsim.mocks import ft6x36
+from kruxsim.mocks import gt911
 from kruxsim.mocks import buttons
 from kruxsim.mocks import rotary
 from kruxsim.sequence import SequenceExecutor
@@ -164,9 +165,11 @@ DOCK_SIZE = (302, 516)
 YAHBOOM_SIZE = (312, 440)
 CUBE_SIZE = (400, 424)
 WONDER_MV_SIZE = (304, 440)
+TZT_SIZE = (314, 442)
 
 # Handle screenshots scale and alpha bg
 # When exporting the mask from GIMP uncheck "Save info about transparent pixels color"
+# Use --no-screenshot-scale until fix mask size and devices.screenshot_rect()
 device_screenshot_size = AMIGO_SIZE
 mask_img = pg.image.load(
     os.path.join("assets", "maixpy_amigo_mask.png")
@@ -196,6 +199,17 @@ elif (args.device == devices.WONDER_MV):
     mask_img = pg.image.load(
         os.path.join("assets", "maixpy_wonder_mv_mask.png")
         ).convert_alpha()
+elif (args.device == devices.TZT):
+    device_screenshot_size = TZT_SIZE
+    mask_img = pg.image.load(
+        os.path.join("assets", "maixpy_tzt_mask.png")
+        ).convert_alpha()
+# TODO: WONDER_K IMG
+# elif (args.device == devices.WONDER_K):
+#     device_screenshot_size = WONDER_K_SIZE
+#     mask_img = pg.image.load(
+#         os.path.join("assets", "maixpy_wonder_k_mask.png")
+#         ).convert_alpha()
     
 # Handle screenshots filename suffix when scaled
 from krux.krux_settings import Settings
@@ -284,7 +298,10 @@ try:
                 if event.key == pg.K_s or event.key == pg.K_p:
                     screenshot("%s-%s.png" % (args.device, time.strftime('%d%m%y_%H_%M_%S')))
             if event.type == pg.MOUSEBUTTONDOWN:
-                ft6x36.touch_control.trigger_event()
+                if args.device == devices.WONDER_K:
+                    gt911.touch_control.trigger_event()
+                else:
+                    ft6x36.touch_control.trigger_event()
             if event.type == pg.ACTIVEEVENT and event.gain:
                 pg.display.flip()
 

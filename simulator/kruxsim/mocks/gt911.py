@@ -19,33 +19,21 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-set -e
+import sys
+from unittest import mock
+from kruxsim.mocks.touchscreen_common import TCOMMON, register_sequence_executor
 
-fonts=$1
-width=$2
-height=$3
 
-# Convert from bdf to hex for all fonts
-for font in $(echo $fonts | sed "s/,/ /g")
-do
-    poetry run python bdftohex.py $font.bdf > $font.hex
-    poetry run python hexfill.py $font.hex $width $height > tmp.hex && cat tmp.hex > $font.hex && rm tmp.hex
-done
+class GT911(TCOMMON):
+    def activate(self, irq_pin, res_pin):
+        pass
 
-# Merge all hex files into one
-hexes=()
-for font in $(echo $fonts | sed "s/,/ /g")
-do
-    hexes+=( $font.hex )
-done
-poetry run python hexmerge.py ${hexes[@]} > merged.hex
 
-# Convert merged hex to krux format
-poetry run python hextokff.py merged.hex $width $height
+touch_control = GT911()
 
-# Remove generated files
-rm merged.hex
-for font in $(echo $fonts | sed "s/,/ /g")
-do
-    rm $font.hex
-done
+
+if "krux.touchscreens.gt911" not in sys.modules:
+    sys.modules["krux.touchscreens.gt911"] = mock.MagicMock(
+        touch_control=touch_control,
+        register_sequence_executor=register_sequence_executor,
+    )

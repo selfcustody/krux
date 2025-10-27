@@ -12,3 +12,18 @@ press BUTTON_A
 press BUTTON_A
 
 screenshot print-test-qr.png
+
+###########################
+# Amigo only touchscreen
+###########################
+
+# Cancel print Test QR
+press_amigo_only BUTTON_A
+x2 press_amigo_only BUTTON_B
+press_amigo_only BUTTON_A
+
+# Navigate to touchscreen
+x2 press_amigo_only BUTTON_B
+press_amigo_only BUTTON_A
+
+screenshot touch-test.png

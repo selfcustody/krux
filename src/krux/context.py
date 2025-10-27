@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import gc
-from .display import display
+from .display import display, Display
 from .input import Input
 from .camera import Camera
 from .light import Light
@@ -33,9 +33,9 @@ class Context:
     """
 
     def __init__(self):
-        self.display = display
-        self.input = Input()
-        self.camera = Camera()
+        self.display = display  # type: Display
+        self.input = Input()  # type: Input
+        self.camera = Camera()  # type: Camera
         self.light = Light() if kboard.has_light else None
         self.power_manager = None
         self.wallet = None

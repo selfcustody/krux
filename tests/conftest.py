@@ -8,6 +8,8 @@ from .shared_mocks import (
     board_m5stickv,
     board_wonder_mv,
     board_yahboom,
+    board_bit,
+    board_wonder_k,
     encode_to_string,
     encode,
     statvfs,
@@ -65,7 +67,9 @@ def mp_modules(mocker, monkeypatch):
     )
     monkeypatch.setitem(sys.modules, "shannon", mocker.MagicMock())
     monkeypatch.setattr(time, "sleep_ms", mocker.MagicMock(), raising=False)
-    monkeypatch.setattr(time, "ticks_ms", mocker.MagicMock(), raising=False)
+    monkeypatch.setattr(
+        time, "ticks_ms", mocker.MagicMock(return_value=1), raising=False
+    )
     monkeypatch.setattr(sys, "print_exception", mocker.MagicMock(), raising=False)
     monkeypatch.setitem(
         sys.modules,
@@ -153,6 +157,35 @@ def wonder_mv(monkeypatch, mp_modules):
     reset_krux_modules()
 
 
-@pytest.fixture(params=["amigo", "m5stickv", "dock", "cube", "yahboom", "wonder_mv"])
+@pytest.fixture
+def bit(monkeypatch, mp_modules):
+    import sys
+
+    monkeypatch.setitem(sys.modules, "board", board_bit())
+    monkeypatch.setitem(sys.modules, "pmu", None)
+    reset_krux_modules()
+
+
+@pytest.fixture
+def wonder_k(monkeypatch, mp_modules):
+    import sys
+
+    monkeypatch.setitem(sys.modules, "board", board_wonder_k())
+    monkeypatch.setitem(sys.modules, "pmu", None)
+    reset_krux_modules()
+
+
+@pytest.fixture(
+    params=[
+        "amigo",
+        "m5stickv",
+        "dock",
+        "cube",
+        "yahboom",
+        "wonder_mv",
+        "bit",
+        "wonder_k",
+    ]
+)
 def multiple_devices(request):
     return request.getfixturevalue(request.param)

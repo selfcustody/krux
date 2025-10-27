@@ -83,7 +83,7 @@ class SettingsPage(Page):
 
     def _draw_settings_pad(self):
         """Draws buttons to change settings with touch"""
-        if self.ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
             offset_y = self.ctx.display.height() * 2 // 3
             self.ctx.input.touch.add_y_delimiter(offset_y)
@@ -315,7 +315,7 @@ class SettingsPage(Page):
         """Handler for the 'Back' on touch settings screen"""
 
         # Update touch detection threshold
-        if self.ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             self.ctx.input.touch.touch_driver.threshold(
                 Settings().hardware.touch.threshold
             )
@@ -406,7 +406,7 @@ class SettingsPage(Page):
             self.ctx.display.to_landscape()
             self.ctx.display.to_portrait()
         elif setting.attr == "brightness":
-            if kboard.is_cube or kboard.is_wonder_mv:
+            if kboard.is_cube or kboard.is_wonder_mv or kboard.is_wonder_k:
                 self.ctx.display.gpio_backlight_ctrl(new_category)
             elif kboard.is_m5stickv:
                 self.ctx.display.set_pmu_backlight(new_category)

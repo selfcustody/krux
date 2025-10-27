@@ -1,0 +1,13 @@
+include _load-12-word-mnemonic.txt
+
+# Navigate to Wallet
+x2 press BUTTON_B
+press BUTTON_A
+
+screenshot wallet_home_options.png
+
+# Navigate to Mnemonic XOR
+x4 press BUTTON_B
+press BUTTON_A
+
+screenshot xor-message.png

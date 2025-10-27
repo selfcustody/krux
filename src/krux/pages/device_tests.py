@@ -24,23 +24,77 @@ from . import Page, Menu, MENU_CONTINUE
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
 from ..krux_settings import t
 from ..wdt import wdt
+from ..kboard import kboard
 
 
 class DeviceTests(Page):
     """On-Device test-suite"""
 
     def __init__(self, ctx):
+        menu_items = [
+            (t("Check SD Card"), self.sd_check),
+            (t("Print Test QR"), self.print_test),
+            (t("Test Suite"), self.test_suite),
+        ]
+        if kboard.has_touchscreen:
+            menu_items += [(t("Touchscreen"), self.test_touch)]
         super().__init__(
             ctx,
             Menu(
                 ctx,
-                [
-                    (t("Print Test QR"), self.print_test),
-                    (t("Test Suite"), self.test_suite),
-                ],
+                menu_items,
             ),
         )
         self.results = []
+
+    def sd_check(self):
+        """Handler for the 'SD Check' menu item"""
+        import uos
+        from ..format import generate_thousands_separator
+        from ..sd_card import SDHandler
+        from .file_manager import SD_ROOT_PATH
+        from ..display import BOTTOM_PROMPT_LINE
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Checking for SD card…"))
+        try:
+            # Check for SD hot-plug
+            with SDHandler():
+                sd_status = uos.statvfs(SD_ROOT_PATH)
+                sd_total_MB = int(sd_status[2] * sd_status[1] / 1024 / 1024)
+                sd_free_MB = int(sd_status[4] * sd_status[1] / 1024 / 1024)
+
+                self.ctx.display.clear()
+                self.ctx.display.draw_hcentered_text(
+                    t("SD card")
+                    + "\n\n"
+                    + t("Size:")
+                    + " "
+                    + generate_thousands_separator(sd_total_MB)
+                    + " MB"
+                    + "\n\n"
+                    + t("Used:")
+                    + " "
+                    + generate_thousands_separator(sd_total_MB - sd_free_MB)
+                    + " MB"
+                    + "\n\n"
+                    + t("Free:")
+                    + " "
+                    + generate_thousands_separator(sd_free_MB)
+                    + " MB",
+                    highlight_prefix=":",
+                )
+                if self.prompt(t("Explore files?"), BOTTOM_PROMPT_LINE):
+                    from .file_manager import FileManager
+
+                    file_manager = FileManager(self.ctx)
+                    file_manager.select_file(
+                        select_file_handler=file_manager.show_file_details
+                    )
+        except OSError:
+            self.flash_error(t("SD card not detected."))
+
+        return MENU_CONTINUE
 
     def print_test(self):
         """Handler for the 'Print Test QR' menu item"""
@@ -153,6 +207,32 @@ class DeviceTests(Page):
             return MENU_CONTINUE
         return self.run_one_test(self.results[idx][0])
 
+    def test_touch(self):
+        """Check touch detection across the entire screen"""
+        from ..buttons import PRESSED
+        from ..themes import theme
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Touchscreen"))
+        while True:
+            wdt.feed()
+            if self.ctx.input.touch_value() == PRESSED:
+                x, y = self.ctx.input.touch.release_point
+                self.ctx.display.fill_rectangle(x, y, 10, 10, theme.fg_color)
+            elif (
+                self.ctx.input.enter_value() == PRESSED
+                or self.ctx.input.page_value() == PRESSED
+                or self.ctx.input.page_prev_value() == PRESSED
+            ):
+                break
+
+        # Prevent release capture when exiting
+        self.ctx.input.wait_for_release()
+        # Prevent the next touch from being mistakenly detected as a swipe
+        self.ctx.input.touch.gesture = None
+
+        return MENU_CONTINUE
+
     def run_one_test(self, test):
         """run a single test w/ interactive=True, display success/fail and results"""
 
@@ -164,7 +244,7 @@ class DeviceTests(Page):
             success = bool(result)
         except Exception as err:
             result = err
-        idx = [i for i, (t, r) in enumerate(self.results) if t == test][0]
+        idx = [i for i, (t, _) in enumerate(self.results) if t == test][0]
         self.results[idx] = (test, success)
 
         self.ctx.display.clear()
@@ -389,7 +469,7 @@ class DeviceTests(Page):
         if not interactive:
             return "Cannot test non-interactively"
 
-        if self.ctx.input.touch is None:
+        if not kboard.has_touchscreen:
             return "Touch not available"
 
         results = []

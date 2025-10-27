@@ -9,6 +9,7 @@ ITERATIONS = 1000  # this should be at least 10k, but remains 1K for legacy test
 TEST_WORDS = (
     "crush inherit small egg include title slogan mom remain blouse boost bonus"
 )
+TEST_WORDS_ENTROPY = b"5\x0e{1\xa3g'\xc5\xf2\xfcv\xb5\x83\x04f\x8c"
 
 ECB_WORDS = "brass creek fuel snack era success impulse dirt caution purity lottery lizard boil festival neither case swift smooth range mail gravity sample never ivory"
 CBC_WORDS = "dog guitar hotel random owner gadget salute riot patrol work advice panic erode leader pass cross section laundry elder asset soul scale immune scatter"
@@ -44,7 +45,7 @@ ECB_ENCRYPTED_QR = (
 OLDECB_ENCRYPTED_QR = b"\x07test ID\x00\x00\x00\n*\xe1\x9d\xc5\x82\xc1\x19\x9b\xb7&\xf2?\x03\xc7o\xf6\xaf\x9e\x81#F,Qs\xe6\x1d\xeb\xd1Y\xa0/\xcf"
 CBC_ENCRYPTED_QR = b'\x07test ID\x0a\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5C\xfa\x96\x90'
 OLDCBC_ENCRYPTED_QR = b'\x07test ID\x01\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\x05\x9e\xd7\x8e\x01\x03`u_\xd7\xab/N\xbc@\x19\xcc\n"\xc5\x8a^3xt\xa4\xb3\x0bK\xca\x8a@\x82\xdaz\xd3'
-CTR_ENCRYPTED_QR = b"\x07test ID\x0f\x00\x00\nd\xc2\xd8\xb7U\xe8\x02~\xda}\xcdO\x967\xbf\xc5%\xa7\x18\x11\xf4\xec\xfd=\xbaY\xbe|\x97\xe2;\xabb\xfa.L\xbc$]'\xc9\xcc#\xba\xcb\x84\xe4J"
+CTR_ENCRYPTED_QR = b"\x07test ID\x0f\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\xf4\x91 \xc7\xa2m\x12\xde{\x0f\xf0&\x8c\x96\x91\xe6\x89\xb0$\x94\xf0\xafR\xc2\x1c)[W\xb54~\x9a\x86\xee*@"
 GCM_ENCRYPTED_QR = b"\x07test ID\x14\x00\x00\nOR\xa1\x93l>2q \x9e\x9dd\xbf\xb7vo]]\x8aO\x90\x8e\x86\xe784L\x02]\x8f\xedT"
 
 ECB_QR_PUBLIC_DATA = (
@@ -393,95 +394,139 @@ def test_delete_from_sd(m5stickv, mocker, mock_file_operations):
 
 
 def test_create_ecb_encrypted_qr_code(m5stickv):
-    from krux.encryption import EncryptedQRCode
-    from krux.krux_settings import Settings
+    from krux.encryption import kef
 
-    Settings().encryption.version = "AES-ECB"
-    encrypted_qr = EncryptedQRCode()
-    qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS)
+    version, iterations = 5, 100000
+    encryptor = kef.Cipher(TEST_KEY, TEST_MNEMONIC_ID, iterations)
+    cpl = encryptor.encrypt(TEST_WORDS_ENTROPY, version)
+    qr_data = kef.wrap(TEST_MNEMONIC_ID, version, iterations, cpl)
     print("qr_data: {}".format(qr_data))
     assert qr_data == ECB_ENCRYPTED_QR
 
 
 def test_create_cbc_encrypted_qr_code(m5stickv):
-    from krux.encryption import EncryptedQRCode
-    from krux.krux_settings import Settings
+    from krux.encryption import kef
 
-    Settings().encryption.version = "AES-CBC"
-    encrypted_qr = EncryptedQRCode()
-    qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, I_VECTOR)
+    version, iterations = 10, 100000
+    encryptor = kef.Cipher(TEST_KEY, TEST_MNEMONIC_ID, iterations)
+    cpl = encryptor.encrypt(TEST_WORDS_ENTROPY, version, I_VECTOR)
+    qr_data = kef.wrap(TEST_MNEMONIC_ID, version, iterations, cpl)
     print("qr_data: {}".format(qr_data))
     assert qr_data == CBC_ENCRYPTED_QR
 
 
-def test_create_gcm_encrypted_qr_code(m5stickv):
-    from krux.encryption import EncryptedQRCode
-    from krux.krux_settings import Settings
+def test_create_ctr_encrypted_qr_code(m5stickv):
+    from krux.encryption import kef
 
-    Settings().encryption.version = "AES-GCM"
-    encrypted_qr = EncryptedQRCode()
-    qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, I_VECTOR[:12])
+    version, iterations = 15, 100000
+    encryptor = kef.Cipher(TEST_KEY, TEST_MNEMONIC_ID, iterations)
+    cpl = encryptor.encrypt(CTR_ENTROPY, version, I_VECTOR[:12])
+    qr_data = kef.wrap(TEST_MNEMONIC_ID, version, iterations, cpl)
+    print("qr_data: {}".format(qr_data))
+    assert qr_data == CTR_ENCRYPTED_QR
+
+
+def test_create_gcm_encrypted_qr_code(m5stickv):
+    from krux.encryption import kef
+
+    version, iterations = 20, 100000
+    encryptor = kef.Cipher(TEST_KEY, TEST_MNEMONIC_ID, iterations)
+    cpl = encryptor.encrypt(TEST_WORDS_ENTROPY, version, I_VECTOR[:12])
+    qr_data = kef.wrap(TEST_MNEMONIC_ID, version, iterations, cpl)
     print("qr_data: {}".format(qr_data))
     assert qr_data == GCM_ENCRYPTED_QR
 
 
 def test_decode_ecb_encrypted_qr_code(m5stickv):
-    from krux.encryption import EncryptedQRCode
+    from krux.encryption import kef
     from embit import bip39
 
-    encrypted_qr = EncryptedQRCode()
-    public_data = encrypted_qr.public_data(ECB_ENCRYPTED_QR)
-    print("public_data: {}".format(public_data))
-    assert public_data == ECB_QR_PUBLIC_DATA
-    word_bytes = encrypted_qr.decrypt(TEST_KEY)
-    words = bip39.mnemonic_from_bytes(word_bytes)
+    public_fmt = "Encrypted QR Code:\nID: {}\nVersion: {}\nPBKDF2 iter.: {}"
+
+    id_, version, iterations, cpl = kef.unwrap(ECB_ENCRYPTED_QR)
+    assert ECB_QR_PUBLIC_DATA == public_fmt.format(
+        id_.decode(), kef.VERSIONS[version]["name"], iterations
+    )
+    decryptor = kef.Cipher(TEST_KEY, id_, iterations)
+    plaintext = decryptor.decrypt(cpl, version)
+    words = bip39.mnemonic_from_bytes(plaintext)
     assert words == TEST_WORDS
 
     # legacy still decrypts
-    public_data = encrypted_qr.public_data(OLDECB_ENCRYPTED_QR)
-    assert public_data == OLDECB_QR_PUBLIC_DATA
-    word_bytes = encrypted_qr.decrypt(TEST_KEY)
-    words = bip39.mnemonic_from_bytes(word_bytes)
+    id_, version, iterations, cpl = kef.unwrap(OLDECB_ENCRYPTED_QR)
+    assert OLDECB_QR_PUBLIC_DATA == public_fmt.format(
+        id_.decode(), kef.VERSIONS[version]["name"], iterations
+    )
+    decryptor = kef.Cipher(TEST_KEY, id_, iterations)
+    plaintext = decryptor.decrypt(cpl, version)
+    words = bip39.mnemonic_from_bytes(plaintext)
     assert words == TEST_WORDS
 
 
 def test_decode_cbc_encrypted_qr_code(m5stickv):
-    from krux.encryption import EncryptedQRCode
+    from krux.encryption import kef
     from embit import bip39
 
-    encrypted_qr = EncryptedQRCode()
-    public_data = encrypted_qr.public_data(CBC_ENCRYPTED_QR)
-    print("public_data: {}".format(public_data))
-    assert public_data == CBC_QR_PUBLIC_DATA
-    word_bytes = encrypted_qr.decrypt(TEST_KEY)
-    words = bip39.mnemonic_from_bytes(word_bytes)
+    public_fmt = "Encrypted QR Code:\nID: {}\nVersion: {}\nPBKDF2 iter.: {}"
+
+    id_, version, iterations, cpl = kef.unwrap(CBC_ENCRYPTED_QR)
+    assert CBC_QR_PUBLIC_DATA == public_fmt.format(
+        id_.decode(), kef.VERSIONS[version]["name"], iterations
+    )
+    decryptor = kef.Cipher(TEST_KEY, id_, iterations)
+    plaintext = decryptor.decrypt(cpl, version)
+    words = bip39.mnemonic_from_bytes(plaintext)
     assert words == TEST_WORDS
 
     # legacy still decrypts
-    public_data = encrypted_qr.public_data(OLDCBC_ENCRYPTED_QR)
-    assert public_data == OLDCBC_QR_PUBLIC_DATA
-    word_bytes = encrypted_qr.decrypt(TEST_KEY)
-    words = bip39.mnemonic_from_bytes(word_bytes)
+    id_, version, iterations, cpl = kef.unwrap(OLDCBC_ENCRYPTED_QR)
+    assert OLDCBC_QR_PUBLIC_DATA == public_fmt.format(
+        id_.decode(), kef.VERSIONS[version]["name"], iterations
+    )
+    decryptor = kef.Cipher(TEST_KEY, id_, iterations)
+    plaintext = decryptor.decrypt(cpl, version)
+    words = bip39.mnemonic_from_bytes(plaintext)
     assert words == TEST_WORDS
 
 
-def test_decode_gcm_encrypted_qr_code(m5stickv):
-    from krux.encryption import EncryptedQRCode
+def test_decode_ctr_encrypted_qr_code(m5stickv):
+    from krux.encryption import kef
     from embit import bip39
 
-    encrypted_qr = EncryptedQRCode()
-    public_data = encrypted_qr.public_data(GCM_ENCRYPTED_QR)
-    print("public_data: {}".format(public_data))
-    assert public_data == GCM_QR_PUBLIC_DATA
-    word_bytes = encrypted_qr.decrypt(TEST_KEY)
-    words = bip39.mnemonic_from_bytes(word_bytes)
+    public_fmt = "Encrypted QR Code:\nID: {}\nVersion: {}\nPBKDF2 iter.: {}"
+
+    id_, version, iterations, cpl = kef.unwrap(CTR_ENCRYPTED_QR)
+    assert CTR_QR_PUBLIC_DATA == public_fmt.format(
+        id_.decode(), kef.VERSIONS[version]["name"], iterations
+    )
+    decryptor = kef.Cipher(TEST_KEY, id_, iterations)
+    plaintext = decryptor.decrypt(cpl, version)
+    words = bip39.mnemonic_from_bytes(plaintext)
+    assert words == CTR_WORDS
+
+
+def test_decode_gcm_encrypted_qr_code(m5stickv):
+    from krux.encryption import kef
+    from embit import bip39
+
+    public_fmt = "Encrypted QR Code:\nID: {}\nVersion: {}\nPBKDF2 iter.: {}"
+
+    id_, version, iterations, cpl = kef.unwrap(GCM_ENCRYPTED_QR)
+    assert GCM_QR_PUBLIC_DATA == public_fmt.format(
+        id_.decode(), kef.VERSIONS[version]["name"], iterations
+    )
+    decryptor = kef.Cipher(TEST_KEY, id_, iterations)
+    plaintext = decryptor.decrypt(cpl, version)
+    words = bip39.mnemonic_from_bytes(plaintext)
     assert words == TEST_WORDS
 
 
 def test_check_encrypted_qr_code_lengths(m5stickv):
-    from krux.encryption import EncryptedQRCode, kef
+    from krux.encryption import kef
     from krux.krux_settings import Settings, EncryptionSettings
     from krux.baseconv import base_encode
+
+    ITERATIONS = 100000
 
     # make encrypted_mnemonics using encryption settings mode preference
     qr_code_datum = {}
@@ -501,8 +546,10 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
 
         Settings().encryption.version = mode_name
         iv = I_VECTOR[: kef.MODE_IVS.get(kef.MODE_NUMBERS[mode_name], 0)]
-        encrypted_qr = EncryptedQRCode()
-        qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS, iv)
+        encryptor = kef.Cipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
+        version = kef.suggest_versions(TEST_WORDS_ENTROPY, mode_name)[0]
+        ciphertext = encryptor.encrypt(TEST_WORDS_ENTROPY, version, iv)
+        qr_data = kef.wrap(TEST_MNEMONIC_ID, version, ITERATIONS, ciphertext)
         if mode_name == "AES-ECB":
             assert len(qr_data) == 31
             assert len(base_encode(qr_data, 43)) == 45
@@ -543,22 +590,25 @@ def test_check_encrypted_qr_code_lengths(m5stickv):
 
 
 def test_customize_pbkdf2_iterations_create_and_decode(m5stickv):
-    from krux.encryption import EncryptedQRCode
-    from krux.krux_settings import Settings
+    from krux.encryption import kef
     from embit import bip39
 
+    ITERATIONS = 99999
+    public_fmt = "Encrypted QR Code:\nID: {}\nVersion: {}\nPBKDF2 iter.: {}"
+
     print("case Encode: customize_pbkdf2_iterations")
-    Settings().encryption.version = "AES-ECB"
-    Settings().encryption.pbkdf2_iterations = 99999
-    encrypted_qr = EncryptedQRCode()
-    qr_data = encrypted_qr.create(TEST_KEY, TEST_MNEMONIC_ID, TEST_WORDS)
+    encryptor = kef.Cipher(TEST_KEY, TEST_MNEMONIC_ID, ITERATIONS)
+    ciphertext = encryptor.encrypt(TEST_WORDS_ENTROPY, 5)
+    qr_data = kef.wrap(TEST_MNEMONIC_ID, 5, ITERATIONS, ciphertext)
     print("qr_data: {}".format(qr_data))
 
     print("case Decode: customize_pbkdf2_iterations")
-    public_data = encrypted_qr.public_data(qr_data)
-    assert public_data == (
+    id_, version, iterations, cpl = kef.unwrap(qr_data)
+    assert (
         "Encrypted QR Code:\nID: test ID\nVersion: AES-ECB\nPBKDF2 iter.: 99999"
+        == public_fmt.format(id_.decode(), kef.VERSIONS[version]["name"], iterations)
     )
-    word_bytes = encrypted_qr.decrypt(TEST_KEY)
-    words = bip39.mnemonic_from_bytes(word_bytes)
+    decryptor = kef.Cipher(TEST_KEY, id_, iterations)
+    plaintext = decryptor.decrypt(cpl, version)
+    words = bip39.mnemonic_from_bytes(plaintext)
     assert words == TEST_WORDS

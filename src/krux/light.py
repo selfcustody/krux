@@ -33,12 +33,6 @@ class IOCircuit:
         self.circuit = GPIO(maixpy_gpio, GPIO.OUT)
         self.turn_off()
 
-    def is_on(self):
-        """Returns a boolean indicating if the circuit is currently on"""
-        if kboard.is_wonder_mv:
-            return self.circuit.value() == 1
-        return self.circuit.value() == 0
-
     def turn_on(self):
         """Turns on the circuit"""
         if kboard.is_wonder_mv:
@@ -52,13 +46,6 @@ class IOCircuit:
             self.circuit.value(0)
         else:
             self.circuit.value(1)
-
-    def toggle(self):
-        """Toggles the circuit on or off"""
-        if self.is_on():
-            self.turn_off()
-        else:
-            self.turn_on()
 
 
 class Light(IOCircuit):

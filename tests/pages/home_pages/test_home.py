@@ -31,6 +31,28 @@ def tdata(mocker):
     SIGNING_MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
     ACTION_MNEMONIC = "action action action action action action action action action action action action"
 
+    TEST_XOR_24_WORD_MNEMONIC_1 = "romance wink lottery autumn shop bring dawn tongue range crater truth ability miss spice fitness easy legal release recall obey exchange recycle dragon room"
+    TEST_XOR_24_WORD_MNEMONIC_2 = "lion misery divide hurry latin fluid camp advance illegal lab pyramid unaware eager fringe sick camera series noodle toy crowd jeans select depth lounge"
+    TEST_XOR_24_WORD_MNEMONIC_INTERMEDIARY_RESULT = "defy island room gas rookie easily blame travel school excess egg unable since milk mother grace rocket case fence photo decorate idle junior cross"
+    TEST_XOR_24_WORD_MNEMONIC_3 = "vault nominee cradle silk own frown throw leg cactus recall talent worry gadget surface shy planet purpose coffee drip few seven term squeeze educate"
+    TEST_XOR_24_WORD_MNEMONIC_RESULT = "silent toe meat possible chair blossom wait occur this worth option bag nurse find fish scene bench asthma bike wage world quit primary indoor"
+
+    TEST_XOR_12_WORD_MNEMONIC_1 = (
+        "romance wink lottery autumn shop bring dawn tongue range crater truth ability"
+    )
+    TEST_XOR_12_WORD_MNEMONIC_2 = (
+        "boat unfair shell violin tree robust open ride visual forest vintage approve"
+    )
+    TEST_XOR_12_WORD_MNEMONIC_INTERMEDIARY_RESULT = (
+        "person bitter door winner candy polar proud fringe early have bulb apple"
+    )
+    TEST_XOR_12_WORD_MNEMONIC_3 = (
+        "lion misery divide hurry latin fluid camp advance illegal lab pyramid unhappy"
+    )
+    TEST_XOR_12_WORD_MNEMONIC_RESULT = (
+        "cannon opinion leader nephew found yard metal galaxy crouch between real trade"
+    )
+
     SINGLESIG_12_WORD_KEY = Key(TEST_12_WORD_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"])
     SINGLESIG_24_WORD_KEY = Key(TEST_24_WORD_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"])
     MULTISIG_12_WORD_KEY = Key(
@@ -135,6 +157,16 @@ def tdata(mocker):
         [
             "TEST_12_WORD_MNEMONIC",
             "TEST_24_WORD_MNEMONIC",
+            "TEST_XOR_12_WORD_MNEMONIC_1",
+            "TEST_XOR_12_WORD_MNEMONIC_2",
+            "TEST_XOR_12_WORD_MNEMONIC_INTERMEDIARY_RESULT",
+            "TEST_XOR_12_WORD_MNEMONIC_3",
+            "TEST_XOR_12_WORD_MNEMONIC_RESULT",
+            "TEST_XOR_24_WORD_MNEMONIC_1",
+            "TEST_XOR_24_WORD_MNEMONIC_2",
+            "TEST_XOR_24_WORD_MNEMONIC_INTERMEDIARY_RESULT",
+            "TEST_XOR_24_WORD_MNEMONIC_3",
+            "TEST_XOR_24_WORD_MNEMONIC_RESULT",
             "SIGNING_MNEMONIC",
             "SINGLESIG_12_WORD_KEY",
             "SINGLESIG_24_WORD_KEY",
@@ -180,6 +212,16 @@ def tdata(mocker):
     )(
         TEST_12_WORD_MNEMONIC,
         TEST_24_WORD_MNEMONIC,
+        TEST_XOR_12_WORD_MNEMONIC_1,
+        TEST_XOR_12_WORD_MNEMONIC_2,
+        TEST_XOR_12_WORD_MNEMONIC_INTERMEDIARY_RESULT,
+        TEST_XOR_12_WORD_MNEMONIC_3,
+        TEST_XOR_12_WORD_MNEMONIC_RESULT,
+        TEST_XOR_24_WORD_MNEMONIC_1,
+        TEST_XOR_24_WORD_MNEMONIC_2,
+        TEST_XOR_24_WORD_MNEMONIC_INTERMEDIARY_RESULT,
+        TEST_XOR_24_WORD_MNEMONIC_3,
+        TEST_XOR_24_WORD_MNEMONIC_RESULT,
         SIGNING_MNEMONIC,
         SINGLESIG_12_WORD_KEY,
         SINGLESIG_24_WORD_KEY,
@@ -466,7 +508,7 @@ def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
         BUTTON_ENTER,  # Load words
         BUTTON_PAGE_PREV,  # Move to "< Back"
         BUTTON_ENTER,  # Leave BIP85
-        BUTTON_PAGE,  # Move to "Back"
+        *([BUTTON_PAGE] * 2),  # Move to "Back"
         BUTTON_ENTER,  # Exit
     ]
 
@@ -479,6 +521,65 @@ def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert ctx.wallet.key.fingerprint_hex_str() == INDEX_1_B85_FINGERPRINT
+
+
+def test_load_xor_not_derive(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from embit.networks import NETWORKS
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BUTTON_SEQUENCE = [
+        *([BUTTON_PAGE] * 4),
+        BUTTON_ENTER,
+        BUTTON_PAGE,
+        BUTTON_ENTER,
+        BUTTON_PAGE,
+        BUTTON_ENTER,
+    ]
+
+    key = Key(tdata.TEST_XOR_24_WORD_MNEMONIC_1, TYPE_SINGLESIG, NETWORKS["test"])
+    wallet = Wallet(key)
+    ctx = create_ctx(mocker, BUTTON_SEQUENCE, wallet)
+    home = Home(ctx)
+    home.wallet()
+
+    assert ctx.wallet.key.fingerprint.hex() == "e51c20a3"
+    assert ctx.input.wait_for_button.call_count == len(BUTTON_SEQUENCE)
+
+
+def test_load_xor_from_wallet_menu(mocker, amigo, tdata):
+    from embit.networks import NETWORKS
+    from krux.pages.home_pages.home import Home
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        *([BUTTON_PAGE] * 4),  # Go to Mnemonic XOR
+        BUTTON_ENTER,  # Enter Mnemonic XOR
+        BUTTON_ENTER,  # Accept Derive
+        BUTTON_PAGE_PREV,  # Go to back
+        BUTTON_ENTER,  # Press Back
+        BUTTON_PAGE,  # Move to Back
+        BUTTON_ENTER,  # Press Back
+    ]
+
+    key = Key(
+        tdata.TEST_XOR_24_WORD_MNEMONIC_1,
+        TYPE_SINGLESIG,
+        NETWORKS["test"],
+    )
+    wallet = Wallet(key)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+    home = Home(ctx)
+    home.wallet()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.wallet.key.fingerprint_hex_str() == "e51c20a3"
 
 
 def test_load_address_view(mocker, amigo, tdata):

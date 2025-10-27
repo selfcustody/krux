@@ -52,7 +52,7 @@ edit_uri: edit/main/docs
 docs_dir: docs
 site_dir: public
 extra:
-  latest_krux: krux-v25.09.0
+  latest_krux: krux-v25.10.0
   latest_installer: v0.0.20
   latest_installer_rpm: krux-installer-0.0.20-1.x86_64.rpm
   latest_installer_deb: krux-installer_0.0.20_amd64.deb
@@ -114,6 +114,7 @@ nav:
       - Tiny Seed and other metal plates: getting-started/features/tinyseed.en.md
       - Empirical Entropy Measurement: getting-started/features/entropy.en.md
       - Tamper Detection: getting-started/features/tamper-detection.en.md
+      - Mnemonic XOR: getting-started/features/mnemonic-xor.en.md
     - Interface:
       - Navigation overview: getting-started/navigation.en.md
       - Settings: getting-started/settings.en.md

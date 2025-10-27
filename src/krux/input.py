@@ -97,16 +97,14 @@ class Input:
         # This flag, used in selection outlines, is set if buttons are being used
         self.buttons_active = True
         self.touch = None
-        if (
-            "touch" in board.config["krux"]["display"]
-            and board.config["krux"]["display"]["touch"]
-        ):
+        if kboard.has_touchscreen:
             from .touch import Touch
 
             self.touch = Touch(
                 board.config["lcd"]["width"],
                 board.config["lcd"]["height"],
                 board.config["krux"]["pins"]["TOUCH_IRQ"],
+                board.config["krux"]["pins"].get("TOUCH_RESET", None),
             )
             self.buttons_active = False
         self.button_integrity_check()
@@ -124,6 +122,7 @@ class Input:
             self.page_prev = None
         if self.touch and self.touch_value() == PRESSED:
             self.touch = None
+            kboard.has_touchscreen = None
 
     def enter_value(self):
         """Intermediary method to pull button ENTER state"""
@@ -148,7 +147,7 @@ class Input:
 
     def touch_value(self):
         """Intermediary method to pull touch state, if touch available"""
-        if self.touch is not None:
+        if kboard.has_touchscreen:
             return self.touch.value()
         return RELEASED
 
@@ -160,47 +159,43 @@ class Input:
 
     def page_event(self):
         """Intermediary method to pull button PAGE event"""
-        event_val = False
         if self.page is not None:
-            event_val = self.page.event()
-        if kboard.is_yahboom:
-            event_val = event_val or self.page_prev_event(check_yahboom=True)
-        return event_val
+            return self.page.event()
+        return False
 
-    def page_prev_event(self, check_yahboom=False):
+    def page_prev_event(self):
         """Intermediary method to pull button PAGE_PREV event"""
-        if not kboard.is_yahboom or check_yahboom:
-            if self.page_prev is not None:
-                return self.page_prev.event()
+        if self.page_prev is not None:
+            return self.page_prev.event()
         return False
 
     def touch_event(self, validate_position=True):
         """Intermediary method to pull button TOUCH event"""
-        if self.touch is not None:
+        if kboard.has_touchscreen:
             return self.touch.event(validate_position)
         return False
 
     def swipe_right_value(self):
         """Intermediary method to pull touch gesture, if touch available"""
-        if self.touch is not None:
+        if kboard.has_touchscreen:
             return self.touch.swipe_right_value()
         return RELEASED
 
     def swipe_left_value(self):
         """Intermediary method to pull touch gesture, if touch available"""
-        if self.touch is not None:
+        if kboard.has_touchscreen:
             return self.touch.swipe_left_value()
         return RELEASED
 
     def swipe_up_value(self):
         """Intermediary method to pull touch gesture, if touch available"""
-        if self.touch is not None:
+        if kboard.has_touchscreen:
             return self.touch.swipe_up_value()
         return RELEASED
 
     def swipe_down_value(self):
         """Intermediary method to pull touch gesture, if touch available"""
-        if self.touch is not None:
+        if kboard.has_touchscreen:
             return self.touch.swipe_down_value()
         return RELEASED
 
@@ -237,6 +232,8 @@ class Input:
             if self.page_event():
                 return BUTTON_PAGE
             if self.page_prev_event():
+                if kboard.is_yahboom:
+                    return BUTTON_PAGE
                 return BUTTON_PAGE_PREV
             if self.touch_event():
                 return BUTTON_TOUCH
@@ -294,7 +291,10 @@ class Input:
             if btn == BUTTON_ENTER:
                 return self.enter_value() == PRESSED
             if btn == BUTTON_PAGE:
-                return self.page_value() == PRESSED
+                val = self.page_value() == PRESSED
+                if kboard.is_yahboom and self.page_prev_value() == PRESSED:
+                    return True
+                return val
             # if btn == BUTTON_PAGE_PREV:
             return self.page_prev_value() == PRESSED
 
@@ -338,6 +338,18 @@ class Input:
         btn = self._detect_press_type(btn)
         self.debounce_time = time.ticks_ms()
         return btn
+
+    def wait_for_fastnav_button(self, block=True, wait_duration=QR_ANIM_PERIOD):
+        """Wait for a button press, with support for fast navigation."""
+        if self.page_value() == PRESSED:
+            time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            return FAST_FORWARD
+        if self.page_prev_value() == PRESSED:
+            time.sleep_ms(KEY_REPEAT_DELAY_MS)
+            if kboard.is_yahboom:
+                return FAST_FORWARD
+            return FAST_BACKWARD
+        return self.wait_for_button(block, wait_duration)
 
     def flush_events(self):
         """Clean eventual event flags unintentionally collected"""

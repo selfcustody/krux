@@ -32,11 +32,8 @@ from ..input import (
     BUTTON_TOUCH,
     FAST_FORWARD,
     FAST_BACKWARD,
-    PRESSED,
-    KEY_REPEAT_DELAY_MS,
 )
 from ..kboard import kboard
-import time
 
 STACKBIT_GO_INDEX = 38
 STACKBIT_ESC_INDEX = 35
@@ -320,7 +317,7 @@ class Stackbit(Page):
             theme.go_color,
         )
         # print border around buttons only on touch devices
-        if self.ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             self.ctx.display.draw_line(
                 x_offset,
                 y_offset,
@@ -367,7 +364,7 @@ class Stackbit(Page):
 
     def _map_keys_array(self):
         """Maps an array of regions for keys to be placed in"""
-        if self.ctx.input.touch is not None:
+        if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
             x_region = self.x_offset + self.x_pad
             for _ in range(8):
@@ -426,14 +423,7 @@ class Stackbit(Page):
                 self._draw_index(index)
             self.preview_word(digits)
             self._draw_punched(digits, y_offset)
-            if self.ctx.input.page_value() == PRESSED:
-                btn = FAST_FORWARD
-                time.sleep_ms(KEY_REPEAT_DELAY_MS)
-            elif self.ctx.input.page_prev_value() == PRESSED:
-                btn = FAST_BACKWARD
-                time.sleep_ms(KEY_REPEAT_DELAY_MS)
-            else:
-                btn = self.ctx.input.wait_for_button()
+            btn = self.ctx.input.wait_for_fastnav_button()
             if btn == BUTTON_TOUCH:
                 btn = BUTTON_ENTER
                 index = self.ctx.input.touch.current_index()

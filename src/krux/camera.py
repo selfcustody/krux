@@ -30,7 +30,7 @@ OV2640_ID = 0x2642  # Lenses, vertical flip - Bit
 OV5642_ID = 0x5642  # Lenses, horizontal flip - Bit
 OV7740_ID = 0x7742  # No lenses, no Flip - M5sitckV, Amigo
 GC0328_ID = 0x9D  # Dock
-GC2145_ID = 0x45  # Yahboom
+GC2145_ID = 0x45  # Yahboom, WonderK
 
 QR_SCAN_MODE = 0
 ANTI_GLARE_MODE = 1
@@ -53,6 +53,11 @@ LUM_TH = {
     (OV2640_ID, ENTROPY_MODE): (0x68, 0x78),
     (OV2640_ID, BINARY_GRID_MODE): (0x44, 0x48),
     (OV2640_ID, ZOOMED_MODE): (0x35, 0x50),
+    (OV5642_ID, QR_SCAN_MODE): (0x60, 0x70),
+    (OV5642_ID, ANTI_GLARE_MODE): (0x20, 0x28),
+    (OV5642_ID, ENTROPY_MODE): (0x68, 0x78),
+    (OV5642_ID, BINARY_GRID_MODE): (0x44, 0x48),
+    (OV5642_ID, ZOOMED_MODE): (0x35, 0x50),
     (OV7740_ID, QR_SCAN_MODE): (0x60, 0x70),
     (OV7740_ID, ANTI_GLARE_MODE): (0x20, 0x28),
     (OV7740_ID, ENTROPY_MODE): (0x68, 0x78),
@@ -83,20 +88,28 @@ class Camera:
         except Exception as e:
             print("Camera not found:", e)
 
+    def _rotate_yaboom_or_wondermv(self):
+        return (
+            kboard.is_yahboom or kboard.is_wonder_mv
+        ) and Settings().is_flipped_orientation()
+
+    def _rotate_wonderk(self):
+        return kboard.is_wonder_k and not Settings().is_flipped_orientation()
+
     def initialize_sensor(self, mode=QR_SCAN_MODE):
         """Initializes the camera"""
         sensor.reset(freq=18200000)
         self.cam_id = sensor.get_id()
-        if kboard.is_cube or (
-            kboard.can_flip_orientation
-            and hasattr(Settings().hardware, "display")
-            and getattr(Settings().hardware.display, "flipped_orientation", False)
+        if (
+            kboard.is_cube
+            or self._rotate_yaboom_or_wondermv()
+            or self._rotate_wonderk()
         ):
             # Rotate camera 180 degrees on Cube
             sensor.set_hmirror(1)
             sensor.set_vflip(1)
         self.mode = mode
-        if mode == BINARY_GRID_MODE and self.cam_id != GC2145_ID:
+        if mode == BINARY_GRID_MODE:
             # Binary grid mode uses grayscale except for GC2145
             sensor.set_pixformat(sensor.GRAYSCALE)
         else:
@@ -170,6 +183,7 @@ class Camera:
             GC0328_ID: self._config_gc0328_lum,
             OV2640_ID: self._config_ovxx40_lum,
             OV7740_ID: self._config_ovxx40_lum,  # Same as OV2640
+            OV5642_ID: self._config_ovxx40_lum,  # Same as OV2640
             GC2145_ID: self._config_gc2145_lum,
         }
 
@@ -209,11 +223,7 @@ class Camera:
 
     def _config_gc2145_lum(self):
         key = (self.cam_id, self.mode)
-        thresholds = LUM_TH.get(key, (0, 0))  # Default to (0, 0) if key not found
-        low, high = thresholds
-
-        if low < 0x10 or high > 0xF0:
-            return
+        low, high = LUM_TH.get(key, (0x20, 0xF2))  # Default to (0, 0) if key not found
 
         # Set register bank 1
         sensor.__write_reg(0xFE, 0x01)

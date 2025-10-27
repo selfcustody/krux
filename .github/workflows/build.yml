@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        device: [maixpy_m5stickv, maixpy_amigo, maixpy_bit, maixpy_dock, maixpy_yahboom, maixpy_cube, maixpy_wonder_mv]
+        device: [maixpy_m5stickv, maixpy_amigo, maixpy_dock, maixpy_yahboom, maixpy_cube, maixpy_wonder_mv, maixpy_tzt]
     runs-on: ubuntu-latest
     services:
       registry:
@@ -88,30 +88,6 @@ jobs:
         with:
           path: ${{ steps.extract-amigo.outputs.destination }}
           name: build-amigo
-
-      - name: Build for Bit
-        if: matrix.device == 'maixpy_bit'
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          build-args: DEVICE=maixpy_bit
-          push: true
-          tags: localhost:5000/selfcustody/krux-builder-bit:latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-      - name: Extract firmware for Bit
-        id: extract-bit
-        if: matrix.device == 'maixpy_bit'
-        uses: shrink/actions-docker-extract@v3
-        with:
-          image: localhost:5000/selfcustody/krux-builder-bit:latest
-          path: /src/firmware/Kboot/build/.
-      - name: Upload firmware for Bit
-        if: matrix.device == 'maixpy_bit'
-        uses: actions/upload-artifact@v4
-        with:
-          path: ${{ steps.extract-bit.outputs.destination }}
-          name: build-bit
 
       - name: Build for Dock
         if: matrix.device == 'maixpy_dock'
@@ -208,7 +184,31 @@ jobs:
         with:
           path: ${{ steps.extract-wonder-mv.outputs.destination }}
           name: build-wonder-mv
-          
+
+      - name: Build for TZT
+        if: matrix.device == 'maixpy_tzt'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          build-args: DEVICE=maixpy_tzt
+          push: true
+          tags: localhost:5000/selfcustody/krux-builder-tzt:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+      - name: Extract firmware for TZT
+        id: extract-tzt
+        if: matrix.device == 'maixpy_tzt'
+        uses: shrink/actions-docker-extract@v3
+        with:
+          image: localhost:5000/selfcustody/krux-builder-tzt:latest
+          path: /src/firmware/Kboot/build/.
+      - name: Upload firmware for TZT
+        if: matrix.device == 'maixpy_tzt'
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ steps.extract-tzt.outputs.destination }}
+          name: build-tzt
+
       - name: Move cache
         run: |
           rm -rf /tmp/.buildx-cache

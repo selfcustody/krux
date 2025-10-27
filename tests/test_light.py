@@ -27,19 +27,6 @@ def test_init(mocker, m5stickv):
     light.turn_off.assert_called()
 
 
-def test_is_on(mocker, m5stickv):
-    mock_modules(mocker)
-    from krux.light import Light
-
-    light = Light()
-    mocker.spy(light.circuit, "value")
-
-    on = light.is_on()
-
-    assert isinstance(on, bool)
-    light.circuit.value.assert_called_with()
-
-
 def test_turn_on(mocker, m5stickv):
     mock_modules(mocker)
     from krux.light import Light
@@ -62,48 +49,3 @@ def test_turn_off(mocker, m5stickv):
     light.turn_off()
 
     light.circuit.value.assert_called_with(1)
-
-
-def test_toggle_from_off(mocker, m5stickv):
-    mock_modules(mocker)
-    from krux.light import Light
-
-    light = Light()
-    mocker.patch.object(light, "is_on", new=lambda: False)
-    mocker.spy(light, "turn_on")
-
-    light.toggle()
-
-    light.turn_on.assert_called()
-
-
-def test_toggle_from_on(mocker, m5stickv):
-    mock_modules(mocker)
-    from krux.light import Light
-
-    light = Light()
-    mocker.patch.object(light, "is_on", new=lambda: True)
-    mocker.spy(light, "turn_off")
-
-    light.toggle()
-
-    light.turn_off.assert_called()
-
-
-def test_toggle_on_wonder_mv(mocker, wonder_mv):
-    mock_modules(mocker)
-    from krux.light import Light
-
-    light = Light()
-    mocker.spy(light, "turn_off")
-    mocker.spy(light, "turn_on")
-
-    # Toggle from on
-    mocker.patch.object(light.circuit, "value", return_value=1)
-    light.toggle()
-    light.turn_off.assert_called()
-
-    # Toggle again, now from off
-    mocker.patch.object(light.circuit, "value", return_value=0)
-    light.toggle()
-    light.turn_on.assert_called()
