@@ -15,7 +15,7 @@ These wallet coordinators are currently **compatible with Krux**:
 - [Nunchuk](https://nunchuk.io/) (mobile)
 - [BlueWallet](https://bluewallet.io/) (mobile)
 - [Bitcoin Keeper](https://bitcoinkeeper.app/) (mobile)
-- [Bull Bitcoin](https://www.bullbitcoin.com/) (mobile)
+- [BULL Wallet](https://wallet.bullbitcoin.com) (mobile)
 
 **Warning!** Krux is INCOMPATIBLE with:
 
