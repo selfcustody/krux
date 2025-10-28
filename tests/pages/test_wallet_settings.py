@@ -199,6 +199,43 @@ def test_passphrase_non_ascii_validation(m5stickv, mocker, tdata):
     assert result is None
 
 
+def test_passphrase_non_decodeable_validation(m5stickv, mocker, tdata):
+    from krux.pages.wallet_settings import PassphraseEditor
+    from krux.pages import Menu, MENU_EXIT
+
+    # Test non-ASCII passphrase rejection
+    BINARY_PASSPHRASE = b"\xde\xad\xbe\xef"  # Contains 0xdeadbeef, not decodeable
+    ctx = create_ctx(mocker, None, tdata.SINGLESIG_12_WORD_KEY)
+    passphrase_editor = PassphraseEditor(ctx)
+
+    # Mock the Menu's run_loop to return non-ASCII passphrase first, then exit
+    menu_returns = [
+        (0, BINARY_PASSPHRASE),  # First call returns binary passphrase
+        (0, MENU_EXIT),  # Second call exits
+    ]
+    mocker.patch.object(
+        Menu,
+        "run_loop",
+        side_effect=menu_returns,
+    )
+
+    # Mock flash_error to track if it was called
+    flash_error_spy = mocker.spy(passphrase_editor, "flash_error")
+
+    result = passphrase_editor.load_passphrase_menu(
+        tdata.SINGLESIG_12_WORD_KEY.mnemonic
+    )
+
+    # Verify that flash_error was called with error message
+    flash_error_spy.assert_called()
+    # Get the actual call arguments
+    call_args = flash_error_spy.call_args[0][0]
+    assert call_args == "Failed to load"
+
+    # Verify that the method returned None (exited without accepting passphrase)
+    assert result is None
+
+
 def test_change_policy_types(m5stickv, mocker, tdata):
     from krux.pages.wallet_settings import WalletSettings
     from krux.wallet import Wallet
