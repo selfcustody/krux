@@ -9,7 +9,7 @@ Krux works with:
 - [Nunchuk](https://nunchuk.io/) (mobile)
 - [BlueWallet](https://bluewallet.io/) (mobile)
 - [Bitcoin Keeper](https://bitcoinkeeper.app/) (mobile)
-- [Bull Bitcoin](https://www.bullbitcoin.com/) (mobile)
+- [BULL Wallet](https://wallet.bullbitcoin.com) (mobile)
 
 ## Step 1: Install the Coordinator Wallet
 
