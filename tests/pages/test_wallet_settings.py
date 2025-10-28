@@ -127,6 +127,7 @@ def test_qr_passphrase_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
         "Failed to decrypt", 248, 2000, highlight_prefix=""
     )
 
+
 def test_qr_passphrase_fails_on_encrypted_non_ascii_bytes(mocker, m5stickv, tdata):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.pages.wallet_settings import PassphraseEditor
