@@ -297,7 +297,14 @@ class Addresses(Page):
             return MENU_CONTINUE
 
         try:
-            data = decrypt_kef(self.ctx, data).decode()
+            data = decrypt_kef(self.ctx, data)
+
+            # Cpython raises UnicodeDecodeError, MaixPy raises TypeError
+            try:
+                data = data.decode()
+            except:
+                self.flash_error(t("Failed to load"))
+                return MENU_CONTINUE
         except KeyError:
             self.flash_error(t("Failed to decrypt"))
             return MENU_CONTINUE
