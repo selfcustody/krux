@@ -91,7 +91,7 @@ class PassphraseEditor(Page):
                     self.flash_error(t("Failed to load"))
                     continue
             # Check if passphrase string is within ascii range
-            if any(byte > 127 for byte in passphrase.encode()):
+            if any(byte > 126 for byte in passphrase.encode()):
                 self.flash_error(t("Failed to load"))
                 continue
 
