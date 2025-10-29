@@ -1,3 +1,9 @@
+# Changelog 25.10.1 - October 2025
+
+### Bugfix: Krux encrypted mnemonic as a passphrase is invalid, but no error was raised
+Instead of displaying an error, the base43 encoded KEF Envelope was displayed and used as the passphrase - deriving the wrong wallet; since version 25.09.0
+Solution: better error handling when decrypted data is invalid for the current context; error: "Failed to load".  Stricter validation to ensure passphrases are ASCII-only strings.
+
 # Changelog 25.10.0 - October 2025
 
 ### New Device Support: TZT
