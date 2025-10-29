@@ -192,7 +192,7 @@ def test_qr_passphrase_fails_on_encrypted_non_ascii_bytes(mocker, m5stickv, tdat
     assert passphrase_editor._load_qr_passphrase() == MENU_CONTINUE
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
     ctx.display.flash_text.assert_called_with(
-        "Failed to decode passphrase", 248, 2000, highlight_prefix=""
+        "Failed to load", 248, 2000, highlight_prefix=""
     )
 
 
