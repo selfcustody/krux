@@ -2018,8 +2018,8 @@ Failed to clone ...
 <h4 id="reproducibility">Reproducibility<a class="headerlink" href="#reproducibility" title="Permanent link">&para;</a></h4>
 <p>If you build from the <code>main</code> branch of the source code, you should be able to reproduce the build process used to generate the latest release binaries and obtain exactly the same copies of the <code>firmware.bin</code> and <code>kboot.kfpkg</code> files, with matching hash checksums (to check for an older version, use the <code>tag</code> instead).</p>
 <p>To check, use the compiled files for the target device. Each command should output the same hash for the two provided files:
-<div class="highlight"><pre><span></span><code>sha256sum<span class="w"> </span>build/firmware.bin<span class="w"> </span>krux-v25.10.0/maixpy_DEVICE/firmware.bin
-sha256sum<span class="w"> </span>build/kboot.kfpkg<span class="w"> </span>krux-v25.10.0/maixpy_DEVICE/kboot.kfpkg
+<div class="highlight"><pre><span></span><code>sha256sum<span class="w"> </span>build/firmware.bin<span class="w"> </span>krux-v25.10.1/maixpy_DEVICE/firmware.bin
+sha256sum<span class="w"> </span>build/kboot.kfpkg<span class="w"> </span>krux-v25.10.1/maixpy_DEVICE/kboot.kfpkg
 </code></pre></div></p>
 <p>If you want to extract and verify the <code>firmware.bin</code>file contained in <code>kboot.kfpkg</code>, use the following:</p>
 <div class="highlight"><pre><span></span><code>unzip<span class="w"> </span>kboot.kfpkg<span class="w"> </span>-d<span class="w"> </span>./kboot/
