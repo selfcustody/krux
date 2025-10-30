@@ -161,6 +161,7 @@ translation_array = [
     "Portefeuille invalide\u2009:",
     "Inverser",
     "Couleurs inversées",
+    "Mode inversé",
     "KEF chiffré",
     "Clé",
     "La clé n'a pas été fournie",
