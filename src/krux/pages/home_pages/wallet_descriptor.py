@@ -162,7 +162,14 @@ class WalletDescriptor(Page):
         from ..encryption_ui import decrypt_kef
 
         try:
-            wallet_data = decrypt_kef(self.ctx, wallet_data).decode()
+            wallet_data = decrypt_kef(self.ctx, wallet_data)
+
+            # Cpython raises UnicodeDecodeError, MaixPy raises TypeError
+            try:
+                wallet_data = wallet_data.decode()
+            except:
+                self.flash_error(t("Failed to load"))
+                return MENU_CONTINUE
         except KeyError:
             self.flash_error(t("Failed to decrypt"))
             return MENU_CONTINUE
