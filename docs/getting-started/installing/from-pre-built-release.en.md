@@ -41,7 +41,7 @@ Connect the device to your computer via USB (for Maix Amigo, make sure you’re 
 ./ktool -B goE -b 1500000 maixpy_DEVICE/kboot.kfpkg
 ```
 
-For `dock`, `wonder_mv` or `tzt` use the `-B dan` parameter:
+For `dock`, `wonder_mv`, `tzt` or `embed_fire` use the `-B dan` parameter:
 ```bash
 ./ktool -B dan -b 1500000 maixpy_DEVICE/kboot.kfpkg
 ```

@@ -117,7 +117,10 @@ class Camera:
         if self.cam_id == OV5642_ID:
             sensor.set_hmirror(1)
         if self.cam_id == OV2640_ID:
-            sensor.set_vflip(1)
+            if kboard.is_embed_fire:
+                sensor.set_hmirror(0)
+            else:
+                sensor.set_vflip(1)
         if kboard.is_bit:
             # CIF mode will use central pixels and discard darker periphery
             sensor.set_framesize(sensor.CIF)
