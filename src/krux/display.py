@@ -67,7 +67,7 @@ human_friendly_splash = """
 """
 # Reformat as a list of strings w/fixed length padding to preserve the shape
 # when it's rendered as horizontally centered individual lines.
-SPLASH = [f"{row:9}" for row in human_friendly_splash.split("\n") if row != '']
+SPLASH = ["{:9}".format(row) for row in human_friendly_splash.split("\n") if row != '']
 
 
 class Display:
