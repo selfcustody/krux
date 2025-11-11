@@ -52,7 +52,6 @@ M5STICKV_WIDTH = 135
 
 ASIAN_MIN_CODEPOINT = 12288
 
-SPLASH_CHAR = "█"
 human_friendly_splash = """
   ██
   ██
