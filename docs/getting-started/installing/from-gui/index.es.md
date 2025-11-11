@@ -1,6 +1,6 @@
 Puedes instalar Krux (ambos la versión oficial o beta) en tu dispotivo con chip K210 utilizando nuestra aplicación oficial para computador, **Krux-Installer**:
 
-[<img src="../../../img/badge_github.png" width="186">](https://github.com/selfcustody/krux-installer/releases)
+[<img src="/krux/img/badge_github.png" width="186">](https://github.com/selfcustody/krux-installer/releases)
 
 Instrucciones de instalación:
 

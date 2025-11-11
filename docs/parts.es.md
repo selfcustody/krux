@@ -1,4 +1,4 @@
-<img src="../../img/krux-devices.jpg" style="width: 60%; min-width: 300px;">
+<img src="/krux/img/krux-devices.jpg" style="width: 60%; min-width: 300px;">
 
 ### Dispositivos Compatibles (tabla comparativa)
 
@@ -39,7 +39,7 @@ proceso de 28nm, RISC-V de doble núcleo de 64bit @400MHz, 8 MB de SRAM de alta 
 </i>
 
 ### M5StickV
-<img src="../img/maixpy_m5stickv/logo-250.png" align="right" style="width: 15%;">
+<img src="/krux/img/maixpy_m5stickv/logo-250.png" align="right" style="width: 15%;">
 
 Krux fue adaptado a este dispositivo por primera vez en Marzo de 2022. Cuenta con la pantalla de menor tamaño y resolución, también incluye batería integrada. Consulta la [advertencia de reconocimiento de USB-C <i style="font-size: 85%">:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info)</i> anterior para información importante. A continuación, se muestra una lista de distribuidores donde se puede encontrar:
 
@@ -57,7 +57,7 @@ Krux fue adaptado a este dispositivo por primera vez en Marzo de 2022. Cuenta co
 <div style="clear: both"></div>
 
 ### Maix Amigo
-<img src="../img/maixpy_amigo/logo-300.png" align="right" style="width: 16%;">
+<img src="/krux/img/maixpy_amigo/logo-300.png" align="right" style="width: 16%;">
 
 Krux a sido compatible con este dispositivo desde su segunda versión en Agosto de 2022. Ofrece la pantalla con mayor tamaño y resolución, pantalla táctil y batería integrada. A continuación, se muestra una lista de distribuidores donde está disponible:
 
@@ -71,7 +71,7 @@ Krux a sido compatible con este dispositivo desde su segunda versión en Agosto 
 <div style="clear: both"></div>
 
 ### Yahboom k210 module
-<img src="../img/maixpy_yahboom/logo-312.png" align="right" style="width: 16%;">
+<img src="/krux/img/maixpy_yahboom/logo-312.png" align="right" style="width: 16%;">
 
 Con soporte de Krux desde marzo de 2024, este dispositivo cuenta con pantalla táctil e incluye una tarjeta compatible de 32 GB, un lector de tarjetas USB, un conector PH2.0 macho-a-macho de 4 pines y un adaptador PH2.0 hembra para conectarlo a una [impresora térmica](#optional-ttl-serial-thermal-printer). A continuación, se muestra una lista de distribuidores donde está disponible:
 
@@ -83,7 +83,7 @@ Con soporte de Krux desde marzo de 2024, este dispositivo cuenta con pantalla t�
 <div style="clear: both"></div>
 
 ### Maix Cube
-<img src="../img/maixpy_cube/logo-400.png" align="right" style="width: 18%;">
+<img src="/krux/img/maixpy_cube/logo-400.png" align="right" style="width: 18%;">
 
 Con soporte de Krux desde julio de 2024, este dispositivo cuenta con la segunda pantalla y resolución más pequeñas, un botón de tres direcciones y batería integrada. A continuación, se muestra una lista de distribuidores donde está disponible:
 
@@ -97,7 +97,7 @@ Con soporte de Krux desde julio de 2024, este dispositivo cuenta con la segunda 
 <div style="clear: both"></div>
 
 ### WonderMV
-<img src="../img/maixpy_wonder_mv/logo-304.png" align="right" style="width: 16%;">
+<img src="/krux/img/maixpy_wonder_mv/logo-304.png" align="right" style="width: 16%;">
 
 Con soporte de Krux desde septiembre de 2024, este dispositivo de pantalla táctil cuenta con una placa trasera metálica e incluye una tarjeta compatible de 32 GB, un lector de tarjetas USB y dos cables macho a macho con conector 5264 de 4 pines para conectarlo a una [impresora térmica](#optional-ttl-serial-thermal-printer). Consulte la [advertencia de reconocimiento de USB-C <i style="font-size: 85%">:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info)</i> y la [adverencia de tarjeta SD <i style="font-size: 85%">:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info)</i> para obtener información importante. Los siguientes distribuidores ofrecen este dispositivo:
 
@@ -111,7 +111,7 @@ Con soporte de Krux desde septiembre de 2024, este dispositivo de pantalla táct
 
 
 ### TZT
-<img src="../img/maixpy_tzt/logo-314.png" align="right" style="width: 16%;">
+<img src="/krux/img/maixpy_tzt/logo-314.png" align="right" style="width: 16%;">
 
 Con soporte de Krux desde octubre de 2025, este dispositivo de pantalla táctil viene con una carcasa de aluminio fresado de primera calidad y cuenta con cinco botones. Disponible a través de los siguientes distribuidores:
 
@@ -122,7 +122,7 @@ Con soporte de Krux desde octubre de 2025, este dispositivo de pantalla táctil 
 
 
 ### Maix Dock
-<img src="../img/maixpy_dock/logo-302.png" align="right" style="width: 16%;">
+<img src="/krux/img/maixpy_dock/logo-302.png" align="right" style="width: 16%;">
 
 Para los aficionados al bricolaje, Krux ofrece soporte para el Maix Dock desde agosto de 2022. Estos kits incluyen una placa y una pantalla, pero requieren que adquieras un codificador rotatorio o botones por separado y que montes el dispositivo tú mismo. Algunas placas Maix Dock también incluyen wifi.
 
