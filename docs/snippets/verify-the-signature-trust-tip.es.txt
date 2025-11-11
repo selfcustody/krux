@@ -1,0 +1,3 @@
+> 🛡️  TIP: Si seguiste los pasos en la [sección de autenticación](#verificar-la-autenticidad),
+ya tienes la garantía de que el software proviene de una fuente verificada y orignal.
+Esto también ayudará a establecer una cadena de confianza al realizar el paso de verificación del programa antes de la instalación.

@@ -7,7 +7,7 @@
 ## Verificar la integridad
 
 ----8<----
-verify-the-integrity-explain.en.txt
+verify-the-integrity-explain.es.txt
 ----8<----
 
 ```pwsh
@@ -47,7 +47,7 @@ Get-Content '.\{{latest_installer_win}}.sha256.txt'
 * Recomendamos instalar [GPG4Win](https://www.gpg4win.org/).
 
 ----8<----
-verify-the-signature-explain.en.txt
+verify-the-signature-explain.es.txt
 ----8<----
  
 ```pwsh
@@ -55,7 +55,7 @@ gpg --verify ./{{latest_installer_win}}.sig
 ```
 
 ----8<----
-verify-the-signature-tip.en.txt
+verify-the-signature-tip.es.txt
 ----8<----
 
 ## Instalar
@@ -65,7 +65,7 @@ Ejecuta el `{{latest_installer_win}}`. Te encontrarás una ventana azul con el m
 <img width="450" src="../../../../img/krux-installer/windows_warn0.jpg" alt="Windows protected your computer" />
 
 ----8<----
-verify-the-signature-trust-tip.en.txt
+verify-the-signature-trust-tip.es.txt
 ----8<----
 
 Sigue las instrucciones del programa para completar la instalación. Al final, presiona "Crear ícono de Escritorio":
@@ -73,5 +73,5 @@ Sigue las instrucciones del programa para completar la instalación. Al final, p
 ## Después de Instalar
 
 ----8<----
-after-install-installer.en.txt
+after-install-installer.es.txt
 ----8<----
