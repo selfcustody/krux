@@ -1,4 +1,4 @@
-<img src="../img/krux-devices.jpg" style="width: 60%; min-width: 300px;">
+<img src="/krux/img/krux-devices.jpg" style="width: 60%; min-width: 300px;">
 
 ### Compatible Devices (comparative table)
 
@@ -43,7 +43,11 @@ Embed Fire touchscreen may shift slightly within the case when pressed. Some uni
 </i>
 
 ### M5StickV
+<<<<<<< HEAD
 <img src="../img/maixpy_m5stickv/logo-250.png" align="right" style="width: 10%;">
+=======
+<img src="/krux/img/maixpy_m5stickv/logo-250.png" align="right" style="width: 15%;">
+>>>>>>> 94fd28b3 (Updated image references to use absolute paths instead of relative links)
 
 Krux was first ported to this device in March 2022. Featuring the smallest screen size and resolution, it also includes a built-in battery. Refer to the [USB-C recognition warning <i style="font-size: 85%">:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info)</i> above for important notes. Below is a list of distributors where it can be found:
 
@@ -61,7 +65,11 @@ Krux was first ported to this device in March 2022. Featuring the smallest scree
 <div style="clear: both"></div>
 
 ### Maix Amigo
+<<<<<<< HEAD
 <img src="../img/maixpy_amigo/logo-300.png" align="right" style="width: 20%;">
+=======
+<img src="/krux/img/maixpy_amigo/logo-300.png" align="right" style="width: 16%;">
+>>>>>>> 94fd28b3 (Updated image references to use absolute paths instead of relative links)
 
 Krux has supported this device since its second version in August 2022. It offers the largest screen size and resolution, a touchscreen, and a built-in battery. Below is a list of distributors where it is available:
 
@@ -75,7 +83,11 @@ Krux has supported this device since its second version in August 2022. It offer
 <div style="clear: both"></div>
 
 ### Yahboom k210 module
+<<<<<<< HEAD
 <img src="../img/maixpy_yahboom/logo-312.png" align="right" style="width: 15%;">
+=======
+<img src="/krux/img/maixpy_yahboom/logo-312.png" align="right" style="width: 16%;">
+>>>>>>> 94fd28b3 (Updated image references to use absolute paths instead of relative links)
 
 Supported by Krux since March 2024, this device features a touchscreen and comes with a compatible 32 GB card, a USB card reader, one PH2.0 4-pin male-to-male connector, and a PH2.0 female adapter for connecting to a [thermal printer](#optional-ttl-serial-thermal-printer). Below is a list of distributors where it is available:
 
@@ -87,7 +99,11 @@ Supported by Krux since March 2024, this device features a touchscreen and comes
 <div style="clear: both"></div>
 
 ### Maix Cube
+<<<<<<< HEAD
 <img src="../img/maixpy_cube/logo-400.png" align="right" style="width: 12%;">
+=======
+<img src="/krux/img/maixpy_cube/logo-400.png" align="right" style="width: 18%;">
+>>>>>>> 94fd28b3 (Updated image references to use absolute paths instead of relative links)
 
 Supported by Krux since July 2024, this device features the second smallest screen size and resolution, a 3-way button, and a built-in battery. Below is a list of distributors where it is available:
 
@@ -101,7 +117,11 @@ Supported by Krux since July 2024, this device features the second smallest scre
 <div style="clear: both"></div>
 
 ### WonderMV
+<<<<<<< HEAD
 <img src="../img/maixpy_wonder_mv/logo-304.png" align="right" style="width: 15%;">
+=======
+<img src="/krux/img/maixpy_wonder_mv/logo-304.png" align="right" style="width: 16%;">
+>>>>>>> 94fd28b3 (Updated image references to use absolute paths instead of relative links)
 
 Supported by Krux since September 2024, this touchscreen device features a metal backplate and includes a compatible 32 GB card, a USB card reader, and two 5264 4-pin connector male-to-male cables for connecting to a [thermal printer](#optional-ttl-serial-thermal-printer). Refer to the [USB-C recognition warning <i style="font-size: 85%">:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info)</i> and the [SD card warning <i style="font-size: 85%">:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info)</i> above for important notes. The following distributors offer this device:
 
@@ -115,7 +135,11 @@ Supported by Krux since September 2024, this touchscreen device features a metal
 
 
 ### TZT
+<<<<<<< HEAD
 <img src="../img/maixpy_tzt/logo-314.png" align="right" style="width: 15%;">
+=======
+<img src="/krux/img/maixpy_tzt/logo-314.png" align="right" style="width: 16%;">
+>>>>>>> 94fd28b3 (Updated image references to use absolute paths instead of relative links)
 
 Supported by Krux since October 2025, this touchscreen device comes in a premium milled aluminum housing and features five buttons. Available through the following distributors:
 
@@ -135,7 +159,11 @@ Supported by Krux since November 2025, this touchscreen device features a 2.4" d
 
 
 ### Maix Dock
+<<<<<<< HEAD
 <img src="../img/maixpy_dock/logo-302.png" align="right" style="width: 18%;">
+=======
+<img src="/krux/img/maixpy_dock/logo-302.png" align="right" style="width: 16%;">
+>>>>>>> 94fd28b3 (Updated image references to use absolute paths instead of relative links)
 
 For DIY enthusiasts, Krux has supported the Maix Dock since August 2022. These kits include a board and screen but require you to source a rotary encoder or buttons separately and assemble the device yourself. Some Maix Dock boards also include Wi-Fi.
 

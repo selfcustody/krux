@@ -53,7 +53,7 @@ error-flashing-windows.es.txt
 
 ### La pantalla táctil de Maix Amigo no funciona con v24.03.0 y posteriores, pero funcionó bien con v23.09.1?
 
-<img src="../img/amigo-inside-switch-up.jpg" align="right">
+<img src="/krux/img/amigo-inside-switch-up.jpg" align="right">
 
 Hemos añadido una IRQ(solicitud de interrupción) de hardware al firmware, por lo que cuando abra su Maix Amigo, verá un interruptor en el centro de la placa del dispositivo; debe estar en la posición superior para que la pantalla táctil funcione con la versión v24.03.0 y posteriores.
 
@@ -111,7 +111,7 @@ También puede instalar [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/
 ### Por qué Krux no escanea el código QR?
 
 <video style="width: 20%; min-width: 240px;" controls class="align-right margin-left">
-    <source src="../img/cam-adjust-pliers.mp4" type="video/mp4"></source>
+    <source src="/krux/img/cam-adjust-pliers.mp4" type="video/mp4"></source>
 </video>
 
 

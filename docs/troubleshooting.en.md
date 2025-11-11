@@ -61,7 +61,7 @@ error-flashing-mac.en.txt
 
 ### Maix Amigo touchscreen doesn't work with v24.03.0 and later, but worked okay with v23.09.1?
 
-<img src="../img/amigo-inside-switch-up.jpg" align="right">
+<img src="/krux/img/amigo-inside-switch-up.jpg" align="right">
 
 We added a hardware IRQ (interrupt request) to the firmware, so when you open your Maix Amigo, you will see a switch in the middle of the device board, it must be in the upper position for the touchscreen to work with v24.03.0 and later.
 
@@ -117,7 +117,7 @@ You can also install [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/ide
 ### Why isn't Krux scanning the QR code?
 
 <video style="width: 20%; min-width: 240px;" controls class="align-right margin-left">
-    <source src="../img/cam-adjust-pliers.mp4" type="video/mp4"></source>
+    <source src="/krux/img/cam-adjust-pliers.mp4" type="video/mp4"></source>
 </video>
 
 The screen displays exactly what Krux sees through its camera. If the QR code looks blurry, the lens may be out of focus. You can correct this by gently rotating the lens: turn it **counterclockwise (unscrewing to reduce focus distance)** or **clockwise (screwing to increase focus distance)** until the image sharpens. Be aware that the factory may have secured the lens with a small drop of glue, making the first adjustment a bit harder. To rotate the plastic lens ring, use your fingertip, tweezers, or small precision pliers (ideally wrapped with electrical tape to prevent scratches). Once adjusted, future focusing should be much easier.

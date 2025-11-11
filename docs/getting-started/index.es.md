@@ -1,4 +1,4 @@
-<img src="../img/krux-devices.jpg" style="width: 40%; min-width: 260px;" class="align-right">
+<img src="/krux/img/krux-devices.jpg" style="width: 40%; min-width: 260px;" class="align-right">
 
 Krux es un programa de código abierto para firmar transacciones de Bitcoin, diseñado para dispositivos con el chip K210; también conocido como un dispositivo firmador. 
 

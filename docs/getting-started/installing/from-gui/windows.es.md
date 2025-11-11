@@ -62,7 +62,7 @@ verify-the-signature-tip.es.txt
 
 Ejecuta el `{{latest_installer_win}}`. Te encontrarás una ventana azul con el mensaje "Windows a protegido su PC". Esto ocurre porque no tenemos un [certificado de firma de código](https://signmycode.com/resources/how-to-sign-an-exe-or-windows-application):
 
-<img width="450" src="../../../../img/krux-installer/windows_warn0.jpg" alt="Windows protected your computer" />
+<img width="450" src="/krux/img/krux-installer/windows_warn0.jpg" alt="Windows protected your computer" />
 
 ----8<----
 verify-the-signature-trust-tip.es.txt
