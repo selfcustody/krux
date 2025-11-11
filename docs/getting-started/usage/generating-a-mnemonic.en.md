@@ -21,6 +21,8 @@ During image capture, entropy quality estimation is displayed to assist you in o
 
 **Note**: These values ​​serve only as indicators or estimations of the quality of entropy, but are not absolute values ​​of entropy in a cryptographic context.
 
+[Lavarand](https://en.wikipedia.org/wiki/Lavarand) is an example of using visually chaotic physical phenomena as a source for a cryptographically secure pseudorandom number generator. While not exactly the same, the underlying concept is analogous: both rely on chaotic and difficult-to-predict physical inputs as non-deterministic entropy sources.
+
 <div style="clear: both"></div>
 
 #### Double mnemonic
