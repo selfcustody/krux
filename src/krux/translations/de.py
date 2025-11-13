@@ -161,6 +161,7 @@ translation_array = [
     "Ungültige Wallet:",
     "Umkehren",
     "Invertierte Farben",
+    "Invertierter Modus",
     "KEF-verschlüsselt",
     "Schlüssel",
     "Schlüssel wurde nicht zur Verfügung gestellt",

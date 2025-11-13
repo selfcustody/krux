@@ -37,6 +37,7 @@ ANTI_GLARE_MODE = 1
 ENTROPY_MODE = 2
 BINARY_GRID_MODE = 3
 ZOOMED_MODE = 4
+INVERTED_MODE = 5
 
 OV2640Z_OFFSET_X = 160
 OV2640Z_OFFSET_Y = 120
@@ -220,7 +221,7 @@ class Camera:
         vpt = (vpt_high << 4) | vpt_low
         # VPT - fast convergence zone, default=0xD4
         sensor.__write_reg(0x26, vpt)
-        if self.mode in (QR_SCAN_MODE, ANTI_GLARE_MODE):
+        if self.mode in (QR_SCAN_MODE, ANTI_GLARE_MODE, INVERTED_MODE):
             # Disable frame integration (bad for animated QR codes)
             sensor.__write_reg(0x15, 0x00)
 
@@ -350,6 +351,9 @@ class Camera:
             elif self.cam_id == OV7740_ID:
                 sensor.__write_reg(0xD5, 0x30)
             sensor.skip_frames()
+            # Enter inverted mode
+            self.mode = INVERTED_MODE
+        elif self.mode == INVERTED_MODE:
             # Go back to standard mode
             self.mode = QR_SCAN_MODE
         else:

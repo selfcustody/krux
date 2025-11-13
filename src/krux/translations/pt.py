@@ -161,6 +161,7 @@ translation_array = [
     "Carteira inválida:",
     "Inverter",
     "Cores invertidas",
+    "Modo invertido",
     "KEF criptografado",
     "Chave",
     "A chave não foi fornecida",

@@ -161,6 +161,7 @@ translation_array = [
     "Ví không hợp lệ:",
     "Đảo ngược",
     "Màu đảo ngược",
+    "Chế độ đảo ngược",
     "Đã mã hóa KEF",
     "Chìa khóa",
     "Khóa không được cung cấp",

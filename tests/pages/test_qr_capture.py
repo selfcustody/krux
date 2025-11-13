@@ -81,6 +81,7 @@ def test_camera_antiglare(mocker, m5stickv):
         ANTI_GLARE_MODE,
         ZOOMED_MODE,
         QR_SCAN_MODE,
+        INVERTED_MODE,
     )
 
     mode = QR_SCAN_MODE
@@ -93,6 +94,8 @@ def test_camera_antiglare(mocker, m5stickv):
             mode = ZOOMED_MODE
         elif mode == ZOOMED_MODE:
             mode = QR_SCAN_MODE
+        elif mode == INVERTED_MODE:
+            mode = INVERTED_MODE
         return mode
 
     time_mocker = TimeMocker(1001)
