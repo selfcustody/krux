@@ -6,6 +6,8 @@ This device shares similarities with the WonderMV but stands out with its larger
 ### New Device Support: WonderK PRO
 From the wonderful land of Korea, a new creation arrives: the WonderK PRO. Created by an entrepreneur who loves the Krux project, the WonderK follows in the footsteps of the WonderMV, but boasts a larger 2.8" display! Computer simulator for the WonderK device is also included.
 
+### Other Bug Fixes and Improvements
+- Added backtick ` to keypad
 
 # Changelog 25.10.1 - October 2025
 
