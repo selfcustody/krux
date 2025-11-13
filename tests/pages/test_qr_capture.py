@@ -100,10 +100,18 @@ def test_camera_antiglare(mocker, m5stickv):
 
     time_mocker = TimeMocker(1001)
     ctx = mock_context(mocker)
+    ctx.camera.mode = INVERTED_MODE
+    fake_img = mocker.MagicMock()
+
+    def fake_snapshot():
+        nonlocal fake_img
+        fake_img.find_qrcodes.return_value = []
+        return fake_img
+
     mocker.patch.object(
         ctx.camera,
         "snapshot",
-        new=snapshot_generator(outcome=DONT_FIND_ANYTHING),
+        new=fake_snapshot,
     )
     mocker.patch.object(
         ctx.camera,
@@ -131,6 +139,7 @@ def test_camera_antiglare(mocker, m5stickv):
         ctx.display.draw_centered_text.assert_has_calls([mocker.call("Zoomed mode")])
         ctx.display.draw_centered_text.assert_has_calls([mocker.call("Inverted mode")])
         ctx.display.draw_centered_text.assert_has_calls([mocker.call("Standard mode")])
+        fake_img.invert.assert_called()
 
 
 def test_light_control(mocker, multiple_devices):
