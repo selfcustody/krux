@@ -9,6 +9,10 @@ From the wonderful land of Korea, a new creation arrives: the WonderK PRO. Creat
 ### More Camera Modes
 An inverted mode was added to enable scanning QR codes displayed with black backgrounds.
 
+### Other Bug Fixes and Improvements
+- Added backtick ` to keypad
+- Bugfix: Screensaver not activating in menu pages without statusbar
+- Embit: Improved BIP39 mnemonic validation
 
 # Changelog 25.10.1 - October 2025
 
