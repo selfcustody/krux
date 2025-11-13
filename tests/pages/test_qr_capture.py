@@ -93,9 +93,9 @@ def test_camera_antiglare(mocker, m5stickv):
         elif mode == ANTI_GLARE_MODE:
             mode = ZOOMED_MODE
         elif mode == ZOOMED_MODE:
-            mode = QR_SCAN_MODE
-        elif mode == INVERTED_MODE:
             mode = INVERTED_MODE
+        elif mode == INVERTED_MODE:
+            mode = QR_SCAN_MODE
         return mode
 
     time_mocker = TimeMocker(1001)
@@ -113,8 +113,8 @@ def test_camera_antiglare(mocker, m5stickv):
     cameras = [OV7740_ID, OV2640_ID, GC2145_ID, GC0328_ID]
     for cam_id in cameras:
         mocker.patch.object(ctx.camera.sensor, "get_id", lambda: cam_id)
-        PAGE_SEQ = [False, True, False, True, False, True, False]
-        PAGE_PREV_SEQ = [False, False, False, False, False, False, True]
+        PAGE_SEQ = [False, True, False, True, False, True, False, True, False]
+        PAGE_PREV_SEQ = [False, False, False, False, False, False, False, False, True]
         mocker.patch("time.ticks_ms", time_mocker.tick)
         ctx.input.page_event = mocker.MagicMock(side_effect=PAGE_SEQ)
         ctx.input.page_prev_event = mocker.MagicMock(side_effect=PAGE_PREV_SEQ)
@@ -122,13 +122,14 @@ def test_camera_antiglare(mocker, m5stickv):
         qr_capturer = QRCodeCapture(ctx)
         qr_code, _ = qr_capturer.qr_capture_loop()
         assert qr_code == None
-        ctx.camera.toggle_camera_mode.assert_has_calls([mocker.call()] * 2)
-        assert ctx.camera.toggle_camera_mode.call_count == 3
+        ctx.camera.toggle_camera_mode.assert_has_calls([mocker.call()] * 3)
+        assert ctx.camera.toggle_camera_mode.call_count == 4
         ctx.light.turn_on.call_count == 0
         ctx.display.draw_centered_text.assert_has_calls(
             [mocker.call("Anti-glare mode")]
         )
         ctx.display.draw_centered_text.assert_has_calls([mocker.call("Zoomed mode")])
+        ctx.display.draw_centered_text.assert_has_calls([mocker.call("Inverted mode")])
         ctx.display.draw_centered_text.assert_has_calls([mocker.call("Standard mode")])
 
 
