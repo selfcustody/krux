@@ -785,7 +785,7 @@ class Menu:
                         )
                     if isinstance(selected_item_index, tuple):
                         return selected_item_index
-                elif btn is None and self.menu_offset == STATUS_BAR_HEIGHT:
+                elif btn is None and self.menu_offset <= STATUS_BAR_HEIGHT:
                     # Activates screensaver if there's no info_box(other things draw on the screen)
                     self.screensaver()
 
