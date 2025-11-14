@@ -203,6 +203,7 @@ translation_array = [
     "Phát hiện phần sụn mới.",
     "Không",
     "Không có cụm mật khẩu",
+    "Các ký tự không phải ASCII đã được phát hiện trong cụm mật khẩu của bạn. Krux không thể đảm bảo rằng các ví khác sẽ có cùng dấu vân tay BIP39.",
     "Không đủ số lần quay!",
     "Số",
     "Bát phân",

@@ -203,6 +203,7 @@ translation_array = [
     "Nieuwe firmware gevonden.",
     "Nee",
     "Geen wachtwoordzin",
+    "Er zijn niet-ASCII-tekens gedetecteerd in uw wachtwoordzin. Krux kan niet garanderen dat andere wallets dezelfde BIP39-vingerafdruk zullen afleiden.",
     "Niet genoeg gedobbeld!",
     "Nummers",
     "Octaal",
