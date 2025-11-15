@@ -51,6 +51,7 @@ from ..qr import to_qr_codes, FORMAT_NONE
 from ..krux_settings import t, Settings
 from ..sd_card import SDHandler
 from ..kboard import kboard
+from ..settings import BACK_ARROW
 
 MENU_CONTINUE = 0
 MENU_EXIT = 1
@@ -656,7 +657,7 @@ class Menu:
         self.menu = menu
         if back_label:
             back_label = t("Back") if back_label == "Back" else back_label
-            self.menu += [("< " + back_label, back_status)]
+            self.menu += [(BACK_ARROW + back_label, back_status)]
         self.disable_statusbar = disable_statusbar or (
             self.ctx.wallet is None and not kboard.has_battery
         )
@@ -925,6 +926,13 @@ class Menu:
                     theme.info_bg_color,
                 )
 
+    def _get_menu_item_color(self, menu_item):
+        if menu_item[1] is None:
+            return theme.disabled_color
+        if len(menu_item) > 2:
+            return menu_item[2]
+        return theme.fg_color
+
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen
         self.ctx.input.touch.clear_regions()
@@ -960,9 +968,7 @@ class Menu:
             offset_y_item = (
                 region_height - len(menu_item_lines) * FONT_HEIGHT
             ) // 2 + y_keypad_map[i]
-            fg_color = (
-                theme.fg_color if menu_item[1] is not None else theme.disabled_color
-            )
+            fg_color = self._get_menu_item_color(menu_item)
             if selected_item_index == i and self.ctx.input.buttons_active:
                 self.ctx.display.fill_rectangle(
                     0,
@@ -1005,9 +1011,7 @@ class Menu:
         items_pad //= max(len(self.menu_view) - 1, 1)
         items_pad = min(items_pad, FONT_HEIGHT)
         for i, menu_item in enumerate(self.menu_view):
-            fg_color = (
-                theme.fg_color if menu_item[1] is not None else theme.disabled_color
-            )
+            fg_color = self._get_menu_item_color(menu_item)
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
             delta_y = len(menu_item_lines) * FONT_HEIGHT + items_pad
             if selected_item_index == i:

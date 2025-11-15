@@ -25,6 +25,7 @@ from embit import bip39
 from binascii import hexlify
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ..krux_settings import t, Settings
+from ..settings import CONTEXT_ARROW
 from ..encryption import QR_CODE_ITER_MULTIPLE
 from krux import kef
 from ..themes import theme
@@ -447,9 +448,11 @@ class EncryptionKey(Page):
                 (t("Type Key"), self.load_key),
                 (t("Scan Key QR Code"), self.load_qr_encryption_key),
             ],
-            back_label=None,
         )
-        _, key = submenu.run_loop()
+        index, key = submenu.run_loop()
+
+        if index == submenu.back_index:
+            return None
 
         try:
             # encryption key may have been encrypted
@@ -559,16 +562,16 @@ class EncryptMnemonic(Page):
         """Menu with mnemonic encryption output options"""
 
         encrypt_outputs_menu = [
-            (t("Store on Flash"), self.store_mnemonic_on_memory),
+            (t("Store on Flash") + CONTEXT_ARROW, self.store_mnemonic_on_memory),
             (
-                t("Store on SD Card"),
+                t("Store on SD Card") + CONTEXT_ARROW,
                 (
                     None
                     if not self.has_sd_card()
                     else lambda: self.store_mnemonic_on_memory(True)
                 ),
             ),
-            (t("Encrypted QR Code"), self.encrypted_qr_code),
+            (t("Encrypted QR Code") + CONTEXT_ARROW, self.encrypted_qr_code),
         ]
         submenu = Menu(self.ctx, encrypt_outputs_menu)
         _, _ = submenu.run_loop()
@@ -648,6 +651,7 @@ class LoadEncryptedMnemonic(Page):
                         if remove_opt
                         else self._load_encrypted_mnemonic(m_id)
                     ),
+                    theme.no_esc_color if remove_opt else theme.fg_color,
                 )
             )
         for mnemonic_id in sorted(sd_mnemonics):
@@ -659,6 +663,7 @@ class LoadEncryptedMnemonic(Page):
                         if remove_opt
                         else self._load_encrypted_mnemonic(m_id, sd_card=True)
                     ),
+                    theme.no_esc_color if remove_opt else theme.fg_color,
                 )
             )
         submenu = Menu(self.ctx, mnemonic_ids_menu)
@@ -699,7 +704,11 @@ class LoadEncryptedMnemonic(Page):
 
         mnemonic_storage = MnemonicStorage()
         self.ctx.display.clear()
-        if self.prompt(t("Remove %s?") % mnemonic_id, self.ctx.display.height() // 2):
+        if self.prompt(
+            t("Remove %s?") % mnemonic_id,
+            self.ctx.display.height() // 2,
+            highlight_prefix="?",
+        ):
             mnemonic_storage.del_mnemonic(mnemonic_id, sd_card)
             message = t("%s removed.") % mnemonic_id
             message += "\n\n"

@@ -22,6 +22,7 @@
 
 from ...display import FONT_HEIGHT
 from ...krux_settings import t, Settings, THERMAL_ADAFRUIT_TXT
+from ...settings import CONTEXT_ARROW
 from .. import (
     Page,
     Menu,
@@ -38,9 +39,9 @@ class MnemonicsView(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("QR Code"), self.qr_code_backup),
-                (t("Encrypted"), self.encrypt_mnemonic_menu),
-                (t("Other Formats"), self.other_backup_formats),
+                (t("QR Code") + CONTEXT_ARROW, self.qr_code_backup),
+                (t("Encrypted") + CONTEXT_ARROW, self.encrypt_mnemonic_menu),
+                (t("Other Formats") + CONTEXT_ARROW, self.other_backup_formats),
             ],
         )
         submenu.run_loop()
@@ -54,7 +55,7 @@ class MnemonicsView(Page):
                 (t("Plaintext QR"), self.display_standard_qr),
                 ("Compact SeedQR", lambda: self.display_seed_qr(True)),
                 ("SeedQR", self.display_seed_qr),
-                (t("Encrypted QR Code"), self.encrypt_qr_code),
+                (t("Encrypted QR Code") + CONTEXT_ARROW, self.encrypt_qr_code),
             ],
         )
         submenu.run_loop()
@@ -71,7 +72,7 @@ class MnemonicsView(Page):
                         self.ctx.wallet.key.mnemonic, t("Mnemonic")
                     ),
                 ),
-                (t("Numbers"), self.display_mnemonic_numbers),
+                (t("Numbers") + CONTEXT_ARROW, self.display_mnemonic_numbers),
                 ("Stackbit 1248", self.stackbit),
                 ("Tinyseed", self.tiny_seed),
             ],

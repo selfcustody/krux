@@ -200,12 +200,13 @@ class Keypad:
                         and self.ctx.input.buttons_active
                     ):
                         if kboard.has_touchscreen:
-                            self.ctx.display.outline(
-                                offset_x + 1,
-                                y + 1,
-                                self.layout.key_h_spacing - 2,
-                                self.layout.key_v_spacing - 2,
-                            )
+                            for i in range(1, 3):
+                                self.ctx.display.outline(
+                                    offset_x + i,
+                                    y + i,
+                                    self.layout.key_h_spacing - i * 2,
+                                    self.layout.key_v_spacing - i * 2,
+                                )
                         else:
                             self.ctx.display.outline(
                                 offset_x - 2,
@@ -219,18 +220,19 @@ class Keypad:
         """Indicates the current keyset index with a small rectangle"""
         if not self.has_more_key():
             return
-        bar_height = FONT_HEIGHT // 6
-        bar_length = FONT_WIDTH
-        bar_padding = FONT_WIDTH // 3
+        keyset_len = len(self.keysets)
+        bar_height = -(-FONT_HEIGHT // 3)  # ceil of division
+        bar_padding = -(-FONT_WIDTH // 3)  # ceil of division
+        bar_width = self.ctx.display.usable_width() // keyset_len - bar_padding
         x_offset = (
-            self.ctx.display.width() - (bar_length + bar_padding) * len(self.keysets)
-        ) // 2
-        for i in range(len(self.keysets)):
-            color = theme.fg_color if i == self.keyset_index else theme.frame_color
+            self.ctx.display.width() - ((bar_width + bar_padding) * keyset_len)
+        ) // 2 + bar_padding // 2
+        for i in range(keyset_len):
+            color = theme.fg_color if i == self.keyset_index else theme.info_bg_color
             self.ctx.display.fill_rectangle(
-                x_offset + (bar_length + bar_padding) * i,
+                x_offset + (bar_width + bar_padding) * i,
                 self.layout.y_keypad_map[-1] + 2,
-                bar_length,
+                bar_width,
                 bar_height,
                 color,
             )

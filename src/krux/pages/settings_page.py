@@ -31,6 +31,7 @@ from ..settings import (
     SD_PATH,
     FLASH_PATH,
     SETTINGS_FILENAME,
+    CONTEXT_ARROW,
 )
 from ..krux_settings import (
     Settings,
@@ -40,6 +41,7 @@ from ..krux_settings import (
     ButtonsSettings,
     t,
     locale_control,
+    ThermalSettings,
 )
 from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 from ..sd_card import SDHandler
@@ -255,7 +257,14 @@ class SettingsPage(Page):
             namespace_list = settings_namespace.namespace_list()
             items = [
                 (
-                    settings_namespace.label(ns.namespace.split(".")[-1]),
+                    settings_namespace.label(ns.namespace.split(".")[-1])
+                    + (
+                        CONTEXT_ARROW
+                        if isinstance(ns, ThermalSettings)
+                        or len(ns.setting_list()) > 1
+                        or len(ns.namespace_list()) > 1
+                        else ""
+                    ),
                     self.namespace(ns),
                 )
                 for ns in namespace_list
@@ -278,7 +287,9 @@ class SettingsPage(Page):
             back_status = lambda: MENU_EXIT  # pylint: disable=C3001
             # Case for "Back" on the main Settings
             if settings_namespace.namespace == Settings.namespace:
-                items.append((t("Factory Settings"), self.restore_settings))
+                items.append(
+                    (t("Factory Settings"), self.restore_settings, theme.no_esc_color)
+                )
                 back_status = self._settings_exit_check
 
             # Case for security settings

@@ -30,7 +30,6 @@ IDLE = 0
 PRESSED = 1
 RELEASED = 2
 
-SWIPE_THRESHOLD = 50
 SWIPE_RIGHT = 1
 SWIPE_LEFT = 2
 SWIPE_UP = 3
@@ -227,20 +226,21 @@ class Touch:
                 self.state = IDLE
             elif self.state == PRESSED:
                 if self.release_point is not None:
+                    swipe_threshold = Settings().hardware.touch.threshold
                     lateral_lenght = self.release_point[0] - self.press_point[0][0]
-                    if lateral_lenght > SWIPE_THRESHOLD:
+                    if lateral_lenght > swipe_threshold:
                         self.gesture = SWIPE_RIGHT
-                    elif -lateral_lenght > SWIPE_THRESHOLD:
+                    elif -lateral_lenght > swipe_threshold:
                         self.gesture = SWIPE_LEFT
                         lateral_lenght *= -1  # make it positive value
                     vertical_lenght = self.release_point[1] - self.press_point[0][1]
                     if (
-                        vertical_lenght > SWIPE_THRESHOLD
+                        vertical_lenght > swipe_threshold
                         and vertical_lenght > lateral_lenght
                     ):
                         self.gesture = SWIPE_DOWN
                     elif (
-                        -vertical_lenght > SWIPE_THRESHOLD
+                        -vertical_lenght > swipe_threshold
                         and -vertical_lenght > lateral_lenght
                     ):
                         self.gesture = SWIPE_UP

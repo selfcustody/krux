@@ -32,7 +32,7 @@ from . import (
 )
 from .mnemonic_loader import MnemonicLoader
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
-from ..krux_settings import Settings
+from ..krux_settings import Settings, t
 from ..key import (
     Key,
     P2WPKH,
@@ -47,8 +47,8 @@ from ..key import (
     POLICY_TYPE_IDS,
     NAME_MULTISIG,
 )
-from ..krux_settings import t
 from ..kboard import kboard
+from ..settings import CONTEXT_ARROW
 
 
 DIGITS_HEX = "0123456789ABCDEF"
@@ -67,13 +67,13 @@ class Login(MnemonicLoader):
 
     def __init__(self, ctx):
         login_menu_items = [
-            (t("Load Mnemonic"), self.load_key),
+            (t("Load Mnemonic") + CONTEXT_ARROW, self.load_key),
             (
-                t("New Mnemonic"),
+                t("New Mnemonic") + CONTEXT_ARROW,
                 (self.new_key if not Settings().security.hide_mnemonic else None),
             ),
-            (t("Settings"), self.settings),
-            (t("Tools"), self.tools),
+            (t("Settings") + CONTEXT_ARROW, self.settings),
+            (t("Tools") + CONTEXT_ARROW, self.tools),
             (t("About"), self.about),
         ]
         if ctx.power_manager is not None:
@@ -95,10 +95,13 @@ class Login(MnemonicLoader):
         submenu = Menu(
             self.ctx,
             [
-                (t("Via Camera"), self.new_key_from_snapshot),
-                (t("Via Words"), lambda: self.load_key_from_text(new=True)),
-                (t("Via D6"), self.new_key_from_dice),
-                (t("Via D20"), lambda: self.new_key_from_dice(True)),
+                (t("Via Camera") + CONTEXT_ARROW, self.new_key_from_snapshot),
+                (
+                    t("Via Words") + CONTEXT_ARROW,
+                    lambda: self.load_key_from_text(new=True),
+                ),
+                (t("Via D6") + CONTEXT_ARROW, self.new_key_from_dice),
+                (t("Via D20") + CONTEXT_ARROW, lambda: self.new_key_from_dice(True)),
             ],
         )
         index, status = submenu.run_loop()
@@ -292,8 +295,8 @@ class Login(MnemonicLoader):
                 self.ctx,
                 [
                     (t("Load Wallet"), lambda: None),
-                    (t("Passphrase"), lambda: None),
-                    (t("Customize"), lambda: None),
+                    (t("Passphrase") + CONTEXT_ARROW, lambda: None),
+                    (t("Customize") + CONTEXT_ARROW, lambda: None),
                 ],
                 offset=(
                     self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)

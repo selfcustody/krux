@@ -52,6 +52,7 @@ from ..input import (
     SWIPE_RIGHT,
     SWIPE_DOWN,
 )
+from ..settings import CONTEXT_ARROW
 
 DATUM_DESCRIPTOR = "DESC"
 DATUM_PSBT = "PSBT"
@@ -733,7 +734,7 @@ class DatumTool(Page):
             menu.append((t("Show Datum"), lambda: "show"))
 
         if not offer_convert:
-            menu.append((t("Convert Datum"), lambda: "convert_begin"))
+            menu.append((t("Convert Datum") + CONTEXT_ARROW, lambda: "convert_begin"))
             menu.append((t("QR Code"), lambda: "export_qr"))
 
             # when not sensitive, allow export to sd
@@ -756,7 +757,7 @@ class DatumTool(Page):
                     menu.append((t("to utf8"), lambda: "utf8"))
                 except:
                     pass
-                menu.append((t("Encrypt"), lambda: "encrypt"))
+                menu.append((t("Encrypt") + CONTEXT_ARROW, lambda: "encrypt"))
 
             elif isinstance(self.contents, str):
                 if "HEX" in self.encodings:
@@ -784,8 +785,6 @@ class DatumTool(Page):
                     ) or option[1]() == self.history[-1]:
                         menu[i] = (option[0] + " (" + t("Undo") + ")", lambda: "undo")
                         break
-
-            menu.append((t("Done Converting"), lambda: "convert_end"))
 
         return menu
 
@@ -816,16 +815,15 @@ class DatumTool(Page):
         info_len = self._info_box()
 
         # run todo_menu
-        back_status = {}
-        if offer_convert:
-            back_status = {"back_label": None}
         menu = Menu(
             self.ctx,
             todo_menu,
             offset=(info_len + 1) * FONT_HEIGHT + DEFAULT_PADDING + 2,
-            **back_status
         )
         _, status = menu.run_loop()
+
+        # Back case for convert menu
+        status = "convert_end" if offer_convert and status == MENU_EXIT else status
 
         if status == MENU_EXIT:
             # if user chose to exit
