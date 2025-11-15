@@ -122,7 +122,7 @@ Supported by Krux since October 2025, this touchscreen device comes in a premium
 ### Embed Fire
 <img src="../img/maixpy_embed_fire/logo-303.png" align="right" style="width: 18%;">
 
-Supported by Krux since November 2025, this touchscreen device features a 2.4" display and a metal backplate. It is available through the following distributors:
+Supported by Krux since November 2025, this touchscreen device features a 2.4" display, a metal backplate and also cables for connecting to a [thermal printer](#optional-ttl-serial-thermal-printer). It is available through the following distributors:
 
 - [AliExpress](https://www.aliexpress.com/w/wholesale-k210-AI-python.html)
 
