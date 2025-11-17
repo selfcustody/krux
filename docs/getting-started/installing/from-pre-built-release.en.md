@@ -79,7 +79,7 @@ Remove the Gatekeeper quarantine extended attribute from ktool-mac:
 xattr -d com.apple.quarantine ktool-mac
 ```
 
-See the correct port using the command line: `ls /dev/cu.usbserial*`, in the example below we use `/dev/cu.usbserial-10` (If the output isn't what you expect try a different cable, preferably a smartphone usb-c charger cable):
+See the correct port using the command line: `ls /dev/cu.usb*`, in the example below we use `/dev/cu.usbserial-10` (If the output isn't what you expect try a different cable, preferably a smartphone usb-c charger cable):
 ```bash
 ./ktool-mac -B goE -b 1500000 maixpy_amigo/kboot.kfpkg -p /dev/cu.usbserial-10
 ```
