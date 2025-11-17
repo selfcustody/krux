@@ -202,6 +202,7 @@ translation_array = [
     "Nieuwe firmware gevonden.",
     "Nee",
     "Geen wachtwoordzin",
+    "Er zijn niet-ASCII-tekens gedetecteerd in uw wachtwoordzin. Krux kan niet garanderen dat andere portefeuilles dezelfde sleutel zullen afleiden.",
     "Niet genoeg gedobbeld!",
     "Nummers",
     "Octaal",
