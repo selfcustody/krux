@@ -651,9 +651,11 @@ class Menu:
         disable_statusbar=False,
         back_label="Back",
         back_status=lambda: MENU_EXIT,
+        infobox_callback=lambda: None,
     ):
         self.ctx = ctx
         self.menu = menu
+        self.infobox_callback = infobox_callback
         if back_label:
             back_label = t("Back") if back_label == "Back" else back_label
             self.menu += [("< " + back_label, back_status)]
@@ -785,9 +787,10 @@ class Menu:
                         )
                     if isinstance(selected_item_index, tuple):
                         return selected_item_index
-                elif btn is None and self.menu_offset <= STATUS_BAR_HEIGHT:
-                    # Activates screensaver if there's no info_box(other things draw on the screen)
+                elif btn is None:
+                    # Activate screensaver (it's time!)
                     self.screensaver()
+                    self.infobox_callback()
 
     def _clicked_item(self, selected_item_index):
         item = self.menu_view[selected_item_index]

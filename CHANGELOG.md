@@ -9,6 +9,7 @@ From the wonderful land of Korea, a new creation arrives: the WonderK PRO. Creat
 ### Other Bug Fixes and Improvements
 - Added backtick ` to keypad
 - Bugfix: Screensaver not activating in menu pages without statusbar
+- Screensaver: Now appears on menu screens that display info boxes
 - Embit: Improved BIP39 mnemonic validation
 
 # Changelog 25.10.1 - October 2025
