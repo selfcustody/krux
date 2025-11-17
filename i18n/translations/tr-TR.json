@@ -181,6 +181,7 @@
     "New firmware detected.": "Yeni donanım yazılımı tespit edildi.",
     "No": "Hayır",
     "No Passphrase": "Parola Yok",
+    "Non-ASCII characters were detected in your passphrase. Krux cannot guarantee that other wallets will derive the same key.": "Parolanızda ASCII olmayan karakterler algılandı. Krux, diğer cüzdanların aynı anahtarı türeteceğini garanti edemez.",
     "Not enough rolls!": "Yeterli zar atışı yok!",
     "Numbers": "Numaralar",
     "Octal": "Sekizlik",

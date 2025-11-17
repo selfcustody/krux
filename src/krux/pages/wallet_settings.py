@@ -92,8 +92,19 @@ class PassphraseEditor(Page):
                     continue
             # Check if passphrase string is within ascii range
             if any(byte > 126 for byte in passphrase.encode()):
-                self.flash_error(t("Failed to load"))
-                continue
+                self.ctx.display.clear()
+                self.ctx.display.draw_hcentered_text(
+                    t(
+                        "Non-ASCII characters were detected in your passphrase. "
+                        "Krux cannot guarantee that other wallets will derive the "
+                        "same key."
+                    )
+                )
+                if not self.prompt(
+                    t("Proceed?"),
+                    BOTTOM_PROMPT_LINE,
+                ):
+                    continue
 
             from ..themes import theme
             from ..key import Key

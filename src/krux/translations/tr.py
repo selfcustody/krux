@@ -203,6 +203,7 @@ translation_array = [
     "Yeni donanım yazılımı tespit edildi.",
     "Hayır",
     "Parola Yok",
+    "Parolanızda ASCII olmayan karakterler algılandı. Krux, diğer cüzdanların aynı anahtarı türeteceğini garanti edemez.",
     "Yeterli zar atışı yok!",
     "Numaralar",
     "Sekizlik",

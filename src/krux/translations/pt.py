@@ -203,6 +203,7 @@ translation_array = [
     "Novo firmware detectado.",
     "Não",
     "Sem Senha",
+    "Caracteres não ASCII foram detectados em sua senha. A Krux não pode garantir que outras carteiras obtenham a mesma chave.",
     "Jogadas insuficientes!",
     "Números",
     "Octal",

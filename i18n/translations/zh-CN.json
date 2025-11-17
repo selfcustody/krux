@@ -181,6 +181,7 @@
     "New firmware detected.": "检测到新固件.",
     "No": "否",
     "No Passphrase": "无 Passphrase ",
+    "Non-ASCII characters were detected in your passphrase. Krux cannot guarantee that other wallets will derive the same key.": "在您的密码短语中检测到非ASCII字符.Krux无法保证其他钱包将获得相同的密钥.",
     "Not enough rolls!": "投掷次数不足！",
     "Numbers": "数字",
     "Octal": "八进制",

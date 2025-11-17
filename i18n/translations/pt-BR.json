@@ -181,6 +181,7 @@
     "New firmware detected.": "Novo firmware detectado.",
     "No": "Não",
     "No Passphrase": "Sem Senha",
+    "Non-ASCII characters were detected in your passphrase. Krux cannot guarantee that other wallets will derive the same key.": "Caracteres não ASCII foram detectados em sua senha. A Krux não pode garantir que outras carteiras obtenham a mesma chave.",
     "Not enough rolls!": "Jogadas insuficientes!",
     "Numbers": "Números",
     "Octal": "Octal",

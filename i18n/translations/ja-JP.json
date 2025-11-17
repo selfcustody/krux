@@ -181,6 +181,7 @@
     "New firmware detected.": "新しいファームウェアが検出されました.",
     "No": "いいえ",
     "No Passphrase": "パスフレーズなし",
+    "Non-ASCII characters were detected in your passphrase. Krux cannot guarantee that other wallets will derive the same key.": "パスフレーズに非ASCII文字が検出されました.Kruxは、他のウォレットが同じキーを取得することを保証することはできません.",
     "Not enough rolls!": "ロールが足りません!",
     "Numbers": "数字",
     "Octal": "Octal",

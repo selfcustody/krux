@@ -181,6 +181,7 @@
     "New firmware detected.": "Phát hiện phần sụn mới.",
     "No": "Không",
     "No Passphrase": "Không có cụm mật khẩu",
+    "Non-ASCII characters were detected in your passphrase. Krux cannot guarantee that other wallets will derive the same key.": "Các ký tự không phải ASCII đã được phát hiện trong cụm mật khẩu của bạn. Krux không thể đảm bảo rằng các ví khác sẽ lấy được cùng một khóa.",
     "Not enough rolls!": "Không đủ số lần quay!",
     "Numbers": "Số",
     "Octal": "Bát phân",

@@ -181,6 +181,7 @@
     "New firmware detected.": "Обнаружена новая прошивка.",
     "No": "Нет",
     "No Passphrase": "Нет Фраза-пароль",
+    "Non-ASCII characters were detected in your passphrase. Krux cannot guarantee that other wallets will derive the same key.": "В вашей парольной фразе обнаружены символы, отличные от ASCII. Krux не может гарантировать, что другие кошельки получат тот же ключ.",
     "Not enough rolls!": "Недостаточно бросков!",
     "Numbers": "Числа",
     "Octal": "Восьмеричный",

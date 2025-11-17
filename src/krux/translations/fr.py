@@ -203,6 +203,7 @@ translation_array = [
     "Nouveau micrologiciel détecté.",
     "Non",
     "Pas de phrase secrète",
+    "Des caractères non ASCII ont été détectés dans votre phrase secrète. Krux ne peut garantir que d'autres portefeuilles obtiendront la même clé.",
     "Pas assez de jets\u2009!",
     "Nombres",
     "Octale",
