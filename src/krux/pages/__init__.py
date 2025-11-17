@@ -67,7 +67,7 @@ PROCEED = (BUTTON_ENTER, BUTTON_TOUCH)
 LETTERS = "abcdefghijklmnopqrstuvwxyz"
 UPPERCASE_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUM_SPECIAL_1 = "1234567890 !#$%()&*'"
-NUM_SPECIAL_2 = '<>.,"[]:;/{}^~|-+=_\\?@'
+NUM_SPECIAL_2 = '<>.,"[]:;/{}^~|-+=_\\?@`'
 DIGITS = "1234567890"
 
 BATTERY_WIDTH = 22
@@ -785,7 +785,7 @@ class Menu:
                         )
                     if isinstance(selected_item_index, tuple):
                         return selected_item_index
-                elif btn is None and self.menu_offset == STATUS_BAR_HEIGHT:
+                elif btn is None and self.menu_offset <= STATUS_BAR_HEIGHT:
                     # Activates screensaver if there's no info_box(other things draw on the screen)
                     self.screensaver()
 

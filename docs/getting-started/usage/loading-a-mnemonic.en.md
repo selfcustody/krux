@@ -161,7 +161,11 @@ It is possible to change any of the **wallet's attributes** (it will be possible
 <img src="../../../img/maixpy_m5stickv/passphrase-load-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/passphrase-load-options-300.png" align="right" class="amigo">
 
-You can type or scan a BIP39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change keypads if your device has a touchscreen. You can also hold the button `PAGE` or `PREVIOUS` when navigating among letters while typing text to fast forward or backward. For scanning, you can also create a QR code from your offline passphrase using the [Datum tool](../features/tools.md/#datum-tool).
+You can type or scan a BIP39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change keypads if your device has a touchscreen. Hold `PAGE` or `PREVIOUS` to move quickly through letters, and hold `ENTER` to jump to the next keypad.
+
+For scanning, you can generate an offline passphrase QR code using the [Datum tool](../features/tools.md/#datum-tool).
+
+**Note**: [BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#from-mnemonic-to-seed) requires passphrases to be NFKD-normalized. Due to firmware size constraints, Krux cannot perform normalization internally. We therefore recommend using only ASCII QR codes or ensuring any non-ASCII are already normalized to NFKD.
 
 <div style="clear: both"></div>
 

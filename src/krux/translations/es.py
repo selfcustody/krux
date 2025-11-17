@@ -204,6 +204,7 @@ translation_array = [
     "Nuevo firmware detectado.",
     "No",
     "Sin Passphrase",
+    "Se detectaron caracteres no ASCII en su frase de contraseña. Krux no puede garantizar que otros monederos obtengan la misma clave.",
     "¡No hay suficientes tiradas!",
     "Números",
     "Octales",

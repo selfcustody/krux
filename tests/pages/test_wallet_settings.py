@@ -199,10 +199,11 @@ def test_qr_passphrase_fails_on_encrypted_non_ascii_bytes(mocker, m5stickv, tdat
 def test_passphrase_non_ascii_validation(m5stickv, mocker, tdata):
     from krux.pages.wallet_settings import PassphraseEditor
     from krux.pages import Menu, MENU_EXIT
+    from krux.input import BUTTON_PAGE_PREV
 
     # Test non-ASCII passphrase rejection
-    NON_ASCII_PASSPHRASE = "Test™"  # Contains non-ASCII character
-    ctx = create_ctx(mocker, None, tdata.SINGLESIG_12_WORD_KEY)
+    NON_ASCII_PASSPHRASE = "Testá"  # Contains non-ASCII character
+    ctx = create_ctx(mocker, [BUTTON_PAGE_PREV], tdata.SINGLESIG_12_WORD_KEY)
     passphrase_editor = PassphraseEditor(ctx)
 
     # Mock the Menu's run_loop to return non-ASCII passphrase first, then exit
@@ -216,18 +217,18 @@ def test_passphrase_non_ascii_validation(m5stickv, mocker, tdata):
         side_effect=menu_returns,
     )
 
-    # Mock flash_error to track if it was called
-    flash_error_spy = mocker.spy(passphrase_editor, "flash_error")
+    # Mock prompt to track if it was called
+    prompt_spy = mocker.spy(passphrase_editor, "prompt")
 
     result = passphrase_editor.load_passphrase_menu(
         tdata.SINGLESIG_12_WORD_KEY.mnemonic
     )
 
-    # Verify that flash_error was called with the ASCII error message
-    flash_error_spy.assert_called()
+    # Verify that it was called
+    prompt_spy.assert_called()
     # Get the actual call arguments
-    call_args = flash_error_spy.call_args[0][0]
-    assert call_args == "Failed to load"
+    call_args = prompt_spy.call_args[0][0]
+    assert call_args == "Proceed?"
 
     # Verify that the method returned None (exited without accepting passphrase)
     assert result is None
