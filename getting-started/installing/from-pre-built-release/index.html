@@ -2043,7 +2043,7 @@ openssl<span class="w"> </span>sha256<span class="w"> </span>&lt;krux-v25.10.1.z
 <p>Remove the Gatekeeper quarantine extended attribute from ktool-mac:
 <div class="highlight"><pre><span></span><code>xattr<span class="w"> </span>-d<span class="w"> </span>com.apple.quarantine<span class="w"> </span>ktool-mac
 </code></pre></div></p>
-<p>See the correct port using the command line: <code>ls /dev/cu.usbserial*</code>, in the example below we use <code>/dev/cu.usbserial-10</code> (If the output isn't what you expect try a different cable, preferably a smartphone usb-c charger cable):
+<p>See the correct port using the command line: <code>ls /dev/cu.usb*</code>, in the example below we use <code>/dev/cu.usbserial-10</code> (If the output isn't what you expect try a different cable, preferably a smartphone usb-c charger cable):
 <div class="highlight"><pre><span></span><code>./ktool-mac<span class="w"> </span>-B<span class="w"> </span>goE<span class="w"> </span>-b<span class="w"> </span><span class="m">1500000</span><span class="w"> </span>maixpy_amigo/kboot.kfpkg<span class="w"> </span>-p<span class="w"> </span>/dev/cu.usbserial-10
 </code></pre></div></p>
 <p>Different OS versions may have different port names, and the absence of ports may indicate a connection, driver or hardware related issue. See <a href="../../../troubleshooting/#device-not-charging-or-being-recognized">Troubleshooting</a> for more info.</p>
