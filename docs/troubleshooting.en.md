@@ -48,6 +48,10 @@ If flashing fails with an error: `Greeting fail, check serial port (SLIP receive
 error-flashing-windows.en.txt
 ----8<----
 
+----8<----
+error-flashing-mac.en.txt
+----8<----
+
 
 ## **After Installing**
 

@@ -204,6 +204,9 @@ flash-krux-logo.en.txt
 error-flashing-windows.en.txt
 ----8<----
 
+----8<----
+error-flashing-mac.en.txt
+----8<----
 
 
 #### Air-gapped update with
