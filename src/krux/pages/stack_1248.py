@@ -221,7 +221,9 @@ class Stackbit(Page):
         self.y_offset = 2 * FONT_HEIGHT
         self.y_pad = FONT_HEIGHT
 
-        self.ctx.display.draw_hcentered_text("Stackbit 1248")
+        self.ctx.display.draw_hcentered_text(
+            "Stackbit 1248", color=theme.highlight_color
+        )
         self._draw_grid(y_offset)
         self._draw_labels(y_offset, word_index)
         digits, digits_str = self._word_to_digits(word)

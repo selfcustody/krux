@@ -44,6 +44,7 @@ from ..display import (
     MINIMAL_PADDING,
     FLASH_MSG_TIME,
     FONT_HEIGHT,
+    FONT_WIDTH,
     STATUS_BAR_HEIGHT,
     BOTTOM_LINE,
 )
@@ -638,6 +639,14 @@ class ListView:
         """Returns the true index of an element in the underlying list"""
         return self.offset + i
 
+    def total_pages(self):
+        """Compute how many pages are required to show all items"""
+        return -(-len(self.list) // self.max_size)  # ceil of division
+
+    def curr_page(self):
+        """Compute the current page number based on the scroll offset"""
+        return self.offset // self.max_size
+
 
 class Menu:
     """Represents a menu that can render itself to the screen, handle item selection,
@@ -722,6 +731,42 @@ class Menu:
             selected_item_index = self._move_back()
         return selected_item_index
 
+    def draw_vertical_bar(self):
+        """Draws a vertical scrolling bar composed of small rectangles."""
+        total_pages = self.menu_view.total_pages()
+        # don't draw if just one page
+        if total_pages < 2:
+            return
+
+        bar_padding = -(-FONT_HEIGHT // 3)  # ceil of division
+        bar_width = -(-FONT_WIDTH // 3)  # ceil of division
+        bar_height = (
+            self.ctx.display.height() - 2 * DEFAULT_PADDING - self.menu_offset
+        ) // total_pages - bar_padding
+        y_offset = (
+            self.ctx.display.height() - ((bar_height + bar_padding) * total_pages)
+        ) // 2 + (bar_padding + self.menu_offset) // 2
+        print(
+            self.menu_offset,
+            total_pages,
+            self.menu_view.curr_page(),
+            bar_height,
+            y_offset,
+        )
+        for i in range(total_pages):
+            color = (
+                theme.toggle_color
+                if i == self.menu_view.curr_page()
+                else theme.info_bg_color
+            )
+            self.ctx.display.fill_rectangle(
+                self.ctx.display.width() - bar_width * 2,
+                y_offset + (bar_height + bar_padding) * i,
+                bar_width,
+                bar_height,
+                color,
+            )
+
     def run_loop(self, start_from_index=None, swipe_up_fnc=None, swipe_down_fnc=None):
         """Runs the menu loop until one of the menu items returns either a MENU_EXIT
         or MENU_SHUTDOWN status
@@ -749,6 +794,7 @@ class Menu:
             else:
                 self._draw_menu(selected_item_index)
             self.draw_status_bar()
+            self.draw_vertical_bar()
             self.ctx.input.reset_ios_state()
             if start_from_submenu:
                 status = self._clicked_item(selected_item_index)

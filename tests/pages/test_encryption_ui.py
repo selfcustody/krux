@@ -45,6 +45,18 @@ def mock_file_operations(mocker):
     mocker.patch("builtins.open", mocker.mock_open(read_data="SEEDS_JSON"))
 
 
+def test_back_load_key_from_keypad(m5stickv, mocker):
+    from krux.pages.encryption_ui import EncryptionKey
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV] + [BUTTON_ENTER]  # go to back  # enter back
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    key_generator = EncryptionKey(ctx)
+    key = key_generator.encryption_key()
+    assert key == None
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
 def test_load_key_from_keypad(m5stickv, mocker):
     from krux.pages.encryption_ui import EncryptionKey
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV

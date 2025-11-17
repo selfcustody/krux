@@ -36,6 +36,7 @@ from ...format import replace_decimal_separator
 from ...key import TYPE_SINGLESIG
 from ...kboard import kboard
 from ...settings import CONTEXT_ARROW
+from ...themes import theme
 
 
 class Home(Page):
@@ -60,7 +61,7 @@ class Home(Page):
                     (t("Wallet") + CONTEXT_ARROW, self.wallet),
                     (t("Address") + CONTEXT_ARROW, self.addresses_menu),
                     (t("Sign"), self.sign),
-                    (shtn_reboot_label, self.shutdown),
+                    (shtn_reboot_label, self.shutdown, theme.no_esc_color),
                 ],
                 back_label=None,
             ),

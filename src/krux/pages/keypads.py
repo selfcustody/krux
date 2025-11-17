@@ -22,6 +22,7 @@
 
 import math
 import lcd
+from ..context import Context
 from ..krux_settings import t
 from ..themes import theme
 from ..input import (
@@ -44,7 +45,7 @@ FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets.
 class KeypadLayout:
     """Groups layout-related attributes for Keypad."""
 
-    def __init__(self, ctx, max_keys_count):
+    def __init__(self, ctx: Context, max_keys_count):
         self.width = math.floor(math.sqrt(max_keys_count))
         self.height = math.ceil(max_keys_count / self.width)
         self.max_index = self.width * self.height
@@ -72,7 +73,7 @@ class KeypadLayout:
 class Keypad:
     """Controls keypad creation and management."""
 
-    def __init__(self, ctx, keysets, possible_keys_fn=None):
+    def __init__(self, ctx: Context, keysets, possible_keys_fn=None):
         self.ctx = ctx
         self.keysets = keysets
         self.keyset_index = 0

@@ -93,7 +93,7 @@ class TinySeed(Page):
 
     def _draw_labels(self, page):
         """Draws labels for import and export Tinyseed UI"""
-        self.ctx.display.draw_hcentered_text(self.label)
+        self.ctx.display.draw_hcentered_text(self.label, color=theme.highlight_color)
         # For non‑minimal displays, show extra bit numbers (rotate to landscape temporarily)
         if not kboard.has_minimal_display:
             self.ctx.display.to_landscape()

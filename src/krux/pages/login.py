@@ -49,6 +49,7 @@ from ..key import (
 )
 from ..kboard import kboard
 from ..settings import CONTEXT_ARROW
+from ..themes import theme
 
 
 DIGITS_HEX = "0123456789ABCDEF"
@@ -79,7 +80,7 @@ class Login(MnemonicLoader):
         if ctx.power_manager is not None:
             kboard.has_battery = ctx.power_manager.has_battery()
         if kboard.has_battery:
-            login_menu_items.append((t("Shutdown"), self.shutdown))
+            login_menu_items.append((t("Shutdown"), self.shutdown, theme.no_esc_color))
 
         super().__init__(
             ctx,
@@ -263,7 +264,6 @@ class Login(MnemonicLoader):
         derivation_path = ""
 
         from ..wallet import Wallet
-        from ..themes import theme
         from .utils import Utils
 
         utils = Utils(self.ctx)
