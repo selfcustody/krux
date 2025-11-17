@@ -1,0 +1,1 @@
+On macOS, you may also run into flashing errors. This often happens when the CH341 USB driver is missing, preventing proper communication with the device. To fix it, download and install the [CH341 driver](https://www.wch-ic.com/downloads/CH341SER_MAC_ZIP.html).
