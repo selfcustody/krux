@@ -203,7 +203,7 @@ translation_array = [
     "Neue Firmware erkannt.",
     "Nein",
     "Keine Passphrase",
-    "Nicht-ASCII-Zeichen wurden in Ihrer Passphrase erkannt. Krux kann nicht garantieren, dass andere Wallets den gleichen BIP39-Fingerabdruck ableiten.",
+    "Nicht-ASCII-Zeichen wurden in Ihrer Passphrase erkannt. Krux kann nicht garantieren, dass andere Wallets den gleichen Schlüssel ableiten.",
     "Nicht genug Würfe!",
     "Zahlen",
     "Oktal",

@@ -97,7 +97,7 @@ class PassphraseEditor(Page):
                     t(
                         "Non-ASCII characters were detected in your passphrase. "
                         "Krux cannot guarantee that other wallets will derive the "
-                        "same BIP39 fingerprint."
+                        "same key."
                     )
                 )
                 if not self.prompt(

@@ -181,7 +181,7 @@
     "New firmware detected.": "Nouveau micrologiciel détecté.",
     "No": "Non",
     "No Passphrase": "Pas de phrase secrète",
-    "Non-ASCII characters were detected in your passphrase. Krux cannot guarantee that other wallets will derive the same BIP39 fingerprint.": "Des caractères non ASCII ont été détectés dans votre phrase secrète. Krux ne peut pas garantir que d'autres portefeuilles dériveront la même empreinte digitale BIP39.",
+    "Non-ASCII characters were detected in your passphrase. Krux cannot guarantee that other wallets will derive the same key.": "Des caractères non ASCII ont été détectés dans votre phrase secrète. Krux ne peut garantir que d'autres portefeuilles obtiendront la même clé.",
     "Not enough rolls!": "Pas assez de jets !",
     "Numbers": "Nombres",
     "Octal": "Octale",
