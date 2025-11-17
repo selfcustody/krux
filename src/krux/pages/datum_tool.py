@@ -640,7 +640,7 @@ class DatumTool(Page):
             if pages[-1] < endpos < content_len:
                 pages.append(endpos)
 
-            offset_y = DEFAULT_PADDING + (info_len) * FONT_HEIGHT + 1
+            offset_y = DEFAULT_PADDING + info_len * FONT_HEIGHT + 1
             for line in lines:
                 self.ctx.display.draw_string(offset_x, offset_y, line)
                 offset_y += FONT_HEIGHT
@@ -832,7 +832,7 @@ class DatumTool(Page):
         menu = Menu(
             self.ctx,
             todo_menu,
-            offset=(info_len + 1) * FONT_HEIGHT + DEFAULT_PADDING + 2,
+            offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
         )
         _, status = menu.run_loop()
 
