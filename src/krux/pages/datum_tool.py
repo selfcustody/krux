@@ -412,23 +412,28 @@ class DatumTool(Page):
         self.history = []
         self.oneline_viewable = None
 
-    def view_qr(self):
-        """Reusable handler for viewing a QR code"""
+    def _get_qr_threshold(self):
         from ..qr import QR_CAPACITY_BYTE, QR_CAPACITY_ALPHANUMERIC, QR_CAPACITY_NUMERIC
-        from ..bbqr import encode_bbqr
-        import urtypes
-        from ur.ur import UR
-
-        # Helper function to check if character is alphanumeric
-        def is_alnum(c):
-            return ("A" <= c <= "Z") or ("0" <= c <= "9") or c in (" $%*+-./:")
 
         seedqrview_thresh = QR_CAPACITY_BYTE[STATIC_QR_MAX_SIZE]
         if not isinstance(self.contents, bytes):
+            # Helper function to check if character is alphanumeric
+            def is_alnum(c):
+                return ("A" <= c <= "Z") or ("0" <= c <= "9") or c in (" $%*+-./:")
+
             if all(c.isdigit() for c in self.contents[:SUFFICIENT_SAMPLE_SIZE]):
                 seedqrview_thresh = QR_CAPACITY_NUMERIC[STATIC_QR_MAX_SIZE]
             elif all(is_alnum(c) for c in self.contents[:SUFFICIENT_SAMPLE_SIZE]):
                 seedqrview_thresh = QR_CAPACITY_ALPHANUMERIC[STATIC_QR_MAX_SIZE]
+        return seedqrview_thresh
+
+    def view_qr(self):
+        """Reusable handler for viewing a QR code"""
+        from ..bbqr import encode_bbqr
+        import urtypes
+        from ur.ur import UR
+
+        seedqrview_thresh = self._get_qr_threshold()
 
         if len(self.contents) <= seedqrview_thresh:
             from .encryption_ui import prompt_for_text_update
@@ -491,11 +496,17 @@ class DatumTool(Page):
             if isinstance(self.contents, bytes):
                 menu_opts.append(("UR bytes", (FORMAT_UR, "bytes")))
 
-            idx, _ = Menu(
+            submenu = Menu(
                 self.ctx,
                 [(x[0], lambda: None) for x in menu_opts],
-                back_label=None,
-            ).run_loop()
+            )
+            idx, _ = submenu.run_loop()
+
+            if idx == submenu.back_index:
+                return MENU_CONTINUE
+
+            del submenu
+            gc.collect()
 
             qr_fmt = menu_opts[idx][1][0]
 
@@ -734,8 +745,11 @@ class DatumTool(Page):
             menu.append((t("Show Datum"), lambda: "show"))
 
         if not offer_convert:
+            qr_context = (
+                CONTEXT_ARROW if len(self.contents) > self._get_qr_threshold() else ""
+            )
             menu.append((t("Convert Datum") + CONTEXT_ARROW, lambda: "convert_begin"))
-            menu.append((t("QR Code"), lambda: "export_qr"))
+            menu.append((t("QR Code") + qr_context, lambda: "export_qr"))
 
             # when not sensitive, allow export to sd
             if not self.sensitive:

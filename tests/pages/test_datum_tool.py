@@ -505,8 +505,7 @@ def test_datumtool_view_qr(m5stickv, mocker):
 
     # with longer text for big pMofN animated qr
     BTN_SEQUENCE = (
-        BUTTON_PAGE,  # to pMofN
-        BUTTON_ENTER,  # go pMofN
+        BUTTON_ENTER,  # go pMofN (static not available!)
         BUTTON_ENTER,  # leave QR view
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -518,6 +517,7 @@ def test_datumtool_view_qr(m5stickv, mocker):
 
     # with longer text for UR-bytes
     BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to < Back
         BUTTON_PAGE_PREV,  # to UR-bytes
         BUTTON_ENTER,  # go UR-bytes
         BUTTON_ENTER,  # leave QR view
@@ -532,6 +532,7 @@ def test_datumtool_view_qr(m5stickv, mocker):
 
     # with longer text for big UR-psbt
     BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to < Back
         BUTTON_PAGE_PREV,  # to UR-bytes
         BUTTON_PAGE_PREV,  # to UR-psbt
         BUTTON_ENTER,  # go UR-psbt
@@ -547,6 +548,7 @@ def test_datumtool_view_qr(m5stickv, mocker):
 
     # with longer text for big BBQr
     BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to < Back
         BUTTON_PAGE_PREV,  # to UR-bytes
         BUTTON_PAGE_PREV,  # to UR-psbt
         BUTTON_PAGE_PREV,  # to BBQr
@@ -563,6 +565,7 @@ def test_datumtool_view_qr(m5stickv, mocker):
 
     # with short latin-1 as a string works
     BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to < Back
         BUTTON_PAGE_PREV,  # deny label update
         BUTTON_ENTER,  # dismiss QR
         BUTTON_PAGE_PREV,  # to Back
@@ -593,9 +596,8 @@ def test_datumtool_view_qr(m5stickv, mocker):
     print(ctx.display.method_calls)
 
     # but can work if encoding unicode string as utf-8 bytes
+    # BIG QR, has options: static, p M of N and ur bytes
     BTN_SEQUENCE = (
-        BUTTON_PAGE_PREV,  # deny label update
-        BUTTON_ENTER,  # dismiss QR
         BUTTON_PAGE_PREV,  # to Back
         BUTTON_ENTER,  # leave QR view
     )

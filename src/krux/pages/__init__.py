@@ -746,13 +746,6 @@ class Menu:
         y_offset = (
             self.ctx.display.height() - ((bar_height + bar_padding) * total_pages)
         ) // 2 + (bar_padding + self.menu_offset) // 2
-        print(
-            self.menu_offset,
-            total_pages,
-            self.menu_view.curr_page(),
-            bar_height,
-            y_offset,
-        )
         for i in range(total_pages):
             color = (
                 theme.toggle_color

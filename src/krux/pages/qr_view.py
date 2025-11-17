@@ -25,7 +25,7 @@ from embit.wordlists.bip39 import WORDLIST
 from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY
 from ..themes import theme, WHITE, BLACK, DARKGREY
 from ..krux_settings import t
-from ..settings import THIN_SPACE
+from ..settings import THIN_SPACE, CONTEXT_ARROW
 from ..qr import get_size
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, M5STICKV_WIDTH
 from ..input import (
@@ -486,7 +486,7 @@ class SeedQRView(Page):
                 lambda: self.save_svg_image(suggested_file_name),
             )
         )
-        submenu = Menu(self.ctx, qr_menu, offset=2 * FONT_HEIGHT, back_label=None)
+        submenu = Menu(self.ctx, qr_menu, offset=2 * FONT_HEIGHT)
         submenu.run_loop()
         return MENU_CONTINUE
         # return MENU_EXIT  # Use this to exit QR Viewer after saving
@@ -566,7 +566,7 @@ class SeedQRView(Page):
                 (t("Return to QR Viewer"), lambda: None),
                 (t("Toggle Brightness"), toggle_brightness),
                 (
-                    t("Save QR Image to SD Card"),
+                    t("Save QR Image to SD Card") + CONTEXT_ARROW,
                     (
                         self.save_qr_image_menu
                         if allow_export and self.has_sd_card()
