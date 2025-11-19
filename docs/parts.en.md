@@ -5,11 +5,11 @@
 | Device | [M5StickV](#m5stickv) | [Maix Amigo](#maix-amigo) | [Maix Dock](#maix-dock) | [Yahboom k210 module](#yahboom-k210-module) | [Maix Cube](#maix-cube) | [WonderMV](#wondermv) | [TZT](#tzt) | [Embed Fire](#embed-fire) |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Price range | US$ 50-55 | US$ 50-85 | US$ 27-35  | US$ 45-61 | US$ 34-49 | US$ 58-86 | US$ 48 | US$ 74 |
-| Screen size / resolution | 1.14" / 135*240 | 3.5" / 320*480 | 2.4" / 240*320 | 2" / 240*320 | 1.3" / 240*240 | 2" / 240*320 | 2" / 240*320 | 2.4" / 240*320 |
+| Screen size /<br> Res. px /<br> PPI | 1.14" /<br> 135 x 240 /<br> 241 | 3.5" /<br> 320 x 480 /<br> 165 | 2.4" /<br> 240 x 320 /<br> 167 | 2" /<br> 240 x 320 /<br> 200 | 1.3" /<br> 240 x 240 /<br> 261 | 2" /<br> 240 x 320 /<br> 200| 2" /<br> 240 x 320 /<br> 200 | 2.4" /<br> 240 x 320 /<br> 167 |
 | Brightness control | :white_check_mark: | :x: | :x: | :x: | :white_check_mark: | :white_check_mark: | :x: | :x: |
-| Device size | 48\*24\*22mm | 104\*63\*17mm | 98\*59\*18mm | 57\*41\*17mm | 40\*40\*16mm | 59\*41\*17mm | 57\*41\*16mm | 63\*45\*14mm |
+| Device size | 48 x 24 x 22mm | 104 x 63 x 17mm | 98 x 59 x 18mm | 57 x 41 x 17mm | 40 x 40 x 16mm | 59 x 41 x 17mm | 57 x 41 x 16mm | 63 x 45 x 14mm |
 | Touchscreen | :x: | Capacitive | :x: | Capacitive | :x: | Capacitive | Capacitive | Capacitive |
-| Camera | `OV7740` | `OV7740` rear<br>`GC0328` front | `GC0328` | `OV2640` <i style="font-size: 85%">(VER:1.0)</i> or<br>`GC2145` <i style="font-size: 85%">(VER:1.1)</i> | `OV7740` | `GC2145` | `GC2145` or<br>`GC0328` | `OV2640` or<br>`GC2145` |
+| Camera | `OV7740` | `OV7740` rear /<br>`GC0328` front | `GC0328` | `OV2640` <i style="font-size: 85%">(VER:1.0)</i> or<br>`GC2145` <i style="font-size: 85%">(VER:1.1)</i> | `OV7740` | `GC2145` | `GC2145` or<br>`GC0328` | `OV2640` or<br>`GC2145` |
 | Battery  | 200mAh | 520mAh | :x: | :x: | 200mAh | :x: | :x: | :x: |
 | Requirements | None | None | [Rotary encoder](https://duckduckgo.com/?q=ky-040)<br> [3D printed case](https://github.com/selfcustody/DockEncoderCase)<br> Soldering<br>Assembly | None | None | None | None | None |
 | Warnings  | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) | [:material-numeric-2-circle:{ title="Maix Amigo screens" }](#amigo-info) | [:material-numeric-3-circle:{ title="Maix Dock and soldered pin" }](#dock-info) | Micro USB | 3-Way button | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) [:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info) | None | None |
