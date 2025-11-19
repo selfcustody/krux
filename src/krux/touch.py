@@ -22,7 +22,6 @@
 # pylint: disable=R0902
 
 import time
-import math
 
 from .kboard import kboard
 from .krux_settings import Settings
@@ -36,6 +35,7 @@ SWIPE_RIGHT = 1
 SWIPE_LEFT = 2
 SWIPE_UP = 3
 SWIPE_DOWN = 4
+SWIPE_NONE = 5
 
 TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
 
@@ -227,25 +227,20 @@ class Touch:
             if self.state == RELEASED:  # On touch release
                 self.state = IDLE
             elif self.state == PRESSED:
-                if self.release_point is not None:
-                    lateral_lenght = self.release_point[0] - self.press_point[0][0]
-                    if lateral_lenght > SWIPE_THRESHOLD:
-                        self.gesture = SWIPE_RIGHT
-                    elif -lateral_lenght > SWIPE_THRESHOLD:
-                        self.gesture = SWIPE_LEFT
-                        lateral_lenght *= -1  # make it positive value
-                    vertical_lenght = self.release_point[1] - self.press_point[0][1]
-                    if (
-                        vertical_lenght > SWIPE_THRESHOLD
-                        and vertical_lenght > lateral_lenght
-                    ):
-                        self.gesture = SWIPE_DOWN
-                    elif (
-                        -vertical_lenght > SWIPE_THRESHOLD
-                        and -vertical_lenght > lateral_lenght
-                    ):
-                        self.gesture = SWIPE_UP
                 self.state = RELEASED
+                if self.release_point is not None:
+                    dx = self.release_point[0] - self.press_point[0][0]
+                    dy = self.release_point[1] - self.press_point[0][1]
+
+                    if abs(dx) > SWIPE_THRESHOLD or abs(dy) > SWIPE_THRESHOLD:
+                        # discards swipes with angle > 27 degrees
+                        if abs(dx) > abs(dy) * 2:
+                            self.gesture = SWIPE_LEFT if dx < 0 else SWIPE_RIGHT
+                        elif abs(dy) > abs(dx) * 2:
+                            self.gesture = SWIPE_UP if dy < 0 else SWIPE_DOWN
+                        else:
+                            # undetermined diagonal swipe
+                            self.gesture = SWIPE_NONE
         else:
             print("Touch error")
         return self.state
@@ -269,33 +264,31 @@ class Touch:
         """Wraps touch states to behave like a regular button"""
         return 1 if self.current_state() == IDLE else 0
 
-    def swipe_right_value(self):
-        """Returns detected gestures and clean respective variable"""
-        if self.gesture == SWIPE_RIGHT:
+    def _swipe_state_check(self, swipe_type):
+        if self.gesture == swipe_type:
             self.gesture = None
             return 0
         return 1
+
+    def swipe_none_value(self):
+        """Returns detected gestures and clean respective variable"""
+        return self._swipe_state_check(SWIPE_NONE)
+
+    def swipe_right_value(self):
+        """Returns detected gestures and clean respective variable"""
+        return self._swipe_state_check(SWIPE_RIGHT)
 
     def swipe_left_value(self):
         """Returns detected gestures and clean respective variable"""
-        if self.gesture == SWIPE_LEFT:
-            self.gesture = None
-            return 0
-        return 1
+        return self._swipe_state_check(SWIPE_LEFT)
 
     def swipe_up_value(self):
         """Returns detected gestures and clean respective variable"""
-        if self.gesture == SWIPE_UP:
-            self.gesture = None
-            return 0
-        return 1
+        return self._swipe_state_check(SWIPE_UP)
 
     def swipe_down_value(self):
         """Returns detected gestures and clean respective variable"""
-        if self.gesture == SWIPE_DOWN:
-            self.gesture = None
-            return 0
-        return 1
+        return self._swipe_state_check(SWIPE_DOWN)
 
     def current_index(self):
         """Returns current index of last touched point"""

@@ -13,9 +13,9 @@ Krux now displays a warning instead of blocking QR-encoded passphrases that cont
 Added new context arrows, customizable colors, and a page index indicator for menu items. Enhanced keypad visuals with a clearer keyset index indicator and a double-outline highlight when navigating with buttons on touch devices.
 
 ### Other Bug Fixes and Improvements
-- Settings: Added a new _Swipe Threshold_
 - Settings: Reduced default _Buttons Debounce_ value (with an even lower default on _M5StickV_)
 - Settings: Expanded value ranges for _Touch Threshold_ and _Buttons Debounce_
+- Swipe handling: Diagonal swipes are now discarded, and the swipe detection threshold has been slightly reduced
 - Keypad: Added backtick **`**
 - Bugfix: Screensaver not activating in menu pages without statusbar
 - Embit: Improved BIP39 mnemonic validation
