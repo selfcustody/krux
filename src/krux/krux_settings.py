@@ -316,13 +316,11 @@ class TouchSettings(SettingsNamespace):
     namespace = "settings.touchscreen"
     default_th = 40 if kboard.is_wonder_k else 22
     threshold = NumberSetting(int, "threshold", default_th, [2, 200])
-    swipe_threshold = NumberSetting(int, "swipe_threshold", 50, [15, 150])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "threshold": t("Touch Threshold"),
-            "swipe_threshold": t("Swipe Threshold"),
         }[attr]
 
 

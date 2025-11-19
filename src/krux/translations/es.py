@@ -312,7 +312,6 @@ translation_array = [
     "Almacenar en la Tarjeta SD",
     "Fuerza",
     "Fuerte",
-    "Umbral de paso",
     "Deslizar para cambiar de modo",
     "TC Hash Flash",
     "TC Flash Hash al arranque",

@@ -312,7 +312,6 @@ translation_array = [
     "Lưu trữ trên thẻ SD",
     "Độ mạnh",
     "Mạnh",
-    "Vuốt Ngưỡng",
     "Vuốt để thay đổi chế độ",
     "TC Flash Hash",
     "Hash Flash TC khi khởi động",

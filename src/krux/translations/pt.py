@@ -312,7 +312,6 @@ translation_array = [
     "Armazenar no cartão SD",
     "Força",
     "Forte",
-    "Limite de deslizamento",
     "Deslize para mudar de modo",
     "TC Flash Hash",
     "TC Flash Hash na Inicialização",

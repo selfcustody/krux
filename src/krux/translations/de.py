@@ -312,7 +312,6 @@ translation_array = [
     "Auf der SD-Karte speichern",
     "Stärke",
     "Stark",
-    "Wischschwelle",
     "Wischen um den Modus zu ändern",
     "TC Flash-Hash",
     "TC Flash-Hash beim Start",

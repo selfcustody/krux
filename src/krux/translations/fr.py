@@ -312,7 +312,6 @@ translation_array = [
     "Stocker sur la carte SD",
     "Force",
     "Fort",
-    "Seuil de balayage",
     "Faites glisser pour changer de mode",
     "TC Flash Hash",
     "TC Flash Hash au démarrage",

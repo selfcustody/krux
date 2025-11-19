@@ -312,7 +312,6 @@ translation_array = [
     "Opslaan op SD kaart",
     "Sterkte",
     "Sterk",
-    "Veegdrempel",
     "Verander modus",
     "TC Flash Hash",
     "Hash Flash bij het opstarten",

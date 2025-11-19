@@ -312,7 +312,6 @@ translation_array = [
     "SD Kartta Sakla",
     "Güç",
     "Güçlü",
-    "Kaydırma Eşiği",
     "Modu değiştirmek için kaydırın",
     "TC Flash Hash",
     "Önyüklemede TC Flash Hash",

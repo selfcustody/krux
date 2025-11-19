@@ -312,7 +312,6 @@ translation_array = [
     "存储到 SD 卡",
     "强度",
     "强",
-    "滑动阈值",
     "滑动切换模式",
     "TC Flash Hash",
     "启动时的 TC Flash Hash",
