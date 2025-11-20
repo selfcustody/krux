@@ -87,6 +87,8 @@ BASE_DEC_SUFFIX = "DEC"
 BASE_HEX_SUFFIX = "HEX"
 BASE_OCT_SUFFIX = "OCT"
 
+TOUCH_HIGHLIGHT_MS = 100
+
 
 class Page:
     """Represents a page in the app, with helper methods for common display and
@@ -760,6 +762,19 @@ class Menu:
                 color,
             )
 
+    def _clear_menu_display(self):
+        if self.menu_offset > STATUS_BAR_HEIGHT:
+            # Clear only the menu area
+            self.ctx.display.fill_rectangle(
+                0,
+                self.menu_offset,
+                self.ctx.display.width(),
+                self.ctx.display.height() - self.menu_offset,
+                theme.bg_color,
+            )
+        else:
+            self.ctx.display.clear()
+
     def run_loop(self, start_from_index=None, swipe_up_fnc=None, swipe_down_fnc=None):
         """Runs the menu loop until one of the menu items returns either a MENU_EXIT
         or MENU_SHUTDOWN status
@@ -771,19 +786,11 @@ class Menu:
             selected_item_index = start_from_index
         while True:
             gc.collect()
-            if self.menu_offset > STATUS_BAR_HEIGHT:
-                # Clear only the menu area
-                self.ctx.display.fill_rectangle(
-                    0,
-                    self.menu_offset,
-                    self.ctx.display.width(),
-                    self.ctx.display.height() - self.menu_offset,
-                    theme.bg_color,
-                )
-            else:
-                self.ctx.display.clear()
+            self._clear_menu_display()
             if kboard.has_touchscreen:
-                self._draw_touch_menu(selected_item_index)
+                self._draw_touch_menu(
+                    selected_item_index, draw_dividers=not self.ctx.input.buttons_active
+                )
             else:
                 self._draw_menu(selected_item_index)
             self.draw_status_bar()
@@ -796,6 +803,7 @@ class Menu:
                 start_from_submenu = False
             else:
                 screensaver_time = Settings().appearance.screensaver_time
+                was_btn_active = self.ctx.input.buttons_active
                 btn = self.ctx.input.wait_for_fastnav_button(
                     # Block if screen saver not active
                     screensaver_time == 0,
@@ -804,6 +812,20 @@ class Menu:
                 if kboard.has_touchscreen:
                     if btn == BUTTON_TOUCH:
                         selected_item_index = self.ctx.input.touch.current_index()
+
+                        # highlight selected index before continue
+                        if was_btn_active:
+                            # need to clear screen if button was used just before
+                            # because an item will be highlighted already
+                            self._clear_menu_display()
+                        self._draw_touch_menu(
+                            selected_item_index,
+                            draw_dividers=not was_btn_active,
+                            highlight=True,
+                        )
+                        time.sleep_ms(
+                            TOUCH_HIGHLIGHT_MS
+                        )  # wait a little to see item highlighted
                         btn = BUTTON_ENTER
                     self.ctx.input.touch.clear_regions()
                 if btn == BUTTON_ENTER:
@@ -972,7 +994,9 @@ class Menu:
             return menu_item[2]
         return theme.fg_color
 
-    def _draw_touch_menu(self, selected_item_index):
+    def _draw_touch_menu(
+        self, selected_item_index, draw_dividers=True, highlight=False
+    ):
         # map regions with dynamic height to fill screen
         self.ctx.input.touch.clear_regions()
         offset_y = 0
@@ -994,8 +1018,8 @@ class Menu:
         self.ctx.input.touch.y_regions = y_keypad_map
 
         # Draw dividers
-        for i, y in enumerate(y_keypad_map[:-1]):
-            if i and not self.ctx.input.buttons_active:
+        if draw_dividers:
+            for y in y_keypad_map[1:-1]:  # skip the first and last entries
                 self.ctx.display.draw_line(
                     0, y, self.ctx.display.width(), y, theme.frame_color
                 )
@@ -1008,7 +1032,9 @@ class Menu:
                 region_height - len(menu_item_lines) * FONT_HEIGHT
             ) // 2 + y_keypad_map[i]
             fg_color = self._get_menu_item_color(menu_item)
-            if selected_item_index == i and self.ctx.input.buttons_active:
+            if selected_item_index == i and (
+                self.ctx.input.buttons_active or highlight
+            ):
                 self.ctx.display.fill_rectangle(
                     0,
                     offset_y_item + 1 - FONT_HEIGHT // 2,
@@ -1017,7 +1043,9 @@ class Menu:
                     fg_color,
                 )
             for j, text in enumerate(menu_item_lines):
-                if selected_item_index == i and self.ctx.input.buttons_active:
+                if selected_item_index == i and (
+                    self.ctx.input.buttons_active or highlight
+                ):
                     self.ctx.display.draw_hcentered_text(
                         text, offset_y_item + FONT_HEIGHT * j, theme.bg_color, fg_color
                     )
