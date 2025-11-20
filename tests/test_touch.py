@@ -308,6 +308,7 @@ def test_gesture_detection(
     touch.state = PRESSED
     touch.press_point = [press_point]
     touch.release_point = release_point
+    touch.pressed_time = time.ticks_ms()
 
     touch.current_state()
 

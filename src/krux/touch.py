@@ -30,6 +30,7 @@ IDLE = 0
 PRESSED = 1
 RELEASED = 2
 
+SWIPE_DURATION_MS = 750
 SWIPE_THRESHOLD = 35
 SWIPE_RIGHT = 1
 SWIPE_LEFT = 2
@@ -48,6 +49,7 @@ class Touch:
         For Krux width = max_y, height = max_x
         """
         self.sample_time = 0
+        self.pressed_time = 0
         self.y_regions = []
         self.x_regions = []
         self.index = 0
@@ -223,26 +225,37 @@ class Touch:
         data = self.touch_driver.current_point()
         if isinstance(data, tuple):
             self._store_points(data)
-        elif data is None:  # gets release then return to idle.
+            return self.state
+
+        if data is None:  # gets release then return to idle.
             if self.state == RELEASED:  # On touch release
                 self.state = IDLE
-            elif self.state == PRESSED:
+                return self.state
+
+            if self.state == PRESSED:
                 self.state = RELEASED
+
                 if self.release_point is not None:
                     dx = self.release_point[0] - self.press_point[0][0]
                     dy = self.release_point[1] - self.press_point[0][1]
 
                     if abs(dx) > SWIPE_THRESHOLD or abs(dy) > SWIPE_THRESHOLD:
-                        # discards swipes with angle > 27 degrees
-                        if abs(dx) > abs(dy) * 2:
-                            self.gesture = SWIPE_LEFT if dx < 0 else SWIPE_RIGHT
-                        elif abs(dy) > abs(dx) * 2:
-                            self.gesture = SWIPE_UP if dy < 0 else SWIPE_DOWN
+                        # discard swipes that took more than ~1s
+                        if self.sample_time - self.pressed_time < SWIPE_DURATION_MS:
+                            # discards swipes with angle > 27 degrees
+                            if abs(dx) > abs(dy) * 2:
+                                self.gesture = SWIPE_LEFT if dx < 0 else SWIPE_RIGHT
+                            elif abs(dy) > abs(dx) * 2:
+                                self.gesture = SWIPE_UP if dy < 0 else SWIPE_DOWN
+                            else:
+                                self.gesture = SWIPE_NONE  # undetermined diagonal swipe
                         else:
-                            # undetermined diagonal swipe
-                            self.gesture = SWIPE_NONE
-        else:
-            print("Touch error")
+                            self.gesture = (
+                                SWIPE_NONE  # hold finger on screen for too long
+                            )
+            return self.state
+
+        print("Touch error")
         return self.state
 
     def event(self, validate_position=True):
@@ -257,6 +270,7 @@ class Touch:
                 if isinstance(self.touch_driver.irq_point, tuple):
                     if self.valid_position(self.touch_driver.irq_point):
                         self._store_points(self.touch_driver.irq_point)
+                        self.pressed_time = time.ticks_ms()
                         return True
         return False
 

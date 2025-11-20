@@ -691,6 +691,7 @@ def test_touch_gestures(mocker, amigo):
             "current_point",
             side_effect=[None, point1, point2, None, None],
         )
+        input.touch.pressed_time = time.ticks_ms()
 
     # Swipe Right
     input.touch.clear_regions()
