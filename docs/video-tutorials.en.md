@@ -5,17 +5,6 @@ Most people prefer to learn by watching videos, and we are fortunate to have exc
 <div markdown="1" class="group-2">
 <div markdown="1" class="video">
 <div markdown="1" class="play-group">
-[![Krux on M5StickV + Sparrow Wallet](https://img.youtube.com/vi/rsdvmIcucwQ/0.jpg)](https://www.youtube.com/watch?v=rsdvmIcucwQ1)
-<div class="play-button">▶</div>
-</div>
-
-Krux on M5StickV + Sparrow Wallet - DIY Bitcoin Hardware Wallet (Similar to SeedSigner)
-
-<small>Crypto Guide (Jan 2023)</small>
-</div>
-
-<div markdown="1" class="video">
-<div markdown="1" class="play-group">
 [![Krux on Maix Amigo + Blue Wallet](https://img.youtube.com/vi/EtV_Iw6a0O0/0.jpg)](https://www.youtube.com/watch?v=EtV_Iw6a0O0)
 <div class="play-button">▶</div>
 </div>
@@ -23,6 +12,17 @@ Krux on M5StickV + Sparrow Wallet - DIY Bitcoin Hardware Wallet (Similar to Seed
 Krux on Maix Amigo + Blue Wallet - DIY Bitcoin Hardware Wallet (Similar to SeedSigner)
 
 <small>Crypto Guide (Dec 2022)</small>
+</div>
+
+<div markdown="1" class="video">
+<div markdown="1" class="play-group">
+[![Krux on M5StickV + Sparrow Wallet](https://img.youtube.com/vi/rsdvmIcucwQ/0.jpg)](https://www.youtube.com/watch?v=rsdvmIcucwQ1)
+<div class="play-button">▶</div>
+</div>
+
+Krux on M5StickV + Sparrow Wallet - DIY Bitcoin Hardware Wallet (Similar to SeedSigner)
+
+<small>Crypto Guide (Jan 2023)</small>
 </div>
 </div>
 
@@ -127,19 +127,6 @@ Usando a Krux com impressora térmica
 
 <div markdown="1" class="video">
 <div markdown="1" class="play-group">
-[![Carteira Bitcoin com celular OFFLINE](https://img.youtube.com/vi/CPEnTP7l_9Y/0.jpg)](https://www.youtube.com/watch?v=CPEnTP7l_9Y)
-<div class="play-button">▶</div>
-</div>
-
-Carteira Bitcoin com celular OFFLINE - Krux mobile APK
-
-<small>DIG P2P - Bitcoin Para Iniciantes! (Aug 2023)</small>
-</div>
-</div>
-
-<div markdown="1" class="group-2">
-<div markdown="1" class="video">
-<div markdown="1" class="play-group">
 [![Como instalar a carteira Krux no celular](https://img.youtube.com/vi/hhMYq75pAOc/0.jpg)](https://www.youtube.com/watch?v=hhMYq75pAOc)
 <div class="play-button">▶</div>
 </div>
@@ -148,7 +135,9 @@ Como instalar a carteira Krux no celular
 
 <small>João Trein (Feb 2024)</small>
 </div>
+</div>
 
+<div markdown="1" class="group-2">
 <div markdown="1" class="video">
 <div markdown="1" class="play-group">
 [![Faça sua hardware wallet em casa com a KRUX!](https://img.youtube.com/vi/1V6Lp0m8esc/0.jpg)](https://www.youtube.com/watch?v=1V6Lp0m8esc)
@@ -158,6 +147,17 @@ Como instalar a carteira Krux no celular
 Faça sua hardware wallet em casa com a KRUX!
 
 <small>CAIOVSKI (Jun 2024)</small>
+</div>
+
+<div markdown="1" class="video">
+<div markdown="1" class="play-group">
+[![MAIX CUBE + KRUX É UMA BOA CARTEIRA?](https://img.youtube.com/vi/8k2RivwnHUc/0.jpg)](https://www.youtube.com/watch?v=8k2RivwnHUc)
+<div class="play-button">▶</div>
+</div>
+
+MAIX CUBE + KRUX É UMA BOA CARTEIRA?
+
+<small>DIG P2P - Bitcoin Para Iniciantes! (Nov 2025)</small>
 </div>
 </div>
 
