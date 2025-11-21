@@ -13,6 +13,7 @@ Krux now displays a warning instead of blocking QR-encoded passphrases that cont
 - Added backtick ` to keypad
 - Bugfix: Screensaver not activating in menu pages without statusbar
 - Embit: Improved BIP39 mnemonic validation
+- Better processing of Binary QR codes
 
 # Changelog 25.10.1 - October 2025
 
