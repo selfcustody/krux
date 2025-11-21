@@ -9,6 +9,9 @@ From the wonderful land of Korea, a new creation arrives: the WonderK PRO. Creat
 ### Changed BIP39 Passphrase Validation
 Krux now displays a warning instead of blocking QR-encoded passphrases that contain non-ASCII characters. Users are encouraged to use QR codes containing only ASCII passphrases or non-ASCII that have already been normalized to NFKD.
 
+### Easier to Scan UR QR Codes
+Exported Uniform Resource (UR) QR codes, a widely adopted standard for exchanging PSBTs, now use uppercase data to reduce QR density, improving scan reliability without increasing the number of frames.
+
 ### Other Bug Fixes and Improvements
 - Added backtick ` to keypad
 - Bugfix: Screensaver not activating in menu pages without statusbar
