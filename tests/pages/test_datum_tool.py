@@ -1187,3 +1187,86 @@ def test_datumtool_show_contents_button_turbo(mocker, m5stickv):
     datum._show_contents()
 
     time.sleep_ms.assert_called_with(KEY_REPEAT_DELAY_MS)
+
+
+def test_datumtoolmenu_scan_qr_binary_decodable(m5stickv, mocker):
+    """Test scan_qr when QR scanner returns binary data that can be decoded to text"""
+    from krux.pages.datum_tool import DatumToolMenu
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    # Binary data that can be decoded to UTF-8 text
+    binary_data = b"Hello World"
+
+    # Mock QR scanner to return binary data
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (binary_data, 0)
+    )
+
+    # Button sequence to exit from DatumTool view
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # go Scan QR
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+        BUTTON_PAGE,  # to Text Entry
+        BUTTON_PAGE,  # to Read File
+        BUTTON_PAGE,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumToolMenu(ctx).run()
+
+    # Verify that the button sequence was executed
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # Verify that the decoded text "Hello World" was displayed in the info box
+    # The display should show the decoded string, not the hex representation
+    display_calls = [
+        str(call) for call in ctx.display.draw_hcentered_text.call_args_list
+    ]
+    assert any(
+        '"Hello World"' in call for call in display_calls
+    ), f"Expected to find decoded text 'Hello World' in display calls, but got: {display_calls}"
+
+
+def test_datumtoolmenu_scan_qr_binary_non_decodable(m5stickv, mocker):
+    """Test scan_qr when QR scanner returns binary data that cannot be decoded to text"""
+    from krux.pages.datum_tool import DatumToolMenu
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    # Binary data that cannot be decoded to UTF-8 (invalid UTF-8 sequence)
+    # 0xFF and 0xFE are not valid UTF-8 byte sequences
+    binary_data = b"\xff\xfe\xfd\xfc"
+
+    # Mock QR scanner to return binary data
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (binary_data, 0)
+    )
+
+    # Button sequence to exit from DatumTool view after scanning binary data
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # go Scan QR
+        BUTTON_PAGE_PREV,  # to Back
+        BUTTON_ENTER,  # go Back
+        BUTTON_PAGE,  # to Text Entry
+        BUTTON_PAGE,  # to Read File
+        BUTTON_PAGE,  # to Back
+        BUTTON_ENTER,  # go Back
+    )
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumToolMenu(ctx).run()
+
+    # Verify that the button sequence was executed
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # Verify that the hex representation was displayed in the info box
+    # Since the data cannot be decoded to text, it should be shown as hex
+    display_calls = [
+        str(call) for call in ctx.display.draw_hcentered_text.call_args_list
+    ]
+    assert any(
+        "0xfffefdfc" in call for call in display_calls
+    ), f"Expected to find hex representation '0xfffefdfc' in display calls, but got: {display_calls}"
