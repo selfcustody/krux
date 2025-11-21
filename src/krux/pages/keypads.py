@@ -22,6 +22,7 @@
 
 import math
 import lcd
+import time
 from ..context import Context
 from ..krux_settings import t
 from ..themes import theme
@@ -29,12 +30,14 @@ from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
     BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
     SWIPE_RIGHT,
     SWIPE_LEFT,
     SWIPE_UP,
     SWIPE_DOWN,
     FAST_FORWARD,
     FAST_BACKWARD,
+    TOUCH_HIGHLIGHT_MS,
 )
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
 from ..kboard import kboard
@@ -152,7 +155,7 @@ class Keypad:
             for x in self.layout.x_keypad_map[:-1]:
                 x = MINIMAL_PADDING if x == 0 else x
                 key = None
-                custom_color = None
+                custom_color = theme.fg_color
                 if key_index < len(self.keys):
                     key = self.keys[key_index]
                 elif key_index == self.del_index:
@@ -190,12 +193,9 @@ class Keypad:
                                 self.layout.key_v_spacing - 2,
                                 theme.frame_color,
                             )
-                        if custom_color:
-                            self.ctx.display.draw_string(
-                                key_offset_x, offset_y, key, custom_color
-                            )
-                        else:
-                            self.ctx.display.draw_string(key_offset_x, offset_y, key)
+                        self.ctx.display.draw_string(
+                            key_offset_x, offset_y, key, custom_color
+                        )
                     if (
                         key_index == self.cur_key_index
                         and self.ctx.input.buttons_active
@@ -259,14 +259,40 @@ class Keypad:
     def touch_to_physical(self):
         """Convert a touch press in button press"""
         self.cur_key_index = self.ctx.input.touch.current_index()
-        actual_button = None
+        if self.cur_key_index < 0:
+            self.cur_key_index = 0
+            return BUTTON_TOUCH
+
+        special_keys = [self.del_index, self.esc_index, self.go_index]
+        if self.has_more_key():
+            special_keys.append(self.more_index)
+
+        if self.cur_key_index < len(self.keys) or self.cur_key_index in special_keys:
+            key_index = 0
+            for y in self.layout.y_keypad_map[:-1]:
+                for x in self.layout.x_keypad_map[:-1]:
+                    if key_index == self.cur_key_index:
+                        offset_x = MINIMAL_PADDING if x == 0 else x
+                        for i in range(1, 3):
+                            self.ctx.display.outline(
+                                offset_x + i,
+                                y + i,
+                                self.layout.key_h_spacing - i * 2,
+                                self.layout.key_v_spacing - i * 2,
+                            )
+                        # wait a little to see item outlined
+                        time.sleep_ms(TOUCH_HIGHLIGHT_MS)
+                    key_index += 1
+
+        actual_button = BUTTON_TOUCH
         if self.cur_key_index < len(self.keys):
             if self.keys[self.cur_key_index] in self.possible_keys:
                 actual_button = BUTTON_ENTER
-        elif self.cur_key_index < self.layout.max_index:
+        elif self.cur_key_index in special_keys:
             actual_button = BUTTON_ENTER
         else:
             self.cur_key_index = 0
+
         return actual_button
 
     def navigate(self, btn):

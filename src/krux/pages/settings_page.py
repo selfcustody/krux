@@ -43,7 +43,13 @@ from ..krux_settings import (
     locale_control,
     ThermalSettings,
 )
-from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+from ..input import (
+    BUTTON_ENTER,
+    BUTTON_PAGE,
+    BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
+    SWIPE_FAIL,
+)
 from ..sd_card import SDHandler
 from . import (
     Page,
@@ -111,6 +117,8 @@ class SettingsPage(Page):
 
     def _touch_to_physical(self, index):
         """Mimics touch presses into physical button presses"""
+        if index < 0:
+            return BUTTON_TOUCH
         if index == 0:
             return BUTTON_PAGE_PREV
         if index == 1:
@@ -385,9 +393,13 @@ class SettingsPage(Page):
                 theme.bg_color,
             )
             self._draw_settings_pad()
-            btn = self.ctx.input.wait_for_button()
-            if btn == BUTTON_TOUCH:
-                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
+
+            # wait until valid input is captured
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_button()
+                if btn == BUTTON_TOUCH:
+                    btn = self._touch_to_physical(self.ctx.input.touch.current_index())
             if btn == BUTTON_ENTER:
                 break
 

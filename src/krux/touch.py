@@ -39,6 +39,7 @@ SWIPE_DOWN = 4
 SWIPE_NONE = 5
 
 TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
+EDGE_PIXELS = 2  # The ammount of pixels to determine the edges of a region
 
 
 class Touch:
@@ -152,21 +153,58 @@ class Touch:
         x_index = 0
 
         # Calculate y index
-        for region in self.y_regions:
-            if data[1] > region:
-                y_index += 1
-        y_index -= 1 if y_index > 0 else 0
+        if self.y_regions:
+            for region in self.y_regions:
+                if data[1] > region:
+                    y_index += 1
 
+            # If touch was between adjacent regions, discard it as an edge touch
+            if (
+                (0 < y_index < len(self.y_regions) - 1)
+                and (
+                    data[1] - EDGE_PIXELS
+                    <= self.y_regions[y_index]
+                    <= data[1] + EDGE_PIXELS
+                )
+            ) or (
+                (0 < y_index - 1)
+                and (
+                    data[1] - EDGE_PIXELS
+                    <= self.y_regions[y_index - 1]
+                    <= data[1] + EDGE_PIXELS
+                )
+            ):
+                return -1
+            y_index -= 1 if y_index > 0 else 0
+
+        index = y_index
         # Calculate x index if x regions are defined (2D array)
         if self.x_regions:
             for x_region in self.x_regions:
                 if data[0] >= x_region:
                     x_index += 1
             x_index -= 1  # Adjust index to be zero-based
+
+            # If touch was between adjacent regions, discard it as an edge touch
+            if (
+                (0 < x_index < len(self.x_regions) - 1)
+                and (
+                    data[0] - EDGE_PIXELS
+                    <= self.x_regions[x_index]
+                    <= data[0] + EDGE_PIXELS
+                )
+            ) or (
+                (0 < x_index - 1)
+                and (
+                    data[0] - EDGE_PIXELS
+                    <= self.x_regions[x_index - 1]
+                    <= data[0] + EDGE_PIXELS
+                )
+            ):
+                return -1
+
             # Combine y and x indices to get the final index
             index = y_index * (len(self.x_regions) - 1) + x_index
-        else:
-            index = y_index
 
         # self.highlight_region(x_index, y_index)
         return index

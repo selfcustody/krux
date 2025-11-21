@@ -43,6 +43,7 @@ from ..input import (
     BUTTON_TOUCH,
     FAST_FORWARD,
     FAST_BACKWARD,
+    SWIPE_FAIL,
 )
 from ..bip39 import entropy_checksum
 from ..kboard import kboard
@@ -375,10 +376,15 @@ class TinySeed(Page):
             if self.ctx.input.buttons_active:
                 self._draw_index(index)
 
-            btn = self.ctx.input.wait_for_fastnav_button()
-            if btn == BUTTON_TOUCH:
-                btn = BUTTON_ENTER
-                index = self.ctx.input.touch.current_index()
+            # wait until valid input is captured
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_fastnav_button()
+                if btn == BUTTON_TOUCH:
+                    index = self.ctx.input.touch.current_index()
+                    if index < 0:
+                        continue
+                    btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if index > TS_ESC_END_POSITION:  # "Go"
                     if not w24 or (w24 and (page or scanning_24)):

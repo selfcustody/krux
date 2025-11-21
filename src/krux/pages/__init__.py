@@ -33,11 +33,13 @@ from ..input import (
     BUTTON_TOUCH,
     SWIPE_DOWN,
     SWIPE_UP,
+    SWIPE_FAIL,
     FAST_FORWARD,
     FAST_BACKWARD,
     SWIPE_LEFT,
     SWIPE_RIGHT,
     ONE_MINUTE,
+    TOUCH_HIGHLIGHT_MS,
 )
 from ..display import (
     DEFAULT_PADDING,
@@ -86,8 +88,6 @@ SWIPE_L_CHAR = "«"
 BASE_DEC_SUFFIX = "DEC"
 BASE_HEX_SUFFIX = "HEX"
 BASE_OCT_SUFFIX = "OCT"
-
-TOUCH_HIGHLIGHT_MS = 100
 
 
 class Page:
@@ -175,9 +175,12 @@ class Page:
             show_swipe_hint = False  # unless overridden by a particular key,
             # don't show the swipe hint after a key press
 
-            btn = self.ctx.input.wait_for_fastnav_button()
-            if btn == BUTTON_TOUCH:
-                btn = pad.touch_to_physical()
+            # wait until valid input is captured
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_fastnav_button()
+                if btn == BUTTON_TOUCH:
+                    btn = pad.touch_to_physical()
             if btn == BUTTON_ENTER:
                 pad.moving_forward = True
                 changed = False
@@ -472,7 +475,18 @@ class Page:
                     2 * FONT_HEIGHT,
                     theme.frame_color,
                 )
-            btn = self.ctx.input.wait_for_button()
+            # wait until valid input is captured
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_button()
+                if btn == BUTTON_TOUCH:
+                    self.ctx.input.touch.clear_regions()
+                    # index 0 is No / 1 is Yes / -1 is Edge touch (ignore)
+                    index = self.ctx.input.touch.current_index()
+                    if index == 1:
+                        return True
+                    if index == 0:
+                        return False
             if btn in (BUTTON_PAGE, BUTTON_PAGE_PREV):
                 answer = not answer
                 # erase yes/no area for next loop
@@ -483,13 +497,6 @@ class Page:
                     3 * FONT_HEIGHT,
                     theme.bg_color,
                 )
-            elif btn == BUTTON_TOUCH:
-                self.ctx.input.touch.clear_regions()
-                # index 0 = No
-                # index 1 = Yes
-                if self.ctx.input.touch.current_index():
-                    return True
-                return False
         # BUTTON_ENTER
         return answer
 
@@ -804,14 +811,17 @@ class Menu:
             else:
                 screensaver_time = Settings().appearance.screensaver_time
                 was_btn_active = self.ctx.input.buttons_active
-                btn = self.ctx.input.wait_for_fastnav_button(
-                    # Block if screen saver not active
-                    screensaver_time == 0,
-                    screensaver_time * ONE_MINUTE,
-                )
-                if kboard.has_touchscreen:
+                btn = BUTTON_TOUCH
+                while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                    btn = self.ctx.input.wait_for_fastnav_button(
+                        # Block if screen saver not active
+                        screensaver_time == 0,
+                        screensaver_time * ONE_MINUTE,
+                    )
                     if btn == BUTTON_TOUCH:
                         selected_item_index = self.ctx.input.touch.current_index()
+                        if selected_item_index < 0:
+                            continue
 
                         # highlight selected index before continue
                         if was_btn_active:
@@ -823,11 +833,11 @@ class Menu:
                             draw_dividers=not was_btn_active,
                             highlight=True,
                         )
-                        time.sleep_ms(
-                            TOUCH_HIGHLIGHT_MS
-                        )  # wait a little to see item highlighted
+                        # wait a little to see item highlighted
+                        time.sleep_ms(TOUCH_HIGHLIGHT_MS)
                         btn = BUTTON_ENTER
-                    self.ctx.input.touch.clear_regions()
+                    if kboard.has_touchscreen:
+                        self.ctx.input.touch.clear_regions()
                 if btn == BUTTON_ENTER:
                     status = self._clicked_item(selected_item_index)
                     if status != MENU_CONTINUE:

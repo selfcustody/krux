@@ -10,16 +10,18 @@ From the wonderful land of Korea, a new creation arrives: the WonderK PRO. Creat
 Krux now displays a warning instead of blocking QR-encoded passphrases that contain non-ASCII characters. Users are encouraged to use QR codes containing only ASCII passphrases or non-ASCII that have already been normalized to NFKD.
 
 ### Improved UI
-Added new context arrows, customizable colors, and a page index indicator for menu items. Enhanced keypad visuals with a clearer keyset index indicator and a double-outline highlight when navigating with buttons on touch devices.
+- Added new context arrows, customizable colors, touch-feedback highlighting and a page index for menu navigation.
+- Refined keypad visuals with a clearer keyset index and a double-outline highlight on touch devices for both touch feedback and button navigation.
 
 ### Other Bug Fixes and Improvements
 - Settings: Reduced default _Buttons Debounce_ value (with an even lower default on _M5StickV_)
 - Settings: Expanded value ranges for _Touch Threshold_ and _Buttons Debounce_
 - Swipe handling: Diagonal and long-hold swipes are now discarded, and the swipe detection threshold has been slightly reduced
+- Touch handling: Discards touches near edges of adjacent regions
 - Keypad: Added backtick **`**
 - Bugfix: Screensaver not activating in menu pages without statusbar
 - Embit: Improved BIP39 mnemonic validation
-- UI: Other small changes
+- UI: Other small changes and optimizations
 
 # Changelog 25.10.1 - October 2025
 

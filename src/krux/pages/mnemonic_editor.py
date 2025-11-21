@@ -33,6 +33,7 @@ from ..input import (
     BUTTON_PAGE_PREV,
     FAST_FORWARD,
     FAST_BACKWARD,
+    SWIPE_FAIL,
 )
 from ..key import Key
 from ..kboard import kboard
@@ -297,16 +298,20 @@ class MnemonicEditor(Page):
             self.ctx.display.clear()
             self._draw_header()
             self._map_words(button_index, page)
-            btn = self.ctx.input.wait_for_fastnav_button()
-            if btn == BUTTON_TOUCH:
-                button_index = self.ctx.input.touch.current_index()
-                if button_index < ESC_INDEX:
-                    if self.mnemonic_length == 24 and button_index % 2 == 1:
-                        button_index //= 2
-                        button_index += 12
-                    else:
-                        button_index //= 2
-                btn = BUTTON_ENTER
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_fastnav_button()
+                if btn == BUTTON_TOUCH:
+                    button_index = self.ctx.input.touch.current_index()
+                    if button_index < 0:
+                        continue
+                    if button_index < ESC_INDEX:
+                        if self.mnemonic_length == 24 and button_index % 2 == 1:
+                            button_index //= 2
+                            button_index += 12
+                        else:
+                            button_index //= 2
+                    btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if button_index == GO_INDEX:
                     if self.mnemonic_length == 24 and kboard.is_m5stickv and page == 0:

@@ -37,6 +37,7 @@ SWIPE_RIGHT = 4
 SWIPE_LEFT = 5
 SWIPE_UP = 6
 SWIPE_DOWN = 7
+SWIPE_FAIL = 99
 FAST_FORWARD = 8
 FAST_BACKWARD = 9
 
@@ -49,6 +50,7 @@ BUTTON_RELEASE_FILTER = 10 if kboard.need_release_filter else 1
 QR_ANIM_PERIOD = 300  # milliseconds
 LONG_PRESS_PERIOD = 1000  # milliseconds
 KEY_REPEAT_DELAY_MS = 100
+TOUCH_HIGHLIGHT_MS = 100
 
 BUTTON_WAIT_PRESS_DELAY = 10
 ONE_MINUTE = 60000
@@ -316,7 +318,7 @@ class Input:
 
             # Check if was a swipe
             if self.swipe_none_value() == PRESSED:
-                return ACTIVATING_BUTTONS
+                return SWIPE_FAIL
             if self.swipe_right_value() == PRESSED:
                 return SWIPE_RIGHT
             if self.swipe_left_value() == PRESSED:

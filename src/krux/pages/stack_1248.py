@@ -32,6 +32,7 @@ from ..input import (
     BUTTON_TOUCH,
     FAST_FORWARD,
     FAST_BACKWARD,
+    SWIPE_FAIL,
 )
 from ..kboard import kboard
 
@@ -425,10 +426,16 @@ class Stackbit(Page):
                 self._draw_index(index)
             self.preview_word(digits)
             self._draw_punched(digits, y_offset)
-            btn = self.ctx.input.wait_for_fastnav_button()
-            if btn == BUTTON_TOUCH:
-                btn = BUTTON_ENTER
-                index = self.ctx.input.touch.current_index()
+
+            # wait until valid input is captured
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_fastnav_button()
+                if btn == BUTTON_TOUCH:
+                    index = self.ctx.input.touch.current_index()
+                    if index < 0:
+                        continue
+                    btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if index >= STACKBIT_GO_INDEX:  # go
                     word = self.digits_to_word(digits)
