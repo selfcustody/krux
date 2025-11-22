@@ -525,6 +525,11 @@ class EncryptionKey(Page):
             return None
         if len(data) > ENCRYPTION_KEY_MAX_LEN:
             raise ValueError("Maximum length exceeded (%s)" % ENCRYPTION_KEY_MAX_LEN)
+        if isinstance(data, bytes):
+            try:
+                data = data.decode()
+            except:
+                pass
         return data
 
 
