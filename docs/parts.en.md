@@ -12,7 +12,7 @@
 | Camera | `OV7740` | `OV7740` rear /<br>`GC0328` front | `GC0328` | `OV2640` <i style="font-size: 85%">(VER:1.0)</i> or<br>`GC2145` <i style="font-size: 85%">(VER:1.1)</i> | `OV7740` | `GC2145` | `GC2145` or<br>`GC0328` | `OV2640` or<br>`GC2145` |
 | Battery  | 200mAh | 520mAh | :x: | :x: | 200mAh | :x: | :x: | :x: |
 | Requirements | None | None | [Rotary encoder](https://duckduckgo.com/?q=ky-040)<br> [3D printed case](https://github.com/selfcustody/DockEncoderCase)<br> Soldering<br>Assembly | None | None | None | None | None |
-| Warnings  | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) | [:material-numeric-2-circle:{ title="Maix Amigo screens" }](#amigo-info) | [:material-numeric-3-circle:{ title="Maix Dock and soldered pin" }](#dock-info) | Micro USB | 3-Way button | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) [:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info) | None | None |
+| Warnings  | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) | [:material-numeric-2-circle:{ title="Maix Amigo screens" }](#amigo-info) | [:material-numeric-3-circle:{ title="Maix Dock and soldered pin" }](#dock-info) | Micro USB | 3-Way button | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) [:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info) | None | [:material-numeric-5-circle:{ title="Embed Fire loose touchscreen" }](#embedfire-info) |
 
 <i style="font-size: 85%">:material-numeric-1-circle:{id="pull-up-resistor-info"}:
 ----8<----
@@ -32,6 +32,10 @@ Some Maix Dock units are shipped with soldered pin connectors, which prevent the
 
 <i style="font-size: 85%">:material-numeric-4-circle:{id="wondermv-info"}:
 WonderMV may restart when certain SD cards are inserted. See [Why does my WonderMV reboot](troubleshooting.md/#why-does-my-wondermv-reboot-when-i-insert-an-sd-card).
+</i>
+
+<i style="font-size: 85%">:material-numeric-5-circle:{id="embedfire-info"}:
+Embed Fire touchscreen may shift slightly within the case when pressed. Some units does't support high baudrate for flash.
 </i>
 
 <i style="font-size: 85%">**All devices feature Kendryte K210 chip:**
