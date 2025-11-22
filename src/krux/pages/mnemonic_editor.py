@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import time
 from embit import bip39
 from embit.wordlists.bip39 import WORDLIST
 from . import Page, ESC_KEY, LETTERS
@@ -34,6 +35,7 @@ from ..input import (
     FAST_FORWARD,
     FAST_BACKWARD,
     SWIPE_FAIL,
+    TOUCH_HIGHLIGHT_MS,
 )
 from ..key import Key
 from ..kboard import kboard
@@ -160,7 +162,7 @@ class MnemonicEditor(Page):
         if kboard.has_minimal_display:
             self.header_offset -= MINIMAL_PADDING
 
-    def _map_words(self, button_index=0, page=0):
+    def _map_words(self, button_index=0, page=0, highlight=False):
         """Map words to the screen"""
 
         def word_color(index):
@@ -211,7 +213,9 @@ class MnemonicEditor(Page):
             x_padding = MINIMAL_PADDING
         while word_index < 12:
             paged_index = word_index + page * 12
-            if word_index == button_index and self.ctx.input.buttons_active:
+            if word_index == button_index and (
+                self.ctx.input.buttons_active or highlight
+            ):
                 self.ctx.display.draw_string(
                     x_padding,
                     y_region,
@@ -227,7 +231,9 @@ class MnemonicEditor(Page):
                     word_color(paged_index),
                 )
             if self.mnemonic_length == 24 and not kboard.is_m5stickv:
-                if word_index + 12 == button_index and self.ctx.input.buttons_active:
+                if word_index + 12 == button_index and (
+                    self.ctx.input.buttons_active or highlight
+                ):
                     self.ctx.display.draw_string(
                         MINIMAL_PADDING + self.ctx.display.width() // 2,
                         y_region,
@@ -255,10 +261,15 @@ class MnemonicEditor(Page):
             go_txt = t("Go")
         esc_txt = t("Esc")
         menu_index = None
-        if self.ctx.input.buttons_active and button_index >= ESC_INDEX:
+        if (self.ctx.input.buttons_active or highlight) and button_index >= ESC_INDEX:
             menu_index = button_index - ESC_INDEX
         self.draw_proceed_menu(
-            go_txt, esc_txt, y_region, menu_index, self.valid_checksum
+            go_txt,
+            esc_txt,
+            y_region,
+            menu_index,
+            self.valid_checksum,
+            highlight=highlight,
         )
 
     def edit_word(self, index):
@@ -311,6 +322,10 @@ class MnemonicEditor(Page):
                             button_index += 12
                         else:
                             button_index //= 2
+                    # Highlight the touched btn
+                    self._map_words(button_index, page, highlight=True)
+                    # wait a little to see item highlighted
+                    time.sleep_ms(TOUCH_HIGHLIGHT_MS)
                     btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if button_index == GO_INDEX:
