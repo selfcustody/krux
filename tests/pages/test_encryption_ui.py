@@ -126,6 +126,38 @@ def test_load_key_from_qr_code(m5stickv, mocker):
     assert key == "qr key"
 
     print("case 2: load_key_from_qr_code")
+    BTN_SEQUENCE = (
+        [BUTTON_PAGE]  # move to QR code key
+        + [BUTTON_ENTER]  # choose QR code key
+        + [BUTTON_ENTER]  # Confirm
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    key_generator = EncryptionKey(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (b"decodable bytes qr key", None),
+    )
+    key = key_generator.encryption_key()
+    assert key == "decodable bytes qr key"
+
+    print("case 3: load_key_from_qr_code")
+    BTN_SEQUENCE = (
+        [BUTTON_PAGE]  # move to QR code key
+        + [BUTTON_ENTER]  # choose QR code key
+        + [BUTTON_ENTER]  # Confirm
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    key_generator = EncryptionKey(ctx)
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (b"\xde\xad\xbe\xef", None)
+    )
+    key = key_generator.encryption_key()
+    assert key == b"\xde\xad\xbe\xef"
+    call_message = mocker.call("Key (4): 0xdeadbeef", 10, highlight_prefix=":")
+    ctx.display.draw_hcentered_text.assert_has_calls([call_message])
+
+    print("case 4: load_key_from_qr_code")
     # Repeat with too much characters >ENCRYPTION_KEY_MAX_LEN
     BTN_SEQUENCE = [
         BUTTON_PAGE,  # move to QR code key
