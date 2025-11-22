@@ -411,70 +411,34 @@ class Page:
 
     def prompt(self, text, offset_y=0, highlight_prefix=""):
         """Prompts user to answer Yes or No"""
-        lines = self.ctx.display.to_lines(text)
-        offset_y -= (len(lines) - 1) * FONT_HEIGHT
-        self.ctx.display.draw_hcentered_text(
+        lines = self.ctx.display.draw_hcentered_text(
             text,
             offset_y,
             theme.fg_color,
             theme.bg_color,
             highlight_prefix=highlight_prefix,
         )
-        self.y_keypad_map = []
-        self.x_keypad_map = []
+        offset_y = min(
+            offset_y + lines * FONT_HEIGHT, self.ctx.display.height() - FONT_HEIGHT
+        )
         if kboard.has_minimal_display:
             return self.ctx.input.wait_for_button() == BUTTON_ENTER
-        offset_y += (len(lines) + 1) * FONT_HEIGHT
-        self.x_keypad_map.extend(
-            [0, self.ctx.display.width() // 2, self.ctx.display.width()]
-        )
-        y_key_map = offset_y - (3 * FONT_HEIGHT // 2)
-        self.y_keypad_map.append(y_key_map)
-        y_key_map += 4 * FONT_HEIGHT
-        self.y_keypad_map.append(min(y_key_map, self.ctx.display.height()))
+        self.x_keypad_map = [
+            DEFAULT_PADDING,
+            self.ctx.display.width() // 2,
+            self.ctx.display.width() - DEFAULT_PADDING,
+        ]
+        touch_offset_y = self.proceed_menu_text_y_offset(offset_y) - 2 * FONT_HEIGHT
+        self.y_keypad_map = [touch_offset_y, touch_offset_y + 4 * FONT_HEIGHT]
         if kboard.has_touchscreen:
             self.ctx.input.touch.set_regions(self.x_keypad_map, self.y_keypad_map)
+
+        go_str = t("Yes")
+        no_str = t("No")
         btn = None
-        answer = True
+        index = 1
         while btn != BUTTON_ENTER:
-            go_str = t("Yes")
-            no_str = t("No")
-            offset_x = (self.ctx.display.width() * 3) // 4 - (
-                lcd.string_width_px(go_str) // 2
-            )
-            self.ctx.display.draw_string(
-                offset_x, offset_y, go_str, theme.go_color, theme.bg_color
-            )
-            offset_x = self.ctx.display.width() // 4 - (
-                lcd.string_width_px(no_str) // 2
-            )
-            self.ctx.display.draw_string(
-                offset_x, offset_y, no_str, theme.no_esc_color, theme.bg_color
-            )
-            if self.ctx.input.buttons_active:
-                if answer:
-                    self.ctx.display.outline(
-                        self.ctx.display.width() // 2,
-                        offset_y - FONT_HEIGHT // 2,
-                        self.ctx.display.usable_width() // 2,
-                        2 * FONT_HEIGHT - 2,
-                        theme.go_color,
-                    )
-                else:
-                    self.ctx.display.outline(
-                        DEFAULT_PADDING,
-                        offset_y - FONT_HEIGHT // 2,
-                        self.ctx.display.usable_width() // 2,
-                        2 * FONT_HEIGHT - 2,
-                        theme.no_esc_color,
-                    )
-            elif kboard.has_touchscreen:
-                self.ctx.display.draw_vline(
-                    self.ctx.display.width() // 2,
-                    self.y_keypad_map[0] + FONT_HEIGHT,
-                    2 * FONT_HEIGHT,
-                    theme.frame_color,
-                )
+            self.draw_proceed_menu(go_str, no_str, offset_y, index)
             # wait until valid input is captured
             btn = BUTTON_TOUCH
             while btn in (BUTTON_TOUCH, SWIPE_FAIL):
@@ -482,23 +446,21 @@ class Page:
                 if btn == BUTTON_TOUCH:
                     self.ctx.input.touch.clear_regions()
                     # index 0 is No / 1 is Yes / -1 is Edge touch (ignore)
-                    index = self.ctx.input.touch.current_index()
-                    if index == 1:
-                        return True
-                    if index == 0:
+                    new_index = self.ctx.input.touch.current_index()
+                    if new_index in (0, 1):
+                        # Highlight the touched btn
+                        self.draw_proceed_menu(
+                            go_str, no_str, offset_y, new_index, highlight=True
+                        )
+                        # wait a little to see item highlighted
+                        time.sleep_ms(TOUCH_HIGHLIGHT_MS)
+                        if new_index == 1:
+                            return True
                         return False
             if btn in (BUTTON_PAGE, BUTTON_PAGE_PREV):
-                answer = not answer
-                # erase yes/no area for next loop
-                self.ctx.display.fill_rectangle(
-                    0,
-                    offset_y - FONT_HEIGHT,
-                    self.ctx.display.width(),
-                    3 * FONT_HEIGHT,
-                    theme.bg_color,
-                )
+                index = (index + 1) % 2
         # BUTTON_ENTER
-        return answer
+        return index == 1
 
     def fit_to_line(self, text, prefix="", fixed_chars=0, crop_middle=True):
         """Fits text with prefix plus fixed_chars at the beginning into one line,
@@ -548,8 +510,20 @@ class Page:
         _, status = self.menu.run_loop(start_from_index)
         return status != MENU_SHUTDOWN
 
+    def proceed_menu_text_y_offset(self, y_offset):
+        """Y offset for the text on proceed menu"""
+        return (
+            self.ctx.display.height() - (y_offset + FONT_HEIGHT + MINIMAL_PADDING)
+        ) // 2 + y_offset
+
     def draw_proceed_menu(
-        self, go_txt, esc_txt, y_offset=0, menu_index=None, go_enabled=True
+        self,
+        go_txt,
+        esc_txt,
+        y_offset=0,
+        menu_index=None,
+        go_enabled=True,
+        highlight=False,
     ):
         """Reusable 'Esc' and 'Go' menu choice"""
         go_x_offset = (
@@ -558,36 +532,62 @@ class Page:
         esc_x_offset = (
             self.ctx.display.width() // 2 - lcd.string_width_px(esc_txt)
         ) // 2
-        go_esc_y_offset = (
-            self.ctx.display.height() - (y_offset + FONT_HEIGHT + MINIMAL_PADDING)
-        ) // 2 + y_offset
-        if menu_index == 0 and self.ctx.input.buttons_active:
+        go_esc_y_offset = self.proceed_menu_text_y_offset(y_offset)
+        go_esc_box_y_offset = go_esc_y_offset - FONT_HEIGHT // 2
+        esc_box_x_offset = self.ctx.display.width() // 2 + DEFAULT_PADDING
+        if menu_index == 0 and (self.ctx.input.buttons_active or highlight):
             self.ctx.display.outline(
                 DEFAULT_PADDING,
-                go_esc_y_offset - FONT_HEIGHT // 2,
+                go_esc_box_y_offset,
                 self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
                 FONT_HEIGHT + FONT_HEIGHT,
                 theme.no_esc_color,
             )
+        else:
+            # erase outline
+            self.ctx.display.outline(
+                DEFAULT_PADDING,
+                go_esc_box_y_offset,
+                self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
+                FONT_HEIGHT + FONT_HEIGHT,
+                theme.bg_color,
+            )
         self.ctx.display.draw_string(
             esc_x_offset, go_esc_y_offset, esc_txt, theme.no_esc_color
         )
-        if menu_index == 1 and self.ctx.input.buttons_active:
+        if menu_index == 1 and (self.ctx.input.buttons_active or highlight):
             self.ctx.display.outline(
-                self.ctx.display.width() // 2 + DEFAULT_PADDING,
-                go_esc_y_offset - FONT_HEIGHT // 2,
+                esc_box_x_offset,
+                go_esc_box_y_offset,
                 self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
                 FONT_HEIGHT + FONT_HEIGHT,
                 theme.go_color,
             )
+        else:
+            # erase outline
+            self.ctx.display.outline(
+                esc_box_x_offset,
+                go_esc_box_y_offset,
+                self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
+                FONT_HEIGHT + FONT_HEIGHT,
+                theme.bg_color,
+            )
         go_color = theme.go_color if go_enabled else theme.disabled_color
         self.ctx.display.draw_string(go_x_offset, go_esc_y_offset, go_txt, go_color)
-        if not self.ctx.input.buttons_active:
+        if not (self.ctx.input.buttons_active or highlight):
             self.ctx.display.draw_vline(
                 self.ctx.display.width() // 2,
                 go_esc_y_offset,
                 FONT_HEIGHT,
                 theme.frame_color,
+            )
+        else:
+            # erase vline
+            self.ctx.display.draw_vline(
+                self.ctx.display.width() // 2,
+                go_esc_y_offset,
+                FONT_HEIGHT,
+                theme.bg_color,
             )
 
     def choose_len_mnemonic(self, extra_option=""):
