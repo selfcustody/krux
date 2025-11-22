@@ -44,6 +44,7 @@ from ..input import (
     FAST_FORWARD,
     FAST_BACKWARD,
     SWIPE_FAIL,
+    TOUCH_HIGHLIGHT_MS,
 )
 from ..bip39 import entropy_checksum
 from ..kboard import kboard
@@ -360,6 +361,8 @@ class TinySeed(Page):
         self._map_keys_array()
         page = 0
         menu_offset = self.y_offset + 12 * self.y_pad
+        go_str = t("Go")
+        no_str = t("Esc")
         while True:
             self._draw_labels(page)
             self._draw_grid()
@@ -367,12 +370,12 @@ class TinySeed(Page):
                 self._draw_disabled(w24)
                 tiny_seed_numbers = self._auto_checksum(tiny_seed_numbers)
             self._draw_punched(tiny_seed_numbers, page)
-            menu_index = (
+            esc_go_index = (
                 1
-                if index >= TS_GO_POSITION
+                if index > TS_ESC_END_POSITION
                 else (0 if index >= TS_ESC_START_POSITION else None)
             )
-            self.draw_proceed_menu(t("Go"), t("Esc"), menu_offset, menu_index)
+            self.draw_proceed_menu(go_str, no_str, menu_offset, esc_go_index)
             if self.ctx.input.buttons_active:
                 self._draw_index(index)
 
@@ -384,6 +387,19 @@ class TinySeed(Page):
                     index = self.ctx.input.touch.current_index()
                     if index < 0:
                         continue
+                    # Highlight the touched btn
+                    if index < TS_ESC_START_POSITION:
+                        self._draw_index(index)
+                    else:  # "Go" or "Esc"
+                        self.draw_proceed_menu(
+                            go_str,
+                            no_str,
+                            menu_offset,
+                            1 if index > TS_ESC_END_POSITION else 0,
+                            highlight=True,
+                        )
+                    # wait a little to see item highlighted
+                    time.sleep_ms(TOUCH_HIGHLIGHT_MS)
                     btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if index > TS_ESC_END_POSITION:  # "Go"
