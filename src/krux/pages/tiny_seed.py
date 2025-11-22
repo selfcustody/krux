@@ -250,7 +250,7 @@ class TinySeed(Page):
         """Outline index position"""
         height = self.y_pad - 2
         y_pos = (index // 12) * self.y_pad + self.y_offset + 1
-        if index < TS_LAST_BIT_NO_CS:
+        if index < TS_ESC_START_POSITION:
             x_pos = (index % 12) * self.x_pad + self.x_offset + 1
             width = self.x_pad - 2
             self.ctx.display.outline(x_pos, y_pos, width, height, theme.fg_color)
@@ -385,8 +385,16 @@ class TinySeed(Page):
                 btn = self.ctx.input.wait_for_fastnav_button()
                 if btn == BUTTON_TOUCH:
                     index = self.ctx.input.touch.current_index()
-                    if index < 0:
+                    # Ignore clicks on invalid indexes (avoids redraw screen)
+                    disabled_indexes = 4 if not w24 else (8 if page else 0)
+                    if (
+                        index < 0
+                        or TS_LAST_BIT_NO_CS - disabled_indexes
+                        < index
+                        < TS_ESC_START_POSITION
+                    ):
                         continue
+
                     # Highlight the touched btn
                     if index < TS_ESC_START_POSITION:
                         self._draw_index(index)
