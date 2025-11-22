@@ -267,7 +267,11 @@ class Keypad:
         if self.has_more_key():
             special_keys.append(self.more_index)
 
-        if self.cur_key_index < len(self.keys) or self.cur_key_index in special_keys:
+        # Highlight the touched key
+        if (
+            self.cur_key_index < len(self.keys)
+            and self.keys[self.cur_key_index] in self.possible_keys
+        ) or self.cur_key_index in special_keys:
             key_index = 0
             for y in self.layout.y_keypad_map[:-1]:
                 for x in self.layout.x_keypad_map[:-1]:
