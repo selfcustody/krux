@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import time
 from embit.wordlists.bip39 import WORDLIST
 from . import Page
 from ..themes import theme
@@ -33,6 +34,7 @@ from ..input import (
     FAST_FORWARD,
     FAST_BACKWARD,
     SWIPE_FAIL,
+    TOUCH_HIGHLIGHT_MS,
 )
 from ..kboard import kboard
 
@@ -302,6 +304,15 @@ class Stackbit(Page):
             color,
         )
 
+    def _draw_esc_go_vline(self, color=theme.frame_color):
+        """draw line between ESC and GO for touch devices"""
+        self.ctx.display.draw_vline(
+            self.x_offset + 4 * self.x_pad,
+            self.y_offset + 5 * self.y_pad + FONT_HEIGHT // 2,
+            FONT_HEIGHT,
+            color,
+        )
+
     def _draw_menu(self):
         """Draws options to leave and proceed"""
         y_offset = self.y_offset + 5 * self.y_pad
@@ -319,31 +330,8 @@ class Stackbit(Page):
             t("Go"),
             theme.go_color,
         )
-        # print border around buttons only on touch devices
-        if kboard.has_touchscreen:
-            self.ctx.display.draw_line(
-                x_offset,
-                y_offset,
-                x_offset + 6 * self.x_pad,
-                y_offset,
-                theme.frame_color,
-            )
-            self.ctx.display.draw_line(
-                x_offset,
-                y_offset + self.y_pad,
-                x_offset + 6 * self.x_pad,
-                y_offset + self.y_pad,
-                theme.frame_color,
-            )
-            for _ in range(3):
-                self.ctx.display.draw_line(
-                    x_offset,
-                    y_offset,
-                    x_offset,
-                    y_offset + self.y_pad,
-                    theme.frame_color,
-                )
-                x_offset += 3 * self.x_pad
+        if not self.ctx.input.buttons_active:
+            self._draw_esc_go_vline()
 
     def digits_to_word(self, digits):
         """Returns seed word respective to digits BIP39 dictionaty position"""
@@ -433,8 +421,16 @@ class Stackbit(Page):
                 btn = self.ctx.input.wait_for_fastnav_button()
                 if btn == BUTTON_TOUCH:
                     index = self.ctx.input.touch.current_index()
-                    if index < 0:
+                    if index < 0 or 13 < index < STACKBIT_ESC_INDEX:
                         continue
+
+                    # Highlight the touched btn
+                    self._draw_index(index)
+                    # erase vline
+                    self._draw_esc_go_vline(theme.bg_color)
+                    # wait a little to see item highlighted
+                    time.sleep_ms(TOUCH_HIGHLIGHT_MS)
+
                     btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if index >= STACKBIT_GO_INDEX:  # go
