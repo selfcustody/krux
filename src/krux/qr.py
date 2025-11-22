@@ -261,7 +261,7 @@ def to_qr_codes(data, max_width, qr_format):
 
             encoder = UREncoder(data, part_size, 0)
             while True:
-                part = encoder.next_part()
+                part = encoder.next_part().upper()
                 code = qrcode.encode(part)
                 yield (code, encoder.fountain_encoder.seq_len())
         elif qr_format == FORMAT_BBQR:
