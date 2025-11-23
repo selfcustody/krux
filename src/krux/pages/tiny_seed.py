@@ -44,6 +44,7 @@ from ..input import (
     FAST_FORWARD,
     FAST_BACKWARD,
     SWIPE_FAIL,
+    SWIPE_LEFT,
     TOUCH_HIGHLIGHT_MS,
 )
 from ..bip39 import entropy_checksum
@@ -341,6 +342,8 @@ class TinySeed(Page):
                 )
             elif index <= TS_GO_POSITION:
                 index = TS_ESC_END_POSITION
+        elif btn == SWIPE_LEFT:
+            index = TS_GO_POSITION
         return index
 
     def enter_tiny_seed(self, w24=False, seed_numbers=None, scanning_24=False):
