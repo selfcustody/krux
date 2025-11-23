@@ -326,6 +326,12 @@ class DatumToolMenu(Page):
             title += ", UR:" + contents.type
             contents = urobj_to_data(contents)
 
+        if isinstance(contents, bytes):
+            try:
+                contents = contents.decode()
+            except:
+                pass
+
         page = DatumTool(self.ctx)
         page.contents, page.title = contents, title
         return page.view_contents()

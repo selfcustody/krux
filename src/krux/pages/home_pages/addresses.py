@@ -313,6 +313,7 @@ class Addresses(Page):
             pass
 
         addr = None
+        data = data.decode() if isinstance(data, bytes) else data
         try:
             from ...wallet import parse_address
 
