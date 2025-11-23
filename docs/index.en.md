@@ -4,17 +4,17 @@ hide:
   - toc
 ---
 # Krux
-<img src="/krux/img/maixpy_yahboom/load-mnemonic-via-tinyseed-filled-312.png" style="width: 11%;">
-<img src="/krux/img/maixpy_tzt/load-mnemonic-seq-overview-314.png" style="width: 11%;">
-<img src="/krux/img/maixpy_amigo/login-options-orange-300.png" style="width: 16%;">
-<img src="/krux/img/maixpy_dock/tools-options-302.png" style="width: 15%;">
-<img src="/krux/img/maixpy_wonder_mv/load-mnemonic-seq-mnemonic-304.png" style="width: 11%;">
-<img src="/krux/img/maixpy_m5stickv/logo-250.png" style="width: 6%;">
-<img src="/krux/img/maixpy_cube/backup-seed-qr-400.png" style="width: 10%;">
+<img src="/krux/img/maixpy_yahboom/load-mnemonic-via-tinyseed-filled-312.png" style="width: 11%; margin: 0 !important;">
+<img src="/krux/img/maixpy_tzt/load-mnemonic-seq-overview-314.png" style="width: 11%; margin: 0 !important;">
+<img src="/krux/img/maixpy_amigo/login-options-orange-300.png" style="width: 16%; margin: 0 !important;">
+<img src="/krux/img/maixpy_dock/tools-options-302.png" style="width: 15%; margin: 0 !important;">
+<img src="/krux/img/maixpy_wonder_mv/load-mnemonic-seq-mnemonic-304.png" style="width: 11%; margin: 0 !important;">
+<img src="/krux/img/maixpy_m5stickv/logo-250.png" style="width: 6%; margin: 0 !important;">
+<img src="/krux/img/maixpy_cube/backup-seed-qr-400.png" style="width: 10%; margin: 0 !important;">
 
 Krux is an open-source firmware that transforms off-the-shelf Kendryte K210 devices, such as the Maix Amigo, M5StickV and [more](parts.md), into versatile bitcoin transaction signers. Beyond its core functionality, Krux is a flexible platform that can adapt to devices with different form factors, providing a suite of tools to assist with the creation and recovery of mnemonic backups, some of which include encryption options for enhanced security.
 
-Devices like the Maix Amigo, Yahboom, WonderMV or TZT come ready to use, with large touchscreens that make it easy and user-friendly to operate. These devices are ideal for those looking for a plug-and-play solution. On the other hand, Krux also supports development board kits, which are perfect for DIY enthusiasts who enjoy customizing and building their own hardware setups.
+Devices like the Maix Amigo, Yahboom, WonderMV, TZT or Embed Fire come ready to use, with large touchscreens that make it easy and user-friendly to operate. These devices are ideal for those looking for a plug-and-play solution. On the other hand, Krux also supports development board kits, which are perfect for DIY enthusiasts who enjoy customizing and building their own hardware setups.
 
 Interacting seamlessly with leading coordinator wallets through QR codes, SD cards, and even thermal printers, the user-friendly firmware offers unique features to support transactions and mnemonic backups in an offline environment.
 

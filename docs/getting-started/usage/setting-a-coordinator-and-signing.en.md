@@ -9,6 +9,7 @@ Krux works with:
 - [Nunchuk](https://nunchuk.io/) (mobile)
 - [BlueWallet](https://bluewallet.io/) (mobile)
 - [Bitcoin Keeper](https://bitcoinkeeper.app/) (mobile)
+- [BULL Wallet](https://wallet.bullbitcoin.com) (mobile)
 
 ## Step 1: Install the Coordinator Wallet
 
@@ -21,7 +22,7 @@ Depending on the coordinator, the steps to add Krux as a signer may vary slightl
 - **Specter and Nunchuk Single-sig:** Add Krux key, then create a wallet that uses it.
 - **Specter and Nunchuk Multisig:** Add Krux key, add other keys, then create a wallet that uses them.
 - **Sparrow, Liana, Bitcoin Safe and BlueWallet**: Create a wallet (or vault in Blue Wallet) and add key(s) during setup.
-- **Bitcoin Keeper**: Add Wallet -> Create Wallet, select single-key or multi-key, and add key(s), or add key(s), then Add Wallet -> Create Wallet and select that key(s).
+- **Bitcoin Keeper**: Add Wallet -> Create Wallet, select single-key or multi-key, and add key(s). Or add key(s), then Add Wallet -> Create Wallet and select that key(s).
 <!-- -->
 
 1. Load a mnemonic and wallet in Krux.

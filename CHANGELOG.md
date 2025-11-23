@@ -1,12 +1,27 @@
 # Changelog 25.XX.X - XXX 2025
 
-### New Device Support: TZT
-The TZT CanMV is similar to the WonderMV but includes five buttons and a premium milled aluminum housing. Computer simulator for the TZT device is also included.
+### New Device Support: Embed Fire
+This device shares similarities with the WonderMV but stands out with its larger 2.4" touchscreen.
 
 ### New Device Support: WonderK PRO
 From the wonderful land of Korea, a new creation arrives: the WonderK PRO. Created by an entrepreneur who loves the Krux project, the WonderK follows in the footsteps of the WonderMV, but boasts a larger 2.8" display! Computer simulator for the WonderK device is also included.
 
-### Code optimization
+
+# Changelog 25.10.1 - October 2025
+
+### Bugfix: Krux encrypted mnemonic as a passphrase is invalid, but no error was raised
+Instead of displaying an error, the base43 encoded KEF Envelope was displayed and used as the passphrase - deriving the wrong wallet; since version 25.09.0
+Solution: better error handling when decrypted data is invalid for the current context; error: "Failed to load".  Stricter validation to ensure passphrases are ASCII-only strings.
+
+# Changelog 25.10.0 - October 2025
+
+### New Device Support: TZT
+The TZT CanMV is similar to the WonderMV but includes five buttons and a premium milled aluminum housing. Computer simulator for the TZT device is also included.
+
+### Mnemonic XOR
+Krux can now apply XOR operations on entropy bytes between a loaded mnemonic and another chosen one, similar to Coinkite's `SeedXOR` protocol.
+
+### Code Optimization
 Reduced firmware size by 25% and lowered RAM usage through code cleanup and optimizations.
 
 ### Increased SD Card Compatibility
@@ -15,16 +30,16 @@ Krux can now recognize and work with a wider range of SD cards that were previou
 ### Discontinued Support for Maix Bit Device
 The Maix Bit device has long been discouraged due to its poor-quality camera. Starting with this release, we are discontinuing support and it will no longer be included in future builds. The support and parameters for building its firmware from source, however, will be kept.
 
-### Mnemonic XOR
-Krux can now apply XOR operations on entropy bytes between a loaded mnemonic and another chosen one, similar to the Coinkite's `SeedXOR` protocol.
-
 ### Other Bug Fixes and Improvements
 - Touchscreen test added in Tools for detection check
-- wbits for deflate-decompress window set to 10 bits to match KEF spec.
+- wbits for deflate-decompress window set to 10 bits to match KEF spec
 - Remove "Reboot" option and status bar, when empty, from Login menu
-- Optimized Datum show: total pages are no longer visible, and navigation no longer wraps from the first page to the last or vice versa; better memory management and handling for large (~100K) files.
+- Optimized Datum show: total pages are no longer visible, and navigation no longer wraps from the first page to the last or vice versa; better memory management and handling for large (~100K) files
 - Enabled swipe up/down gestures on keypads, menus, and QR transcribe
 - Fix mnemonic thermal printing when long words span multiple lines
+- Tools -> Check SD card is now in Tools -> Device Tests
+- All devices scan TinySeed and other binary grids in grayscale mode for better speed.
+- Button functionality reestablished on some pages for Yahboom with v1.1 hardware
 
 # Changelog 25.09.0 - September 2025
 

@@ -2,17 +2,17 @@
 
 ### Compatible Devices (comparative table)
 
-| Device | [M5StickV](#m5stickv) | [Maix Amigo](#maix-amigo) | [Maix Dock](#maix-dock) | [Yahboom k210 module](#yahboom-k210-module) | [Maix Cube](#maix-cube) | [WonderMV](#wondermv) | [TZT](#tzt) |
-| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| Price range | US$ 50-55 | US$ 50-85 | US$ 27-35  | US$ 45-61 | US$ 34-49 | US$ 58-86 | US$ 48 |
-| Screen size / resolution | 1.14" / 135*240 | 3.5" / 320*480 | 2.4" / 240*320 | 2" / 240*320 | 1.3" / 240*240 | 2" / 240*320 | 2" / 240*320 |
-| Brightness control | :white_check_mark: | :x: | :x: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Device size | 48\*24\*22mm | 104\*63\*17mm | 98\*59\*18mm | 57\*41\*17mm | 40\*40\*16mm | 59\*41\*17mm | 57\*41\*16mm |
-| Touchscreen | :x: | Capacitive | :x: | Capacitive | :x: | Capacitive | Capacitive |
-| Camera | `OV7740` | `OV7740` rear<br>`GC0328` front | `GC0328` | `OV2640` <i style="font-size: 85%">(VER:1.0)</i> or<br>`GC2145` <i style="font-size: 85%">(VER:1.1)</i> | `OV7740` | `GC2145` | `GC2145` or<br>`GC0328` |
-| Battery  | 200mAh | 520mAh | :x: | :x: | 200mAh | :x: | :x: |
-| Requirements | None | None | [Rotary encoder](https://duckduckgo.com/?q=ky-040)<br> [3D printed case](https://github.com/selfcustody/DockEncoderCase)<br> Soldering<br>Assembly | None | None | None | None |
-| Warnings  | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) | [:material-numeric-2-circle:{ title="Maix Amigo screens" }](#amigo-info) | [:material-numeric-3-circle:{ title="Maix Dock and soldered pin" }](#dock-info) | Micro USB | 3-Way button | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) [:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info) | None |
+| Device | [M5StickV](#m5stickv) | [Maix Amigo](#maix-amigo) | [Maix Dock](#maix-dock) | [Yahboom k210 module](#yahboom-k210-module) | [Maix Cube](#maix-cube) | [WonderMV](#wondermv) | [TZT](#tzt) | [Embed Fire](#embed-fire) |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| Price range | US$ 50-55 | US$ 50-85 | US$ 27-35  | US$ 45-61 | US$ 34-49 | US$ 58-86 | US$ 48 | US$ 74 |
+| Screen size / resolution | 1.14" / 135*240 | 3.5" / 320*480 | 2.4" / 240*320 | 2" / 240*320 | 1.3" / 240*240 | 2" / 240*320 | 2" / 240*320 | 2.4" / 240*320 |
+| Brightness control | :white_check_mark: | :x: | :x: | :x: | :white_check_mark: | :white_check_mark: | :x: | :x: |
+| Device size | 48\*24\*22mm | 104\*63\*17mm | 98\*59\*18mm | 57\*41\*17mm | 40\*40\*16mm | 59\*41\*17mm | 57\*41\*16mm | 63\*45\*14mm |
+| Touchscreen | :x: | Capacitive | :x: | Capacitive | :x: | Capacitive | Capacitive | Capacitive |
+| Camera | `OV7740` | `OV7740` rear<br>`GC0328` front | `GC0328` | `OV2640` <i style="font-size: 85%">(VER:1.0)</i> or<br>`GC2145` <i style="font-size: 85%">(VER:1.1)</i> | `OV7740` | `GC2145` | `GC2145` or<br>`GC0328` | `OV2640` |
+| Battery  | 200mAh | 520mAh | :x: | :x: | 200mAh | :x: | :x: | :x: |
+| Requirements | None | None | [Rotary encoder](https://duckduckgo.com/?q=ky-040)<br> [3D printed case](https://github.com/selfcustody/DockEncoderCase)<br> Soldering<br>Assembly | None | None | None | None | None |
+| Warnings  | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) | [:material-numeric-2-circle:{ title="Maix Amigo screens" }](#amigo-info) | [:material-numeric-3-circle:{ title="Maix Dock and soldered pin" }](#dock-info) | Micro USB | 3-Way button | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) [:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info) | None | None |
 
 <i style="font-size: 85%">:material-numeric-1-circle:{id="pull-up-resistor-info"}:
 ----8<----
@@ -39,7 +39,7 @@ WonderMV may restart when certain SD cards are inserted. See [Why does my Wonder
 </i>
 
 ### M5StickV
-<img src="/krux/img/maixpy_m5stickv/logo-250.png" align="right" style="width: 15%;">
+<img src="/krux/img/maixpy_m5stickv/logo-250.png" align="right" style="width: 10%;">
 
 Krux was first ported to this device in March 2022. Featuring the smallest screen size and resolution, it also includes a built-in battery. Refer to the [USB-C recognition warning <i style="font-size: 85%">:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info)</i> above for important notes. Below is a list of distributors where it can be found:
 
@@ -57,7 +57,7 @@ Krux was first ported to this device in March 2022. Featuring the smallest scree
 <div style="clear: both"></div>
 
 ### Maix Amigo
-<img src="/krux/img/maixpy_amigo/logo-300.png" align="right" style="width: 16%;">
+<img src="/krux/img/maixpy_amigo/logo-300.png" align="right" style="width: 20%;">
 
 Krux has supported this device since its second version in August 2022. It offers the largest screen size and resolution, a touchscreen, and a built-in battery. Below is a list of distributors where it is available:
 
@@ -71,7 +71,7 @@ Krux has supported this device since its second version in August 2022. It offer
 <div style="clear: both"></div>
 
 ### Yahboom k210 module
-<img src="/krux/img/maixpy_yahboom/logo-312.png" align="right" style="width: 16%;">
+<img src="/krux/img/maixpy_yahboom/logo-312.png" align="right" style="width: 15%;">
 
 Supported by Krux since March 2024, this device features a touchscreen and comes with a compatible 32 GB card, a USB card reader, one PH2.0 4-pin male-to-male connector, and a PH2.0 female adapter for connecting to a [thermal printer](#optional-ttl-serial-thermal-printer). Below is a list of distributors where it is available:
 
@@ -83,7 +83,7 @@ Supported by Krux since March 2024, this device features a touchscreen and comes
 <div style="clear: both"></div>
 
 ### Maix Cube
-<img src="/krux/img/maixpy_cube/logo-400.png" align="right" style="width: 18%;">
+<img src="/krux/img/maixpy_cube/logo-400.png" align="right" style="width: 12%;">
 
 Supported by Krux since July 2024, this device features the second smallest screen size and resolution, a 3-way button, and a built-in battery. Below is a list of distributors where it is available:
 
@@ -97,7 +97,7 @@ Supported by Krux since July 2024, this device features the second smallest scre
 <div style="clear: both"></div>
 
 ### WonderMV
-<img src="/krux/img/maixpy_wonder_mv/logo-304.png" align="right" style="width: 16%;">
+<img src="/krux/img/maixpy_wonder_mv/logo-304.png" align="right" style="width: 15%;">
 
 Supported by Krux since September 2024, this touchscreen device features a metal backplate and includes a compatible 32 GB card, a USB card reader, and two 5264 4-pin connector male-to-male cables for connecting to a [thermal printer](#optional-ttl-serial-thermal-printer). Refer to the [USB-C recognition warning <i style="font-size: 85%">:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info)</i> and the [SD card warning <i style="font-size: 85%">:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info)</i> above for important notes. The following distributors offer this device:
 
@@ -111,7 +111,7 @@ Supported by Krux since September 2024, this touchscreen device features a metal
 
 
 ### TZT
-<img src="/krux/img/maixpy_tzt/logo-314.png" align="right" style="width: 16%;">
+<img src="/krux/img/maixpy_tzt/logo-314.png" align="right" style="width: 15%;">
 
 Supported by Krux since October 2025, this touchscreen device comes in a premium milled aluminum housing and features five buttons. Available through the following distributors:
 
@@ -119,10 +119,19 @@ Supported by Krux since October 2025, this touchscreen device comes in a premium
 
 <div style="clear: both"></div>
 
+### Embed Fire
+<img src="../img/maixpy_embed_fire/logo-303.png" align="right" style="width: 18%;">
+
+Supported by Krux since November 2025, this touchscreen device features a 2.4" display and a metal backplate. It is available through the following distributors:
+
+- [AliExpress](https://www.aliexpress.com/w/wholesale-k210-AI-python.html)
+
+<div style="clear: both"></div>
+
 
 
 ### Maix Dock
-<img src="/krux/img/maixpy_dock/logo-302.png" align="right" style="width: 16%;">
+<img src="/krux/img/maixpy_dock/logo-302.png" align="right" style="width: 18%;">
 
 For DIY enthusiasts, Krux has supported the Maix Dock since August 2022. These kits include a board and screen but require you to source a rotary encoder or buttons separately and assemble the device yourself. Some Maix Dock boards also include Wi-Fi.
 

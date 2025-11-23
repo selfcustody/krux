@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2024 Krux contributors
+# Copyright (c) 2021-2023 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,5 +19,21 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-VERSION = "25.11.beta0"
-SIGNER_PUBKEY = "03339e883157e45891e61ca9df4cd3bb895ef32d475b8e793559ea10a36766689b"
+import sys
+from unittest import mock
+from kruxsim.mocks.touchscreen_common import TCOMMON, register_sequence_executor
+
+
+class CST816(TCOMMON):
+    def activate(self, irq_pin):
+        pass
+
+
+touch_control = CST816()
+
+
+if "krux.touchscreens.cst816" not in sys.modules:
+    sys.modules["krux.touchscreens.cst816"] = mock.MagicMock(
+        touch_control=touch_control,
+        register_sequence_executor=register_sequence_executor,
+    )

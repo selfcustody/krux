@@ -70,6 +70,7 @@ if [ "$1" == "build" ]; then
         [ "$device" == "maixpy_yahboom_devkit" ]||
         [ "$device" == "maixpy_tzt" ]||
         [ "$device" == "maixpy_wonder_k" ]||
+        [ "$device" == "maixpy_embed_fire" ]||
         [ "$allow_unsupported" ]; then
             declare $(grep -m 1 version pyproject.toml | sed 's/ *= */=/g' | sed 's/"//g' | sed 's/\r//g')
             sed -i -- 's/VERSION = ".*"/VERSION = "'"$version"'"/g' src/krux/metadata.py
@@ -96,7 +97,7 @@ elif [ "$1" == "flash" -o "$1" == "boot" -o "$1" == "boot-terminal" -o "$1" == "
         CMD_SUFFIX="-s firmware.bin"
     elif [ "$1" == "boot-terminal" ]; then
         CMD_SUFFIX="-s firmware.bin -t"
-    else
+    elif [ "$1" == "erase" ]; then
         CMD_SUFFIX="-E"
     fi
     device="$2"
@@ -105,6 +106,9 @@ elif [ "$1" == "flash" -o "$1" == "boot" -o "$1" == "boot-terminal" -o "$1" == "
     else
         device_vendor_product_id=""
         BAUDRATE=2000000
+        if [ "$device" == "maixpy_embed_fire" ]; then
+            BAUDRATE=400000
+        fi
         if [ "$device" == "maixpy_m5stickv" ]; then
             # https://devicehunt.com/view/type/usb/vendor/0403/device/6001
             device_vendor_product_id="0403:6001"
@@ -118,7 +122,8 @@ elif [ "$1" == "flash" -o "$1" == "boot" -o "$1" == "boot-terminal" -o "$1" == "
         [ "$device" == "maixpy_yahboom" ]||
         [ "$device" == "maixpy_wonder_mv" ]||
         [ "$device" == "maixpy_yahboom_devkit" ]||
-        [ "$device" == "maixpy_wonder_k" ]; then
+        [ "$device" == "maixpy_wonder_k" ]||
+        [ "$device" == "maixpy_embed_fire" ]; then
             # https://devicehunt.com/view/type/usb/vendor/1a86/device/7523
             device_vendor_product_id="1a86:7523"
         elif [ "$device" == "maixpy_tzt" ]; then
@@ -138,7 +143,8 @@ elif [ "$1" == "flash" -o "$1" == "boot" -o "$1" == "boot-terminal" -o "$1" == "
         if [ "$device" == "maixpy_dock" ]||
         [ "$device" == "maixpy_wonder_mv" ]||
         [ "$device" == "maixpy_tzt" ]||
-        [ "$device" == "maixpy_wonder_k" ]; then
+        [ "$device" == "maixpy_wonder_k" ]||
+        [ "$device" == "maixpy_embed_fire" ]; then
             BOARD="dan"
         else
             BOARD="goE"
@@ -283,7 +289,7 @@ elif [ "$1" == "build-release" ]; then
     cp -f ktool-win.exe ../$release_dir/ktool-win.exe
     cd ..
 
-    devices=("maixpy_m5stickv" "maixpy_amigo" "maixpy_dock" "maixpy_yahboom" "maixpy_cube" "maixpy_wonder_mv" "maixpy_tzt")
+    devices=("maixpy_m5stickv" "maixpy_amigo" "maixpy_dock" "maixpy_yahboom" "maixpy_cube" "maixpy_wonder_mv" "maixpy_tzt" "maixpy_embed_fire")
     for device in ${devices[@]}; do
         ./krux build $device
         mkdir -p $release_dir/$device

@@ -22,7 +22,7 @@
 
 [tool.poetry]
 name = "krux"
-version = "25.10.beta3"
+version = "25.11.beta0"
 description = "Open-source signing device firmware for Bitcoin"
 authors = ["Jeff S <jeffreesun@protonmail.com>"]
 readme = "README.md"
@@ -130,6 +130,7 @@ simulator-cube = "python simulator/simulator.py --device maixpy_cube"
 simulator-wonder-mv = "python simulator/simulator.py --device maixpy_wonder_mv"
 simulator-tzt = "python simulator/simulator.py --device maixpy_tzt"
 simulator-wonder-k = "python simulator/simulator.py --device maixpy_wonder_k"
+simulator-embed-fire = "python simulator/simulator.py --device maixpy_embed_fire"
 # aliases
 simulator.ref = "simulator-amigo"
 simulator-m5.ref = "simulator-m5stickv"
@@ -138,6 +139,8 @@ simulator-wonder.ref = "simulator-wonder-mv"
 simulator-wondermv.ref = "simulator-wonder-mv"
 simulator-wonderk.ref = "simulator-wonder-k"
 simulator-k.ref = "simulator-wonder-k"
+simulator-embed.ref = "simulator-embed-fire"
+simulator-embedfire.ref = "simulator-embed-fire"
 
 # git tasks
 git-update = "git submodule update --init --recursive"

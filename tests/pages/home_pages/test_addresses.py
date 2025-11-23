@@ -360,6 +360,40 @@ def test_scan_address_highlight(mocker, m5stickv, tdata):
         assert ctx.input.wait_for_button.call_count == len(case[5])
 
 
+def test_scan_address_fails_on_encrypted_non_ascii_bytes(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.addresses import Addresses
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages import MENU_CONTINUE
+
+    # non-ascii 0x8f byte encrypted w/ key="a" to test decoding failure
+    # in Cpython: UnicodeDecodeError is raised; in MaixPy: TypeError is raised
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x84\x2b\x2c",
+            0,
+        ),
+    )
+
+    btn_seq = [
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # type key
+        BUTTON_ENTER,  # enter "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key "a"
+    ]
+    ctx = create_ctx(mocker, btn_seq)
+    addresses_ui = Addresses(ctx)
+    assert addresses_ui.scan_address() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    ctx.display.flash_text.assert_called_with(
+        "Failed to load", 248, 2000, highlight_prefix=""
+    )
+
+
 def test_list_disable_change_address(mocker, m5stickv, tdata):
     from krux.pages.home_pages.addresses import Addresses
     from krux.input import BUTTON_ENTER, BUTTON_PAGE

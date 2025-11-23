@@ -119,6 +119,7 @@ from kruxsim.mocks import sensor
 from kruxsim.mocks import shannon
 from kruxsim.mocks import ft6x36
 from kruxsim.mocks import gt911
+from kruxsim.mocks import cst816
 from kruxsim.mocks import buttons
 from kruxsim.mocks import rotary
 from kruxsim.sequence import SequenceExecutor
@@ -173,6 +174,7 @@ YAHBOOM_SIZE = (312, 440)
 CUBE_SIZE = (400, 424)
 WONDER_MV_SIZE = (304, 440)
 TZT_SIZE = (314, 442)
+EMBEDFIRE_SIZE = (303,407)
 
 # Handle screenshots scale and alpha bg
 # When exporting the mask from GIMP uncheck "Save info about transparent pixels color"
@@ -210,6 +212,11 @@ elif (args.device == devices.TZT):
     device_screenshot_size = TZT_SIZE
     mask_img = pg.image.load(
         os.path.join("assets", "maixpy_tzt_mask.png")
+        ).convert_alpha()
+elif (args.device == devices.EMBEDFIRE):
+    device_screenshot_size = EMBEDFIRE_SIZE
+    mask_img = pg.image.load(
+        os.path.join("assets", "maixpy_embed_fire_mask.png")
         ).convert_alpha()
 # TODO: WONDER_K IMG
 # elif (args.device == devices.WONDER_K):
@@ -307,6 +314,8 @@ try:
             if event.type == pg.MOUSEBUTTONDOWN:
                 if args.device == devices.WONDER_K:
                     gt911.touch_control.trigger_event()
+                elif args.device == devices.EMBEDFIRE:
+                    cst816.touch_control.trigger_event()
                 else:
                     ft6x36.touch_control.trigger_event()
             if event.type == pg.ACTIVEEVENT and event.gain:

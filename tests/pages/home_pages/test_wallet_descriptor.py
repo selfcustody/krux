@@ -225,6 +225,44 @@ def test_wallet_load_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
     )
 
 
+def test_wallet_load_fails_on_encrypted_non_ascii_bytes(mocker, m5stickv, tdata):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages import MENU_CONTINUE
+
+    # non-ascii 0x8f byte encrypted w/ key="a" to test decoding failure
+    # in Cpython: UnicodeDecodeError is raised; in MaixPy: TypeError is raised
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x84\x2b\x2c",
+            0,
+        ),
+    )
+
+    btn_seq = [
+        BUTTON_ENTER,  # confirm load
+        BUTTON_ENTER,  # go load from camera
+        BUTTON_ENTER,  # confirm decrypt
+        BUTTON_ENTER,  # type key
+        BUTTON_ENTER,  # enter "a"
+        BUTTON_PAGE_PREV,  # back to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key "a"
+    ]
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    walletdescriptor_ui = WalletDescriptor(ctx)
+    assert walletdescriptor_ui.wallet() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    ctx.display.flash_text.assert_called_with(
+        "Failed to load", 248, 2000, highlight_prefix=""
+    )
+
+
 def test_load_desc_without_change(mocker, m5stickv, tdata):
     import krux
 

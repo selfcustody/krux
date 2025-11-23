@@ -59,7 +59,7 @@ A suite of automated tests to verify important features on your device.
 
 <div style="clear: both"></div>
 
-#### Touchscreen (Maix Amigo, Yahboom, WonderMV and TZT only)
+#### Touchscreen (Maix Amigo, Yahboom, WonderMV, TZT or Embed Fire only)
 <img src="/krux/img/maixpy_amigo/touch-test-300.png" align="right" class="amigo">
 
 Confirm that touch input is accurately detected across the entire display surface.
