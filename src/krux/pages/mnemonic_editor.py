@@ -209,13 +209,35 @@ class MnemonicEditor(Page):
         word_index = 0
         if kboard.is_m5stickv or self.mnemonic_length == 12:
             x_padding = DEFAULT_PADDING
+            rect_width = self.ctx.display.width()
         else:
             x_padding = MINIMAL_PADDING
+            rect_width = self.ctx.display.width() //2
+        x_padding_24w = MINIMAL_PADDING + self.ctx.display.width() // 2
+
+        # draw Go and Esc before because they can overlap
+        go_txt = t("Go")
+        esc_txt = t("Esc")
+        menu_index = None
+        if self.mnemonic_length == 24 and kboard.is_m5stickv and page == 0:
+            go_txt = "13-24"
+        if (self.ctx.input.buttons_active or highlight) and button_index >= ESC_INDEX:
+            menu_index = button_index - ESC_INDEX
+        self.draw_proceed_menu(
+            go_txt,
+            esc_txt,
+            y_region + 12*word_v_padding,
+            menu_index,
+            self.valid_checksum,
+            highlight=highlight,
+        )
+
         while word_index < 12:
             paged_index = word_index + page * 12
             if word_index == button_index and (
                 self.ctx.input.buttons_active or highlight
             ):
+                self.ctx.display.fill_rectangle(0, y_region-2, rect_width, word_v_padding+1, word_color(paged_index))
                 self.ctx.display.draw_string(
                     x_padding,
                     y_region,
@@ -234,8 +256,10 @@ class MnemonicEditor(Page):
                 if word_index + 12 == button_index and (
                     self.ctx.input.buttons_active or highlight
                 ):
+                    # x_padding = MINIMAL_PADDING + self.ctx.display.width() // 2
+                    self.ctx.display.fill_rectangle(self.ctx.display.width() // 2, y_region-2, rect_width, word_v_padding+1, word_color(paged_index))
                     self.ctx.display.draw_string(
-                        MINIMAL_PADDING + self.ctx.display.width() // 2,
+                        x_padding_24w,
                         y_region,
                         str(word_index + 13)
                         + "."
@@ -245,7 +269,7 @@ class MnemonicEditor(Page):
                     )
                 else:
                     self.ctx.display.draw_string(
-                        MINIMAL_PADDING + self.ctx.display.width() // 2,
+                        x_padding_24w,
                         y_region,
                         str(word_index + 13)
                         + "."
@@ -254,23 +278,6 @@ class MnemonicEditor(Page):
                     )
             word_index += 1
             y_region += word_v_padding
-
-        if self.mnemonic_length == 24 and kboard.is_m5stickv and page == 0:
-            go_txt = "13-24"
-        else:
-            go_txt = t("Go")
-        esc_txt = t("Esc")
-        menu_index = None
-        if (self.ctx.input.buttons_active or highlight) and button_index >= ESC_INDEX:
-            menu_index = button_index - ESC_INDEX
-        self.draw_proceed_menu(
-            go_txt,
-            esc_txt,
-            y_region,
-            menu_index,
-            self.valid_checksum,
-            highlight=highlight,
-        )
 
     def edit_word(self, index):
         """Edit a word"""
@@ -322,6 +329,8 @@ class MnemonicEditor(Page):
                             button_index += 12
                         else:
                             button_index //= 2
+                    # clear screen
+                    self.ctx.display.fill_rectangle(0, self.header_offset, self.ctx.display.width(), self.ctx.display.height() * 3 // 4 + FONT_HEIGHT//2, theme.bg_color)
                     # Highlight the touched btn
                     self._map_words(button_index, page, highlight=True)
                     # wait a little to see item highlighted
