@@ -1,0 +1,1 @@
+Los puertos USB-C del M5StickV y WonderMV carecen de los resistores pull-up necesarios para ser detectados por el ordenador y la alimentación de poder. Si no dispone de un puerto USB-A, puede utilizar una estación USB entre el puerto USB-C de su ordenador y estos dispositivos.
