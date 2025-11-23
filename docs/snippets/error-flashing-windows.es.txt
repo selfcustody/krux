@@ -1,0 +1,5 @@
+En Windows, al intentar flashear Yahboom o WonderMV usando **Krux-Installer**, puede aparecer el error **flash failed**. esto significa que Windows no encuentra el controlador para comunicarse con el dispositivo por USB (aparecerá un dispositivo *USB Serial* no reconocido en *Administrador de dispositivo -> Otros dispositivos*). Para solucionarlo, descargue e instale el controlador [CH340/341](https://www.wch-ic.com/downloads/ch341ser_exe.html) (aparecerá un dispositivo *USB-SERIAL CH340* en *Administrador de dispositivos -> Puertos (COM & LPT)*).
+
+<img src="/krux/img/krux-installer/flash-failed.jpg" style="width: 38%; min-width: 320px;">
+<img src="/krux/img/krux-installer/usb-serial.jpg" style="width: 30%; min-width: 240px;">
+<img src="/krux/img/krux-installer/usb-serial-driver.jpg" style="width: 25%; min-width: 180px;">

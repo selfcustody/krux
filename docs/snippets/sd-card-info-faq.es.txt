@@ -1,0 +1,1 @@
+No podemos garantizar que una tarjeta micro SD sea compatible con tu dispositivo; tendrás que probarlo en tu dispositivo para estar seguro, lea la [Solución de problemas](/krux/troubleshooting/#why-isnt-krux-detecting-my-microsd-card-or-presenting-an-error) para más información. 

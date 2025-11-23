@@ -99,7 +99,7 @@ Con soporte de Krux desde julio de 2024, este dispositivo cuenta con la segunda 
 ### WonderMV
 <img src="../img/maixpy_wonder_mv/logo-304.png" align="right" style="width: 16%;">
 
-Con soporte de Krux desde septiembre de 2024, este dispositivo de pantalla táctil cuenta con una placa trasera metálica e incluye una tarjeta compatible de 32 GB, un lector de tarjetas USB y dos cables macho a macho con conector 5264 de 4 pines para conectarlo a una [impresora térmica.](#optional-ttl-serial-thermal-printer). Consulte la [advertencia de reconocimiento de USB-C <i style="font-size: 85%">:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info)</i> y la [adverencia de tarjeta SD <i style="font-size: 85%">:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info)</i> para obtener información importante. Los siguientes distribuidores ofrecen este dispositivo:
+Con soporte de Krux desde septiembre de 2024, este dispositivo de pantalla táctil cuenta con una placa trasera metálica e incluye una tarjeta compatible de 32 GB, un lector de tarjetas USB y dos cables macho a macho con conector 5264 de 4 pines para conectarlo a una [impresora térmica](#optional-ttl-serial-thermal-printer). Consulte la [advertencia de reconocimiento de USB-C <i style="font-size: 85%">:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info)</i> y la [adverencia de tarjeta SD <i style="font-size: 85%">:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info)</i> para obtener información importante. Los siguientes distribuidores ofrecen este dispositivo:
 
 - [AliExpress](https://www.aliexpress.com/w/wholesale-k210-wondermv.html)
 - [Amazon](https://www.amazon.com/s?k=k210+WonderMV)
@@ -146,13 +146,13 @@ Este viene con el dispositivo. Es necesario para alimentarlo, cargarlo (si tiene
 
 ### (Opcional) Tarjeta MicroSD
 ----8<----
-sd-card-info-faq.en.txt
+sd-card-info-faq.es.txt
 ----8<----
 Yahboom incluye una tarjeta compatible de 32 GB. El tamaño de la tarjeta no es importante; una tarjeta de más de unos pocos megabytes será suficiente.
 
 ### (Opcional) Impresora Térmica Serial TTL
 ----8<----
-warning-printer.en.txt
+warning-printer.es.txt
 ----8<----
 
 Krux puede imprimir todos los códigos QR que genera, incluyendo los de mnemónicos, xpubs, copias de seguridad de billetera y PSBT firmados, utilizando una impresora térmica conectada localmente a través de su puerto serial.
