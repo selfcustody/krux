@@ -262,7 +262,6 @@ class MnemonicEditor(Page):
                 if word_index + 12 == button_index and (
                     self.ctx.input.buttons_active or highlight
                 ):
-                    # x_padding = MINIMAL_PADDING + self.ctx.display.width() // 2
                     self.ctx.display.fill_rectangle(
                         self.ctx.display.width() // 2,
                         y_region - 2,
@@ -341,7 +340,7 @@ class MnemonicEditor(Page):
                             button_index += 12
                         else:
                             button_index //= 2
-                    # clear screen
+                    # clear words area to remove any highligh from btn
                     self.ctx.display.fill_rectangle(
                         0,
                         self.header_offset,
