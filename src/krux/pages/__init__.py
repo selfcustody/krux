@@ -516,32 +516,6 @@ class Page:
             self.ctx.display.height() - (y_offset + FONT_HEIGHT + MINIMAL_PADDING)
         ) // 2 + y_offset
 
-    def _draw_procced_outline_esc(self, offset_y, color=theme.no_esc_color):
-        self.ctx.display.outline(
-            DEFAULT_PADDING,
-            offset_y,
-            self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
-            FONT_HEIGHT * 2,
-            color,
-        )
-
-    def _draw_proceed_outline_go(self, offset_x, offset_y, color=theme.go_color):
-        self.ctx.display.outline(
-            offset_x,
-            offset_y,
-            self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
-            FONT_HEIGHT * 2,
-            color,
-        )
-
-    def _draw_proceed_vline(self, offset_y, color=theme.frame_color):
-        self.ctx.display.draw_vline(
-            self.ctx.display.width() // 2,
-            offset_y,
-            FONT_HEIGHT,
-            color,
-        )
-
     def draw_proceed_menu(
         self,
         go_txt,
@@ -561,28 +535,43 @@ class Page:
         go_esc_y_offset = self.proceed_menu_text_y_offset(y_offset)
         go_esc_box_y_offset = go_esc_y_offset - FONT_HEIGHT // 2
         esc_box_x_offset = self.ctx.display.width() // 2 + DEFAULT_PADDING
+        bg_color = theme.bg_color
+        fg_color = theme.no_esc_color
         if menu_index == 0 and (self.ctx.input.buttons_active or highlight):
-            self._draw_procced_outline_esc(go_esc_box_y_offset)
-        else:
-            # erase outline
-            self._draw_procced_outline_esc(go_esc_box_y_offset, theme.bg_color)
-        self.ctx.display.draw_string(
-            esc_x_offset, go_esc_y_offset, esc_txt, theme.no_esc_color
+            bg_color = fg_color
+            fg_color = theme.bg_color
+        self.ctx.display.fill_rectangle(
+            DEFAULT_PADDING,
+            go_esc_box_y_offset,
+            self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
+            FONT_HEIGHT * 2,
+            bg_color,
         )
+        self.ctx.display.draw_string(
+            esc_x_offset, go_esc_y_offset, esc_txt, fg_color, bg_color
+        )
+        bg_color = theme.bg_color
+        fg_color = theme.go_color if go_enabled else theme.disabled_color
         if menu_index == 1 and (self.ctx.input.buttons_active or highlight):
-            self._draw_proceed_outline_go(esc_box_x_offset, go_esc_box_y_offset)
-        else:
-            # erase outline
-            self._draw_proceed_outline_go(
-                esc_box_x_offset, go_esc_box_y_offset, theme.bg_color
-            )
-        go_color = theme.go_color if go_enabled else theme.disabled_color
-        self.ctx.display.draw_string(go_x_offset, go_esc_y_offset, go_txt, go_color)
+            bg_color = fg_color
+            fg_color = theme.bg_color
+        self.ctx.display.fill_rectangle(
+            esc_box_x_offset,
+            go_esc_box_y_offset,
+            self.ctx.display.width() // 2 - 2 * DEFAULT_PADDING,
+            FONT_HEIGHT * 2,
+            bg_color,
+        )
+        self.ctx.display.draw_string(
+            go_x_offset, go_esc_y_offset, go_txt, fg_color, bg_color
+        )
         if not (self.ctx.input.buttons_active or highlight):
-            self._draw_proceed_vline(go_esc_y_offset)
-        else:
-            # erase vline
-            self._draw_proceed_vline(go_esc_y_offset, theme.bg_color)
+            self.ctx.display.draw_vline(
+                self.ctx.display.width() // 2,
+                go_esc_y_offset,
+                FONT_HEIGHT,
+                theme.frame_color,
+            )
 
     def choose_len_mnemonic(self, extra_option=""):
         """Reusable '12 or 24 words?" menu choice"""

@@ -11,7 +11,7 @@ Krux now displays a warning instead of blocking QR-encoded passphrases that cont
 
 ### Improved UI
 - Added new context arrows, customizable colors, touch-feedback highlighting and a page index for menu navigation.
-- Refined keypad visuals with a clearer keyset index and a double-outline highlight on touch devices for both touch feedback and button navigation.
+- Refined keypad visuals with a clearer keyset index and touch-feedback highlighting.
 - Added touch-feedback highlighting to confirmation prompts, Stackbit 1248, Tinyseed and Mnemonic editor.
 
 ### Other Bug Fixes and Improvements
