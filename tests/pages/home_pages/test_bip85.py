@@ -23,7 +23,7 @@ def test_bip85_bip39_mnemonic_derivation_amigo(mocker, amigo, tdata):
         (
             tdata.SINGLESIG_12_WORD_KEY,
             [
-                BUTTON_PAGE_PREV,  # Move to "Back"
+                BUTTON_PAGE_PREV,  # Move to "< Back"
                 BUTTON_ENTER,  # Confirm
             ],
             None,
@@ -100,7 +100,7 @@ def test_bip85_bip39_mnemonic_derivation_amigo(mocker, amigo, tdata):
             "a620a1bc",
             False,
         ),
-        # 12w, ESC
+        # 5 - 12w, ESC
         (
             tdata.SINGLESIG_12_WORD_KEY,
             [
@@ -116,7 +116,7 @@ def test_bip85_bip39_mnemonic_derivation_amigo(mocker, amigo, tdata):
             "a620a1bc",
             False,
         ),
-        # Assert if no index is assigned it stays in the loop
+        # 6 - Assert if no index is assigned it stays in the loop
         (
             tdata.SINGLESIG_12_WORD_KEY,
             [
@@ -136,7 +136,7 @@ def test_bip85_bip39_mnemonic_derivation_amigo(mocker, amigo, tdata):
             "a620a1bc",
             True,
         ),
-        # Too big index
+        # 7 - Too big index
         (
             tdata.SINGLESIG_12_WORD_KEY,
             [
@@ -235,7 +235,7 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
         (
             tdata.SINGLESIG_12_WORD_KEY,
             [
-                BUTTON_PAGE_PREV,  # Move to "Back"
+                BUTTON_PAGE_PREV,  # Move to "< Back"
                 BUTTON_ENTER,  # Confirm
             ],
             None,
@@ -441,7 +441,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_ENTER,  # Go
                 BUTTON_PAGE_PREV,  # Move to "< Back"
                 BUTTON_ENTER,  # Leave password
-                BUTTON_PAGE,  # Move to "< Back"
+                *([BUTTON_PAGE_PREV] * 2),  # Move to "< Back"
                 BUTTON_ENTER,  # Leave BIP85
             ],
             "n6JwU7iRyf2vhYeaToS3K\n\nIndex: 1\nLength: 21",
@@ -460,7 +460,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_ENTER,  # Go
                 BUTTON_PAGE_PREV,  # Move to "< Back"
                 BUTTON_ENTER,  # Leave password
-                BUTTON_PAGE,  # Move to "< Back"
+                *([BUTTON_PAGE_PREV] * 2),  # Move to "< Back"
                 BUTTON_ENTER,  # Leave BIP85
             ],
             "SC7Ib2KFm8/Fo6T8Okw+m\n\nIndex: 1\nLength: 21",
@@ -482,7 +482,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_ENTER,  # Go with 21
                 BUTTON_PAGE_PREV,  # Move to "< Back"
                 BUTTON_ENTER,  # Leave password
-                BUTTON_PAGE,  # Move to "< Back"
+                *([BUTTON_PAGE_PREV] * 2),  # Move to "< Back"
                 BUTTON_ENTER,  # Leave BIP85
             ],
             "n6JwU7iRyf2vhYeaToS3K\n\nIndex: 1\nLength: 21",
@@ -499,7 +499,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 *([BUTTON_PAGE_PREV] * 2),  # Move to "Esc"
                 BUTTON_ENTER,  # Press "Esc"
                 BUTTON_ENTER,  # Confirm
-                BUTTON_PAGE,  # Move to "< Back"
+                *([BUTTON_PAGE_PREV] * 2),  # Move to "< Back"
                 BUTTON_ENTER,  # Leave BIP85
             ],
             None,
@@ -521,7 +521,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_ENTER,  # Back main menu
                 BUTTON_PAGE_PREV,  # Move to "< Back"
                 BUTTON_ENTER,  # Leave password
-                BUTTON_PAGE,  # Move to "< Back"
+                *([BUTTON_PAGE_PREV] * 2),  # Move to "< Back"
                 BUTTON_ENTER,  # Leave BIP85
             ],
             "n6JwU7iRyf2vhYeaToS3K\n\nIndex: 1\nLength: 21",
@@ -548,7 +548,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_ENTER,  # Save
                 BUTTON_PAGE_PREV,  # Move to "< Back"
                 BUTTON_ENTER,  # Leave password
-                BUTTON_PAGE,  # Move to "< Back"
+                *([BUTTON_PAGE_PREV] * 2),  # Move to "< Back"
                 BUTTON_ENTER,  # Leave BIP85
             ],
             "n6JwU7iRyf2vhYeaToS3K\n\nIndex: 1\nLength: 21",
@@ -570,7 +570,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 BUTTON_ENTER,  # Go
                 BUTTON_PAGE_PREV,  # Move to "< Back"
                 BUTTON_ENTER,  # Leave password
-                BUTTON_PAGE,  # Move to "< Back"
+                *([BUTTON_PAGE_PREV] * 2),  # Move to "< Back"
                 BUTTON_ENTER,  # Leave BIP85
             ],
             "dKLoepugzdVJvdL56ogNV\n\nIndex: 0\nLength: 21",
@@ -584,7 +584,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
                 *([BUTTON_PAGE_PREV] * 2),  # Move to "Esc"
                 BUTTON_ENTER,  # Press "Esc"
                 BUTTON_ENTER,  # Confirm ESC with "Yes"
-                BUTTON_PAGE,  # Move to "< Back"
+                *([BUTTON_PAGE_PREV] * 2),  # Move to "< Back"
                 BUTTON_ENTER,  # Leave BIP85
             ],
             None,  # No password info generated
