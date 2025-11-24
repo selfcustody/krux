@@ -3,7 +3,7 @@ import hashlib
 import random
 
 ENTROPY_MESSAGE_STR = (
-    f"Shannon's entropy:\n%s bits (%s bits/px)\n\nPixels deviation index: %s"
+    f"Shannon's entropy:\n%s bits\n(%s bits/px)\n\nPixels deviation index: %s"
 )
 
 ENTROPY_INSUFFICIENT_MESSAGE_STR = "Insufficient entropy!\n\n" + ENTROPY_MESSAGE_STR
