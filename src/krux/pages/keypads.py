@@ -194,9 +194,9 @@ class Keypad:
                     self.ctx.input.buttons_active or prev_index is not None
                 ):
                     self.ctx.display.fill_rectangle(
-                        offset_x + 1,
+                        offset_x if kboard.is_m5stickv else offset_x + 1,
                         y + 1,
-                        self.layout.key_h_spacing - 2,
+                        self.layout.key_h_spacing - 1 if kboard.is_m5stickv else self.layout.key_h_spacing - 2,
                         self.layout.key_v_spacing - 2,
                         color,
                     )
