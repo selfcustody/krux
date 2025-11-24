@@ -5,13 +5,16 @@ import random
 
 def _called_with_insufficient_entropy_message(ctx):
     """Helper bool to determine if ctx.display.draw_centered_text was called with a message including "Insufficient" """
-    return len(
-        [
-            call
-            for call in ctx.display.draw_centered_text.call_args_list
-            if "Insufficient" in call.args[0]
-        ]
-    ) > 0
+    return (
+        len(
+            [
+                call
+                for call in ctx.display.draw_centered_text.call_args_list
+                if "Insufficient" in call.args[0]
+            ]
+        )
+        > 0
+    )
 
 
 def test_cancel_capture(amigo, mocker):
