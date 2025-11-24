@@ -176,18 +176,17 @@ class MnemonicEditor(Page):
                 return theme.highlight_color
             return theme.fg_color
 
-        # Words occupy 75% of the screen
-        word_v_padding = self.ctx.display.height() * 3 // 4
-        word_v_padding //= 12
+        # Words occupy 75% of the screen 3/4 for 12 words 4*12=48
+        word_v_padding = self.ctx.display.height() * 3 // 48
 
         if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
             self.ctx.input.touch.x_regions.append(0)
-            self.ctx.input.touch.x_regions.append(self.ctx.display.width() // 2)
+            self.ctx.input.touch.x_regions.append(self.ctx.display.width() >> 1)
             self.ctx.input.touch.x_regions.append(self.ctx.display.width())
             if not self.ctx.input.buttons_active and self.mnemonic_length == 24:
                 self.ctx.display.draw_vline(
-                    self.ctx.display.width() // 2,
+                    self.ctx.display.width() >> 1,
                     self.header_offset,
                     12 * word_v_padding,
                     theme.frame_color,
@@ -212,8 +211,8 @@ class MnemonicEditor(Page):
             rect_width = self.ctx.display.width()
         else:
             x_padding = MINIMAL_PADDING
-            rect_width = self.ctx.display.width() // 2
-        x_padding_24w = MINIMAL_PADDING + self.ctx.display.width() // 2
+            rect_width = self.ctx.display.width() >> 1
+        x_padding_24w = MINIMAL_PADDING + (self.ctx.display.width() >> 1)
 
         # draw Go and Esc before because they can overlap
         go_txt = t("Go")
@@ -263,7 +262,7 @@ class MnemonicEditor(Page):
                     self.ctx.input.buttons_active or highlight
                 ):
                     self.ctx.display.fill_rectangle(
-                        self.ctx.display.width() // 2,
+                        self.ctx.display.width() >> 1,
                         y_region - 2,
                         rect_width,
                         word_v_padding + 1,
@@ -336,10 +335,9 @@ class MnemonicEditor(Page):
                         continue
                     if button_index < ESC_INDEX:
                         if self.mnemonic_length == 24 and button_index % 2 == 1:
-                            button_index //= 2
-                            button_index += 12
+                            button_index = (button_index >> 1) + 12
                         else:
-                            button_index //= 2
+                            button_index >>= 1
                     # clear words area to remove any highligh from btn
                     self.ctx.display.fill_rectangle(
                         0,
@@ -365,7 +363,7 @@ class MnemonicEditor(Page):
                 if button_index == ESC_INDEX:
                     # Cancel
                     self.ctx.display.clear()
-                    if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+                    if self.prompt(t("Are you sure?"), self.ctx.display.height() >> 1):
                         return None
                     continue
                 new_word = self.edit_word(button_index + page * 12)
@@ -373,7 +371,7 @@ class MnemonicEditor(Page):
                     self.ctx.display.clear()
                     if self.prompt(
                         str(button_index + 1) + ".\n\n" + new_word + "\n\n",
-                        self.ctx.display.height() // 2,
+                        self.ctx.display.height() >> 1,
                     ):
                         self.current_mnemonic[button_index + page * 12] = new_word
                         self.calculate_checksum()
