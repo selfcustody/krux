@@ -39,7 +39,7 @@ SWIPE_DOWN = 4
 SWIPE_NONE = 5
 
 TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
-EDGE_PIXELS = 2  # The ammount of pixels to determine the edges of a region
+EDGE_PIXELS = 1  # The ammount of pixels to determine the edges of a region
 
 
 class Touch:
@@ -147,67 +147,43 @@ class Touch:
     def _extract_index(self, data):
         """
         Gets an index from touched points, x and y delimiters.
-        The index is calculated based on the position of the touch within the defined regions.
+        Return index or -1 if touching an edge.
         """
-        y_index = 0
-        x_index = 0
+        x, y = data
 
-        # Calculate y index
-        if self.y_regions:
-            for region in self.y_regions:
-                if data[1] > region:
-                    y_index += 1
+        # Helper to deal with X/Y regions
+        def _compute_axis_index(pos, regions):
+            if not regions:
+                return 0
 
-            # If touch was between adjacent regions, discard it as an edge touch
-            if (
-                (0 < y_index < len(self.y_regions) - 1)
-                and (
-                    data[1] - EDGE_PIXELS
-                    <= self.y_regions[y_index]
-                    <= data[1] + EDGE_PIXELS
-                )
-            ) or (
-                (0 < y_index - 1)
-                and (
-                    data[1] - EDGE_PIXELS
-                    <= self.y_regions[y_index - 1]
-                    <= data[1] + EDGE_PIXELS
-                )
-            ):
+            # Count how many region boundaries pos passed
+            idx = sum(pos >= r for r in regions)
+
+            # Edge detection: touching either adjacent boundary
+            # Check boundary at idx (right-side)
+            if idx < len(regions) and abs(pos - regions[idx]) <= EDGE_PIXELS:
                 return -1
-            y_index -= 1 if y_index > 0 else 0
 
-        index = y_index
-        # Calculate x index if x regions are defined (2D array)
+            # Check boundary at idx-1 (left-side)
+            if idx > 0 and abs(pos - regions[idx - 1]) <= EDGE_PIXELS:
+                return -1
+
+            # Valid index never below 0
+            return max(idx - 1, 0)
+
+        # Y index
+        y_index = _compute_axis_index(y, self.y_regions)
+        if y_index < 0:
+            return -1
+
+        # X index
         if self.x_regions:
-            for x_region in self.x_regions:
-                if data[0] >= x_region:
-                    x_index += 1
-            x_index -= 1  # Adjust index to be zero-based
-
-            # If touch was between adjacent regions, discard it as an edge touch
-            if (
-                (0 < x_index < len(self.x_regions) - 1)
-                and (
-                    data[0] - EDGE_PIXELS
-                    <= self.x_regions[x_index]
-                    <= data[0] + EDGE_PIXELS
-                )
-            ) or (
-                (0 < x_index - 1)
-                and (
-                    data[0] - EDGE_PIXELS
-                    <= self.x_regions[x_index - 1]
-                    <= data[0] + EDGE_PIXELS
-                )
-            ):
+            x_index = _compute_axis_index(x, self.x_regions)
+            if x_index < 0:
                 return -1
+            return y_index * (len(self.x_regions) - 1) + x_index
 
-            # Combine y and x indices to get the final index
-            index = y_index * (len(self.x_regions) - 1) + x_index
-
-        # self.highlight_region(x_index, y_index)
-        return index
+        return y_index
 
     def set_regions(self, x_list=None, y_list=None):
         """Set buttons map regions x and y"""
