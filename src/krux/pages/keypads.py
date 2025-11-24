@@ -196,7 +196,11 @@ class Keypad:
                     self.ctx.display.fill_rectangle(
                         offset_x if kboard.is_m5stickv else offset_x + 1,
                         y + 1,
-                        self.layout.key_h_spacing - 1 if kboard.is_m5stickv else self.layout.key_h_spacing - 2,
+                        (
+                            self.layout.key_h_spacing - 1
+                            if kboard.is_m5stickv
+                            else self.layout.key_h_spacing - 2
+                        ),
                         self.layout.key_v_spacing - 2,
                         color,
                     )

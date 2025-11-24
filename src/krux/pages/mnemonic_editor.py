@@ -240,7 +240,11 @@ class MnemonicEditor(Page):
                     0,
                     y_region if kboard.has_minimal_display else y_region - 2,
                     rect_width,
-                    word_v_padding if kboard.has_minimal_display else word_v_padding + 1,
+                    (
+                        word_v_padding
+                        if kboard.has_minimal_display
+                        else word_v_padding + 1
+                    ),
                     word_color(paged_index),
                 )
                 self.ctx.display.draw_string(
@@ -265,7 +269,11 @@ class MnemonicEditor(Page):
                         self.ctx.display.width() >> 1,
                         y_region if kboard.has_minimal_display else y_region - 2,
                         rect_width,
-                        word_v_padding if kboard.has_minimal_display else word_v_padding + 1,
+                        (
+                            word_v_padding
+                            if kboard.has_minimal_display
+                            else word_v_padding + 1
+                        ),
                         word_color(paged_index),
                     )
                     self.ctx.display.draw_string(
