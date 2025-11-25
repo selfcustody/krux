@@ -354,10 +354,8 @@ class MnemonicEditor(Page):
                         self.ctx.display.height() * 3 // 4 + FONT_HEIGHT // 2,
                         theme.bg_color,
                     )
-                    # Highlight the touched btn
-                    self._map_words(button_index, page, highlight=True)
-                    # wait a little to see item highlighted
-                    time.sleep_ms(TOUCH_HIGHLIGHT_MS)
+                    self._map_words(button_index, page, highlight=True)  # highlight
+                    time.sleep_ms(TOUCH_HIGHLIGHT_MS)  # wait a little
                     btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if button_index == GO_INDEX:

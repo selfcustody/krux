@@ -452,8 +452,7 @@ class Page:
                         self.draw_proceed_menu(
                             go_str, no_str, offset_y, new_index, highlight=True
                         )
-                        # wait a little to see item highlighted
-                        time.sleep_ms(TOUCH_HIGHLIGHT_MS)
+                        time.sleep_ms(TOUCH_HIGHLIGHT_MS)  # wait a little
                         if new_index == 1:
                             return True
                         return False
@@ -809,15 +808,13 @@ class Menu:
                         # highlight selected index before continue
                         if was_btn_active:
                             # need to clear screen if button was used just before
-                            # because an item will be highlighted already
                             self._clear_menu_display()
                         self._draw_touch_menu(
                             selected_item_index,
                             draw_dividers=not was_btn_active,
                             highlight=True,
                         )
-                        # wait a little to see item highlighted
-                        time.sleep_ms(TOUCH_HIGHLIGHT_MS)
+                        time.sleep_ms(TOUCH_HIGHLIGHT_MS)  # wait a little
                         btn = BUTTON_ENTER
                     if kboard.has_touchscreen:
                         self.ctx.input.touch.clear_regions()

@@ -409,8 +409,7 @@ class TinySeed(Page):
                             1 if index > TS_ESC_END_POSITION else 0,
                             highlight=True,
                         )
-                    # wait a little to see item highlighted
-                    time.sleep_ms(TOUCH_HIGHLIGHT_MS)
+                    time.sleep_ms(TOUCH_HIGHLIGHT_MS)  # wait a little
                     btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if index > TS_ESC_END_POSITION:  # "Go"

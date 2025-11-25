@@ -15,7 +15,7 @@ Exported Uniform Resource (UR) QR codes, a widely adopted standard for exchangin
 ### Improved UI
 - Added new context arrows, customizable colors, touch-feedback highlighting and a page index for menu navigation.
 - Refined keypad visuals with a clearer keyset index and touch-feedback highlighting.
-- Added touch-feedback highlighting to confirmation prompts, Stackbit 1248, Tinyseed and Mnemonic editor.
+- Added touch-feedback highlighting to confirmation prompts, Category Settings, Stackbit 1248, Tinyseed and Mnemonic editor.
 
 ### Other Bug Fixes and Improvements
 - Settings: Reduced default _Buttons Debounce_ value (with an even lower default on _M5StickV_)

@@ -451,8 +451,7 @@ class Stackbit(Page):
                     # Highlight the touched btn
                     self._draw_index(index)
                     self._draw_menu(index, touch_highlight=True)
-                    # wait a little to see item highlighted
-                    time.sleep_ms(TOUCH_HIGHLIGHT_MS)
+                    time.sleep_ms(TOUCH_HIGHLIGHT_MS)  # wait a little
 
                     btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:

@@ -293,10 +293,8 @@ class Keypad:
             self.cur_key_index = 0
 
         if actual_button == BUTTON_ENTER:
-            # Highlight the touched key
-            self.draw_keys(prev_index=prev_index)
-            # wait a little to see item highlighted
-            time.sleep_ms(TOUCH_HIGHLIGHT_MS)
+            self.draw_keys(prev_index=prev_index)  # highlight
+            time.sleep_ms(TOUCH_HIGHLIGHT_MS)  # wait a little
 
         return actual_button
 
