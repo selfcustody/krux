@@ -312,6 +312,7 @@ def test_current_state_released_to_idle(mocker, amigo, mock_settings):
         ((100, 100), (100, 160), 4),  # SWIPE_DOWN (vertical = 60 > lateral)
         ((100, 160), (100, 100), 3),  # SWIPE_UP (vertical = -60 > lateral)
         ((100, 100), (105, 105), None),  # No gesture (< threshold)
+        ((10, 10), (60, 60), 5),  # SWIPE_FAIL diagonal swipe
     ],
 )
 def test_gesture_detection(
@@ -334,6 +335,29 @@ def test_gesture_detection(
     touch.current_state()
 
     assert touch.gesture == expected_gesture
+
+
+def test_gesture_long_duration_fail(
+    mocker,
+    amigo,
+    mock_settings,
+):
+    """Test swipe gesture fail detection"""
+    from krux.touch import Touch, PRESSED, SWIPE_NONE
+
+    mock_driver = mocker.MagicMock()
+    mock_driver.current_point.return_value = None
+    mocker.patch("krux.touchscreens.ft6x36.touch_control", mock_driver)
+    mocker.patch("time.ticks_ms", side_effect=[1000, 3000])
+
+    touch = Touch(width=240, height=135, irq_pin=20)
+    touch.state = PRESSED
+    touch.press_point = [(10, 10)]
+    touch.release_point = (10, 60)
+
+    touch.current_state()
+
+    assert touch.gesture == SWIPE_NONE
 
 
 def test_event_with_validation(mocker, amigo, mock_settings):
