@@ -174,6 +174,7 @@ class Touch:
         # X index
         if self.x_regions:
             x_index = _compute_axis_index(x, self.x_regions)
+            x_index = x_index - 1 if x_index == len(self.x_regions) - 1 else x_index
             if x_index < 0:
                 return -1
             return y_index * (len(self.x_regions) - 1) + x_index
