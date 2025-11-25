@@ -313,15 +313,6 @@ class Stackbit(Page):
             x_pos + 2, y_pos + 1, 3 * self.x_pad - 4, self.y_pad, color
         )
 
-    def _draw_esc_go_vline(self, color=theme.frame_color):
-        """draw line between ESC and GO for touch devices"""
-        self.ctx.display.draw_vline(
-            self.x_offset + 4 * self.x_pad,
-            self.y_offset + 5 * self.y_pad + FONT_HEIGHT // 2,
-            FONT_HEIGHT,
-            color,
-        )
-
     def _draw_menu(self, index, touch_highlight=False):
         """Draws options to leave and proceed"""
         y_offset = self.y_offset + 5 * self.y_pad
@@ -357,7 +348,13 @@ class Stackbit(Page):
             theme.go_color,
         )
 
-        self._draw_esc_go_vline()
+        if kboard.has_touchscreen:
+            self.ctx.display.draw_vline(
+                self.x_offset + 4 * self.x_pad,
+                self.y_offset + 5 * self.y_pad + FONT_HEIGHT // 2,
+                FONT_HEIGHT,
+                theme.frame_color,
+            )
 
     def digits_to_word(self, digits):
         """Returns seed word respective to digits BIP39 dictionaty position"""
@@ -486,13 +483,11 @@ class Stackbit(Page):
                             self.ctx.display.clear()
                             if self.prompt(t("Done?"), self.ctx.display.height() // 2):
                                 break
-                            # self._map_keys_array() #can be removed?
                         word_index += 1
                 elif index >= STACKBIT_ESC_INDEX:  # ESC
                     self.ctx.display.clear()
                     if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
                         break
-                    # self._map_keys_array()
                 elif index < 14:
                     digits = self._toggle_bit(digits, index)
             else:
