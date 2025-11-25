@@ -157,15 +157,10 @@ class Touch:
                 return 0
 
             # Count how many region boundaries pos passed
-            idx = sum(pos >= r for r in regions)
+            idx = sum(pos + EDGE_PIXELS >= r for r in regions)
 
-            # Edge detection: touching either adjacent boundary
-            # Check boundary at idx (right-side)
-            if idx < len(regions) and abs(pos - regions[idx]) <= EDGE_PIXELS:
-                return -1
-
-            # Check boundary at idx-1 (left-side)
-            if idx > 0 and abs(pos - regions[idx - 1]) <= EDGE_PIXELS:
+            # # Check boundary at idx-1 (left-side)
+            if 1 < idx < len(regions) and abs(pos - regions[idx - 1]) <= EDGE_PIXELS:
                 return -1
 
             # Valid index never below 0

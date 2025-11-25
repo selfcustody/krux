@@ -14,16 +14,6 @@ def mock_settings(mocker):
     return mock_settings_obj
 
 
-@pytest.fixture
-def mock_touch_driver(mocker):
-    """Mock a generic touch driver"""
-    driver = mocker.MagicMock()
-    driver.current_point.return_value = None
-    driver.event.return_value = False
-    driver.irq_point = None
-    return driver
-
-
 def test_touch_init_ft6x36(mocker, amigo, mock_settings):
     """Test Touch initialization with FT6X36 driver (default case)"""
     from krux.touch import Touch
@@ -206,6 +196,24 @@ def test_valid_position(
         ([40, 80, 120], [], (50, 50), 0),  # y=50 between 40-80: index 0
         ([40, 80, 120], [], (50, 90), 1),  # y=90 between 80-120: index 1
         ([40, 80, 120], [], (50, 130), 2),  # y=130 > 120: index 2
+        ([0, 100, 200], [], (100, 100), -1),  # boundary y region: index -1
+        ([0, 100, 200], [], (100, 200), 2),  # last boundary y region ignore: index 2
+        ([], [10, 100, 200], (100, 100), -1),  # boundary x region: index -1
+        ([], [0, 100, 200], (201, 100), 2),  # second boundary x region: index -1
+        (
+            [0, 100, 200],
+            [0, 100, 200],
+            (100, 100),
+            -1,
+        ),  # boundary x and y region: index -1
+        ([], [], (50, 50), 0),  # no regions
+        ([60, 120], [], (10, 30), 0),  # before first y region
+        ([60, 120], [], (10, 80), 0),  # normal y region
+        ([60, 120], [], (10, 60), 0),  # edge of the first y region
+        ([60, 120], [], (10, 120), 1),  # edge of last y region
+        ([60, 120], [50, 100, 150], (70, 130), 2),  # normal 2D index
+        ([60, 120], [50, 100, 150], (100, 130), -1),  # boundary x region: index -1
+        ([60, 80, 90, 100, 110, 120], [], (0, 91), -1),  # boundary with more regions
     ],
 )
 def test_extract_index(
