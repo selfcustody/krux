@@ -54,16 +54,33 @@ def with_prefix(device):
 images = {}
 
 
+def setup_pygame_image_format(device):
+    try:
+        images[device] = pg.image.load(
+            os.path.join("assets", "%s.png" % device)
+        ).convert_alpha()
+        return images.copy()
+    except pg.error as pgerr:
+        print("WARNING: %s" % str(pgerr))
+        print("Trying bmp format...")
+        try:
+            images[device] = pg.image.load(
+                os.path.join("assets", "%s.bmp" % device)
+            ).convert_alpha()
+            return images.copy()
+        except pg.error as pgerr_bmp:
+            raise pgerr_bmp from pgerr_bmp
+
+
 def load_image(device):
     device = with_prefix(device)
     # TODO: remove WONDER_K after img is ready
     if device == PC or device == WONDER_K:
         return None
     if device not in images:
-        images[device] = pg.image.load(
-            os.path.join("assets", "%s.png" % device)
-        ).convert_alpha()
-    return images[device]
+        # First try: png images
+        setup_pygame_image_format(device)
+        return images[device]
 
 
 fonts = {}
@@ -71,31 +88,34 @@ fonts = {}
 
 def load_font(device):
     device = with_prefix(device)
+    typename = "freetype"
+
+    try:
+        getattr(pg, typename)
+    except AttributeError:
+        typename = "font"
+
+    fonttype = getattr(pg, typename)
+
     if device not in fonts:
         if device in (M5STICKV, CUBE):
             fonts[device] = [
-                pg.freetype.Font(
-                   os.path.join("..", "firmware", "font", "ter-u14n.bdf"),
+                fonttype.Font(
+                    os.path.join("..", "firmware", "font", "ter-u14n.bdf"),
                 ),
-                pg.freetype.Font(
-                   os.path.join("..", "firmware", "font", "FusionPixel-14.bdf"),
+                fonttype.Font(
+                    os.path.join("..", "firmware", "font", "FusionPixel-14.bdf"),
                 ),
             ]
         elif device in (DOCK, YAHBOOM, WONDER_MV, TZT, WONDER_K, EMBEDFIRE):
             fonts[device] = [
-                pg.freetype.Font(
-                    os.path.join("..", "firmware", "font", "ter-u16n.bdf")
-                ),
-                pg.freetype.Font(
-                    os.path.join("..", "firmware", "font", "unifont-16.bdf")
-                ),
-        ]
+                fonttype.Font(os.path.join("..", "firmware", "font", "ter-u16n.bdf")),
+                fonttype.Font(os.path.join("..", "firmware", "font", "unifont-16.bdf")),
+            ]
         else:
             fonts[device] = [
-                pg.freetype.Font(
-                    os.path.join("..", "firmware", "font", "ter-u24b.bdf")
-                ),
-                pg.freetype.Font(
+                fonttype.Font(os.path.join("..", "firmware", "font", "ter-u24b.bdf")),
+                fonttype.Font(
                     os.path.join("..", "firmware", "font", "NotoSansCJK-24.bdf")
                 ),
             ]

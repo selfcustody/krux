@@ -26,7 +26,7 @@ import threading
 import pygame as pg
 from kruxsim import devices, events
 
-exec_folder = 'simulator'
+exec_folder = "simulator"
 current_dir = os.getcwd()
 
 # check if is executing in exec_folder, if not, try to change to exec_folder
@@ -48,37 +48,30 @@ parser.add_argument(
 )
 parser.add_argument(
     "--printer",
-    type=bool,
+    action="store_true",
     default=False,
     required=False,
-    action=argparse.BooleanOptionalAction,
 )
 parser.add_argument(
     "--sd",
-    type=bool,
+    action="store_true",
     default=False,
     required=False,
-    action=argparse.BooleanOptionalAction,
 )
 parser.add_argument(
     "--exit-after-sequence",
-    type=bool,
+    action="store_true",
     default=True,
     required=False,
-    action=argparse.BooleanOptionalAction,
 )
 parser.add_argument(
     "--screenshot-scale",
-    type=bool,
+    action="store_true",
     default=True,
     required=False,
-    action=argparse.BooleanOptionalAction,
 )
 
 args = parser.parse_args()
-
-pg.init()
-pg.freetype.init()
 
 from kruxsim.mocks import board
 
@@ -119,6 +112,8 @@ from kruxsim.sequence import SequenceExecutor
 from kruxsim.mocks import uhashlib_hw
 from kruxsim.mocks import baseconv
 
+from kruxsim.devices import setup_pygame_image_format
+
 sequence_executor = None
 if args.sequence:
     sequence_executor = SequenceExecutor(args.sequence)
@@ -130,9 +125,27 @@ ft6x36.register_sequence_executor(sequence_executor)
 
 
 def run_krux():
-    with open("../src/boot.py", "r", encoding='utf-8') as boot_file:
+    with open("../src/boot.py", "r", encoding="utf-8") as boot_file:
         exec(boot_file.read())
 
+
+def init_pygame() -> dict:
+    """Init pygame; prefer freetype if present. Returns context with 'HAS_FT' and 'FONT'."""
+    pg.init()
+    ctx = {"HAS_FT": False, "FONT": None}
+    try:
+        # Some builds don’t include freetype; this import will fail there.
+        import pygame.freetype as ft  # type: ignore
+
+        ft.init()
+        ctx["HAS_FT"] = True
+        ctx["FONT"] = ft.SysFont(None, 16)  # default; adjust later if needed
+    except Exception as err:
+        print(err)
+    return ctx
+
+
+init_pygame()
 
 # mock for SD
 if args.sd:
@@ -173,44 +186,32 @@ EMBEDFIRE_SIZE = (303,407)
 # When exporting the mask from GIMP uncheck "Save info about transparent pixels color"
 # Use --no-screenshot-scale until fix mask size and devices.screenshot_rect()
 device_screenshot_size = AMIGO_SIZE
-mask_img = pg.image.load(
-    os.path.join("assets", "maixpy_amigo_mask.png")
-    ).convert_alpha()
-if (args.device == devices.M5STICKV):
+
+# First try the png format, if it fail try bmp format
+mask_name = "maixpy_amigo_mask"
+if args.device == devices.M5STICKV:
     device_screenshot_size = M5STICKV_SIZE
-    mask_img = pg.image.load(
-        os.path.join("assets", "maixpy_m5stickv_mask.png")
-        ).convert_alpha()
-elif (args.device == devices.DOCK):
+    mask_name = "maixpy_m5stickv_mask"
+elif args.device == devices.DOCK:
     device_screenshot_size = DOCK_SIZE
-    mask_img = pg.image.load(
-        os.path.join("assets", "maixpy_dock_mask.png")
-        ).convert_alpha()
-elif (args.device == devices.YAHBOOM):
+    mask_name = "maixpy_dock_mask"
+elif args.device == devices.YAHBOOM:
     device_screenshot_size = YAHBOOM_SIZE
-    mask_img = pg.image.load(
-        os.path.join("assets", "maixpy_yahboom_mask.png")
-        ).convert_alpha()
-elif (args.device == devices.CUBE):
+    mask_name = "maixpy_yahboom_mask"
+elif args.device == devices.CUBE:
     device_screenshot_size = CUBE_SIZE
-    mask_img = pg.image.load(
-        os.path.join("assets", "maixpy_cube_mask.png")
-        ).convert_alpha()
-elif (args.device == devices.WONDER_MV):
+    mask_name = "maixpy_cube_mask"
+elif args.device == devices.WONDER_MV:
     device_screenshot_size = WONDER_MV_SIZE
-    mask_img = pg.image.load(
-        os.path.join("assets", "maixpy_wonder_mv_mask.png")
-        ).convert_alpha()
-elif (args.device == devices.TZT):
+    mask_name = "maixpy_wonder_mv_mask.png"
+elif args.device == devices.TZT:
     device_screenshot_size = TZT_SIZE
-    mask_img = pg.image.load(
-        os.path.join("assets", "maixpy_tzt_mask.png")
-        ).convert_alpha()
-elif (args.device == devices.EMBEDFIRE):
+    mask_name = "maixpy_tzt_mask.png"
+elif args.device == devices.EMBEDFIRE:
     device_screenshot_size = EMBEDFIRE_SIZE
-    mask_img = pg.image.load(
-        os.path.join("assets", "maixpy_embed_fire_mask.png")
-        ).convert_alpha()
+    mask_name = "maixpy_embed_fire_mask.png"
+
+mask_img = setup_pygame_image_format(mask_name)
 # TODO: WONDER_K IMG
 # elif (args.device == devices.WONDER_K):
 #     device_screenshot_size = WONDER_K_SIZE
