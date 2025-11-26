@@ -185,12 +185,21 @@ plugins:
           Generating a Mnemonic: Generar una Mnemónica
           Loading a Mnemonic: Cargar una Mnemónica
           Navigating the Main Menu: Navegar el Menú Principal
-          Using a Single-sig Wallet: Usando una Billetera de Firma Única
-          Using a Multisig Wallet: Usando una Billetera Multifirma
-          Printing: Imprimiendo
+          Using a Single-sig Wallet: Usar una Billetera de Firma Única
+          Using a Multisig Wallet: Usar una Billetera Multifirma
+          Printing: Impresión
           Settings: Ajustes
-          From GUI application: Desde la aplicación de escritorio
-          Exploring Features: Explorar Características
-          Video Tutorials: Video Tutoriales
-          Troubleshooting: Solución de problemas
+          From GUI application: Desde la Aplicación Gráfica
+          Exploring Features: Explorar Funciones
+          Video Tutorials: Tutoriales en Video
+          Troubleshooting: Solución de Problemas
           Usage: Uso
+          From pre-built official release: Desde la versión oficial precompilada
+          From pre-built test release: Desde la versión de prueba precompilada
+          From source: Desde el código fuente 
+          Basic Usage: Uso Básico
+          Debian-like: Distros Debian y similares
+          Fedora-like: Distros Fedora y similares
+          Other linux distro: Otras distribuciones de Linux
+          Setting a Coordinator and Signing: Configurar una Billetera Coordinadora y Firmar
+          

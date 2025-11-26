@@ -1,0 +1,17 @@
+Abra el archivo `dmg` y se mostrará un nuevo volumen;
+Arrastre y suelte el **Krux-Installer** a la carpeta **Aplicaciones**:
+
+<img width="450" src="/krux/img/krux-installer/dmg_volume.png" alt="krux-installer's DMG volume" />
+
+Antes de ejecutar, deberá eliminar la etiqueta de cuarentena de la aplicación.
+Esto ocurre porque no hemos añadido la [firma y notarización de código de Apple](https://support.apple.com/guide/security/app-code-signing-process-sec3ad8e6e53/web).
+
+Para solucionarlo, abra su terminal y ejecute el siguiente comando:
+
+```bash
+xattr -d com.apple.quarantine -r /Applications/krux-installer.app
+```
+
+----8<----
+verify-the-signature-trust-tip.es.txt
+----8<----

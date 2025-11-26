@@ -177,74 +177,74 @@ Ahora podrá seleccionar si desea realizar un proceso de flasheo o una actualiza
 
 Haga clic en [Flashear con](#flash-with) para instalar mediante USB o en [Actualización sin conexión a la red](#air-gapped-update-with) para realizar actualizaciones mediante una tarjeta SD.
 
-#### Flash with
+#### Flashear 
 
-When flash starts, it will warn you to **not disconnect the device until the process is complete**.
-You'll be able to see the flash progress:
+Cuando comienza el flasheo, serás advertidode **no desconectar el dispositivo hasta que el proceso sea completado**
+Podrás ver el progreso del flash:
 
 <img width="640" src=" /krux/img/krux-installer/flash.png" alt="Krux-Installer unzip" />
-> ⚠️  TIP: You must connect and turn on your device **before click extract and flashing starts!**.
+> ⚠️  CONSEJO: Debes conectar y encender tu dispositivo **antes de presionar extraer y comenzar el flasheo!**.
 
-As well a done icon:
+Y también un ícono de bien hecho:
 
 <img width="640" src=" /krux/img/krux-installer/flash_done.png" alt="Krux-Installer unzip" />
 
-> ⚠️  TIP:
+> ⚠️  CONSEJO:
 ----8<----
-flash-krux-logo.en.txt
-----8<----
-
-
-##### Error flashing
-----8<----
-error-flashing-windows.en.txt
+flash-krux-logo.es.txt
 ----8<----
 
 
+##### Error de flasheo
+----8<----
+error-flashing-windows.es.txt
+----8<----
 
-#### Air-gapped update with
 
-Once you've installed the initial firmware on your device via USB, you can perform further firmware upgrades via SD card to keep the device airgapped.
+
+#### Actualización sin conexión a la red
+
+Una vez instalado el firmware inicial en tu dispositivo mediante USB, puedes realizar actualizaciones adicionales mediante una tarjeta SD para mantener el dispositivo aislado.
 
 <img width="640" src=" /krux/img/krux-installer/unzip.png" alt="Krux-Installer unzip" />
-> ⚠️ Click on "Air-gapped update with"
+> ⚠️ Presiona "Air-gapped update with"
 
-Once the `firmware.bin` and `firmware.bin.sig` are extracted, you'll see a warning message.
+Una vez extraídos los archivos `firmware.bin` y `firmware.bin.sig` verás un mensaje de advertencia.
 
 <img width="640" src=" /krux/img/krux-installer/warn_airgap.png" alt="Krux-Installer warn airgap" />
 
-Insert the SD card and click 'Proceed' to allow the installer to detect it.
+Inserta la tarjeta SD y haz clic en 'Continuar' para que el instalador la detecte.
 
 <img width="640" src=" /krux/img/krux-installer/list_drivers.png" alt="Krux-Installer warn airgap" />
-> ⚠️ If a single SD card is inserted, the screen will display a large button. If multiple removable drives are detected, both SD cards and other drives will be listed.
+> ⚠️ Si se inserta una sola tarjeta SD, la pantalla mostrará un botón grande. Si se detectan varias unidades extraíbles, se listarán tanto las tarjetas SD como las demás unidades.
 
-Select the desired removable drive to copy both `firmware.bin` and `firmware.bin.sig.` The first is the Krux firmware, and the second is a signature file that verifies the firmware’s integrity and authenticity. 
+Seleccione la unidad extraíble deseada para copiar `firmware.bin` y `firmware.bin.sig.` El primero es el firmware de Krux y el segundo es un archivo de firma que verifica la integridad y autenticidad del firmware. 
 
-Now you can compare the firmware's hash computed by installer with  the firmware's hash computed by the device. 
+Ahora puede comparar el hash del firmware calculado por el instalador con el hash del firmware calculado por el dispositivo.
 
 <img width="640" src=" /krux/img/krux-installer/airgap_done.png" alt="Krux-Installer warn airgap" />
-> ⚠️ Once files are copied, remove the SD card from computer, connect to device and compare the hashes
+> ⚠️ Una vez copiados los archivos, retira la tarjeta SD de la computadora, conéctala al dispositivo y compara los hashes.
 
-### Wipe device
+### Borrar dispositivo
 
-This is a two step process, **Warning msg** and **Wipe process**.
+Este proceso consta de dos pasos: **Mensaje de advertencia** y **Proceso de borrado**.
 
-#### Warning
+#### Advertencia
 
-Before the wipe starts, it will show to you a message:
+Antes de que comienze el borrado, se mostrará un mensaje:
 
 <img width="640" src=" /krux/img/krux-installer/wipe_warn.png" alt="Wipe Warning" />
-> ⚠️  TIP: It's useful when your device is not working or for security reasons.
-To use Krux again, you'll need to re-flash the firmware.
+> ⚠️  CONSEJO: Es útil cuando el dispositivo no funciona o por razones de seguridad.
+Para volver a usar Krux, deberás volver a flashear el firmware.
 
-#### Wipe
+#### Borrar
 
-Once the process starts, the screen will appear frozen and a spinner will keep moving.
-When it's done, you can scroll down you will see a `check` icon.
+Una vez iniciado el proceso, la pantalla se congelará y un icono giratorio seguirá moviéndose.
+Cuando termine, puedes desplazarte hacia abajo y verás un icono de `verificación.`
 
 <img width="640" src=" /krux/img/krux-installer/wipe.png" alt="Wipe Warning" />
-> ⚠️  TIP: Do not unplug or poweroff your device or computer. Wait until the process finishes.
+> ⚠️  CONSEJO: No desconectes ni apagues tu dispositivo ni tu computadora. Espera a que finalice el proceso.
 
 ----8<----
-tips-after-install.en.txt
+tips-after-install.es.txt
 ----8<----
