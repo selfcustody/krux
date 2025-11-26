@@ -326,7 +326,7 @@ class MnemonicEditor(Page):
                 if new_word is not None:
                     self.ctx.display.clear()
                     if self.prompt(
-                        str(button_index + 1) + ".\n\n" + new_word + "\n\n",
+                        str(button_index + page * 12 + 1) + ".\n\n" + new_word + "\n\n",
                         self.ctx.display.height() // 2,
                     ):
                         self.current_mnemonic[button_index + page * 12] = new_word
