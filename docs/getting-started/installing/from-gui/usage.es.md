@@ -119,9 +119,9 @@ Una vez que seleccione el dispositivo y la versión, se habilitará el botón «
     
     * Descomprimir el firmware correcto;
 
-    * Flasheo:
+    * Actualización:
         
-        * Flasheo mediante USB;
+        * Actualización mediante USB;
 
         * Actualización sin conexión a la red mediante tarjeta SD;
         
@@ -130,7 +130,7 @@ Una vez que seleccione el dispositivo y la versión, se habilitará el botón «
 
     * Descarga de recursos;
 
-    * Flasheo;
+    * Actualización;
 
 #### Advertencia
 
@@ -171,19 +171,19 @@ los archivos `zip.sig` y `selfcustody.pem`.
 
 #### Descomprimir
 
-Ahora podrá seleccionar si desea realizar un proceso de flasheo o una actualización sin conexión a la red:
+Ahora podrá seleccionar si desea realizar un proceso de actualización o un proceso sin conexión a la red:
 
 <img width="640" src=" /krux/img/krux-installer/unzip.png" alt="Krux-Installer unzip" />
 
-Haga clic en [Flashear con](#flash-with) para instalar mediante USB o en [Actualización sin conexión a la red](#air-gapped-update-with) para realizar actualizaciones mediante una tarjeta SD.
+Haga clic en [Actualizar con](#flash-with) para instalar mediante USB o en [Actualizar sin conexión a la red](#air-gapped-update-with) para realizar actualizaciones mediante una tarjeta SD.
 
-#### Flashear 
+#### Actualizar
 
-Cuando comienza el flasheo, serás advertidode **no desconectar el dispositivo hasta que el proceso sea completado**
-Podrás ver el progreso del flash:
+Cuando comienza la actualización, serás advertido de **no desconectar el dispositivo hasta que el proceso sea completado.** 
+Podrás ver el progreso de la actualización:
 
 <img width="640" src=" /krux/img/krux-installer/flash.png" alt="Krux-Installer unzip" />
-> ⚠️  CONSEJO: Debes conectar y encender tu dispositivo **antes de presionar extraer y comenzar el flasheo!**.
+> ⚠️  CONSEJO: Debes conectar y encender tu dispositivo **antes de presionar extraer y comenzar la actualización!**.
 
 Y también un ícono de bien hecho:
 
@@ -195,7 +195,7 @@ flash-krux-logo.es.txt
 ----8<----
 
 
-##### Error de flasheo
+##### Error de actualización
 ----8<----
 error-flashing-windows.es.txt
 ----8<----
@@ -204,7 +204,7 @@ error-flashing-windows.es.txt
 
 #### Actualización sin conexión a la red
 
-Una vez instalado el firmware inicial en tu dispositivo mediante USB, puedes realizar actualizaciones adicionales mediante una tarjeta SD para mantener el dispositivo aislado.
+Una vez instalado el firmware inicial en tu dispositivo mediante USB, puedes realizar actualizaciones adicionales mediante una tarjeta SD para mantener el dispositivo aislado de internet.
 
 <img width="640" src=" /krux/img/krux-installer/unzip.png" alt="Krux-Installer unzip" />
 > ⚠️ Presiona "Air-gapped update with"
@@ -235,7 +235,7 @@ Antes de que comienze el borrado, se mostrará un mensaje:
 
 <img width="640" src=" /krux/img/krux-installer/wipe_warn.png" alt="Wipe Warning" />
 > ⚠️  CONSEJO: Es útil cuando el dispositivo no funciona o por razones de seguridad.
-Para volver a usar Krux, deberás volver a flashear el firmware.
+Para volver a usar Krux, deberás volver a actualizar el firmware.
 
 #### Borrar
 
