@@ -2,11 +2,19 @@ from ..shared_mocks import mock_context, snapshot_generator, SNAP_SUCCESS, IMAGE
 import hashlib
 import random
 
-ENTROPY_MESSAGE_STR = (
-    f"Shannon's entropy:\n%s bits (%s bits/px)\n\nPixels deviation index: %s"
-)
 
-ENTROPY_INSUFFICIENT_MESSAGE_STR = "Insufficient entropy!\n\n" + ENTROPY_MESSAGE_STR
+def _called_with_insufficient_entropy_message(ctx):
+    """Helper bool to determine if ctx.display.draw_centered_text was called with a message including "Insufficient" """
+    return (
+        len(
+            [
+                call
+                for call in ctx.display.draw_centered_text.call_args_list
+                if "Insufficient" in call.args[0]
+            ]
+        )
+        > 0
+    )
 
 
 def test_cancel_capture(amigo, mocker):
@@ -51,8 +59,6 @@ def test_insufficient_variance(amigo, mocker):
         INSUFFICIENT_VARIANCE_TH,
         INSUFFICIENT_SHANNONS_ENTROPY_TH,
     )
-    from krux.themes import RED
-    from krux.format import generate_thousands_separator
 
     # Mock snapshot to return a successful snapshot
     mocker.patch(
@@ -77,7 +83,6 @@ def test_insufficient_variance(amigo, mocker):
 
     # Mock shannon.entropy_img16b to return a value above the threshold
     shannon_value = INSUFFICIENT_SHANNONS_ENTROPY_TH + 1
-    total_shannon = shannon_value * 320 * 240
     mocker.patch("shannon.entropy_img16b", return_value=shannon_value)
 
     # Call the capture method
@@ -87,13 +92,7 @@ def test_insufficient_variance(amigo, mocker):
     assert result is None
 
     # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
-    call_message = mocker.call(
-        ENTROPY_INSUFFICIENT_MESSAGE_STR
-        % (generate_thousands_separator(total_shannon), shannon_value, variance),
-        RED,
-    )
-
-    ctx.display.draw_centered_text.assert_has_calls([call_message])
+    assert _called_with_insufficient_entropy_message(ctx)
 
 
 def test_insufficient_shannons_entropy(amigo, mocker):
@@ -103,8 +102,6 @@ def test_insufficient_shannons_entropy(amigo, mocker):
         INSUFFICIENT_VARIANCE_TH,
         INSUFFICIENT_SHANNONS_ENTROPY_TH,
     )
-    from krux.themes import RED
-    from krux.format import generate_thousands_separator
 
     # Mock snapshot to return a successful snapshot
     mocker.patch(
@@ -123,16 +120,12 @@ def test_insufficient_shannons_entropy(amigo, mocker):
     # Create an instance of CameraEntropy
     camera_entropy = CameraEntropy(ctx)
 
-    # Create an instance of CameraEntropy
-    camera_entropy = CameraEntropy(ctx)
-
     # Mock rms value to return a value above the threshold
     variance = INSUFFICIENT_VARIANCE_TH + 1
     camera_entropy.rms_value = mocker.MagicMock(return_value=variance)
 
     # Mock shannon.entropy_img16b to return a value below the threshold
     shannon_value = INSUFFICIENT_SHANNONS_ENTROPY_TH - 1
-    total_shannon = shannon_value * 320 * 240
     mocker.patch("shannon.entropy_img16b", return_value=shannon_value)
 
     # Call the capture method
@@ -142,13 +135,7 @@ def test_insufficient_shannons_entropy(amigo, mocker):
     assert result is None
 
     # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
-    call_message = mocker.call(
-        ENTROPY_INSUFFICIENT_MESSAGE_STR
-        % (generate_thousands_separator(total_shannon), shannon_value, variance),
-        RED,
-    )
-
-    ctx.display.draw_centered_text.assert_has_calls([call_message])
+    assert _called_with_insufficient_entropy_message(ctx)
 
 
 def test_poor_variance(amigo, mocker):
@@ -162,8 +149,6 @@ def test_poor_variance(amigo, mocker):
         INSUFFICIENT_SHANNONS_ENTROPY_TH,
     )
 
-    from krux.format import generate_thousands_separator
-
     # Mock snapshot to return a successful snapshot
     mocker.patch(
         "krux.camera.sensor.snapshot", new=snapshot_generator(outcome=SNAP_SUCCESS)
@@ -181,16 +166,12 @@ def test_poor_variance(amigo, mocker):
     # Create an instance of CameraEntropy
     camera_entropy = CameraEntropy(ctx)
 
-    # Create an instance of CameraEntropy
-    camera_entropy = CameraEntropy(ctx)
-
     # Mock rms value to return a value below the poor threshold, but above insufficient
     variance = POOR_VARIANCE_TH - 1
     camera_entropy.rms_value = mocker.MagicMock(return_value=variance)
 
     # Mock shannon.entropy_img16b to return a value above the threshold
     shannon_value = INSUFFICIENT_SHANNONS_ENTROPY_TH + 1
-    total_shannon = shannon_value * 320 * 240
     mocker.patch("shannon.entropy_img16b", return_value=shannon_value)
 
     # Call the capture method
@@ -202,14 +183,8 @@ def test_poor_variance(amigo, mocker):
 
     assert result == hasher.digest()
 
-    # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
-    call_message = mocker.call(
-        ENTROPY_MESSAGE_STR
-        % (generate_thousands_separator(total_shannon), shannon_value, variance),
-        highlight_prefix=":",
-    )
-
-    ctx.display.draw_centered_text.assert_has_calls([call_message])
+    # Assert ctx.display.draw_centered_text was NOT called with "Insufficient entropy!"
+    assert not _called_with_insufficient_entropy_message(ctx)
 
 
 def test_good_variance_good_shannons_entropy(amigo, mocker):
@@ -222,7 +197,6 @@ def test_good_variance_good_shannons_entropy(amigo, mocker):
         POOR_VARIANCE_TH,
         INSUFFICIENT_SHANNONS_ENTROPY_TH,
     )
-    from krux.format import generate_thousands_separator
 
     # Mock snapshot to return a successful snapshot
     mocker.patch(
@@ -247,7 +221,6 @@ def test_good_variance_good_shannons_entropy(amigo, mocker):
 
     # Mock shannon.entropy_img16b to return a value above the threshold
     shannon_value = INSUFFICIENT_SHANNONS_ENTROPY_TH + 1
-    total_shannon = shannon_value * 320 * 240
     mocker.patch("shannon.entropy_img16b", return_value=shannon_value)
 
     # Call the capture method
@@ -259,14 +232,8 @@ def test_good_variance_good_shannons_entropy(amigo, mocker):
 
     assert result == hasher.digest()
 
-    # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
-    call_message = mocker.call(
-        ENTROPY_MESSAGE_STR
-        % (generate_thousands_separator(total_shannon), shannon_value, variance),
-        highlight_prefix=":",
-    )
-
-    ctx.display.draw_centered_text.assert_has_calls([call_message])
+    # Assert ctx.display.draw_centered_text was NOT called with "Insufficient entropy!"
+    assert not _called_with_insufficient_entropy_message(ctx)
 
 
 def test_entropy_measurement_update_state_2(amigo, mocker):

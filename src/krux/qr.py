@@ -372,6 +372,7 @@ def find_min_num_parts(data, max_width, qr_format):
 
 def parse_pmofn_qr_part(data):
     """Parses the QR as a P M-of-N part, extracting the part's content, index, and total"""
+    data = data.decode() if isinstance(data, bytes) else data
     of_index = data.index("of")
     space_index = data.index(" ")
     part_index = int(data[1:of_index])
@@ -382,6 +383,7 @@ def parse_pmofn_qr_part(data):
 def detect_format(data):
     """Detects the QR format of the given data"""
     qr_format = FORMAT_NONE
+    data = data.decode() if isinstance(data, bytes) else data
     try:
         if data.startswith("p"):
             header = data.split(" ")[0]
