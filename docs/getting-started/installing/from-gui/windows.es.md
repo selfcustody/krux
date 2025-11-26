@@ -1,4 +1,4 @@
-# :material-microsoft-windows: Descargar recursos
+# :material-microsoft-windows: Descargar Recursos
  
 * [`{{latest_installer_win}}`](https://github.com/selfcustody/krux-installer/releases/download/{{latest_installer}}/{{latest_installer_win}})
 * [`{{latest_installer_win}}.sha256.txt`](https://github.com/selfcustody/krux-installer/releases/download/{{latest_installer}}/{{latest_installer_win}}.sha256.txt)
