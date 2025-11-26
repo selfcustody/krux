@@ -230,8 +230,8 @@ class MnemonicEditor(Page):
                     self.ctx.display.draw_string(
                         MINIMAL_PADDING + self.ctx.display.width() // 2,
                         y_region,
-                        str(word_index + 13)
-                        + "."
+                        "{:>2}".format(word_index + 13)
+                        + ". "
                         + self.current_mnemonic[word_index + 12],
                         theme.bg_color,
                         word_color(word_index + 12),
@@ -240,8 +240,8 @@ class MnemonicEditor(Page):
                     self.ctx.display.draw_string(
                         MINIMAL_PADDING + self.ctx.display.width() // 2,
                         y_region,
-                        str(word_index + 13)
-                        + "."
+                        "{:>2}".format(word_index + 13)
+                        + ". "
                         + self.current_mnemonic[word_index + 12],
                         word_color(word_index + 12),
                     )
