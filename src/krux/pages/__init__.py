@@ -345,7 +345,7 @@ class Page:
         display_mnemonic = display_mnemonic or mnemonic
         words = display_mnemonic.split(" ")
         word_list = [
-            "{}.{}{}".format(i + 1, "  " if i + 1 < 10 else " ", word)
+            "{:>2}. {}".format(i + 1, word)
             for i, word in enumerate(words)
         ]
         if is_double_mnemonic(mnemonic):

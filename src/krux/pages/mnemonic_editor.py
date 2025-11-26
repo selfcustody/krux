@@ -214,7 +214,7 @@ class MnemonicEditor(Page):
                 self.ctx.display.draw_string(
                     x_padding,
                     y_region,
-                    str(paged_index + 1) + "." + self.current_mnemonic[paged_index],
+                    "{:>2}".format(paged_index + 1) + ". " + self.current_mnemonic[paged_index],
                     theme.bg_color,
                     word_color(paged_index),
                 )
@@ -222,7 +222,7 @@ class MnemonicEditor(Page):
                 self.ctx.display.draw_string(
                     x_padding,
                     y_region,
-                    str(paged_index + 1) + "." + self.current_mnemonic[paged_index],
+                    "{:>2}".format(paged_index + 1) + ". " + self.current_mnemonic[paged_index],
                     word_color(paged_index),
                 )
             if self.mnemonic_length == 24 and not kboard.is_m5stickv:
