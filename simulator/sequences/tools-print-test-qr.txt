@@ -5,10 +5,11 @@ x3 press BUTTON_B
 press BUTTON_A
 
 # Navigate to Device Tests
-x2 press BUTTON_B
+press BUTTON_B
 press BUTTON_A
 
 # Print Test QR
+press BUTTON_B
 press BUTTON_A
 
 screenshot print-test-qr.png

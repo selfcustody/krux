@@ -5,8 +5,8 @@ In **Settings -> Encryption Settings**, you can adjust *PBKDF2 Iterations* and *
 
 During encryption, users may be prompted to override their preferences or select a specific version. Most importantly: **the encryption key MUST be strong**. If a KEF envelope is created with a weak key and shared or exposed, it should be assumed to offer **NO protection**, and the secret will be leaked.
 
-<img src="../../../../img/maixpy_m5stickv/load-mnemonic-kef-via-qr-250.png" align="right" class="m5stickv">
-<img src="../../../../img/maixpy_amigo/load-mnemonic-kef-via-qr-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/load-mnemonic-kef-via-qr-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/load-mnemonic-kef-via-qr-300.png" align="right" class="amigo">
 
 When Krux detects data resembling a KEF-encrypted envelope, it prompts the user to *"Decrypt?"*, showing the KEF version, envelope ID (or label), and the PBKDF2 iteration count used during creation. To decrypt, the same key (typed or scanned) must be provided. Once unlocked, Krux uses the plaintext within context. If decryption is declined, the raw envelope is used instead—usually resulting in an error, since KEF data is meaningless without decryption.
 

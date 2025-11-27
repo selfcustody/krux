@@ -64,7 +64,7 @@ Execute the `{{latest_installer_win}}`. You'll be faced with a blue window sayin
 "Windows protected your PC". This occurs because we don't have a
 [code signing certificate](https://signmycode.com/resources/how-to-sign-an-exe-or-windows-application):
 
-<img width="450" src="../../../../img/krux-installer/windows_warn0.jpg" alt="Windows protected your computer" />
+<img width="450" src="/krux/img/krux-installer/windows_warn0.jpg" alt="Windows protected your computer" />
 
 ----8<----
 verify-the-signature-trust-tip.en.txt

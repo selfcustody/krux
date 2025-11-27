@@ -1,11 +1,11 @@
 After entering your mnemonic, and loading a wallet, you will find yourself on Krux's main menu. Below is a breakdown of the entries available:
 
-<img src="../../../img/maixpy_amigo/home-options-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/home-options-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/home-options-300.png" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/home-options-250.png" class="m5stickv">
 
 ### Backup Mnemonic
-<img src="../../../img/maixpy_m5stickv/backup-options-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/backup-options-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/backup-options-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/backup-options-300.png" align="right" class="amigo">
 
 This will open a new submenu with different types of backups. `QR Code` based, `Encrypted` and `Other Formats`.
 
@@ -16,8 +16,8 @@ If you set a [printer](../settings.md/#printer), it will also give the option to
 #### QR Code
 - **Plaintext QR**
 
-<img src="../../../img/maixpy_m5stickv/backup-qr-plain-text-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/backup-qr-plain-text-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/backup-qr-plain-text-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/backup-qr-plain-text-300.png" align="right" class="amigo">
 
 Generate a QR containing the mnemonic words as regular text, where words are separated by spaces. Like any QR code, it can be printed after setting up the printer driver.
 
@@ -25,8 +25,8 @@ Generate a QR containing the mnemonic words as regular text, where words are sep
 
 - **Compact SeedQR**
 
-<img src="../../../img/maixpy_m5stickv/backup-compact-qr-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/backup-compact-qr-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/backup-compact-qr-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/backup-compact-qr-300.png" align="right" class="amigo">
 
 A QR code is created from a binary representation of mnemonic words. Format created by SeedSigner, more info [here](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md#compactseedqr-specification).
 
@@ -34,8 +34,8 @@ A QR code is created from a binary representation of mnemonic words. Format crea
 
 - **SeedQR**
 
-<img src="../../../img/maixpy_m5stickv/backup-seed-qr-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/backup-seed-qr-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/backup-seed-qr-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/backup-seed-qr-300.png" align="right" class="amigo">
 
 Words are converted to their BIP39 numeric indexes, those numbers are then concatenated as a string and finally converted to a QR code. Format created by SeedSigner, more info [here](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md).
 
@@ -50,8 +50,8 @@ This option converts the encrypted mnemonic into a QR code. Enter an encryption 
 Please refer to [Transcribing QR Codes](../features/QR-transcript-tools.md) for details on transcription modes and helper tools.
 
 #### Encrypted
-<img src="../../../img/maixpy_m5stickv/home-encrypt-options-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/home-encrypt-options-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/home-encrypt-options-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/home-encrypt-options-300.png" align="right" class="amigo">
 
 This feature allows you to back up your mnemonic by encrypting it and storing it on the device's flash memory, on an SD card, or in QR code format. You can customize the encryption method and parameters in the [settings](../settings.md/#encryption).
 
@@ -76,8 +76,8 @@ It's another path for the same functionality present on QR Code backups, describ
 
 - **Words**
 
-<img src="../../../img/maixpy_m5stickv/backup-mnemonic-words-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/backup-mnemonic-words-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/backup-mnemonic-words-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/backup-mnemonic-words-300.png" align="right" class="amigo">
 
 Display the BIP39 mnemonic words as text so you can write them down.
 
@@ -85,8 +85,8 @@ Display the BIP39 mnemonic words as text so you can write them down.
 
 - **Numbers**
 
-<img src="../../../img/maixpy_m5stickv/backup-mnemonic-numbers-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/backup-mnemonic-numbers-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/backup-mnemonic-numbers-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/backup-mnemonic-numbers-300.png" align="right" class="amigo">
 
 Display the BIP39 mnemonic word numbers (1-2048) in decimal, hex, or octal format.
 
@@ -94,8 +94,8 @@ Display the BIP39 mnemonic word numbers (1-2048) in decimal, hex, or octal forma
 
 - **Stackbit 1248**
 
-<img src="../../../img/maixpy_m5stickv/backup-stackbit-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/backup-stackbit-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/backup-stackbit-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/backup-stackbit-300.png" align="right" class="amigo">
 
 This metal backup format represents the BIP39 mnemonic word's numbers (1-2048). Each of the four digits is converted to a sum of 1, 2, 4 or 8. This option does not print even if a printer driver is set.
 
@@ -103,8 +103,8 @@ This metal backup format represents the BIP39 mnemonic word's numbers (1-2048). 
 
 - **Tinyseed**
 
-<img src="../../../img/maixpy_m5stickv/backup-tiny-seed-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/backup-tiny-seed-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/backup-tiny-seed-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/backup-tiny-seed-300.png" align="right" class="amigo">
 
 This metal backup format represents the BIP39 mnemonic word's numbers (1-2048) in binary format on a metal plate, where the 1's are marked (punched) and the 0's are left intact. You can also print your mnemonic in this format after setting up the thermal printer driver.
 <div style="clear: both"></div>
@@ -113,12 +113,12 @@ This metal backup format represents the BIP39 mnemonic word's numbers (1-2048) i
 
 A menu will be presented with options to display your master extended public key (xpub) as text and as a QR code. Depending on the script type or whether a single-sig or multisig wallet was loaded, the options shown will be *xpub, ypub, zpub or Zpub*. When displayed as text, the extended public key can be stored on an SD card if available. If you choose to export a QR code, you can not only scan it but also save it as an image on an SD card or be printed, after setting up the printer driver.
 
-<img src="../../../img/maixpy_amigo/extended-public-key-menu-300.png" class="amigo">
-<img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-text-300.png" class="amigo">
-<img src="../../../img/maixpy_amigo/extended-public-key-wsh-xpub-qr-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/extended-public-key-menu-250.png" class="m5stickv">
-<img src="../../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-text-250.png" class="m5stickv">
-<img src="../../../img/maixpy_m5stickv/extended-public-key-wsh-xpub-qr-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/extended-public-key-menu-300.png" class="amigo">
+<img src="/krux/img/maixpy_amigo/extended-public-key-wsh-xpub-text-300.png" class="amigo">
+<img src="/krux/img/maixpy_amigo/extended-public-key-wsh-xpub-qr-300.png" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/extended-public-key-menu-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_m5stickv/extended-public-key-wsh-xpub-text-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_m5stickv/extended-public-key-wsh-xpub-qr-250.png" class="m5stickv">
 
 All QR codes will contain [key origin information in key expressions](https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki#Key_Expressions). If your wallet coordinator cannot parse this information, it will not be able to import the wallet's fingerprint. As a result, Krux will not perform important verifications when signing *PSBT* transactions created by this wallet coordinator, unless you manually add the fingerprint in the coordinator.
 
@@ -128,8 +128,8 @@ Some coordinators are phasing out support for variants like ypub and zpub in fav
 
 ### Wallet
 
-<img src="../../../img/maixpy_m5stickv/wallet_home_options-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/wallet_home_options-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/wallet_home_options-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/wallet_home_options-300.png" align="right" class="amigo">
 
 Here you can load, view and save `Wallet Descriptor`, you can also customize the wallet by setting a `Passphrase` or change other attribute using the `Customize` button. It is possible to derive `BIP85` entropy for `BIP39 Mnemonic` and `Base64 Password` as well.
 
@@ -147,8 +147,8 @@ Output descriptors standardize wallet address generation, ensuring accurate wall
 
 For multisig and miniscript, loading a wallet descriptor is essential to verify addresses and *PSBT* validations. For single-sig wallets, it remains optional and serves as a redundancy check of the coordinator's wallet attributes.
 
-<img src="../../../img/maixpy_m5stickv/wallet-wsh-load-prompt-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/wallet-wsh-load-prompt-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/wallet-wsh-load-prompt-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/wallet-wsh-load-prompt-300.png" align="right" class="amigo">
 
 When you select the `Wallet Descriptor` option for the first time, you will be prompted to load via QR code or SD card. After loading, a preview of the descriptor attributes will be displayed for confirmation. We shown each key’s fingerprint, derivation path, and abbreviated XPUB highlighted with a different color.
 
@@ -156,11 +156,11 @@ When you select the `Wallet Descriptor` option for the first time, you will be p
 
 **Miniscript Descriptors** present an indented view of the miniscript after the keys. When Taproot is used, Krux checks if the internal key is "provably unspendable", meaning funds can only be moved via Tap tree scripts, in which case the internal key is displayed in a disabled color.
 
-<img src="../../../img/maixpy_amigo/wallet-descriptor-tr-minis-1-300.png" class="amigo">
-<img src="../../../img/maixpy_amigo/wallet-descriptor-tr-minis-2-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/wallet-descriptor-tr-minis-1-250.png" class="m5stickv">
-<img src="../../../img/maixpy_m5stickv/wallet-descriptor-tr-minis-2-250.png" class="m5stickv">
-<img src="../../../img/maixpy_m5stickv/wallet-descriptor-tr-minis-3-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/wallet-descriptor-tr-minis-1-300.png" class="amigo">
+<img src="/krux/img/maixpy_amigo/wallet-descriptor-tr-minis-2-300.png" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/wallet-descriptor-tr-minis-1-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_m5stickv/wallet-descriptor-tr-minis-2-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_m5stickv/wallet-descriptor-tr-minis-3-250.png" class="m5stickv">
 
 Re-access the "Wallet Descriptor" option after loading your wallet to view its name and a QR code containing the originally loaded data. If an SD card is inserted, you can save the descriptor for future use without a coordinator's assistance. Like any QR code, it can be printed after setting up the printer driver.
 
@@ -169,8 +169,8 @@ Krux also allows you to verify a descriptor's receive and change addresses witho
 Please note that if you customize the wallet parameters or restart the device, the descriptor will be unloaded, and you may need to load it again to check addresses.
 
 #### Passphrase
-<img src="../../../img/maixpy_m5stickv/passphrase-load-options-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/passphrase-load-options-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/passphrase-load-options-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/passphrase-load-options-300.png" align="right" class="amigo">
 
 If you forgot to load a passphrase while loading your wallet, or if you use multiple passphrases with the same mnemonic, you can add, replace, or remove a passphrase here. Simply choose between typing or scanning it.
 
@@ -181,8 +181,8 @@ Don't forget to verify the resulting fingerprint in the status bar to ensure you
 <div style="clear: both"></div>
 
 #### Customize
-<img src="../../../img/maixpy_m5stickv/wallet-customization-options-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/wallet-customization-options-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/wallet-customization-options-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/wallet-customization-options-300.png" align="right" class="amigo">
 
 Here you are presented with the same customization options that you have when loading. You can change `Network`, `Policy Type`, `Script Type`, and `Account`. On loading a mnemonic page we already detail [the wallet's attributes](./loading-a-mnemonic.md/#confirm-wallet-attributes).
 
@@ -190,8 +190,8 @@ Here you are presented with the same customization options that you have when lo
 
 #### BIP85
 
-<img src="../../../img/maixpy_m5stickv/bip85-options-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/bip85-options-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/bip85-options-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/bip85-options-300.png" align="right" class="amigo">
 
 Bitcoin *BIP85* (aka Deterministic Entropy From BIP32 Keychains) allows for the generation of deterministic entropy using a BIP32 master key. This entropy can then be used to create various cryptographic keys and mnemonics (e.g., BIP39 seed phrases). BIP85 ensures that all derived keys and mnemonics are deterministic and reproducible, meaning they can be recreated from the same master key. This feature is useful for securely managing multiple child keys from a single master key without the need to store each one separately.
 
@@ -199,10 +199,10 @@ Bitcoin *BIP85* (aka Deterministic Entropy From BIP32 Keychains) allows for the 
 
 ##### BIP39 Mnemonic
 
-<img src="../../../img/maixpy_amigo/bip85-child-index-300.png" class="amigo">
-<img src="../../../img/maixpy_amigo/bip85-load-child-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/bip85-child-index-250.png" class="m5stickv">
-<img src="../../../img/maixpy_m5stickv/bip85-load-child-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/bip85-child-index-300.png" class="amigo">
+<img src="/krux/img/maixpy_amigo/bip85-load-child-300.png" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/bip85-child-index-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_m5stickv/bip85-load-child-250.png" class="m5stickv">
 
 Choose between *12 or 24 words*, then type the desired *index* to export a *child mnemonic*. After being presented with the new mnemonic, you can choose to load and use it right away.
 
@@ -210,16 +210,16 @@ Choose between *12 or 24 words*, then type the desired *index* to export a *chil
 
 ##### Base64 Password
 
-<img src="../../../img/maixpy_amigo/bip85-password-len-300.png" class="amigo">
-<img src="../../../img/maixpy_amigo/bip85-password-created-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/bip85-password-len-250.png" class="m5stickv">
-<img src="../../../img/maixpy_m5stickv/bip85-password-created-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/bip85-password-len-300.png" class="amigo">
+<img src="/krux/img/maixpy_amigo/bip85-password-created-300.png" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/bip85-password-len-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_m5stickv/bip85-password-created-250.png" class="m5stickv">
 
 To create a *Base64 password*, which can be used in a variety of logins, from email to social media accounts, choose an index and then a length of at least 20 characters. The resulting password will be displayed on the screen and can also be exported to an SD Card or as a QR code.
 
 #### Mnemonic XOR
-<img src="../../../img/maixpy_m5stickv/xor-message-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/xor-message-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/xor-message-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/xor-message-300.png" align="right" class="amigo">
 
 Mnemonic XOR enables the **combination of two or more mnemonics** by applying an XOR (exclusive OR) operation to their entropy bytes, **resulting in a new mnemonic**. This functionality can be used to split a mnemonic into multiple parts (or "shares") or to merge existing ones.
 
@@ -228,16 +228,16 @@ For detailed instructions on combining, splitting, and recovering mnemonics usin
 <div style="clear: both"></div>
 
 ### Address
-<img src="../../../img/maixpy_m5stickv/address-menu-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/address-menu-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/address-menu-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/address-menu-300.png" align="right" class="amigo">
 
 Scan, list, export or print your wallet addresses.
 
 <div style="clear: both"></div>
 
 #### Scan Address
-<img src="../../../img/maixpy_m5stickv/scan-address-scanned-address-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/scan-address-scanned-address-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/scan-address-scanned-address-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/scan-address-scanned-address-300.png" align="right" class="amigo">
 
 This option turns on the camera and allows you to scan in a QR code of an address. Upon scanning, it will render its QR code back to the display along with the address below.
 
@@ -248,32 +248,32 @@ After this, you will be asked if you want to check that the address belongs to y
 <div style="clear: both"></div>
 
 #### List Addresses
-<img src="../../../img/maixpy_m5stickv/list-address-receive-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/list-address-receive-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/list-address-receive-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/list-address-receive-300.png" align="right" class="amigo">
 
 List your wallet *receiving or change addresses*, you can select an arbitrary address to show your QR code and print if you want.
 
 <div style="clear: both"></div>
 
 #### Export Addresses
-<img src="../../../img/maixpy_m5stickv/export-address-quantity-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/export-address-quantity-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/export-address-quantity-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/export-address-quantity-300.png" align="right" class="amigo">
 
 Export your wallet *receiving or change addresses* starting from a selected *index* and *quantity* to a CSV file on your SD card.
 
 <div style="clear: both"></div>
 
 ### Sign
-<img src="../../../img/maixpy_m5stickv/sign-options-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/sign-options-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/sign-options-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/sign-options-300.png" align="right" class="amigo">
 
 Here you can choose to sign a *PSBT* or a *Message*. You can load both by scanning QR codes or selecting a file from an SD card.
 
 <div style="clear: both"></div>
 
 #### PSBT
-<img src="../../../img/maixpy_m5stickv/sign-psbt-from-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/sign-psbt-from-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/sign-psbt-from-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/sign-psbt-from-300.png" align="right" class="amigo">
 
 To sign a Bitcoin *PSBT*, you have the following options:
 
@@ -282,8 +282,8 @@ To sign a Bitcoin *PSBT*, you have the following options:
 
 <div style="clear: both"></div>
 
-<img src="../../../img/maixpy_m5stickv/sign-psbt-info-1-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/sign-psbt-info-1-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/sign-psbt-info-1-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/sign-psbt-info-1-300.png" align="right" class="amigo">
 
 Upon loading the unsigned *PSBT*, you will be presented with a preview of the transaction, showing:
 
@@ -296,8 +296,8 @@ Amounts are displayed according to your locale and the International Bureau of W
 
 <div style="clear: both"></div>
 
-<img src="../../../img/maixpy_m5stickv/sign-psbt-sign-prompt-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/sign-psbt-sign-prompt-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/sign-psbt-sign-prompt-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/sign-psbt-sign-prompt-300.png" align="right" class="amigo">
 
 You can then choose to review the PSBT or proceed with one of two signing options:
 
@@ -314,8 +314,8 @@ Similar to *PSBTs*, Krux can load, sign, and export signatures for *messages*. T
 
 - **Standard Messages and Files**
 
-<img src="../../../img/maixpy_m5stickv/sign-message-sha256-sign-prompt-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/sign-message-sha256-sign-prompt-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/sign-message-sha256-sign-prompt-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/sign-message-sha256-sign-prompt-300.png" align="right" class="amigo">
 
 You can scan or load a file from an SD card, the content can be plaintext or the SHA-256 hash of a message. Upon loading, you will be shown a preview of the *message's* SHA-256 hash for confirmation before signing.
 
@@ -329,8 +329,8 @@ This feature is used to sign Krux releases, airgapped, using a Krux device.
 
 - **Messages at Address**
 
-<img src="../../../img/maixpy_m5stickv/sign-message-at-address-prompt-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/sign-message-at-address-prompt-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/sign-message-at-address-prompt-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/sign-message-at-address-prompt-300.png" align="right" class="amigo">
 
 Coordinators like Sparrow and Specter offer the possibility to sign *messages* at a Bitcoin receive address, allowing you to attest ownership of that address. Krux will detect if the *message* is of this type and present a similar workflow for signing. The main difference is that the address will be displayed along with the raw *message*, and since the *message* is signed with a derived address instead of the master public key, Krux won't offer the option to export the raw public key after the signature.
 

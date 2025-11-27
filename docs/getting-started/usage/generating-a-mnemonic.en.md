@@ -2,20 +2,20 @@ Krux supports creating 12 and 24-word [BIP39 mnemonic](https://github.com/bitcoi
 
 At the start screen, select **New Mnemonic**, and choose between camera, words, rolls of a D6 (standard six-sided die), or a D20 (20-sided die).
 
-<img src="../../../img/maixpy_amigo/new-mnemonic-options-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-options-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/new-mnemonic-options-300.png" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/new-mnemonic-options-250.png" class="m5stickv">
 
 ## Camera
 (Experimental!) Choose between 12, 24 words or double mnemonic, then take a random picture and Krux will generate a mnemonic from the hash of the image bytes.
 
-<img src="../../../img/maixpy_amigo/new-mnemonic-via-snapshot-prompt-300.png" class="amigo">
-<img src="../../../img/maixpy_amigo/new-mnemonic-via-snapshot-capturing-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-prompt-250.png" class="m5stickv">
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-capturing-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/new-mnemonic-via-snapshot-prompt-300.png" class="amigo">
+<img src="/krux/img/maixpy_amigo/new-mnemonic-via-snapshot-capturing-300.png" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/new-mnemonic-via-snapshot-prompt-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_m5stickv/new-mnemonic-via-snapshot-capturing-250.png" class="m5stickv">
 
 #### Image Entropy Quality Estimation
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-entropy-estimation-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/new-mnemonic-via-snapshot-entropy-estimation-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/new-mnemonic-via-snapshot-entropy-estimation-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/new-mnemonic-via-snapshot-entropy-estimation-300.png" align="right" class="amigo">
 
 During image capture, entropy quality estimation is displayed to assist you in obtaining a quality image source for your key. After the snapshot is taken, [Shannon's entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) and pixel deviation indices are presented. Minimum thresholds are established to prevent the use of poor-quality images with low entropy for key generation.
 
@@ -36,22 +36,22 @@ For the final word, Krux will assist you in picking a valid 12th or 24th word by
 ### Via D6
 Choose between 12 or 24 words. The entropy in a single roll of a D6 is 2.585 bits ( log<sub>2</sub>(6) ); therefore a minimum of 50 rolls is required for 128 bits of entropy, enough to generate a 12-word mnemonic. For 24 words, a minimum of 99 rolls is required for 256 bits of entropy.
 
-<img src="../../../img/maixpy_amigo/new-mnemonic-via-d6-roll-1-300.png" class="amigo">
-<img src="../../../img/maixpy_amigo/new-mnemonic-via-d6-last-n-rolls-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-1-250.png" class="m5stickv">
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-last-n-rolls-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/new-mnemonic-via-d6-roll-1-300.png" class="amigo">
+<img src="/krux/img/maixpy_amigo/new-mnemonic-via-d6-last-n-rolls-300.png" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/new-mnemonic-via-d6-roll-1-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_m5stickv/new-mnemonic-via-d6-last-n-rolls-250.png" class="m5stickv">
 
 ### Via D20
 The entropy in a single roll of a D20 is 4.322 bits ( log<sub>2</sub>(20) ); therefore a minimum of 30 rolls is required to generate a 12-word mnemonic and 60 rolls to generate a 24-word mnemonic.
 
-<img src="../../../img/maixpy_amigo/new-mnemonic-via-d20-roll-1-300.png" class="amigo">
-<img src="../../../img/maixpy_amigo/new-mnemonic-via-d20-last-n-rolls-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d20-roll-1-250.png" class="m5stickv">
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d20-last-n-rolls-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/new-mnemonic-via-d20-roll-1-300.png" class="amigo">
+<img src="/krux/img/maixpy_amigo/new-mnemonic-via-d20-last-n-rolls-300.png" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/new-mnemonic-via-d20-roll-1-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_m5stickv/new-mnemonic-via-d20-last-n-rolls-250.png" class="m5stickv">
 
 ### Dice Rolls Entropy Quality Estimation
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-string-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/new-mnemonic-via-d6-roll-string-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/new-mnemonic-via-d6-roll-string-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/new-mnemonic-via-d6-roll-string-300.png" align="right" class="amigo">
 
 As you enter your dice rolls, you'll see two progress bars fill up. The top progress bar shows how many rolls you've entered compared to the minimum required. The bottom progress bar shows the real-time calculated [Shannon's entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) compared to the minimum required (128 bits for 12 words and 256 bits for 24 words). When the Shannon's entropy estimation reaches the recommended level, the progress bar will be full, and its frame will change color. If you've reached the minimum number of rolls but the entropy estimation is still below the recommended level, a warning will appear suggesting that you add more rolls to increase the entropy.
 
@@ -64,15 +64,15 @@ Learn more about [Krux Entropy Quality Estimation](../features/entropy.md).
 ### Stats for Nerds
 A low Shannon's entropy value could suggest that your dice are biased or that there's a problem with how you're gathering entropy. To investigate further, examine the "Stats for Nerds" section to check the distribution of your rolls and look for any abnormalities.
 
-<img src="../../../img/maixpy_amigo/new-mnemonic-via-d6-roll-nerd-stats-300.png" class="amigo">
-<img src="../../../img/maixpy_amigo/new-mnemonic-via-d20-roll-nerd-stats-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-nerd-stats-250.png" class="m5stickv">
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d20-roll-nerd-stats-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/new-mnemonic-via-d6-roll-nerd-stats-300.png" class="amigo">
+<img src="/krux/img/maixpy_amigo/new-mnemonic-via-d20-roll-nerd-stats-300.png" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/new-mnemonic-via-d6-roll-nerd-stats-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_m5stickv/new-mnemonic-via-d20-roll-nerd-stats-250.png" class="m5stickv">
 
 
 ## (Optional) Edit Mnemonic
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-edited-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/new-mnemonic-edited-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/new-mnemonic-edited-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/new-mnemonic-edited-300.png" align="right" class="amigo">
 
 After sufficient entropy is given, you can manually add custom entropy by editing some of the words. Simply touch or navigate to the word you want to change and replace it. Edited words will be highlighted, and the final word will automatically update to ensure a valid checksum. However, proceed with caution, modifying words can negatively impact the natural entropy previously captured.
 
@@ -87,10 +87,10 @@ When you have entered your final roll, Krux will hash this string using [SHA256]
 
 In case a camera snapshot is used as a source, the image bytes, which contain pixels data in RGB565 format, will be hashed in the same way as the dice rolls.
 
-<img src="../../../img/maixpy_amigo/new-mnemonic-via-snapshot-sha256-300.png" class="amigo">
-<img src="../../../img/maixpy_amigo/new-mnemonic-via-d6-roll-sha256-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-250.png" class="m5stickv">
-<img src="../../../img/maixpy_m5stickv/new-mnemonic-via-d6-roll-sha256-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/new-mnemonic-via-snapshot-sha256-300.png" class="amigo">
+<img src="/krux/img/maixpy_amigo/new-mnemonic-via-d6-roll-sha256-300.png" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/new-mnemonic-via-snapshot-sha256-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_m5stickv/new-mnemonic-via-d6-roll-sha256-250.png" class="m5stickv">
 
 Krux then takes this hash, runs [`unhexlify`](https://docs.python.org/3/library/binascii.html#binascii.unhexlify) on it to encode it as bytes, and deterministically converts it into a mnemonic according to the [BIP39 Reference Implementation](https://github.com/trezor/python-mnemonic/blob/6b7ebdb3624bbcae1a7b3c5485427a5587795120/src/mnemonic/mnemonic.py#L189-L207).
 

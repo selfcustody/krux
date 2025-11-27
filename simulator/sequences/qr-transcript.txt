@@ -5,7 +5,6 @@ x3 press BUTTON_B
 press BUTTON_A
 
 # Navigate to Datum
-press BUTTON_B
 press BUTTON_A
 
 # Navigate to Via Manual Input

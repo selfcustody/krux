@@ -1,6 +1,6 @@
 This page explains how to download and install Krux firmware from our official, pre-built latest release.
 
-[<img src="../../../img/badge_github.png" width="186">](https://github.com/selfcustody/krux/releases)
+[<img src="/krux/img/badge_github.png" width="186">](https://github.com/selfcustody/krux/releases)
 
 ### Verify the files
 Before installing the release, it's a good idea to check that:

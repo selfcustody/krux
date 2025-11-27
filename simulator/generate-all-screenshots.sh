@@ -22,7 +22,7 @@
 
 #!/bin/bash
 
-locales=("en-US")
+locales=("en-US", "es-MX")
 devices=("maixpy_m5stickv" "maixpy_amigo")
 
 rm -rf krux-screenshots

@@ -5,7 +5,7 @@ x3 press BUTTON_B
 press BUTTON_A
 
 # Descriptor Addresses
-x3 press BUTTON_B
+x2 press BUTTON_B
 press BUTTON_A
 
 screenshot descriptor-addresses.png

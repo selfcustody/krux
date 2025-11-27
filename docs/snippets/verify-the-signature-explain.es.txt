@@ -1,0 +1,6 @@
+El primer paso es importar la llave del desarrollador:
+
+```bash
+gpg --keyserver hkps://keys.openpgp.org --recv-keys B4281DDDFBBD207BFA4113138974C90299326322
+```
+Luego, para verificarlo tú mismo, utiliza el siguiente comando en terminal:
