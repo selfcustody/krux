@@ -112,6 +112,7 @@ translation_array = [
     "Digite o número em hexadecimal de cada palavra do seu mnemônico BIP39, de 1 a 800.",
     "Digite o número em octal de cada palavra do seu mnemônico BIP39, de 1 a 4000.",
     "Digite cada palavra do seu mnemônico BIP39.",
+    "Limiar de Entropia",
     "Apagar Dados do Usuário",
     "Apagando dados do usuário…",
     "Erro:",

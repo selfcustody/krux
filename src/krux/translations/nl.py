@@ -112,6 +112,7 @@ translation_array = [
     "Voer elk woord van jouw BIP39 geheugensteun in als een hexadecimaal van 1 tot 800.",
     "Voer elk woord van jouw BIP39 geheugensteun in als een octaal van 1 tot 4000.",
     "Voer elk woord van jouw BIP39 geheugensteun in.",
+    "Entropiedrempel",
     "Gegevens van gebruiker wissen",
     "Gebruikersgegevens worden gewist…",
     "Fout:",

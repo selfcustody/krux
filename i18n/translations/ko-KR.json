@@ -90,6 +90,7 @@
     "Enter each word of your BIP39 mnemonic as a number in hexadecimal from 1 to 800.": "BIP39 니모닉의 각 단어를 1에서 800 사이의 16진수 숫자로 입력하십시오.",
     "Enter each word of your BIP39 mnemonic as a number in octal from 1 to 4000.": "BIP39 니모닉의 각 단어를 1에서 4000 사이의 8진수 숫자로 입력하십시오.",
     "Enter each word of your BIP39 mnemonic.": "BIP39 니모닉의 각 단어를 입력하십시오.",
+    "Entropy Threshold": "엔트로피 임계값",
     "Erase User's Data": "사용자 데이터 지우기",
     "Erasing user's data…": "사용자 데이터 삭제 중…",
     "Error:": "오류:",
