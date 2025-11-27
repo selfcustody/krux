@@ -162,6 +162,7 @@ translation_array = [
     "Cartera inválida:",
     "Invertir",
     "Colores Invertidos",
+    "Modo invertido",
     "Kef encriptado",
     "Clave",
     "No se proporcionó la clave",

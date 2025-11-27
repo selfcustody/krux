@@ -162,6 +162,7 @@ translation_array = [
     "Geçersiz cüzdan:",
     "Ters Çevir",
     "Ters Renkler",
+    "Ters mod",
     "Kef Şifreli",
     "Anahtar",
     "Anahtar sağlanmadı",

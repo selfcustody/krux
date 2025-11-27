@@ -28,7 +28,7 @@ from ..themes import theme
 from ..qr import QRPartParser, FORMAT_UR
 from ..wdt import wdt
 from ..krux_settings import t
-from ..camera import QR_SCAN_MODE, ANTI_GLARE_MODE, ZOOMED_MODE
+from ..camera import QR_SCAN_MODE, ANTI_GLARE_MODE, ZOOMED_MODE, INVERTED_MODE
 from ..kboard import kboard
 
 ANTI_GLARE_WAIT_TIME = 500
@@ -72,6 +72,8 @@ class QRCodeCapture(Page):
                 theme.bg_color,
             )
             self.ctx.display.draw_centered_text(t("Zoomed mode"))
+        elif mode == INVERTED_MODE:
+            self.ctx.display.draw_centered_text(t("Inverted mode"))
         time.sleep_ms(ANTI_GLARE_WAIT_TIME)
         # Erase the message from the screen
         self.ctx.display.fill_rectangle(
@@ -156,7 +158,7 @@ class QRCodeCapture(Page):
             elif self.ctx.input.enter_event():
                 break
 
-            # Anti-glare / zoom / normal mode
+            # Anti-glare / zoom / inverted / normal mode
             page_prev_event = self.ctx.input.page_prev_event()
             if self.ctx.input.page_event() or (kboard.is_yahboom and page_prev_event):
                 if self.ctx.camera.has_antiglare():
@@ -184,6 +186,8 @@ class QRCodeCapture(Page):
                 ur_highlighted = False
 
             img = self.ctx.camera.snapshot()
+            if self.ctx.camera.mode == INVERTED_MODE:
+                img.invert()
             if time.ticks_ms() < start_time + MESSAGE_DISPLAY_PERIOD:
                 self.ctx.display.render_image(img, title_lines=title_lines)
             else:

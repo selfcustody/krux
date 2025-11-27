@@ -162,6 +162,7 @@ translation_array = [
     "Ongeldige portemonnee:",
     "Omkeren",
     "Omgekeerde kleuren",
+    "Omgekeerde modus",
     "KEF versleuteld",
     "Sleutel",
     "Sleutel niet verstrekt",
