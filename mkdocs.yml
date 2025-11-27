@@ -59,6 +59,10 @@ extra:
   latest_installer_win: krux-installer_v0.0.20.Setup.exe
   latest_installer_mac_arm: krux-installer_0.0.20_arm64.dmg
   latest_installer_mac_intel: krux-installer_0.0.20_x86_64.dmg
+  latest_installer_sha: krux-installer.SHA256.txt
+  latest_installer_sig: krux_installer.SHA256.txt.sig
+  latest_installer_key: B4281DDDFBBD207BFA4113138974C90299326322
+  latest_installer_keyserver: hkps://keys.openpgp.org
   social:
     - icon: fontawesome/solid/bullhorn
       link: https://bitcointalk.org/index.php?topic=5489022.0

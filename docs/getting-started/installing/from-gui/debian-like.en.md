@@ -1,33 +1,7 @@
 # :material-debian: Download assets
     
 * [`{{latest_installer_deb}}`](https://github.com/selfcustody/krux-installer/releases/download/{{latest_installer}}/{{latest_installer_deb}})
-* [`{{latest_installer_deb}}.sha256.txt`](https://github.com/selfcustody/krux-installer/releases/download/{{latest_installer}}/{{latest_installer_deb}}.sha256.txt)
-* [`{{latest_installer_deb}}.sig`](https://github.com/selfcustody/krux-installer/releases/download/{{latest_installer}}/{{latest_installer_deb}}.sig)
 
-## Verify the integrity
-
-----8<----
-verify-the-integrity-explain.en.txt
-----8<----
-
-```bash
-sha256sum --check ./{{latest_installer_deb}}.sha256.txt
-```
-    
-## Verify the authenticity
-
-----8<----
-verify-the-signature-explain.en.txt
-----8<----
-
-```bash
-gpg --verify ./{{latest_installer_deb}}.sig
-```
-
-----8<----
-verify-the-signature-tip.en.txt
-----8<----
-    
 ## Install
 
 **Krux-Installer** isn't available on Debian or Ubuntu repositories.
