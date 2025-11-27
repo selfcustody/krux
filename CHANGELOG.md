@@ -15,6 +15,7 @@ Exported Uniform Resource (UR) QR codes, a widely adopted standard for exchangin
 ### Other Bug Fixes and Improvements
 - Added backtick ` to keypad
 - Bugfix: Screensaver not activating in menu pages without statusbar
+- Screensaver: Now appears on menu screens that display info boxes
 - Embit: Improved BIP39 mnemonic validation
 - Bug Fix: Corrected handling of certain binary-encoded QR codes
 
