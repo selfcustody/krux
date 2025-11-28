@@ -200,10 +200,8 @@ flash-krux-logo.en.txt
 
 
 ##### Error flashing
-----8<----
-error-flashing-windows.en.txt
-----8<----
 
+If **Krux-Installer** shows a **flash failed** error or freezes at **PLEASE DO NOT UNPLUG YOUR DEVICE** with the message **INFO Trying to Enter K210 ROM ISP Mode…**, it means the installer couldn’t establish a proper connection to the device. See the [troubleshooting](/krux/troubleshooting/#error-when-flashing) section for guidance on how to fix this.
 
 
 #### Air-gapped update with
