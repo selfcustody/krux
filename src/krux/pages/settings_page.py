@@ -31,6 +31,7 @@ from ..settings import (
     SD_PATH,
     FLASH_PATH,
     SETTINGS_FILENAME,
+    CONTEXT_ARROW,
 )
 from ..krux_settings import (
     Settings,
@@ -40,12 +41,21 @@ from ..krux_settings import (
     ButtonsSettings,
     t,
     locale_control,
+    ThermalSettings,
 )
-from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+from ..input import (
+    BUTTON_ENTER,
+    BUTTON_PAGE,
+    BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
+    SWIPE_FAIL,
+    TOUCH_HIGHLIGHT_MS,
+)
 from ..sd_card import SDHandler
 from . import (
     Page,
     Menu,
+    Context,
     DIGITS,
     LETTERS,
     UPPERCASE_LETTERS,
@@ -57,6 +67,7 @@ from . import (
     DEFAULT_PADDING,
 )
 import os
+import time
 from ..kboard import kboard
 
 PERSIST_MSG_TIME = 2500
@@ -73,7 +84,7 @@ CATEGORY_SETTING_COLOR_DICT = {
 class SettingsPage(Page):
     """Class to manage settings interface"""
 
-    def __init__(self, ctx):
+    def __init__(self, ctx: Context):
         super().__init__(ctx, None)
         self.ctx = ctx
 
@@ -81,34 +92,47 @@ class SettingsPage(Page):
         """Handler for the settings"""
         return self.namespace(Settings())()
 
-    def _draw_settings_pad(self):
+    def _draw_settings_pad(self, index=-1):
         """Draws buttons to change settings with touch"""
-        if kboard.has_touchscreen:
-            self.ctx.input.touch.clear_regions()
-            offset_y = self.ctx.display.height() * 2 // 3
-            self.ctx.input.touch.add_y_delimiter(offset_y)
-            self.ctx.input.touch.add_y_delimiter(offset_y + FONT_HEIGHT * 3)
-            button_width = (self.ctx.display.width() - 2 * DEFAULT_PADDING) // 3
-            for i in range(4):
-                self.ctx.input.touch.add_x_delimiter(DEFAULT_PADDING + button_width * i)
-            offset_y += FONT_HEIGHT
-            keys = ["<", t("Go"), ">"]
-            for i, x in enumerate(self.ctx.input.touch.x_regions[:-1]):
-                self.ctx.display.outline(
-                    x,
-                    self.ctx.input.touch.y_regions[0],
-                    button_width - 1,
-                    FONT_HEIGHT * 3,
-                    theme.frame_color,
+        self.ctx.input.touch.clear_regions()
+        offset_y = self.ctx.display.height() * 2 // 3
+        self.ctx.input.touch.add_y_delimiter(offset_y)
+        self.ctx.input.touch.add_y_delimiter(offset_y + FONT_HEIGHT * 3)
+        button_width = (self.ctx.display.width() - 2 * DEFAULT_PADDING) // 3
+        for i in range(4):
+            self.ctx.input.touch.add_x_delimiter(DEFAULT_PADDING + button_width * i)
+        offset_y += FONT_HEIGHT
+        keys = ["<", t("Go"), ">"]
+        for i, x in enumerate(self.ctx.input.touch.x_regions[:-1]):
+            self.ctx.display.outline(
+                x,
+                self.ctx.input.touch.y_regions[0],
+                button_width - 1,
+                FONT_HEIGHT * 3,
+                theme.frame_color,
+            )
+            offset_x = x
+            offset_x += (button_width - lcd.string_width_px(keys[i])) // 2
+            fg_color = theme.fg_color if i % 2 == 0 else theme.go_color
+            bg_color = theme.bg_color
+            if i == index:
+                self.ctx.display.fill_rectangle(
+                    x + 1,
+                    self.ctx.input.touch.y_regions[0] + 1,
+                    button_width - 2,
+                    FONT_HEIGHT * 3 - 1,
+                    fg_color,
                 )
-                offset_x = x
-                offset_x += (button_width - lcd.string_width_px(keys[i])) // 2
-                self.ctx.display.draw_string(
-                    offset_x, offset_y, keys[i], theme.fg_color, theme.bg_color
-                )
+                bg_color = fg_color
+                fg_color = theme.bg_color
+            self.ctx.display.draw_string(
+                offset_x, offset_y, keys[i], fg_color, bg_color
+            )
 
     def _touch_to_physical(self, index):
         """Mimics touch presses into physical button presses"""
+        if index < 0:
+            return BUTTON_TOUCH
         if index == 0:
             return BUTTON_PAGE_PREV
         if index == 1:
@@ -255,7 +279,14 @@ class SettingsPage(Page):
             namespace_list = settings_namespace.namespace_list()
             items = [
                 (
-                    settings_namespace.label(ns.namespace.split(".")[-1]),
+                    settings_namespace.label(ns.namespace.split(".")[-1])
+                    + (
+                        CONTEXT_ARROW
+                        if isinstance(ns, ThermalSettings)
+                        or len(ns.setting_list()) > 1
+                        or len(ns.namespace_list()) > 1
+                        else ""
+                    ),
                     self.namespace(ns),
                 )
                 for ns in namespace_list
@@ -278,7 +309,9 @@ class SettingsPage(Page):
             back_status = lambda: MENU_EXIT  # pylint: disable=C3001
             # Case for "Back" on the main Settings
             if settings_namespace.namespace == Settings.namespace:
-                items.append((t("Factory Settings"), self.restore_settings))
+                items.append(
+                    (t("Factory Settings"), self.restore_settings, theme.no_esc_color)
+                )
                 back_status = self._settings_exit_check
 
             # Case for security settings
@@ -373,19 +406,33 @@ class SettingsPage(Page):
                 color,
                 theme.bg_color,
             )
-            self._draw_settings_pad()
-            btn = self.ctx.input.wait_for_button()
-            if btn == BUTTON_TOUCH:
-                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
+            if kboard.has_touchscreen:
+                self._draw_settings_pad()
+
+            # wait until valid input is captured
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_button()
+                if btn == BUTTON_TOUCH:
+                    btn = self._touch_to_physical(self.ctx.input.touch.current_index())
             if btn == BUTTON_ENTER:
+                if kboard.has_touchscreen:
+                    self._draw_settings_pad(1)  # highlight
+                    time.sleep_ms(TOUCH_HIGHLIGHT_MS)  # wait a little
                 break
 
             new_category = current_category
             for i, category in enumerate(categories):
                 if current_category == category:
                     if btn in (BUTTON_PAGE, None):
+                        if kboard.has_touchscreen:
+                            self._draw_settings_pad(2)  # highlight
+                            time.sleep_ms(TOUCH_HIGHLIGHT_MS)  # wait a little
                         new_category = categories[(i + 1) % len(categories)]
                     elif btn == BUTTON_PAGE_PREV:
+                        if kboard.has_touchscreen:
+                            self._draw_settings_pad(0)  # highlight
+                            time.sleep_ms(TOUCH_HIGHLIGHT_MS)  # wait a little
                         new_category = categories[(i - 1) % len(categories)]
                     setting.__set__(settings_namespace, new_category)
                     break

@@ -39,6 +39,7 @@ from ..key import (
     SINGLESIG_SCRIPT_PURPOSE,
     MULTISIG_SCRIPT_PURPOSE,
     MINISCRIPT_PURPOSE,
+    MINISCRIPT_SCRIPT_MAP,
     TYPE_SINGLESIG,
     TYPE_MULTISIG,
     TYPE_MINISCRIPT,
@@ -47,10 +48,7 @@ from ..key import (
     NAME_MINISCRIPT,
 )
 
-from ..settings import (
-    MAIN_TXT,
-    TEST_TXT,
-)
+from ..settings import MAIN_TXT, TEST_TXT, CONTEXT_ARROW
 
 from ..key import P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 
@@ -221,9 +219,9 @@ class WalletSettings(Page):
             submenu = Menu(
                 self.ctx,
                 [
-                    (t("Network"), lambda: None),
-                    (t("Policy Type"), lambda: None),
-                    (t("Script Type"), lambda: None),
+                    (t("Network") + CONTEXT_ARROW, lambda: None),
+                    (t("Policy Type") + CONTEXT_ARROW, lambda: None),
+                    (t("Script Type") + CONTEXT_ARROW, lambda: None),
                     (account_txt, lambda: None),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
@@ -245,7 +243,7 @@ class WalletSettings(Page):
                     derivation_path = ""
                     network = new_network
             elif index == 1:
-                new_policy_type = self._policy_type()
+                new_policy_type = self._policy_type(policy_type, script_type)
                 if new_policy_type is not None:
                     derivation_path = ""
                     policy_type = new_policy_type
@@ -265,9 +263,9 @@ class WalletSettings(Page):
                         script_type = self._script_type_multisig()
                         script_type = P2WSH if script_type is None else script_type
 
-                    elif policy_type == TYPE_MINISCRIPT and script_type not in (
-                        P2WSH,
-                        P2TR,
+                    elif (
+                        policy_type == TYPE_MINISCRIPT
+                        and script_type not in MINISCRIPT_SCRIPT_MAP.values()
                     ):
                         # If is miniscript, pick P2WSH or P2TR
                         script_type = self._miniscript_type()
@@ -314,15 +312,29 @@ class WalletSettings(Page):
             return None
         return NETWORKS[TEST_TXT] if index == 1 else NETWORKS[MAIN_TXT]
 
-    def _policy_type(self):
+    def _policy_type(self, curr_policy, curr_script):
         """Policy type selection menu"""
+        items = [
+            [NAME_SINGLE_SIG, lambda: MENU_EXIT],
+            [NAME_MULTISIG, lambda: MENU_EXIT],
+            [NAME_MINISCRIPT + " (Experimental)", lambda: MENU_EXIT],
+        ]
+        # add context arrow where appropriate
+        if (
+            curr_policy != TYPE_SINGLESIG
+            and curr_script not in SINGLESIG_SCRIPT_PURPOSE
+        ):
+            items[TYPE_SINGLESIG][0] = items[TYPE_SINGLESIG][0] + CONTEXT_ARROW
+        if curr_policy != TYPE_MULTISIG and curr_script not in MULTISIG_SCRIPT_PURPOSE:
+            items[TYPE_MULTISIG][0] = items[TYPE_MULTISIG][0] + CONTEXT_ARROW
+        if (
+            curr_policy != TYPE_MINISCRIPT
+            and curr_script not in MINISCRIPT_SCRIPT_MAP.values()
+        ):
+            items[TYPE_MINISCRIPT][0] = items[TYPE_MINISCRIPT][0] + CONTEXT_ARROW
         submenu = Menu(
             self.ctx,
-            [
-                (NAME_SINGLE_SIG, lambda: MENU_EXIT),
-                (NAME_MULTISIG, lambda: MENU_EXIT),
-                (NAME_MINISCRIPT + " (Experimental)", lambda: MENU_EXIT),
-            ],
+            items,
             disable_statusbar=True,
         )
         index, _ = submenu.run_loop()

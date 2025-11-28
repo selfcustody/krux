@@ -23,7 +23,7 @@
 import gc
 from ...display import BOTTOM_PROMPT_LINE
 from ...krux_settings import t
-from ...settings import THIN_SPACE
+from ...settings import THIN_SPACE, CONTEXT_ARROW
 from ...qr import FORMAT_NONE
 from .. import (
     Page,
@@ -54,15 +54,15 @@ class Addresses(Page):
             self.ctx,
             [
                 (
-                    t("Scan Address"),
+                    t("Scan Address") + CONTEXT_ARROW,
                     lambda: self._receive_change_menu(self.scan_address),
                 ),
                 (
-                    t("List Addresses"),
+                    t("List Addresses") + CONTEXT_ARROW,
                     lambda: self._receive_change_menu(self.list_address_type),
                 ),
                 (
-                    t("Export Addresses"),
+                    t("Export Addresses") + CONTEXT_ARROW,
                     (
                         None
                         if not self.has_sd_card()

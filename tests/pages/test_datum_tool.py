@@ -505,8 +505,7 @@ def test_datumtool_view_qr(m5stickv, mocker):
 
     # with longer text for big pMofN animated qr
     BTN_SEQUENCE = (
-        BUTTON_PAGE,  # to pMofN
-        BUTTON_ENTER,  # go pMofN
+        BUTTON_ENTER,  # go pMofN (static not available!)
         BUTTON_ENTER,  # leave QR view
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -518,6 +517,7 @@ def test_datumtool_view_qr(m5stickv, mocker):
 
     # with longer text for UR-bytes
     BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to < Back
         BUTTON_PAGE_PREV,  # to UR-bytes
         BUTTON_ENTER,  # go UR-bytes
         BUTTON_ENTER,  # leave QR view
@@ -532,6 +532,7 @@ def test_datumtool_view_qr(m5stickv, mocker):
 
     # with longer text for big UR-psbt
     BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to < Back
         BUTTON_PAGE_PREV,  # to UR-bytes
         BUTTON_PAGE_PREV,  # to UR-psbt
         BUTTON_ENTER,  # go UR-psbt
@@ -547,6 +548,7 @@ def test_datumtool_view_qr(m5stickv, mocker):
 
     # with longer text for big BBQr
     BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to < Back
         BUTTON_PAGE_PREV,  # to UR-bytes
         BUTTON_PAGE_PREV,  # to UR-psbt
         BUTTON_PAGE_PREV,  # to BBQr
@@ -563,6 +565,7 @@ def test_datumtool_view_qr(m5stickv, mocker):
 
     # with short latin-1 as a string works
     BTN_SEQUENCE = (
+        BUTTON_PAGE_PREV,  # to < Back
         BUTTON_PAGE_PREV,  # deny label update
         BUTTON_ENTER,  # dismiss QR
         BUTTON_PAGE_PREV,  # to Back
@@ -593,9 +596,8 @@ def test_datumtool_view_qr(m5stickv, mocker):
     print(ctx.display.method_calls)
 
     # but can work if encoding unicode string as utf-8 bytes
+    # BIG QR, has options: static, p M of N and ur bytes
     BTN_SEQUENCE = (
-        BUTTON_PAGE_PREV,  # deny label update
-        BUTTON_ENTER,  # dismiss QR
         BUTTON_PAGE_PREV,  # to Back
         BUTTON_ENTER,  # leave QR view
     )
@@ -840,6 +842,7 @@ def test_datumtool__decrypt_as_kef_envelope(m5stickv, mocker):
 def test_datumtool__build_options_menu(m5stickv, mocker):
     """With DatumTool already initialized, test ._build_options_menu()"""
     from krux.pages.datum_tool import DatumTool
+    from krux.settings import CONTEXT_ARROW
 
     some_chars = "This are characters"
     some_hex_plus = "deadbeef3456"
@@ -853,7 +856,7 @@ def test_datumtool__build_options_menu(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == 0
     assert [name for name, func in menu] == [
         "Show Datum",
-        "Convert Datum",
+        "Convert Datum" + CONTEXT_ARROW,
         "QR Code",
         "Save to SD card",
     ]
@@ -865,7 +868,7 @@ def test_datumtool__build_options_menu(m5stickv, mocker):
     page._analyze_contents()
     menu = page._build_options_menu(offer_convert=True, offer_show=False)
     assert ctx.input.wait_for_button.call_count == 0
-    assert [name for name, func in menu] == ["from utf8", "Done Converting"]
+    assert [name for name, func in menu] == ["from utf8"]
 
     # w/ HEX_plus content, w/ offer_convert and w/o offer_show
     ctx = create_ctx(mocker, [])
@@ -881,7 +884,6 @@ def test_datumtool__build_options_menu(m5stickv, mocker):
         "from base43",
         "from base64",
         "from utf8",
-        "Done Converting",
     ]
 
     # w/ hex_plus content, w/ offer_convert and w/o offer_show
@@ -896,7 +898,6 @@ def test_datumtool__build_options_menu(m5stickv, mocker):
         "shift case",
         "from base64",
         "from utf8",
-        "Done Converting",
     ]
 
     # w/ bytes content, w/ offer_convert and w/o offer_show
@@ -912,8 +913,7 @@ def test_datumtool__build_options_menu(m5stickv, mocker):
         "to base43",
         "to base64",
         "to utf8",
-        "Encrypt",
-        "Done Converting",
+        "Encrypt" + CONTEXT_ARROW,
     ]
 
     # w/ hex_plus-ish bytes content and history, w/ offer_convert and w/o offer_show
@@ -930,8 +930,7 @@ def test_datumtool__build_options_menu(m5stickv, mocker):
         "to base43",
         "to base64",
         "to utf8",
-        "Encrypt",
-        "Done Converting",
+        "Encrypt" + CONTEXT_ARROW,
     ]
 
 

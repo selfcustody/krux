@@ -373,6 +373,14 @@ def test_swipe_down_value_released_when_none(mocker, m5stickv):
     assert input.swipe_down_value() == RELEASED
 
 
+def test_swipe_fail_value_released_when_none(mocker, m5stickv):
+    from krux.input import Input, RELEASED
+
+    input = Input()
+    input.touch = None
+    assert input.swipe_none_value() == RELEASED
+
+
 def test_wait_for_release(mocker, m5stickv):
     import krux
     from krux.input import Input, RELEASED, PRESSED, BUTTON_ENTER
@@ -457,6 +465,7 @@ def test_debounce_presses_with_greater_interval(mocker, m5stickv):
 
 def test_debounce_presses_with_smaller_interval(mocker, m5stickv):
     from krux.input import Input, RELEASED, PRESSED
+    from krux.krux_settings import Settings
 
     input = Input()
     interval = 10  # ms
@@ -473,9 +482,11 @@ def test_debounce_presses_with_smaller_interval(mocker, m5stickv):
     btn = input.wait_for_button()
     assert btn == 0
     assert input.entropy > 0
-    # Assert that the flush_events was called 10 times
+    # Assert that the flush_events was called debounce / interval times
     # meaning that the debounce time was respected
-    assert input.flush_events.call_count == 10
+    assert (
+        input.flush_events.call_count == Settings().hardware.buttons.debounce / interval
+    )
 
 
 def test_wait_for_button_blocks_until_enter_released(mocker, m5stickv):
@@ -673,7 +684,14 @@ def test_touch_indexing(mocker, amigo):
 
 def test_touch_gestures(mocker, amigo):
     import krux
-    from krux.input import Input, SWIPE_LEFT, SWIPE_RIGHT, SWIPE_UP, SWIPE_DOWN
+    from krux.input import (
+        Input,
+        SWIPE_LEFT,
+        SWIPE_RIGHT,
+        SWIPE_UP,
+        SWIPE_DOWN,
+        SWIPE_FAIL,
+    )
 
     input = Input()
     input = reset_input_states(mocker, input)
@@ -688,6 +706,7 @@ def test_touch_gestures(mocker, amigo):
             "current_point",
             side_effect=[None, point1, point2, None, None],
         )
+        input.touch.pressed_time = time.ticks_ms()
 
     # Swipe Right
     input.touch.clear_regions()
@@ -715,6 +734,13 @@ def test_touch_gestures(mocker, amigo):
     mock_points((75, 50), (75, 150))
     btn = input.wait_for_button(True)
     assert btn == SWIPE_DOWN
+    krux.input.wdt.feed.assert_called()
+
+    # Swipe Fail
+    input.touch.clear_regions()
+    mock_points((75, 50), (150, 100))
+    btn = input.wait_for_button(True)
+    assert btn == SWIPE_FAIL
     krux.input.wdt.feed.assert_called()
 
 
