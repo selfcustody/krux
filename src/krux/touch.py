@@ -163,8 +163,8 @@ class Touch:
             if 1 < idx < len(regions) and abs(pos - regions[idx - 1]) <= EDGE_PIXELS:
                 return -1
 
-            # Valid index never below 0
-            return max(idx - 1, 0)
+            # Valid is 0<= idx <= len(regions) -2 [valid regions]
+            return max(min(idx - 1, len(regions) - 2), 0)
 
         # Y index
         y_index = _compute_axis_index(y, self.y_regions)
@@ -174,11 +174,14 @@ class Touch:
         # X index
         if self.x_regions:
             x_index = _compute_axis_index(x, self.x_regions)
-            x_index = x_index - 1 if x_index == len(self.x_regions) - 1 else x_index
             if x_index < 0:
                 return -1
+            # self.highlight_region(
+            #     y_index * (len(self.x_regions) - 1) + x_index, y_index
+            # )
             return y_index * (len(self.x_regions) - 1) + x_index
 
+        # self.highlight_region(0, y_index)
         return y_index
 
     def set_regions(self, x_list=None, y_list=None):

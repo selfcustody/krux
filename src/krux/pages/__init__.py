@@ -161,7 +161,7 @@ class Page:
         """
         buffer = starting_buffer
         pad = Keypad(self.ctx, keysets, possible_keys_fn)
-        swipe_has_not_been_used = True
+        swipe_used = False
         show_swipe_hint = False
         while True:
             self.ctx.display.clear()
@@ -200,8 +200,7 @@ class Page:
                 elif pad.cur_key_index == pad.go_index:
                     break
                 elif pad.cur_key_index == pad.more_index:
-                    swipeable = kboard.has_touchscreen
-                    if swipeable and swipe_has_not_been_used:
+                    if kboard.has_touchscreen and not swipe_used:
                         show_swipe_hint = True
                     pad.next_keyset()
                 elif pad.cur_key_index < len(pad.keys):
@@ -219,7 +218,7 @@ class Page:
                     break
             else:
                 if btn in (SWIPE_UP, SWIPE_LEFT, SWIPE_DOWN, SWIPE_RIGHT):
-                    swipe_has_not_been_used = False
+                    swipe_used = True
                 pad.navigate(btn)
         if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
@@ -428,8 +427,8 @@ class Page:
             self.ctx.display.width() // 2,
             self.ctx.display.width() - DEFAULT_PADDING,
         ]
-        touch_offset_y = self.proceed_menu_text_y_offset(offset_y) - 2 * FONT_HEIGHT
-        self.y_keypad_map = [touch_offset_y, touch_offset_y + 4 * FONT_HEIGHT]
+        touch_offset_y = self.proceed_menu_text_y_offset(offset_y) - FONT_HEIGHT
+        self.y_keypad_map = [touch_offset_y, touch_offset_y + 3 * FONT_HEIGHT]
         if kboard.has_touchscreen:
             self.ctx.input.touch.set_regions(self.x_keypad_map, self.y_keypad_map)
 
@@ -816,8 +815,8 @@ class Menu:
                         )
                         time.sleep_ms(TOUCH_HIGHLIGHT_MS)  # wait a little
                         btn = BUTTON_ENTER
-                    if kboard.has_touchscreen:
-                        self.ctx.input.touch.clear_regions()
+                if kboard.has_touchscreen:
+                    self.ctx.input.touch.clear_regions()
                 if btn == BUTTON_ENTER:
                     status = self._clicked_item(selected_item_index)
                     if status != MENU_CONTINUE:
@@ -842,14 +841,12 @@ class Menu:
                     self.screensaver()
 
     def _clicked_item(self, selected_item_index):
-        item = self.menu_view[selected_item_index]
-        if item[1] is None:
-            return MENU_CONTINUE
         try:
+            action = self.menu_view[selected_item_index][1]
+            if action is None:
+                return MENU_CONTINUE
             self.ctx.display.clear()
-            status = item[1]()
-            if status != MENU_CONTINUE:
-                return status
+            return action()
         except Exception as e:
             self.ctx.display.to_portrait()
             self.ctx.display.clear()

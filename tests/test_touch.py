@@ -191,7 +191,7 @@ def test_valid_position(
     [
         ([60, 120], [], (100, 50), 0),  # y=50 < 60: index 0
         ([60, 120], [], (100, 80), 0),  # y=80 between 60 and 120: index 0
-        ([60, 120], [], (100, 130), 1),  # y=130 > 120: index 1
+        ([60, 120], [], (100, 130), 0),  # y=130 > 120: index 0 (max==len(regions)-2)
         ([40, 80, 120], [], (50, 30), 0),  # y=30 < 40: index 0
         ([40, 80, 120], [], (50, 50), 0),  # y=50 between 40-80: index 0
         ([40, 80, 120], [], (50, 90), 1),  # y=90 between 80-120: index 1
@@ -199,12 +199,12 @@ def test_valid_position(
             [40, 80, 120],
             [],
             (50, 130),
-            2,
-        ),  # y=130 > 120: index 2 (y for last index is its value)
+            1,
+        ),  # y=130 > 120: index 1 (max==len(regions)-2)
         ([0, 100, 200], [], (100, 100), -1),  # boundary y region: index -1
-        ([0, 100, 200], [], (100, 200), 2),  # last boundary y region ignore: index 2
-        ([], [10, 100, 200], (0, 100), 0),  # x=0 < 10: index 0
-        ([], [10, 100, 200], (50, 100), 0),  # x=50 < 100: index 0
+        ([0, 100, 200], [], (100, 200), 1),  # last boundary y region ignore: index 1
+        ([], [10, 100, 200], (0, 100), 0),  # x=0 < 10: index 0 first region
+        ([], [10, 100, 200], (50, 100), 0),  # x=50 < 100: index 0 still first region
         ([], [10, 100, 200], (100, 100), -1),  # boundary x region: index -1
         ([], [10, 100, 200], (150, 100), 1),  # x=150 > 100: index 1
         (
@@ -212,7 +212,7 @@ def test_valid_position(
             [0, 100, 200],
             (201, 100),
             1,
-        ),  # x=201 > 200: index 1 (x for last index is less 1)
+        ),  # x=201 > 200: index 1 (max==len(regions)-2)
         (
             [0, 100, 200],
             [0, 100, 200],
@@ -223,8 +223,13 @@ def test_valid_position(
         ([60, 120], [], (10, 30), 0),  # before first y region
         ([60, 120], [], (10, 80), 0),  # normal y region
         ([60, 120], [], (10, 60), 0),  # edge of the first y region
-        ([60, 120], [], (10, 120), 1),  # edge of last y region
-        ([60, 120], [50, 100, 150], (70, 130), 2),  # normal 2D index
+        ([60, 120], [], (10, 120), 0),  # edge of last y region
+        (
+            [60, 120],
+            [50, 100, 150],
+            (70, 130),
+            0,
+        ),  # y=130 > last region, x=70 > 50 first region
         ([60, 120], [50, 100, 150], (100, 130), -1),  # boundary x region: index -1
         ([60, 80, 90, 100, 110, 120], [], (0, 91), -1),  # boundary with more regions
     ],
