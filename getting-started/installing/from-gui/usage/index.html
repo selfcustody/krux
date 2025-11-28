@@ -2383,10 +2383,7 @@ When the flashing process completes, you should see the Krux logo:</p>
 <p>If it doesn't, try turning your device off and on by holding down the power button for six seconds.</p>
 <p>Congrats, you're now running Krux!</p>
 <h5 id="error-flashing">Error flashing<a class="headerlink" href="#error-flashing" title="Permanent link">&para;</a></h5>
-<p>On Windows, you may encounter the <strong>flash failed</strong> error when trying to flash Yahboom or WonderMV using <strong>Krux-Installer</strong>. This means that Windows could not find the driver to communicate with the device via USB (an unrecognized <em>USB Serial</em> will be listed in <em>Device Manager -&gt; Other devices</em>). To fix this, download and install the <a href="https://www.wch-ic.com/downloads/ch341ser_exe.html">CH340/341 driver</a> (a <em>USB-SERIAL CH340</em> will be listed in <em>Device Manager -&gt; Ports (COM &amp; LPT)</em>).</p>
-<p><img src="/krux/img/krux-installer/flash-failed.jpg" style="width: 38%; min-width: 320px;">
-<img src="/krux/img/krux-installer/usb-serial.jpg" style="width: 30%; min-width: 240px;">
-<img src="/krux/img/krux-installer/usb-serial-driver.jpg" style="width: 25%; min-width: 180px;"></p>
+<p>If <strong>Krux-Installer</strong> shows a <strong>flash failed</strong> error or freezes at <strong>PLEASE DO NOT UNPLUG YOUR DEVICE</strong> with the message <strong>INFO Trying to Enter K210 ROM ISP Mode…</strong>, it means the installer couldn’t establish a proper connection to the device. See the <a href="/krux/troubleshooting/#error-when-flashing">troubleshooting</a> section for guidance on how to fix this.</p>
 <h4 id="air-gapped-update-with">Air-gapped update with<a class="headerlink" href="#air-gapped-update-with" title="Permanent link">&para;</a></h4>
 <p>Once you've installed the initial firmware on your device via USB, you can perform further firmware upgrades via SD card to keep the device airgapped.</p>
 <p><img width="640" src=" ../../../../img/krux-installer/unzip.png" alt="Krux-Installer unzip" /></p>
