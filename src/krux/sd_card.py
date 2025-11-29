@@ -34,6 +34,7 @@ PUBKEY_FILE_EXTENSION = ".pub"
 BMP_IMAGE_EXTENSION = ".bmp"
 PBM_IMAGE_EXTENSION = ".pbm"
 SVG_IMAGE_EXTENSION = ".svg"
+MPY_FILE_EXTENSION = ".mpy"
 
 
 class SDHandler:

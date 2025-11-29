@@ -153,10 +153,12 @@ def test_access_to_device_tests(m5stickv, mocker):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = [
+        BUTTON_PAGE,  # select kapps
         BUTTON_PAGE,  # select device tests
         BUTTON_ENTER,  # Go device tests
         BUTTON_PAGE_PREV,  # Go to Back
         BUTTON_ENTER,  # Leave device tests
+        BUTTON_PAGE_PREV,
         BUTTON_PAGE_PREV,
         BUTTON_PAGE_PREV,  # select Back
         BUTTON_ENTER,  # leave
@@ -166,3 +168,37 @@ def test_access_to_device_tests(m5stickv, mocker):
     tool = Tools(ctx)
     tool.run()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_load_krux_app_without_allow(m5stickv, mocker):
+    from krux.pages.tools import Tools
+    from krux.pages import MENU_CONTINUE
+
+    ctx = create_ctx(mocker, None)
+    tool = Tools(ctx)
+
+    mocker.spy(tool, "flash_error")
+
+    val = tool.load_krux_app()
+    assert val == MENU_CONTINUE
+    assert tool.flash_error.called
+    tool.flash_error.assert_called_with("Allow in settings first!")
+    assert (("Allow in settings first!",),) in tool.flash_error.call_args_list
+
+
+def test_load_krux_app_with_allow(m5stickv, mocker):
+    from krux.pages.tools import Tools
+    from krux.pages import MENU_CONTINUE
+    from krux.krux_settings import Settings
+
+    ctx = create_ctx(mocker, None)
+    tool = Tools(ctx)
+    Settings().security.allow_kapp = True
+
+    mocker.spy(tool, "flash_error")
+    mocker.patch("krux.pages.kapps.Kapps", new=mocker.MagicMock())
+
+    val = tool.load_krux_app()
+    assert val == MENU_CONTINUE
+    assert not tool.flash_error.called
+    assert (("Allow in settings first!",),) not in tool.flash_error.call_args_list
