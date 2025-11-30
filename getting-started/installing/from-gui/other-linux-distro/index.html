@@ -824,24 +824,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#verify-the-integrity" class="md-nav__link">
-    <span class="md-ellipsis">
-      Verify the integrity
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-the-authenticity" class="md-nav__link">
-    <span class="md-ellipsis">
-      Verify the authenticity
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#install" class="md-nav__link">
     <span class="md-ellipsis">
       Install
@@ -1934,24 +1916,7 @@
 <p>For this installation, we'll use the <code>.deb</code> sources:</p>
 <ul>
 <li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.20/krux-installer_0.0.20_amd64.deb"><code>krux-installer_0.0.20_amd64.deb</code></a></li>
-<li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.20/krux-installer_0.0.20_amd64.deb.sha256.txt"><code>krux-installer_0.0.20_amd64.deb.sha256.txt</code></a></li>
-<li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.20/krux-installer_0.0.20_amd64.deb.sig"><code>krux-installer_0.0.20_amd64.deb.sig</code></a></li>
 </ul>
-<h2 id="verify-the-integrity">Verify the integrity<a class="headerlink" href="#verify-the-integrity" title="Permanent link">&para;</a></h2>
-<p>Open your terminal and type the command below:</p>
-<div class="highlight"><pre><span></span><code>sha256sum<span class="w"> </span>--check<span class="w"> </span>./krux-installer_0.0.20_amd64.deb.sha256.txt
-</code></pre></div>
-<h2 id="verify-the-authenticity">Verify the authenticity<a class="headerlink" href="#verify-the-authenticity" title="Permanent link">&para;</a></h2>
-<p>The first step is import the developer's key:</p>
-<div class="highlight"><pre><span></span><code>gpg<span class="w"> </span>--keyserver<span class="w"> </span>hkps://keys.openpgp.org<span class="w"> </span>--recv-keys<span class="w"> </span>B4281DDDFBBD207BFA4113138974C90299326322
-</code></pre></div>
-<p>Then, to verify yourself, run this command on your terminal:</p>
-<div class="highlight"><pre><span></span><code>gpg<span class="w"> </span>--verify<span class="w"> </span>./krux-installer_0.0.20_amd64.deb.sig
-</code></pre></div>
-<blockquote>
-<p>⚠️  TIP: If the verification was successful,
-you may get a message similar to: <code>Good signature from "qlrddev &lt;qlrddev@gmail.com&gt;"</code></p>
-</blockquote>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
 <p>This step it's not really an installation.
 At least it will make the program's binary available somewhere on your computer;

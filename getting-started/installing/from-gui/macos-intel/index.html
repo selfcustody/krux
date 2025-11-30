@@ -732,24 +732,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#verify-the-integrity" class="md-nav__link">
-    <span class="md-ellipsis">
-      Verify the integrity
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-the-authenticity" class="md-nav__link">
-    <span class="md-ellipsis">
-      Verify the authenticity
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#install" class="md-nav__link">
     <span class="md-ellipsis">
       Install
@@ -1918,24 +1900,7 @@
 <h1 id="download-assets"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11"/></svg></span> Download assets<a class="headerlink" href="#download-assets" title="Permanent link">&para;</a></h1>
 <ul>
 <li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.20/krux-installer_0.0.20_x86_64.dmg"><code>krux-installer_0.0.20_x86_64.dmg</code></a></li>
-<li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.20/krux-installer_0.0.20_x86_64.dmg.sha256.txt"><code>krux-installer_0.0.20_x86_64.dmg.sha256.txt</code></a></li>
-<li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.20/krux-installer_0.0.20_x86_64.dmg.sig"><code>krux-installer_0.0.20_x86_64.dmg.sig</code></a></li>
 </ul>
-<h2 id="verify-the-integrity">Verify the integrity<a class="headerlink" href="#verify-the-integrity" title="Permanent link">&para;</a></h2>
-<p>Open your terminal and type the command below:</p>
-<div class="highlight"><pre><span></span><code>sha256sum<span class="w"> </span>--check<span class="w"> </span>./krux-installer_0.0.20_x86_64.dmg.sha256.txt
-</code></pre></div>
-<h2 id="verify-the-authenticity">Verify the authenticity<a class="headerlink" href="#verify-the-authenticity" title="Permanent link">&para;</a></h2>
-<p>The first step is import the developer's key:</p>
-<div class="highlight"><pre><span></span><code>gpg<span class="w"> </span>--keyserver<span class="w"> </span>hkps://keys.openpgp.org<span class="w"> </span>--recv-keys<span class="w"> </span>B4281DDDFBBD207BFA4113138974C90299326322
-</code></pre></div>
-<p>Then, to verify yourself, run this command on your terminal:</p>
-<div class="highlight"><pre><span></span><code>gpg<span class="w"> </span>--verify<span class="w"> </span>./krux-installer_0.0.20_x86_64.dmg.sig
-</code></pre></div>
-<blockquote>
-<p>⚠️  TIP: If the verification was successful,
-you may get a message similar to: <code>Good signature from "qlrddev &lt;qlrddev@gmail.com&gt;"</code></p>
-</blockquote>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
 <p>Open the <code>dmg</code> file and a new volume will be presented;
 drag'n'drop the <strong>Krux-Installer</strong> to the <strong>Applications</strong> folder:</p>
@@ -1945,12 +1910,6 @@ This occurs because we have not added the <a href="https://support.apple.com/gui
 <p>To fix this, open your terminal and execute the following command:</p>
 <div class="highlight"><pre><span></span><code>xattr<span class="w"> </span>-d<span class="w"> </span>com.apple.quarantine<span class="w"> </span>-r<span class="w"> </span>/Applications/krux-installer.app
 </code></pre></div>
-<blockquote>
-<p>🛡️  TIP: If you followed the steps presented in <a href="#verify-the-authenticity">authenticity section</a>,
-you already have the assurance that the software is from a verified and genuine software publisher.
-This will also help establish a chain of trust when you perform the firmware verification
-step before flashing.</p>
-</blockquote>
 <h2 id="after-install">After install<a class="headerlink" href="#after-install" title="Permanent link">&para;</a></h2>
 <p>Once done, you will use <strong>Krux-Installer</strong> GUI to perform the <a href="/krux/getting-started/installing/from-gui/usage">firmware installation</a>. </p>
 
