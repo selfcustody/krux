@@ -5,6 +5,7 @@ official desktop application, **Krux-Installer**:
 
 Install instructions:
 
+- [:material-fingerprint: Don't trust, verify](./verify-download.en.md)
 - [:material-microsoft-windows: Windows](./windows.md)
 - [:material-apple: MacOS Intel](./macos-intel.md)
 - [:material-apple: MacOS M1/M2/M3](./macos-arm64.md)
