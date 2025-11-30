@@ -19,7 +19,7 @@ gpg --keyserver {{latest_installer_keyserver}} --recv-keys {{latest_installer_ke
 Then, to verify yourself, run this:
 
 ```bash
-gpg --verify {{latest_installer_sha}}.txt.sig
+gpg --verify {{latest_installer_sha}}.sig
 ```
 
 **Windows**
@@ -40,7 +40,7 @@ is authentic, we can proceed with the integrity check in your `bash`/`zsh` termi
 **Linux / MacOS**
 
 ```bash
-sha256sum --check {{latest_installer_sha}}.txt
+sha256sum --check {{latest_installer_sha}}
 ```
 
 **Windows**
