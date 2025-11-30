@@ -17,6 +17,7 @@ Exported Uniform Resource (UR) QR codes, a widely adopted standard for exchangin
 - Bugfix: Screensaver not activating in menu pages without statusbar
 - Embit: Improved BIP39 mnemonic validation
 - Bug Fix: Corrected handling of certain binary-encoded QR codes
+- QR codes: Added support for inverted QR codes, enabling scans of QRs with a black background
 
 # Changelog 25.10.1 - October 2025
 

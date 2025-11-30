@@ -131,11 +131,16 @@ class QRCodeCapture(Page):
         self.ctx.display.draw_centered_text(t("Loading Camera…"))
         self.ctx.camera.initialize_run()
 
+        read_none = 0
+        read_normal = 1
+        read_inverted = 2
+
         parser = QRPartParser()
         prev_parsed_count = 0
         new_part = None
         previous_part = None
         ur_highlighted = False
+        read_qr_success = read_none
 
         # Flush events ocurred while loading camera
         self.ctx.input.reset_ios_state()
@@ -189,7 +194,18 @@ class QRCodeCapture(Page):
             else:
                 self.ctx.display.render_image(img)
 
-            res = img.find_qrcodes()
+            if read_qr_success != read_inverted:
+                res = img.find_qrcodes()
+                if res:
+                    read_qr_success = read_normal
+
+            # try inverted colors if not sucessfull
+            if read_qr_success != read_normal:
+                img.invert()
+                res = img.find_qrcodes()
+                if res:
+                    read_qr_success = read_inverted
+
             if res:
                 data = res[0].payload()
                 new_part = parser.parse(data)
