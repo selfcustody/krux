@@ -13,7 +13,10 @@ Krux now displays a warning instead of blocking QR-encoded passphrases that cont
 Exported Uniform Resource (UR) QR codes, a widely adopted standard for exchanging PSBTs, now use uppercase data to reduce QR density, improving scan reliability without increasing the number of frames.
 
 ### Other Bug Fixes and Improvements
-- Added backtick ` to keypad
+- Settings: Reduced default _Buttons Debounce_ value (with an even lower default on _M5StickV_)
+- Settings: Expanded value ranges for _Touch Threshold_ and _Buttons Debounce_
+- Swipe handling: Detection threshold has been slightly reduced
+- Keypad: Added backtick **`**
 - Bugfix: Screensaver not activating in menu pages without statusbar
 - Embit: Improved BIP39 mnemonic validation
 - Bug Fix: Corrected handling of certain binary-encoded QR codes
