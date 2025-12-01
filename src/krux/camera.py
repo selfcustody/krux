@@ -176,7 +176,7 @@ class Camera:
         # Center weight mode = 7, default=0x01 (center mode = 0)
         sensor.__write_reg(0x0C, 0x71)
 
-    def has_antiglare(self):
+    def has_mode_control(self):
         """Returns whether the camera has anti-glare functionality"""
         return self.cam_id in (OV7740_ID, OV2640_ID, GC2145_ID, GC0328_ID)
 
