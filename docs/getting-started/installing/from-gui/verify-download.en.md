@@ -48,12 +48,11 @@ sha256sum --check {{latest_installer_sha}}
 You can verify the integrity with this command in a `powershell` terminal:
 
 ```pwsh
-(Get-FileHash '.\{{latest_installer_win}}' -Algorithm SHA256).Hash -ieq (
-  (Select-String '.\{{latest_installer_sha}}' -Pattern (
-      '^\s*([0-9a-f]{64})\s+' + [regex]::Escape((Split-Path '.\{{latest_installer_win}}' -Leaf)) + '$'
-    ) | Select-Object -First 1
-  ).Matches[0].Groups[1].Value
-)
+$exe = '.\{{latest_installer_win}}'
+$file = Split-Path $exe -Leaf
+
+(Get-FileHash $exe -Algorithm SHA256).Hash -eq
+(Select-String $file '.\{{latest_installer_sha}}').Line.Split()[0].ToUpper()
 ```
 
 > 🛡️  TIP: If you followed the authenticity/integrity checks steps presented, you already
