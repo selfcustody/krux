@@ -44,9 +44,13 @@ If the device behaves this way when connected to the computer, Windows is known 
 ### Error when flashing
 If flashing fails with an error: `Greeting fail, check serial port (SLIP receive timeout (wait frame start))` or `[ERROR] No vaild COM Port found in Auto Detect, Check Your Connection or Specify One by --port/-p`, double check the command used. Most of devices need to pass the argument `-B goE` to *ktool*, but `dock` and `wonder_mv` uses the argument `-B dan` instead. For `yahboom` you also need to manually specify the port using the `-p` argument.
 
-----8<----
-error-flashing-windows.en.txt
-----8<----
+**WonderMV**: Some units have a hardware issue that can leave the device in a bad state in which it can't be flashed . If flashing fails, unplug the USB cable, wait 10+ seconds to allow the hardware to fully reset, then reconnect and retry.
+
+On **Windows**, you may encounter the **flash failed** error when trying to flash Yahboom or WonderMV using **Krux-Installer**. This means that Windows could not find the driver to communicate with the device via USB (an unrecognized *USB Serial* will be listed in *Device Manager -> Other devices*). To fix this, download and install the [CH340/341 driver](https://www.wch-ic.com/downloads/ch341ser_exe.html) (a *USB-SERIAL CH340* will be listed in *Device Manager -> Ports (COM & LPT)*).
+
+<img src="/krux/img/krux-installer/flash-failed.jpg" style="width: 38%; min-width: 320px;">
+<img src="/krux/img/krux-installer/usb-serial.jpg" style="width: 30%; min-width: 240px;">
+<img src="/krux/img/krux-installer/usb-serial-driver.jpg" style="width: 25%; min-width: 180px;">
 
 ----8<----
 error-flashing-mac.en.txt
