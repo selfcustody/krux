@@ -151,6 +151,7 @@ class QRCodeCapture(Page):
 
         # Cache end time for message display to avoid repeated addition
         message_end_time = start_time + MESSAGE_DISPLAY_PERIOD
+        first_frame = True
 
         while True:
             wdt.feed()
@@ -193,8 +194,9 @@ class QRCodeCapture(Page):
             else:
                 self.ctx.display.render_image(img)
 
-            res = img.find_qrcodes()
+            res = img.find_qrcodes(find_inverted=first_frame)
             if res:
+                first_frame = False
                 new_part = parser.parse(res[0].payload())
 
                 if (
