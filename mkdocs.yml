@@ -90,8 +90,7 @@ nav:
         - From GUI application: getting-started/installing/from-gui/index.en.md
         - Verify: getting-started/installing/from-gui/verify-download.en.md
         - Windows: getting-started/installing/from-gui/windows.en.md
-        - MacOS Intel: getting-started/installing/from-gui/macos-intel.en.md
-        - MacOS ARM64: getting-started/installing/from-gui/macos-arm64.en.md
+        - MacOS: getting-started/installing/from-gui/macos.en.md
         - Debian-like: getting-started/installing/from-gui/debian-like.en.md
         - Fedora-like: getting-started/installing/from-gui/fedora-like.en.md
         - Other linux distro: getting-started/installing/from-gui/other-linux-distro.en.md
