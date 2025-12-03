@@ -122,8 +122,10 @@ def test_enter_stackbit_touch(amigo, mocker):
     from krux.input import BUTTON_TOUCH
 
     YES = 1
-    BTN_SEQUENCE = [BUTTON_TOUCH] * 3 * 12 + [BUTTON_TOUCH]
-    TOUCH_SEQUENCE = [0, STACKBIT_GO_INDEX + 1, YES] * 12 + [YES]
+    BTN_SEQUENCE = [BUTTON_TOUCH] * 4 * 12 + [BUTTON_TOUCH]
+    TOUCH_SEQUENCE = [0, -1, STACKBIT_GO_INDEX + 1, YES] * 12 + [
+        YES
+    ]  # negative values (invalid touches) should not change the result
     TEST_12_WORDS = "language language language language language language language language language language language language"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=TOUCH_SEQUENCE)
@@ -181,3 +183,15 @@ def test_entering_stackbit_buttons_turbo(mocker, m5stickv):
         stackbit.enter_1248()
 
     stackbit.index.assert_called_with(0, FAST_BACKWARD)
+
+
+def test_stackbit_index_ignore_swipe(mocker, amigo):
+    from krux.pages.stack_1248 import Stackbit
+    from krux.input import SWIPE_LEFT, SWIPE_RIGHT, SWIPE_DOWN, SWIPE_UP, SWIPE_FAIL
+
+    ctx = create_ctx(mocker, [])
+    stackbit = Stackbit(ctx)
+    tmp = 10
+    for swipe in (SWIPE_LEFT, SWIPE_RIGHT, SWIPE_DOWN, SWIPE_UP, SWIPE_FAIL):
+        new_index = stackbit.index(tmp, swipe)
+        assert new_index == tmp

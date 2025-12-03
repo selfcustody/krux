@@ -15,7 +15,8 @@ Exported Uniform Resource (UR) QR codes, a widely adopted standard for exchangin
 ### Other Bug Fixes and Improvements
 - Settings: Reduced default _Buttons Debounce_ value (with an even lower default on _M5StickV_)
 - Settings: Expanded value ranges for _Touch Threshold_ and _Buttons Debounce_
-- Swipe handling: Detection threshold has been slightly reduced
+- Swipe handling: Diagonal and long-hold swipes are now discarded, and the swipe detection threshold has been slightly reduced
+- Touch handling: Discards touches near edges of adjacent regions
 - Keypad: Added backtick **`**
 - Bugfix: Screensaver not activating in menu pages without statusbar
 - Embit: Improved BIP39 mnemonic validation

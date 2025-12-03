@@ -31,6 +31,7 @@ from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
     BUTTON_PAGE_PREV,
+    SWIPE_FAIL,
     FAST_FORWARD,
     FAST_BACKWARD,
 )
@@ -294,16 +295,19 @@ class MnemonicEditor(Page):
             self.ctx.display.clear()
             self._draw_header()
             self._map_words(button_index, page)
-            btn = self.ctx.input.wait_for_fastnav_button()
-            if btn == BUTTON_TOUCH:
-                button_index = self.ctx.input.touch.current_index()
-                if button_index < ESC_INDEX:
-                    if self.mnemonic_length == 24 and button_index % 2 == 1:
-                        button_index //= 2
-                        button_index += 12
-                    else:
-                        button_index //= 2
-                btn = BUTTON_ENTER
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_fastnav_button()
+                if btn == BUTTON_TOUCH:
+                    button_index = self.ctx.input.touch.current_index()
+                    if button_index < 0:
+                        continue
+                    if button_index < ESC_INDEX:
+                        if self.mnemonic_length == 24 and button_index % 2 == 1:
+                            button_index = (button_index >> 1) + 12
+                        else:
+                            button_index >>= 1
+                    btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if button_index == GO_INDEX:
                     if self.mnemonic_length == 24 and kboard.is_m5stickv and page == 0:
@@ -316,7 +320,7 @@ class MnemonicEditor(Page):
                 if button_index == ESC_INDEX:
                     # Cancel
                     self.ctx.display.clear()
-                    if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+                    if self.prompt(t("Are you sure?"), self.ctx.display.height() >> 1):
                         return None
                     continue
                 new_word = self.edit_word(button_index + page * 12)
@@ -324,7 +328,7 @@ class MnemonicEditor(Page):
                     self.ctx.display.clear()
                     if self.prompt(
                         str(button_index + page * 12 + 1) + ".\n\n" + new_word + "\n\n",
-                        self.ctx.display.height() // 2,
+                        self.ctx.display.height() >> 1,
                     ):
                         self.current_mnemonic[button_index + page * 12] = new_word
                         self.calculate_checksum()
