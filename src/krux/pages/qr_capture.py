@@ -53,8 +53,8 @@ class QRCodeCapture(Page):
         else:
             self.ctx.light.turn_off()
 
-    def anti_glare_control(self):
-        """Controls the anti-glare based on the user input"""
+    def mode_control(self):
+        """Controls camera mode based on the user input"""
         self.ctx.display.to_portrait()
         mode = self.ctx.camera.toggle_camera_mode()
         if mode == QR_SCAN_MODE:
@@ -137,7 +137,7 @@ class QRCodeCapture(Page):
         previous_part = None
         ur_highlighted = False
 
-        # Flush events ocurred while loading camera
+        # Flush events occurred while loading camera
         self.ctx.input.reset_ios_state()
         start_time = time.ticks_ms()
         self.ctx.display.clear()
@@ -148,6 +148,11 @@ class QRCodeCapture(Page):
             t("Press PAGE to toggle mode"), offset_y
         )
         self.ctx.display.to_landscape()
+
+        # Cache end time for message display to avoid repeated addition
+        message_end_time = start_time + MESSAGE_DISPLAY_PERIOD
+        first_frame = True
+
         while True:
             wdt.feed()
 
@@ -159,8 +164,8 @@ class QRCodeCapture(Page):
             # Anti-glare / zoom / normal mode
             page_prev_event = self.ctx.input.page_prev_event()
             if self.ctx.input.page_event() or (kboard.is_yahboom and page_prev_event):
-                if self.ctx.camera.has_antiglare():
-                    self.anti_glare_control()
+                if self.ctx.camera.has_mode_control():
+                    self.mode_control()
                 else:
                     break
 
@@ -184,15 +189,15 @@ class QRCodeCapture(Page):
                 ur_highlighted = False
 
             img = self.ctx.camera.snapshot()
-            if time.ticks_ms() < start_time + MESSAGE_DISPLAY_PERIOD:
+            if time.ticks_ms() < message_end_time:
                 self.ctx.display.render_image(img, title_lines=title_lines)
             else:
                 self.ctx.display.render_image(img)
 
-            res = img.find_qrcodes()
+            res = img.find_qrcodes(find_inverted=first_frame)
             if res:
-                data = res[0].payload()
-                new_part = parser.parse(data)
+                first_frame = False
+                new_part = parser.parse(res[0].payload())
 
                 if (
                     parser.format == FORMAT_UR
