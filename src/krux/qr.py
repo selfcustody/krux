@@ -181,6 +181,7 @@ class QRPartParser:
                 from ur.ur_decoder import URDecoder
 
                 self.decoder = URDecoder()
+            data = data.decode() if isinstance(data, bytes) else data
             self.decoder.receive_part(data)
         elif self.format == FORMAT_BBQR:
             from .bbqr import parse_bbqr
