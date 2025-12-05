@@ -6,7 +6,7 @@ At the start screen, select **New Mnemonic**, and choose between camera, words, 
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-options-250.png" class="m5stickv">
 
 ## Camera
-(Experimental!) Choose between 12, 24 words or double mnemonic, then take a random picture and Krux will generate a mnemonic from the hash of the image's raw bytes.
+(Experimental!) Choose between 12, 24 words or double mnemonic, then take a random picture and Krux will generate a mnemonic from the hash of the image's raw bytes.<i style="font-size: 85%">[:material-numeric-1-circle:{ title="Conceptually similar to Lavarand" }](#lavarand)</i>
 
 <img src="../../../img/maixpy_amigo/new-mnemonic-via-snapshot-prompt-300.png" class="amigo">
 <img src="../../../img/maixpy_amigo/new-mnemonic-via-snapshot-capturing-300.png" class="amigo">
@@ -21,7 +21,9 @@ During image capture, a real-time entropy quality indicator is displayed to help
 
 **Note**: These metrics are *approximations* intended to guide image selection. They do **not** represent absolute cryptographic entropy values.
 
+<i style="font-size: 85%">:material-numeric-1-circle:{id="lavarand"}:
 This approach is conceptually similar to [Lavarand](https://en.wikipedia.org/wiki/Lavarand), which used chaotic visual phenomena as source of entropy for cryptographic random number generators. Likewise, Krux leverages the unpredictable structure of captured images as entropy.
+</i>
 
 <div style="clear: both"></div>
 
