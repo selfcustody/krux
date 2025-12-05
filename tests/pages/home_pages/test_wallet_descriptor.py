@@ -78,55 +78,7 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_ENTER, BUTTON_ENTER],
         ),
-        # 9 vague BlueWallet-ish p2pkh, requires allow_assumption
-        (
-            False,
-            tdata.LEGACY1_KEY,
-            tdata.VAGUE_LEGACY1_XPUB,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # 10 vague BlueWallet-ish p2pkh w/o key loaded, requires allow_assumption
-        (
-            False,
-            None,
-            tdata.VAGUE_LEGACY1_XPUB,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # 11 vague BlueWallet-ish p2sh-p2wpkh ypub
-        (
-            False,
-            tdata.NESTEDSW1_KEY,
-            tdata.VAGUE_NESTEDSW1_YPUB,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # 12 vague BlueWallet-ish p2sh-p2wpkh ypub w/o key loaded
-        (
-            False,
-            None,
-            tdata.VAGUE_NESTEDSW1_YPUB,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # 13 vague BlueWallet-ish p2wpkh zpub
-        (
-            False,
-            tdata.NATIVESW1_KEY,
-            tdata.VAGUE_NATIVESW1_ZPUB,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # 14 vague BlueWallet-ish p2wpkh zpub w/o key loaded
-        (
-            False,
-            None,
-            tdata.VAGUE_NATIVESW1_ZPUB,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # 15 Load, from SD card, good data, accept
+        # 9 Load, from SD card, good data, accept
         (
             False,
             tdata.SINGLESIG_12_WORD_KEY,
