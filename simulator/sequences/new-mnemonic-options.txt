@@ -20,7 +20,7 @@ qrcode arara.png
 qrcode arara.png
 qrcode arara.png
 
-#screenshot new-mnemonic-via-snapshot-capturing.png
+screenshot new-mnemonic-via-snapshot-capturing.png
 
 wait 0.3
 
