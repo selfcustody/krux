@@ -400,7 +400,10 @@ class Home(Page):
                 return False
 
         # Fix zero fingerprint, it is necessary for the signing process on embit in a few cases
-        if signer.fill_zero_fingerprint():
+        if (
+            self.ctx.wallet.key.fingerprint != b"\x00\x00\x00\x00"
+            and signer.fill_zero_fingerprint()
+        ):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Fingerprint unset in PSBT"))
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
