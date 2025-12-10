@@ -47,10 +47,7 @@ from ..key import (
     NAME_MINISCRIPT,
 )
 
-from ..settings import (
-    MAIN_TXT,
-    TEST_TXT,
-)
+from ..settings import MAIN_TXT, TEST_TXT, SIGNET_TXT, REGTEST_TXT
 
 from ..key import P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 
@@ -306,13 +303,25 @@ class WalletSettings(Page):
             [
                 ("Mainnet", lambda: None),
                 ("Testnet", lambda: None),
+                ("Signet", lambda: None),
+                ("Regtest", lambda: None),
             ],
             disable_statusbar=True,
         )
         index, _ = submenu.run_loop()
         if index == submenu.back_index:
             return None
-        return NETWORKS[TEST_TXT] if index == 1 else NETWORKS[MAIN_TXT]
+
+        if index == 1:
+            return NETWORKS[TEST_TXT]
+
+        if index == 2:
+            return NETWORKS[SIGNET_TXT]
+
+        if index == 3:
+            return NETWORKS[REGTEST_TXT]
+
+        return NETWORKS[MAIN_TXT]
 
     def _policy_type(self):
         """Policy type selection menu"""

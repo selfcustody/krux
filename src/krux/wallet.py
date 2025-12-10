@@ -22,6 +22,7 @@
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key
 from embit.networks import NETWORKS
+from .settings import MAIN_TXT, TEST_TXT, SIGNET_TXT, REGTEST_TXT
 from .krux_settings import t
 from .qr import FORMAT_BBQR, FORMAT_NONE
 from .key import (
@@ -54,6 +55,7 @@ class Wallet:
         self.policy = None
         self.persisted = False
         self._network = None
+
         if self.key and self.key.policy_type == TYPE_SINGLESIG:
             if self.key.script_type == P2PKH:
                 self.descriptor = Descriptor.from_string(
@@ -95,14 +97,19 @@ class Wallet:
                 self._network = [
                     k for k, v in NETWORKS.items() if v == self.key.network
                 ][0]
-            else:
-                # use first key; restrict networks to "main" and "test", version to pubkeys
-                version = self.descriptor.keys[0].key.version
-                for em_network in ("main", "test"):
-                    for em_vertype in ("xpub", "ypub", "zpub", "Ypub", "Zpub"):
-                        if version == NETWORKS[em_network][em_vertype]:
-                            self._network = em_network
-                            break
+            elif self.descriptor:
+                # restrict to known networks and pubkey-only versions
+                net, vt = version_to_network_versiontype(
+                    self.descriptor.keys[0].key.version
+                )
+                if net in (MAIN_TXT, TEST_TXT, SIGNET_TXT, REGTEST_TXT) and vt in (
+                    "xpub",
+                    "ypub",
+                    "zpub",
+                    "Ypub",
+                    "Zpub",
+                ):
+                    self._network = net
         return self._network
 
     def is_multisig(self):
@@ -163,7 +170,7 @@ class Wallet:
     def _determine_descriptor_network(self, descriptor):
         """Returns the network from descriptor's xpub version"""
         version = descriptor.keys[0].key.version
-        for em_network in ("main", "test"):
+        for em_network in (MAIN_TXT, TEST_TXT, SIGNET_TXT, REGTEST_TXT):
             for em_vertype in ("xpub", "ypub", "zpub", "Ypub", "Zpub"):
                 if version == NETWORKS[em_network][em_vertype]:
                     return NETWORKS[em_network]
@@ -503,7 +510,7 @@ def parse_address(address_data):
 
     if not isinstance(sc, Script):
         try:
-            address_to_scriptpubkey(addr)
+            sc = address_to_scriptpubkey(addr)
         except:
             raise ValueError("invalid address")
 

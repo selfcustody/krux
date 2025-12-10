@@ -23,7 +23,7 @@
 
 import lcd
 from ..display import FONT_HEIGHT, FONT_WIDTH, PORTRAIT
-from ..themes import theme, MAIN_TXT_COLOR, TEST_TXT_COLOR
+from ..themes import theme
 from ..settings import (
     CategorySetting,
     NumberSetting,
@@ -36,6 +36,8 @@ from ..krux_settings import (
     Settings,
     MAIN_TXT,
     TEST_TXT,
+    SIGNET_TXT,
+    REGTEST_TXT,
     TouchSettings,
     ButtonsSettings,
     t,
@@ -63,8 +65,10 @@ PERSIST_MSG_TIME = 2500
 DISPLAY_TEST_TIME = 5000  # 5 seconds
 
 CATEGORY_SETTING_COLOR_DICT = {
-    MAIN_TXT: MAIN_TXT_COLOR,
-    TEST_TXT: TEST_TXT_COLOR,
+    MAIN_TXT: theme.main_color,
+    TEST_TXT: theme.test_color,
+    SIGNET_TXT: theme.signet_color,
+    REGTEST_TXT: theme.regtest_color,
     True: theme.go_color,
     False: theme.no_esc_color,
 }
