@@ -38,6 +38,8 @@ MNEMONICS_FILE = "seeds.json"
 # Network settings
 MAIN_TXT = "main"
 TEST_TXT = "test"
+SIGNET_TXT = "signet"
+REGTEST_TXT = "regtest"
 
 THIN_SPACE = " "  # "\u2009"
 ELLIPSIS = "…"  # "\u2026"
