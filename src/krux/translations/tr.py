@@ -112,6 +112,7 @@ translation_array = [
     "BIP39 mnemonic'inizin her kelimesini 1'den 800'e kadar onaltılık bir sayı olarak girin.",
     "BIP39 mnemonic'inizin her kelimesini 1'den 4000'e kadar sekizlik bir sayı olarak girin.",
     "BIP39 mnemonic'inizin her kelimesini girin.",
+    "Entropi Eşiği",
     "Kullanıcı Verilerini Sil",
     "Kullanıcının verileri siliniyor…",
     "Hata:",
