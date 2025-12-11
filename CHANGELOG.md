@@ -3,6 +3,11 @@
 ### New Device Support: Embed Fire
 This device shares similarities with the WonderMV but stands out with its larger 2.4" touchscreen.
 
+### Krux apps (Kapps)
+New tool for executing developer-signed utility apps that extend Krux functionality. Includes two initial Kapps: 
+- Nostr: Create or load your key using NIP-06 or NIP-19, and airgap-sign events
+- Steganography: Concel data within BMP image files
+
 ### New Device Support: WonderK PRO
 From the wonderful land of Korea, a new creation arrives: the WonderK PRO. Created by an entrepreneur who loves the Krux project, the WonderK follows in the footsteps of the WonderMV, but boasts a larger 2.8" display! Computer simulator for the WonderK device is also included.
 

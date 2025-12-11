@@ -20,42 +20,35 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-# from . import Page
 from ..display import SPLASH, FONT_HEIGHT, TOTAL_LINES
 from ..themes import theme
 
 
-class ScreenSaver:
-    """Screensaver animation method"""
-
-    def __init__(self, ctx):
-        self.ctx = ctx
-
-    def start(self):
-        """Displays a screensaver until user presses a button or touch"""
-        anim_frame = 0
-        initial_offset = (TOTAL_LINES - len(SPLASH)) // 2
-        fg_color = theme.fg_color
-        bg_color = theme.bg_color
-        self.ctx.display.clear()
-        button_press = None
-        while button_press is None:
-            # show animation on the screeen
-            offset_y = anim_frame * FONT_HEIGHT
-            self.ctx.display.fill_rectangle(
-                0,
-                offset_y,
-                self.ctx.display.width(),
-                FONT_HEIGHT,
-                bg_color,
+def screensaver_start(ctx):
+    """Displays a screensaver until user presses a button or touch"""
+    anim_frame = 0
+    initial_offset = (TOTAL_LINES - len(SPLASH)) // 2
+    fg_color = theme.fg_color
+    bg_color = theme.bg_color
+    ctx.display.clear()
+    button_press = None
+    while button_press is None:
+        # show animation on the screeen
+        offset_y = anim_frame * FONT_HEIGHT
+        ctx.display.fill_rectangle(
+            0,
+            offset_y,
+            ctx.display.width(),
+            FONT_HEIGHT,
+            bg_color,
+        )
+        if initial_offset <= anim_frame < len(SPLASH) + initial_offset:
+            ctx.display.draw_hcentered_text(
+                SPLASH[anim_frame - initial_offset], offset_y, fg_color, bg_color
             )
-            if initial_offset <= anim_frame < len(SPLASH) + initial_offset:
-                self.ctx.display.draw_hcentered_text(
-                    SPLASH[anim_frame - initial_offset], offset_y, fg_color, bg_color
-                )
-            anim_frame += 1
-            if anim_frame > len(SPLASH) + 2 * initial_offset:
-                anim_frame = 0
-                bg_color, fg_color = fg_color, bg_color
-            # wait_duration(animation period) can be modified here
-            button_press = self.ctx.input.wait_for_button(block=False)
+        anim_frame += 1
+        if anim_frame > len(SPLASH) + 2 * initial_offset + 1:
+            anim_frame = 0
+            bg_color, fg_color = fg_color, bg_color
+        # wait_duration(animation period) can be modified here
+        button_press = ctx.input.wait_for_button(block=False)
