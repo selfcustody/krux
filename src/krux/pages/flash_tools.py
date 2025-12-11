@@ -47,7 +47,7 @@ class FlashTools(Page):
             [
                 (t("Flash Map"), self.flash_map),
                 (t("TC Flash Hash"), self.tc_flash_hash),
-                (t("Erase User's Data"), self.erase_users_data),
+                (t("Erase User's Data"), self.erase_users_data, theme.no_esc_color),
             ],
         )
         flash_menu.run_loop()

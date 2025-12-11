@@ -93,7 +93,6 @@ translation_array = [
     "Gerätetests",
     "Bildschirm",
     "Schalten Sie das Gerät nicht aus, es kann eine Weile dauern.",
-    "Konvertierung abgeschlossen",
     "Fertig?",
     "Doppelte Gedächtnisstütze",
     "Driver",

@@ -41,6 +41,8 @@ TEST_TXT = "test"
 
 THIN_SPACE = " "  # "\u2009"
 ELLIPSIS = "…"  # "\u2026"
+CONTEXT_ARROW = THIN_SPACE + ">"
+BACK_ARROW = "<" + THIN_SPACE
 
 
 class SettingsNamespace:

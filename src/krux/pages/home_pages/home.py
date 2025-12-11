@@ -35,6 +35,8 @@ from ...krux_settings import t, Settings
 from ...format import replace_decimal_separator
 from ...key import TYPE_SINGLESIG
 from ...kboard import kboard
+from ...settings import CONTEXT_ARROW
+from ...themes import theme
 
 
 class Home(Page):
@@ -48,18 +50,18 @@ class Home(Page):
                 ctx,
                 [
                     (
-                        t("Backup Mnemonic"),
+                        t("Backup Mnemonic") + CONTEXT_ARROW,
                         (
                             self.backup_mnemonic
                             if not Settings().security.hide_mnemonic
                             else None
                         ),
                     ),
-                    (t("Extended Public Key"), self.public_key),
-                    (t("Wallet"), self.wallet),
-                    (t("Address"), self.addresses_menu),
+                    (t("Extended Public Key") + CONTEXT_ARROW, self.public_key),
+                    (t("Wallet") + CONTEXT_ARROW, self.wallet),
+                    (t("Address") + CONTEXT_ARROW, self.addresses_menu),
                     (t("Sign"), self.sign),
-                    (shtn_reboot_label, self.shutdown),
+                    (shtn_reboot_label, self.shutdown, theme.no_esc_color),
                 ],
                 back_label=None,
             ),
@@ -187,11 +189,11 @@ class Home(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Wallet Descriptor"), self.wallet_descriptor),
-                (t("Passphrase"), self.passphrase),
-                (t("Customize"), self.customize),
-                ("BIP85", self.bip85),
-                (t("Mnemonic XOR"), self.mnemonic_xor),
+                (t("Wallet Descriptor") + CONTEXT_ARROW, self.wallet_descriptor),
+                (t("Passphrase") + CONTEXT_ARROW, self.passphrase),
+                (t("Customize") + CONTEXT_ARROW, self.customize),
+                ("BIP85" + CONTEXT_ARROW, self.bip85),
+                (t("Mnemonic XOR") + CONTEXT_ARROW, self.mnemonic_xor),
             ],
         )
         submenu.run_loop()
@@ -209,8 +211,8 @@ class Home(Page):
         submenu = Menu(
             self.ctx,
             [
-                ("PSBT", self.sign_psbt),
-                (t("Message"), self.sign_message),
+                ("PSBT" + CONTEXT_ARROW, self.sign_psbt),
+                (t("Message") + CONTEXT_ARROW, self.sign_message),
             ],
         )
         submenu.run_loop()

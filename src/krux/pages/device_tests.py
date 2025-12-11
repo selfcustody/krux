@@ -344,8 +344,7 @@ class DeviceTests(Page):
         churns nonce through sha256() and pbkdf_hmac(sha256,) calls,
         raises ValueError if calculated results don't match expected results
         """
-        from uhashlib_hw import sha256 as f_hash
-        from uhashlib_hw import pbkdf2_hmac_sha256 as f_hmac
+        from uhashlib_hw import sha256 as f_hash, pbkdf2_hmac_sha256 as f_hmac
 
         # pylint: disable=C0301
         expecteds = [
