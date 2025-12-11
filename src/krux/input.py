@@ -204,7 +204,9 @@ class Input:
         self.entropy += 1
         wdt.feed()
 
-    def _wait_for_press(self, block=True, wait_duration=QR_ANIM_PERIOD):
+    def _wait_for_press(
+        self, block=True, wait_duration=QR_ANIM_PERIOD, update_callback=None
+    ):
         """
         Wait for first button press or for wait_duration ms.
         Use block to wait indefinitely
@@ -226,6 +228,8 @@ class Input:
             self.flush_events()
             self.flushed_flag = not block
 
+        update_count = 0
+        update_trigger = BUTTON_WAIT_PRESS_DELAY * BUTTON_WAIT_PRESS_DELAY
         while True:
             if self.enter_event():
                 return BUTTON_ENTER
@@ -242,6 +246,12 @@ class Input:
 
             if not block and time.ticks_ms() > start_time + wait_duration:
                 return None
+
+            if update_callback is not None:
+                update_count += 1
+                if update_count > update_trigger:
+                    update_count = 0
+                    update_callback()
 
             time.sleep_ms(BUTTON_WAIT_PRESS_DELAY)
 
@@ -327,19 +337,23 @@ class Input:
 
         return btn
 
-    def wait_for_button(self, block=True, wait_duration=QR_ANIM_PERIOD):
+    def wait_for_button(
+        self, block=True, wait_duration=QR_ANIM_PERIOD, update_callback=None
+    ):
         """Waits for any button to release, optionally blocking if block=True.
         Returns the button that was released, or None if non blocking.
         """
         self.wait_for_release()
-        btn = self._wait_for_press(block, wait_duration)
+        btn = self._wait_for_press(block, wait_duration, update_callback)
         if btn is not None:
             auto_shutdown.feed()
         btn = self._detect_press_type(btn)
         self.debounce_time = time.ticks_ms()
         return btn
 
-    def wait_for_fastnav_button(self, block=True, wait_duration=QR_ANIM_PERIOD):
+    def wait_for_fastnav_button(
+        self, block=True, wait_duration=QR_ANIM_PERIOD, update_callback=None
+    ):
         """Wait for a button press, with support for fast navigation."""
         if self.page_value() == PRESSED:
             time.sleep_ms(KEY_REPEAT_DELAY_MS)
@@ -349,7 +363,7 @@ class Input:
             if kboard.is_yahboom:
                 return FAST_FORWARD
             return FAST_BACKWARD
-        return self.wait_for_button(block, wait_duration)
+        return self.wait_for_button(block, wait_duration, update_callback)
 
     def flush_events(self):
         """Clean eventual event flags unintentionally collected"""

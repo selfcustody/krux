@@ -12,6 +12,9 @@ Krux now displays a warning instead of blocking QR-encoded passphrases that cont
 ### Easier to Scan UR QR Codes
 Exported Uniform Resource (UR) QR codes, a widely adopted standard for exchanging PSBTs, now use uppercase data to reduce QR density, improving scan reliability without increasing the number of frames.
 
+### Battery Percentage Indicator
+Battery level is now displayed as a percentage (configurable in settings). The on-screen value updates automatically.
+
 ### Other Bug Fixes and Improvements
 - Settings: Reduced default _Buttons Debounce_ value (with an even lower default on _M5StickV_)
 - Settings: Expanded value ranges for _Touch Threshold_ and _Buttons Debounce_
