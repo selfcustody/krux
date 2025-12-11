@@ -83,6 +83,7 @@ def urobj_to_data(ur_obj):
 
     if ur_obj.type == "crypto-bip39":
         data = urtypes.crypto.BIP39.from_cbor(ur_obj.cbor).words
+        data = " ".join(data)
     elif ur_obj.type == "crypto-account":
         data = (
             urtypes.crypto.Account.from_cbor(ur_obj.cbor)

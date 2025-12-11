@@ -134,7 +134,7 @@ def test_initialize_run_with_anti_glair_enabled(mocker, m5stickv):
     assert c.cam_id is not None
 
 
-def test_toggle_antiglare(mocker, m5stickv):
+def test_toggle_mode(mocker, m5stickv):
     import krux
     from krux.camera import (
         Camera,
@@ -153,9 +153,9 @@ def test_toggle_antiglare(mocker, m5stickv):
     for sensor_id in SENSORS_LIST:
         mocker.patch("krux.camera.sensor.get_id", lambda: sensor_id)
         c = Camera()
-        mocker.spy(c, "has_antiglare")
+        mocker.spy(c, "has_mode_control")
         c.initialize_sensor()
-        if c.has_antiglare():
+        if c.has_mode_control():
             assert c.mode == QR_SCAN_MODE
             c.toggle_camera_mode()
             assert c.mode == ANTI_GLARE_MODE

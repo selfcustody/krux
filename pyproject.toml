@@ -22,7 +22,7 @@
 
 [tool.poetry]
 name = "krux"
-version = "25.11.beta1"
+version = "25.11.beta2"
 description = "Open-source signing device firmware for Bitcoin"
 authors = ["Jeff S <jeffreesun@protonmail.com>"]
 readme = "README.md"
@@ -30,7 +30,6 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.12.3"
-translate = "^3.6.1"
 embit = { path = "./vendor/embit/", develop = true }
 ur = { path = "./vendor/foundation-ur-py/", develop = true }
 urtypes = { path = "./vendor/urtypes/", develop = true }
@@ -65,6 +64,8 @@ PyQRCode = "^1.2.1"
 pycryptodome = "^3.23.0"
 poethepoet = "^0.37.0"
 vulture = "^2.14"
+translate = "^3.6.1"
+urllib3 = ">=2.6.0"
 
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions", "mkdocs-macros-plugin"]

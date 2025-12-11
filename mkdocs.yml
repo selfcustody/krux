@@ -52,13 +52,17 @@ edit_uri: edit/main/docs
 docs_dir: docs
 site_dir: public
 extra:
-  latest_krux: krux-v25.11.beta1
-  latest_installer: v0.0.20
-  latest_installer_rpm: krux-installer-0.0.20-1.x86_64.rpm
-  latest_installer_deb: krux-installer_0.0.20_amd64.deb
-  latest_installer_win: krux-installer_v0.0.20.Setup.exe
-  latest_installer_mac_arm: krux-installer_0.0.20_arm64.dmg
+  latest_krux: krux-v25.11.beta2
+  latest_installer: v0.0.21
+  latest_installer_rpm: krux_installer-0.0.21-1.x86_64.rpm
+  latest_installer_deb: krux_installer_0.0.21_amd64.deb
+  latest_installer_win: krux_installer_v0.0.21_Setup.exe
+  latest_installer_mac_arm: krux_installer_0.0.21_arm64.dmg
   latest_installer_mac_intel: krux-installer_0.0.20_x86_64.dmg
+  latest_installer_sha: krux-installer.SHA256.txt
+  latest_installer_sig: krux-installer.SHA256.txt.sig
+  latest_installer_key: B4281DDDFBBD207BFA4113138974C90299326322
+  latest_installer_keyserver: hkps://keys.openpgp.org
   social:
     - icon: fontawesome/solid/bullhorn
       link: https://bitcointalk.org/index.php?topic=5489022.0
@@ -84,9 +88,9 @@ nav:
       - Installing: getting-started/installing/index.en.md
       - From GUI application:
         - From GUI application: getting-started/installing/from-gui/index.en.md
+        - Verify: getting-started/installing/from-gui/verify-download.en.md
         - Windows: getting-started/installing/from-gui/windows.en.md
-        - MacOS Intel: getting-started/installing/from-gui/macos-intel.en.md
-        - MacOS ARM64: getting-started/installing/from-gui/macos-arm64.en.md
+        - MacOS: getting-started/installing/from-gui/macos.en.md
         - Debian-like: getting-started/installing/from-gui/debian-like.en.md
         - Fedora-like: getting-started/installing/from-gui/fedora-like.en.md
         - Other linux distro: getting-started/installing/from-gui/other-linux-distro.en.md

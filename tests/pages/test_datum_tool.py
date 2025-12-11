@@ -36,10 +36,7 @@ def test_urobj_to_data(m5stickv, mocker):
     MULTISIG_DESCR = "wsh(multi(1,xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB/1/0/*,xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH/0/0/*))#t2zpj2eu"
 
     cases = [
-        {
-            "control": UR("crypto-bip39", UR_BIP39_WORDS_BYTES),
-            "expected": MNEMONIC.split(" "),
-        },
+        {"control": UR("crypto-bip39", UR_BIP39_WORDS_BYTES), "expected": MNEMONIC},
         {
             "control": UR("crypto-output", UR_OUTPUT_MULTISIG_DESCR_BYTES),
             "expected": MULTISIG_DESCR,

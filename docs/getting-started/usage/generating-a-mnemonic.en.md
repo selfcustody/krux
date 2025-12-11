@@ -6,7 +6,7 @@ At the start screen, select **New Mnemonic**, and choose between camera, words, 
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-options-250.png" class="m5stickv">
 
 ## Camera
-(Experimental!) Choose between 12, 24 words or double mnemonic, then take a random picture and Krux will generate a mnemonic from the hash of the image bytes.
+(Experimental!) Choose between 12, 24 words or double mnemonic, then take a random picture and Krux will generate a mnemonic from the hash of the image's raw bytes.<i style="font-size: 85%">[:material-numeric-1-circle:{ title="Conceptually similar to Lavarand" }](#lavarand)</i>
 
 <img src="../../../img/maixpy_amigo/new-mnemonic-via-snapshot-prompt-300.png" class="amigo">
 <img src="../../../img/maixpy_amigo/new-mnemonic-via-snapshot-capturing-300.png" class="amigo">
@@ -17,9 +17,13 @@ At the start screen, select **New Mnemonic**, and choose between camera, words, 
 <img src="../../../img/maixpy_m5stickv/new-mnemonic-via-snapshot-entropy-estimation-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/new-mnemonic-via-snapshot-entropy-estimation-300.png" align="right" class="amigo">
 
-During image capture, entropy quality estimation is displayed to assist you in obtaining a quality image source for your key. After the snapshot is taken, [Shannon's entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) and pixel deviation indices are presented. Minimum thresholds are established to prevent the use of poor-quality images with low entropy for key generation.
+During image capture, a real-time entropy quality indicator is displayed to help you select a suitable image. After the photo is taken, [Shannon's entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)) and pixel deviation metrics are shown. Minimum thresholds are enforced to prevent using images with insufficient entropy quality.
 
-**Note**: These values ​​serve only as indicators or estimations of the quality of entropy, but are not absolute values ​​of entropy in a cryptographic context.
+**Note**: These metrics are *approximations* intended to guide image selection. They do **not** represent absolute cryptographic entropy values.
+
+<i style="font-size: 85%">:material-numeric-1-circle:{id="lavarand"}:
+This approach is conceptually similar to [Lavarand](https://en.wikipedia.org/wiki/Lavarand), which used chaotic visual phenomena as source of entropy for cryptographic random number generators. Likewise, Krux leverages the unpredictable structure of captured images as entropy.
+</i>
 
 <div style="clear: both"></div>
 
