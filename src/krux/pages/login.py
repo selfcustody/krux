@@ -203,6 +203,7 @@ class Login(MnemonicLoader):
                 return self._load_key_from_words(entropy_mnemonic.split(), new=True)
         return MENU_CONTINUE
 
+    # pylint: disable=too-many-locals
     def _load_key_from_words(self, words, charset=LETTERS, new=False):
         mnemonic = " ".join(words)
 
@@ -218,7 +219,6 @@ class Login(MnemonicLoader):
         if mnemonic is None:
             return MENU_CONTINUE
 
-        passphrase = ""
         if not hasattr(Settings().wallet, "policy_type") and hasattr(
             Settings().wallet, "multisig"
         ):
@@ -257,6 +257,7 @@ class Login(MnemonicLoader):
                 Settings().wallet.script_type, P2WSH
             )
 
+        passphrase = ""
         derivation_path = ""
 
         from ..wallet import Wallet
@@ -287,7 +288,31 @@ class Login(MnemonicLoader):
                 else t("Passphrase") + " (%d): *…*" % len(passphrase)
             )
 
-            self.ctx.display.clear()
+            def _print_infobox():
+                self.ctx.display.clear()
+                num_lines = self.ctx.display.draw_hcentered_text(
+                    wallet_info, info_box=True
+                )
+
+                # draw fingerprint with highlight color
+                self.ctx.display.draw_hcentered_text(
+                    key.fingerprint_hex_str(True),
+                    color=theme.highlight_color,
+                    bg_color=theme.info_bg_color,
+                )
+
+                # draw network with highlight color
+                self.ctx.display.draw_hcentered_text(
+                    network_name,
+                    DEFAULT_PADDING + FONT_HEIGHT,
+                    color=Utils.get_network_color(network_name),
+                    bg_color=theme.info_bg_color,
+                )
+
+                return num_lines
+
+            num_lines = _print_infobox()
+
             submenu = Menu(
                 self.ctx,
                 [
@@ -295,26 +320,8 @@ class Login(MnemonicLoader):
                     (t("Passphrase"), lambda: None),
                     (t("Customize"), lambda: None),
                 ],
-                offset=(
-                    self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
-                    * FONT_HEIGHT
-                    + DEFAULT_PADDING
-                ),
-            )
-
-            # draw fingerprint with highlight color
-            self.ctx.display.draw_hcentered_text(
-                key.fingerprint_hex_str(True),
-                color=theme.highlight_color,
-                bg_color=theme.info_bg_color,
-            )
-
-            # draw network with highlight color
-            self.ctx.display.draw_hcentered_text(
-                network_name,
-                DEFAULT_PADDING + FONT_HEIGHT,
-                color=Utils.get_network_color(network_name),
-                bg_color=theme.info_bg_color,
+                offset=num_lines * FONT_HEIGHT + DEFAULT_PADDING,
+                infobox_callback=_print_infobox,
             )
 
             index, _ = submenu.run_loop()
