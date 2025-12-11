@@ -266,6 +266,7 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
     PREV_INDEX = 0
     GO_INDEX = 1
     NEXT_INDEX = 2
+    INVALID_INDEX = -1  # SWIPE
 
     HARDWARE_INDEX = 2
     LOCALE_INDEX = 3
@@ -331,6 +332,9 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
                 LOCALE_INDEX,
                 # Change Locale
                 NEXT_INDEX,
+                NEXT_INDEX,
+                INVALID_INDEX,
+                PREV_INDEX,
                 GO_INDEX,
             ),
             [

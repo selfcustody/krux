@@ -19,3 +19,13 @@ def test_button_turbo(mocker, m5stickv):
     ctx.input.page_prev_value = mocker.MagicMock(side_effect=[PRESSED, None])
     keypad.navigate(FAST_BACKWARD)
     keypad._previous_key.assert_called()
+
+
+def test_invalid_touch_index(mocker, amigo):
+    from krux.pages.keypads import Keypad
+    from krux.input import BUTTON_TOUCH
+
+    ctx = create_ctx(mocker, [BUTTON_TOUCH], touch_seq=[-1])
+    keypad = Keypad(ctx, "abc")
+    btn = keypad.touch_to_physical()
+    assert keypad.cur_key_index == 0

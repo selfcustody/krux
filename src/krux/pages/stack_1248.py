@@ -32,6 +32,7 @@ from ..input import (
     BUTTON_TOUCH,
     FAST_FORWARD,
     FAST_BACKWARD,
+    SWIPE_FAIL,
 )
 from ..kboard import kboard
 
@@ -392,9 +393,10 @@ class Stackbit(Page):
                 return STACKBIT_GO_INDEX
             if index <= STACKBIT_MAX_INDEX:
                 return page_prev_move[index]
-            if index <= STACKBIT_ESC_INDEX:
+            if index < STACKBIT_GO_INDEX:
                 return STACKBIT_MAX_INDEX
-        return STACKBIT_ESC_INDEX
+            return STACKBIT_ESC_INDEX
+        return index
 
     def enter_1248(self):
         """UI to manually enter a Stackbit 1248"""
@@ -414,7 +416,9 @@ class Stackbit(Page):
         words = []
         while word_index <= 24:
             self._map_keys_array()
-            self.ctx.display.draw_hcentered_text("Stackbit 1248")
+            self.ctx.display.draw_hcentered_text(
+                "Stackbit 1248", color=theme.highlight_color
+            )
             y_offset = self.y_offset
             self._draw_grid(y_offset)
             self._draw_labels(y_offset, word_index)
@@ -423,10 +427,15 @@ class Stackbit(Page):
                 self._draw_index(index)
             self.preview_word(digits)
             self._draw_punched(digits, y_offset)
-            btn = self.ctx.input.wait_for_fastnav_button()
-            if btn == BUTTON_TOUCH:
-                btn = BUTTON_ENTER
-                index = self.ctx.input.touch.current_index()
+            # wait until valid input is captured
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_fastnav_button()
+                if btn == BUTTON_TOUCH:
+                    index = self.ctx.input.touch.current_index()
+                    if index < 0 or 13 < index < STACKBIT_ESC_INDEX:
+                        continue
+                    btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if index >= STACKBIT_GO_INDEX:  # go
                     word = self.digits_to_word(digits)
@@ -455,13 +464,11 @@ class Stackbit(Page):
                             self.ctx.display.clear()
                             if self.prompt(t("Done?"), self.ctx.display.height() // 2):
                                 break
-                            # self._map_keys_array() #can be removed?
                         word_index += 1
                 elif index >= STACKBIT_ESC_INDEX:  # ESC
                     self.ctx.display.clear()
                     if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
                         break
-                    # self._map_keys_array()
                 elif index < 14:
                     digits = self._toggle_bit(digits, index)
             else:
