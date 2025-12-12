@@ -131,6 +131,13 @@ POLICY_TYPE_IDS = {
     NAME_MINISCRIPT: TYPE_MINISCRIPT,
 }
 
+# Reverse mapping: policy type ID to name
+POLICY_TYPE_NAMES_MAP = {
+    TYPE_SINGLESIG: NAME_SINGLE_SIG,
+    TYPE_MULTISIG: NAME_MULTISIG,
+    TYPE_MINISCRIPT: NAME_MINISCRIPT,
+}
+
 
 FINGERPRINT_SYMBOL = "⊚"
 DERIVATION_PATH_SYMBOL = "↳"
@@ -345,3 +352,15 @@ class Key:
             candidates.append(last_word)
 
         return candidates
+
+
+def get_policy_type_name(policy_type):
+    """Returns human-readable name for a policy type constant"""
+    return POLICY_TYPE_NAMES_MAP.get(policy_type, "Unknown")
+
+
+def get_network_name(network):
+    """Returns human-readable name for a network object (Mainnet or Testnet)"""
+    if not network:
+        return None
+    return "Mainnet" if network == NETWORKS["main"] else "Testnet"

@@ -152,6 +152,13 @@ For multisig and miniscript, loading a wallet descriptor is essential to verify 
 
 When you select the `Wallet Descriptor` option for the first time, you will be prompted to load via QR code or SD card. After loading, a preview of the descriptor attributes will be displayed for confirmation. We shown each key’s fingerprint, derivation path, and abbreviated XPUB highlighted with a different color.
 
+Loading a descriptor is also a quick way to set wallet attributes, as all necessary information is extracted automatically:
+- Network (Mainnet or Testnet)
+- Policy type (single-sig, multisig or miniscript)
+- Script type (Native Segwit, Taproot, Nested Segwit, Legacy)
+
+This eliminates the need for manual configuration and ensures consistency with your coordinator wallet.
+
 <div style="clear: both"></div>
 
 **Miniscript Descriptors** present an indented view of the miniscript after the keys. When Taproot is used, Krux checks if the internal key is "provably unspendable", meaning funds can only be moved via Tap tree scripts, in which case the internal key is displayed in a disabled color.

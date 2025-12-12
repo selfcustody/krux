@@ -1155,125 +1155,319 @@ def test_load_singlesig(mocker, m5stickv, tdata):
                 assert wallet.has_change_addr()
 
 
-def test_load_singlesig_fails_with_multisig_descriptor(mocker, m5stickv, tdata):
-    from krux.wallet import Wallet
-    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
-
-    wallet = Wallet(tdata.SINGLESIG_KEY)
-
-    cases = [
-        (tdata.SPECTER_MULTISIG_WALLET_DATA, FORMAT_PMOFN),
-        (tdata.BLUEWALLET_MULTISIG_WALLET_DATA, FORMAT_NONE),
-        (tdata.UR_OUTPUT_MULTISIG_WALLET_DATA, FORMAT_UR),
-        (tdata.UR_BYTES_MULTISIG_WALLET_DATA, FORMAT_UR),
-    ]
-    for case in cases:
-        with pytest.raises(ValueError):
-            wallet.load(case[0], case[1])
-
-
-def test_load_singlesig_fails_with_miniscript_descriptor(mocker, m5stickv, tdata):
-    from krux.wallet import Wallet
-    from krux.qr import FORMAT_NONE
-
-    wallet = Wallet(tdata.SINGLESIG_KEY)
-
-    with pytest.raises(ValueError):
-        wallet.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
-    with pytest.raises(ValueError):
-        wallet.load(tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
-
-
-def test_load_multisig_fails_with_singlesig_descriptor(mocker, m5stickv, tdata):
-    from krux.wallet import Wallet
-    from krux.qr import FORMAT_NONE, FORMAT_PMOFN
-
-    wallet = Wallet(tdata.MULTISIG_NATIVE_SW_1)
-
-    cases = [
-        (tdata.SPECTER_SINGLESIG_WALLET_DATA, FORMAT_PMOFN),
-        (tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR, FORMAT_NONE),
-    ]
-    for case in cases:
-        with pytest.raises(ValueError):
-            wallet.load(case[0], case[1])
-
-
-def test_load_multisig_fails_with_miniscript_descriptor(mocker, m5stickv, tdata):
-    from krux.wallet import Wallet
-    from krux.qr import FORMAT_NONE
-
-    wallet = Wallet(tdata.MULTISIG_NATIVE_SW_1)
-
-    with pytest.raises(ValueError):
-        wallet.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
-    with pytest.raises(ValueError):
-        wallet.load(tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
-
-
-def test_load_miniscript_fails_with_singlesig_descriptor(mocker, m5stickv, tdata):
-    from krux.wallet import Wallet
-    from krux.qr import FORMAT_NONE, FORMAT_PMOFN
-
-    wallets = [
-        Wallet(tdata.MINISCRIPT_KEY),
-        Wallet(tdata.TAP_MINISCRIPT_KEY),
-    ]
-
-    cases = [
-        (tdata.SPECTER_SINGLESIG_WALLET_DATA, FORMAT_PMOFN),
-        (tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR, FORMAT_NONE),
-    ]
-    for wallet in wallets:
-        for case in cases:
-            with pytest.raises(ValueError):
-                wallet.load(case[0], case[1])
-
-
-def test_load_miniscript_fails_with_multisig_descriptor(mocker, m5stickv, tdata):
-    from krux.wallet import Wallet
-    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
-
-    wallets = [
-        Wallet(tdata.MINISCRIPT_KEY),
-        Wallet(tdata.TAP_MINISCRIPT_KEY),
-    ]
-
-    cases = [
-        (tdata.SPECTER_MULTISIG_WALLET_DATA, FORMAT_PMOFN),
-        (tdata.BLUEWALLET_MULTISIG_WALLET_DATA, FORMAT_NONE),
-        (tdata.UR_OUTPUT_MULTISIG_WALLET_DATA, FORMAT_UR),
-        (tdata.UR_BYTES_MULTISIG_WALLET_DATA, FORMAT_UR),
-    ]
-
-    for wallet in wallets:
-        for case in cases:
-            with pytest.raises(ValueError):
-                wallet.load(case[0], case[1])
-
-
-def test_load_wsh_miniscript_fails_with_tr_miniscript_descriptor(
+def test_load_singlesig_warns_mismatch_with_multisig_descriptor(
     mocker, m5stickv, tdata
 ):
-    from krux.wallet import Wallet
+    from krux.wallet import Wallet, PolicyMismatchWarning
+    from krux.key import Key, TYPE_MULTISIG, TYPE_SINGLESIG
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+
+    wallet = Wallet(tdata.SINGLESIG_KEY)
+
+    cases = [
+        (tdata.SPECTER_MULTISIG_WALLET_DATA, FORMAT_PMOFN),
+        (tdata.BLUEWALLET_MULTISIG_WALLET_DATA, FORMAT_NONE),
+        (tdata.UR_OUTPUT_MULTISIG_WALLET_DATA, FORMAT_UR),
+        (tdata.UR_BYTES_MULTISIG_WALLET_DATA, FORMAT_UR),
+    ]
+    for case in cases:
+        # Should raise PolicyMismatchWarning due to policy type mismatch
+        with pytest.raises(PolicyMismatchWarning) as exc_info:
+            wallet.load(case[0], case[1])
+
+        # Verify exception contains correct policy types
+        assert exc_info.value.args[0] == TYPE_MULTISIG  # required_policy_type
+        assert exc_info.value.args[2] == TYPE_SINGLESIG  # current_policy_type
+
+        # Note: These descriptors don't contain this key's xpub as a cosigner,
+        # so even after fixing the policy type, loading would fail with
+        # "xpub not a multisig cosigner" error
+
+
+def test_load_singlesig_warns_mismatch_with_miniscript_descriptor(
+    mocker, m5stickv, tdata
+):
+    from krux.wallet import Wallet, PolicyMismatchWarning
+    from krux.key import Key, TYPE_MINISCRIPT, TYPE_SINGLESIG, P2WSH, P2TR
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(tdata.SINGLESIG_KEY)
+
+    # Test P2WSH miniscript
+    with pytest.raises(PolicyMismatchWarning) as exc_info:
+        wallet.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert exc_info.value.args[0] == TYPE_MINISCRIPT  # required_policy_type
+    assert exc_info.value.args[1] == P2WSH  # required_script_type
+    assert exc_info.value.args[2] == TYPE_SINGLESIG  # current_policy_type
+
+    # Verify wallet can load with correct policy
+    miniscript_key = Key(
+        tdata.SINGLESIG_KEY.mnemonic,
+        TYPE_MINISCRIPT,
+        tdata.SINGLESIG_KEY.network,
+        tdata.SINGLESIG_KEY.passphrase,
+        script_type=P2WSH,
+    )
+    wallet_wsh = Wallet(miniscript_key)
+    wallet_wsh.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert wallet_wsh.is_loaded()
+
+    # Test P2TR miniscript
+    with pytest.raises(PolicyMismatchWarning) as exc_info:
+        wallet.load(tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert exc_info.value.args[0] == TYPE_MINISCRIPT  # required_policy_type
+    assert exc_info.value.args[1] == P2TR  # required_script_type
+    assert exc_info.value.args[2] == TYPE_SINGLESIG  # current_policy_type
+
+    # Verify wallet can load with correct policy
+    tap_miniscript_key = Key(
+        tdata.SINGLESIG_KEY.mnemonic,
+        TYPE_MINISCRIPT,
+        tdata.SINGLESIG_KEY.network,
+        tdata.SINGLESIG_KEY.passphrase,
+        script_type=P2TR,
+    )
+    wallet_tr = Wallet(tap_miniscript_key)
+    wallet_tr.load(tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert wallet_tr.is_loaded()
+
+
+def test_load_multisig_warns_mismatch_with_singlesig_descriptor(
+    mocker, m5stickv, tdata
+):
+    from krux.wallet import Wallet, PolicyMismatchWarning
+    from krux.key import Key, TYPE_SINGLESIG, TYPE_MULTISIG
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN
+
+    wallet = Wallet(tdata.MULTISIG_NATIVE_SW_1)
+
+    cases = [
+        (tdata.SPECTER_SINGLESIG_WALLET_DATA, FORMAT_PMOFN),
+        (tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR, FORMAT_NONE),
+    ]
+    for case in cases:
+        # Should raise PolicyMismatchWarning due to policy type mismatch
+        with pytest.raises(PolicyMismatchWarning) as exc_info:
+            wallet.load(case[0], case[1])
+
+        # Verify exception contains correct policy types
+        assert exc_info.value.args[0] == TYPE_SINGLESIG  # required_policy_type
+        assert exc_info.value.args[2] == TYPE_MULTISIG  # current_policy_type
+
+        # Verify wallet can load after re-creating with correct policy
+        singlesig_key = Key(
+            tdata.MULTISIG_NATIVE_SW_1.mnemonic,
+            TYPE_SINGLESIG,
+            tdata.MULTISIG_NATIVE_SW_1.network,
+            tdata.MULTISIG_NATIVE_SW_1.passphrase,
+        )
+        wallet_with_correct_policy = Wallet(singlesig_key)
+        wallet_with_correct_policy.load(case[0], case[1])
+        assert wallet_with_correct_policy.is_loaded()
+
+
+def test_load_multisig_warns_mismatch_with_miniscript_descriptor(
+    mocker, m5stickv, tdata
+):
+    from krux.wallet import Wallet, PolicyMismatchWarning
+    from krux.key import Key, TYPE_MINISCRIPT, TYPE_MULTISIG, P2WSH, P2TR
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(tdata.MULTISIG_NATIVE_SW_1)
+
+    # Test P2WSH miniscript
+    with pytest.raises(PolicyMismatchWarning) as exc_info:
+        wallet.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert exc_info.value.args[0] == TYPE_MINISCRIPT  # required_policy_type
+    assert exc_info.value.args[1] == P2WSH  # required_script_type
+    assert exc_info.value.args[2] == TYPE_MULTISIG  # current_policy_type
+
+    # Verify wallet can load with correct policy
+    miniscript_key = Key(
+        tdata.MULTISIG_NATIVE_SW_1.mnemonic,
+        TYPE_MINISCRIPT,
+        tdata.MULTISIG_NATIVE_SW_1.network,
+        tdata.MULTISIG_NATIVE_SW_1.passphrase,
+        script_type=P2WSH,
+    )
+    wallet_wsh = Wallet(miniscript_key)
+    wallet_wsh.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert wallet_wsh.is_loaded()
+
+    # Test P2TR miniscript
+    with pytest.raises(PolicyMismatchWarning) as exc_info:
+        wallet.load(tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert exc_info.value.args[0] == TYPE_MINISCRIPT  # required_policy_type
+    assert exc_info.value.args[1] == P2TR  # required_script_type
+    assert exc_info.value.args[2] == TYPE_MULTISIG  # current_policy_type
+
+    # Verify wallet can load with correct policy
+    tap_miniscript_key = Key(
+        tdata.MULTISIG_NATIVE_SW_1.mnemonic,
+        TYPE_MINISCRIPT,
+        tdata.MULTISIG_NATIVE_SW_1.network,
+        tdata.MULTISIG_NATIVE_SW_1.passphrase,
+        script_type=P2TR,
+    )
+    wallet_tr = Wallet(tap_miniscript_key)
+    wallet_tr.load(tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert wallet_tr.is_loaded()
+
+
+def test_load_miniscript_warns_mismatch_with_singlesig_descriptor(
+    mocker, m5stickv, tdata
+):
+    from krux.wallet import Wallet, PolicyMismatchWarning
+    from krux.key import Key, TYPE_SINGLESIG, TYPE_MINISCRIPT, P2WPKH
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN
+
+    miniscript_keys = [
+        tdata.MINISCRIPT_KEY,
+        tdata.TAP_MINISCRIPT_KEY,
+    ]
+
+    cases = [
+        (tdata.SPECTER_SINGLESIG_WALLET_DATA, FORMAT_PMOFN),
+        (tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR, FORMAT_NONE),
+    ]
+
+    for miniscript_key in miniscript_keys:
+        wallet = Wallet(miniscript_key)
+        for case in cases:
+            # Should raise PolicyMismatchWarning due to policy type mismatch
+            with pytest.raises(PolicyMismatchWarning) as exc_info:
+                wallet.load(case[0], case[1])
+
+            # Verify exception contains correct policy types
+            assert exc_info.value.args[0] == TYPE_SINGLESIG  # required_policy_type
+            assert exc_info.value.args[2] == TYPE_MINISCRIPT  # current_policy_type
+
+            # Verify wallet can load after re-creating with correct policy
+            singlesig_key = Key(
+                miniscript_key.mnemonic,
+                TYPE_SINGLESIG,
+                network=miniscript_key.network,
+                passphrase=miniscript_key.passphrase,
+                account_index=miniscript_key.account_index,
+                script_type=P2WPKH,
+            )
+            wallet_with_correct_policy = Wallet(singlesig_key)
+            wallet_with_correct_policy.load(case[0], case[1])
+            assert wallet_with_correct_policy.is_loaded()
+
+
+def test_load_miniscript_warns_mismatch_with_multisig_descriptor(
+    mocker, m5stickv, tdata
+):
+    from krux.wallet import Wallet, PolicyMismatchWarning
+    from krux.key import Key, TYPE_MULTISIG, TYPE_MINISCRIPT, P2WSH
+    from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
+
+    miniscript_keys = [
+        tdata.MINISCRIPT_KEY,
+        tdata.TAP_MINISCRIPT_KEY,
+    ]
+
+    cases = [
+        (tdata.SPECTER_MULTISIG_WALLET_DATA, FORMAT_PMOFN),
+        (tdata.BLUEWALLET_MULTISIG_WALLET_DATA, FORMAT_NONE),
+        (tdata.UR_OUTPUT_MULTISIG_WALLET_DATA, FORMAT_UR),
+        (tdata.UR_BYTES_MULTISIG_WALLET_DATA, FORMAT_UR),
+    ]
+
+    for miniscript_key in miniscript_keys:
+        wallet = Wallet(miniscript_key)
+        for case in cases:
+            # Should raise PolicyMismatchWarning due to policy type mismatch
+            with pytest.raises(PolicyMismatchWarning) as exc_info:
+                wallet.load(case[0], case[1])
+
+            # Verify exception contains correct policy types
+            required_policy_type = exc_info.value.args[0]
+            assert required_policy_type == TYPE_MULTISIG
+            assert exc_info.value.args[2] == TYPE_MINISCRIPT  # current_policy_type
+
+            # Note: These descriptors don't contain this key's xpub as a cosigner,
+            # so even after fixing the policy type, loading would fail with
+            # "xpub not a multisig cosigner" error
+
+
+def test_load_wsh_miniscript_warns_mismatch_with_tr_miniscript_descriptor(
+    mocker, m5stickv, tdata
+):
+    from krux.wallet import Wallet, PolicyMismatchWarning
+    from krux.key import Key, TYPE_MINISCRIPT, P2WSH, P2TR
     from krux.qr import FORMAT_NONE
 
     wallet = Wallet(tdata.MINISCRIPT_KEY)
 
-    with pytest.raises(ValueError):
+    # Should raise PolicyMismatchWarning due to script type mismatch
+    with pytest.raises(PolicyMismatchWarning) as exc_info:
         wallet.load(tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
 
+    # Verify exception contains correct policy and script types
+    required_policy_type = exc_info.value.args[0]
+    required_script_type = exc_info.value.args[1]
+    assert required_policy_type == TYPE_MINISCRIPT
+    assert required_script_type == P2TR
+    assert exc_info.value.args[2] == TYPE_MINISCRIPT  # current_policy_type
 
-def test_load_tr_miniscript_fails_with_wsh_miniscript_descriptor(
+    # Extract required network if present in exception
+    required_network = exc_info.value.args[3] if len(exc_info.value.args) > 3 else None
+
+    # Verify wallet can load after re-creating with correct script type and network
+    corrected_key = Key(
+        tdata.MINISCRIPT_KEY.mnemonic,
+        required_policy_type,
+        network=required_network if required_network else tdata.MINISCRIPT_KEY.network,
+        passphrase=tdata.MINISCRIPT_KEY.passphrase,
+        account_index=tdata.MINISCRIPT_KEY.account_index,
+        script_type=required_script_type,
+    )
+    wallet_with_correct_script = Wallet(corrected_key)
+    wallet_with_correct_script.load(
+        tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE
+    )
+    assert wallet_with_correct_script.is_loaded()
+
+
+def test_load_tr_miniscript_warns_mismatch_with_wsh_miniscript_descriptor(
     mocker, m5stickv, tdata
 ):
-    from krux.wallet import Wallet
+    from krux.wallet import Wallet, PolicyMismatchWarning
+    from krux.key import Key, TYPE_MINISCRIPT, P2WSH, P2TR
     from krux.qr import FORMAT_NONE
 
     wallet = Wallet(tdata.TAP_MINISCRIPT_KEY)
 
-    with pytest.raises(ValueError):
+    # Should raise PolicyMismatchWarning due to script type mismatch
+    with pytest.raises(PolicyMismatchWarning) as exc_info:
         wallet.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+
+    # Verify exception contains correct policy and script types
+    required_policy_type = exc_info.value.args[0]
+    required_script_type = exc_info.value.args[1]
+    assert required_policy_type == TYPE_MINISCRIPT
+    assert required_script_type == P2WSH
+    assert exc_info.value.args[2] == TYPE_MINISCRIPT  # current_policy_type
+
+    # Extract required network if present in exception
+    required_network = exc_info.value.args[3] if len(exc_info.value.args) > 3 else None
+
+    # Verify wallet can load after re-creating with correct script type and network
+    corrected_key = Key(
+        tdata.TAP_MINISCRIPT_KEY.mnemonic,
+        required_policy_type,
+        network=(
+            required_network if required_network else tdata.TAP_MINISCRIPT_KEY.network
+        ),
+        passphrase=tdata.TAP_MINISCRIPT_KEY.passphrase,
+        account_index=tdata.TAP_MINISCRIPT_KEY.account_index,
+        script_type=required_script_type,
+    )
+    wallet_with_correct_script = Wallet(corrected_key)
+    wallet_with_correct_script.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert wallet_with_correct_script.is_loaded()
 
 
 def test_load_singlesig_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata):
@@ -1297,59 +1491,83 @@ def test_load_multisig_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata)
 
 
 def test_load_miniscript_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata):
-    from krux.wallet import Wallet
+    from krux.wallet import Wallet, PolicyMismatchWarning
+    from krux.key import Key
     from krux.qr import FORMAT_NONE
 
     wallet = Wallet(tdata.MINISCRIPT_KEY)
 
-    with pytest.raises(ValueError):
+    # First, should raise PolicyMismatchWarning due to network mismatch
+    with pytest.raises(PolicyMismatchWarning) as exc_info:
         wallet.load(tdata.UNRELATED_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+
+    # Extract required policy, script type, and network from exception
+    required_policy_type = exc_info.value.args[0]
+    required_script_type = exc_info.value.args[1]
+    required_network = (
+        exc_info.value.args[3]
+        if len(exc_info.value.args) > 3
+        else tdata.MINISCRIPT_KEY.network
+    )
+
+    # Create key with correct network but still unrelated to descriptor
+    corrected_key = Key(
+        tdata.MINISCRIPT_KEY.mnemonic,
+        required_policy_type,
+        network=required_network if required_network else tdata.MINISCRIPT_KEY.network,
+        passphrase=tdata.MINISCRIPT_KEY.passphrase,
+        account_index=tdata.MINISCRIPT_KEY.account_index,
+        script_type=required_script_type,
+    )
+    wallet_corrected = Wallet(corrected_key)
+
+    # Now should raise ValueError because key is not in descriptor
+    with pytest.raises(ValueError):
+        wallet_corrected.load(tdata.UNRELATED_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
 
 
 def test_load_tr_miniscript_fails_when_key_not_in_descriptor(mocker, m5stickv, tdata):
-    from krux.wallet import Wallet
+    from krux.wallet import Wallet, PolicyMismatchWarning
+    from krux.key import Key
     from krux.qr import FORMAT_NONE
 
     wallet = Wallet(tdata.TAP_MINISCRIPT_KEY)
 
-    with pytest.raises(ValueError):
+    # First, should raise PolicyMismatchWarning due to network mismatch
+    with pytest.raises(PolicyMismatchWarning) as exc_info:
         wallet.load(tdata.UNRELATED_TAP_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+
+    # Extract required policy, script type, and network from exception
+    required_policy_type = exc_info.value.args[0]
+    required_script_type = exc_info.value.args[1]
+    required_network = (
+        exc_info.value.args[3]
+        if len(exc_info.value.args) > 3
+        else tdata.TAP_MINISCRIPT_KEY.network
+    )
+
+    # Create key with correct network but still unrelated to descriptor
+    corrected_key = Key(
+        tdata.TAP_MINISCRIPT_KEY.mnemonic,
+        required_policy_type,
+        network=(
+            required_network if required_network else tdata.TAP_MINISCRIPT_KEY.network
+        ),
+        passphrase=tdata.TAP_MINISCRIPT_KEY.passphrase,
+        account_index=tdata.TAP_MINISCRIPT_KEY.account_index,
+        script_type=required_script_type,
+    )
+    wallet_corrected = Wallet(corrected_key)
+
+    # Now should raise ValueError because key is not in descriptor
+    with pytest.raises(ValueError):
+        wallet_corrected.load(tdata.UNRELATED_TAP_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
 
 
 def test_parse_wallet(mocker, m5stickv, tdata):
-    from krux.wallet import parse_wallet, AssumptionWarning
+    from krux.wallet import parse_wallet
 
     cases = [
-        (
-            tdata.KRUX_LEGACY1_XPUB,
-            tdata.KRUX_LEGACY1_DESCRIPTOR,
-            None,
-        ),
-        (
-            tdata.KRUX_NESTEDSW1_XPUB,
-            tdata.KRUX_NESTEDSW1_DESCRIPTOR,
-            None,
-        ),
-        (
-            tdata.KRUX_NESTEDSW1_YPUB,
-            tdata.KRUX_NESTEDSW1_YPUB_DESCRIPTOR,
-            None,
-        ),
-        (
-            tdata.KRUX_NATIVESW1_XPUB,
-            tdata.KRUX_NATIVESW1_DESCRIPTOR,
-            None,
-        ),
-        (
-            tdata.KRUX_NATIVESW1_ZPUB,
-            tdata.KRUX_NATIVESW1_ZPUB_DESCRIPTOR,
-            None,
-        ),
-        (
-            tdata.KRUX_TAPROOT1_XPUB,
-            tdata.KRUX_TAPROOT1_DESCRIPTOR,
-            None,
-        ),
         (
             tdata.SPECTER_SINGLESIG_WALLET_DATA,
             tdata.SPECTER_SINGLESIG_DESCRIPTOR,
@@ -1359,21 +1577,6 @@ def test_parse_wallet(mocker, m5stickv, tdata):
             tdata.SPECTER_MULTISIG_WALLET_DATA,
             tdata.SPECTER_MULTISIG_DESCRIPTOR,
             "Specter Multisig Wallet",
-        ),
-        (
-            tdata.BLUEWALLET_SINGLESIG_WALLET_DATA,
-            tdata.BLUEWALLET_SINGLESIG_DESCRIPTOR,
-            None,
-        ),
-        # ( BlueWallet legacy bip44 xpub w/o key-origin is not supported, will default to bip84
-        #    tdata.BLUEWALLET_LEGACY_WALLET_DATA,
-        #    tdata.BLUEWALLET_LEGACY_DESCRIPTOR,
-        #    None,
-        # ),
-        (
-            tdata.BLUEWALLET_NESTEDSW_WALLET_DATA,
-            tdata.BLUEWALLET_NESTEDSW_DESCRIPTOR,
-            None,
         ),
         (
             tdata.BLUEWALLET_MULTISIG_WALLET_DATA,
@@ -1426,10 +1629,7 @@ def test_parse_wallet(mocker, m5stickv, tdata):
     for case in cases:
         print(case_n)
         case_n += 1
-        try:
-            descriptor, label = parse_wallet(case[0])
-        except AssumptionWarning as e:
-            descriptor, label = parse_wallet(case[0], allow_assumption=e.args[1])
+        descriptor, label = parse_wallet(case[0])
         assert descriptor.to_string() == case[1].split("#")[0].replace("'", "h")
         assert label == case[2]
 
@@ -1620,139 +1820,6 @@ def test_version_to_network_versiontype():
                 network_name,
                 versiontype,
             )
-
-
-def test_xpub_data_to_derivation():
-    from krux.wallet import xpub_data_to_derivation, AssumptionWarning
-
-    # purpose
-    LEGACY = 44 + 2**31
-    NATSW = 84 + 2**31
-    NESSW = 49 + 2**31
-    TAPROOT = 86 + 2**31
-    MULTISIG = 48 + 2**31
-
-    # network
-    MAIN = 0 + 2**31
-    TEST = 1 + 2**31
-
-    # account
-    ACCT0 = 0 + 2**31
-    ACCT1 = 1 + 2**31
-
-    # multisig script type
-    MULTINESSW = 1 + 2**31
-    MULTINATSW = 2 + 2**31
-
-    cases = [
-        # versiontype, network, child, depth, allow_assumption, expected_return
-        ("xpub", "main", ACCT0, 3, None, AssumptionWarning),  # don't assume
-        ("xpub", "main", ACCT0, 3, [NATSW, MAIN, ACCT0], [NATSW, MAIN, ACCT0]),
-        ("xpub", "test", ACCT0, 3, [NATSW, TEST, ACCT0], [NATSW, TEST, ACCT0]),
-        ("xpub", "main", ACCT1, 3, [NATSW, MAIN, ACCT1], [NATSW, MAIN, ACCT1]),
-        ("xpub", "main", ACCT0, 4, [NATSW, MAIN, ACCT0], None),  # wrong depth
-        ("ypub", "main", ACCT0, 3, None, [NESSW, MAIN, ACCT0]),
-        ("ypub", "test", ACCT0, 3, None, [NESSW, TEST, ACCT0]),
-        ("ypub", "main", ACCT1, 3, None, [NESSW, MAIN, ACCT1]),
-        ("ypub", "test", ACCT1, 3, None, [NESSW, TEST, ACCT1]),
-        ("ypub", "main", ACCT0, 4, None, None),  # wrong depth
-        ("zpub", "main", ACCT0, 3, None, [NATSW, MAIN, ACCT0]),
-        ("zpub", "test", ACCT0, 3, None, [NATSW, TEST, ACCT0]),
-        ("zpub", "main", ACCT1, 3, None, [NATSW, MAIN, ACCT1]),
-        ("zpub", "test", ACCT1, 3, None, [NATSW, TEST, ACCT1]),
-        ("zpub", "main", ACCT0, 4, None, None),  # wrong depth
-        ("Ypub", "main", MULTINESSW, 4, None, AssumptionWarning),  # don't assume
-        ("Ypub", "test", MULTINESSW, 4, None, AssumptionWarning),
-        (
-            "Ypub",
-            "main",
-            MULTINESSW,
-            4,
-            [MULTISIG, MAIN, ACCT0, MULTINESSW],
-            [MULTISIG, MAIN, ACCT0, MULTINESSW],
-        ),
-        (
-            "Ypub",
-            "test",
-            MULTINESSW,
-            4,
-            [MULTISIG, TEST, ACCT0, MULTINESSW],
-            [MULTISIG, TEST, ACCT0, MULTINESSW],
-        ),
-        ("Ypub", "main", MULTINESSW, 3, None, None),  # wrong depth
-        ("Zpub", "main", MULTINATSW, 4, None, AssumptionWarning),  # don't assume
-        ("Zpub", "test", MULTINATSW, 4, None, AssumptionWarning),
-        (
-            "Zpub",
-            "main",
-            MULTINATSW,
-            4,
-            [MULTISIG, MAIN, ACCT0, MULTINATSW],
-            [MULTISIG, MAIN, ACCT0, MULTINATSW],
-        ),
-        (
-            "Zpub",
-            "test",
-            MULTINATSW,
-            4,
-            [MULTISIG, TEST, ACCT0, MULTINATSW],
-            [MULTISIG, TEST, ACCT0, MULTINATSW],
-        ),
-        ("Zpub", "main", MULTINATSW, 3, None, None),  # wrong depth
-    ]
-
-    for _case in cases:
-        if type(_case[5]) == type and issubclass(_case[5], Exception):
-            with pytest.raises(_case[5]):
-                xpub_data_to_derivation(*_case[:5])
-        else:
-            assert xpub_data_to_derivation(*_case[:5]) == _case[5]
-
-
-def test_derivation_to_script_wrapper():
-    from krux.wallet import derivation_to_script_wrapper
-
-    # purpose
-    LEGACY = 44 + 2**31
-    NATSW = 84 + 2**31
-    NESSW = 49 + 2**31
-    TAPROOT = 86 + 2**31
-
-    # network
-    MAIN = 0 + 2**31
-    TEST = 1 + 2**31
-
-    # account
-    HARD = 0 + 2**31
-
-    NOTHARD = 2**31 - 1
-
-    cases = [
-        # derivation list as the only function param and expected return
-        ([HARD, MAIN], None),
-        ([HARD, TEST], None),
-        ([HARD, MAIN, HARD], None),
-        ([NOTHARD, MAIN, HARD], None),
-        ([LEGACY, MAIN, HARD], "pkh({})"),
-        ([LEGACY, TEST, HARD], "pkh({})"),
-        ([LEGACY, MAIN, NOTHARD], None),
-        ([LEGACY, NOTHARD, HARD], None),
-        ([NESSW, MAIN, HARD], "sh(wpkh({}))"),
-        ([NESSW, TEST, HARD], "sh(wpkh({}))"),
-        ([NESSW, MAIN, NOTHARD], None),
-        ([NESSW, NOTHARD, HARD], None),
-        ([NATSW, MAIN, HARD], "wpkh({})"),
-        ([NATSW, TEST, HARD], "wpkh({})"),
-        ([NATSW, MAIN, NOTHARD], None),
-        ([NATSW, NOTHARD, HARD], None),
-        ([TAPROOT, MAIN, HARD], "tr({})"),
-        ([TAPROOT, TEST, HARD], "tr({})"),
-        ([TAPROOT, MAIN, NOTHARD], None),
-        ([TAPROOT, NOTHARD, HARD], None),
-    ]
-
-    for _case in cases:
-        assert derivation_to_script_wrapper(_case[0]) == _case[1]
 
 
 def test_parse_wallet_via_ur_output(mocker, m5stickv):

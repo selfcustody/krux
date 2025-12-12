@@ -22,7 +22,6 @@
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key
 from embit.networks import NETWORKS
-from embit.bip32 import HARDENED_INDEX
 from .krux_settings import t
 from .qr import FORMAT_BBQR, FORMAT_NONE
 from .key import (
@@ -33,16 +32,14 @@ from .key import (
     P2WPKH,
     P2WSH,
     P2TR,
-    SINGLESIG_SCRIPT_PURPOSE,
-    MULTISIG_SCRIPT_PURPOSE,
     TYPE_SINGLESIG,
     TYPE_MULTISIG,
     TYPE_MINISCRIPT,
 )
 
 
-class AssumptionWarning(Exception):
-    """An exception for assumptions that require user acceptance"""
+class PolicyMismatchWarning(Exception):
+    """An exception for wallet policy type mismatches that require user acceptance"""
 
 
 class Wallet:
@@ -133,8 +130,47 @@ class Wallet:
         """Returns a boolean indicating whether or not this wallet has been loaded"""
         return self.wallet_data is not None
 
-    def _validate_descriptor(self, descriptor, descriptor_xpubs):
-        """Validates the descriptor against the current key and policy type"""
+    def _determine_descriptor_policy(self, descriptor):
+        """Returns required policy type and script type from descriptor"""
+        descriptor_is_multisig = descriptor.is_basic_multisig
+        descriptor_is_miniscript = not descriptor_is_multisig and (
+            descriptor.miniscript is not None or descriptor.taptree
+        )
+        descriptor_is_singlesig = (
+            not descriptor_is_multisig
+            and not descriptor_is_miniscript
+            and descriptor.key is not None
+        )
+
+        if descriptor_is_multisig:
+            return TYPE_MULTISIG, None
+        if descriptor_is_miniscript:
+            script_type = P2TR if descriptor.taptree else P2WSH
+            return TYPE_MINISCRIPT, script_type
+        if descriptor_is_singlesig or (
+            not descriptor.key and len(descriptor.keys) == 1
+        ):
+            script_type = descriptor.scriptpubkey_type()
+            # Check for nested segwit (sh(wpkh(...)))
+            if script_type == "p2sh" and hasattr(descriptor, "witness_script"):
+                if descriptor.witness_script:
+                    # It's sh(wpkh(...)) = P2SH-P2WPKH
+                    script_type = P2SH_P2WPKH
+            return TYPE_SINGLESIG, script_type
+
+        raise ValueError("Unable to determine descriptor policy type")
+
+    def _determine_descriptor_network(self, descriptor):
+        """Returns the network from descriptor's xpub version"""
+        version = descriptor.keys[0].key.version
+        for em_network in ("main", "test"):
+            for em_vertype in ("xpub", "ypub", "zpub", "Ypub", "Zpub"):
+                if version == NETWORKS[em_network][em_vertype]:
+                    return NETWORKS[em_network]
+        return None
+
+    def _validate_xpub_match(self, descriptor, descriptor_xpubs):
+        """Validates that key's xpub matches the descriptor"""
         if self.is_multisig():
             if not descriptor.is_basic_multisig:
                 raise ValueError("not multisig")
@@ -150,15 +186,44 @@ class Wallet:
             if self.key.xpub() not in descriptor_xpubs:
                 raise ValueError("xpub not a miniscript cosigner")
         else:
-            if not descriptor.key:
-                if len(descriptor.keys) > 1:
-                    raise ValueError("not single-sig")
+            if not descriptor.key and len(descriptor.keys) > 1:
+                raise ValueError("not single-sig")
             if self.key.xpub() != descriptor_xpubs[0]:
                 raise ValueError("xpub does not match")
 
-    def load(self, wallet_data, qr_format, allow_assumption=None):
+    def _validate_descriptor(self, descriptor, descriptor_xpubs):
+        """Validates the descriptor against the current key and policy type"""
+        # Determine required policy and script type from descriptor
+        required_policy_type, required_script_type = self._determine_descriptor_policy(
+            descriptor
+        )
+
+        # Determine required network from descriptor
+        required_network = self._determine_descriptor_network(descriptor)
+
+        # Check for policy, script type, or network mismatch
+        policy_mismatch = self.key.policy_type != required_policy_type
+        script_type_mismatch = (
+            required_script_type is not None
+            and self.key.script_type != required_script_type
+        )
+        network_mismatch = required_network and self.key.network != required_network
+
+        if policy_mismatch or script_type_mismatch or network_mismatch:
+            raise PolicyMismatchWarning(
+                required_policy_type,
+                required_script_type,
+                self.key.policy_type,
+                required_network,
+                self.key.network,
+            )
+
+        # Validate that xpub matches descriptor requirements
+        self._validate_xpub_match(descriptor, descriptor_xpubs)
+
+    def load(self, wallet_data, qr_format):
         """Loads the wallet from the given data"""
-        descriptor, label = parse_wallet(wallet_data, allow_assumption)
+        descriptor, label = parse_wallet(wallet_data)
 
         # convert descriptor keys to 'xpub' on same network -- for comparison only
         descriptor_xpubs = []
@@ -358,7 +423,7 @@ def parse_key_value_file(wallet_data):
     return None, None
 
 
-def parse_wallet(wallet_data, allow_assumption=None):
+def parse_wallet(wallet_data):
     """Exhaustively tries to parse the wallet data from a known format, returning
     a descriptor and label if possible.
 
@@ -422,31 +487,7 @@ def parse_wallet(wallet_data, allow_assumption=None):
         descriptor = Descriptor.from_string(wallet_data.strip())
         return descriptor, None
     except:
-        # If that fails, try to parse as an xpub as a last resort
-        pubkey = Key.from_string(wallet_data.strip())
-        if pubkey.is_extended:
-            network, versiontype = version_to_network_versiontype(pubkey.key.version)
-
-            xpub = pubkey.key.to_base58()
-
-            fmt = None
-            if pubkey.origin is None:
-                # assume derivation if possible
-                derivation = xpub_data_to_derivation(
-                    versiontype,
-                    network,
-                    pubkey.key.child_number,
-                    pubkey.key.depth,
-                    allow_assumption=allow_assumption,
-                )
-                if derivation:
-                    fmt = derivation_to_script_wrapper(derivation)
-            else:
-                fmt = derivation_to_script_wrapper(pubkey.origin.derivation)
-                fmt = fmt.format("[" + str(pubkey.origin) + "]{}")
-
-            descriptor = Descriptor.from_string(fmt.format(xpub))
-            return descriptor, None
+        pass
 
     raise ValueError("invalid wallet format")
 
@@ -495,96 +536,6 @@ def version_to_network_versiontype(hdkey_version):
             versiontype = [k for k, v in versiontypes.items() if v == hdkey_version][0]
             break
     return network, versiontype
-
-
-def xpub_data_to_derivation(versiontype, network, child, depth, allow_assumption=None):
-    """returns assumed derivation list for supported slip32 bips
-    based on embit.networks.NETWORKS keys for versiontype, network,
-    child_number (used as account for single-sig) and depth.  Depth
-    is used as weak verification, it must match the expected depth.
-    Where unsafe assumptions could be made, AssumptionWarning is raised
-    (with warning text and assumed derivation as first two params)
-    unless called with allow_assumption=assumed_derivation.
-    """
-
-    derivation, network_node, assumption_text = None, None, None
-
-    if network == "main":
-        network_node = 0 + HARDENED_INDEX
-    elif network in ("test", "regtest", "signet"):
-        network_node = 1 + HARDENED_INDEX
-
-    if network_node and child >= HARDENED_INDEX:
-        if versiontype == "xpub" and depth == 3:
-            derivation = [
-                SINGLESIG_SCRIPT_PURPOSE[P2WPKH] + HARDENED_INDEX,
-                network_node,
-                child,
-            ]
-            if allow_assumption != derivation:
-                assumption_text = t("Native Segwit - 84 would be assumed")
-        elif versiontype == "ypub" and depth == 3:
-            derivation = [
-                SINGLESIG_SCRIPT_PURPOSE[P2SH_P2WPKH] + HARDENED_INDEX,
-                network_node,
-                child,
-            ]
-        elif versiontype == "zpub" and depth == 3:
-            derivation = [
-                SINGLESIG_SCRIPT_PURPOSE[P2WPKH] + HARDENED_INDEX,
-                network_node,
-                child,
-            ]
-        elif versiontype == "Ypub" and depth == 4 and child == 1 + HARDENED_INDEX:
-            derivation = [
-                MULTISIG_SCRIPT_PURPOSE[P2SH_P2WSH] + HARDENED_INDEX,
-                network_node,
-                0 + HARDENED_INDEX,
-                child,
-            ]
-            if allow_assumption != derivation:
-                assumption_text = t("Account #0 would be assumed")
-        elif versiontype == "Zpub" and depth == 4 and child == 2 + HARDENED_INDEX:
-            derivation = [
-                MULTISIG_SCRIPT_PURPOSE[P2WSH] + HARDENED_INDEX,
-                network_node,
-                0 + HARDENED_INDEX,
-                child,
-            ]
-            if allow_assumption != derivation:
-                assumption_text = t("Account #0 would be assumed")
-
-    if assumption_text:
-        raise AssumptionWarning(assumption_text, derivation)
-
-    return derivation
-
-
-def derivation_to_script_wrapper(derivation):
-    """returns format_str for wrapping xpub into wallet descriptor,
-    supporting single-sig only for now, based on
-    embit.descriptor.arguments.KeyOrigin.derivation list"""
-    format_str = None
-
-    if len(derivation) == 3:
-        purpose = derivation[0]
-        network = derivation[1]
-        account = derivation[2]
-
-        if (
-            network in (0 + HARDENED_INDEX, 1 + HARDENED_INDEX)
-            and account >= 0 + HARDENED_INDEX
-        ):
-            if purpose == SINGLESIG_SCRIPT_PURPOSE[P2PKH] + HARDENED_INDEX:
-                format_str = "pkh({})"
-            elif purpose == SINGLESIG_SCRIPT_PURPOSE[P2SH_P2WPKH] + HARDENED_INDEX:
-                format_str = "sh(wpkh({}))"
-            elif purpose == SINGLESIG_SCRIPT_PURPOSE[P2WPKH] + HARDENED_INDEX:
-                format_str = "wpkh({})"
-            elif purpose == SINGLESIG_SCRIPT_PURPOSE[P2TR] + HARDENED_INDEX:
-                format_str = "tr({})"
-
-    return format_str
 
 
 def is_double_mnemonic(mnemonic: str):
