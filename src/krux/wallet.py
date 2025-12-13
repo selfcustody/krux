@@ -101,7 +101,7 @@ class Wallet:
             else:
                 # use first key; restrict networks to "main" and "test", version to pubkeys
                 version = self.descriptor.keys[0].key.version
-                for em_network in ("main", "test"):
+                for em_network in ("main", "test", "signet", "regtest"):
                     for em_vertype in ("xpub", "ypub", "zpub", "Ypub", "Zpub"):
                         if version == NETWORKS[em_network][em_vertype]:
                             self._network = em_network
@@ -478,7 +478,7 @@ def parse_address(address_data):
 
     if not isinstance(sc, Script):
         try:
-            address_to_scriptpubkey(addr)
+            sc = address_to_scriptpubkey(addr)
         except:
             raise ValueError("invalid address")
 
@@ -491,6 +491,8 @@ def version_to_network_versiontype(hdkey_version):
     network, versiontype = None, None
     for netname, versiontypes in NETWORKS.items():
         if hdkey_version in versiontypes.values():
+            print(netname)
+            print(versiontypes)
             network = netname
             versiontype = [k for k, v in versiontypes.items() if v == hdkey_version][0]
             break

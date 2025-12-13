@@ -30,6 +30,8 @@ from .settings import (
     FLASH_PATH,
     MAIN_TXT,
     TEST_TXT,
+    SIGNET_TXT,
+    REGTEST_TXT,
 )
 
 from .key import (
@@ -138,7 +140,9 @@ class DefaultWallet(SettingsNamespace):
     """Bitcoin-specific settings"""
 
     namespace = "settings.wallet"
-    network = CategorySetting("network", MAIN_TXT, [MAIN_TXT, TEST_TXT])
+    network = CategorySetting(
+        "network", MAIN_TXT, [MAIN_TXT, TEST_TXT, SIGNET_TXT, REGTEST_TXT]
+    )
     script_type = CategorySetting(
         "script_type", "Native Segwit - 84", SINGLESIG_SCRIPT_NAMES
     )
