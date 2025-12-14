@@ -22,7 +22,6 @@
 import gc
 import time
 import lcd
-import _thread
 from ..context import Context
 from .keypads import Keypad
 from ..themes import theme, WHITE, GREEN, DARKGREY
@@ -728,6 +727,11 @@ class Menu:
         if start_from_index is not None:
             start_from_submenu = True
             selected_item_index = start_from_index
+        battery_update_fnc = (
+            self.draw_battery_indicator
+            if kboard.has_battery and not self.disable_statusbar
+            else None
+        )
         while True:
             gc.collect()
             if self.menu_offset > STATUS_BAR_HEIGHT:
@@ -758,7 +762,7 @@ class Menu:
                     # Block if screen saver not active
                     screensaver_time == 0,
                     screensaver_time * ONE_MINUTE,
-                    update_callback=self.draw_status_bar,
+                    update_callback=battery_update_fnc,
                 )
                 if kboard.has_touchscreen:
                     if btn == BUTTON_TOUCH:
@@ -814,8 +818,6 @@ class Menu:
             )
             self.draw_network_indicator()
             self.draw_wallet_indicator()
-            if kboard.has_battery:
-                _thread.start_new_thread(self.draw_battery_indicator, ())
 
     #     self.draw_ram_indicator()
 

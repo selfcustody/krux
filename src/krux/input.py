@@ -50,6 +50,7 @@ KEY_REPEAT_DELAY_MS = 100
 
 BUTTON_WAIT_PRESS_DELAY = 10
 ONE_MINUTE = 60000
+UPDATE_CALLBACK_DELAY = 5000
 
 
 class Input:
@@ -228,8 +229,7 @@ class Input:
             self.flush_events()
             self.flushed_flag = not block
 
-        update_count = 0
-        update_trigger = BUTTON_WAIT_PRESS_DELAY * BUTTON_WAIT_PRESS_DELAY
+        update_time = time.ticks_ms() - UPDATE_CALLBACK_DELAY
         while True:
             if self.enter_event():
                 return BUTTON_ENTER
@@ -247,11 +247,12 @@ class Input:
             if not block and time.ticks_ms() > start_time + wait_duration:
                 return None
 
-            if update_callback is not None:
-                update_count += 1
-                if update_count > update_trigger:
-                    update_count = 0
-                    update_callback()
+            if (
+                update_callback is not None
+                and time.ticks_ms() > update_time + UPDATE_CALLBACK_DELAY
+            ):
+                update_time = time.ticks_ms()
+                update_callback()
 
             time.sleep_ms(BUTTON_WAIT_PRESS_DELAY)
 
