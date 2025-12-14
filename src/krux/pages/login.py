@@ -319,7 +319,10 @@ class Login(MnemonicLoader):
 
             index, _ = submenu.run_loop()
             if index == submenu.back_index:
-                if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+                if self.prompt(
+                    t("Back to Menu") + "\n\n" + t("Are you sure?"),
+                    self.ctx.display.height() >> 1,
+                ):
                     del key
                     return MENU_CONTINUE
             if index == 0:
