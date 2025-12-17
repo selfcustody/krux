@@ -8,7 +8,7 @@ Al ejecutar **Krux-Installer**, verá un menú con 4 botones habilitados y dos b
 * Botones habilitados:
     * `Versión`: selecciona una versión del firmware;
     
-    * `Dispositivo`: selecciona un dispotivo compatible con la versión seleccionada;
+    * `Dispositivo`: selecciona un dispositivo compatible con la versión seleccionada;
     
     * `Ajustes`: cambia algunos ajustes de la aplicación;
     
@@ -96,7 +96,7 @@ Al iniciarse, **Krux-Installer** reconoce la configuración regional de su siste
 ### Seleccionar dispotivo
 
 Cada vez que seleccione una nueva versión, verá que el botón del dispositivo se
-restablece al estado `Dispositivo: seleccione uno nuevo` Una vez seleccionada la versión, puede elegir el dispositivo
+restablece al estado `Dispositivo: seleccione uno nuevo`. Una vez seleccionada la versión, puede elegir el dispositivo
 en ​​el que se escribirá el firmware.
 
 Primero, seleccione el dispositivo que desea actualizar. A continuación, el menú mostrará tres opciones:
