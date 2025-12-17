@@ -12,12 +12,12 @@ Estas son billeteras externas actualmente **compatibles con Krux**:
 - [Specter Desktop](https://specter.solutions/) (computador)
 - [Liana](https://wizardsardine.com/liana/) (computador)
 - [Bitcoin Safe](https://bitcoin-safe.org/) (computador)
-- [Nunchuk](https://nunchuk.io/) (móbil)
-- [BlueWallet](https://bluewallet.io/) (móbil)
-- [Bitcoin Keeper](https://bitcoinkeeper.app/) (móbil)
+- [Nunchuk](https://nunchuk.io/) (móvil)
+- [BlueWallet](https://bluewallet.io/) (móvil)
+- [Bitcoin Keeper](https://bitcoinkeeper.app/) (móvil)
 
 **Advertencia!** Krux es INCOMPATIBLE con:
 
-- [Electrum Bitcoin Wallet](https://electrum.org/) (computador / móbil - error 'no es posible firmar') 
+- [Electrum Bitcoin Wallet](https://electrum.org/) (computador / móvil - error 'no es posible firmar') 
 
 <div style="clear: both"></div>
