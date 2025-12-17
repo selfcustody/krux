@@ -103,7 +103,10 @@ class Page:
     def esc_prompt(self):
         """Prompts user for leaving"""
         self.ctx.display.clear()
-        answer = self.prompt(t("Are you sure?"), self.ctx.display.height() // 2)
+        answer = self.prompt(
+            t("Back to Menu") + "\n\n" + t("Are you sure?"),
+            self.ctx.display.height() >> 1,
+        )
         if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
         return ESC_KEY if answer else None
@@ -522,7 +525,11 @@ class Page:
 
     def shutdown(self):
         """Handler for the 'shutdown' menu item"""
-        if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+        shtn_reboot_label = t("Shutdown") if kboard.has_battery else t("Reboot")
+        if self.prompt(
+            shtn_reboot_label + "\n\n" + t("Are you sure?"),
+            self.ctx.display.height() >> 1,
+        ):
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Shutting down…"))
             time.sleep_ms(SHUTDOWN_WAIT_TIME)
