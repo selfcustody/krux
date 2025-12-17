@@ -1,0 +1,6 @@
+## Consejos
+### Soporte multilingüe
+¿Prefieres otro idioma? Krux admite varios idiomas. Una vez en la pantalla de inicio, ve a `Configuración`, luego a `Configuración regional`, y selecciona la configuración regional que deseas utilizar.
+
+### Actualización mediante tarjeta microSD
+Una vez que haya instalado el firmware inicial en su dispositivo mediante USB, puede continuar actualizando el dispositivo o puede realizar más actualizaciones [mediante tarjeta microSD](/krux/getting-started/features/sd-card-update/) para mantener el dispositivo aislado de internet.
