@@ -214,6 +214,13 @@ class SettingsPage(Page):
 
         return MENU_CONTINUE
 
+    def enter_biometric_registration(self):
+        """Handler for the 'Biometric Registration' menu item"""
+        from .biometric_pages import BiometricRegistration
+        
+        biometric_registration = BiometricRegistration(self.ctx)
+        return biometric_registration.manage()
+
     def _settings_exit_check(self):
         """Handler for the 'Back' on settings screen"""
 
@@ -267,6 +274,7 @@ class SettingsPage(Page):
                         self.setting(settings_namespace, setting),
                     )
                     for setting in setting_list
+                    if not (settings_namespace.namespace == "settings.security" and setting.attr == "biometric_unlock")
                 ]
             )
 
@@ -284,6 +292,7 @@ class SettingsPage(Page):
             # Case for security settings
             if settings_namespace.namespace == "settings.security":
                 items.append((t("Tamper Check Code"), self.enter_modify_tc_code))
+                items.append((t("Manage Biometrics"), self.enter_biometric_registration))
 
             submenu = Menu(self.ctx, items, back_status=back_status)
             index, status = submenu.run_loop()

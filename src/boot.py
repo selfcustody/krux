@@ -134,10 +134,6 @@ def home(ctx_home):
                 break
 
 
-preimport_ticks = time.ticks_ms()
-draw_splash()
-check_for_updates()
-gc.collect()
 
 from krux.context import ctx
 from krux.auto_shutdown import auto_shutdown
@@ -145,11 +141,40 @@ from krux.auto_shutdown import auto_shutdown
 ctx.power_manager = power_manager
 auto_shutdown.add_ctx(ctx)
 
+# Biometric Login Check
+biometric_attempted = False
+try:
+    from krux.krux_settings import Settings
+    if Settings().security.biometric_unlock:
+        from krux.pages.biometric_pages import QR_DATA_FILE
+        # Only initialize LCD if we actually have data to check
+        try:
+            os.stat(QR_DATA_FILE)
+            from krux.pages.biometric_pages import BiometricUnlock
+            from krux.display import display
+            display.initialize_lcd()
+            
+            unlocker = BiometricUnlock(ctx)
+            if unlocker.qr_data:
+                unlocker.run() 
+                biometric_attempted = True
+        except:
+            pass
+except Exception as e:
+    print("Biometric boot error:", e)
+
+preimport_ticks = time.ticks_ms()
+
+if not biometric_attempted:
+    draw_splash()
+
+check_for_updates()
+gc.collect()
 
 # If importing happened too fast, sleep the difference so the logo
-# will be shown
+# will be shown (only if we showed it)
 postimport_ticks = time.ticks_ms()
-if preimport_ticks + MIN_SPLASH_WAIT_TIME > postimport_ticks:
+if not biometric_attempted and preimport_ticks + MIN_SPLASH_WAIT_TIME > postimport_ticks:
     time.sleep_ms(preimport_ticks + MIN_SPLASH_WAIT_TIME - postimport_ticks)
 
 if not tc_code_verification(ctx):
