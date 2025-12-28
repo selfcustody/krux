@@ -25,6 +25,7 @@ Exported Uniform Resource (UR) QR codes, a widely adopted standard for exchangin
 - Bug Fix: Corrected handling of certain binary-encoded QR codes
 - Fix fingerprint unset warn message for rare case
 - Improved QR code decoding performance and added inverted color QR code detection
+- Improve scan TinySeed and other binary visibility by drawing punches only
 
 # Changelog 25.10.1 - October 2025
 
