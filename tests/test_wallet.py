@@ -1,3 +1,4 @@
+from re import S
 import pytest
 from ur.ur_decoder import URDecoder
 
@@ -28,9 +29,18 @@ def tdata(mocker):
     TEST_MNEMONIC2 = "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     TEST_MNEMONIC3 = "range fatigue into stadium endless kitchen royal present rally welcome scatter twice"
 
-    SINGLESIG_KEY = Key(
-        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"]
-    )  # default account=0, script=P2WPKH
+    SINGLESIG_KEY = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"])
+
+    SINGLESIG_KEY_TESTNET = SINGLESIG_KEY
+    SINGLESIG_KEY_TESTNET.network = NETWORKS["test"]
+
+    SINGLESIG_KEY_SIGNET = SINGLESIG_KEY
+    SINGLESIG_KEY_SIGNET.network = NETWORKS["signet"]
+
+    SINGLESIG_KEY_REGTEST = SINGLESIG_KEY
+    SINGLESIG_KEY_REGTEST.network = NETWORKS["regtest"]
+    # default account=0, script=P2WPKH
+
     LEGACY1_KEY = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"], "", 1, P2PKH)
     NESTEDSW1_KEY = Key(
         TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"], "", 1, P2SH_P2WPKH
@@ -109,7 +119,6 @@ def tdata(mocker):
     KRUX_NATIVESW1_XPUB = "[55f8fc5d/84h/0h/1h]xpub6DPMTPxGMqdu43FvwYdC6eHCPJWckCkx1rLJ1HEG7259GyWQD5P17WB2oowP9SpQdC8ogrmXfwfoazvf6Te8svtxWh4UTwTqyRdG5G54FxW"
     KRUX_NATIVESW1_ZPUB = "[55f8fc5d/84h/0h/1h]zpub6s3t4jJ6fCirkdeAcGCSWpUCjEoWdSjwr5Nja522s2puPB8riPi8MdVJrDrZ9G8FSUNRBoxebGNuMa9nXrUAUQGAFNTKdm6pWskYrMahu1i"
     KRUX_NATIVESW1_ZPUB_DESCRIPTOR = "wpkh(" + KRUX_NATIVESW1_ZPUB + ")"
-
     KRUX_TAPROOT1_DESCRIPTOR = "tr([55f8fc5d/86h/0h/1h]xpub6CNGwJbVG9sQsJjtwLiemRFAfvDafL8zRthnHWNQbRz1PwAm28T1v5hLmJhFft71oEDCbA3xHemnScW5VWheP1BxXNVnoYboyw6t4wuKu5q)"
     KRUX_TAPROOT1_XPUB = "[55f8fc5d/86h/0h/1h]xpub6CNGwJbVG9sQsJjtwLiemRFAfvDafL8zRthnHWNQbRz1PwAm28T1v5hLmJhFft71oEDCbA3xHemnScW5VWheP1BxXNVnoYboyw6t4wuKu5q"
 
@@ -213,7 +222,7 @@ def tdata(mocker):
     xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu
 
     d3a80c8b:
-    xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv
+    xpub6FKYY6y3oVi7ihSCszFKRSSINGLESIG_KEY_TESTNET eZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv
     """
 
     BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_KEYS = """
@@ -260,6 +269,7 @@ def tdata(mocker):
     )
 
     UNAMBIGUOUS_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/<0;1>/*)"
+    UNAMBIGUOUS_SINGLESIG_DESCRIPTOR_TESTNET = "wpkh([55f8fc5d/84h/0h/0h]tpubDEx7EkaqE8rG5NsCrijASmBjWiNv6teugndQCs4YN6JDS4hpJ3QtSC4ifPAcE7LQXtjRgB96trmEucoLbsiYYMuvLthymAhssZQpEPPb1pUpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/<0;1>/*)"
     AMBIGUOUS_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)"
 
     UNAMBIGUOUS_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*))"
@@ -283,6 +293,9 @@ def tdata(mocker):
             "TEST_MNEMONIC2",
             "TEST_MNEMONIC3",
             "SINGLESIG_KEY",
+            "SINGLESIG_KEY_TESTNET",
+            "SINGLESIG_KEY_SIGNET",
+            "SINGLESIG_KEY_REGTEST",
             "LEGACY1_KEY",
             "NESTEDSW1_KEY",
             "TAPROOT1_KEY",
@@ -341,6 +354,7 @@ def tdata(mocker):
             "UR_BYTES_MULTISIG_DESCRIPTOR",
             "UR_BYTES_MULTISIG_WALLET_DATA",
             "UNAMBIGUOUS_SINGLESIG_DESCRIPTOR",
+            "UNAMBIGUOUS_SINGLESIG_DESCRIPTOR_TESTNET",
             "AMBIGUOUS_SINGLESIG_DESCRIPTOR",
             "UNAMBIGUOUS_MULTISIG_DESCRIPTOR",
             "AMBIGUOUS_MULTISIG_DESCRIPTOR",
@@ -358,6 +372,9 @@ def tdata(mocker):
         TEST_MNEMONIC2,
         TEST_MNEMONIC3,
         SINGLESIG_KEY,
+        SINGLESIG_KEY_TESTNET,
+        SINGLESIG_KEY_SIGNET,
+        SINGLESIG_KEY_REGTEST,
         LEGACY1_KEY,
         NESTEDSW1_KEY,
         TAPROOT1_KEY,
@@ -418,6 +435,7 @@ def tdata(mocker):
         UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
         AMBIGUOUS_SINGLESIG_DESCRIPTOR,
         UNAMBIGUOUS_MULTISIG_DESCRIPTOR,
+        UNAMBIGUOUS_SINGLESIG_DESCRIPTOR_TESTNET,
         AMBIGUOUS_MULTISIG_DESCRIPTOR,
         UNRELATED_SINGLESIG_DESCRIPTOR,
         UNRELATED_MULTISIG_DESCRIPTOR,
@@ -432,40 +450,53 @@ def tdata(mocker):
 
 def test_init_singlesig(mocker, m5stickv, tdata):
     from embit.descriptor import Descriptor
+    from krux.key import get_network_name
     from krux.wallet import Wallet, to_unambiguous_descriptor
+    from embit.networks import NETWORKS
 
     cases = [
-        # key, descriptor, label, policy
-        (None, None, None, None),
+        # key, descriptor, label, policy, network
+        (None, None, None, None, None),
         (
             tdata.SINGLESIG_KEY,
             tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
             "Single-sig",
             {"type": "p2wpkh"},
+            "Mainnet",
+        ),
+        (
+            tdata.SINGLESIG_KEY_TESTNET,
+            tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR_TESTNET,
+            "Single-sig",
+            {"type": "p2wpkh"},
+            NETWORKS["test"],
         ),
         (
             tdata.LEGACY1_KEY,
             tdata.KRUX_LEGACY1_DESCRIPTOR,
             "Single-sig",
             {"type": "p2pkh"},
+            NETWORKS["main"],
         ),
         (
             tdata.NESTEDSW1_KEY,
             tdata.KRUX_NESTEDSW1_DESCRIPTOR,
             "Single-sig",
             {"type": "p2sh-p2wpkh"},
+            NETWORKS["main"],
         ),
         (
             tdata.TAPROOT1_KEY,
             tdata.KRUX_TAPROOT1_DESCRIPTOR,
             "Single-sig",
             {"type": "p2tr"},
+            NETWORKS["main"],
         ),
     ]
 
-    for _case in cases:
+    for i, _case in enumerate(cases):
+        print(f"Case {i}")
         wallet = Wallet(_case[0])
-        assert isinstance(wallet, Wallet)
         if wallet.descriptor:
             # don't fail simply because of a difference between ambiguous and unambiguous
             try:
@@ -477,6 +508,9 @@ def test_init_singlesig(mocker, m5stickv, tdata):
                 assert wallet.descriptor.to_string() == test_descr
         assert wallet.label == _case[2]
         assert wallet.policy == _case[3]
+
+        if wallet.key:
+            assert get_network_name(wallet.key.network) == _case[4]
 
 
 def test_init_multisig(mocker, m5stickv, tdata):
