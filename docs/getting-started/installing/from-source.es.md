@@ -37,9 +37,9 @@ Para compilar y flashear el firmware:
 ./krux build maixpy_amigo
 ```
 
-The first time, the build can take around an hour or so to complete. Subsequent builds should take only a few minutes. If all goes well, you should see a new `build` folder containing `firmware.bin` and `kboot.kfpkg` files when the build completes.
+La primera vez, la compilación del código puede tardar aproximadamente una hora. Las compilaciones posteriores deberían tardar solo unos minutos. Si todo va bien, verá una nueva carpeta `build` con los archivos `firmware.bin` y `kboot.kfpkg` al finalizar la compilación.
 
-**Note**: if you encounter any of these errors while building, it is a problem connecting to github, try again (if the error persists, try changing the DNS/VPN or correcting the hostname resolution of github.com to an IP that is working for you):
+**Nota**: Si encuentra alguno de estos errores durante la compilación, se debe a un problema de conexión a GitHub. Inténtelo de nuevo (si el error persiste, intente cambiar el DNS/VPN o corregir la resolución del nombre de host de github.com a una IP que funcione correctamente):
 ```
 error: RPC failed; curl 92 HTTP/2 stream 0 was not closed cleanly: CANCEL (err8)
 fatal: the remote end hung up unexpectedly
@@ -49,61 +49,61 @@ fatal: clone of ... failed
 Failed to clone ...
 ```
 
-#### Reproducibility
-If you build from the `main` branch of the source code, you should be able to reproduce the build process used to generate the latest release binaries and obtain exactly the same copies of the `firmware.bin` and `kboot.kfpkg` files, with matching hash checksums (to check for an older version, use the `tag` instead).
+#### Reproducibilidad
+Si compila desde la rama `main` del código fuente, debería poder reproducir el proceso de compilación utilizado para generar los binarios de la última versión y obtener exactamente las mismas copias de los archivos `firmware.bin` y `kboot.kfpkg`, con las sumas de comprobación hash correspondientes (para comprobar si hay una versión anterior, utilice la etiqueta `tag`).
 
-To check, use the compiled files for the target device. Each command should output the same hash for the two provided files:
+Para comprobarlo, utilice los archivos compilatdos para el dispositivo de destino. Cada comando debe generar el mismo hash para los dos archivos proporcionados:
 ```bash
 sha256sum build/firmware.bin {{latest_krux}}/maixpy_DEVICE/firmware.bin
 sha256sum build/kboot.kfpkg {{latest_krux}}/maixpy_DEVICE/kboot.kfpkg
 ```
 
-If you want to extract and verify the `firmware.bin`file contained in `kboot.kfpkg`, use the following:
+Si desea extraer y verificar el archivo `firmware.bin` contenido en `kboot.kfpkg`, utilice lo siguiente:
 
 ```bash
 unzip kboot.kfpkg -d ./kboot/
 ```
 
-### Flash the firmware onto the device
-Connect the device to your computer via USB (for Maix Amigo, make sure you’re using bottom port), power it on, and run the following, replacing `DEVICE` with either `m5stickv`, `amigo`, `cube`, `dock`, `yahboom`, `wonder_mv`, `tzt` or `embed_fire`:
+### Instale el firmware en el dispositivo
+Conecte el dispositivo a su computadora mediante USB (para Maix Amigo, asegúrese de usar el puerto inferior), enciéndalo y ejecute lo siguiente, reemplazando `DEVICE` por `m5stickv`, `amigo`, `cube`, `dock`, `yahboom`, `wonder_mv`, `tzt` o `embed_fire`:
 ```bash
-# flash firmware to DEVICE
+# flashear el firmware al DISPOSITIVO
 ./krux flash maixpy_DEVICE
 ```
-If flashing fails try reading [Troubleshooting](../../troubleshooting.md)
+Si el flasheo falla, intenta leer [Solución de problemas](../../troubleshooting.md)
 
 ----8<----
-flash-krux-logo.en.txt
+flash-krux-logo.es.txt
 ----8<----
 
 ----8<----
-amigo-more-info-faq.en.txt
+amigo-more-info-faq.es.txt
 ----8<----
 
-### Signing the firmware
-You can sign the firmware to [perform airgapped upgrades](#prerequisite-for-upgrading-via-microsd) using one of the two methods listed below:
+### Firma del firmware
+Puedes firmar el firmware para [realizar actualizaciones en sistemas aislados (air-gapped)](#prerequisite-for-upgrading-via-microsd) usando uno de los dos métodos que se indican a continuación:
 
-#### Method 1: Signing from Krux
-First, calculate the SHA256 hash of the new firmware by running:
+#### Método 1: Firma desde Krux
+Primero, calcula el hash SHA256 del nuevo firmware ejecutando:
 ```bash
 ./krux sha256 build/firmware.bin
 ```
 
-Copy this hex string and turn it into a QR code using whichever QR code generator you'd like.
+Copia esta cadena hexadecimal y conviértela en un código QR usando el generador de códigos QR que prefieras.
 
-In Krux, enter the mnemonic of your private key that will be used for signing, and go to **Sign -> Message**. Scan the QR code you generated, and you will be asked if you wish to sign the hash. Proceed, and you will be presented with a base64-encoded string containing the signature, as text and as a QR code.
+En Krux, introduce la clave mnemotécnica de tu clave privada que se usará para firmar y ve a **Firmar -> Mensaje**. Escanea el código QR que generaste y se te preguntará si desdeas firmar el hash. Continúa y verás una cadena codificada en base64 que contiene la firma, tanto en texto como en código QR.
 
-Take this string and create a signature file by running:
+Toma esta cadena y crea un archivo de firma ejecutando:
 ```bash
 ./krux b64decode "signature-in-base64" > build/firmware.bin.sig
 ```
 
-This will generate a `firmware.bin.sig` file containing a signature of the firmware's SHA256 hash.
+Esto generará un archivo `firmware.bin.sig` que contiene la firma del hash SHA256 del firmware.
 
-#### Method 2: Signing from your computer with OpenSSL
-With the keypair [you generated before](#prerequisite-for-upgrading-via-microsd), you can now run:
+#### Método 2: Firmar desde tu ordenador con OpenSSL
+Con el par de claves [que generaste anteriormente](#prerequisite-for-upgrading-via-microsd), ahora puedes ejecutar:
 ```bash
 ./krux sign build/firmware.bin privkey.pem
 ```
 
-This will generate a `firmware.bin.sig` file containing a signature of the firmware's SHA256 hash.
+Esto generará un archivo `firmware.bin.sig` que contiene la firma del HASH256 del firmware.
