@@ -51,6 +51,10 @@ TC_CODE_PBKDF2_ITERATIONS = 100000
 
 DEFAULT_LOCALE = "en-US"
 
+TAMPER_CHECK_INPUT_SCAN_QR = "Scan QR"
+TAMPER_CHECK_INPUT_MANUAL = "Manual"
+TAMPER_CHECK_INPUT_ASK_EVERY_TIME = "Ask every time"
+
 DEFAULT_TX_PIN = (
     board.config["board_info"]["CONNEXT_A"]
     if "CONNEXT_A" in board.config["board_info"]
@@ -475,6 +479,15 @@ class SecuritySettings(SettingsNamespace):
     auto_shutdown = NumberSetting(int, "auto_shutdown", 10, [0, 60])
     hide_mnemonic = CategorySetting("hide_mnemonic", False, [False, True])
     boot_flash_hash = CategorySetting("boot_flash_hash", False, [False, True])
+    tamper_check_code_input_mode = CategorySetting(
+        "tamper_check_code_input_mode",
+        TAMPER_CHECK_INPUT_ASK_EVERY_TIME,
+        [
+            TAMPER_CHECK_INPUT_SCAN_QR,
+            TAMPER_CHECK_INPUT_MANUAL,
+            TAMPER_CHECK_INPUT_ASK_EVERY_TIME,
+        ],
+    )
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -482,6 +495,7 @@ class SecuritySettings(SettingsNamespace):
             "auto_shutdown": t("Shutdown Time"),
             "hide_mnemonic": t("Hide Mnemonics"),
             "boot_flash_hash": t("TC Flash Hash at Boot"),
+            "tamper_check_code_input_mode": t("TC Input Mode"),
         }[attr]
 
 
