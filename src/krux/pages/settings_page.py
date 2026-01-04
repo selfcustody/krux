@@ -260,15 +260,36 @@ class SettingsPage(Page):
                 )
                 for ns in namespace_list
             ]
-            items.extend(
-                [
-                    (
-                        settings_namespace.label(setting.attr),
-                        self.setting(settings_namespace, setting),
-                    )
-                    for setting in setting_list
-                ]
-            )
+            if settings_namespace.namespace == "settings.security":
+                regular_settings = []
+                tc_input_item = None
+                for setting in setting_list:
+                    if setting.attr == "tamper_check_code_input_mode":
+                        tc_input_item = (
+                            settings_namespace.label(setting.attr),
+                            self.setting(settings_namespace, setting),
+                        )
+                    else:
+                        regular_settings.append(
+                            (
+                                settings_namespace.label(setting.attr),
+                                self.setting(settings_namespace, setting),
+                            )
+                        )
+                items.extend(regular_settings)
+                items.append((t("Tamper Check Code"), self.enter_modify_tc_code))
+                if tc_input_item:
+                    items.append(tc_input_item)
+            else:
+                items.extend(
+                    [
+                        (
+                            settings_namespace.label(setting.attr),
+                            self.setting(settings_namespace, setting),
+                        )
+                        for setting in setting_list
+                    ]
+                )
 
             # If there is only one item in the namespace, don't show a submenu
             # and instead jump straight to the item's menu
@@ -280,10 +301,6 @@ class SettingsPage(Page):
             if settings_namespace.namespace == Settings.namespace:
                 items.append((t("Factory Settings"), self.restore_settings))
                 back_status = self._settings_exit_check
-
-            # Case for security settings
-            if settings_namespace.namespace == "settings.security":
-                items.append((t("Tamper Check Code"), self.enter_modify_tc_code))
 
             submenu = Menu(self.ctx, items, back_status=back_status)
             index, status = submenu.run_loop()
