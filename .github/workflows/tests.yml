@@ -8,6 +8,7 @@ on:
   pull_request:
 
 jobs:
+
   lint-black:
     runs-on: ubuntu-latest
     steps:
@@ -108,3 +109,14 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  lint-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: qlrd/pymarkdownlnt-gh-action@v1
+        with:
+          disable-rules: "MD013,MD025,MD033,MD036,MD041"
+          enable-rules:  "MD024"
+          paths:         "./**.md"
+          warn-only:     "true"
