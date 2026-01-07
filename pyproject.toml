@@ -66,6 +66,7 @@ poethepoet = "^0.37.0"
 vulture = "^2.14"
 translate = "^3.6.1"
 urllib3 = ">=2.6.0"
+pymarkdownlnt = "^0.9.34"
 
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions", "mkdocs-macros-plugin"]
@@ -86,7 +87,8 @@ format-test.ref = "format-tests"
 # pylint tasks
 lint-src = "pylint src"
 lint-scripts = "pylint firmware/font/*.py firmware/scripts/*.py i18n/*.py"
-lint = ["lint-src", "lint-scripts"]
+lint-docs = "pymarkdownlnt -d MD013,MD025,MD033,MD036,MD041 -e MD024 scan README.md"
+lint = ["lint-src", "lint-scripts", "lint-docs"]
 # aliases
 pylint.ref = "lint"
 
