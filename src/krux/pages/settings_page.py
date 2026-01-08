@@ -338,7 +338,9 @@ class SettingsPage(Page):
 
     def category_setting(self, settings_namespace, setting):
         """Handler for viewing and editing a CategorySetting"""
-        categories = setting.categories
+        categories = (
+            setting.categories() if callable(setting.categories) else setting.categories
+        )
 
         starting_category = setting.__get__(settings_namespace)
         while True:

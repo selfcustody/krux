@@ -5,6 +5,7 @@ x3 press BUTTON_B
 press BUTTON_A
 
 # Datum Tool
+press BUTTON_B
 press BUTTON_A
 
 

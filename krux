@@ -246,7 +246,19 @@ elif [ "$1" == "sign" ]; then
             echo "Missing private_key"
         else
             sig_bin=$file.sig
-            openssl dgst -sign $privkey_pem -keyform PEM -sha256 -out $sig_bin -binary $file
+            # ECDSA signatures using openssl vary in size (70–72 bytes) due to DER encoding of r and s values.
+            # Krux uses secp256k1, which enforces strict canonical DER, expecting signatures in the minimal 70-byte form.
+
+            # Loop until signature is exactly 70 bytes
+            while true; do
+                openssl dgst -sign $privkey_pem -keyform PEM -sha256 -out $sig_bin -binary $file
+                if [ "$(wc -c < "$sig_bin")" -eq 70 ]; then
+                    echo "Signature is exactly 70 bytes. Done!"
+                    break
+                else
+                    echo "Signature size greater than 70 bytes. Retrying..."
+                fi
+            done
         fi
     fi
 elif [ "$1" == "verify" ]; then

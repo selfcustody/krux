@@ -34,6 +34,7 @@ FLASH_PATH = "flash"
 # Specific storage filenames
 SETTINGS_FILENAME = "settings.json"
 MNEMONICS_FILE = "seeds.json"
+STARTUP_APPS_FILE = "startup.json"
 
 # Network settings
 MAIN_TXT = "main"
@@ -102,7 +103,8 @@ class CategorySetting(Setting):
             return self
 
         stored_val = store.get(obj.namespace, self.attr, self.default_value)
-        if stored_val not in self.categories:
+        categories = self.categories() if callable(self.categories) else self.categories
+        if stored_val not in categories:
             return self.default_value
         return stored_val
 

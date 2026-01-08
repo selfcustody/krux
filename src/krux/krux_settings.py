@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 import board
 import binascii
+import ujson as json
 from .settings import (
     SettingsNamespace,
     CategorySetting,
@@ -30,6 +31,7 @@ from .settings import (
     FLASH_PATH,
     MAIN_TXT,
     TEST_TXT,
+    STARTUP_APPS_FILE,
 )
 
 from .key import (
@@ -46,7 +48,7 @@ from .kboard import kboard
 
 BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
 
-TC_CODE_PATH = "/flash/tcc"
+TC_CODE_PATH = "/" + FLASH_PATH + "/tcc"
 TC_CODE_PBKDF2_ITERATIONS = 100000
 
 DEFAULT_LOCALE = "en-US"
@@ -472,10 +474,23 @@ class ThemeSettings(SettingsNamespace):
 class SecuritySettings(SettingsNamespace):
     """Security settings"""
 
+    # pylint: disable=no-method-argument
+    def _load_startup_apps():
+        """Dynamically retrieve available startup apps"""
+        try:
+            with open("/%s/%s" % (FLASH_PATH, STARTUP_APPS_FILE), "r") as f:
+                apps = json.load(f)
+        except:
+            apps = []
+
+        return apps + ["none"]
+
     namespace = "settings.security"
     auto_shutdown = NumberSetting(int, "auto_shutdown", 10, [0, 60])
     hide_mnemonic = CategorySetting("hide_mnemonic", False, [False, True])
     boot_flash_hash = CategorySetting("boot_flash_hash", False, [False, True])
+    allow_kapp = CategorySetting("allow_kapp", False, [False, True])
+    startup_kapp = CategorySetting("startup_kapp", "none", _load_startup_apps)
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -483,6 +498,8 @@ class SecuritySettings(SettingsNamespace):
             "auto_shutdown": t("Shutdown Time"),
             "hide_mnemonic": t("Hide Mnemonics"),
             "boot_flash_hash": t("TC Flash Hash at Boot"),
+            "allow_kapp": t("Allow Krux apps"),
+            "startup_kapp": t("Startup Kapp"),
         }[attr]
 
 

@@ -7,7 +7,7 @@ press BUTTON_A
 screenshot tools-options.png
 
 # Device tests
-press BUTTON_B
+x2 press BUTTON_B
 press BUTTON_A
 
 screenshot device-tests-options.png
