@@ -65,7 +65,7 @@ pycryptodome = "^3.23.0"
 poethepoet = "^0.37.0"
 vulture = "^2.14"
 translate = "^3.6.1"
-urllib3 = ">=2.6.0"
+urllib3 = ">=2.6.3"
 
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions", "mkdocs-macros-plugin"]
