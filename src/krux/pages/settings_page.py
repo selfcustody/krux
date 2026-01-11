@@ -41,7 +41,13 @@ from ..krux_settings import (
     t,
     locale_control,
 )
-from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+from ..input import (
+    BUTTON_ENTER,
+    BUTTON_PAGE,
+    BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
+    SWIPE_FAIL,
+)
 from ..sd_card import SDHandler
 from . import (
     Page,
@@ -83,32 +89,33 @@ class SettingsPage(Page):
 
     def _draw_settings_pad(self):
         """Draws buttons to change settings with touch"""
-        if kboard.has_touchscreen:
-            self.ctx.input.touch.clear_regions()
-            offset_y = self.ctx.display.height() * 2 // 3
-            self.ctx.input.touch.add_y_delimiter(offset_y)
-            self.ctx.input.touch.add_y_delimiter(offset_y + FONT_HEIGHT * 3)
-            button_width = (self.ctx.display.width() - 2 * DEFAULT_PADDING) // 3
-            for i in range(4):
-                self.ctx.input.touch.add_x_delimiter(DEFAULT_PADDING + button_width * i)
-            offset_y += FONT_HEIGHT
-            keys = ["<", t("Go"), ">"]
-            for i, x in enumerate(self.ctx.input.touch.x_regions[:-1]):
-                self.ctx.display.outline(
-                    x,
-                    self.ctx.input.touch.y_regions[0],
-                    button_width - 1,
-                    FONT_HEIGHT * 3,
-                    theme.frame_color,
-                )
-                offset_x = x
-                offset_x += (button_width - lcd.string_width_px(keys[i])) // 2
-                self.ctx.display.draw_string(
-                    offset_x, offset_y, keys[i], theme.fg_color, theme.bg_color
-                )
+        self.ctx.input.touch.clear_regions()
+        offset_y = self.ctx.display.height() * 2 // 3
+        self.ctx.input.touch.add_y_delimiter(offset_y)
+        self.ctx.input.touch.add_y_delimiter(offset_y + FONT_HEIGHT * 3)
+        button_width = (self.ctx.display.width() - 2 * DEFAULT_PADDING) // 3
+        for i in range(4):
+            self.ctx.input.touch.add_x_delimiter(DEFAULT_PADDING + button_width * i)
+        offset_y += FONT_HEIGHT
+        keys = ["<", t("Go"), ">"]
+        for i, x in enumerate(self.ctx.input.touch.x_regions[:-1]):
+            self.ctx.display.outline(
+                x,
+                self.ctx.input.touch.y_regions[0],
+                button_width - 1,
+                FONT_HEIGHT * 3,
+                theme.frame_color,
+            )
+            offset_x = x
+            offset_x += (button_width - lcd.string_width_px(keys[i])) // 2
+            self.ctx.display.draw_string(
+                offset_x, offset_y, keys[i], theme.fg_color, theme.bg_color
+            )
 
     def _touch_to_physical(self, index):
         """Mimics touch presses into physical button presses"""
+        if index < 0:
+            return BUTTON_TOUCH
         if index == 0:
             return BUTTON_PAGE_PREV
         if index == 1:
@@ -373,10 +380,15 @@ class SettingsPage(Page):
                 color,
                 theme.bg_color,
             )
-            self._draw_settings_pad()
-            btn = self.ctx.input.wait_for_button()
-            if btn == BUTTON_TOUCH:
-                btn = self._touch_to_physical(self.ctx.input.touch.current_index())
+            if kboard.has_touchscreen:
+                self._draw_settings_pad()
+
+            # wait until valid input is captured
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_button()
+                if btn == BUTTON_TOUCH:
+                    btn = self._touch_to_physical(self.ctx.input.touch.current_index())
             if btn == BUTTON_ENTER:
                 break
 
