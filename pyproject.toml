@@ -66,9 +66,16 @@ poethepoet = "^0.37.0"
 vulture = "^2.14"
 translate = "^3.6.1"
 urllib3 = ">=2.6.0"
+sphinx = "^9.1.0"
 
 [tool.poetry.extras]
-docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions", "mkdocs-macros-plugin"]
+docs = [
+  "mkdocs",
+  "mkdocs-material",
+  "mkdocs-static-i18n",
+  "pymdown-extensions",
+  "mkdocs-macros-plugin",
+]
 simulator = ["numpy", "opencv-python", "Pillow", "pygame", "pyzbar"]
 flash = ["pyserial"]
 sign = ["qrcode"]
@@ -108,10 +115,54 @@ pytest.ref = "tests"
 
 # pre commit task (do formatting, linting and tests)
 pre-commit = ["format", "lint", "i18n validate", "vulture", "test-simple"]
-pre-release = ["format", "lint", "i18n validate", "i18n-build", "update-glyphs", "vulture", "test-simple"]
+pre-release = [
+  "format",
+  "lint",
+  "i18n validate",
+  "i18n-build",
+  "update-glyphs",
+  "vulture",
+  "test-simple",
+]
 
 # run docs locally
 docs = "poetry run mkdocs serve"
+readthedocs-gen.sequence = [
+  # Install deps
+  { cmd = "python -m pip install -r requirements.txt", cwd = "docs" },
+
+  # Clean build output
+  { cmd = "mkdir -p source", cwd = "docs" },
+
+  # We need temporary init files
+  { cmd = "touch __init__.py", cwd = "src" },
+  { cmd = "touch __init__.py", cwd = "src/krux" },
+
+  # Generate . rst files for ENTIRE src/ (includes boot.py and krux/)
+  { cmd = "sphinx-apidoc -o source ../src --implicit-namespaces -f -e -M", cwd = "docs" },
+
+  # Copy boot.rst
+  { cmd = "cp snippets/boot.rst source/src.boot.rst", cwd = "docs" },
+
+  # Remove temporary init files
+  { cmd = "rm __init__.py", cwd = "src" },
+  { cmd = "rm __init__.py", cwd = "src/krux" },
+
+  # Create modules.rst with src.  prefix
+  { shell = "printf 'Krux firmware reference\\n=============\\n\\n..  toctree::\\n   :maxdepth: 4\\n\\n   src\\n' > source/modules.rst", cwd = "docs" },
+]
+readthedocs.sequence = [
+  # Build
+  { cmd = "sphinx-build -b html . _build", cwd = "docs" },
+
+  # Serve
+  { cmd = "python -m http.server", cwd = "docs/_build" },
+]
+readthedocs-clean = [
+  { cwd = "docs", cmd = "python -m pip uninstall -r requirements.txt -y" },
+  { cmd = "rm -rf source/", cwd = "docs" },
+  { cwd = "docs", cmd = "rm -rf _build" },
+]
 
 # translations tasks
 i18n = "python i18n/i18n.py"
@@ -156,7 +207,7 @@ flash-dock.ref = "flash-cmd -B dan"
 boot-cmd.ref = "ktool-cmd -s build/firmware.bin"
 boot.ref = "boot-cmd -B goE"
 boot-dock.ref = "boot-cmd -B dan"
-terminal.ref = "ktool-cmd -T" # for yahboom add param: --reset
+terminal.ref = "ktool-cmd -T"                                 # for yahboom add param: --reset
 erase.ref = "ktool-cmd -B goE -E"
 erase-dock.ref = "ktool-cmd -B dan -E"
 

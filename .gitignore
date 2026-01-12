@@ -86,3 +86,6 @@ krux-*/ktool*
 
 # IDE files
 .vscode
+
+# Readthedocs
+docs/_build/*
