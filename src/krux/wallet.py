@@ -265,32 +265,12 @@ class Wallet:
         elif self.descriptor.miniscript is not None or self.descriptor.taptree:
             if self.descriptor.taptree:
                 if not descriptor.keys[0].origin:
-                    import hashlib
                     from embit.ec import NUMS_PUBKEY
-                    from embit.bip32 import HDKey
-
-                    # In case internal key is disabled, check if NUMS is known
-
-                    # Hash all pubkeys, except internal, to compute deterministic chain code
-                    hasher = hashlib.sha256()
-                    for key in descriptor.keys[1:]:
-                        hasher.update(key.sec())
-                    det_chain_code = hasher.digest()
-
-                    # Create provably unspendable deterministic key
-                    version = self.descriptor.keys[0].key.version
-                    provably_unspendable = HDKey(
-                        NUMS_PUBKEY, det_chain_code, version=version
-                    )
-
+                    # Check if BIP-0341 NUMS was used
                     # Compare expected provably unspendable key with first descriptor key
-                    if (
-                        descriptor.keys[0].key.to_base58()
-                        != provably_unspendable.to_base58()
-                    ):
+                    if (descriptor.keys[0].key.get_public_key() != NUMS_PUBKEY):
                         self.wallet_data = None
                         raise ValueError("Internal key not provably unspendable")
-
                 taproot_txt = "TR "
                 miniscript_type = P2TR
             else:
