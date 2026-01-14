@@ -52,20 +52,22 @@ M5STICKV_WIDTH = 135
 
 ASIAN_MIN_CODEPOINT = 12288
 
-# Splash will use horizontally-centered text plots. Uses Thin spaces to help with alignment
-SPLASH = [
-    "██" + THIN_SPACE * 3,
-    "██" + THIN_SPACE * 3,
-    "██" + THIN_SPACE * 3,
-    "██████" + THIN_SPACE * 3,
-    "██" + THIN_SPACE * 3,
-    THIN_SPACE + "██" + THIN_SPACE * 2 + "██",
-    "██" + THIN_SPACE + "██",
-    "████" + THIN_SPACE,
-    "██" + THIN_SPACE + "██",
-    THIN_SPACE + "██" + THIN_SPACE * 2 + "██",
-    THIN_SPACE * 2 + "██" + THIN_SPACE * 3 + "██",
-]
+human_friendly_splash = """
+  ██
+  ██
+  ██
+██████
+  ██
+  ██  ██
+  ██ ██
+  ████
+  ██ ██
+  ██  ██
+  ██   ██
+"""
+# Reformat as a list of strings w/fixed length padding to preserve the shape
+# when it's rendered as horizontally centered individual lines.
+SPLASH = ["{:<9}".format(row) for row in human_friendly_splash.split("\n") if row != '']
 
 
 class Display:
