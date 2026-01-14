@@ -15,14 +15,21 @@ Krux now displays a warning instead of blocking QR-encoded passphrases that cont
 ### Easier to Scan UR QR Codes
 Exported Uniform Resource (UR) QR codes, a widely adopted standard for exchanging PSBTs, now use uppercase data to reduce QR density, improving scan reliability without increasing the number of frames.
 
+### Improved UI
+- Added new context arrows, customizable colors, touch-feedback highlighting and a page index for menu navigation.
+- Refined keypad visuals with a clearer keyset index and touch-feedback highlighting.
+- Added touch-feedback highlighting to confirmation prompts, Category Settings, Stackbit 1248, Tinyseed and Mnemonic editor.
+
 ### Other Bug Fixes and Improvements
 - Settings: Reduced default _Buttons Debounce_ value (with an even lower default on _M5StickV_)
 - Settings: Expanded value ranges for _Touch Threshold_ and _Buttons Debounce_
-- Swipe handling: Detection threshold has been slightly reduced
+- Swipe handling: Diagonal and long-hold swipes are now discarded, and the swipe detection threshold has been slightly reduced
+- Touch handling: Discards touches near edges of adjacent regions
 - Keypad: Added backtick **`**
 - Bugfix: Screensaver not activating in menu pages without statusbar
 - Embit: Improved BIP39 mnemonic validation
 - Bug Fix: Corrected handling of certain binary-encoded QR codes
+- UI: Other small changes and optimizations
 - Fix fingerprint unset warn message for rare case
 - Improved QR code decoding performance and added inverted color QR code detection
 

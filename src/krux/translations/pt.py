@@ -92,7 +92,6 @@ translation_array = [
     "Testes do Dispositivo",
     "Display",
     "Não desligue, pode demorar um pouco para concluir.",
-    "Concluída a conversão",
     "Concluído?",
     "Mnemônico duplo",
     "Driver",

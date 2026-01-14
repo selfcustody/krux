@@ -37,6 +37,7 @@ from ..display import BOTTOM_PROMPT_LINE
 from ..qr import FORMAT_UR
 from ..key import Key
 from ..krux_settings import t
+from ..settings import CONTEXT_ARROW
 
 
 DIGITS_HEX = "0123456789ABCDEF"
@@ -55,9 +56,12 @@ class MnemonicLoader(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Via Camera"), self.load_key_from_camera),
-                (t("Via Manual Input"), self.load_key_from_manual_input),
-                (t("From Storage"), self.load_mnemonic_from_storage),
+                (t("Via Camera") + CONTEXT_ARROW, self.load_key_from_camera),
+                (
+                    t("Via Manual Input") + CONTEXT_ARROW,
+                    self.load_key_from_manual_input,
+                ),
+                (t("From Storage") + CONTEXT_ARROW, self.load_mnemonic_from_storage),
             ],
         )
         index, status = submenu.run_loop()
@@ -71,13 +75,16 @@ class MnemonicLoader(Page):
             self.ctx,
             [
                 (t("QR Code"), self.load_key_from_qr_code),
-                ("Tinyseed", lambda: self.load_key_from_tiny_seed_image("Tinyseed")),
                 (
-                    "OneKey KeyTag",
+                    "Tinyseed" + CONTEXT_ARROW,
+                    lambda: self.load_key_from_tiny_seed_image("Tinyseed"),
+                ),
+                (
+                    "OneKey KeyTag" + CONTEXT_ARROW,
                     lambda: self.load_key_from_tiny_seed_image("OneKey KeyTag"),
                 ),
                 (
-                    t("Binary Grid"),
+                    t("Binary Grid") + CONTEXT_ARROW,
                     lambda: self.load_key_from_tiny_seed_image("Binary Grid"),
                 ),
             ],
@@ -93,8 +100,8 @@ class MnemonicLoader(Page):
             self.ctx,
             [
                 (t("Words"), self.load_key_from_text),
-                (t("Word Numbers"), self.pre_load_key_from_digits),
-                ("Tinyseed (Bits)", self.load_key_from_tiny_seed),
+                (t("Word Numbers") + CONTEXT_ARROW, self.pre_load_key_from_digits),
+                ("Tinyseed (Bits)" + CONTEXT_ARROW, self.load_key_from_tiny_seed),
                 ("Stackbit 1248", self.load_key_from_1248),
             ],
         )

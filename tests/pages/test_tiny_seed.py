@@ -122,6 +122,16 @@ def test_enter_tiny_seed_button_turbo(mocker, m5stickv):
     tiny_seed._new_index.assert_called_with(0, FAST_BACKWARD, False, 0)
 
 
+def test_next_index(mocker, m5stickv):
+    from krux.pages.tiny_seed import TinySeed, TS_GO_POSITION
+    from krux.input import SWIPE_LEFT
+
+    ctx = create_ctx(mocker, [])
+    tiny = TinySeed(ctx)
+    index = tiny._new_index(0, SWIPE_LEFT, False, 0)
+    assert index == TS_GO_POSITION
+
+
 def test_enter_tiny_seed_24w_m5stickv(m5stickv, mocker):
     from krux.pages.tiny_seed import TinySeed
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -176,6 +186,8 @@ def test_enter_tiny_seed_24w_amigo(amigo, mocker):
         + [3]
         # Toggle to last editable bit
         + [135]
+        # An invalid index don't change result
+        + [-1]
         # Press ESC
         + [TS_ESC_START_POSITION]
         # Give up from ESC

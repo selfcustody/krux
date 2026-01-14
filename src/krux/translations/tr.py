@@ -92,7 +92,6 @@ translation_array = [
     "Cihaz Testleri",
     "Ekran",
     "Kapatmayın, tamamlanması biraz zaman alabilir.",
-    "Dönüştürme Tamamlandı",
     "Tamamlandı mı?",
     "Çifte anımsatıcı",
     "Sürücü",

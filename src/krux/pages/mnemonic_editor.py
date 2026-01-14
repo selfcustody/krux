@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import time
 from embit import bip39
 from embit.wordlists.bip39 import WORDLIST
 from . import Page, ESC_KEY, LETTERS
@@ -33,6 +34,8 @@ from ..input import (
     BUTTON_PAGE_PREV,
     FAST_FORWARD,
     FAST_BACKWARD,
+    SWIPE_FAIL,
+    TOUCH_HIGHLIGHT_MS,
 )
 from ..key import Key
 from ..kboard import kboard
@@ -159,7 +162,7 @@ class MnemonicEditor(Page):
         if kboard.has_minimal_display:
             self.header_offset -= MINIMAL_PADDING
 
-    def _map_words(self, button_index=0, page=0):
+    def _map_words(self, button_index=0, page=0, highlight=False):
         """Map words to the screen"""
 
         def word_color(index):
@@ -173,18 +176,17 @@ class MnemonicEditor(Page):
                 return theme.highlight_color
             return theme.fg_color
 
-        # Words occupy 75% of the screen
-        word_v_padding = self.ctx.display.height() * 3 // 4
-        word_v_padding //= 12
+        # Words occupy 75% of the screen 3/4 for 12 words 4*12=48
+        word_v_padding = self.ctx.display.height() * 3 // 48
 
         if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
             self.ctx.input.touch.x_regions.append(0)
-            self.ctx.input.touch.x_regions.append(self.ctx.display.width() // 2)
+            self.ctx.input.touch.x_regions.append(self.ctx.display.width() >> 1)
             self.ctx.input.touch.x_regions.append(self.ctx.display.width())
             if not self.ctx.input.buttons_active and self.mnemonic_length == 24:
                 self.ctx.display.draw_vline(
-                    self.ctx.display.width() // 2,
+                    self.ctx.display.width() >> 1,
                     self.header_offset,
                     12 * word_v_padding,
                     theme.frame_color,
@@ -206,16 +208,49 @@ class MnemonicEditor(Page):
         word_index = 0
         if kboard.is_m5stickv or self.mnemonic_length == 12:
             x_padding = DEFAULT_PADDING
+            rect_width = self.ctx.display.width()
         else:
             x_padding = MINIMAL_PADDING
+            rect_width = self.ctx.display.width() >> 1
+
+        # draw Go and Esc before because they can overlap
+        go_txt = t("Go")
+        esc_txt = t("Esc")
+        menu_index = None
+        if self.mnemonic_length == 24 and kboard.is_m5stickv and page == 0:
+            go_txt = "13-24"
+        if (self.ctx.input.buttons_active or highlight) and button_index >= ESC_INDEX:
+            menu_index = button_index - ESC_INDEX
+        self.draw_proceed_menu(
+            go_txt,
+            esc_txt,
+            y_region + 12 * word_v_padding,
+            menu_index,
+            self.valid_checksum,
+            highlight=highlight,
+        )
+
         while word_index < 12:
             paged_index = word_index + page * 12
             font_color = word_color(paged_index)
             bg_color = theme.bg_color
-            if word_index == button_index and self.ctx.input.buttons_active:
+            if word_index == button_index and (
+                self.ctx.input.buttons_active or highlight
+            ):
                 # Flip the color values for the selected word
                 bg_color = font_color
                 font_color = theme.bg_color
+                self.ctx.display.fill_rectangle(
+                    0,
+                    y_region if kboard.has_minimal_display else y_region - 2,
+                    rect_width,
+                    (
+                        word_v_padding
+                        if kboard.has_minimal_display
+                        else word_v_padding + 1
+                    ),
+                    bg_color,
+                )
             self.ctx.display.draw_string(
                 x_padding,
                 y_region,
@@ -229,10 +264,23 @@ class MnemonicEditor(Page):
                 # Display is wide enough; render the next 12 words on the right side
                 font_color = word_color(word_index + 12)
                 bg_color = theme.bg_color
-                if word_index + 12 == button_index and self.ctx.input.buttons_active:
+                if word_index + 12 == button_index and (
+                    self.ctx.input.buttons_active or highlight
+                ):
                     # Flip the color values for the selected word
                     bg_color = font_color
                     font_color = theme.bg_color
+                    self.ctx.display.fill_rectangle(
+                        self.ctx.display.width() >> 1,
+                        y_region if kboard.has_minimal_display else y_region - 2,
+                        rect_width,
+                        (
+                            word_v_padding
+                            if kboard.has_minimal_display
+                            else word_v_padding + 1
+                        ),
+                        bg_color,
+                    )
                 self.ctx.display.draw_string(
                     MINIMAL_PADDING + self.ctx.display.width() // 2,
                     y_region,
@@ -244,18 +292,6 @@ class MnemonicEditor(Page):
                 )
             word_index += 1
             y_region += word_v_padding
-
-        if self.mnemonic_length == 24 and kboard.is_m5stickv and page == 0:
-            go_txt = "13-24"
-        else:
-            go_txt = t("Go")
-        esc_txt = t("Esc")
-        menu_index = None
-        if self.ctx.input.buttons_active and button_index >= ESC_INDEX:
-            menu_index = button_index - ESC_INDEX
-        self.draw_proceed_menu(
-            go_txt, esc_txt, y_region, menu_index, self.valid_checksum
-        )
 
     def edit_word(self, index):
         """Edit a word"""
@@ -294,16 +330,29 @@ class MnemonicEditor(Page):
             self.ctx.display.clear()
             self._draw_header()
             self._map_words(button_index, page)
-            btn = self.ctx.input.wait_for_fastnav_button()
-            if btn == BUTTON_TOUCH:
-                button_index = self.ctx.input.touch.current_index()
-                if button_index < ESC_INDEX:
-                    if self.mnemonic_length == 24 and button_index % 2 == 1:
-                        button_index //= 2
-                        button_index += 12
-                    else:
-                        button_index //= 2
-                btn = BUTTON_ENTER
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_fastnav_button()
+                if btn == BUTTON_TOUCH:
+                    button_index = self.ctx.input.touch.current_index()
+                    if button_index < 0:
+                        continue
+                    if button_index < ESC_INDEX:
+                        if self.mnemonic_length == 24 and button_index % 2 == 1:
+                            button_index = (button_index >> 1) + 12
+                        else:
+                            button_index >>= 1
+                    # clear words area to remove any highligh from btn
+                    self.ctx.display.fill_rectangle(
+                        0,
+                        self.header_offset,
+                        self.ctx.display.width(),
+                        self.ctx.display.height() * 3 // 4 + FONT_HEIGHT // 2,
+                        theme.bg_color,
+                    )
+                    self._map_words(button_index, page, highlight=True)  # highlight
+                    time.sleep_ms(TOUCH_HIGHLIGHT_MS)  # wait a little
+                    btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if button_index == GO_INDEX:
                     if self.mnemonic_length == 24 and kboard.is_m5stickv and page == 0:
@@ -316,7 +365,7 @@ class MnemonicEditor(Page):
                 if button_index == ESC_INDEX:
                     # Cancel
                     self.ctx.display.clear()
-                    if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+                    if self.prompt(t("Are you sure?"), self.ctx.display.height() >> 1):
                         return None
                     continue
                 new_word = self.edit_word(button_index + page * 12)
@@ -324,7 +373,7 @@ class MnemonicEditor(Page):
                     self.ctx.display.clear()
                     if self.prompt(
                         str(button_index + page * 12 + 1) + ".\n\n" + new_word + "\n\n",
-                        self.ctx.display.height() // 2,
+                        self.ctx.display.height() >> 1,
                     ):
                         self.current_mnemonic[button_index + page * 12] = new_word
                         self.calculate_checksum()

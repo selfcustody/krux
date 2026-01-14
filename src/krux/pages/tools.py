@@ -32,6 +32,8 @@ from . import (
     # NUM_SPECIAL_2,
 )
 from ..krux_settings import t
+from ..settings import CONTEXT_ARROW
+from ..themes import theme
 
 
 # TODO: re-enable "Create a QR Code" (and keypads ^^^) once encryption is possible w/o Datum Tool
@@ -46,12 +48,16 @@ class Tools(Page):
             Menu(
                 ctx,
                 [
-                    (t("Datum Tool"), self.datum_tool),
-                    (t("Device Tests"), self.device_tests),
+                    (t("Datum Tool") + CONTEXT_ARROW, self.datum_tool),
+                    (t("Device Tests") + CONTEXT_ARROW, self.device_tests),
                     # (t("Create QR Code"), self.create_qr),
                     (t("Descriptor Addresses"), self.descriptor_addresses),
-                    (t("Flash Tools"), self.flash_tools),
-                    (t("Remove Mnemonic"), self.rm_stored_mnemonic),
+                    (t("Flash Tools") + CONTEXT_ARROW, self.flash_tools),
+                    (
+                        t("Remove Mnemonic") + CONTEXT_ARROW,
+                        self.rm_stored_mnemonic,
+                        theme.no_esc_color,
+                    ),
                 ],
             ),
         )

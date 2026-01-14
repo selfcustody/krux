@@ -92,7 +92,6 @@ translation_array = [
     "Pruebas del dispositivo",
     "Pantalla",
     "No apagues el dispositivo, puede tardar un tiempo en completarse.",
-    "Listo para convertir",
     "¿Listo?",
     "Doble mnemónico",
     "Operador",

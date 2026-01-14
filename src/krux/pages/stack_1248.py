@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import time
 from embit.wordlists.bip39 import WORDLIST
 from . import Page
+from . import Context
 from ..themes import theme
 from ..krux_settings import t
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
@@ -32,6 +34,8 @@ from ..input import (
     BUTTON_TOUCH,
     FAST_FORWARD,
     FAST_BACKWARD,
+    SWIPE_FAIL,
+    TOUCH_HIGHLIGHT_MS,
 )
 from ..kboard import kboard
 
@@ -43,7 +47,7 @@ STACKBIT_MAX_INDEX = 13
 class Stackbit(Page):
     """Class for handling Stackbit 1248 fomat"""
 
-    def __init__(self, ctx):
+    def __init__(self, ctx: Context):
         super().__init__(ctx, None)
         self.ctx = ctx
         self.x_offset = DEFAULT_PADDING
@@ -221,7 +225,9 @@ class Stackbit(Page):
         self.y_offset = 2 * FONT_HEIGHT
         self.y_pad = FONT_HEIGHT
 
-        self.ctx.display.draw_hcentered_text("Stackbit 1248")
+        self.ctx.display.draw_hcentered_text(
+            "Stackbit 1248", color=theme.highlight_color
+        )
         self._draw_grid(y_offset)
         self._draw_labels(y_offset, word_index)
         digits, digits_str = self._word_to_digits(word)
@@ -273,74 +279,82 @@ class Stackbit(Page):
     def _draw_index(self, index):
         """Outline index respective"""
         x_offset = self.x_offset + self.x_pad + 1
-        width = 3 * self.x_pad
-        y_position = index // 7
-        y_position *= self.y_pad
-        y_position += self.y_offset - 1
-        color = theme.fg_color
-        if index >= STACKBIT_GO_INDEX:
-            x_position = x_offset + 3 * self.x_pad
-            y_position += 1
-            color = theme.go_color
-        elif index >= STACKBIT_ESC_INDEX:
-            x_position = x_offset
-            y_position += 1
-            color = theme.no_esc_color
-        else:
-            x_position = index % 7
-            x_position *= self.x_pad
-            x_position += x_offset
-            width = self.x_pad - 2
-        self.ctx.display.outline(
-            x_position,
-            y_position,
-            width,
+        y_pos = self.y_offset - 1 + (index // 7) * self.y_pad
+
+        # clear GO / ESC prev highlighted area
+        color = theme.bg_color
+        self.ctx.display.fill_rectangle(
+            x_offset,
+            self.y_offset + 5 * self.y_pad,
+            6 * self.x_pad,
             self.y_pad,
             color,
         )
 
-    def _draw_menu(self):
+        if index < STACKBIT_ESC_INDEX:
+            x_pos = x_offset + (index % 7) * self.x_pad
+            self.ctx.display.outline(
+                x_pos,
+                y_pos,
+                self.x_pad - 2,
+                self.y_pad,
+                theme.fg_color,
+            )
+            return
+
+        # GO / ESC button
+        if index >= STACKBIT_GO_INDEX:
+            x_pos = x_offset + 3 * self.x_pad
+            color = theme.go_color
+        elif index >= STACKBIT_ESC_INDEX:
+            x_pos = x_offset
+            color = theme.no_esc_color
+        self.ctx.display.fill_rectangle(
+            x_pos + 2, y_pos + 1, 3 * self.x_pad - 4, self.y_pad, color
+        )
+
+    def _draw_menu(self, index, touch_highlight=False):
         """Draws options to leave and proceed"""
         y_offset = self.y_offset + 5 * self.y_pad
         label_y_offset = (self.y_pad - FONT_HEIGHT) // 2
         x_offset = self.x_offset + self.x_pad
-        self.ctx.display.draw_string(
-            x_offset + 1 * self.x_pad,
-            y_offset + label_y_offset,
+
+        # Helper to compute highlight state
+        def _draw_button(cond, x_mul, label, base_color):
+            highlight = (
+                cond if self.ctx.input.buttons_active else cond and touch_highlight
+            )
+            fg_color = theme.bg_color if highlight else base_color
+            bg_color = base_color if highlight else theme.bg_color
+            self.ctx.display.draw_string(
+                round(x_offset + x_mul * self.x_pad),
+                y_offset + label_y_offset,
+                t(label),
+                fg_color,
+                bg_color,
+            )
+
+        # ESC / GO button
+        _draw_button(
+            STACKBIT_ESC_INDEX <= index < STACKBIT_GO_INDEX,
+            1,
             t("Esc"),
             theme.no_esc_color,
         )
-        self.ctx.display.draw_string(
-            round(x_offset + 4.2 * self.x_pad),
-            y_offset + label_y_offset,
+        _draw_button(
+            index >= STACKBIT_GO_INDEX,
+            4.2,
             t("Go"),
             theme.go_color,
         )
-        # print border around buttons only on touch devices
+
         if kboard.has_touchscreen:
-            self.ctx.display.draw_line(
-                x_offset,
-                y_offset,
-                x_offset + 6 * self.x_pad,
-                y_offset,
+            self.ctx.display.draw_vline(
+                self.x_offset + 4 * self.x_pad,
+                self.y_offset + 5 * self.y_pad + FONT_HEIGHT // 2,
+                FONT_HEIGHT,
                 theme.frame_color,
             )
-            self.ctx.display.draw_line(
-                x_offset,
-                y_offset + self.y_pad,
-                x_offset + 6 * self.x_pad,
-                y_offset + self.y_pad,
-                theme.frame_color,
-            )
-            for _ in range(3):
-                self.ctx.display.draw_line(
-                    x_offset,
-                    y_offset,
-                    x_offset,
-                    y_offset + self.y_pad,
-                    theme.frame_color,
-                )
-                x_offset += 3 * self.x_pad
 
     def digits_to_word(self, digits):
         """Returns seed word respective to digits BIP39 dictionaty position"""
@@ -392,9 +406,10 @@ class Stackbit(Page):
                 return STACKBIT_GO_INDEX
             if index <= STACKBIT_MAX_INDEX:
                 return page_prev_move[index]
-            if index <= STACKBIT_ESC_INDEX:
+            if index < STACKBIT_GO_INDEX:
                 return STACKBIT_MAX_INDEX
-        return STACKBIT_ESC_INDEX
+            return STACKBIT_ESC_INDEX
+        return index
 
     def enter_1248(self):
         """UI to manually enter a Stackbit 1248"""
@@ -418,15 +433,27 @@ class Stackbit(Page):
             y_offset = self.y_offset
             self._draw_grid(y_offset)
             self._draw_labels(y_offset, word_index)
-            self._draw_menu()
             if self.ctx.input.buttons_active:
                 self._draw_index(index)
+            self._draw_menu(index)
             self.preview_word(digits)
             self._draw_punched(digits, y_offset)
-            btn = self.ctx.input.wait_for_fastnav_button()
-            if btn == BUTTON_TOUCH:
-                btn = BUTTON_ENTER
-                index = self.ctx.input.touch.current_index()
+
+            # wait until valid input is captured
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_fastnav_button()
+                if btn == BUTTON_TOUCH:
+                    index = self.ctx.input.touch.current_index()
+                    if index < 0 or 13 < index < STACKBIT_ESC_INDEX:
+                        continue
+
+                    # Highlight the touched btn
+                    self._draw_index(index)
+                    self._draw_menu(index, touch_highlight=True)
+                    time.sleep_ms(TOUCH_HIGHLIGHT_MS)  # wait a little
+
+                    btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if index >= STACKBIT_GO_INDEX:  # go
                     word = self.digits_to_word(digits)
@@ -455,13 +482,11 @@ class Stackbit(Page):
                             self.ctx.display.clear()
                             if self.prompt(t("Done?"), self.ctx.display.height() // 2):
                                 break
-                            # self._map_keys_array() #can be removed?
                         word_index += 1
                 elif index >= STACKBIT_ESC_INDEX:  # ESC
                     self.ctx.display.clear()
                     if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
                         break
-                    # self._map_keys_array()
                 elif index < 14:
                     digits = self._toggle_bit(digits, index)
             else:
