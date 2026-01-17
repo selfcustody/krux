@@ -156,6 +156,7 @@ class Key:
         script_type=P2WPKH,
         derivation="",
     ):
+        print(network)
         self.mnemonic = mnemonic
         self.policy_type = policy_type
         self.network = network
@@ -253,7 +254,8 @@ class Key:
 
         prv = self.root.derive(derivation).key
         sig = secp256k1.ecdsa_sign_recoverable(
-            message_hash, prv._secret  # pylint: disable=W0212
+            message_hash,
+            prv._secret,  # pylint: disable=W0212
         )
         flag = sig[64]
         flag = bytes([27 + flag + 4])
@@ -363,4 +365,10 @@ def get_network_name(network):
     """Returns human-readable name for a network object (Mainnet or Testnet)"""
     if not network:
         return None
-    return "Mainnet" if network == NETWORKS["main"] else "Testnet"
+    if network == NETWORKS["test"]:
+        return "Mainnet"
+    if network == NETWORKS["signet"]:
+        return "Testnet"
+    if network == NETWORKS["regtest"]:
+        return "Signet"
+    return "Mainnet"

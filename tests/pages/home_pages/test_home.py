@@ -414,25 +414,111 @@ def test_change_passphrase_menu(mocker, amigo, tdata):
 def test_cancel_customize_wallet_menu(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_PAGE
 
-    BTN_SEQUENCE = [
-        BUTTON_PAGE_PREV,  # Move to No
-        BUTTON_ENTER,  # Press No
+    cases = [
+        # Case 0: Start with a mainnet wallet and cancel customization
+        (
+            [
+                BUTTON_PAGE_PREV,  # Move to No
+                BUTTON_ENTER,  # Press No
+            ],
+            "Mainnet",
+            "Mainnet",
+        ),
+        # Case 1: Start with a mainnet wallet, start the customization and cancel it
+        (
+            [
+                BUTTON_ENTER,  # Choose Yes
+                BUTTON_PAGE_PREV,  # Move to Back
+                BUTTON_ENTER,  # Press Back
+            ],
+            "Mainnet",
+            "Mainnet",
+        ),
+        # Case 2: Start with a mainnet wallet, start the customization and cancel it
+        (
+            [
+                BUTTON_ENTER,  # Choose Yes
+                BUTTON_ENTER,  # Choose network
+                BUTTON_PAGE_PREV,  # Move to Back
+                BUTTON_ENTER,  # Press Back
+                BUTTON_PAGE_PREV,  # Move to Back
+                BUTTON_ENTER,  # Press Back
+            ],
+            "Mainnet",
+            "Mainnet",
+        ),
+        # Case 3: Start with a mainnet wallet, start the customization and select mainnet
+        (
+            [
+                BUTTON_ENTER,  # Choose Yes
+                BUTTON_ENTER,  # Choose network
+                BUTTON_ENTER,  # Press Mainnet
+                BUTTON_PAGE_PREV,  # Move to Back
+                BUTTON_ENTER,  # Press Back
+            ],
+            "Mainnet",
+            "Mainnet",
+        ),
+        # Case 4: Start with a mainnet wallet, start the customization and select testnet
+        (
+            [
+                BUTTON_ENTER,  # Choose Yes
+                BUTTON_ENTER,  # Choose network
+                BUTTON_PAGE,  # Move to Testnet
+                BUTTON_ENTER,  # Press Testnet
+                BUTTON_PAGE_PREV,  # Move to Back
+                BUTTON_ENTER,  # Press Back
+            ],
+            "Mainnet",
+            "Testnet",
+        ),
+        # Case 5: Start with a mainnet wallet, start the customization and select signet
+        (
+            [
+                BUTTON_ENTER,  # Choose Yes
+                BUTTON_ENTER,  # Choose network
+                BUTTON_PAGE,  # Move to Testnet
+                BUTTON_PAGE,  # Move to Signet
+                BUTTON_ENTER,  # Press Signet
+                BUTTON_PAGE_PREV,  # Move to Back
+                BUTTON_ENTER,  # Press Back
+            ],
+            "Mainnet",
+            "Signet",
+        ),
+        # Case 6: Start with a mainnet wallet, start the customization and select regtest
+        (
+            [
+                BUTTON_ENTER,  # Choose Yes
+                BUTTON_ENTER,  # Choose network
+                BUTTON_PAGE,  # Move to Testnet
+                BUTTON_PAGE,  # Move to Signet
+                BUTTON_PAGE,  # Move to Regtest
+                BUTTON_ENTER,  # Press Regtest
+                BUTTON_PAGE_PREV,  # Move to Back
+                BUTTON_ENTER,  # Press Back
+            ],
+            "Mainnet",
+            "Regtest",
+        ),
     ]
 
-    # Wallet before customization
-    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
-    assert wallet.key.network["name"] == "Mainnet"
+    for n, case in enumerate(cases):
+        print(f"Case {n}: {case}")
 
-    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
-    home = Home(ctx)
-    home.customize()
+        # Wallet before customization
+        wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+        assert wallet.key.network["name"] == case[1]
 
-    # Wallet after cancel customization
-    # should remain the same as before
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    assert ctx.wallet.key.network["name"] == "Mainnet"
+        ctx = create_ctx(mocker, case[0], wallet=wallet)
+        home = Home(ctx)
+        home.customize()
+
+        # Wallet after customization
+        assert ctx.input.wait_for_button.call_count == len(case[0])
+        assert ctx.wallet.key.network["name"] == case[2]
 
 
 def test_customize_wallet_menu(mocker, amigo, tdata):
@@ -440,23 +526,71 @@ def test_customize_wallet_menu(mocker, amigo, tdata):
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
-    BTN_SEQUENCE = [
-        BUTTON_ENTER,  # Agree to customize
-        BUTTON_ENTER,  # Enter "Network"
-        BUTTON_PAGE,  # Change to "Testnet"
-        BUTTON_ENTER,  # Confirm "Testnet"
-        BUTTON_PAGE_PREV,  # Go to Back
-        BUTTON_ENTER,  # Exit
+    cases = [
+        # Mainet -> Mainnet
+        (
+            [
+                BUTTON_ENTER,  # Agree to customize
+                BUTTON_ENTER,  # Enter "Network"
+                BUTTON_ENTER,  # Confirm "Mainnet"
+                BUTTON_PAGE_PREV,  # Go to Back
+                BUTTON_ENTER,  # Exit
+            ],
+            "Mainnet",
+            "Mainnet",
+        ),
+        # Mainet -> Testnet
+        (
+            [
+                BUTTON_ENTER,  # Agree to customize
+                BUTTON_ENTER,  # Enter "Network"
+                BUTTON_PAGE,  # Change to "Testnet"
+                BUTTON_ENTER,  # Confirm "Testnet"
+                BUTTON_PAGE_PREV,  # Go to Back
+                BUTTON_ENTER,  # Exit
+            ],
+            "Mainnet",
+            "Testnet",
+        ),
+        # Mainet -> Signet
+        (
+            [
+                BUTTON_ENTER,  # Agree to customize
+                BUTTON_ENTER,  # Enter "Network"
+                *([BUTTON_PAGE] * 2),  # Change to "Signet"
+                BUTTON_ENTER,  # Confirm "Signet"
+                BUTTON_PAGE_PREV,  # Go to Back
+                BUTTON_ENTER,  # Exit
+            ],
+            "Mainnet",
+            "Signet",
+        ),
+        # Mainet -> Regtest
+        (
+            [
+                BUTTON_ENTER,  # Agree to customize
+                BUTTON_ENTER,  # Enter "Network"
+                *([BUTTON_PAGE] * 3),  # Change to "Regtest"
+                BUTTON_ENTER,  # Confirm "Regtest"
+                BUTTON_PAGE_PREV,  # Go to Back
+                BUTTON_ENTER,  # Exit
+            ],
+            "Mainnet",
+            "Regtest",
+        ),
     ]
 
-    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
-    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
-    assert ctx.wallet.key.network["name"] == "Mainnet"
-    home = Home(ctx)
-    home.customize()
+    for n, case in enumerate(cases):
+        print(f"Case {n}: {case}")
+        wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+        ctx = create_ctx(mocker, case[0], wallet=wallet)
+        assert ctx.wallet.key.network["name"] == case[1]
+        home = Home(ctx)
+        home.customize()
 
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    assert ctx.wallet.key.network["name"] == "Testnet"
+        assert ctx.wallet.key.network["name"] == case[2]
+        assert ctx.input.wait_for_button.call_count == len(case[0])
+        n += 1
 
 
 def test_cancel_load_bip85_menu(mocker, amigo, tdata):

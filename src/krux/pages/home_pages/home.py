@@ -150,6 +150,7 @@ class Home(Page):
         )
         if prev_key != new_key:
             self.ctx.wallet = Wallet(new_key)
+
         return MENU_CONTINUE
 
     def bip85(self):
