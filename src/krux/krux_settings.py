@@ -310,6 +310,19 @@ class ButtonsSettings(SettingsNamespace):
         }[attr]
 
 
+class BatterySettings(SettingsNamespace):
+    """Battery display settings"""
+
+    namespace = "settings.battery"
+    percentage = CategorySetting("percentage", True, [False, True])
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "percentage": t("Percentage"),
+        }[attr]
+
+
 class TouchSettings(SettingsNamespace):
     """Touch sensitivity settings"""
 
@@ -376,6 +389,8 @@ class HardwareSettings(SettingsNamespace):
     def __init__(self):
         self.printer = PrinterSettings()
         self.buttons = ButtonsSettings()
+        if kboard.has_battery:
+            self.battery = BatterySettings()
         if board.config["krux"]["display"].get("touch", False):
             self.touch = TouchSettings()
         if kboard.is_amigo:
@@ -390,6 +405,8 @@ class HardwareSettings(SettingsNamespace):
             "printer": t("Printer"),
         }
         hardware_menu["buttons"] = t("Buttons")
+        if kboard.has_battery:
+            hardware_menu["battery"] = t("Battery")
         if board.config["krux"]["display"].get("touch", False):
             hardware_menu["touchscreen"] = t("Touchscreen")
         if kboard.is_amigo:
