@@ -222,42 +222,42 @@ class QRCodeCapture(Page):
 def qr_str_to_bytes(qr_result):
     """
     both simulator and MaixPy will return qrcode result as str,
-    even when the qr should be binary.  This function attempts
+    even when the qr should be binary. This function attempts
     encodings to return bytes when binary.
-
+    """
     # previously working -- mostly, but too complicated
     # lots of playing here while dealing with binary qrcode
     # and trying to understand differences between when reading
     # from maixpy device vs simulator
-    if isinstance(qr_result, str):
-        as_bytes = qr_result.encode()
-        binary = bool(128 <= max(as_bytes) < 256)
-        try:
-            as_bytes.decode()
-            maixpy = False
-        except:
-            maixpy = True
-
-        if binary:
-            if maixpy:
-                qr_result = as_bytes
-            else:
-                maxord = max((ord(x) for x in qr_result))
-                if maxord < 256:
-                    # same as latin-1 on sim, except works in micropython
-                    qr_result = bytes((ord(x) for x in qr_result))
-                else:
-                    big5 = 0
-                    as_bytes = b""
-                    for i, char in enumerate(qr_result):
-                        if ord(char) < 256:
-                            as_bytes += bytes([ord(char)])
-                        else:
-                            as_bytes += char.encode("big5")
-                            big5 += 1
-                    qr_result = as_bytes
-    """
-
+    #
+    # if isinstance(qr_result, str):
+    #    as_bytes = qr_result.encode()
+    #    binary = bool(128 <= max(as_bytes) < 256)
+    #    try:
+    #        as_bytes.decode()
+    #        maixpy = False
+    #    except:
+    #        maixpy = True
+    #
+    #    if binary:
+    #        if maixpy:
+    #            qr_result = as_bytes
+    #        else:
+    #            maxord = max((ord(x) for x in qr_result))
+    #            if maxord < 256:
+    #                # same as latin-1 on sim, except works in micropython
+    #                qr_result = bytes((ord(x) for x in qr_result))
+    #            else:
+    #                big5 = 0
+    #                as_bytes = b""
+    #                for i, char in enumerate(qr_result):
+    #                    if ord(char) < 256:
+    #                        as_bytes += bytes([ord(char)])
+    #                    else:
+    #                        as_bytes += char.encode("big5")
+    #                        big5 += 1
+    #                qr_result = as_bytes
+    #
     # TODO: get this working for partially encoded "big5" strings on simulator
     # TODO: remove notes above in func-doc
     # TODO: remove all print statements

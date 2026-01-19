@@ -26,7 +26,10 @@ import time
 import gc
 import os
 
+from krux.context import ctx
 from krux.power import power_manager
+from krux.auto_shutdown import auto_shutdown
+
 
 MIN_SPLASH_WAIT_TIME = 1000
 
@@ -134,29 +137,52 @@ def home(ctx_home):
                 break
 
 
-preimport_ticks = time.ticks_ms()
-draw_splash()
-check_for_updates()
-gc.collect()
+def on_preimport_ticks():
+    """Draw K logo, check for new firmare and make garbage collector work"""
+    _ticks = time.ticks_ms()
+    draw_splash()
+    check_for_updates()
+    gc.collect()
+    return _ticks
 
-from krux.context import ctx
-from krux.auto_shutdown import auto_shutdown
+
+def on_postimport_ticks(pt):
+    """If importing happened too fast, sleep the difference so the logo
+    will be shown"""
+    postimport_ticks = time.ticks_ms()
+    if pt + MIN_SPLASH_WAIT_TIME > postimport_ticks:
+        time.sleep_ms(pt + MIN_SPLASH_WAIT_TIME - postimport_ticks)
+
+
+def on_tc_code_verification(pm):
+    """Check for TC_CODE and if it fails, shutdown the device"""
+    if not tc_code_verification(ctx):
+        pm.shutdown()
+
+
+def on_run():
+    """Basic architecture of krux:
+    - Runs ``src.krux.pages.login.Login`` page;
+    - cleans memory calling ``garbage.collect``;
+    - runs ``src.krux.pages.home.Home`` page.
+    """
+    login(ctx)
+    gc.collect()
+    home(ctx)
+
+
+def on_shutdown():
+    """Clear the current ``src.krux.context.Context`` and calls ``power_manager.shutdown``"""
+    ctx.clear()
+    power_manager.shutdown()
+
+
+preimport_ticks = on_preimport_ticks()
 
 ctx.power_manager = power_manager
 auto_shutdown.add_ctx(ctx)
 
-
-# If importing happened too fast, sleep the difference so the logo
-# will be shown
-postimport_ticks = time.ticks_ms()
-if preimport_ticks + MIN_SPLASH_WAIT_TIME > postimport_ticks:
-    time.sleep_ms(preimport_ticks + MIN_SPLASH_WAIT_TIME - postimport_ticks)
-
-if not tc_code_verification(ctx):
-    power_manager.shutdown()
-login(ctx)
-gc.collect()
-home(ctx)
-
-ctx.clear()
-power_manager.shutdown()
+on_postimport_ticks(preimport_ticks)
+on_tc_code_verification(power_manager)
+on_run()
+on_shutdown()
