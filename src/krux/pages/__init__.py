@@ -33,6 +33,7 @@ from ..input import (
     BUTTON_TOUCH,
     SWIPE_DOWN,
     SWIPE_UP,
+    SWIPE_FAIL,
     FAST_FORWARD,
     FAST_BACKWARD,
     SWIPE_LEFT,
@@ -157,7 +158,7 @@ class Page:
         """
         buffer = starting_buffer
         pad = Keypad(self.ctx, keysets, possible_keys_fn)
-        swipe_has_not_been_used = True
+        swipe_used = False
         show_swipe_hint = False
         while True:
             self.ctx.display.clear()
@@ -171,9 +172,12 @@ class Page:
             show_swipe_hint = False  # unless overridden by a particular key,
             # don't show the swipe hint after a key press
 
-            btn = self.ctx.input.wait_for_fastnav_button()
-            if btn == BUTTON_TOUCH:
-                btn = pad.touch_to_physical()
+            # wait until valid input is captured
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_fastnav_button()
+                if btn == BUTTON_TOUCH:
+                    btn = pad.touch_to_physical()
             if btn == BUTTON_ENTER:
                 pad.moving_forward = True
                 changed = False
@@ -193,8 +197,7 @@ class Page:
                 elif pad.cur_key_index == pad.go_index:
                     break
                 elif pad.cur_key_index == pad.more_index:
-                    swipeable = kboard.has_touchscreen
-                    if swipeable and swipe_has_not_been_used:
+                    if kboard.has_touchscreen and not swipe_used:
                         show_swipe_hint = True
                     pad.next_keyset()
                 elif pad.cur_key_index < len(pad.keys):
@@ -212,7 +215,7 @@ class Page:
                     break
             else:
                 if btn in (SWIPE_UP, SWIPE_LEFT, SWIPE_DOWN, SWIPE_RIGHT):
-                    swipe_has_not_been_used = False
+                    swipe_used = True
                 pad.navigate(btn)
         if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
@@ -401,90 +404,58 @@ class Page:
 
     def prompt(self, text, offset_y=0, highlight_prefix=""):
         """Prompts user to answer Yes or No"""
-        lines = self.ctx.display.to_lines(text)
-        offset_y -= (len(lines) - 1) * FONT_HEIGHT
-        self.ctx.display.draw_hcentered_text(
+        lines = self.ctx.display.draw_hcentered_text(
             text,
             offset_y,
             theme.fg_color,
             theme.bg_color,
             highlight_prefix=highlight_prefix,
         )
-        self.y_keypad_map = []
-        self.x_keypad_map = []
+        offset_y = min(
+            offset_y + lines * FONT_HEIGHT, self.ctx.display.height() - FONT_HEIGHT
+        )
         if kboard.has_minimal_display:
             return self.ctx.input.wait_for_button() == BUTTON_ENTER
-        offset_y += (len(lines) + 1) * FONT_HEIGHT
-        self.x_keypad_map.extend(
-            [0, self.ctx.display.width() // 2, self.ctx.display.width()]
-        )
-        y_key_map = offset_y - (3 * FONT_HEIGHT // 2)
-        self.y_keypad_map.append(y_key_map)
-        y_key_map += 4 * FONT_HEIGHT
-        self.y_keypad_map.append(min(y_key_map, self.ctx.display.height()))
+        self.x_keypad_map = [
+            DEFAULT_PADDING,
+            self.ctx.display.width() // 2,
+            self.ctx.display.width() - DEFAULT_PADDING,
+        ]
+        touch_offset_y = self.proceed_menu_text_y_offset(offset_y) - FONT_HEIGHT
+        self.y_keypad_map = [touch_offset_y, touch_offset_y + 3 * FONT_HEIGHT]
         if kboard.has_touchscreen:
             self.ctx.input.touch.set_regions(self.x_keypad_map, self.y_keypad_map)
+
+        go_str = t("Yes")
+        no_str = t("No")
         btn = None
-        answer = True
+        index = 1
         while btn != BUTTON_ENTER:
-            go_str = t("Yes")
-            no_str = t("No")
-            offset_x = (self.ctx.display.width() * 3) // 4 - (
-                lcd.string_width_px(go_str) // 2
-            )
-            self.ctx.display.draw_string(
-                offset_x, offset_y, go_str, theme.go_color, theme.bg_color
-            )
-            offset_x = self.ctx.display.width() // 4 - (
-                lcd.string_width_px(no_str) // 2
-            )
-            self.ctx.display.draw_string(
-                offset_x, offset_y, no_str, theme.no_esc_color, theme.bg_color
-            )
-            if self.ctx.input.buttons_active:
-                if answer:
-                    self.ctx.display.outline(
-                        self.ctx.display.width() // 2,
-                        offset_y - FONT_HEIGHT // 2,
-                        self.ctx.display.usable_width() // 2,
-                        2 * FONT_HEIGHT - 2,
-                        theme.go_color,
-                    )
-                else:
-                    self.ctx.display.outline(
-                        DEFAULT_PADDING,
-                        offset_y - FONT_HEIGHT // 2,
-                        self.ctx.display.usable_width() // 2,
-                        2 * FONT_HEIGHT - 2,
-                        theme.no_esc_color,
-                    )
-            elif kboard.has_touchscreen:
-                self.ctx.display.draw_vline(
-                    self.ctx.display.width() // 2,
-                    self.y_keypad_map[0] + FONT_HEIGHT,
-                    2 * FONT_HEIGHT,
-                    theme.frame_color,
-                )
-            btn = self.ctx.input.wait_for_button()
+            self.draw_proceed_menu(go_str, no_str, offset_y, index)
+            # wait until valid input is captured
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_button()
+                if btn == BUTTON_TOUCH:
+                    self.ctx.input.touch.clear_regions()
+                    # index 0 is No / 1 is Yes / -1 is Edge touch (ignore)
+                    new_index = self.ctx.input.touch.current_index()
+                    if new_index in (0, 1):
+                        if new_index == 1:
+                            return True
+                        return False
             if btn in (BUTTON_PAGE, BUTTON_PAGE_PREV):
-                answer = not answer
                 # erase yes/no area for next loop
                 self.ctx.display.fill_rectangle(
                     0,
-                    offset_y - FONT_HEIGHT,
+                    self.proceed_menu_text_y_offset(offset_y) - FONT_HEIGHT // 2,
                     self.ctx.display.width(),
                     3 * FONT_HEIGHT,
                     theme.bg_color,
                 )
-            elif btn == BUTTON_TOUCH:
-                self.ctx.input.touch.clear_regions()
-                # index 0 = No
-                # index 1 = Yes
-                if self.ctx.input.touch.current_index():
-                    return True
-                return False
+                index = (index + 1) % 2
         # BUTTON_ENTER
-        return answer
+        return index == 1
 
     def fit_to_line(self, text, prefix="", fixed_chars=0, crop_middle=True):
         """Fits text with prefix plus fixed_chars at the beginning into one line,
@@ -534,6 +505,12 @@ class Page:
         _, status = self.menu.run_loop(start_from_index)
         return status != MENU_SHUTDOWN
 
+    def proceed_menu_text_y_offset(self, y_offset):
+        """Y offset for the text on proceed menu"""
+        return (
+            self.ctx.display.height() - (y_offset + FONT_HEIGHT + MINIMAL_PADDING)
+        ) // 2 + y_offset
+
     def draw_proceed_menu(
         self, go_txt, esc_txt, y_offset=0, menu_index=None, go_enabled=True
     ):
@@ -544,9 +521,7 @@ class Page:
         esc_x_offset = (
             self.ctx.display.width() // 2 - lcd.string_width_px(esc_txt)
         ) // 2
-        go_esc_y_offset = (
-            self.ctx.display.height() - (y_offset + FONT_HEIGHT + MINIMAL_PADDING)
-        ) // 2 + y_offset
+        go_esc_y_offset = self.proceed_menu_text_y_offset(y_offset)
         if menu_index == 0 and self.ctx.input.buttons_active:
             self.ctx.display.outline(
                 DEFAULT_PADDING,
@@ -753,15 +728,19 @@ class Menu:
                 start_from_submenu = False
             else:
                 screensaver_time = Settings().appearance.screensaver_time
-                btn = self.ctx.input.wait_for_fastnav_button(
-                    # Block if screen saver not active
-                    screensaver_time == 0,
-                    screensaver_time * ONE_MINUTE,
-                )
-                if kboard.has_touchscreen:
+                btn = BUTTON_TOUCH
+                while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                    btn = self.ctx.input.wait_for_fastnav_button(
+                        # Block if screen saver not active
+                        screensaver_time == 0,
+                        screensaver_time * ONE_MINUTE,
+                    )
                     if btn == BUTTON_TOUCH:
                         selected_item_index = self.ctx.input.touch.current_index()
+                        if selected_item_index < 0:
+                            continue
                         btn = BUTTON_ENTER
+                if kboard.has_touchscreen:
                     self.ctx.input.touch.clear_regions()
                 if btn == BUTTON_ENTER:
                     status = self._clicked_item(selected_item_index)
