@@ -95,7 +95,7 @@ You can also retrieve [encrypted mnemonics previously stored](./navigating-the-m
 <img src="/krux/img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-250.png" align="right" class="m5stickv">
 <img src="/krux/img/maixpy_amigo/load-mnemonic-seq-mnemonic-300.png" align="right" class="amigo">
 
-Once you have entered your mnemonic, you will be presented with the full list of words to confirm. A 12 word has only 4 checksum bits, so it has a 1 in 16 chance (6,25%) of still being valid even if you mistype a word. A 24 word phrase has 8 checksum bits, so it only has 1 in 256 chance (~0,4%) of still being valid if you mistype a word.
+Once you have entered your mnemonic, you will be presented with the full list of words to confirm. A 12 word phrase has only 4 checksum bits, so it has a 1 in 16 chance (6,25%) of still being valid even if you mistype a word. A 24 word phrase has 8 checksum bits, so it only has 1 in 256 chance (~0,4%) of still being valid if you mistype a word.
 
 <div style="clear: both"></div>
 
