@@ -119,13 +119,8 @@ Here you choose between `thermal/adafruit`, `cnc/file`, `cnc/grbl` or `none` (de
 
 <div style="clear: both"></div>
 
-<<<<<<< HEAD
 #### Touchscreen (Maix Amigo, Yahboom, WonderMV, TZT or Embed Fire only)
-<img src="../../img/maixpy_amigo/touchscreen-300.png" align="right" class="amigo">
-=======
-#### Touchscreen (Maix Amigo, Yahboom, WonderMV and TZT only)
 <img src="/krux/img/maixpy_amigo/touchscreen-300.png" align="right" class="amigo">
->>>>>>> 94fd28b3 (Updated image references to use absolute paths instead of relative links)
 
 If your device has touchscreen you can change the touch detection threshold. If it is being too sensitive or detecting false or ghost touches, you should increase the threshold value, making it less sensitive. The other way is also valid, reduce the threshold to make the screen more sensitive to touches.
 

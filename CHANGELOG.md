@@ -56,12 +56,9 @@ The Maix Bit device has long been discouraged due to its poor-quality camera. St
 - Optimized Datum show: total pages are no longer visible, and navigation no longer wraps from the first page to the last or vice versa; better memory management and handling for large (~100K) files
 - Enabled swipe up/down gestures on keypads, menus, and QR transcribe
 - Fix mnemonic thermal printing when long words span multiple lines
-<<<<<<< HEAD
 - Tools -> Check SD card is now in Tools -> Device Tests
 - All devices scan TinySeed and other binary grids in grayscale mode for better speed.
 - Button functionality reestablished on some pages for Yahboom with v1.1 hardware
-=======
->>>>>>> 1558347e (Fix mnemonic printing issue with long words)
 
 # Changelog 25.09.0 - September 2025
 
