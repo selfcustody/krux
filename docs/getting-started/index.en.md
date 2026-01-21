@@ -1,4 +1,4 @@
-<img src="../img/krux-devices.jpg" style="width: 40%; min-width: 260px;" class="align-right">
+<img src="/krux/img/krux-devices.jpg" style="width: 40%; min-width: 260px;" class="align-right">
 
 Krux is open-source Bitcoin signing firmware for devices with the K210 chipset; also known as a hardware signer. 
 

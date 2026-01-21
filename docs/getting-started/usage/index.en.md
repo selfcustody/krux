@@ -1,7 +1,7 @@
 After successfully installing the firmware, you will see this screen with the following options.
 
-<img src="../../img/maixpy_m5stickv/login-options-250.png" align="right" class="m5stickv">
-<img src="../../img/maixpy_amigo/login-options-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/login-options-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/login-options-300.png" align="right" class="amigo">
 
 #### Load Mnemonic
 Load your 12 or 24-word [BIP39 mnemonic](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki). For more information, see [Loading a Mnemonic](loading-a-mnemonic.md).
@@ -17,8 +17,8 @@ Useful tools are available, such as an SD card explorer or a QR code creator. Se
 
 <div style="clear: both"></div>
 
-<img src="../../img/maixpy_m5stickv/about-250.png" align="right" class="m5stickv">
-<img src="../../img/maixpy_amigo/about-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/about-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/about-300.png" align="right" class="amigo">
 
 #### About
 

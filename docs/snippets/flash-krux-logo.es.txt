@@ -1,0 +1,8 @@
+Cuando el proceso de actualización se complete, deberías ver el logo de Krux:
+
+<img src="/krux/img/maixpy_amigo/logo-300.png" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/logo-250.png" class="m5stickv">
+
+Si no es así, intenta apagar y prender tu dispositivo manteniendo presionado el boton de encendido por seis segundos.
+
+¡Felicitaciones, ahora estás ejecutando Krux!

@@ -2,13 +2,13 @@
 The examples below have been created so that you can test the workflow for scanning both 12 and 24 word mnemonics (the left plate only for a 12 word mnemonic and both plates for 24). The resulting fingerprint from an successful scan is also incldued in the image.
 
 ### Tinyseed
-![](../../img/tinyseed_binarygrid/tinyseed.jpg)
+![](/krux/img/tinyseed_binarygrid/tinyseed.jpg)
 
 ### OneKey KeyTag
-![](../../img/tinyseed_binarygrid/onekey_keytag.jpg)
+![](/krux/img/tinyseed_binarygrid/onekey_keytag.jpg)
 
 ### Binary Grid
-![](../../img/tinyseed_binarygrid/binarygrid.jpg)
+![](/krux/img/tinyseed_binarygrid/binarygrid.jpg)
 
 ## Size, Offset and Padding Reference
 The general logic for how these are processed is:
@@ -23,4 +23,4 @@ If you have a different type of grid that you want to use, you will need to edit
 
 You can match the pre-sets for supported key-types to the physical dimensions of the tag as shown below (offset numbers are in 1/10th of a millimeter).
 
-![](../../img/tinyseed_binarygrid/size_reference.jpg)
+![](/krux/img/tinyseed_binarygrid/size_reference.jpg)

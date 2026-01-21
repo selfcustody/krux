@@ -6,7 +6,7 @@ It is an implementation of the XOR ([exclusive OR](https://en.wikipedia.org/wiki
 
 Krux derives a new mnemonic (and therefore a new seed) by performing an XOR operation on the **entropy bytes** of the source mnemonics. The result of this XOR operation is a new set of **entropy bytes**, which is then converted into a new mnemonic - and subsequently, a new seed.
 
-<img src="../../../img/mnemonic_xor.png" align="center">
+<img src="/krux/img/mnemonic_xor.png" align="center">
 
 - Obtain two different mnemonics (A and B) and extract their **entropy bytes**.
 - Validate the input entropies to prevent redundant or unsafe operations:

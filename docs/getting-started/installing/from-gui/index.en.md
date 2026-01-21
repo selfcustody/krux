@@ -1,7 +1,7 @@
 You can install Krux (both official or beta releases) onto your K210-based device using our
 official desktop application, **Krux-Installer**:
 
-[<img src="../../../img/badge_github.png" width="186">](https://github.com/selfcustody/krux-installer/releases)
+[<img src="/krux/img/badge_github.png" width="186">](https://github.com/selfcustody/krux-installer/releases)
 
 Install instructions:
 

@@ -19,7 +19,8 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 extra_javascript:
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - scripts/search_filter.js
+  - https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6
   - https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js
   - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML
 
@@ -31,10 +32,26 @@ theme:
   name: material
   logo: img/favicon.png
   favicon: img/favicon.png
+  language: en
   palette:
-    primary: white
-    accent: light blue
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: light blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    
   features:
+    - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
@@ -76,58 +93,58 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/selfcustody/krux
       name: Our code on Github
-  generator: true
+  generator: false
 copyright: 
   Powered by <a href="https://embit.rocks/">embit</a>, the Bitcoin library for Python 3 and Micropython
 
 nav:
-  - Home: index.en.md
+  - Home: index.md
   - Getting Started:
-    - Getting Started: getting-started/index.en.md
+    - Getting Started: getting-started/index.md
     - Installing:
-      - Installing: getting-started/installing/index.en.md
+      - Installing: getting-started/installing/index.md
       - From GUI application:
-        - From GUI application: getting-started/installing/from-gui/index.en.md
-        - Verify: getting-started/installing/from-gui/verify-download.en.md
-        - Windows: getting-started/installing/from-gui/windows.en.md
-        - MacOS: getting-started/installing/from-gui/macos.en.md
-        - Debian-like: getting-started/installing/from-gui/debian-like.en.md
-        - Fedora-like: getting-started/installing/from-gui/fedora-like.en.md
-        - Other linux distro: getting-started/installing/from-gui/other-linux-distro.en.md
-        - Usage: getting-started/installing/from-gui/usage.en.md
-      - From pre-built official release: getting-started/installing/from-pre-built-release.en.md
-      - From pre-built test release: getting-started/installing/from-test-release.en.md
-      - From source: getting-started/installing/from-source.en.md
+        - From GUI application: getting-started/installing/from-gui/index.md
+        - Verify: getting-started/installing/from-gui/verify-download.md
+        - Windows: getting-started/installing/from-gui/windows.md
+        - MacOS: getting-started/installing/from-gui/macos.md
+        - Debian-like: getting-started/installing/from-gui/debian-like.md
+        - Fedora-like: getting-started/installing/from-gui/fedora-like.md
+        - Other linux distro: getting-started/installing/from-gui/other-linux-distro.md
+        - Usage: getting-started/installing/from-gui/usage.md
+      - From pre-built official release: getting-started/installing/from-pre-built-release.md
+      - From pre-built test release: getting-started/installing/from-test-release.md
+      - From source: getting-started/installing/from-source.md
     - Basic Usage:
-      - Basic Usage: getting-started/usage/index.en.md
-      - Generating a Mnemonic: getting-started/usage/generating-a-mnemonic.en.md
-      - Loading a Mnemonic: getting-started/usage/loading-a-mnemonic.en.md
-      - Navigating the Main Menu: getting-started/usage/navigating-the-main-menu.en.md
-      - Setting a Coordinator and Signing: getting-started/usage/setting-a-coordinator-and-signing.en.md
+      - Basic Usage: getting-started/usage/index.md
+      - Generating a Mnemonic: getting-started/usage/generating-a-mnemonic.md
+      - Loading a Mnemonic: getting-started/usage/loading-a-mnemonic.md
+      - Navigating the Main Menu: getting-started/usage/navigating-the-main-menu.md
+      - Setting a Coordinator and Signing: getting-started/usage/setting-a-coordinator-and-signing.md
   - Exploring Features:
     - Features:
       - Encryption:
-        - Encryption Introduction: getting-started/features/encryption/encryption.en.md
-        - KEF Specifications: getting-started/features/encryption/kef-specifications.en.md
+        - Encryption Introduction: getting-started/features/encryption/encryption.md
+        - KEF Specifications: getting-started/features/encryption/kef-specifications.md
       - Printing:
-        - Printing: getting-started/features/printing/printing.en.md
-        - CNC Engraving: getting-started/features/printing/cnc.en.md
-      - SD Card Updates: getting-started/features/sd-card-update.en.md
-      - Tools: getting-started/features/tools.en.md
-      - Transcribing QR Codes: getting-started/features/QR-transcript-tools.en.md
-      - Tiny Seed and other metal plates: getting-started/features/tinyseed.en.md
-      - Empirical Entropy Measurement: getting-started/features/entropy.en.md
-      - Tamper Detection: getting-started/features/tamper-detection.en.md
-      - Mnemonic XOR: getting-started/features/mnemonic-xor.en.md
+        - Printing: getting-started/features/printing/printing.md
+        - CNC Engraving: getting-started/features/printing/cnc.md
+      - SD Card Updates: getting-started/features/sd-card-update.md
+      - Tools: getting-started/features/tools.md
+      - Transcribing QR Codes: getting-started/features/QR-transcript-tools.md
+      - Tiny Seed and other metal plates: getting-started/features/tinyseed.md
+      - Empirical Entropy Measurement: getting-started/features/entropy.md
+      - Tamper Detection: getting-started/features/tamper-detection.md
+      - Mnemonic XOR: getting-started/features/mnemonic-xor.md
     - Interface:
-      - Navigation overview: getting-started/navigation.en.md
-      - Settings: getting-started/settings.en.md
-      - Templates: getting-started/templates/templates.en.md
-  - Video Tutorials: video-tutorials.en.md
-  - Devices and Parts List: parts.en.md
-  - FAQ: faq.en.md
-  - Troubleshooting: troubleshooting.en.md
-  - Support the Project: support.en.md
+      - Navigation overview: getting-started/navigation.md
+      - Settings: getting-started/settings.md
+      - Templates: getting-started/templates/templates.md
+  - Video Tutorials: video-tutorials.md
+  - Devices and Parts List: parts.md
+  - FAQ: faq.md
+  - Troubleshooting: troubleshooting.md
+  - Support the Project: support.md
 
 plugins:
  - search
@@ -138,4 +155,37 @@ plugins:
       - locale: en
         default: true
         name: English
-        build: true
+      - locale: es
+        name: Español
+        site_name: Krux - Programa de código abierto de equipos de firma para Bitcoin
+        copyright: 
+          Desarrollado por <a href="https://embit.rocks/">embit</a>, la biblioteca Bitcoin para Python 3 y Micropython
+        nav_translations:
+          Home: Inicio
+          Getting Started: Primeros Pasos
+          Devices and Parts List: Dispositivos y Lista de Piezas
+          FAQ: Preguntas Frecuentes
+          Support the Project: Apoyar el Proyecto
+          About: Acerca de
+          Installing: Instalación 
+          Generating a Mnemonic: Generar una Mnemónica
+          Loading a Mnemonic: Cargar una Mnemónica
+          Navigating the Main Menu: Navegar el Menú Principal
+          Using a Single-sig Wallet: Usar una Billetera de Firma Única
+          Using a Multisig Wallet: Usar una Billetera Multifirma
+          Printing: Impresión
+          Settings: Ajustes
+          From GUI application: Desde la Aplicación Gráfica
+          Exploring Features: Explorar Funciones
+          Video Tutorials: Tutoriales en Video
+          Troubleshooting: Solución de Problemas
+          Usage: Uso
+          From pre-built official release: Desde la versión oficial precompilada
+          From pre-built test release: Desde la versión de prueba precompilada
+          From source: Desde el código fuente 
+          Basic Usage: Uso Básico
+          Debian-like: Distros Debian y similares
+          Fedora-like: Distros Fedora y similares
+          Other linux distro: Otras distribuciones de Linux
+          Setting a Coordinator and Signing: Configurar una Billetera Coordinadora y Firmar
+          

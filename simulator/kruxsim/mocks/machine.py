@@ -48,10 +48,10 @@ setattr(krux.printers, "create_printer", new_create_printer)
 simulating_printer = False
 
 
-def simulate_printer():
+def simulate_printer(driver = THERMAL_ADAFRUIT_TXT):
     global simulating_printer
     simulating_printer = True
-    Settings().hardware.printer.driver = THERMAL_ADAFRUIT_TXT
+    Settings().hardware.printer.driver = driver
 
 
 def reset():

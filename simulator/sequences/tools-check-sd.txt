@@ -10,8 +10,6 @@ screenshot tools-options.png
 press BUTTON_B
 press BUTTON_A
 
-screenshot device-tests-options.png
-
 # Check SD Card
 press BUTTON_A
 
