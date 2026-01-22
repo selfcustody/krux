@@ -55,7 +55,7 @@ pyserial = { version = "^3.5", optional = true }
 qrcode = { version = "^8.2", optional = true }
 
 [tool.poetry.group.dev.dependencies]
-black = "^25.1.0"
+black = "^26.1.0"
 pylint = "^4.0.2"
 pytest = "^8.4.2"
 pytest-cov = "^5.0.0"
