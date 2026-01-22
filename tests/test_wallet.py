@@ -1663,9 +1663,8 @@ def test_provably_unspendable_non_deterministic_chain_code(mocker, m5stickv, tda
     NON_DETERMINISTIC_CHAIN_CODE = "tr(xpub661MyMwAqRbcFhaVQsdthkuGZQS3e9MENERDseTmnmhX2dFdgitmaFGLSPeXtcRzQ8jQaG3XCYPUknq7jX86V1qU6p981ripVVbvYnE5XpV/<0;1>/*,{and_v(v:multi_a(2,[55f8fc5d/48'/0'/0'/2']xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<2;3>/*,[3e15470d/48'/0'/0'/2']xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<2;3>/*,[d3a80c8b/48'/0'/0'/2']xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*),older(65535)),multi_a(2,[55f8fc5d/48'/0'/0'/2']xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,[3e15470d/48'/0'/0'/2']xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*)})"
 
     wallet = Wallet(tdata.TAP_MINISCRIPT_KEY)
-    with pytest.raises(ValueError, match="Internal key not provably unspendable"):
-        wallet.load(NON_DETERMINISTIC_CHAIN_CODE, FORMAT_NONE)
-    assert not wallet.is_loaded()
+    wallet.load(NON_DETERMINISTIC_CHAIN_CODE, FORMAT_NONE)
+    assert wallet.is_loaded() #ignored the chaincode
 
 
 def test_parse_wallet_raises_errors(mocker, m5stickv, tdata):
