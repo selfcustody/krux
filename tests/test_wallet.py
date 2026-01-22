@@ -1664,7 +1664,7 @@ def test_provably_unspendable_non_deterministic_chain_code(mocker, m5stickv, tda
 
     wallet = Wallet(tdata.TAP_MINISCRIPT_KEY)
     wallet.load(NON_DETERMINISTIC_CHAIN_CODE, FORMAT_NONE)
-    assert wallet.is_loaded() #ignored the chaincode
+    assert wallet.is_loaded()  # ignored the chaincode
 
 
 def test_parse_wallet_raises_errors(mocker, m5stickv, tdata):

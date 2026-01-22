@@ -266,9 +266,10 @@ class Wallet:
             if self.descriptor.taptree:
                 if not descriptor.keys[0].origin:
                     from embit.ec import NUMS_PUBKEY
+
                     # Check if BIP-0341 NUMS was used
                     # Compare expected provably unspendable key with first descriptor key
-                    if (descriptor.keys[0].key.get_public_key() != NUMS_PUBKEY):
+                    if descriptor.keys[0].key.get_public_key() != NUMS_PUBKEY:
                         self.wallet_data = None
                         raise ValueError("Internal key not provably unspendable")
                 taproot_txt = "TR "
