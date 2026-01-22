@@ -59,7 +59,16 @@ RUN apt-get update -y && \
         python3-setuptools
 
 RUN mkdir -p /opt && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --branch v8.2.0-20190409 https://github.com/kendryte/kendryte-gnu-toolchain
+    GIT_TERMINAL_PROMPT=0 \
+    git clone --depth 1 --branch v8.2.0-20190409 https://github.com/kendryte/kendryte-gnu-toolchain
+
+RUN cd kendryte-gnu-toolchain && \
+    sed -i 's|https://github.com/bminor/binutils-gdb.git|https://github.com/riscvarchive/riscv-binutils-gdb.git|' .gitmodules && \
+    git submodule sync && \
+    git submodule update \
+      --init \
+      --recursive \
+      --depth 1
 
 RUN cd kendryte-gnu-toolchain && \
     export PATH=$PATH:/opt/kendryte-toolchain/bin && \
