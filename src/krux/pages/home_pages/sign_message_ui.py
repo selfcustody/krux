@@ -45,7 +45,6 @@ from ...sd_card import (
 from ...settings import TEST_TXT, MAIN_TXT
 from ...kboard import kboard
 
-
 SD_MESSAGE_HEADER = "-----BEGIN BITCOIN SIGNED MESSAGE-----"
 SD_SIGNATURE_HEADER = "-----BEGIN BITCOIN SIGNATURE-----"
 SD_SIGNATURE_FOOTER = "-----END BITCOIN SIGNATURE-----"

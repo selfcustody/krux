@@ -1,7 +1,6 @@
 import pytest
 from unittest.mock import patch
 
-
 TEST_WORDS = (
     "crush inherit small egg include title slogan mom remain blouse boost bonus"
 )
