@@ -89,6 +89,7 @@
     "Enter each word of your BIP39 mnemonic as a number in hexadecimal from 1 to 800.": "Digite o número em hexadecimal de cada palavra do seu mnemônico BIP39, de 1 a 800.",
     "Enter each word of your BIP39 mnemonic as a number in octal from 1 to 4000.": "Digite o número em octal de cada palavra do seu mnemônico BIP39, de 1 a 4000.",
     "Enter each word of your BIP39 mnemonic.": "Digite cada palavra do seu mnemônico BIP39.",
+    "Entropy Threshold": "Limiar de Entropia",
     "Erase User's Data": "Apagar Dados do Usuário",
     "Erasing user's data…": "Apagando dados do usuário…",
     "Error:": "Erro:",

@@ -89,6 +89,7 @@
     "Enter each word of your BIP39 mnemonic as a number in hexadecimal from 1 to 800.": "BIP39 mnemonic'inizin her kelimesini 1'den 800'e kadar onaltılık bir sayı olarak girin.",
     "Enter each word of your BIP39 mnemonic as a number in octal from 1 to 4000.": "BIP39 mnemonic'inizin her kelimesini 1'den 4000'e kadar sekizlik bir sayı olarak girin.",
     "Enter each word of your BIP39 mnemonic.": "BIP39 mnemonic'inizin her kelimesini girin.",
+    "Entropy Threshold": "Entropi Eşiği",
     "Erase User's Data": "Kullanıcı Verilerini Sil",
     "Erasing user's data…": "Kullanıcının verileri siliniyor…",
     "Error:": "Hata:",

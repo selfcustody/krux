@@ -111,6 +111,7 @@ translation_array = [
     "Entrez chaque mot de votre mnémonique BIP39 sous la forme d'un nombre en hexadécimal de 1 à 800.",
     "Entrez chaque mot de votre mnémonique BIP39 sous la forme d'un nombre en octal de 1 à 4000.",
     "Entrez chaque mot de votre mnémonique BIP39.",
+    "Seuil d'entropie",
     "Effacer les données de l'utilisateur",
     "Effacement des données de l'utilisateur…",
     "Erreur\u2009:",
