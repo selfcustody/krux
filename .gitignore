@@ -82,7 +82,8 @@ simulator/flash
 !tests/files/*
 
 # ignore build-release files
-krux-*/ktool*
+ktool-*
+*mpy.sig
 
 # IDE files
 .vscode

@@ -77,7 +77,7 @@ sign = ["qrcode"]
 # format tasks
 format-src = "black src"
 format-tests = "black tests"
-format-scripts = "black firmware/font firmware/scripts i18n/*.py"
+format-scripts = "black firmware/font firmware/scripts i18n kapps"
 format = ["format-src", "format-tests", "format-scripts"]
 # aliases
 black.ref = "format"
@@ -85,7 +85,7 @@ format-test.ref = "format-tests"
 
 # pylint tasks
 lint-src = "pylint src"
-lint-scripts = "pylint firmware/font/*.py firmware/scripts/*.py i18n/*.py"
+lint-scripts = "pylint firmware/font/*.py firmware/scripts/*.py i18n/*.py kapps/*.py"
 lint = ["lint-src", "lint-scripts"]
 # aliases
 pylint.ref = "lint"
@@ -164,6 +164,13 @@ erase-dock.ref = "ktool-cmd -B dan -E"
 update-glyphs = "python ./firmware/font/bdftokff.py True"
 glyphs.ref = "update-glyphs"
 fonts.ref = "update-glyphs"
+
+# kapps tasks
+mpy = "./firmware/MaixPy/components/micropython/core/mpy-cross/mpy-cross"
+mpy-all = { shell = "for f in kapps/*.py; do poetry run poe mpy \"$f\"; done" }
+# aliases
+mpy-cross.ref = "mpy"
+mpy-cross-all.ref = "mpy-all"
 
 # task for sign_release?
 # python sign_release.py

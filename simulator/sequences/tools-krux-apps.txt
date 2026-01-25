@@ -1,0 +1,10 @@
+include _wait-for-logo.txt
+
+# Navigate to Tools
+x3 press BUTTON_B
+press BUTTON_A
+
+# Load Krux app
+press BUTTON_A
+
+screenshot krux-apps.png
