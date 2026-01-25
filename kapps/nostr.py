@@ -53,7 +53,6 @@ import hashlib
 import time
 import gc
 
-
 NSEC_SIZE = 63
 HEX_SIZE = 64
 
