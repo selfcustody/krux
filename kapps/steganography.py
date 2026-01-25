@@ -56,6 +56,7 @@ import image
 import lcd
 import gc
 
+
 # 16 bits - 2 bytes - 565
 # 65535 - white 1111 1111 1111 1111
 # 248 - red     0000 0000 1111 1000
