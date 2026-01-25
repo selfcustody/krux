@@ -115,6 +115,7 @@ from kruxsim.mocks import gt911
 from kruxsim.mocks import cst816
 from kruxsim.mocks import buttons
 from kruxsim.mocks import rotary
+from kruxsim.mocks import vfs
 from kruxsim.sequence import SequenceExecutor
 from kruxsim.mocks import uhashlib_hw
 from kruxsim.mocks import baseconv
@@ -141,6 +142,11 @@ if args.sd:
     if not os.path.exists(SD_PATH):
         os.makedirs(SD_PATH)
     from kruxsim.mocks import sd_card
+
+# fake flash memory, create the flash folder if not exists
+from krux.settings import FLASH_PATH
+if not os.path.exists(FLASH_PATH):
+    os.makedirs(FLASH_PATH)
 
 t = threading.Thread(target=run_krux)
 t.daemon = True

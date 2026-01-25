@@ -27,17 +27,18 @@ import gc
 import os
 
 from krux.power import power_manager
+from krux.display import display
+from krux.context import ctx
 
 MIN_SPLASH_WAIT_TIME = 1000
 
 
-def draw_splash():
+def draw_splash(display_splash):
     """Display splash while loading modules"""
-    from krux.display import display, SPLASH
+    from krux.display import SPLASH
 
-    display.initialize_lcd()
-    display.clear()
-    display.draw_centered_text(SPLASH)
+    display_splash.clear()
+    display_splash.draw_centered_text(SPLASH)
 
 
 def check_for_updates():
@@ -134,23 +135,45 @@ def home(ctx_home):
                 break
 
 
-preimport_ticks = time.ticks_ms()
-draw_splash()
-check_for_updates()
-gc.collect()
+def startup_kapp(ctx_app):
+    """Check for startup kapp needs to run before firmware"""
+    from krux.krux_settings import Settings
 
-from krux.context import ctx
+    app_name = Settings().security.startup_kapp
+    if app_name == "none":
+        return False
+
+    from krux.pages.kapps import Kapps
+
+    kapps = Kapps(ctx_app)
+    kapps.execute_flash_kapp(app_name, prompt=False)
+
+    return True
+
+
+# ------
+# Boot initialization
+# ------
+
+display.initialize_lcd()
+
+if not startup_kapp(ctx):
+    preimport_ticks = time.ticks_ms()
+    draw_splash(display)
+    check_for_updates()
+    gc.collect()
+
+    # If importing happened too fast, sleep the difference so the logo
+    # will be shown
+    postimport_ticks = time.ticks_ms()
+    if preimport_ticks + MIN_SPLASH_WAIT_TIME > postimport_ticks:
+        time.sleep_ms(preimport_ticks + MIN_SPLASH_WAIT_TIME - postimport_ticks)
+
+
 from krux.auto_shutdown import auto_shutdown
 
 ctx.power_manager = power_manager
 auto_shutdown.add_ctx(ctx)
-
-
-# If importing happened too fast, sleep the difference so the logo
-# will be shown
-postimport_ticks = time.ticks_ms()
-if preimport_ticks + MIN_SPLASH_WAIT_TIME > postimport_ticks:
-    time.sleep_ms(preimport_ticks + MIN_SPLASH_WAIT_TIME - postimport_ticks)
 
 if not tc_code_verification(ctx):
     power_manager.shutdown()
