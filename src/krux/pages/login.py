@@ -217,6 +217,9 @@ class Login(MnemonicLoader):
         if mnemonic is None:
             return MENU_CONTINUE
 
+        return self._load_wallet_key(mnemonic)
+
+    def _load_wallet_key(self, mnemonic):
         passphrase = ""
         if not hasattr(Settings().wallet, "policy_type") and hasattr(
             Settings().wallet, "multisig"

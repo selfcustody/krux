@@ -45,7 +45,7 @@ class FileManager(Page):
         import os
 
         path = SD_ROOT_PATH
-        status = ""
+        status = MENU_CONTINUE
         while True:
             # if is a dir then list all files in it
             if SDHandler.dir_exists(path):
