@@ -179,3 +179,80 @@ mpy-cross-all.ref = "mpy-all"
 missing-glyphs = "python ./firmware/font/missing_glyphs.py"
 fonts-missing.ref = "missing-glyphs"
 missing.ref = "missing-glyphs"
+
+# build tasks
+[tool.poe.tasks.firmware]
+args = [
+  { name = "device", help = "Device to be firmwared", options = [
+    "-d",
+    "--device",
+  ], default = "amigo" },
+  { name = "prvkey", help = "Path to private key PEM", options = [
+    "-p",
+    "--prvkey",
+  ], default = "privkey.pem" },
+  { name = "pubkey", help = "Path to public key PEM", options = [
+    "-P",
+    "--pubkey",
+  ], default = "pubkey.pem" },
+]
+help = "Compile firmware to device"
+shell = """
+set -euo pipefail
+
+HEX="$(./krux pem-to-pubkey "${pubkey}")"
+python scripts/set_signer_pubkey.py --pubkey "$HEX"
+./krux build maixpy_$device
+mkdir -p build/maixpy_$device
+"""
+
+# kapps tasks
+[tool.poe.tasks.kapp]
+args = [
+  { name = "name", help = "Basename of kapp/<name>.py", options = [
+    "-n",
+    "--name",
+  ], default = "nostr" },
+  { name = "prvkey", help = "Path to private key PEM", options = [
+    "-p",
+    "--prvkey",
+  ], default = "privkey.pem" },
+  { name = "pubkey", help = "Path to public key PEM", options = [
+    "-P",
+    "--pubkey",
+  ], default = "pubkey.pem" },
+]
+help = "Compile a .py to .mpy kapp and sign it to .mpy.sig"
+shell = """
+set -euo pipefail
+
+HEX="$(./krux pem-to-pubkey "${pubkey}")"
+python scripts/set_signer_pubkey.py --pubkey "$HEX"
+./krux build kapp "${name}"
+./krux sign "kapps/${name}.mpy" "${prvkey}"
+cp "kapps/${name}.mpy" "simulator/sd/${name}.mpy"
+cp "kapps/${name}.mpy.sig" "simulator/sd/${name}.mpy.sig"
+cp "kapps/${name}.py" "simulator/${name}.py"
+"""
+
+# clean docker
+[tool.poe.tasks.docker]
+args = [
+  { name = "purge", help = "Clean the docker (krux) environment", options = [
+    "-p",
+    "--purge",
+  ] },
+]
+help = "Clean the docker krux environment or Purge all docker environment"
+shell = """
+set -euo pipefail
+
+if [ "${purge}" = "krux" ]; then
+  ./krux clean
+elif [ "${purge}" = "all" ]; then
+  ./krux purge
+else
+  echo "ERROR: argument ${purge} not recognized"
+  exit 1
+fi
+"""

@@ -151,6 +151,7 @@ class Page:
         starting_buffer="",
         esc_prompt=True,
         buffer_title="",
+        compute_possible_keys=True,
     ):
         """Displays a key pad and captures a series of keys until the user returns.
         Returns a string.
@@ -164,7 +165,8 @@ class Page:
             self._print_keypad_header(title, show_swipe_hint, buffer, buffer_title)
             if progress_bar_fn:
                 progress_bar_fn()
-            pad.compute_possible_keys(buffer)
+            if compute_possible_keys:
+                pad.compute_possible_keys(buffer)
             pad.get_valid_index()
             pad.draw_keys()
             pad.draw_keyset_index()
