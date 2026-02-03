@@ -22,8 +22,7 @@
 import gc
 from embit.psbt import PSBT, CompressMode
 from ur.ur import UR
-import urtypes
-from urtypes.crypto import CRYPTO_PSBT
+from urtypes.crypto.psbt import PSBT as URTYPE_PSBT, CRYPTO_PSBT
 from .baseconv import base_decode
 from .krux_settings import t
 from .settings import THIN_SPACE, ELLIPSIS
@@ -93,9 +92,7 @@ class PSBTSigner:
             self.base_encoding = 64  # In case it is exported as QR code
         elif isinstance(psbt_data, UR):
             try:
-                self.psbt = PSBT.parse(
-                    urtypes.crypto.PSBT.from_cbor(psbt_data.cbor).data
-                )
+                self.psbt = PSBT.parse(URTYPE_PSBT.from_cbor(psbt_data.cbor).data)
                 self.ur_type = CRYPTO_PSBT
                 # self.base_encoding = 64
             except:
@@ -538,7 +535,7 @@ class PSBTSigner:
             return (
                 UR(
                     CRYPTO_PSBT.type,
-                    urtypes.crypto.PSBT(psbt_data).to_cbor(),
+                    URTYPE_PSBT(psbt_data).to_cbor(),
                 ),
                 self.qr_format,
             )

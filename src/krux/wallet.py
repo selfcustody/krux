@@ -414,26 +414,28 @@ def parse_wallet(wallet_data):
 
     # Check if wallet_data is a UR object without loading the UR module
     if wallet_data.__class__.__name__ == "UR":
-        import urtypes
-
         # Try to parse as a Crypto-Output type
         try:
-            output = urtypes.crypto.Output.from_cbor(wallet_data.cbor)
+            from urtypes.crypto.output import Output
+
+            output = Output.from_cbor(wallet_data.cbor)
             return Descriptor.from_string(output.descriptor()), None
         except:
             pass
 
         # Try to parse as a Crypto-Account type
         try:
-            account = urtypes.crypto.Account.from_cbor(
-                wallet_data.cbor
-            ).output_descriptors[0]
+            from urtypes.crypto.account import Account
+
+            account = Account.from_cbor(wallet_data.cbor).output_descriptors[0]
             return Descriptor.from_string(account.descriptor()), None
         except:
             pass
 
         # Treat the UR as a generic UR bytes object and extract the data for further processing
-        wallet_data = urtypes.Bytes.from_cbor(wallet_data.cbor).data
+        from urtypes.bytes import Bytes
+
+        wallet_data = Bytes.from_cbor(wallet_data.cbor).data
 
     # Process as a string
     wallet_data = (

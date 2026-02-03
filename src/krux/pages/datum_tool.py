@@ -78,23 +78,23 @@ SLOW_ENCODING_MAX_SIZE = 2**14  # base43,base58,bech32 not offered above this si
 
 def urobj_to_data(ur_obj):
     """returns flatened data from a UR object. belongs in qr or qr_capture???"""
-    import urtypes
+    from urtypes.crypto.bip39 import BIP39
+    from urtypes.crypto.account import Account
+    from urtypes.crypto.output import Output
+    from urtypes.crypto.psbt import PSBT
+    from urtypes.bytes import Bytes
 
-    if ur_obj.type == "crypto-bip39":
-        data = urtypes.crypto.BIP39.from_cbor(ur_obj.cbor).words
+    if ur_obj.type.upper() == "CRYPTO-BIP39":
+        data = BIP39.from_cbor(ur_obj.cbor).words
         data = " ".join(data)
-    elif ur_obj.type == "crypto-account":
-        data = (
-            urtypes.crypto.Account.from_cbor(ur_obj.cbor)
-            .output_descriptors[0]
-            .descriptor()
-        )
-    elif ur_obj.type == "crypto-output":
-        data = urtypes.crypto.Output.from_cbor(ur_obj.cbor).descriptor()
-    elif ur_obj.type == "crypto-psbt":
-        data = urtypes.crypto.PSBT.from_cbor(ur_obj.cbor).data
-    elif ur_obj.type == "bytes":
-        data = urtypes.bytes.Bytes.from_cbor(ur_obj.cbor).data
+    elif ur_obj.type.upper() == "CRYPTO-ACCOUNT":
+        data = Account.from_cbor(ur_obj.cbor).output_descriptors[0].descriptor()
+    elif ur_obj.type.upper() == "CRYPTO-OUTPUT":
+        data = Output.from_cbor(ur_obj.cbor).descriptor()
+    elif ur_obj.type.upper() == "CRYPTO-PSBT":
+        data = PSBT.from_cbor(ur_obj.cbor).data
+    elif ur_obj.type.upper() == "BYTES":
+        data = Bytes.from_cbor(ur_obj.cbor).data
     else:
         data = None
     return data
@@ -422,7 +422,8 @@ class DatumTool(Page):
         """Reusable handler for viewing a QR code"""
         from ..qr import QR_CAPACITY_BYTE, QR_CAPACITY_ALPHANUMERIC, QR_CAPACITY_NUMERIC
         from ..bbqr import encode_bbqr
-        import urtypes
+        from urtypes.bytes import Bytes
+        from urtypes.crypto.psbt import PSBT
         from ur.ur import UR
 
         # Helper function to check if character is alphanumeric
@@ -515,9 +516,9 @@ class DatumTool(Page):
                 elif qr_fmt == FORMAT_UR:
                     ur_type = menu_opts[idx][1][1]
                     if ur_type == "bytes":
-                        encoded = UR(ur_type, urtypes.Bytes(encoded).to_cbor())
+                        encoded = UR(ur_type, Bytes(encoded).to_cbor())
                     elif ur_type == "crypto-psbt":
-                        encoded = UR(ur_type, urtypes.PSBT(encoded).to_cbor())
+                        encoded = UR(ur_type, PSBT(encoded).to_cbor())
                     # TODO: other urtypes
 
             try:

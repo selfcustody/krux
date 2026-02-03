@@ -210,9 +210,7 @@ class QRPartParser:
     def result(self):
         """Returns the combined part data"""
         if self.format == FORMAT_UR:
-            from ur.ur import UR
-
-            return UR(self.decoder.result.type, bytearray(self.decoder.result.cbor))
+            return self.decoder.result
 
         if self.format == FORMAT_BBQR:
             from .bbqr import decode_bbqr

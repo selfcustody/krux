@@ -115,7 +115,7 @@ def test_parser(mocker, m5stickv, tdata):
 
             if num == 4:
                 # Multi-part UR
-                assert parser.total_count() == len(parts) * 2
+                assert parser.processed_parts_count() == i + 1
             else:
                 assert parser.total_count() == len(parts)
             if parser.format == FORMAT_UR:
@@ -132,7 +132,7 @@ def test_parser(mocker, m5stickv, tdata):
         parser.parse(parts[0])
 
         if num == 4:
-            assert parser.total_count() == len(parts) * 2
+            assert parser.processed_parts_count() == i + 1
         else:
             assert parser.total_count() == len(parts)
 
