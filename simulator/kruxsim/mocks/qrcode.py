@@ -21,43 +21,36 @@
 # THE SOFTWARE.
 import sys
 from unittest import mock
-import pyqrcode
-import re
+import qrcode as qrc
 
 
 def encode(data):
-    # Uses string encoded qr as it already cleaned up the frames
-    # PyQRcode also doesn't offer any binary output
+    # Changed from pyqrcode to qrcode
+    qr = qrc.QRCode(error_correction=qrc.constants.ERROR_CORRECT_L)
+    qr.add_data(data)
+    qr.make(fit=True)
 
-    def is_qr_alphanumeric(string):
-        return bool(re.match("^[A-Z0-9 $%*+\-./:]+$", string))
+    matrix = qr.get_matrix()
+    size = len(matrix)
 
-    mode = "binary"
-    if isinstance(data, str):
-        if data.isnumeric():
-            mode = "numeric"
-        elif is_qr_alphanumeric(data):
-            mode = "alphanumeric"
+    # Same logic as old pyqrcode
+    byte_length = (size * size + 7) // 8
+    binary_qr = bytearray(b"\x00" * byte_length)
 
-    try:
-        code_str = pyqrcode.create(data, error="L", mode=mode).text(quiet_zone=0)
-    except:
-        # pre-decode if binary (SeedQR)
-        data = data.decode("latin-1")
-        code_str = pyqrcode.create(data, error="L", mode="binary").text(quiet_zone=0)
-    size = 0
-    while code_str[size] != "\n":
-        size += 1
-    binary_qr = bytearray(b"\x00" * ((size * size + 7) // 8))
     for y in range(size):
         for x in range(size):
             bit_index = y * size + x
-            bit_string_index = y * (size + 1) + x
-            if code_str[bit_string_index] == "1":
-                binary_qr[bit_index >> 3] |= 1 << (bit_index % 8)
+            if matrix[y][x]:
+                byte_idx = bit_index >> 3
+                bit_in_byte = bit_index & 7   # % 8
+                binary_qr[byte_idx] |= (1 << bit_in_byte)
+
     return binary_qr
 
+# delete imported qrcode lib
+del sys.modules["qrcode"]
 
+# mock the qrcode lib from Krux
 if "qrcode" not in sys.modules:
     sys.modules["qrcode"] = mock.MagicMock(
         encode=encode,
