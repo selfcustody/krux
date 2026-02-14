@@ -157,7 +157,7 @@ plugins:
         name: English
       - locale: es
         name: Español
-        site_name: Krux - Programa de código abierto de equipos de firma para Bitcoin
+        site_name: Krux - Firmware de código abierto para dispositivos de firma de Bitcoin
         copyright: 
           Desarrollado por <a href="https://embit.rocks/">embit</a>, la biblioteca Bitcoin para Python 3 y Micropython
         nav_translations:
@@ -168,6 +168,7 @@ plugins:
           Support the Project: Apoyar el Proyecto
           About: Acerca de
           Installing: Instalación 
+          Verify: Verificación
           Generating a Mnemonic: Generar una Mnemónica
           Loading a Mnemonic: Cargar una Mnemónica
           Navigating the Main Menu: Navegar el Menú Principal
