@@ -121,6 +121,32 @@ This option permanently removes all stored encrypted mnemonics, settings and `TC
 
 <div style="clear: both"></div>
 
+### Paper Wallet
+
+The **Paper Wallet** Kapp loads and exports Bitcoin paper wallets compatible with WIF, CSV and Base64 private keys; currently we not support encrypted [BIP38](https://bips.xyz/38) wallets[ˆ1]. Also we do not generate any paper wallet[^2].
+
+
+#### Loading wallets
+
+Load it via **Tools > Load Krux app** after copying the signed `.mpy` file to an SD card.
+
+Load one or more WIF ([Wallet Import Format](https://en.bitcoin.it/wiki/Wallet_import_format)) private keys by scanning QR codes or reading encrypted wallets from the SD card. Supported input formats include raw WIF, Base64-encoded WIF, and CSV. When a single key is loaded, Krux creates a **single wallet**; loading two or more keys creates a **bulk wallet** identified by a combined checksum.
+
+#### Backup key
+
+Encrypt and store the loaded wallet using Krux's encrypted format (KEF). Wallets can be saved to the SD card or to the device's internal flash memory. For bulk wallets, each key is encrypted and stored individually. 
+
+#### Export key
+
+Export the wallet in one of several plaintext or encrypted formats:
+
+- **Base64** (.txt) - WIF re-encoded as Base64. For bulk wallets, exported as CSV with Base64-encoded WIFs.
+- **Hex** (.hex) - WIF re-encoded as hexadecimal. For bulk wallets, exported as CSV with hex-encoded WIFs.
+- **CSV** (.csv) - Comma-separated format: `index, "address", "wif"`.
+- **SVG** (.svg) - Styled paper wallet in the bitaddress.org style with SHARE (public address + QR) and SECRET (private key + QR) sections separated by a fold line. For bulk wallets, all wallets are combined into a single SVG file. Each format can optionally be encrypted before saving.
+
+<div style="clear: both"></div>
+
 ### Remove Mnemonic
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-storage-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-storage-options-300.png" align="right" class="amigo">
