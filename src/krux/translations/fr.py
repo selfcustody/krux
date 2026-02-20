@@ -92,7 +92,6 @@ translation_array = [
     "Tests de l'appareil",
     "Affichage",
     "Ne pas éteindre, cela peut prendre un certain temps.",
-    "Conversion terminée",
     "Terminé\u2009?",
     "Double mnémonique",
     "Pilote",

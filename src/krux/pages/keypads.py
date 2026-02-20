@@ -22,18 +22,22 @@
 
 import math
 import lcd
+import time
+from ..context import Context
 from ..krux_settings import t
 from ..themes import theme
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
     BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
     SWIPE_RIGHT,
     SWIPE_LEFT,
     SWIPE_UP,
     SWIPE_DOWN,
     FAST_FORWARD,
     FAST_BACKWARD,
+    TOUCH_HIGHLIGHT_MS,
 )
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
 from ..kboard import kboard
@@ -44,7 +48,7 @@ FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets.
 class KeypadLayout:
     """Groups layout-related attributes for Keypad."""
 
-    def __init__(self, ctx, max_keys_count):
+    def __init__(self, ctx: Context, max_keys_count):
         self.width = math.floor(math.sqrt(max_keys_count))
         self.height = math.ceil(max_keys_count / self.width)
         self.max_index = self.width * self.height
@@ -72,7 +76,7 @@ class KeypadLayout:
 class Keypad:
     """Controls keypad creation and management."""
 
-    def __init__(self, ctx, keysets, possible_keys_fn=None):
+    def __init__(self, ctx: Context, keysets, possible_keys_fn=None):
         self.ctx = ctx
         self.keysets = keysets
         self.keyset_index = 0
@@ -143,94 +147,108 @@ class Keypad:
         if self.possible_keys_fn is not None:
             self.possible_keys = self.possible_keys_fn(buffer)
 
-    def draw_keys(self):
+    def draw_keys(self, prev_index=None):
         """Draws keypad on the screen"""
         key_index = 0
+
         for y in self.layout.y_keypad_map[:-1]:
             offset_y = y + (self.layout.key_v_spacing - FONT_HEIGHT) // 2
+
             for x in self.layout.x_keypad_map[:-1]:
-                x = MINIMAL_PADDING if x == 0 else x
-                key = None
-                custom_color = None
+                offset_x = MINIMAL_PADDING if x == 0 else x
+
+                # Resolve key + color based on index
+                color = theme.fg_color
                 if key_index < len(self.keys):
                     key = self.keys[key_index]
                 elif key_index == self.del_index:
-                    key = "<"
-                    custom_color = theme.del_color
+                    key, color = "<", theme.del_color
                 elif key_index == self.esc_index:
-                    key = t("Esc")
-                    custom_color = theme.no_esc_color
+                    key, color = t("Esc"), theme.no_esc_color
                 elif key_index == self.go_index:
-                    key = t("Go")
-                    custom_color = theme.go_color
+                    key, color = t("Go"), theme.go_color
                 elif self.has_more_key() and key_index == self.more_index:
                     key = self.keysets[self._move_keyset_index()][:3]
-                    custom_color = theme.toggle_color
+                    color = theme.toggle_color
+                else:
+                    key = None
 
-                if key is not None:
-                    offset_x = x
-                    key_offset_x = (
-                        self.layout.key_h_spacing - lcd.string_width_px(key)
-                    ) // 2 + offset_x
-                    if (
-                        key_index < len(self.keys)
-                        and self.keys[key_index] not in self.possible_keys
-                    ):
-                        # faded text
-                        self.ctx.display.draw_string(
-                            key_offset_x, offset_y, key, theme.disabled_color
+                if key is None:
+                    key_index += 1
+                    continue
+
+                key_offset_x = offset_x + (
+                    (self.layout.key_h_spacing - lcd.string_width_px(key)) // 2
+                )
+
+                # Disabled
+                if key_index < len(self.keys) and key not in self.possible_keys:
+                    self.ctx.display.draw_string(
+                        key_offset_x, offset_y, key, theme.disabled_color
+                    )
+                    key_index += 1
+                    continue
+
+                # Highlighted
+                if key_index == self.cur_key_index and (
+                    self.ctx.input.buttons_active or prev_index is not None
+                ):
+                    self.ctx.display.fill_rectangle(
+                        offset_x if kboard.is_m5stickv else offset_x + 1,
+                        y + 1,
+                        (
+                            self.layout.key_h_spacing - 1
+                            if kboard.is_m5stickv
+                            else self.layout.key_h_spacing - 2
+                        ),
+                        self.layout.key_v_spacing - 2,
+                        color,
+                    )
+                    self.ctx.display.draw_string(
+                        key_offset_x, offset_y, key, theme.bg_color, color
+                    )
+                    key_index += 1
+                    continue
+
+                # Touchscreen clear prev btn highlight + lines
+                if kboard.has_touchscreen:
+                    # clear highlight from previous
+                    if prev_index is not None:
+                        self.ctx.display.fill_rectangle(
+                            offset_x + 1,
+                            y + 1,
+                            self.layout.key_h_spacing - 2,
+                            self.layout.key_v_spacing - 2,
+                            theme.bg_color,
                         )
-                    else:
-                        if kboard.has_touchscreen:
-                            self.ctx.display.outline(
-                                offset_x + 1,
-                                y + 1,
-                                self.layout.key_h_spacing - 2,
-                                self.layout.key_v_spacing - 2,
-                                theme.frame_color,
-                            )
-                        if custom_color:
-                            self.ctx.display.draw_string(
-                                key_offset_x, offset_y, key, custom_color
-                            )
-                        else:
-                            self.ctx.display.draw_string(key_offset_x, offset_y, key)
-                    if (
-                        key_index == self.cur_key_index
-                        and self.ctx.input.buttons_active
-                    ):
-                        if kboard.has_touchscreen:
-                            self.ctx.display.outline(
-                                offset_x + 1,
-                                y + 1,
-                                self.layout.key_h_spacing - 2,
-                                self.layout.key_v_spacing - 2,
-                            )
-                        else:
-                            self.ctx.display.outline(
-                                offset_x - 2,
-                                y,
-                                self.layout.key_h_spacing + 1,
-                                self.layout.key_v_spacing - 1,
-                            )
+                    self.ctx.display.outline(
+                        offset_x + 1,
+                        y + 1,
+                        self.layout.key_h_spacing - 2,
+                        self.layout.key_v_spacing - 2,
+                        theme.frame_color,
+                    )
+
+                self.ctx.display.draw_string(key_offset_x, offset_y, key, color)
                 key_index += 1
 
     def draw_keyset_index(self):
         """Indicates the current keyset index with a small rectangle"""
         if not self.has_more_key():
             return
-        bar_height = FONT_HEIGHT // 6
-        bar_length = FONT_WIDTH
-        bar_padding = FONT_WIDTH // 3
+        keyset_len = len(self.keysets)
+        bar_height = -(-FONT_HEIGHT // 3)  # ceil of division
+        bar_padding = -(-FONT_WIDTH // 3)  # ceil of division
+        bar_width = self.ctx.display.usable_width() // keyset_len - bar_padding
         x_offset = (
-            self.ctx.display.width() - (bar_length + bar_padding) * len(self.keysets)
-        ) // 2
-        for i in range(len(self.keysets)):
-            color = theme.fg_color if i == self.keyset_index else theme.frame_color
+            self.ctx.display.width() - ((bar_width + bar_padding) * keyset_len)
+        ) // 2 + bar_padding // 2
+        for i in range(keyset_len):
+            color = theme.fg_color if i == self.keyset_index else theme.info_bg_color
             self.ctx.display.fill_rectangle(
-                x_offset + (bar_length + bar_padding) * i,
+                x_offset + (bar_width + bar_padding) * i,
                 self.layout.y_keypad_map[-1] + 2,
-                bar_length,
+                bar_width,
                 bar_height,
                 color,
             )
@@ -255,15 +273,29 @@ class Keypad:
 
     def touch_to_physical(self):
         """Convert a touch press in button press"""
+        prev_index = self.cur_key_index
         self.cur_key_index = self.ctx.input.touch.current_index()
-        actual_button = None
+        if self.cur_key_index < 0:
+            self.cur_key_index = 0
+            return BUTTON_TOUCH
+
+        special_keys = [self.del_index, self.esc_index, self.go_index]
+        if self.has_more_key():
+            special_keys.append(self.more_index)
+
+        actual_button = BUTTON_TOUCH
         if self.cur_key_index < len(self.keys):
             if self.keys[self.cur_key_index] in self.possible_keys:
                 actual_button = BUTTON_ENTER
-        elif self.cur_key_index < self.layout.max_index:
+        elif self.cur_key_index in special_keys:
             actual_button = BUTTON_ENTER
         else:
             self.cur_key_index = 0
+
+        if actual_button == BUTTON_ENTER:
+            self.draw_keys(prev_index=prev_index)  # highlight
+            time.sleep_ms(TOUCH_HIGHLIGHT_MS)  # wait a little
+
         return actual_button
 
     def navigate(self, btn):

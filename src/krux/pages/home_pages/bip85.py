@@ -24,8 +24,8 @@ from ...qr import FORMAT_NONE
 from ...sd_card import B64_FILE_EXTENSION
 from ...baseconv import base_encode
 from ...display import BOTTOM_PROMPT_LINE, FONT_HEIGHT, DEFAULT_PADDING
-from ...krux_settings import t
-from ...krux_settings import Settings
+from ...krux_settings import t, Settings
+from ...settings import CONTEXT_ARROW
 from .. import (
     Menu,
     Page,
@@ -180,7 +180,7 @@ class Bip85(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("BIP39 Mnemonic"), self._derive_mnemonic),
+                (t("BIP39 Mnemonic") + CONTEXT_ARROW, self._derive_mnemonic),
                 (t("Base64 Password"), self._derive_base64_password),
             ],
         )

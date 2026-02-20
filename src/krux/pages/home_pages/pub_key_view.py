@@ -22,6 +22,7 @@
 
 from ...display import FONT_HEIGHT
 from ...krux_settings import t
+from ...settings import CONTEXT_ARROW
 from .. import (
     Page,
     Menu,
@@ -119,7 +120,10 @@ class PubkeyView(Page):
                 :WALLET_XPUB_START
             ].upper()
             pub_key_menu_items.append(
-                (title + " - " + t("Text"), lambda ver=version: _pub_key_text(ver))
+                (
+                    title + " - " + t("Text") + CONTEXT_ARROW,
+                    lambda ver=version: _pub_key_text(ver),
+                )
             )
             pub_key_menu_items.append(
                 (title + " - " + t("QR Code"), lambda ver=version: _pub_key_qr(ver))

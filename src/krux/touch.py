@@ -30,13 +30,16 @@ IDLE = 0
 PRESSED = 1
 RELEASED = 2
 
+SWIPE_DURATION_MS = 750
 SWIPE_THRESHOLD = 35
 SWIPE_RIGHT = 1
 SWIPE_LEFT = 2
 SWIPE_UP = 3
 SWIPE_DOWN = 4
+SWIPE_NONE = 5
 
 TOUCH_S_PERIOD = 20  # Touch sample period - Min = 10
+EDGE_PIXELS = 1  # The ammount of pixels to determine the edges of a region
 
 
 class Touch:
@@ -47,6 +50,7 @@ class Touch:
         For Krux width = max_y, height = max_x
         """
         self.sample_time = 0
+        self.pressed_time = 0
         self.y_regions = []
         self.x_regions = []
         self.index = 0
@@ -143,30 +147,42 @@ class Touch:
     def _extract_index(self, data):
         """
         Gets an index from touched points, x and y delimiters.
-        The index is calculated based on the position of the touch within the defined regions.
+        Return index or -1 if touching an edge.
         """
-        y_index = 0
-        x_index = 0
+        x, y = data
 
-        # Calculate y index
-        for region in self.y_regions:
-            if data[1] > region:
-                y_index += 1
-        y_index -= 1 if y_index > 0 else 0
+        # Helper to deal with X/Y regions
+        def _compute_axis_index(pos, regions):
+            if not regions:
+                return 0
 
-        # Calculate x index if x regions are defined (2D array)
+            # Count how many region boundaries pos passed
+            idx = sum(pos + EDGE_PIXELS >= r for r in regions)
+
+            # # Check boundary at idx-1 (left-side)
+            if 1 < idx < len(regions) and abs(pos - regions[idx - 1]) <= EDGE_PIXELS:
+                return -1
+
+            # Valid is 0<= idx <= len(regions) -2 [valid regions]
+            return max(min(idx - 1, len(regions) - 2), 0)
+
+        # Y index
+        y_index = _compute_axis_index(y, self.y_regions)
+        if y_index < 0:
+            return -1
+
+        # X index
         if self.x_regions:
-            for x_region in self.x_regions:
-                if data[0] >= x_region:
-                    x_index += 1
-            x_index -= 1  # Adjust index to be zero-based
-            # Combine y and x indices to get the final index
-            index = y_index * (len(self.x_regions) - 1) + x_index
-        else:
-            index = y_index
+            x_index = _compute_axis_index(x, self.x_regions)
+            if x_index < 0:
+                return -1
+            # self.highlight_region(
+            #     y_index * (len(self.x_regions) - 1) + x_index, y_index
+            # )
+            return y_index * (len(self.x_regions) - 1) + x_index
 
-        # self.highlight_region(x_index, y_index)
-        return index
+        # self.highlight_region(0, y_index)
+        return y_index
 
     def set_regions(self, x_list=None, y_list=None):
         """Set buttons map regions x and y"""
@@ -222,31 +238,37 @@ class Touch:
         data = self.touch_driver.current_point()
         if isinstance(data, tuple):
             self._store_points(data)
-        elif data is None:  # gets release then return to idle.
+            return self.state
+
+        if data is None:  # gets release then return to idle.
             if self.state == RELEASED:  # On touch release
                 self.state = IDLE
-            elif self.state == PRESSED:
-                if self.release_point is not None:
-                    lateral_lenght = self.release_point[0] - self.press_point[0][0]
-                    if lateral_lenght > SWIPE_THRESHOLD:
-                        self.gesture = SWIPE_RIGHT
-                    elif -lateral_lenght > SWIPE_THRESHOLD:
-                        self.gesture = SWIPE_LEFT
-                        lateral_lenght *= -1  # make it positive value
-                    vertical_lenght = self.release_point[1] - self.press_point[0][1]
-                    if (
-                        vertical_lenght > SWIPE_THRESHOLD
-                        and vertical_lenght > lateral_lenght
-                    ):
-                        self.gesture = SWIPE_DOWN
-                    elif (
-                        -vertical_lenght > SWIPE_THRESHOLD
-                        and -vertical_lenght > lateral_lenght
-                    ):
-                        self.gesture = SWIPE_UP
+                return self.state
+
+            if self.state == PRESSED:
                 self.state = RELEASED
-        else:
-            print("Touch error")
+
+                if self.release_point is not None:
+                    dx = self.release_point[0] - self.press_point[0][0]
+                    dy = self.release_point[1] - self.press_point[0][1]
+
+                    if abs(dx) > SWIPE_THRESHOLD or abs(dy) > SWIPE_THRESHOLD:
+                        # discard swipes that took more than ~1s
+                        if self.sample_time - self.pressed_time < SWIPE_DURATION_MS:
+                            # discards swipes with angle > 27 degrees
+                            if abs(dx) > abs(dy) * 2:
+                                self.gesture = SWIPE_LEFT if dx < 0 else SWIPE_RIGHT
+                            elif abs(dy) > abs(dx) * 2:
+                                self.gesture = SWIPE_UP if dy < 0 else SWIPE_DOWN
+                            else:
+                                self.gesture = SWIPE_NONE  # undetermined diagonal swipe
+                        else:
+                            self.gesture = (
+                                SWIPE_NONE  # hold finger on screen for too long
+                            )
+            return self.state
+
+        print("Touch error")
         return self.state
 
     def event(self, validate_position=True):
@@ -261,6 +283,7 @@ class Touch:
                 if isinstance(self.touch_driver.irq_point, tuple):
                     if self.valid_position(self.touch_driver.irq_point):
                         self._store_points(self.touch_driver.irq_point)
+                        self.pressed_time = time.ticks_ms()
                         return True
         return False
 
@@ -268,33 +291,31 @@ class Touch:
         """Wraps touch states to behave like a regular button"""
         return 1 if self.current_state() == IDLE else 0
 
-    def swipe_right_value(self):
-        """Returns detected gestures and clean respective variable"""
-        if self.gesture == SWIPE_RIGHT:
+    def _swipe_state_check(self, swipe_type):
+        if self.gesture == swipe_type:
             self.gesture = None
             return 0
         return 1
+
+    def swipe_none_value(self):
+        """Returns detected gestures and clean respective variable"""
+        return self._swipe_state_check(SWIPE_NONE)
+
+    def swipe_right_value(self):
+        """Returns detected gestures and clean respective variable"""
+        return self._swipe_state_check(SWIPE_RIGHT)
 
     def swipe_left_value(self):
         """Returns detected gestures and clean respective variable"""
-        if self.gesture == SWIPE_LEFT:
-            self.gesture = None
-            return 0
-        return 1
+        return self._swipe_state_check(SWIPE_LEFT)
 
     def swipe_up_value(self):
         """Returns detected gestures and clean respective variable"""
-        if self.gesture == SWIPE_UP:
-            self.gesture = None
-            return 0
-        return 1
+        return self._swipe_state_check(SWIPE_UP)
 
     def swipe_down_value(self):
         """Returns detected gestures and clean respective variable"""
-        if self.gesture == SWIPE_DOWN:
-            self.gesture = None
-            return 0
-        return 1
+        return self._swipe_state_check(SWIPE_DOWN)
 
     def current_index(self):
         """Returns current index of last touched point"""

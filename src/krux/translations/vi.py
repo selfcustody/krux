@@ -92,7 +92,6 @@ translation_array = [
     "Kiểm tra thiết bị",
     "Hiển thị",
     "Không được tắt máy, có thể mất một lúc để hoàn thành.",
-    "Hoàn tất chuyển đổi",
     "Hoàn tất?",
     "Từ gợi nhớ kép",
     "Driver",

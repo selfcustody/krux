@@ -92,7 +92,6 @@ translation_array = [
     "Apparaattests",
     "Weergave",
     "Schakel het apparaat niet uit, het kan even duren voordat het klaar is.",
-    "Converteren gedaan.\r",
     "Klaar?",
     "Dubbel geheugensteuntje",
     "Driver",
