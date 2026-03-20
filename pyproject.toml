@@ -111,7 +111,7 @@ pre-commit = ["format", "lint", "i18n validate", "vulture", "test-simple"]
 pre-release = ["format", "lint", "i18n validate", "i18n-build", "update-glyphs", "vulture", "test-simple"]
 
 # run docs locally
-docs = "poetry run mkdocs serve"
+docs = "poetry run mkdocs serve --livereload"
 
 # translations tasks
 i18n = "python i18n/i18n.py"
