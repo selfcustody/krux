@@ -30,7 +30,7 @@ rm -rf screenshots && mkdir -p screenshots
 
 # Create an sd folder and a fresh settings.json file
 mkdir -p sd && rm -f sd/settings.json
-echo "{\"settings\": {\"i18n\": {\"locale\": \"$locale\"}}}" > sd/settings.json
+echo "{\"settings\": {\"i18n\": {\"locale\": \"$locale\"}, \"persist\": {\"location\": \"sd\"}}}" > sd/settings.json
 
 # Create an encrypted mnemonic file to generate "Load -> From Storage" screenshots
 encrypted_mnemonics="{\"d668b8b7\": {\"version\": 0, \"key_iterations\": 100000, \"data\": \"haAyMxF\
@@ -42,12 +42,13 @@ echo "$encrypted_mnemonics" > sd/seeds.json
 # Sequences
 
 # Login
-poetry run poe simulator --sequence sequences/logo.txt  --device $device
+poetry run poe simulator --sequence sequences/logo.txt --sd --device $device
 poetry run poe simulator --sequence sequences/about.txt --sd --device $device
 poetry run poe simulator --sequence sequences/load-mnemonic-options.txt --sd --device $device
 poetry run poe simulator --sequence sequences/new-mnemonic-options.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/load-mnemonic-sequence.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/load-mnemonic-double-mnemonic.txt  --sd --device $device
+poetry run poe simulator --sequence sequences/load-mnemonic-kef-via-qr.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/edit-mnemonic.txt  --sd --device $device
 
 # Home
@@ -65,7 +66,7 @@ poetry run poe simulator --sequence sequences/list-address.txt --sd --device $de
 poetry run poe simulator --sequence sequences/export-address.txt --sd --device $device
 poetry run poe simulator --sequence sequences/sign-psbt.txt  --sd --device $device
 poetry run poe simulator --sequence sequences/sign-message.txt --sd  --device $device
-poetry run poe simulator --sequence sequences/sign-message-at-address.txt  --device $device
+poetry run poe simulator --sequence sequences/sign-message-at-address.txt --sd  --device $device
 
 # Tools
 poetry run poe simulator --sequence sequences/tools-datum-tool.txt  --sd --device $device
@@ -84,3 +85,5 @@ poetry run poe simulator --sequence sequences/all-settings.txt --sd --device $de
 # Other
 poetry run poe simulator --sequence sequences/qr-transcript.txt --sd --printer --device $device
 poetry run poe simulator --sequence sequences/print-qr.txt --sd --printer --device $device
+poetry run poe simulator --sequence sequences/print-qr-file.txt --sd --printer file --device $device
+poetry run poe simulator --sequence sequences/print-qr-grbl.txt --sd --printer grbl --device $device

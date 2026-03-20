@@ -1,0 +1,2 @@
+##### Nota sobre el Maix Amigo
+Algunas pantallas de Amigo tienen las coordenadas X invertidas, mientras que otras muestran los colores de forma diferente. Para más información consulta [Solución de problemas](/krux/troubleshooting/#troubleshooting-lcd-settings-on-maix-amigo).

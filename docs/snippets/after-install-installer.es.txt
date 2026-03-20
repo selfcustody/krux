@@ -1,0 +1,1 @@
+Una vez hecho esto, usarás la aplicación **Krux-installer** para realizar la [instalación del firmware](/krux/getting-started/installing/from-gui/usage). 
