@@ -7,7 +7,7 @@ Tenga en cuenta que estos son archivos binarios sin firma.
 Descargue el firmware experimental compilado en el [repositorio de prueba (beta)](https://github.com/odudex/krux_binaries) o la aplicación de Android `apk` en [KruxMobileApp](https://github.com/selfcustody/KruxMobileApp).
 
 #### Móvil - Android
-La [aplicación móvil para android de Krux](../../faq.md#what-is-krux-mobile-android-app) está diseñada para aprender sobre Krux y las transacciones sin conexión a internet en Bitcoin. Debido a las numerosas vulnerabilidades potenciales inherentes a los smartphones, como la falta de control sobre el sistema operativo, los paquetes externos y los accesorios de hardware, la aplicación Krux NO debe usarse para administrar billeteras que contengan ahorros o claves y mnemónicos importantes. Para una gestión segura de sus claves, se recomienda un dispositivo dedicado.
+La [aplicación móvil para android de Krux](../../faq.md#what-is-krux-mobile-android-app) está diseñada para aprender sobre Krux y las transacciones sin conexión a internet en Bitcoin. Debido a las numerosas vulnerabilidades potenciales inherentes a los smartphones, como la falta de control sobre el sistema operativo, los paquetes externos y los accesorios de hardware, la aplicación Krux NO debe usarse para administrar carteras que contengan ahorros o claves y mnemónicos importantes. Para una gestión segura de sus claves, se recomienda un dispositivo dedicado.
 
 #### Firmware compilado para dispositivos Kendryte K210
 #### M5StickV

@@ -1,7 +1,7 @@
-## ¿Es Krux una billetera electrónica (hardware wallet)?
-El término "billetera electrónica" suele referirse a dispositivos diseñados específicamente para almacenar llaves privadas y firmar transacciones. Estos dispositivos normalmente incluyen componentes de seguridad dedicados, como chips de elemento seguro (secure element chips).
+## ¿Es Krux una cartera electrónica (hardware wallet)?
+El término "cartera electrónica" suele referirse a dispositivos diseñados específicamente para almacenar llaves privadas y firmar transacciones. Estos dispositivos normalmente incluyen componentes de seguridad dedicados, como chips de elemento seguro (secure element chips).
 
-Krux fue desarrollado inicialmente como un firmador (signer), funcionando exclusivamente en modo amnésico, lo que significa que el usuario debe cargar sus llaves cada vez que enciende el dispositivo. Sin embargo, Krux ha evolucionado y ahora ofrece la opción de almacenar frases mnemonicas (semillas), de manera similar a las billeteras de hardware tradicionales. Estas semillas mnemonicas pueden guardarse en la memoria interna del dispositivo o en tarjetas SD.
+Krux fue desarrollado inicialmente como un firmador (signer), funcionando exclusivamente en modo amnésico, lo que significa que el usuario debe cargar sus llaves cada vez que enciende el dispositivo. Sin embargo, Krux ha evolucionado y ahora ofrece la opción de almacenar frases mnemonicas (semillas), de manera similar a las carteras de hardware tradicionales. Estas semillas mnemonicas pueden guardarse en la memoria interna del dispositivo o en tarjetas SD.
 
 Krux no incluye chips de seguridad física (secure elements). La protección de los datos almacenados depende del cifrado. Puedes leer más sobre este tema en: [Krux Encryption - Regarding BIP39 Mnemonics](getting-started/features/encryption/encryption.md/#regarding-bip39-mnemonics).
 
@@ -23,7 +23,7 @@ Para instalarlo, es posible que debas habilitar la opción de permitir instalaci
 
 ### ¿Es segura de usar?
 La app Krux Mobile está diseñada con fines educativos, para aprender sobre Krux y las transacciones desconectadas de Internet en Bitcoin.
-Debido a las múltiples vulnerabilidades posibles en los teléfonos inteligentes —como la falta de control sobre el sistema operativo, las bibliotecas o el hardware—, **no se recomienda usar** la app para manejar billeteras con ahorros reales **ni claves importantes**.
+Debido a las múltiples vulnerabilidades posibles en los teléfonos inteligentes —como la falta de control sobre el sistema operativo, las bibliotecas o el hardware—, **no se recomienda usar** la app para manejar carteras con ahorros reales **ni claves importantes**.
 
 Para una gestión segura de tus llaves, usa siempre **un dispositivo dedicado exclusivamente** a ese propósito.
 
