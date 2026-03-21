@@ -77,7 +77,7 @@ Un valor bajo de entropía de Shannon podría indicar que tus dados están sesga
 
 Una vez que se haya asignado suficiente entropía, puede agregar manualmente una entropía personalizada editando algunas palabras. Simplemente toque o navegue hasta la palabra que desea cambiar y reemplácela. Las palabras editadas se resaltarán y la última palabra se actualizará automáticamente para garantizar una suma de comprobación válida. Sin embargo, tenga cuidado, ya que modificar palabras puede afectar negativamente la entropía natural capturada previamente.
 
-En la siguiente pantalla, cargará una cartera. Puede leer más sobre esto en [Cargar una cartera mnemónica -> Confirmar atributos de la cartera](./loading-a-mnemonic.md/#confirm-wallet-attributes).
+En la siguiente pantalla, cargará una cartera. Puede leer más sobre esto en [Cargar una frase mnemónica -> Confirmar la configuración de la cartera](./loading-a-mnemonic.md/#confirm-wallet-attributes).
 
 <div style="clear: both"></div>
 

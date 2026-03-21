@@ -43,7 +43,7 @@ Las palabras se convierten a sus indices numéricos BIP39, estos números se con
 
 - **Código QR cifrado**
 
-Esta opción convierte la frase mnemotécnica cifrada en un código QR. Introduzca una clave de cifrado y, opcionalmente, un ID personalizado. Al escanear este código QR mediante **Cargar frase mnemotécnica -> Via Cámara -> Código QR**, se le pedirá que introduzca la clave de descifrado para cargar la frase mnemotécnica almacenada en él. Cómo cualquier código QR, se puede imprimir tras configurar el controlador de la impresora.
+Esta opción convierte la frase mnemotécnica cifrada en un código QR. Introduzca una clave de cifrado y, opcionalmente, un ID personalizado. Al escanear este código QR mediante **Cargar frase mnemónica -> Via Cámara -> Código QR**, se le pedirá que introduzca la clave de descifrado para cargar la frase mnemotécnica almacenada en él. Cómo cualquier código QR, se puede imprimir tras configurar el controlador de la impresora.
 
 **Transcripción de códigos QR**
 
