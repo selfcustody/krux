@@ -1,4 +1,4 @@
-<img src="/krux/img/krux-devices.jpg" style="width: 60%; min-width: 300px;">
+<img src="/krux/es/img/krux-devices.jpg" style="width: 60%; min-width: 300px;">
 
 ### Dispositivos Compatibles (tabla comparativa)
 
@@ -39,7 +39,7 @@ proceso de 28nm, RISC-V de doble núcleo de 64bit @400MHz, 8 MB de SRAM de alta 
 </i>
 
 ### M5StickV
-<img src="/krux/img/maixpy_m5stickv/logo-250.png" align="right" style="width: 15%;">
+<img src="/krux/es/img/maixpy_m5stickv/logo-250.png" align="right" style="width: 15%;">
 
 Krux fue adaptado a este dispositivo por primera vez en Marzo de 2022. Cuenta con la pantalla de menor tamaño y resolución, también incluye batería integrada. Consulta la [advertencia de reconocimiento de USB-C <i style="font-size: 85%">:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info)</i> anterior para información importante. A continuación, se muestra una lista de distribuidores donde se puede encontrar:
 
@@ -57,7 +57,7 @@ Krux fue adaptado a este dispositivo por primera vez en Marzo de 2022. Cuenta co
 <div style="clear: both"></div>
 
 ### Maix Amigo
-<img src="/krux/img/maixpy_amigo/logo-300.png" align="right" style="width: 16%;">
+<img src="/krux/es/img/maixpy_amigo/logo-300.png" align="right" style="width: 16%;">
 
 Krux a sido compatible con este dispositivo desde su segunda versión en Agosto de 2022. Ofrece la pantalla con mayor tamaño y resolución, pantalla táctil y batería integrada. A continuación, se muestra una lista de distribuidores donde está disponible:
 
@@ -71,7 +71,7 @@ Krux a sido compatible con este dispositivo desde su segunda versión en Agosto 
 <div style="clear: both"></div>
 
 ### Yahboom k210 module
-<img src="/krux/img/maixpy_yahboom/logo-312.png" align="right" style="width: 16%;">
+<img src="/krux/es/img/maixpy_yahboom/logo-312.png" align="right" style="width: 16%;">
 
 Con soporte de Krux desde marzo de 2024, este dispositivo cuenta con pantalla táctil e incluye una tarjeta compatible de 32 GB, un lector de tarjetas USB, un conector PH2.0 macho-a-macho de 4 pines y un adaptador PH2.0 hembra para conectarlo a una [impresora térmica](#optional-ttl-serial-thermal-printer). A continuación, se muestra una lista de distribuidores donde está disponible:
 
@@ -83,7 +83,7 @@ Con soporte de Krux desde marzo de 2024, este dispositivo cuenta con pantalla t�
 <div style="clear: both"></div>
 
 ### Maix Cube
-<img src="/krux/img/maixpy_cube/logo-400.png" align="right" style="width: 18%;">
+<img src="/krux/es/img/maixpy_cube/logo-400.png" align="right" style="width: 18%;">
 
 Con soporte de Krux desde julio de 2024, este dispositivo cuenta con la segunda pantalla y resolución más pequeñas, un botón de tres direcciones y batería integrada. A continuación, se muestra una lista de distribuidores donde está disponible:
 
@@ -97,7 +97,7 @@ Con soporte de Krux desde julio de 2024, este dispositivo cuenta con la segunda 
 <div style="clear: both"></div>
 
 ### WonderMV
-<img src="/krux/img/maixpy_wonder_mv/logo-304.png" align="right" style="width: 16%;">
+<img src="/krux/es/img/maixpy_wonder_mv/logo-304.png" align="right" style="width: 16%;">
 
 Con soporte de Krux desde septiembre de 2024, este dispositivo de pantalla táctil cuenta con una placa trasera metálica e incluye una tarjeta compatible de 32 GB, un lector de tarjetas USB y dos cables macho a macho con conector 5264 de 4 pines para conectarlo a una [impresora térmica](#optional-ttl-serial-thermal-printer). Consulte la [advertencia de reconocimiento de USB-C <i style="font-size: 85%">:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info)</i> y la [adverencia de tarjeta SD <i style="font-size: 85%">:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info)</i> para obtener información importante. Los siguientes distribuidores ofrecen este dispositivo:
 
@@ -111,7 +111,7 @@ Con soporte de Krux desde septiembre de 2024, este dispositivo de pantalla táct
 
 
 ### TZT
-<img src="/krux/img/maixpy_tzt/logo-314.png" align="right" style="width: 16%;">
+<img src="/krux/es/img/maixpy_tzt/logo-314.png" align="right" style="width: 16%;">
 
 Con soporte de Krux desde octubre de 2025, este dispositivo de pantalla táctil viene con una carcasa de aluminio fresado de primera calidad y cuenta con cinco botones. Disponible a través de los siguientes distribuidores:
 
@@ -122,7 +122,7 @@ Con soporte de Krux desde octubre de 2025, este dispositivo de pantalla táctil 
 
 
 ### Maix Dock
-<img src="/krux/img/maixpy_dock/logo-302.png" align="right" style="width: 16%;">
+<img src="/krux/es/img/maixpy_dock/logo-302.png" align="right" style="width: 16%;">
 
 Para los aficionados al bricolaje, Krux ofrece soporte para el Maix Dock desde agosto de 2022. Estos kits incluyen una placa y una pantalla, pero requieren que adquieras un codificador rotatorio o botones por separado y que montes el dispositivo tú mismo. Algunas placas Maix Dock también incluyen wifi.
 
@@ -155,7 +155,7 @@ Yahboom incluye una tarjeta compatible de 32 GB. El tamaño de la tarjeta no es 
 warning-printer.es.txt
 ----8<----
 
-Krux puede imprimir todos los códigos QR que genera, incluyendo los de mnemónicos, xpubs, copias de seguridad de billetera y PSBT firmados, utilizando una impresora térmica conectada localmente a través de su puerto serial.
+Krux puede imprimir todos los códigos QR que genera, incluyendo los de mnemónicos, xpubs, copias de seguridad de cartera y PSBT firmados, utilizando una impresora térmica conectada localmente a través de su puerto serial.
 
 Muchas impresoras térmicas serie TTL son compatibles, pero actualmente la [Goojprt QR203](https://www.aliexpress.com/w/wholesale-Goojprt-QR203.html) ofrece la mejor compatibilidad (excepto que esta impresora solo admite caracteres ASCII o chinos; los caracteres no ASCII se imprimirán como chinos). El [paquete de inicio de la impresora Adafruit](https://www.adafruit.com/product/600) también es una opción práctica para empezar, ya que incluye todos los componentes necesarios para imprimir (excepto el cable de conversión). Para garantizar un funcionamiento correcto, habilite el controlador de la impresora en [ajustes](getting-started/settings.md/#thermal), configure el pin de transmisión y la velocidad en baudios a 19200 o 9600 (según la impresora), como se explica en este [tutorial de la impresora Adafruit](https://learn.adafruit.com/mini-thermal-receipt-printer/first-test). Necesitará conectar el Tx del dispositivo al Rx de la impresora y la tierra del dispositivo a la tierra de la impresora. No conecte ningún otro pin, ya que una conexión incorrecta podría dañar el dispositivo. La impresora requiere una fuente de alimentación dedicada, generalmente con una salida de 5 a 9 V (o 12 V) y capaz de suministrar al menos 2 A. Para más información, [consulte esta discusión](https://github.com/selfcustody/krux/discussions/312).
 

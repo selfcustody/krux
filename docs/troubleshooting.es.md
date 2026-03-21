@@ -53,7 +53,7 @@ error-flashing-windows.es.txt
 
 ### La pantalla táctil de Maix Amigo no funciona con v24.03.0 y posteriores, pero funcionó bien con v23.09.1?
 
-<img src="/krux/img/amigo-inside-switch-up.jpg" align="right">
+<img src="/krux/es/img/amigo-inside-switch-up.jpg" align="right">
 
 Hemos añadido una IRQ(solicitud de interrupción) de hardware al firmware, por lo que cuando abra su Maix Amigo, verá un interruptor en el centro de la placa del dispositivo; debe estar en la posición superior para que la pantalla táctil funcione con la versión v24.03.0 y posteriores.
 
@@ -111,7 +111,7 @@ También puede instalar [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/
 ### Por qué Krux no escanea el código QR?
 
 <video style="width: 20%; min-width: 240px;" controls class="align-right margin-left">
-    <source src="/krux/img/cam-adjust-pliers.mp4" type="video/mp4"></source>
+    <source src="/krux/es/img/cam-adjust-pliers.mp4" type="video/mp4"></source>
 </video>
 
 
@@ -155,7 +155,7 @@ Además, Krux reconoce códigos QR animados que usan texto plano `pMofN` (el for
 
 Puedes cambiar el brillo de los códigos QR de PSBT pulsando el botón `PAGE` o `PREVIOUS`. Si usas un M5StickV, la pantalla pequeña dificulta que las cámaras web de los portátiles capturen suficiente detalle para analizar los códigos QR que muestra. Por ahora, una solución alternativa es tomar una foto o grabar un vídeo del código QR con una cámara de mejor calidad (como la de tu teléfono), ampliarla y mostrarla en tu cámara web.
 
-Como alternativa, puede ser más sencillo usar una billetera móvil (BlueWallet o Nunchuk) con el M5StickV, ya que las cámaras de los teléfonos no parecen tener problemas para leer los códigos QR pequeños. También puedes guardar el PSBT en una tarjeta microSD para que Krux lo firme y luego guardar el PSBT firmado para transferirlo al ordenador o al teléfono. Otros códigos QR mostrados por Krux también se pueden exportar como imagen a la tarjeta SD.
+Como alternativa, puede ser más sencillo usar una cartera móvil (BlueWallet o Nunchuk) con el M5StickV, ya que las cámaras de los teléfonos no parecen tener problemas para leer los códigos QR pequeños. También puedes guardar el PSBT en una tarjeta microSD para que Krux lo firme y luego guardar el PSBT firmado para transferirlo al ordenador o al teléfono. Otros códigos QR mostrados por Krux también se pueden exportar como imagen a la tarjeta SD.
 
 
 ### ¿Por qué Krux dice que la entropía de mis cincuenta tiradas de dados no contiene 128 bits de entropía?

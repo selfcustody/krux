@@ -1,7 +1,7 @@
 Tras instalar correctamente el firmware, verá esta pantalla con las siguientes opciones.
 
-<img src="/krux/img/maixpy_m5stickv/login-options-250.png" align="right" class="m5stickv">
-<img src="/krux/img/maixpy_amigo/login-options-300.png" align="right" class="amigo">
+<img src="/krux/es/img/maixpy_m5stickv/login-options-250.png" align="right" class="m5stickv">
+<img src="/krux/es/img/maixpy_amigo/login-options-300.png" align="right" class="amigo">
 
 #### Cargar Mnemónico
 Cargue su [mnemónico BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) de 12 o 24 palabras. Para más información, consulte [Cargar un mnemónico](loading-a-mnemonic.md).
@@ -17,8 +17,8 @@ Dispones de herramientas útiles, como un explorador de tarjetas SD o un creador
 
 <div style="clear: both"></div>
 
-<img src="/krux/img/maixpy_m5stickv/about-250.png" align="right" class="m5stickv">
-<img src="/krux/img/maixpy_amigo/about-300.png" align="right" class="amigo">
+<img src="/krux/es/img/maixpy_m5stickv/about-250.png" align="right" class="m5stickv">
+<img src="/krux/es/img/maixpy_amigo/about-300.png" align="right" class="amigo">
 
 #### Acerca de
 
