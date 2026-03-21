@@ -3,7 +3,7 @@ Esta guía explica el uso básico del instalador. El inicio puede variar en algu
 ### Menú Principal
 Al ejecutar **Krux-Installer**, verá un menú con 4 botones habilitados y dos botones deshabilitados:
 
-<img width="640" src="/krux/es/img/krux-installer/main.png" alt="Krux-Installer Main Menu" />
+<img width="640" src="/krux/img/krux-installer/main.png" alt="Krux-Installer Main Menu" />
 
 * Botones habilitados:
     * `Versión`: selecciona una versión del firmware;
@@ -27,14 +27,14 @@ Al ejecutar **Krux-Installer**, verá un menú con 4 botones habilitados y dos b
 #### Error fatal de Kivy - OpenGL
 Nuestra última versión utiliza Kivy y requiere al menos OpenGL versión 2.0. Si se produce este error, intente instalar el [Paquete de compatibilidad de OpenCL™, OpenGL® y Vulkan®](https://apps.microsoft.com/detail/9nqpsl29bfff) de Microsoft.
 
-<img src="/krux/es/img/krux-installer/opengl-error.jpg" style="width: 37%; min-width: 250px;">
+<img src="/krux/img/krux-installer/opengl-error.jpg" style="width: 37%; min-width: 250px;">
 
 ### Seleccionar versión
 
 Al iniciarse, la aplicación se configurará con la última versión, `{{latest_krux}}`. Pero también puedes seleccionar
 una versión beta o versiones anteriores:
     
-<img width="640" src="/krux/es/img/krux-installer/select_version_menu.png" alt="Krux-Installer Select Version Menu" />
+<img width="640" src="/krux/img/krux-installer/select_version_menu.png" alt="Krux-Installer Select Version Menu" />
 
 * Haz clic en el botón que muestra el texto `Versión: {{latest_krux}}`;
 
@@ -46,13 +46,13 @@ una versión beta o versiones anteriores:
 
 Tras seleccionar `odudex/krux_binaries`, verá la siguiente advertencia:
 
-<img width="640" src=" /krux/es/img/krux-installer/warn_beta.png" alt="Krux-Installer warning beta version" />
+<img width="640" src=" /krux/img/krux-installer/warn_beta.png" alt="Krux-Installer warning beta version" />
 
 #### Versiones anteriores
 
 * Incluimos esta opción por si le interesa conocer el historial de desarrollo del firmware;
 
-<img width="640" src=" /krux/es/img/krux-installer/select_old_version_menu.png" alt="Krux-Installer Select Old Version Menu" />
+<img width="640" src=" /krux/img/krux-installer/select_old_version_menu.png" alt="Krux-Installer Select Old Version Menu" />
 
 * Cada versión es compatible con un dispositivo u otro;
 
@@ -71,7 +71,7 @@ Tras seleccionar `odudex/krux_binaries`, verá la siguiente advertencia:
 
 Aquí puedes configurar algunos detalles del firmware de Krux, como:
 
-<img width="640" src=" /krux/es/img/krux-installer/app_settings.png" alt="Krux-Installer App settings Menu" />
+<img width="640" src=" /krux/img/krux-installer/app_settings.png" alt="Krux-Installer App settings Menu" />
 
 * Dónde guardar los archivos descargados;
 
@@ -82,7 +82,7 @@ Aquí puedes configurar algunos detalles del firmware de Krux, como:
 ##### Velocidad de transmisión de la memoria flash
 La velocidad de transmisión de la memoria flash determina la rapidez con la que se escribirá el firmware en el dispositivo.
 
-<img width="640" src=" /krux/es/img/krux-installer/baudrate.png" alt="Krux-Installer baudrate" />
+<img width="640" src=" /krux/img/krux-installer/baudrate.png" alt="Krux-Installer baudrate" />
 
 Utilice una de las siguientes velocidades (m5StickV no admite 2000000): 9600, 19200, 28800, 38400, 57600, 76800, 115200, 230400, 460800, 576000, 921600, 1500000, 2000000.
 
@@ -90,7 +90,7 @@ Utilice una de las siguientes velocidades (m5StickV no admite 2000000): 9600, 19
 
 Al iniciarse, **Krux-Installer** reconoce la configuración regional de su sistema. Si su idioma no es compatible, se utilizará `en_US` por defecto.
 
-<img width="640" src=" /krux/es/img/krux-installer/locale_menu.png" alt="Krux-Installer locale menu" />
+<img width="640" src=" /krux/img/krux-installer/locale_menu.png" alt="Krux-Installer locale menu" />
 
 
 ### Seleccionar dispotivo
@@ -101,7 +101,7 @@ en ​​el que se escribirá el firmware.
 
 Primero, seleccione el dispositivo que desea actualizar. A continuación, el menú mostrará tres opciones:
 
-<img width="640" src=" /krux/es/img/krux-installer/select_device.png" alt="Select Device Menu" />
+<img width="640" src=" /krux/img/krux-installer/select_device.png" alt="Select Device Menu" />
 
 Tenga en cuenta que algunos dispositivos pueden estar deshabilitados si no son compatibles con la versión seleccionada.
 
@@ -137,7 +137,7 @@ Una vez que seleccione el dispositivo y la versión, se habilitará el botón «
 Si ya ha descargado los recursos, recibirá una advertencia y se le ofrecerá la posibilidad de
 descargarlos de nuevo o continuar sin descargarlos:
 
-<img width="640" src=" /krux/es/img/krux-installer/warn_already_downloaded.png" alt="Krux-Installer already downloaded" />
+<img width="640" src=" /krux/img/krux-installer/warn_already_downloaded.png" alt="Krux-Installer already downloaded" />
 
 #### Descarga
 
@@ -153,7 +153,7 @@ descargarlos de nuevo o continuar sin descargarlos:
 
 * Descargar el archivo `selfcustody.pem` con un certificado de clave pública, firmado por `odudex`;
 
-<img width="640" src=" /krux/es/img/krux-installer/download_assets.png" alt="Krux-Installer downloading assets" />
+<img width="640" src=" /krux/img/krux-installer/download_assets.png" alt="Krux-Installer downloading assets" />
 
 ##### Versiones beta
 
@@ -166,14 +166,14 @@ descargarlos de nuevo o continuar sin descargarlos:
 * La verificación de autenticidad comprueba si el archivo `zip` fue firmado realmente por `odudex`, utilizando
 los archivos `zip.sig` y `selfcustody.pem`.
 
-<img width="640" src=" /krux/es/img/krux-installer/verification.png" alt="Krux-Installer verification process" />
+<img width="640" src=" /krux/img/krux-installer/verification.png" alt="Krux-Installer verification process" />
 
 
 #### Descomprimir
 
 Ahora podrá seleccionar si desea realizar un proceso de actualización o un proceso sin conexión a la red:
 
-<img width="640" src=" /krux/es/img/krux-installer/unzip.png" alt="Krux-Installer unzip" />
+<img width="640" src=" /krux/img/krux-installer/unzip.png" alt="Krux-Installer unzip" />
 
 Haga clic en [Actualizar con](#flash-with) para instalar mediante USB o en [Actualizar sin conexión a la red](#air-gapped-update-with) para realizar actualizaciones mediante una tarjeta SD.
 
@@ -182,12 +182,12 @@ Haga clic en [Actualizar con](#flash-with) para instalar mediante USB o en [Actu
 Cuando comienza la actualización, serás advertido de **no desconectar el dispositivo hasta que el proceso sea completado.** 
 Podrás ver el progreso de la actualización:
 
-<img width="640" src=" /krux/es/img/krux-installer/flash.png" alt="Krux-Installer unzip" />
+<img width="640" src=" /krux/img/krux-installer/flash.png" alt="Krux-Installer unzip" />
 > ⚠️  CONSEJO: Debes conectar y encender tu dispositivo **antes de presionar extraer y comenzar la actualización!**.
 
 Y también un ícono de bien hecho:
 
-<img width="640" src=" /krux/es/img/krux-installer/flash_done.png" alt="Krux-Installer unzip" />
+<img width="640" src=" /krux/img/krux-installer/flash_done.png" alt="Krux-Installer unzip" />
 
 > ⚠️  CONSEJO:
 ----8<----
@@ -206,23 +206,23 @@ error-flashing-windows.es.txt
 
 Una vez instalado el firmware inicial en tu dispositivo mediante USB, puedes realizar actualizaciones adicionales mediante una tarjeta SD para mantener el dispositivo aislado de internet.
 
-<img width="640" src=" /krux/es/img/krux-installer/unzip.png" alt="Krux-Installer unzip" />
+<img width="640" src=" /krux/img/krux-installer/unzip.png" alt="Krux-Installer unzip" />
 > ⚠️ Presiona "Air-gapped update with"
 
 Una vez extraídos los archivos `firmware.bin` y `firmware.bin.sig` verás un mensaje de advertencia.
 
-<img width="640" src=" /krux/es/img/krux-installer/warn_airgap.png" alt="Krux-Installer warn airgap" />
+<img width="640" src=" /krux/img/krux-installer/warn_airgap.png" alt="Krux-Installer warn airgap" />
 
 Inserta la tarjeta SD y haz clic en 'Continuar' para que el instalador la detecte.
 
-<img width="640" src=" /krux/es/img/krux-installer/list_drivers.png" alt="Krux-Installer warn airgap" />
+<img width="640" src=" /krux/img/krux-installer/list_drivers.png" alt="Krux-Installer warn airgap" />
 > ⚠️ Si se inserta una sola tarjeta SD, la pantalla mostrará un botón grande. Si se detectan varias unidades extraíbles, se listarán tanto las tarjetas SD como las demás unidades.
 
 Seleccione la unidad extraíble deseada para copiar `firmware.bin` y `firmware.bin.sig.` El primero es el firmware de Krux y el segundo es un archivo de firma que verifica la integridad y autenticidad del firmware. 
 
 Ahora puede comparar el hash del firmware calculado por el instalador con el hash del firmware calculado por el dispositivo.
 
-<img width="640" src=" /krux/es/img/krux-installer/airgap_done.png" alt="Krux-Installer warn airgap" />
+<img width="640" src=" /krux/img/krux-installer/airgap_done.png" alt="Krux-Installer warn airgap" />
 > ⚠️ Una vez copiados los archivos, retira la tarjeta SD de la computadora, conéctala al dispositivo y compara los hashes.
 
 ### Borrar dispositivo
@@ -233,7 +233,7 @@ Este proceso consta de dos pasos: **Mensaje de advertencia** y **Proceso de borr
 
 Antes de que comienze el borrado, se mostrará un mensaje:
 
-<img width="640" src=" /krux/es/img/krux-installer/wipe_warn.png" alt="Wipe Warning" />
+<img width="640" src=" /krux/img/krux-installer/wipe_warn.png" alt="Wipe Warning" />
 > ⚠️  CONSEJO: Es útil cuando el dispositivo no funciona o por razones de seguridad.
 Para volver a usar Krux, deberás volver a actualizar el firmware.
 
@@ -242,7 +242,7 @@ Para volver a usar Krux, deberás volver a actualizar el firmware.
 Una vez iniciado el proceso, la pantalla se congelará y un icono giratorio seguirá moviéndose.
 Cuando termine, puedes desplazarte hacia abajo y verás un icono de `verificación.`
 
-<img width="640" src=" /krux/es/img/krux-installer/wipe.png" alt="Wipe Warning" />
+<img width="640" src=" /krux/img/krux-installer/wipe.png" alt="Wipe Warning" />
 > ⚠️  CONSEJO: No desconectes ni apagues tu dispositivo ni tu computadora. Espera a que finalice el proceso.
 
 ----8<----
