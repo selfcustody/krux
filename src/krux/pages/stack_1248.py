@@ -20,8 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+import lcd
+import image
+import sensor
+import time
 from embit.wordlists.bip39 import WORDLIST
-from . import Page
+from . import Page, FLASH_MSG_TIME
 from ..themes import theme
 from ..krux_settings import t
 from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
@@ -34,6 +38,8 @@ from ..input import (
     FAST_BACKWARD,
 )
 from ..kboard import kboard
+from ..camera import BINARY_GRID_MODE
+from ..wdt import wdt
 
 STACKBIT_GO_INDEX = 38
 STACKBIT_ESC_INDEX = 35
