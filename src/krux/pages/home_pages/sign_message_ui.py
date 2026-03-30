@@ -234,9 +234,20 @@ class SignMessage(Utils):
 
     def sign_standard_message(self, data):
         """Signs a standard message"""
-        message_hash = self._compute_message_hash(data)
+        message_hash, is_raw_hash = self._compute_message_hash(data)
         if message_hash is None:
             return ""
+
+        if is_raw_hash:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Warning:")
+                + "\n\n"
+                + t("Signing raw hash. Proceed only if you trust the source."),
+                highlight_prefix=":",
+            )
+            if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+                return ""
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
@@ -251,15 +262,15 @@ class SignMessage(Utils):
         return sig
 
     def _compute_message_hash(self, data):
-        """Computes the hash for the message"""
+        """Computes the hash for the message, returns (hash, is_raw_hash)"""
         if len(data) == 32:
-            return data
+            return data, True
         if len(data) == 64:
             try:
-                return binascii.unhexlify(data)
+                return binascii.unhexlify(data), True
             except:
                 pass
-        return hashlib.sha256(data).digest()
+        return hashlib.sha256(data).digest(), False
 
     def _export_signature(
         self,

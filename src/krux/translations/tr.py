@@ -298,6 +298,7 @@ translation_array = [
     "İmza:",
     "İmzalı Mesaj",
     "İmzalı PSBT",
+    "Ham karma imzalanıyor. Yalnızca kaynağa güveniyorsanız devam edin.",
     "İmzalama…",
     "Tek-imza",
     "Boyut:",
