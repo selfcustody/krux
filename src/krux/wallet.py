@@ -471,6 +471,8 @@ def parse_wallet(wallet_data):
         descriptor, label = parse_key_value_file(wallet_data)
         if descriptor and label:
             return descriptor, label
+    except ValueError:
+        raise
     except:
         raise ValueError("invalid wallet format")
 
