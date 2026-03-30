@@ -3,6 +3,7 @@
 ### Security Fixes
 - Reject PSBT inputs with non-standard sighash types before signing
 - Fix ZeroDivisionError in fee calculation for zero-value output PSBTs
+- Validate multisig quorum: reject m=0 and m>n in key-value wallet files
 
 # Changelog 26.03.0 - March 2025
 
