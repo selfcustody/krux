@@ -1522,6 +1522,98 @@ def test_sign_fails_with_0_sigs_added(mocker, m5stickv, tdata):
     signer.psbt.sign_with.assert_called_with(wallet.key.root)
 
 
+def test_check_sighash_rejects_sighash_none(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from embit.transaction import SIGHASH
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, tdata.P2WPKH_PSBT, FORMAT_NONE)
+    # Inject SIGHASH_NONE into the first input
+    signer.psbt.inputs[0].sighash_type = SIGHASH.NONE
+
+    with pytest.raises(ValueError, match="non-standard sighash type: 0x02"):
+        signer.sign()
+
+
+def test_check_sighash_rejects_sighash_single(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from embit.transaction import SIGHASH
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, tdata.P2WPKH_PSBT, FORMAT_NONE)
+    signer.psbt.inputs[0].sighash_type = SIGHASH.SINGLE
+
+    with pytest.raises(ValueError, match="non-standard sighash type: 0x03"):
+        signer.sign()
+
+
+def test_check_sighash_rejects_anyonecanpay(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from embit.transaction import SIGHASH
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, tdata.P2WPKH_PSBT, FORMAT_NONE)
+    signer.psbt.inputs[0].sighash_type = SIGHASH.ALL | SIGHASH.ANYONECANPAY
+
+    with pytest.raises(ValueError, match="non-standard sighash type: 0x81"):
+        signer.sign()
+
+
+def test_check_sighash_allows_default_and_all(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from embit.transaction import SIGHASH
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+
+    # SIGHASH_ALL should be accepted (signs successfully)
+    signer = PSBTSigner(wallet, tdata.P2WPKH_PSBT, FORMAT_NONE)
+    signer.psbt.inputs[0].sighash_type = SIGHASH.ALL
+    signer.sign()  # Should not raise
+
+    # SIGHASH_DEFAULT should be accepted
+    signer = PSBTSigner(wallet, tdata.P2WPKH_PSBT, FORMAT_NONE)
+    signer.psbt.inputs[0].sighash_type = SIGHASH.DEFAULT
+    signer.sign()  # Should not raise
+
+    # None (unset) should be accepted
+    signer = PSBTSigner(wallet, tdata.P2WPKH_PSBT, FORMAT_NONE)
+    signer.psbt.inputs[0].sighash_type = None
+    signer.sign()  # Should not raise
+
+
+def test_check_sighash_reports_correct_input_index(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from embit.transaction import SIGHASH
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, tdata.P2PKH_PSBT, FORMAT_NONE)
+    # P2PKH_PSBT has 3 inputs; set non-standard sighash on the third one
+    if len(signer.psbt.inputs) >= 3:
+        signer.psbt.inputs[2].sighash_type = SIGHASH.NONE
+        with pytest.raises(ValueError, match="Input 2"):
+            signer.sign()
+
+
 def test_outputs_singlesig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner

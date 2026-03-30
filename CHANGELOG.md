@@ -1,3 +1,8 @@
+# Changelog 26.03.1 - March 2025
+
+### Security Fixes
+Reject PSBT inputs with non-standard sighash types before signing
+
 # Changelog 26.03.0 - March 2025
 
 ### New Device Support: Embed Fire
