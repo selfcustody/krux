@@ -431,8 +431,26 @@ class PSBTSigner:
 
         return messages, fee_percent
 
+    def check_sighash(self):
+        """Check that all inputs use SIGHASH_ALL (or DEFAULT for taproot).
+
+        Refuse to sign if any input requests a non-standard sighash type
+        (SIGHASH_NONE, SIGHASH_SINGLE, ANYONECANPAY), as these can allow
+        an attacker to redirect funds after signing.
+        """
+        from embit.transaction import SIGHASH
+
+        safe_sighash = {None, SIGHASH.DEFAULT, SIGHASH.ALL}
+        for i, inp in enumerate(self.psbt.inputs):
+            if inp.sighash_type not in safe_sighash:
+                sighash_val = inp.sighash_type
+                raise ValueError(
+                    "Input %d has non-standard sighash type: 0x%02x" % (i, sighash_val)
+                )
+
     def add_signatures(self):
         """Add signatures to PSBT"""
+        self.check_sighash()
         sigs_added = self.psbt.sign_with(self.wallet.key.root)
         if sigs_added == 0:
             raise ValueError("cannot sign")
