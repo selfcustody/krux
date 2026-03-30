@@ -1936,3 +1936,49 @@ def test_descriptor_rejects_m_zero(m5stickv):
             "[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/0/*,"
             "[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/0/*))"
         )
+
+
+def test_wallet_load_rejects_descriptor_m_zero(mocker, m5stickv):
+    """Audit C8: defense-in-depth in Wallet.load rejects m=0 from descriptor"""
+    from unittest.mock import MagicMock
+    from krux.wallet import Wallet
+
+    mock_descriptor = MagicMock()
+    mock_descriptor.key = None
+    mock_descriptor.is_basic_multisig = True
+    mock_descriptor.miniscript.args.__getitem__ = lambda self, i: 0  # m=0
+    mock_descriptor.keys = [MagicMock(), MagicMock(), MagicMock()]  # n=3
+
+    mocker.patch("krux.wallet.parse_wallet", return_value=(mock_descriptor, "Test"))
+    mocker.patch("krux.wallet.to_unambiguous_descriptor", return_value=mock_descriptor)
+    mocker.patch(
+        "krux.wallet.version_to_network_versiontype",
+        return_value=("main", "xpub"),
+    )
+
+    wallet = Wallet(None)
+    with pytest.raises(ValueError, match="m must be at least 1"):
+        wallet.load("fake_data", 0)
+
+
+def test_wallet_load_rejects_descriptor_m_greater_than_n(mocker, m5stickv):
+    """Audit C8: defense-in-depth in Wallet.load rejects m>n from descriptor"""
+    from unittest.mock import MagicMock
+    from krux.wallet import Wallet
+
+    mock_descriptor = MagicMock()
+    mock_descriptor.key = None
+    mock_descriptor.is_basic_multisig = True
+    mock_descriptor.miniscript.args.__getitem__ = lambda self, i: 4  # m=4
+    mock_descriptor.keys = [MagicMock(), MagicMock(), MagicMock()]  # n=3
+
+    mocker.patch("krux.wallet.parse_wallet", return_value=(mock_descriptor, "Test"))
+    mocker.patch("krux.wallet.to_unambiguous_descriptor", return_value=mock_descriptor)
+    mocker.patch(
+        "krux.wallet.version_to_network_versiontype",
+        return_value=("main", "xpub"),
+    )
+
+    wallet = Wallet(None)
+    with pytest.raises(ValueError, match="m .* exceeds n"):
+        wallet.load("fake_data", 0)
