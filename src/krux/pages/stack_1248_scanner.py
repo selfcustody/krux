@@ -27,10 +27,17 @@ from embit.wordlists.bip39 import WORDLIST
 from . import Page
 from ..krux_settings import t
 from ..themes import theme
-from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
+from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
 from ..camera import BINARY_GRID_MODE
 from ..wdt import wdt
-from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH, FAST_FORWARD, FAST_BACKWARD
+from ..input import (
+    BUTTON_ENTER,
+    BUTTON_PAGE,
+    BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
+    FAST_FORWARD,
+    FAST_BACKWARD,
+)
 from ..kboard import kboard
 from .stack_1248 import Stackbit, STACKBIT_GO_INDEX, STACKBIT_ESC_INDEX
 
@@ -53,8 +60,8 @@ class StackbitScanner(Page):
     """
 
     # Plate type constants
-    PLATE_FULL = "full"    # 85x54mm, 16x12 grid, 12 words
-    PLATE_MINI = "mini"    # 42.5x54mm, 8x12 grid, 6 words
+    PLATE_FULL = "full"  # 85x54mm, 16x12 grid, 12 words
+    PLATE_MINI = "mini"  # 42.5x54mm, 8x12 grid, 6 words
 
     def __init__(self, ctx):
         super().__init__(ctx, None)
@@ -65,6 +72,7 @@ class StackbitScanner(Page):
         self.debug_mode = True  # Show visual markers for detected punches
         self.plate_type = self.PLATE_FULL  # Detected plate type
 
+    # pylint: disable=R0914
     def _detect_plate(self, img, force_type=None):
         """Detect the Stackbit 1248 plate as a bright blob
 
@@ -88,7 +96,7 @@ class StackbitScanner(Page):
             y_stride=5,
             area_threshold=2000,
             pixels_threshold=1500,
-            merge=True
+            merge=True,
         )
 
         best_rect = None
@@ -98,9 +106,9 @@ class StackbitScanner(Page):
         # Aspect ratios for different plate types
         # Full plate: 85 / 54 = 1.574 (landscape)
         # Mini plate: 42.5 / 54 = 0.787 (portrait)
-        FULL_ASPECT = 1.574
-        MINI_ASPECT = 0.787
-        ASPECT_TOLERANCE = 0.35
+        full_aspect = 1.574
+        mini_aspect = 0.787
+        aspect_tolerance = 0.35
 
         img_center_x = img.width() // 2
         img_center_y = img.height() // 2
@@ -117,13 +125,13 @@ class StackbitScanner(Page):
             aspect_diff = 999
 
             if force_type == self.PLATE_FULL or force_type is None:
-                if abs(aspect - FULL_ASPECT) < ASPECT_TOLERANCE:
+                if abs(aspect - full_aspect) < aspect_tolerance:
                     plate_type = self.PLATE_FULL
-                    aspect_diff = abs(aspect - FULL_ASPECT)
+                    aspect_diff = abs(aspect - full_aspect)
 
             if force_type == self.PLATE_MINI or force_type is None:
-                mini_diff = abs(aspect - MINI_ASPECT)
-                if mini_diff < ASPECT_TOLERANCE and mini_diff < aspect_diff:
+                mini_diff = abs(aspect - mini_aspect)
+                if mini_diff < aspect_tolerance and mini_diff < aspect_diff:
                     plate_type = self.PLATE_MINI
                     aspect_diff = mini_diff
 
@@ -139,9 +147,11 @@ class StackbitScanner(Page):
             # Score based on centering
             blob_center_x = rect[0] + rect[2] // 2
             blob_center_y = rect[1] + rect[3] // 2
-            dist_from_center = ((blob_center_x - img_center_x) ** 2 +
-                               (blob_center_y - img_center_y) ** 2) ** 0.5
-            max_dist = (img_center_x ** 2 + img_center_y ** 2) ** 0.5
+            dist_from_center = (
+                (blob_center_x - img_center_x) ** 2
+                + (blob_center_y - img_center_y) ** 2
+            ) ** 0.5
+            max_dist = (img_center_x**2 + img_center_y**2) ** 0.5
             center_score = 1.0 - (dist_from_center / max_dist)
 
             # Combined score
@@ -190,8 +200,6 @@ class StackbitScanner(Page):
         # Draw rectangle outline
         img.draw_rectangle(rect, lcd.WHITE, thickness=2)
 
-        num_cols = 16 if plate_type == self.PLATE_FULL else 8
-
         # Draw vertical lines
         for i, x in enumerate(self.x_regions):
             # Thicker lines for word separators
@@ -200,18 +208,12 @@ class StackbitScanner(Page):
             else:
                 thickness = 2 if i == 0 else 1
             img.draw_line(
-                x, rect[1],
-                x, rect[1] + rect[3],
-                lcd.WHITE, thickness=thickness
+                x, rect[1], x, rect[1] + rect[3], lcd.WHITE, thickness=thickness
             )
 
         # Draw horizontal lines (12 rows)
         for y in self.y_regions:
-            img.draw_line(
-                rect[0], y,
-                rect[0] + rect[2], y,
-                lcd.WHITE, thickness=1
-            )
+            img.draw_line(rect[0], y, rect[0] + rect[2], y, lcd.WHITE, thickness=1)
 
     def _read_cell(self, img, x, y, w, h, draw_debug=False):
         """Read a single cell and return True if punched
@@ -247,7 +249,7 @@ class StackbitScanner(Page):
                         roi=(x, y, w, h),
                         pixels_threshold=int(w * h * 0.1),
                         area_threshold=int(w * h * 0.08),
-                        merge=True
+                        merge=True,
                     )
                     for blob in blobs:
                         if blob.roundness() > 0.3:
@@ -404,15 +406,15 @@ class StackbitScanner(Page):
         if plate_type == self.PLATE_MINI:
             # Mini plate: 8 columns, 6 words (same layout as left half)
             return self._decode_6_words_from_half(grid, col_offset=0)
-        else:
-            # Full plate: 16 columns, 12 words
-            numbers = []
-            # Left half (words 1-6, columns 0-7)
-            numbers.extend(self._decode_6_words_from_half(grid, col_offset=0))
-            # Right half (words 7-12, columns 8-15)
-            numbers.extend(self._decode_6_words_from_half(grid, col_offset=8))
-            return numbers
+        # Full plate: 16 columns, 12 words
+        numbers = []
+        # Left half (words 1-6, columns 0-7)
+        numbers.extend(self._decode_6_words_from_half(grid, col_offset=0))
+        # Right half (words 7-12, columns 8-15)
+        numbers.extend(self._decode_6_words_from_half(grid, col_offset=8))
+        return numbers
 
+    # pylint: disable=W0212
     def _edit_single_word(self, word_index, number):
         """Edit a single word using the Stackbit 1248 editor UI
 
@@ -463,7 +465,12 @@ class StackbitScanner(Page):
                 if index >= STACKBIT_GO_INDEX:
                     word = sb.digits_to_word(digits)
                     if word is not None:
-                        return digits[0] * 1000 + digits[1] * 100 + digits[2] * 10 + digits[3]
+                        return (
+                            digits[0] * 1000
+                            + digits[1] * 100
+                            + digits[2] * 10
+                            + digits[3]
+                        )
                 elif index >= STACKBIT_ESC_INDEX:
                     return None
                 elif index < 14:
@@ -472,6 +479,7 @@ class StackbitScanner(Page):
                 index = sb.index(index, btn)
             self.ctx.display.clear()
 
+    # pylint: disable=R0914,R0912,R0915
     def _show_stackbit_words(self, grid, word_offset=0, plate_type=None):
         """Show decoded words with editing support and Back/Next navigation
 
@@ -502,7 +510,7 @@ class StackbitScanner(Page):
                 (number // 1000) % 10,
                 (number // 100) % 10,
                 (number // 10) % 10,
-                number % 10
+                number % 10,
             ]
             digits_str = "{:04d}".format(number)
 
@@ -517,13 +525,18 @@ class StackbitScanner(Page):
                 index_x_offset -= FONT_WIDTH
 
             self.ctx.display.fill_rectangle(
-                grid_x_offset, y_offset - 2,
-                x_pad + FONT_WIDTH // 2, 2 * y_pad + 2,
+                grid_x_offset,
+                y_offset - 2,
+                x_pad + FONT_WIDTH // 2,
+                2 * y_pad + 2,
                 theme.disabled_color,
             )
             self.ctx.display.draw_string(
-                index_x_offset, y_offset + y_pad // 2,
-                str(word_idx), theme.fg_color, theme.disabled_color,
+                index_x_offset,
+                y_offset + y_pad // 2,
+                str(word_idx),
+                theme.fg_color,
+                theme.disabled_color,
             )
 
             numbers_offset = x_offset + x_pad + (x_pad - FONT_WIDTH) // 2
@@ -531,45 +544,117 @@ class StackbitScanner(Page):
             lower_numbers = [2, 4, 8, 4, 8, 4, 8]
             label_y_offset = y_offset + (y_pad - FONT_HEIGHT) // 2
             for i in range(len(upper_numbers)):
-                self.ctx.display.draw_string(numbers_offset, label_y_offset, str(upper_numbers[i]), theme.fg_color)
-                self.ctx.display.draw_string(numbers_offset, label_y_offset + y_pad, str(lower_numbers[i]), theme.fg_color)
+                self.ctx.display.draw_string(
+                    numbers_offset,
+                    label_y_offset,
+                    str(upper_numbers[i]),
+                    theme.fg_color,
+                )
+                self.ctx.display.draw_string(
+                    numbers_offset,
+                    label_y_offset + y_pad,
+                    str(lower_numbers[i]),
+                    theme.fg_color,
+                )
                 numbers_offset += x_pad
 
             width = 8 * x_pad + FONT_WIDTH // 2
             height = 2 * y_pad + 2
-            self.ctx.display.draw_line(grid_x_offset, y_offset - 2, grid_x_offset + width, y_offset - 2, theme.frame_color)
-            self.ctx.display.draw_line(grid_x_offset, y_offset - 2 + height, grid_x_offset + width, y_offset - 2 + height, theme.frame_color)
+            self.ctx.display.draw_line(
+                grid_x_offset,
+                y_offset - 2,
+                grid_x_offset + width,
+                y_offset - 2,
+                theme.frame_color,
+            )
+            self.ctx.display.draw_line(
+                grid_x_offset,
+                y_offset - 2 + height,
+                grid_x_offset + width,
+                y_offset - 2 + height,
+                theme.frame_color,
+            )
             x_bar = x_offset
-            self.ctx.display.draw_line(grid_x_offset, y_offset - 2, grid_x_offset, y_offset - 2 + height, theme.frame_color)
+            self.ctx.display.draw_line(
+                grid_x_offset,
+                y_offset - 2,
+                grid_x_offset,
+                y_offset - 2 + height,
+                theme.frame_color,
+            )
             x_bar += x_pad
-            self.ctx.display.draw_line(x_bar, y_offset - 2, x_bar, y_offset - 2 + height, theme.frame_color)
+            self.ctx.display.draw_line(
+                x_bar, y_offset - 2, x_bar, y_offset - 2 + height, theme.frame_color
+            )
             x_bar += x_pad
             for _ in range(4):
-                self.ctx.display.draw_line(x_bar, y_offset - 2, x_bar, y_offset - 2 + height, theme.frame_color)
+                self.ctx.display.draw_line(
+                    x_bar, y_offset - 2, x_bar, y_offset - 2 + height, theme.frame_color
+                )
                 x_bar += 2 * x_pad
 
             outline_width = x_pad - 6
             outline_height = y_pad - 4
             outline_x = x_offset + x_pad + 3
             if digits[0] == 2:
-                self.ctx.display.outline(outline_x, y_offset + y_pad + 1, outline_width, outline_height, theme.highlight_color)
+                self.ctx.display.outline(
+                    outline_x,
+                    y_offset + y_pad + 1,
+                    outline_width,
+                    outline_height,
+                    theme.highlight_color,
+                )
             elif digits[0] == 1:
-                self.ctx.display.outline(outline_x, y_offset + 1, outline_width, outline_height, theme.highlight_color)
+                self.ctx.display.outline(
+                    outline_x,
+                    y_offset + 1,
+                    outline_width,
+                    outline_height,
+                    theme.highlight_color,
+                )
             outline_x += x_pad
             for d in range(3):
                 digit = digits[d + 1]
                 if (digit >> 3) & 1:
-                    self.ctx.display.outline(outline_x + x_pad, y_offset + y_pad + 1, outline_width, outline_height, theme.highlight_color)
+                    self.ctx.display.outline(
+                        outline_x + x_pad,
+                        y_offset + y_pad + 1,
+                        outline_width,
+                        outline_height,
+                        theme.highlight_color,
+                    )
                 if (digit >> 2) & 1:
-                    self.ctx.display.outline(outline_x, y_offset + y_pad + 1, outline_width, outline_height, theme.highlight_color)
+                    self.ctx.display.outline(
+                        outline_x,
+                        y_offset + y_pad + 1,
+                        outline_width,
+                        outline_height,
+                        theme.highlight_color,
+                    )
                 if (digit >> 1) & 1:
-                    self.ctx.display.outline(outline_x + x_pad, y_offset + 1, outline_width, outline_height, theme.highlight_color)
+                    self.ctx.display.outline(
+                        outline_x + x_pad,
+                        y_offset + 1,
+                        outline_width,
+                        outline_height,
+                        theme.highlight_color,
+                    )
                 if digit & 1:
-                    self.ctx.display.outline(outline_x, y_offset + 1, outline_width, outline_height, theme.highlight_color)
+                    self.ctx.display.outline(
+                        outline_x,
+                        y_offset + 1,
+                        outline_width,
+                        outline_height,
+                        theme.highlight_color,
+                    )
                 outline_x += 2 * x_pad
 
-            self.ctx.display.draw_string(x_offset + 17 * FONT_WIDTH, y_offset, digits_str, theme.highlight_color)
-            self.ctx.display.draw_string(x_offset + 17 * FONT_WIDTH, y_offset + y_pad, word, theme.disabled_color)
+            self.ctx.display.draw_string(
+                x_offset + 17 * FONT_WIDTH, y_offset, digits_str, theme.highlight_color
+            )
+            self.ctx.display.draw_string(
+                x_offset + 17 * FONT_WIDTH, y_offset + y_pad, word, theme.disabled_color
+            )
 
         # Split numbers into pages of 6
         num_words = len(numbers)
@@ -585,8 +670,8 @@ class StackbitScanner(Page):
         current_page = 0
 
         while True:
-            is_first = (current_page == 0)
-            is_last = (current_page == len(pages) - 1)
+            is_first = current_page == 0
+            is_last = current_page == len(pages) - 1
             page_nums = pages[current_page]
             num_on_page = len(page_nums)
 
@@ -604,7 +689,9 @@ class StackbitScanner(Page):
             # Draw footer: Back / Next (or Go)
             footer_y = self.ctx.display.height() - FONT_HEIGHT - 4
             if not is_first:
-                self.ctx.display.draw_string(x_offset, footer_y, "< " + t("Back"), theme.no_esc_color)
+                self.ctx.display.draw_string(
+                    x_offset, footer_y, "< " + t("Back"), theme.no_esc_color
+                )
             next_label = t("Next") + " >" if not is_last else t("Go") + " >"
             next_color = theme.fg_color if not is_last else theme.go_color
             next_x = self.ctx.display.width() - len(next_label) * FONT_WIDTH - x_offset
@@ -634,8 +721,7 @@ class StackbitScanner(Page):
                 if row < num_on_page:
                     # Touch on word row → edit it
                     edited = self._edit_single_word(
-                        page_offsets[current_page] + row + 1,
-                        page_nums[row]
+                        page_offsets[current_page] + row + 1, page_nums[row]
                     )
                     if edited is not None:
                         pages[current_page][row] = edited
@@ -682,6 +768,7 @@ class StackbitScanner(Page):
                 return None
         return words
 
+    # pylint: disable=R0914,R0912,R0915
     def scanner(self, w24=False):
         """Scans the Stackbit 1248 plate with manual trigger
 
@@ -702,7 +789,9 @@ class StackbitScanner(Page):
 
         self.ctx.display.clear()
         if w24:
-            message = t("Position plate") + "\n" + t("Words 1-12") + "\n" + t("Click to read")
+            message = (
+                t("Position plate") + "\n" + t("Words 1-12") + "\n" + t("Click to read")
+            )
         else:
             message = t("Position plate") + "\n" + t("Click to read")
         self.ctx.display.draw_centered_text(message)
@@ -745,13 +834,17 @@ class StackbitScanner(Page):
                         sample_w = int(w * 0.7)
                         sample_x = x + int(w * 0.15)
 
-                        self._read_cell(img, sample_x, sample_y, sample_w, sample_h, True)
+                        self._read_cell(
+                            img, sample_x, sample_y, sample_w, sample_h, True
+                        )
 
             # Display image
             lcd.display(img)
 
             # Check for click/touch to perform final reading
-            if self.ctx.input.enter_event() or self.ctx.input.touch_event(validate_position=False):
+            if self.ctx.input.enter_event() or self.ctx.input.touch_event(
+                validate_position=False
+            ):
                 if rect and plate_type:
                     sensor.run(0)
                     self.ctx.display.to_portrait()
@@ -759,19 +852,21 @@ class StackbitScanner(Page):
                     # Remember plate type from first scan
                     if detected_plate_type is None:
                         detected_plate_type = plate_type
-                        mini_mode = (plate_type == self.PLATE_MINI and not w24)
+                        mini_mode = plate_type == self.PLATE_MINI and not w24
 
-                    grid, x_regions_viz, y_regions_viz = self._read_all_grid_cells(img, rect, plate_type)
+                    grid, _, _ = self._read_all_grid_cells(img, rect, plate_type)
 
                     # Calculate word offset for display
                     if w24 and page == 1:
                         word_offset = 12  # Second scan of 24-word mode: words 13-24
                     elif mini_mode and page == 1:
-                        word_offset = 6   # Second scan of mini plate: words 7-12
+                        word_offset = 6  # Second scan of mini plate: words 7-12
                     else:
-                        word_offset = 0   # First scan: words 1-6 or 1-12
+                        word_offset = 0  # First scan: words 1-6 or 1-12
 
-                    edited_numbers = self._show_stackbit_words(grid, word_offset, plate_type)
+                    edited_numbers = self._show_stackbit_words(
+                        grid, word_offset, plate_type
+                    )
 
                     if edited_numbers is not None:
                         words = self._numbers_to_words(edited_numbers)
@@ -787,9 +882,11 @@ class StackbitScanner(Page):
 
                                 self.ctx.display.clear()
                                 self.flash_text(
-                                    t("Flip plate") + "\n" +
-                                    t("Words 13-24") + "\n\n" +
-                                    t("Click to read")
+                                    t("Flip plate")
+                                    + "\n"
+                                    + t("Words 13-24")
+                                    + "\n\n"
+                                    + t("Click to read")
                                 )
 
                                 self.ctx.camera.initialize_run(mode=BINARY_GRID_MODE)
@@ -797,10 +894,9 @@ class StackbitScanner(Page):
                                 self.ctx.display.to_landscape()
                                 self.ctx.display.clear()
                                 continue
-                            else:
-                                all_words.extend(words)
-                                return all_words
-                        elif mini_mode:
+                            all_words.extend(words)
+                            return all_words
+                        if mini_mode:
                             # Mini plate 12-word mode: 2 scans of 6 words each
                             if page == 0:
                                 all_words = words[:]
@@ -808,9 +904,11 @@ class StackbitScanner(Page):
 
                                 self.ctx.display.clear()
                                 self.flash_text(
-                                    t("Flip plate") + "\n" +
-                                    t("Words 7-12") + "\n\n" +
-                                    t("Click to read")
+                                    t("Flip plate")
+                                    + "\n"
+                                    + t("Words 7-12")
+                                    + "\n\n"
+                                    + t("Click to read")
                                 )
 
                                 self.ctx.camera.initialize_run(mode=BINARY_GRID_MODE)
@@ -818,12 +916,10 @@ class StackbitScanner(Page):
                                 self.ctx.display.to_landscape()
                                 self.ctx.display.clear()
                                 continue
-                            else:
-                                all_words.extend(words)
-                                return all_words
-                        else:
-                            # Full plate 12-word mode: single scan
-                            return words
+                            all_words.extend(words)
+                            return all_words
+                        # Full plate 12-word mode: single scan
+                        return words
 
                     # Invalid words - return to scanning
                     self.ctx.display.to_landscape()

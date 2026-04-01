@@ -583,7 +583,7 @@ def test_export_xor_to_same_mnemonic_from_qrcode(mocker, amigo, tdata):
         BUTTON_ENTER,  # Press "Via camera"
         BUTTON_ENTER,  # QRCode
         BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
-        *([BUTTON_PAGE] * 5),  # Move to back
+        *([BUTTON_PAGE] * 6),  # Move to back
         BUTTON_ENTER,  # Press back
         *([BUTTON_PAGE] * 3),  # Move to back
         BUTTON_ENTER,  # Press back
@@ -625,7 +625,7 @@ def test_export_xor_to_inverted_mnemonic_from_qrcode(mocker, amigo, tdata):
         BUTTON_ENTER,  # Press "Via camera"
         BUTTON_ENTER,  # QRCodeCapture
         BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
-        *([BUTTON_PAGE] * 5),  # Move to back
+        *([BUTTON_PAGE] * 6),  # Move to back
         BUTTON_ENTER,  # Press back
         *([BUTTON_PAGE] * 3),  # Move to back
         BUTTON_ENTER,  # Press back
@@ -669,7 +669,7 @@ def test_export_xor_low_entropy_mnemonic_from_qrcode(mocker, amigo, tdata):
         BUTTON_ENTER,  # Press "Via camera"
         BUTTON_ENTER,  # QRCodeCapture
         BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
-        *([BUTTON_PAGE] * 5),  # Move to back
+        *([BUTTON_PAGE] * 6),  # Move to back
         BUTTON_ENTER,  # Press back
         *([BUTTON_PAGE] * 3),  # Move to back
         BUTTON_ENTER,  # Press back
