@@ -84,7 +84,7 @@ black.ref = "format"
 format-test.ref = "format-tests"
 
 # pylint tasks
-lint-src = "pylint src"
+lint-src = "pylint --load-plugins=pylint.extensions.mccabe --max-complexity=20  src"
 lint-scripts = "pylint firmware/font/*.py firmware/scripts/*.py i18n/*.py"
 lint = ["lint-src", "lint-scripts"]
 # aliases
