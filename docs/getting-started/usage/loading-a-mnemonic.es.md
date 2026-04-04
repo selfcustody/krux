@@ -1,4 +1,4 @@
-Una vez que tengas un [mnemonico BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) de 12 o 24 palabras, seleccione `Cargar Mnemónico` en el menú de inicio de Krux (también conocido como menú de inicio de sesión) y elija un método de entrada:
+Una vez que tengas un [mnemonico BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) de 12 o 24 palabras, seleccione `Importar Mnemónico` en el menú de inicio de Krux (también conocido como menú de inicio de sesión) y elija un método de entrada:
 
 <img src="/krux/es/img/maixpy_amigo/load-mnemonic-options-300.png" class="amigo">
 <img src="/krux/es/img/maixpy_m5stickv/load-mnemonic-options-250.png" class="m5stickv">

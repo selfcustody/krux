@@ -36,7 +36,7 @@ verify-the-signature-tip.es.txt
 
 ## Verificar la integridad
 
-Tras verificar la autenticidad del archivo [`{{latest_installer_sha}}`](https://github.com/selfcustody/krux-installer/releases/download/{{latest_installer}}/{{latest_installer_sha}}), podemo proceder a la comprobación de integridad en tu terminal `bash`/`zsh`:
+Tras verificar la autenticidad del archivo [`{{latest_installer_sha}}`](https://github.com/selfcustody/krux-installer/releases/download/{{latest_installer}}/{{latest_installer_sha}}), podemos proceder a la comprobación de integridad en tu terminal `bash`/`zsh`:
 
 **Linux / MacOS**
 

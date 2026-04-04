@@ -4,7 +4,7 @@ Krux es un programa de código abierto para firmar transacciones de Bitcoin, dis
 
 La firma de transacciones en Krux se realiza sin conexión a internet, mediante un código QR o una tarjeta SD utilizando la funcionalidad [PSBT](https://bitcoinops.org/en/topics/psbt/). Puedes crear/cargar tu [semilla mnemotécnica BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki), o importar un descriptor de cartera, y firmar transacciones sin tener que conectar el dispositivo a la computadora (excepto para la instalación inicial del programa). El equipo lee códigos QR con su cámara y los muestra en su pantalla o en papel mediante un [accesorio de impresora térmica](../getting-started/features/printing/printing.md). 
 
-Krux funciona sin conexión a internet, por lo cual nunca gestiona la difusión de la transacción PSBT. En su lugar, puedes utilizar Krux con carteras externas para enviar las transacciones desde tu computadora o dispositivo móbil conectado, manteniendo siempre tus claves privadas fuera de linea. 
+Krux funciona sin conexión a internet, por lo cual nunca gestiona la difusión de la transacción PSBT. En su lugar, puedes utilizar Krux con carteras externas para enviar las transacciones desde tu computadora o dispositivo móvil conectado, manteniendo siempre tus claves privadas fuera de linea. 
 
 Estas son carteras externas actualmente **compatibles con Krux**:
 

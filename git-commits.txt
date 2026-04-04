@@ -1,0 +1,45 @@
+72545579 HEAD@{0}: rebase (finish): returning to refs/heads/develop
+72545579 HEAD@{1}: rebase (pick): (ADD) loading/generating a mnemonic docs into spanish
+7758867a HEAD@{2}: rebase (pick): installing from source and usage index pages in spanish
+0e0bdd23 HEAD@{3}: rebase (pick): (ADD) installing from- esp docs
+b9d416af HEAD@{4}: rebase (pick): (FIX) improved choosing of words for better understanding in spanish
+2eeba0fb HEAD@{5}: rebase (pick): (ADD) espanish docs installing-from-gui linux mac windows other
+13dc281a HEAD@{6}: rebase (continue): Updated image references to use absolute paths instead of relative links
+024b87d0 HEAD@{7}: rebase (pick): (ADD) esp docs
+cd0a641a HEAD@{8}: rebase (pick): (ADD) esp lang snippets
+8d1a17ab HEAD@{9}: rebase (pick): (ADD) esp snippets
+4d94d57e HEAD@{10}: rebase (pick): Added missing imgs and other small fixes
+ce1ea094 HEAD@{11}: rebase (pick): fix typo
+510fa9db HEAD@{12}: rebase (pick): (ADD) windows installing doc in spanish
+51a1c960 HEAD@{13}: rebase (pick): Added es imgs and fix sequences
+af8f2af6 HEAD@{14}: rebase (continue): Fix mnemonic printing issue with long words
+4b29d05a HEAD@{15}: rebase (pick): top menu titles and subentries translated to es
+38981844 HEAD@{16}: rebase (pick): dark and light modes
+03c9bd68 HEAD@{17}: rebase (pick): moved templates img to correct folder
+2613ac1e HEAD@{18}: rebase (continue): fix menu for translations
+93ce9ee0 HEAD@{19}: rebase (pick): ADD es translation to docs pages
+97d1fb3c HEAD@{20}: rebase (start): checkout upstream/develop
+a08ea46d HEAD@{21}: checkout: moving from develop to develop
+a08ea46d HEAD@{22}: commit: (ADD) loading/generating a mnemonic docs into spanish
+871924c6 HEAD@{23}: commit: installing from source and usage index pages in spanish
+f12a3e1f HEAD@{24}: commit: (ADD) installing from- esp docs
+67d64662 HEAD@{25}: commit: (FIX) improved choosing of words for better understanding in spanish
+9fb7546c HEAD@{26}: commit: (ADD) espanish docs installing-from-gui linux mac windows other
+7789a79a HEAD@{27}: pull: Fast-forward
+fb8a8d5d HEAD@{28}: pull --no-rebase: Merge made by the 'ort' strategy.
+3aa78d39 HEAD@{29}: commit: (ADD) esp docs
+b34875b8 HEAD@{30}: commit: (ADD) esp lang snippets
+a7abc5ae HEAD@{31}: commit: (ADD) esp snippets
+140ac754 HEAD@{32}: pull: Fast-forward
+dd94f0f2 HEAD@{33}: commit: fix typo
+a0f6e4bb HEAD@{34}: commit: (ADD) windows installing doc in spanish
+a3cc520a HEAD@{35}: pull: Fast-forward
+7efbccde HEAD@{36}: checkout: moving from main to develop
+8e4a2cfb HEAD@{37}: checkout: moving from develop to main
+7efbccde HEAD@{38}: pull: Fast-forward
+f013acbb HEAD@{39}: pull --no-rebase origin develop: Merge made by the 'ort' strategy.
+48d13564 HEAD@{40}: commit: ADD es translation to docs pages
+88aa2213 HEAD@{41}: checkout: moving from main to develop
+8e4a2cfb HEAD@{42}: checkout: moving from develop to main
+88aa2213 HEAD@{43}: checkout: moving from main to develop
+8e4a2cfb HEAD@{44}: clone: from https://github.com/selfcustody/krux
