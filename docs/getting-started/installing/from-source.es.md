@@ -12,7 +12,7 @@ git pull origin main && git submodule update --init --recursive
 ```
 
 #### Requisito previo para actualizar mediante microSD
-Si desea realizar actualizaciones posteriores sin conección a internet mediante una tarjeta micro SD, necesitará un par de claves privada y pública para firmar sus compilaciones de código y verificar las firmas. Si no desea realizar más actualizaciones sin coneccion a internet, vaya a la [sección de compilación](#build-the-firmware-linux-or-wsl).
+Si desea realizar actualizaciones posteriores sin conección a internet mediante una tarjeta micro SD, necesitará un par de claves privada y pública para firmar sus compilaciones de código y verificar las firmas. Si no desea realizar más actualizaciones sin conección a internet, vaya a la [sección de compilación](#build-the-firmware-linux-or-wsl).
 
 Puedes usar una instalación de Krux existente y una clave mnemotécnica para firmar sus compilaciones de código, **o bien**, puede generar un par de claves y firmar desde la [linea de comando con `openssl`](https://wiki.openssl.org/index.php/Command_Line_Elliptic_Curve_Operations). Se han añadido comandos al script de shell de `krux` para facilitar esta tarea.
 
@@ -52,7 +52,7 @@ Failed to clone ...
 #### Reproducibilidad
 Si compila desde la rama `main` del código fuente, debería poder reproducir el proceso de compilación utilizado para generar los binarios de la última versión y obtener exactamente las mismas copias de los archivos `firmware.bin` y `kboot.kfpkg`, con las sumas de comprobación hash correspondientes (para comprobar si hay una versión anterior, utilice la etiqueta `tag`).
 
-Para comprobarlo, utilice los archivos compilatdos para el dispositivo de destino. Cada comando debe generar el mismo hash para los dos archivos proporcionados:
+Para comprobarlo, utilice los archivos compilados para el dispositivo de destino. Cada comando debe generar el mismo hash para los dos archivos proporcionados:
 ```bash
 sha256sum build/firmware.bin {{latest_krux}}/maixpy_DEVICE/firmware.bin
 sha256sum build/kboot.kfpkg {{latest_krux}}/maixpy_DEVICE/kboot.kfpkg

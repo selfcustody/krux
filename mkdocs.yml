@@ -169,8 +169,8 @@ plugins:
           About: Acerca de
           Installing: Instalación 
           Verify: Verificación
-          Generating a Mnemonic: Generar una frase Mnemónica
-          Loading a Mnemonic: Cargar una frase Mnemónica
+          Generating a Mnemonic: Nuevo Mnemónico
+          Loading a Mnemonic: Importar Mnemónico
           Navigating the Main Menu: Navegar el Menú Principal
           Using a Single-sig Wallet: Usar una Cartera de Firma Única
           Using a Multisig Wallet: Usar una Cartera Multifirma

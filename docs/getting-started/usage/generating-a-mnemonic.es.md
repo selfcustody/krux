@@ -1,12 +1,12 @@
 Krux permite crear frases semilla [mnemónicas BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) de 12 y 24 palabras mediante bits aleatorios, también conocido como [entropía](https://en.wikipedia.org/wiki/Entropy_(computing)). Generar entropía real es complicado, especialmente en un dispositivo integrado, por lo que recomendamos externalizar la generación de entropía mediante tiradas de dados. Sin embargo, también es posible seleccionar palabras al azar (por ejemplo, SeedPicker) o usar la cámara como fuente de entropía para crear rápidamente una mnemónica.
 
-En la pantalla de inicio, seleccione **Nueva mnemónica**, y elija entre cámara, palabras, tiradas de un D6 (dado estándar de seis caras) o un D20 (dado de 20 caras).
+En la pantalla de inicio, seleccione **Nuevo mnemónico**, y elija entre cámara, palabras, tiradas de un D6 (dado estándar de seis caras) o un D20 (dado de 20 caras).
 
 <img src="/krux/es/img/maixpy_amigo/new-mnemonic-options-300.png" class="amigo">
 <img src="/krux/es/img/maixpy_m5stickv/new-mnemonic-options-250.png" class="m5stickv">
 
 ## Cámara
-(¡Experimental!) Elije entre 12, 24 palabras o una mnemotecnia doble. Luego, toma una foto al azar y Krux generará una mnemotecnia a partir del hash de los bytes de la imagen.
+(¡Experimental!) Elije entre 12, 24 palabras o una mnemotecnia doble. Luego, toma una foto al azar y Krux generará un nuevo mnemónico a partir del hash de los bytes de la imagen.
 
 <img src="/krux/es/img/maixpy_amigo/new-mnemonic-via-snapshot-prompt-300.png" class="amigo">
 <img src="/krux/es/img/maixpy_amigo/new-mnemonic-via-snapshot-capturing-300.png" class="amigo">
@@ -54,7 +54,7 @@ La entropía en una sola tirada de un D20 es de 4,322 bits ( log<sub>2</sub>(20)
 <img src="/krux/es/img/maixpy_m5stickv/new-mnemonic-via-d6-roll-string-250.png" align="right" class="m5stickv">
 <img src="/krux/es/img/maixpy_amigo/new-mnemonic-via-d6-roll-string-300.png" align="right" class="amigo">
 
-Al introducir tus tiradas de dados, verás cómo se llenan dos barras de progreso. La barra superior muestra cuántas tiradas has realizado en comparación con el mínimo requerido. La barra inferior muestra un cálculo en tiempo real de la [entropía de Shannon](https://en.wikipedia.org/wiki/Entropy_(information_theory)) cen comparación con el mínimo requerido (128 bits para 12 palabras y 256 bits para 24 palabras). Cuando la estimación de la entropía de Shannon alcance el nivel recomendado, la barra de progreso se llenará y su marco cambiará de color. Si has alcanzado el número mínimo de tiradas, pero la estimación de la entropía sigue estando por debajo del nivel recomendado, aparecerá una advertencia que te sugerirá que añadas más tiradas para aumentar la entropía.
+Al introducir tus tiradas de dados, verás cómo se llenan dos barras de progreso. La barra superior muestra cuántas tiradas has realizado en comparación con el mínimo requerido. La barra inferior muestra un cálculo en tiempo real de la [entropía de Shannon](https://en.wikipedia.org/wiki/Entropy_(information_theory)) en comparación con el mínimo requerido (128 bits para 12 palabras y 256 bits para 24 palabras). Cuando la estimación de la entropía de Shannon alcance el nivel recomendado, la barra de progreso se llenará y su marco cambiará de color. Si has alcanzado el número mínimo de tiradas, pero la estimación de la entropía sigue estando por debajo del nivel recomendado, aparecerá una advertencia que te sugerirá que añadas más tiradas para aumentar la entropía.
 
 **Nota**: Al igual que la estimación de la calidad de la entropía de la imagen, la entropía de Shannon en las tiradas de dados sirve como indicador y no debe considerarse una medida absoluta de la entropía criptográfica.
 

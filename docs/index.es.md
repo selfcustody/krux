@@ -12,7 +12,7 @@ hide:
 <img src="/krux/img/maixpy_m5stickv/logo-250.png" style="width: 6%;">
 <img src="/krux/img/maixpy_cube/backup-seed-qr-400.png" style="width: 10%;">
 
-Krux es un programa de código abierto que convierte los dispositivos basados en el chip Kendryte K210, como el Maix Amigo, M5StickV y [otros](parts.md), en firmadores de transacciones de bitcoin muy versátiles. Además de su función principal, Krux es una plataforma flexible que puede adaptarse a distintos tipos de dispotivos. Incluye un conjunto de herramientas para crear y recuperar copias de seguridad de frases mnemónicas (semillas), algunas con opciones de cifrado para mayor seguridad.
+Krux es un programa de código abierto que convierte los dispositivos basados en el chip Kendryte K210, como el Maix Amigo, M5StickV y [otros](parts.md), en firmadores de transacciones de bitcoin muy versátiles. Además de su función principal, Krux es una plataforma flexible que puede adaptarse a distintos tipos de dispositivos. Incluye un conjunto de herramientas para crear y recuperar copias de seguridad de frases mnemónicas (semillas), algunas con opciones de cifrado para mayor seguridad.
 
 Equipos como el Maix Amigo, Yahboom, WonderVM o TZT vienen listos para usar, con pantallas táctiles grandes y fáciles de utilizar. Son ideales para quienes buscan una solución simple al estilo "enchufar y usar". Por otro lado, Krux también funciona con placas de desarrollo, perfectas para los entusiastas del "házlo tú mismo" (DIY) que disfrutan personalizando y armando su propio equipo. 
 

@@ -3,7 +3,7 @@ Después de ingresar tu mnemónico y cargar una cartera, llegarás al menú prin
 <img src="/krux/es/img/maixpy_amigo/home-options-300.png" class="amigo">
 <img src="/krux/es/img/maixpy_m5stickv/home-options-250.png" class="m5stickv">
 
-### Respaldo del mnemónico (Backup Mnemonic)
+### Backup del mnemónico (respaldar el Mnemónico)
 <img src="/krux/es/img/maixpy_m5stickv/backup-options-250.png" align="right" class="m5stickv">
 <img src="/krux/es/img/maixpy_amigo/backup-options-300.png" align="right" class="amigo">
 
@@ -131,7 +131,7 @@ Algunos coordinadores están eliminando gradualmente la compatibilidad con varia
 <img src="/krux/es/img/maixpy_m5stickv/wallet_home_options-250.png" align="right" class="m5stickv">
 <img src="/krux/es/img/maixpy_amigo/wallet_home_options-300.png" align="right" class="amigo">
 
-Aquí puedes cargar, ver y guardar el `Descriptor de la cartera`, también puedes personalizarla estableciendo una `Contraseña` o cambiando otros atributos con el botón `Personalizar`. Es posible calcular la entropia `BIP85` para el `Mnemónico BIP39` y la `Contraseña Base64`.
+Aquí puedes cargar, ver y guardar el `Descriptor de la cartera`, también puedes personalizarla estableciendo una `Passphrase (Contraseña)` o cambiando otros atributos con el botón `Personalizar`. Es posible calcular la entropia `BIP85` para el `Mnemónico BIP39` y la `Contraseña Base64`.
 
 <div style="clear: both"></div>
 
@@ -181,7 +181,7 @@ Tenga en cuenta que si personaliza los parámetros de la Cartera o reinicia el d
 
 Si olvidaste ingresar una contraseña al cargar tu billetera, o si usas varias contraseñas con la misma frase mnemotécnica, puedes agregar, reemplazar o eliminar una contraseña aquí. Simplemente elige entre escribirla o escanearla.
 
-Para eliminar una contraseña, selecciona `Ingresar contraseña BIP39`, deja el campo en blanco y presiona `Ir`.
+Para eliminar una contraseña, selecciona `Escribe la passphrase BIP39`, deja el campo en blanco y presiona `Ir`.
 
 No olvides verificar la huella digital resultante en la barra de estado para asegurarte de haber ingresado la clave correcta.
 
@@ -224,11 +224,11 @@ Elige entre *12 o 24 palabras* y luego escribe el *index* deseado para exportar 
 
 Para crear una *contraseña Base64*, que se puede usar para iniciar sesión en diversos sistemas, desde correo electrónico hasta redes sociales, elige un índice y una longitud de al menos 20 caracteres. La contraseña resultante se mostrará en pantalla y también se puede exportar a una tarjeta SD o código QR.
 
-#### Mnemónico XOR
+#### XOR Mnemónico
 <img src="/krux/es/img/maixpy_m5stickv/xor-message-250.png" align="right" class="m5stickv">
 <img src="/krux/es/img/maixpy_amigo/xor-message-300.png" align="right" class="amigo">
 
-El Mnemónico XOR permite **combinar dos o más mnemónicos** aplicando una operación XOR (exclusive OR) a sus bytes de entropía, **generando un nuevo mnemónico**. Esta funcionalidad puede utilizarse para dividir un mnemónico en múltiples partes (o “fragmentos” / shares) o para combinar mnemónicos existentes.
+El XOR Mnemónico permite **combinar dos o más mnemónicos** aplicando una operación XOR (exclusive OR) a sus bytes de entropía, **generando un nuevo mnemónico**. Esta funcionalidad puede utilizarse para dividir un mnemónico en múltiples partes (o “fragmentos” / shares) o para combinar mnemónicos existentes.
 
 Para obtener instrucciones detalladas sobre cómo combinar, dividir y recuperar mnemónicos mediante XOR, consulta [Mnemonic XOR](../features/mnemonic-xor.md).
 
@@ -321,8 +321,8 @@ Al igual que con los *PSBT*, Krux puede cargar, firmar y exportar firmas para *m
 
 - **Mensajes y archivos estándar**
 
-<img src="/kru/es/img/maixpy_m5stickv/sign-message-sha256-sign-prompt-250.png" align="right" class="m5stickv">
-<img src="/kru/es/img/maixpy_amigo/sign-message-sha256-sign-prompt-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/sign-message-sha256-sign-prompt-250.es.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/sign-message-sha256-sign-prompt-300.es.png" align="right" class="amigo">
 
 Puedes escanear o cargar un archivo desde una tarjeta SD. El contenido puede ser texto plano o el hash SHA-256 de un mensaje. Al cargarlo, verás una vista previa del hash SHA-256 *del mensaje* para confirmar antes de firmar.
 

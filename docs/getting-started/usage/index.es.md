@@ -3,11 +3,11 @@ Tras instalar correctamente el firmware, verá esta pantalla con las siguientes 
 <img src="/krux/es/img/maixpy_m5stickv/login-options-250.png" align="right" class="m5stickv">
 <img src="/krux/es/img/maixpy_amigo/login-options-300.png" align="right" class="amigo">
 
-#### Cargar Mnemónico
-Cargue su [mnemónico BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) de 12 o 24 palabras. Para más información, consulte [Cargar un mnemónico](loading-a-mnemonic.md).
+#### Importar Mnemónico
+Importe su [mnemónico BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) de 12 o 24 palabras. Para más información, consulte [Importar mnemónico](loading-a-mnemonic.md).
 
 #### Nuevo Mnemónico
-Crea tu [mnemónico BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) de 12 o 24 palabras. Para más información, consulte [Generar un Mnemónico](generating-a-mnemonic.md).
+Crea tu [mnemónico BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) de 12 o 24 palabras. Para más información, consulte [Nuevo Mnemónico](generating-a-mnemonic.md).
 
 #### Ajustes
 Configura tu dispositivo según tus preferencias, cambia el idioma, la apariencia y más. Consulta todas las opciones en la página de [Ajustes](../settings.md).

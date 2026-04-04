@@ -93,7 +93,7 @@ Al iniciarse, **Krux-Installer** reconoce la configuración regional de su siste
 <img width="640" src=" /krux/img/krux-installer/locale_menu.png" alt="Krux-Installer locale menu" />
 
 
-### Seleccionar dispotivo
+### Seleccionar dispositivo
 
 Cada vez que seleccione una nueva versión, verá que el botón del dispositivo se
 restablece al estado `Dispositivo: seleccione uno nuevo`. Una vez seleccionada la versión, puede elegir el dispositivo
