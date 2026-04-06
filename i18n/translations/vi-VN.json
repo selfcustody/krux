@@ -276,6 +276,7 @@
     "Signature:": "Chữ ký:",
     "Signed Message": "Tin nhắn đã ký",
     "Signed PSBT": "Đã ký PSBT",
+    "Signing raw hash. Proceed only if you trust the source.": "Ký mã băm thô. Chỉ tiến hành nếu bạn tin tưởng nguồn.",
     "Signing…": "Biển báo…",
     "Single-sig": "Khóa đơn",
     "Size:": "Dung lượng:",

@@ -276,6 +276,7 @@
     "Signature:": "Подпись:",
     "Signed Message": "Подписанное Сообщение",
     "Signed PSBT": "Подписанное PSBT",
+    "Signing raw hash. Proceed only if you trust the source.": "Подписание необработанного хэша. Продолжайте, только если вы доверяете источнику.",
     "Signing…": "Подпись…",
     "Single-sig": "Одна подпись",
     "Size:": "Размер:",

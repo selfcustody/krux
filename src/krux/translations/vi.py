@@ -298,6 +298,7 @@ translation_array = [
     "Chữ ký:",
     "Tin nhắn đã ký",
     "Đã ký PSBT",
+    "Ký mã băm thô. Chỉ tiến hành nếu bạn tin tưởng nguồn.",
     "Biển báo…",
     "Khóa đơn",
     "Dung lượng:",

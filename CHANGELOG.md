@@ -2,6 +2,7 @@
 
 ### Security Fixes
 - Reject PSBT inputs with non-standard sighash types before signing
+- Warn user before signing raw hashes in message signing
 - Fix ZeroDivisionError in fee calculation for zero-value output PSBTs
 - Validate multisig quorum: reject m=0 and m>n in key-value wallet files
 

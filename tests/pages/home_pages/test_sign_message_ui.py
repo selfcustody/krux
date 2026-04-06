@@ -21,6 +21,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             # 3 btn_seq
             [
                 BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Raw hash warning - Proceed
                 BUTTON_ENTER,  # Confirm to Sign SHA
                 BUTTON_ENTER,  # Check signature
                 BUTTON_ENTER,  # Sign to QR code
@@ -41,6 +42,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             None,
             [
                 BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Raw hash warning - Proceed
                 BUTTON_ENTER,  # Confirm to Sign SHA
                 BUTTON_ENTER,  # Check signature
                 BUTTON_ENTER,  # Sign to QR code
@@ -95,6 +97,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             MockPrinter(),
             [
                 BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Raw hash warning - Proceed
                 BUTTON_ENTER,  # Confirm to Sign SHA
                 BUTTON_ENTER,  # Check signature
                 BUTTON_ENTER,  # Sign to QR code
@@ -115,6 +118,7 @@ def test_sign_message(mocker, m5stickv, tdata):
             MockPrinter(),
             [
                 BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # Raw hash warning - Proceed
                 BUTTON_ENTER,  # Confirm to Sign SHA
                 BUTTON_ENTER,  # Check signature
                 BUTTON_ENTER,  # Sign to QR code
@@ -128,14 +132,14 @@ def test_sign_message(mocker, m5stickv, tdata):
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
-        # 6 Hex-encoded hash, Decline to sign
+        # 6 Hex-encoded hash, Decline at raw hash warning
         (
             "1af9487b14714080ce5556b4455fd06c4e0a5f719d8c0ea2b5a884e5ebfc6de7",
             FORMAT_NONE,
             None,
             [
                 BUTTON_ENTER,  # Load from camera
-                BUTTON_PAGE,  # Decline to sign
+                BUTTON_PAGE,  # Decline raw hash warning
             ],
             None,
             None,

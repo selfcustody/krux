@@ -276,6 +276,7 @@
     "Signature:": "签名:",
     "Signed Message": "签名消息",
     "Signed PSBT": "已签名 PSBT",
+    "Signing raw hash. Proceed only if you trust the source.": "签名原始哈希.仅当您信任源时才继续.",
     "Signing…": "签名…",
     "Single-sig": "单签",
     "Size:": "大小:",
