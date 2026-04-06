@@ -559,5 +559,7 @@ def _reinflate(data):
     try:
         with deflate.DeflateIO(io.BytesIO(data)) as d:
             return d.read()
+    except ValueError:
+        raise
     except:
         raise ValueError("Error decompressing")

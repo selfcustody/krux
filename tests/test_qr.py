@@ -222,3 +222,25 @@ def test_find_min_num_parts(m5stickv):
 
     assert raised_ex.type is ValueError
     assert raised_ex.value.args[0] == "Invalid format type"
+
+
+def test_parse_pmofn_rejects_excessive_parts(m5stickv):
+    """C5: pMofN parser must reject part_total exceeding the 99-part limit"""
+    from krux.qr import parse_pmofn_qr_part
+
+    with pytest.raises(ValueError, match="Invalid pMofN part total"):
+        parse_pmofn_qr_part("p1of100 data")
+
+    with pytest.raises(ValueError, match="Invalid pMofN part total"):
+        parse_pmofn_qr_part("p1of0 data")
+
+
+def test_parse_pmofn_rejects_invalid_index(m5stickv):
+    """C5: pMofN parser must reject part_index out of range"""
+    from krux.qr import parse_pmofn_qr_part
+
+    with pytest.raises(ValueError, match="Invalid pMofN part index"):
+        parse_pmofn_qr_part("p0of3 data")
+
+    with pytest.raises(ValueError, match="Invalid pMofN part index"):
+        parse_pmofn_qr_part("p4of3 data")

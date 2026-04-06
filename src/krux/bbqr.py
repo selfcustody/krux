@@ -73,6 +73,8 @@ def parse_bbqr(data):
     except ValueError:
         raise ValueError("Invalid BBQR format")
 
+    if part_total < 1:
+        raise ValueError("Invalid part total")
     if part_index >= part_total:
         raise ValueError("Invalid part index")
 
@@ -101,6 +103,8 @@ def deflate_decompress(data):
 
         with deflate.DeflateIO(BytesIO(data)) as d:
             return d.read()
+    except ValueError:
+        raise
     except:
         raise ValueError("Error decompressing BBQR")
 
