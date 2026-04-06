@@ -2257,3 +2257,21 @@ def test_sign_sats_vB(m5stickv):
     )
 
     # TODO: Add a multisig with descriptor so change can be deteted
+
+
+def test_fee_percent_zero_out_amount(mocker, m5stickv, tdata):
+    """Test that fee calculation handles zero out_amount (OP_RETURN only PSBTs)
+    without raising ZeroDivisionError (audit finding C7)"""
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, tdata.P2WPKH_PSBT, FORMAT_NONE)
+
+    # Call _get_resume_fee with out_amount=0 (simulates OP_RETURN only PSBT)
+    resume_fee_str, fee_percent = signer._get_resume_fee(1000, 0, {})
+    assert fee_percent == 100.0
+    assert "100.0%" in resume_fee_str

@@ -250,6 +250,10 @@ class Wallet:
         elif self.descriptor.is_basic_multisig:
             m = int(str(self.descriptor.miniscript.args[0]))
             n = len(self.descriptor.keys)
+            if m < 1:
+                raise ValueError("multisig quorum m must be at least 1, got %d" % m)
+            if m > n:
+                raise ValueError("multisig quorum m (%d) exceeds n (%d)" % (m, n))
             cosigners = [key.key.to_base58() for key in self.descriptor.keys]
             if self.descriptor.is_sorted:
                 cosigners = sorted(cosigners)
@@ -363,6 +367,11 @@ def parse_key_value_file(wallet_data):
         m = int(policy[: policy.index("of")].strip())
         n = int(policy[policy.index("of") + 2 :].strip())
 
+        if m < 1:
+            raise ValueError("multisig quorum m must be at least 1, got %d" % m)
+        if m > n:
+            raise ValueError("multisig quorum m (%d) exceeds n (%d)" % (m, n))
+
         keys = []
         for i in range(len(key_vals)):
             kv = key_vals[i]
@@ -462,6 +471,8 @@ def parse_wallet(wallet_data):
         descriptor, label = parse_key_value_file(wallet_data)
         if descriptor and label:
             return descriptor, label
+    except ValueError:
+        raise
     except:
         raise ValueError("invalid wallet format")
 

@@ -114,7 +114,6 @@ def decrypt_kef(ctx, data):
         kef_envelope = KEFEnvelope(ctx)
         if not kef_envelope.parse(data):
             return data
-    raise ValueError(err)
 
 
 def prompt_for_text_update(
