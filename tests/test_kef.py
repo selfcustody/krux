@@ -1097,6 +1097,25 @@ def test_unwrap_exceptions(m5stickv):
             kef.unwrap(encoded)
 
 
+def test_unwrap_rejects_low_iterations(m5stickv):
+    # A malicious envelope must not be allowed to declare a trivial PBKDF2
+    # work factor (e.g. iterations=0) and bypass key stretching.
+    from krux import kef
+
+    for original in (
+        ECB_ENCRYPTED_KEF,
+        CBC_ENCRYPTED_KEF,
+        CTR_ENCRYPTED_KEF,
+        GCM_ENCRYPTED_KEF,
+    ):
+        len_id = original[0]
+        # iterations field is the 3 bytes immediately after id and version
+        start = 2 + len_id
+        tampered = original[:start] + b"\x00\x00\x00" + original[start + 3 :]
+        with pytest.raises(ValueError, match="Invalid iterations"):
+            kef.unwrap(tampered)
+
+
 def test_faithful_encrypted_wrapper(m5stickv):
     from krux import kef
 
