@@ -703,6 +703,61 @@ def test_decrypt_kef(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == 0
 
 
+def test_unseal_ui_failed_attempts_backoff(m5stickv, mocker):
+    # A failed decrypt must bump KEFEnvelope._failed_attempts and the next
+    # attempt must wait via time.sleep_ms with an exponentially growing,
+    # capped delay. A successful decrypt resets the counter.
+    from krux import kef
+    from krux.pages.encryption_ui import decrypt_kef, KEFEnvelope
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    plaintext = b"super secret payload"
+    envelope = kef.wrap(
+        b"lbl", 0, 10000, kef.Cipher(b"correct", "lbl", 10000).encrypt(plaintext, 0)
+    )
+
+    KEFEnvelope._failed_attempts = 0
+    sleep_mock = mocker.patch("krux.pages.encryption_ui.time.sleep_ms")
+
+    # First attempt with wrong key, no prior failures so no sleep yet.
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Decrypt?
+        BUTTON_ENTER,  # enter key
+        BUTTON_ENTER,  # type "a"
+        BUTTON_PAGE_PREV,  # to "Go"
+        BUTTON_ENTER,  # Go
+        BUTTON_ENTER,  # confirm key
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    with pytest.raises(KeyError, match="Failed to decrypt"):
+        decrypt_kef(ctx, envelope)
+    assert KEFEnvelope._failed_attempts == 1
+    assert sleep_mock.call_count == 0
+
+    # Second attempt with wrong key: a 1000ms sleep must precede the work.
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    with pytest.raises(KeyError, match="Failed to decrypt"):
+        decrypt_kef(ctx, envelope)
+    assert KEFEnvelope._failed_attempts == 2
+    assert sleep_mock.call_args_list[-1].args[0] == 1000
+
+    # Third attempt: delay doubles to 2000ms.
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    with pytest.raises(KeyError, match="Failed to decrypt"):
+        decrypt_kef(ctx, envelope)
+    assert KEFEnvelope._failed_attempts == 3
+    assert sleep_mock.call_args_list[-1].args[0] == 2000
+
+    # The 30s cap applies for very large counters.
+    KEFEnvelope._failed_attempts = 50
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    with pytest.raises(KeyError, match="Failed to decrypt"):
+        decrypt_kef(ctx, envelope)
+    assert sleep_mock.call_args_list[-1].args[0] == 30000
+
+    KEFEnvelope._failed_attempts = 0
+
+
 def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     """
     Intention here is to verify that KEFEnvelope class is instantiated

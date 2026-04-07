@@ -153,6 +153,12 @@ def prompt_for_text_update(
 class KEFEnvelope(Page):
     """UI to handle KEF-Encryption-Format Envelopes"""
 
+    # Class level counter of failed KEF decryption attempts within the
+    # current boot. Lives in RAM only, never persisted to flash. A power
+    # cycle clears it, an accepted trade off to slow interactive brute
+    # forcing within a single session without durable lockout state.
+    _failed_attempts = 0
+
     def __init__(self, ctx):
         super().__init__(ctx, None)
         self.ctx = ctx
@@ -362,13 +368,23 @@ class KEFEnvelope(Page):
                 return None
         if not (self.__key or self.input_key_ui(creating=False)):
             return None
+        if KEFEnvelope._failed_attempts > 0:
+            # Growing in session delay before each new attempt after a failure.
+            # Capped to keep the UI responsive. Cleared on a successful decrypt
+            # or device reset.
+            delay_ms = min(1000 * (2 ** (KEFEnvelope._failed_attempts - 1)), 30000)
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Processing…"))
+            time.sleep_ms(delay_ms)
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing…"))
         cipher = kef.Cipher(self.__key, self.label, self.iterations)
         plaintext = cipher.decrypt(self.ciphertext, self.version)
         self.__key = None
         if plaintext is None:
+            KEFEnvelope._failed_attempts += 1
             raise KeyError("Failed to decrypt")
+        KEFEnvelope._failed_attempts = 0
         if display_plain:
             self.ctx.display.clear()
             try:
