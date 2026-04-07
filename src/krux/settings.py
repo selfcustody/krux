@@ -35,6 +35,10 @@ FLASH_PATH = "flash"
 SETTINGS_FILENAME = "settings.json"
 MNEMONICS_FILE = "seeds.json"
 
+# Maximum accepted size of settings.json (bytes). Guards against malicious
+# oversized files on SD that could exhaust RAM during load.
+MAX_SETTINGS_FILE_SIZE = 8192
+
 # Network settings
 MAIN_TXT = "main"
 TEST_TXT = "test"
@@ -191,10 +195,22 @@ class Store:
         return "/" + location + "/"
 
     def _load_settings(self):
-        """Loads settings based on the current file_location (SD/flash)"""
+        """Loads settings based on the current file_location (SD/flash).
+
+        Rejects files larger than MAX_SETTINGS_FILE_SIZE and any payload whose
+        top-level value is not a JSON object. Per-setting type/range/category
+        validation is enforced lazily by the Setting descriptors on read.
+        """
         try:
             with open(self.file_location + SETTINGS_FILENAME, "r") as f:
-                self.settings = json.loads(f.read())
+                # Read one extra byte to detect oversized files
+                contents = f.read(MAX_SETTINGS_FILE_SIZE + 1)
+            if len(contents) > MAX_SETTINGS_FILE_SIZE:
+                return
+            loaded = json.loads(contents)
+            if not isinstance(loaded, dict):
+                return
+            self.settings = loaded
         except:
             pass
 

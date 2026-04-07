@@ -1,4 +1,4 @@
-# Changelog 26.03.1 - March 2025
+# Changelog 26.04.0 - April 2025
 
 ### Security Fixes
 - Reject PSBT inputs with non-standard sighash types before signing
@@ -7,6 +7,7 @@
 - Validate multisig quorum: reject m=0 and m>n in key-value wallet files
 - DeflateIO enforces 100KB max decompressed size, preventing zip bomb OOM via BBQR encoding "Z" or KEF decryption
 - Enforce part_total limits in pMofN (1–99) and BBQR (≥1) QR parsers, preventing OOM via unbounded part accumulation
+- Validate settings.json on load: enforce max file size and reject non-object payloads, preventing OOM and type-confusion via a malicious SD card
 
 # Changelog 26.03.0 - March 2025
 
