@@ -339,6 +339,46 @@ def test_files_and_folders_with_long_filenames(m5stickv, mocker, mock_file_opera
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_select_file_filters_traversal_entries(m5stickv, mocker):
+    # A malicious or corrupted SD must not be able to inject "."/".." or
+    # entries containing path separators that would let the user traverse
+    # outside the current directory when concatenated into a path.
+    from krux.pages.file_manager import FileManager
+    from krux.input import BUTTON_PAGE_PREV, BUTTON_ENTER
+
+    mocker.patch(
+        "os.listdir",
+        new=mocker.MagicMock(
+            return_value=[
+                ".",
+                "..",
+                "../etc",
+                "sub/evil",
+                "back\\evil",
+                "good.txt",
+            ]
+        ),
+    )
+    mocker.patch("os.remove", mocker.mock_open(read_data=""))
+    mocker.patch(
+        "krux.sd_card.SDHandler.dir_exists", mocker.MagicMock(side_effect=[True])
+    )
+    mocker.patch(
+        "krux.sd_card.SDHandler.file_exists", mocker.MagicMock(return_value=True)
+    )
+
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV, BUTTON_ENTER]  # back -> exit
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    file_manager = FileManager(ctx)
+    file_manager.select_file()
+
+    # Only the safe entry must be displayed; all traversal candidates filtered.
+    rendered = [c.args[0] for c in ctx.display.to_lines.call_args_list]
+    assert "good.txt" in rendered
+    for bad in (".", "..", "../etc", "sub/evil", "back\\evil"):
+        assert bad not in rendered
+
+
 def test_folders_exploring(m5stickv, mocker, mock_file_operations):
     from krux.pages.file_manager import FileManager
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV

@@ -56,8 +56,19 @@ class FileManager(Page):
                     items.append("..")
                     menu_items.append(("../", lambda: MENU_EXIT))
 
-                # sorts by name ignorecase
-                dir_files = sorted(os.listdir(path), key=str.lower)
+                # sorts by name ignorecase. Filter out any entry that could
+                # escape the current directory: a malicious or corrupted SD
+                # card could in principle return names containing path
+                # separators or "."/".." which, concatenated below, would
+                # allow traversal outside the intended folder.
+                dir_files = sorted(
+                    (
+                        f
+                        for f in os.listdir(path)
+                        if f not in (".", "..") and "/" not in f and "\\" not in f
+                    ),
+                    key=str.lower,
+                )
 
                 # separate directories from files
                 directories = []
