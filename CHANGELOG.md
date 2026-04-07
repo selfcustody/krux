@@ -5,6 +5,8 @@
 - Warn user before signing raw hashes in message signing
 - Fix ZeroDivisionError in fee calculation for zero-value output PSBTs
 - Validate multisig quorum: reject m=0 and m>n in key-value wallet files
+- DeflateIO enforces 100KB max decompressed size, preventing zip bomb OOM via BBQR encoding "Z" or KEF decryption
+- Enforce part_total limits in pMofN (1–99) and BBQR (≥1) QR parsers, preventing OOM via unbounded part accumulation
 
 # Changelog 26.03.0 - March 2025
 

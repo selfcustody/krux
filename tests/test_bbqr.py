@@ -293,6 +293,29 @@ def test_deflate_decompress_invalid_data(m5stickv):
         deflate_decompress("non binary string")
 
 
+def test_deflate_decompress_size_limit(m5stickv):
+    """C4: deflate decompression must reject data exceeding DeflateIO size limit"""
+    import zlib
+    from krux.bbqr import deflate_decompress
+    from .shared_mocks import MAX_DECOMPRESSED_SIZE
+
+    # Create data larger than the limit
+    big_data = b"\x00" * (MAX_DECOMPRESSED_SIZE + 1)
+    compressed = zlib.compress(big_data, wbits=-10)
+
+    with pytest.raises(ValueError, match="exceeds size limit"):
+        deflate_decompress(compressed)
+
+
+def test_parse_bbqr_rejects_zero_part_total(m5stickv):
+    """C5: BBQR parser must reject part_total < 1"""
+    from krux.bbqr import parse_bbqr
+
+    # "B:" = BBQR prefix, "Z" = encoding, "P" = file type, "00" = total 0 (base36), "00" = index
+    with pytest.raises(ValueError, match="Invalid part total"):
+        parse_bbqr("B:ZP0000data")
+
+
 def test_decode_bbqr_descriptors(m5stickv):
     from krux.qr import detect_format
     from krux.bbqr import decode_bbqr, parse_bbqr

@@ -1258,6 +1258,15 @@ def test_deflate_compression(m5stickv):
         with pytest.raises(ValueError, match="Error decompressing"):
             kef._reinflate(compressed[:-1])
 
+    # Reinflate must reject data exceeding DeflateIO size limit
+    import zlib
+    from tests.shared_mocks import MAX_DECOMPRESSED_SIZE
+
+    big_data = b"\x00" * (MAX_DECOMPRESSED_SIZE + 1)
+    compressed = zlib.compress(big_data, wbits=-10)
+    with pytest.raises(ValueError, match="exceeds size limit"):
+        kef._reinflate(compressed)
+
 
 def kef_self_document(version, label=None, iterations=None, limit=None):
     """This is NOT a unit-test, it's a way for KEF encoding to document itself"""
