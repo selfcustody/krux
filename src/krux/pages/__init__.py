@@ -138,6 +138,10 @@ class Page:
         """Flashes text centered on the display for duration ms"""
         self.flash_text(text, theme.error_color)
 
+    def flash_success(self, text):
+        """Flashes success text centered on the display for duration ms"""
+        self.flash_text(text, theme.go_color)
+
     # pylint: disable=too-many-arguments
     def capture_from_keypad(
         self,

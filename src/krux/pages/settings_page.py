@@ -187,7 +187,7 @@ class SettingsPage(Page):
         with open(TC_CODE_PATH, "wb") as f:
             f.write(secret)
         self.ctx.tc_code_enabled = True
-        self.flash_text(t("Tamper check code set successfully"))
+        self.flash_success(t("Tamper check code set successfully"))
 
         from .fill_flash import FillFlash
 
