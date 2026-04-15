@@ -508,7 +508,7 @@ def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
         BUTTON_ENTER,  # Load words
         BUTTON_PAGE_PREV,  # Move to "< Back"
         BUTTON_ENTER,  # Leave BIP85
-        *([BUTTON_PAGE] * 2),  # Move to "Back"
+        *([BUTTON_PAGE] * 3),  # Move to "Back"
         BUTTON_ENTER,  # Exit
     ]
 
@@ -531,7 +531,7 @@ def test_load_xor_not_derive(mocker, amigo, tdata):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BUTTON_SEQUENCE = [
-        *([BUTTON_PAGE] * 4),
+        *([BUTTON_PAGE] * 5),
         BUTTON_ENTER,
         BUTTON_PAGE,
         BUTTON_ENTER,
@@ -559,7 +559,7 @@ def test_load_xor_from_wallet_menu(mocker, amigo, tdata):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = [
-        *([BUTTON_PAGE] * 4),  # Go to Mnemonic XOR
+        *([BUTTON_PAGE] * 5),  # Go to Mnemonic XOR
         BUTTON_ENTER,  # Enter Mnemonic XOR
         BUTTON_ENTER,  # Accept Derive
         BUTTON_PAGE_PREV,  # Go to back
