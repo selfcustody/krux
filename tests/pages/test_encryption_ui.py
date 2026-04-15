@@ -758,6 +758,54 @@ def test_unseal_ui_failed_attempts_backoff(m5stickv, mocker):
     KEFEnvelope._failed_attempts = 0
 
 
+def test_load_encrypted_mnemonic_shares_failed_attempts_backoff(m5stickv, mocker):
+    # LoadEncryptedMnemonic._load_encrypted_mnemonic must read and update the
+    # same KEFEnvelope._failed_attempts counter, so an attacker can not split
+    # brute force attempts across the stored mnemonic and KEFEnvelope paths.
+    from krux.input import BUTTON_ENTER
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.encryption_ui import KEFEnvelope, LoadEncryptedMnemonic
+
+    mocker.patch(
+        "krux.pages.encryption_ui.EncryptionKey.encryption_key",
+        mocker.MagicMock(return_value="wrong key"),
+    )
+    sleep_mock = mocker.patch("krux.pages.encryption_ui.time.sleep_ms")
+
+    # Start from a non zero counter set by a prior KEFEnvelope failure. The
+    # stored mnemonic flow must honour it and delay before its own attempt.
+    KEFEnvelope._failed_attempts = 1
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    with patch("krux.encryption.open", new=mocker.mock_open(read_data=SEEDS_JSON)):
+        page = LoadEncryptedMnemonic(ctx)
+        result = page._load_encrypted_mnemonic("ecbID")
+    assert result == MENU_CONTINUE
+    assert sleep_mock.call_args_list[-1].args[0] == 1000
+    assert KEFEnvelope._failed_attempts == 2
+
+    # A second wrong key doubles the delay to 2000ms.
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    with patch("krux.encryption.open", new=mocker.mock_open(read_data=SEEDS_JSON)):
+        page = LoadEncryptedMnemonic(ctx)
+        result = page._load_encrypted_mnemonic("ecbID")
+    assert result == MENU_CONTINUE
+    assert sleep_mock.call_args_list[-1].args[0] == 2000
+    assert KEFEnvelope._failed_attempts == 3
+
+    # A successful decrypt must reset the shared counter to 0.
+    mocker.patch(
+        "krux.pages.encryption_ui.EncryptionKey.encryption_key",
+        mocker.MagicMock(return_value=TEST_KEY),
+    )
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    with patch("krux.encryption.open", new=mocker.mock_open(read_data=SEEDS_JSON)):
+        page = LoadEncryptedMnemonic(ctx)
+        result = page._load_encrypted_mnemonic("ecbID")
+    assert result == ECB_WORDS.split()
+    assert KEFEnvelope._failed_attempts == 0
+
+
 def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     """
     Intention here is to verify that KEFEnvelope class is instantiated

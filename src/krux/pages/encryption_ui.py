@@ -153,11 +153,29 @@ def prompt_for_text_update(
 class KEFEnvelope(Page):
     """UI to handle KEF-Encryption-Format Envelopes"""
 
-    # Class level counter of failed KEF decryption attempts within the
-    # current boot. Lives in RAM only, never persisted to flash. A power
-    # cycle clears it, an accepted trade off to slow interactive brute
-    # forcing within a single session without durable lockout state.
+    # Shared in session counter of failed KEF decryption attempts across
+    # all UI decrypt paths (unseal_ui and LoadEncryptedMnemonic). Lives in
+    # RAM only, never persisted to flash. A power cycle clears it, an
+    # accepted trade off to slow interactive brute forcing within a single
+    # session without durable lockout state.
     _failed_attempts = 0
+
+    @classmethod
+    def backoff_delay_ms(cls):
+        """Exponential delay (capped at 30s) before the next decrypt attempt."""
+        if cls._failed_attempts <= 0:
+            return 0
+        return min(1000 * (2 ** (cls._failed_attempts - 1)), 30000)
+
+    @classmethod
+    def note_decrypt_failure(cls):
+        """Bump the shared in session failure counter."""
+        cls._failed_attempts += 1
+
+    @classmethod
+    def note_decrypt_success(cls):
+        """Reset the shared in session failure counter."""
+        cls._failed_attempts = 0
 
     def __init__(self, ctx):
         super().__init__(ctx, None)
@@ -368,11 +386,11 @@ class KEFEnvelope(Page):
                 return None
         if not (self.__key or self.input_key_ui(creating=False)):
             return None
-        if KEFEnvelope._failed_attempts > 0:
+        delay_ms = KEFEnvelope.backoff_delay_ms()
+        if delay_ms:
             # Growing in session delay before each new attempt after a failure.
             # Capped to keep the UI responsive. Cleared on a successful decrypt
             # or device reset.
-            delay_ms = min(1000 * (2 ** (KEFEnvelope._failed_attempts - 1)), 30000)
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(t("Processing…"))
             time.sleep_ms(delay_ms)
@@ -382,9 +400,9 @@ class KEFEnvelope(Page):
         plaintext = cipher.decrypt(self.ciphertext, self.version)
         self.__key = None
         if plaintext is None:
-            KEFEnvelope._failed_attempts += 1
+            KEFEnvelope.note_decrypt_failure()
             raise KeyError("Failed to decrypt")
-        KEFEnvelope._failed_attempts = 0
+        KEFEnvelope.note_decrypt_success()
         if display_plain:
             self.ctx.display.clear()
             try:
@@ -700,16 +718,24 @@ class LoadEncryptedMnemonic(Page):
             return MENU_CONTINUE
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing…"))
+        # Share the in session failure counter with KEFEnvelope.unseal_ui so
+        # an attacker can not split attempts across the two decrypt paths.
+        delay_ms = KEFEnvelope.backoff_delay_ms()
+        if delay_ms:
+            time.sleep_ms(delay_ms)
         mnemonic_storage = MnemonicStorage()
         try:
             words = mnemonic_storage.decrypt(key, mnemonic_id, sd_card).split()
         except:
+            KEFEnvelope.note_decrypt_failure()
             self.flash_error(error_txt)
             return MENU_CONTINUE
 
         if len(words) not in (12, 24):
+            KEFEnvelope.note_decrypt_failure()
             self.flash_error(error_txt)
             return MENU_CONTINUE
+        KEFEnvelope.note_decrypt_success()
         del mnemonic_storage
         return words
 
