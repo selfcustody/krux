@@ -181,6 +181,13 @@ class Home(Page):
 
         return MENU_CONTINUE
 
+    def silent_payment(self):
+        """Handler for the 'Silent Payment' menu item"""
+        from .silent_payment import SilentPayment
+
+        sp = SilentPayment(self.ctx)
+        return sp.export()
+
     def wallet(self):
         """Handler for the 'wallet' menu item"""
 
@@ -191,6 +198,7 @@ class Home(Page):
                 (t("Passphrase"), self.passphrase),
                 (t("Customize"), self.customize),
                 ("BIP85", self.bip85),
+                (t("Silent Payment"), self.silent_payment),
                 (t("Mnemonic XOR"), self.mnemonic_xor),
             ],
         )
