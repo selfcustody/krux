@@ -38,6 +38,8 @@ from ..kboard import kboard
 STACKBIT_GO_INDEX = 38
 STACKBIT_ESC_INDEX = 35
 STACKBIT_MAX_INDEX = 13
+BIT_WEIGHTS = (1, 2, 4, 8)
+BIT_LABELS = ("1", "2", "4", "8")
 
 
 class Stackbit(Page):
@@ -341,6 +343,248 @@ class Stackbit(Page):
                     theme.frame_color,
                 )
                 x_offset += 3 * self.x_pad
+
+    def export_1248_vertical_compact(
+        self, words_list, y_start
+    ):  # pylint: disable=too-many-locals
+        """Draws compact Stackbit 1248 grids for minimal displays, 2 words per row"""
+        n_word_cols = 2
+        n_cols_per_word = 4
+        word_col_gap = 4
+        row_gap = 3
+        header_h = FONT_HEIGHT
+
+        label_w = FONT_WIDTH
+        x_start = MINIMAL_PADDING
+        right_pad = MINIMAL_PADDING
+
+        available_w = (
+            self.ctx.display.width() - x_start - label_w - word_col_gap - right_pad
+        )
+        cell_w = available_w // (n_word_cols * n_cols_per_word)
+
+        n_rows = (len(words_list) + n_word_cols - 1) // n_word_cols
+        available_h = self.ctx.display.height() - y_start
+        cell_h = (available_h - n_rows * header_h - (n_rows - 1) * row_gap) // (
+            n_rows * 4
+        )
+        cell_h = min(cell_h, FONT_HEIGHT)
+
+        grid_w = n_cols_per_word * cell_w
+        row_total_h = header_h + 4 * cell_h
+
+        dot_size = max(min(cell_w, cell_h) - 6, 1)
+        radius = dot_size // 2
+
+        x_label = x_start
+        x_grid_left = x_label + label_w
+        x_grid_right = x_grid_left + grid_w + word_col_gap
+
+        for row_idx in range(n_rows):
+            word_pair = words_list[row_idx * n_word_cols : (row_idx + 1) * n_word_cols]
+            y_row = y_start + row_idx * (row_total_h + row_gap)
+            y_grid = y_row + header_h  # grid starts below the header
+            grid_h = 4 * cell_h
+
+            # Word-number headers
+            for col_idx, (word_idx, _) in enumerate(word_pair):
+                x_grid = x_grid_left if col_idx == 0 else x_grid_right
+                self.ctx.display.fill_rectangle(
+                    x_grid, y_row, grid_w, header_h, theme.disabled_color
+                )
+                x_num = x_grid + (grid_w - 2 * FONT_WIDTH) // 2
+                self.ctx.display.draw_string(
+                    x_num,
+                    y_row,
+                    "%02d" % word_idx,
+                    theme.fg_color,
+                    theme.disabled_color,
+                )
+
+            # Row labels
+            for bit_row, label in enumerate(BIT_LABELS):
+                self.ctx.display.draw_string(
+                    x_label,
+                    y_grid + bit_row * cell_h,
+                    label,
+                    theme.fg_color,
+                )
+
+            for col_idx, (_, word) in enumerate(word_pair):
+                x_grid = x_grid_left if col_idx == 0 else x_grid_right
+
+                # Outer grid border
+                self.ctx.display.draw_line(
+                    x_grid, y_grid, x_grid + grid_w, y_grid, theme.frame_color
+                )
+                self.ctx.display.draw_line(
+                    x_grid,
+                    y_grid + grid_h,
+                    x_grid + grid_w,
+                    y_grid + grid_h,
+                    theme.frame_color,
+                )
+                self.ctx.display.draw_line(
+                    x_grid, y_grid, x_grid, y_grid + grid_h, theme.frame_color
+                )
+                self.ctx.display.draw_line(
+                    x_grid + grid_w,
+                    y_grid,
+                    x_grid + grid_w,
+                    y_grid + grid_h,
+                    theme.frame_color,
+                )
+
+                # Internal vertical column dividers
+                for c in range(1, n_cols_per_word):
+                    x_line = x_grid + c * cell_w
+                    self.ctx.display.draw_line(
+                        x_line, y_grid, x_line, y_grid + grid_h, theme.frame_color
+                    )
+
+                # Internal horizontal row dividers
+                for r in range(1, 4):
+                    y_line = y_grid + r * cell_h
+                    self.ctx.display.draw_line(
+                        x_grid, y_line, x_grid + grid_w, y_line, theme.frame_color
+                    )
+
+                # Punched marks
+                digits, _ = self._word_to_digits(word)
+                for col, d in enumerate(digits):
+                    x_col = x_grid + col * cell_w
+                    for bit_row, bit_val in enumerate(BIT_WEIGHTS):
+                        if d & bit_val:
+                            x_dot = x_col + (cell_w - dot_size) // 2
+                            y_dot = y_grid + bit_row * cell_h + (cell_h - dot_size) // 2
+                            self.ctx.display.fill_rectangle(
+                                x_dot,
+                                y_dot,
+                                dot_size,
+                                dot_size,
+                                theme.highlight_color,
+                                radius,
+                            )
+
+    def export_1248_vertical_grouped(
+        self, y_offset, words_group
+    ):  # pylint: disable=too-many-locals
+        """Draws grouped Stackbit 1248 grids with individual bordered sections per word"""
+        if kboard.is_m5stickv:
+            self.x_offset = MINIMAL_PADDING
+        else:
+            self.x_offset = DEFAULT_PADDING
+
+        n_words = len(words_group)
+        n_cols_per_word = 4
+        n_gaps = n_words - 1
+        word_gap = 4
+
+        label_w = FONT_WIDTH + 2
+        available = self.ctx.display.width() - self.x_offset - DEFAULT_PADDING - label_w
+        cell_w = (available - n_gaps * word_gap) // (n_words * n_cols_per_word)
+        cell_h = FONT_HEIGHT
+        header_h = FONT_HEIGHT
+
+        word_block_w = n_cols_per_word * cell_w
+        word_stride = word_block_w + word_gap
+
+        x_label = self.x_offset
+        x_grid0 = x_label + label_w
+        grid_h = 4 * cell_h
+        y_grid = y_offset + header_h
+
+        # Row labels
+        for i, label in enumerate(BIT_LABELS):
+            self.ctx.display.draw_string(
+                x_label, y_grid + i * cell_h, label, theme.fg_color
+            )
+
+        # Per-word header and grid
+        for i, (word_idx, _) in enumerate(words_group):
+            x_sec = x_grid0 + i * word_stride
+
+            # Header background with centred word number
+            self.ctx.display.fill_rectangle(
+                x_sec, y_offset, word_block_w, header_h, theme.disabled_color
+            )
+            x_num = x_sec + (word_block_w - 2 * FONT_WIDTH) // 2
+            self.ctx.display.draw_string(
+                x_num, y_offset, "%02d" % word_idx, theme.fg_color, theme.disabled_color
+            )
+
+            # Outer border of this word's grid
+            self.ctx.display.draw_line(
+                x_sec, y_grid, x_sec + word_block_w, y_grid, theme.frame_color
+            )
+            self.ctx.display.draw_line(
+                x_sec,
+                y_grid + grid_h,
+                x_sec + word_block_w,
+                y_grid + grid_h,
+                theme.frame_color,
+            )
+            self.ctx.display.draw_line(
+                x_sec, y_grid, x_sec, y_grid + grid_h, theme.frame_color
+            )
+            self.ctx.display.draw_line(
+                x_sec + word_block_w,
+                y_grid,
+                x_sec + word_block_w,
+                y_grid + grid_h,
+                theme.frame_color,
+            )
+
+            # Vertical column dividers
+            for col in range(1, n_cols_per_word):
+                x_line = x_sec + col * cell_w
+                self.ctx.display.draw_line(
+                    x_line, y_grid, x_line, y_grid + grid_h, theme.frame_color
+                )
+
+            # Horizontal row dividers
+            if i == 0:
+                for row in range(1, 4):
+                    y_line = y_grid + row * cell_h
+                    for j in range(n_words):
+                        xs = x_grid0 + j * word_stride
+                        self.ctx.display.draw_line(
+                            xs, y_line, xs + word_block_w, y_line, theme.frame_color
+                        )
+
+        # Punched marks
+        dot_size = max(min(cell_w, cell_h) - 6, 1)
+        radius = dot_size // 2
+
+        for w_i, (_, word) in enumerate(words_group):
+            x_sec = x_grid0 + w_i * word_stride
+            digits, _ = self._word_to_digits(word)
+            for col, d in enumerate(digits):
+                x_col = x_sec + col * cell_w
+                for row_idx, bit_val in enumerate(BIT_WEIGHTS):
+                    if d & bit_val:
+                        x_dot = x_col + (cell_w - dot_size) // 2
+                        y_dot = y_grid + row_idx * cell_h + (cell_h - dot_size) // 2
+                        self.ctx.display.fill_rectangle(
+                            x_dot,
+                            y_dot,
+                            dot_size,
+                            dot_size,
+                            theme.highlight_color,
+                            radius,
+                        )
+
+        # Code and word name below each section
+        y_text = y_grid + grid_h + 2
+        for i, (_, word) in enumerate(words_group):
+            x_sec = x_grid0 + i * word_stride
+            _, digits_str = self._word_to_digits(word)
+            self.ctx.display.draw_string(
+                x_sec, y_text, digits_str, theme.highlight_color
+            )
+            self.ctx.display.draw_string(
+                x_sec, y_text + FONT_HEIGHT, word, theme.disabled_color
+            )
 
     def digits_to_word(self, digits):
         """Returns seed word respective to digits BIP39 dictionaty position"""
