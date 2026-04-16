@@ -375,7 +375,7 @@ class SeedQRView(Page):
                     return
 
                 bmp_img.save(SDHandler.PATH_STR % new_filename)
-                self.flash_text(
+                self.flash_success(
                     t("Saved to SD card:") + "\n\n%s" % new_filename,
                     highlight_prefix=":",
                 )

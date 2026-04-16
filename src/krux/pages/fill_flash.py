@@ -122,5 +122,5 @@ class FillFlash(Page):
             block_count += 1
 
         self.ctx.camera.stop_sensor()
-        self.flash_text(t("Flash filled with camera entropy"))
+        self.flash_success(t("Flash filled with camera entropy"))
         return MENU_CONTINUE

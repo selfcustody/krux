@@ -89,7 +89,7 @@ class SaveFile(Page):
                                 sd.write(new_filename, data)
 
                             # Show the user the filename
-                            self.flash_text(
+                            self.flash_success(
                                 t("Saved to SD card:") + "\n\n%s" % new_filename,
                                 highlight_prefix=":",
                             )
