@@ -86,3 +86,4 @@ krux-*/ktool*
 
 # IDE files
 .vscode
+.claude
