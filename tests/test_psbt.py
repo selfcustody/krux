@@ -2074,6 +2074,36 @@ def test_xpubs_fails_with_no_xpubs(mocker, m5stickv, tdata):
         signer.xpubs()
 
 
+def test_xpubs_rejects_multiple_origin_less_keys(mocker, m5stickv):
+    # In a multi-key descriptor, more than one key without origin info would
+    # silently lose cosigner identity. Only the single taproot internal-key
+    # exception is allowed; a second origin-less key must raise.
+    from krux.psbt import PSBTSigner
+
+    signer = PSBTSigner.__new__(PSBTSigner)
+    signer.psbt = mocker.MagicMock(xpubs=None)
+    signer.wallet = mocker.MagicMock()
+
+    key_with_origin = mocker.MagicMock()
+    key_with_origin.origin.fingerprint = b"\x00\x01\x02\x03"
+    key_with_origin.origin.derivation = [0]
+    key_with_origin.key = "xpub_with_origin"
+
+    origin_less_a = mocker.MagicMock(origin=None, key="xpub_a")
+    origin_less_b = mocker.MagicMock(origin=None, key="xpub_b")
+
+    # One origin-less key is allowed (taproot internal key exception).
+    signer.wallet.descriptor.keys = [key_with_origin, origin_less_a]
+    xpubs, origin_less = signer.xpubs()
+    assert origin_less == "xpub_a"
+    assert "xpub_with_origin" in xpubs
+
+    # Two origin-less keys must be rejected.
+    signer.wallet.descriptor.keys = [key_with_origin, origin_less_a, origin_less_b]
+    with pytest.raises(ValueError, match="multiple xpubs without origin"):
+        signer.xpubs()
+
+
 def test_sign_single_1_input_1_output_no_change(m5stickv):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner

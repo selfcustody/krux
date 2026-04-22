@@ -589,7 +589,13 @@ class PSBTSigner:
                 )
             elif len(descriptor_keys) > 1:
                 # Allow one descriptor key without origin data for taproot
-                # Pure taptree descriptors won't have origin data for internal key
+                # Pure taptree descriptors won't have origin data for internal key.
+                # Reject more than one origin-less key in a multi-key descriptor:
+                # otherwise unverifiable cosigners would be silently accepted.
+                if origin_less_xpub is not None:
+                    raise ValueError(
+                        "multiple xpubs without origin in multi-key descriptor"
+                    )
                 origin_less_xpub = descriptor_key.key
 
         return xpubs, origin_less_xpub
