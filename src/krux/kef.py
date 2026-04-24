@@ -23,7 +23,6 @@
 import ucryptolib
 import uhashlib_hw
 
-
 # KEF: AES, MODEs VERSIONS, MODE_NUMBERS, and MODE_IVS are defined here
 #  to disable a MODE: set its value to None
 #  to disable a VERSION: set its value to None

@@ -373,12 +373,12 @@ class GRBLPrinter(GCodeGenerator):
         fm.register(
             Settings().hardware.printer.cnc.grbl.tx_pin,
             fm.fpioa.UART2_TX,
-            force=False,
+            force=True,
         )
         fm.register(
             Settings().hardware.printer.cnc.grbl.rx_pin,
             fm.fpioa.UART2_RX,
-            force=False,
+            force=True,
         )
 
         self.uart_conn = UART(UART.UART2, Settings().hardware.printer.cnc.grbl.baudrate)

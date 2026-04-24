@@ -187,9 +187,11 @@ class CameraEntropy(Page):
         shannon_16b_total = shannon_16b * img_pixels
 
         entropy_msg = t("Shannon's entropy:") + "\n"
-        entropy_msg += (t("%s bits (%s bits/px)") + "\n\n") % (
-            generate_thousands_separator(int(shannon_16b_total)),
-            replace_decimal_separator("%.2g" % shannon_16b),
+        entropy_msg += (t("%s bits") + "\n") % generate_thousands_separator(
+            int(shannon_16b_total)
+        )
+        entropy_msg += (t("(%s bits/px)") + "\n\n") % replace_decimal_separator(
+            "%.2g" % shannon_16b
         )
         entropy_msg += "%s %s" % (t("Pixels deviation index:"), str(self.stdev_index))
         self.ctx.display.clear()

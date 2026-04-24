@@ -52,6 +52,10 @@ On **Windows**, you may encounter the **flash failed** error when trying to flas
 <img src="/krux/img/krux-installer/usb-serial.jpg" style="width: 30%; min-width: 240px;">
 <img src="/krux/img/krux-installer/usb-serial-driver.jpg" style="width: 25%; min-width: 180px;">
 
+----8<----
+error-flashing-mac.en.txt
+----8<----
+
 
 ## **After Installing**
 

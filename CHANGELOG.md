@@ -1,3 +1,32 @@
+# Changelog 26.03.0 - March 2025
+
+### New Device Support: Embed Fire
+This device shares similarities with the WonderMV but stands out with its larger 2.4" touchscreen.
+
+### New Device Support: WonderK PRO
+From the wonderful land of Korea, a new creation arrives: the WonderK PRO. Created by an entrepreneur who loves the Krux project, the WonderK follows in the footsteps of the WonderMV, but boasts a larger 2.8" display! Computer simulator for the WonderK device is also included.
+
+### Loading a Descriptor Sets Wallet Attributes
+Loading a descriptor is now a quick way to set wallet attributes, as all necessary information is extracted automatically. This eliminates the need for manual configuration and ensures consistency with your coordinator wallet.
+
+### Changed BIP39 Passphrase Validation
+Krux now displays a warning instead of blocking QR-encoded passphrases that contain non-ASCII characters. Users are encouraged to use QR codes containing only ASCII passphrases or non-ASCII that have already been normalized to NFKD.
+
+### Easier to Scan UR QR Codes
+Exported Uniform Resource (UR) QR codes, a widely adopted standard for exchanging PSBTs, now use uppercase data to reduce QR density, improving scan reliability without increasing the number of frames.
+
+### Other Bug Fixes and Improvements
+- Settings: Reduced default _Buttons Debounce_ value (with an even lower default on _M5StickV_)
+- Settings: Expanded value ranges for _Touch Threshold_ and _Buttons Debounce_
+- Swipe handling: Detection threshold has been slightly reduced
+- Keypad: Added backtick **`**
+- Bugfix: Screensaver not activating in menu pages without statusbar
+- Embit: Improved BIP39 mnemonic validation
+- Bug Fix: Corrected handling of certain binary-encoded QR codes
+- Fix fingerprint unset warn message for rare case
+- Improved QR code decoding performance and added inverted color QR code detection
+- Allow non deterministic chaincodes to be used with Taproot provably unspendable keys
+
 # Changelog 25.10.1 - October 2025
 
 ### Bugfix: Krux encrypted mnemonic as a passphrase is invalid, but no error was raised
@@ -28,6 +57,9 @@ The Maix Bit device has long been discouraged due to its poor-quality camera. St
 - Optimized Datum show: total pages are no longer visible, and navigation no longer wraps from the first page to the last or vice versa; better memory management and handling for large (~100K) files
 - Enabled swipe up/down gestures on keypads, menus, and QR transcribe
 - Fix mnemonic thermal printing when long words span multiple lines
+- Tools -> Check SD card is now in Tools -> Device Tests
+- All devices scan TinySeed and other binary grids in grayscale mode for better speed.
+- Button functionality reestablished on some pages for Yahboom with v1.1 hardware
 
 # Changelog 25.09.0 - September 2025
 

@@ -122,10 +122,11 @@ class WalletDescriptor(Page):
 
         return MENU_CONTINUE
 
-    def _load_wallet(self):
-        """Load a wallet output descriptor from the camera or SD card"""
-
+    def _load_wallet_data(self):
+        """Loads and decrypts wallet data from camera or SD card"""
         persisted = False
+        wallet_data = None
+
         load_method = self.load_method()
         if load_method == LOAD_FROM_CAMERA:
             from ..qr_capture import QRCodeCapture
@@ -150,15 +151,16 @@ class WalletDescriptor(Page):
             except OSError:
                 pass
         else:  # Cancel
-            return MENU_CONTINUE
+            return None, None, False
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing…"))
         if wallet_data is None:
             # Camera or SD card loading failed!
             self.flash_error(t("Failed to load"))
-            return MENU_CONTINUE
+            return None, None, False
 
+        # Decrypt if needed
         from ..encryption_ui import decrypt_kef
 
         try:
@@ -169,31 +171,167 @@ class WalletDescriptor(Page):
                 wallet_data = wallet_data.decode()
             except:
                 self.flash_error(t("Failed to load"))
-                return MENU_CONTINUE
+                return None, None, False
         except KeyError:
             self.flash_error(t("Failed to decrypt"))
-            return MENU_CONTINUE
+            return None, None, False
         except ValueError:
             # ValueError=not KEF or declined to decrypt
             pass
 
-        from ...wallet import Wallet, AssumptionWarning
+        return wallet_data, qr_format, persisted
+
+    def _build_mismatch_warning(
+        self,
+        current_policy_type,
+        required_policy_type,
+        current_network,
+        required_network,
+        current_script_type=None,
+        required_script_type=None,
+    ):
+        """Builds warning text for policy/network/script type mismatch"""
+        from ...key import get_policy_type_name, get_network_name
+
+        offset_y = DEFAULT_PADDING + 2 * FONT_HEIGHT
+
+        # Check if policy changed
+        if current_policy_type != required_policy_type:
+            self.ctx.display.draw_hcentered_text(
+                "{}:".format(t("Policy Type")), offset_y, theme.highlight_color
+            )
+            offset_y += FONT_HEIGHT
+            offset_y += (
+                self.ctx.display.draw_hcentered_text(
+                    "{} > {}".format(
+                        get_policy_type_name(current_policy_type),
+                        get_policy_type_name(required_policy_type),
+                    ),
+                    offset_y,
+                )
+                * FONT_HEIGHT
+            )
+            offset_y += 2 * FONT_HEIGHT
+
+        # Check if script type changed
+        if (
+            required_script_type
+            and current_script_type
+            and current_script_type != required_script_type
+        ):
+            self.ctx.display.draw_hcentered_text(
+                "{}:".format(t("Script Type")), offset_y, theme.highlight_color
+            )
+            offset_y += FONT_HEIGHT
+            offset_y += (
+                self.ctx.display.draw_hcentered_text(
+                    "{} > {}".format(
+                        current_script_type.upper(),
+                        required_script_type.upper(),
+                    ),
+                    offset_y,
+                )
+                * FONT_HEIGHT
+            )
+            offset_y += 2 * FONT_HEIGHT
+
+        # Check if network changed
+        if required_network and current_network != required_network:
+            self.ctx.display.draw_hcentered_text(
+                "{}:".format(t("Network")), offset_y, theme.highlight_color
+            )
+            offset_y += FONT_HEIGHT
+            offset_y += (
+                self.ctx.display.draw_hcentered_text(
+                    "{} > {}".format(
+                        get_network_name(current_network),
+                        get_network_name(required_network),
+                    ),
+                    offset_y,
+                )
+                * FONT_HEIGHT
+            )
+
+    def _handle_policy_mismatch(self, exception, wallet_data, qr_format, persisted):
+        """Handles policy/network mismatch by prompting user and re-deriving key"""
+        from ...wallet import Wallet
+        from ...key import Key
+
+        required_policy_type = exception.args[0]
+        required_script_type = exception.args[1]
+        current_policy_type = exception.args[2]
+        required_network = exception.args[3] if len(exception.args) > 3 else None
+        current_network = exception.args[4] if len(exception.args) > 4 else None
+        current_script_type = self.ctx.wallet.key.script_type
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_hcentered_text(
+            t("Wallet mismatch:"), DEFAULT_PADDING, theme.error_color
+        )
+
+        self._build_mismatch_warning(
+            current_policy_type,
+            required_policy_type,
+            current_network,
+            required_network,
+            current_script_type,
+            required_script_type,
+        )
+
+        if not self.prompt(t("Change wallet?"), BOTTOM_PROMPT_LINE):
+            return None, None
+
+        # Re-derive key with correct policy type, script type, and network
+        updated_key = Key(
+            self.ctx.wallet.key.mnemonic,
+            required_policy_type,
+            network=(
+                required_network if required_network else self.ctx.wallet.key.network
+            ),
+            passphrase=self.ctx.wallet.key.passphrase,
+            account_index=self.ctx.wallet.key.account_index,
+            script_type=required_script_type,
+        )
+
+        wallet = Wallet(updated_key)
+        wallet.persisted = persisted
+        try:
+            wallet.load(wallet_data, qr_format)
+            self.ctx.wallet.key = updated_key
+            return wallet, None
+        except Exception as e:
+            return wallet, e
+
+    def _attempt_wallet_load(self, wallet_data, qr_format, persisted):
+        """Attempts to load wallet with exception handling"""
+        from ...wallet import Wallet, PolicyMismatchWarning
 
         wallet = Wallet(self.ctx.wallet.key)
         wallet.persisted = persisted
         wallet_load_exception = None
+
         try:
             wallet.load(wallet_data, qr_format)
-        except AssumptionWarning as e:
-            self.ctx.display.clear()
-            self.ctx.display.draw_centered_text(e.args[0], theme.error_color)
-            if self.prompt(t("Accept assumption?"), BOTTOM_PROMPT_LINE):
-                try:
-                    wallet.load(wallet_data, qr_format, allow_assumption=e.args[1])
-                except Exception as e_again:
-                    wallet_load_exception = e_again
+        except PolicyMismatchWarning as e:
+            return self._handle_policy_mismatch(e, wallet_data, qr_format, persisted)
         except Exception as e:
             wallet_load_exception = e
+
+        return wallet, wallet_load_exception
+
+    def _load_wallet(self):
+        """Load a wallet output descriptor from the camera or SD card"""
+        # Load wallet data
+        wallet_data, qr_format, persisted = self._load_wallet_data()
+        if wallet_data is None:
+            return MENU_CONTINUE
+
+        # Attempt to load the wallet with exception handling
+        wallet, wallet_load_exception = self._attempt_wallet_load(
+            wallet_data, qr_format, persisted
+        )
+
+        # Handle loading errors
         if wallet_load_exception:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
@@ -201,21 +339,27 @@ class WalletDescriptor(Page):
                 theme.error_color,
             )
             self.ctx.input.wait_for_button()
+            return MENU_CONTINUE
 
-        if wallet.is_loaded():
-            if not wallet.has_change_addr():
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(
-                    t("Could not determine change address."), theme.error_color
-                )
-                if not self.prompt(t("Proceed anyway?"), BOTTOM_PROMPT_LINE):
-                    return MENU_CONTINUE
+        # Check if wallet was successfully loaded
+        if not wallet or not wallet.is_loaded():
+            return MENU_CONTINUE
 
+        # Warn about missing change address if needed
+        if not wallet.has_change_addr():
             self.ctx.display.clear()
-            self.display_loading_wallet(wallet)
-            if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
-                self.ctx.wallet = wallet
-                self.flash_text(t("Wallet output descriptor loaded!"))
+            self.ctx.display.draw_centered_text(
+                t("Could not determine change address."), theme.error_color
+            )
+            if not self.prompt(t("Proceed anyway?"), BOTTOM_PROMPT_LINE):
+                return MENU_CONTINUE
+
+        # Display wallet and confirm loading
+        self.ctx.display.clear()
+        self.display_loading_wallet(wallet)
+        if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
+            self.ctx.wallet = wallet
+            self.flash_text(t("Wallet output descriptor loaded!"))
 
         return MENU_CONTINUE
 

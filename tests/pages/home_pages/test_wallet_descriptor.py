@@ -78,55 +78,7 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_ENTER, BUTTON_ENTER],
         ),
-        # 9 vague BlueWallet-ish p2pkh, requires allow_assumption
-        (
-            False,
-            tdata.LEGACY1_KEY,
-            tdata.VAGUE_LEGACY1_XPUB,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # 10 vague BlueWallet-ish p2pkh w/o key loaded, requires allow_assumption
-        (
-            False,
-            None,
-            tdata.VAGUE_LEGACY1_XPUB,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # 11 vague BlueWallet-ish p2sh-p2wpkh ypub
-        (
-            False,
-            tdata.NESTEDSW1_KEY,
-            tdata.VAGUE_NESTEDSW1_YPUB,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # 12 vague BlueWallet-ish p2sh-p2wpkh ypub w/o key loaded
-        (
-            False,
-            None,
-            tdata.VAGUE_NESTEDSW1_YPUB,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # 13 vague BlueWallet-ish p2wpkh zpub
-        (
-            False,
-            tdata.NATIVESW1_KEY,
-            tdata.VAGUE_NATIVESW1_ZPUB,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # 14 vague BlueWallet-ish p2wpkh zpub w/o key loaded
-        (
-            False,
-            None,
-            tdata.VAGUE_NATIVESW1_ZPUB,
-            None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # 15 Load, from SD card, good data, accept
+        # 9 Load, from SD card, good data, accept
         (
             False,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -447,3 +399,524 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
         wallet_descriptor.display_loading_wallet.assert_called_once()
         assert ctx.wallet.has_change_addr()
         assert ctx.input.wait_for_button.call_count == len(case[2])
+
+
+def test_policy_mismatch_singlesig_to_multisig_accept(
+    mocker, m5stickv, tdata, wallet_tdata
+):
+    """Test: Singlesig key loading multisig descriptor - user accepts change"""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.key import TYPE_MULTISIG
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor? Yes
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # Accept policy change (singlesig -> multisig)
+        BUTTON_ENTER,  # Accept wallet load
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (wallet_tdata.UNAMBIGUOUS_MULTISIG_DESCRIPTOR, FORMAT_PMOFN),
+    )
+    mocker.patch.object(
+        wallet_descriptor,
+        "display_qr_codes",
+        new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+    )
+    # Mock display_loading_wallet to avoid pagination button presses
+    mocker.patch.object(wallet_descriptor, "display_loading_wallet", return_value=None)
+    mocker.spy(wallet_descriptor, "_handle_policy_mismatch")
+
+    wallet_descriptor.wallet()
+
+    # Verify mismatch was handled
+    wallet_descriptor._handle_policy_mismatch.assert_called_once()
+    # Verify key was re-derived with multisig policy
+    assert ctx.wallet.key.policy_type == TYPE_MULTISIG
+    # Verify wallet was loaded
+    assert ctx.wallet.is_loaded()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_policy_mismatch_singlesig_to_multisig_decline(
+    mocker, m5stickv, tdata, wallet_tdata
+):
+    """Test: Singlesig key loading multisig descriptor - user declines change"""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.key import TYPE_SINGLESIG
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor? Yes
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_PAGE,  # Decline policy change
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (wallet_tdata.UNAMBIGUOUS_MULTISIG_DESCRIPTOR, FORMAT_PMOFN),
+    )
+    mocker.spy(wallet_descriptor, "_handle_policy_mismatch")
+
+    wallet_descriptor.wallet()
+
+    # Verify mismatch was handled
+    wallet_descriptor._handle_policy_mismatch.assert_called_once()
+    # Verify key was NOT changed (still singlesig)
+    assert ctx.wallet.key.policy_type == TYPE_SINGLESIG
+    # Verify wallet was NOT loaded
+    assert not ctx.wallet.is_loaded()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_policy_mismatch_singlesig_to_miniscript_accept(
+    mocker, m5stickv, tdata, wallet_tdata
+):
+    """Test: Singlesig key loading miniscript descriptor - user accepts change"""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.key import TYPE_MINISCRIPT, P2WSH
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor? Yes
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # Accept policy change (singlesig -> miniscript)
+        BUTTON_ENTER,  # Accept wallet load
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (wallet_tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_PMOFN),
+    )
+    mocker.patch.object(
+        wallet_descriptor,
+        "display_qr_codes",
+        new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+    )
+    # Mock display_loading_wallet to avoid pagination button presses
+    mocker.patch.object(wallet_descriptor, "display_loading_wallet", return_value=None)
+    mocker.spy(wallet_descriptor, "_handle_policy_mismatch")
+
+    wallet_descriptor.wallet()
+
+    # Verify mismatch was handled
+    wallet_descriptor._handle_policy_mismatch.assert_called_once()
+    # Verify key was re-derived with miniscript policy and P2WSH script type
+    assert ctx.wallet.key.policy_type == TYPE_MINISCRIPT
+    assert ctx.wallet.key.script_type == P2WSH
+    # Verify wallet was loaded
+    assert ctx.wallet.is_loaded()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_policy_mismatch_singlesig_to_taproot_miniscript_accept(
+    mocker, m5stickv, tdata, wallet_tdata
+):
+    """Test: Singlesig key loading taproot miniscript descriptor - user accepts change"""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.key import TYPE_MINISCRIPT, P2TR
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor? Yes
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # Accept policy change (singlesig -> miniscript)
+        BUTTON_ENTER,  # Accept wallet load
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            wallet_tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR,
+            FORMAT_PMOFN,
+        ),
+    )
+    mocker.patch.object(
+        wallet_descriptor,
+        "display_qr_codes",
+        new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+    )
+    # Mock display_loading_wallet to avoid pagination button presses
+    mocker.patch.object(wallet_descriptor, "display_loading_wallet", return_value=None)
+    mocker.spy(wallet_descriptor, "_handle_policy_mismatch")
+
+    wallet_descriptor.wallet()
+
+    # Verify mismatch was handled
+    wallet_descriptor._handle_policy_mismatch.assert_called_once()
+    # Verify key was re-derived with miniscript policy and P2TR script type
+    assert ctx.wallet.key.policy_type == TYPE_MINISCRIPT
+    assert ctx.wallet.key.script_type == P2TR
+    # Verify wallet was loaded
+    assert ctx.wallet.is_loaded()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_policy_mismatch_multisig_to_singlesig_accept(
+    mocker, m5stickv, tdata, wallet_tdata
+):
+    """Test: Multisig key loading singlesig descriptor - user accepts change"""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.key import TYPE_SINGLESIG
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor? Yes
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # Accept policy change (multisig -> singlesig)
+        BUTTON_ENTER,  # Accept wallet load
+    ]
+
+    wallet = Wallet(tdata.MULTISIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (wallet_tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR, FORMAT_PMOFN),
+    )
+    mocker.patch.object(
+        wallet_descriptor,
+        "display_qr_codes",
+        new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+    )
+    # Mock display_loading_wallet to avoid pagination button presses
+    mocker.patch.object(wallet_descriptor, "display_loading_wallet", return_value=None)
+    mocker.spy(wallet_descriptor, "_handle_policy_mismatch")
+
+    wallet_descriptor.wallet()
+
+    # Verify mismatch was handled
+    wallet_descriptor._handle_policy_mismatch.assert_called_once()
+    # Verify key was re-derived with singlesig policy
+    assert ctx.wallet.key.policy_type == TYPE_SINGLESIG
+    # Verify wallet was loaded
+    assert ctx.wallet.is_loaded()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_policy_mismatch_multisig_to_miniscript_accept(
+    mocker, m5stickv, tdata, wallet_tdata
+):
+    """Test: Multisig key loading miniscript descriptor - user accepts change"""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.key import TYPE_MINISCRIPT, P2WSH
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor? Yes
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # Accept policy change (multisig -> miniscript)
+        BUTTON_ENTER,  # Accept wallet load
+    ]
+
+    wallet = Wallet(tdata.MULTISIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (wallet_tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_PMOFN),
+    )
+    mocker.patch.object(
+        wallet_descriptor,
+        "display_qr_codes",
+        new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+    )
+    # Mock display_loading_wallet to avoid pagination button presses
+    mocker.patch.object(wallet_descriptor, "display_loading_wallet", return_value=None)
+    mocker.spy(wallet_descriptor, "_handle_policy_mismatch")
+
+    wallet_descriptor.wallet()
+
+    # Verify mismatch was handled
+    wallet_descriptor._handle_policy_mismatch.assert_called_once()
+    # Verify key was re-derived with miniscript policy
+    assert ctx.wallet.key.policy_type == TYPE_MINISCRIPT
+    assert ctx.wallet.key.script_type == P2WSH
+    # Verify wallet was loaded
+    assert ctx.wallet.is_loaded()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_policy_mismatch_miniscript_to_singlesig_accept(
+    mocker, amigo, tdata, wallet_tdata
+):
+    """Test: Miniscript key loading singlesig descriptor - user accepts change"""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.key import TYPE_SINGLESIG
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor? Yes
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # Accept policy change (miniscript -> singlesig)
+        BUTTON_ENTER,  # Accept wallet load
+    ]
+
+    wallet = Wallet(wallet_tdata.MINISCRIPT_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    # Use UNAMBIGUOUS_SINGLESIG_DESCRIPTOR which has /<0;1>/* (change branch)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (wallet_tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR, FORMAT_PMOFN),
+    )
+    mocker.patch.object(
+        wallet_descriptor,
+        "display_qr_codes",
+        new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+    )
+    # Mock display_loading_wallet to avoid pagination button presses
+    mocker.patch.object(wallet_descriptor, "display_loading_wallet", return_value=None)
+    mocker.spy(wallet_descriptor, "_handle_policy_mismatch")
+
+    wallet_descriptor.wallet()
+
+    # Verify mismatch was handled
+    wallet_descriptor._handle_policy_mismatch.assert_called_once()
+    # Verify key was re-derived with singlesig policy
+    assert ctx.wallet.key.policy_type == TYPE_SINGLESIG
+    # Verify wallet was loaded
+    assert ctx.wallet.is_loaded()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_network_mismatch_mainnet_to_testnet_accept(mocker, m5stickv, tdata):
+    """Test: Mainnet key loading testnet descriptor - user accepts change"""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from embit.networks import NETWORKS
+
+    # Testnet singlesig descriptor matching TEST_12_WORD_MNEMONIC
+    # Derived from [55f8fc5d/84'/1'/0'] for testnet
+    TESTNET_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/1h/0h]tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s/<0;1>/*)"
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor? Yes
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # Accept network change (mainnet -> testnet)
+        BUTTON_ENTER,  # Accept wallet load
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (TESTNET_SINGLESIG_DESCRIPTOR, FORMAT_PMOFN),
+    )
+    mocker.patch.object(
+        wallet_descriptor,
+        "display_qr_codes",
+        new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+    )
+    # Mock display_loading_wallet to avoid pagination button presses
+    mocker.patch.object(wallet_descriptor, "display_loading_wallet", return_value=None)
+    mocker.spy(wallet_descriptor, "_handle_policy_mismatch")
+
+    wallet_descriptor.wallet()
+
+    # Verify mismatch was handled
+    wallet_descriptor._handle_policy_mismatch.assert_called_once()
+    # Verify key was re-derived with testnet network
+    assert ctx.wallet.key.network == NETWORKS["test"]
+    # Verify wallet was loaded
+    assert ctx.wallet.is_loaded()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_network_mismatch_mainnet_to_testnet_decline(mocker, m5stickv, tdata):
+    """Test: Mainnet key loading testnet descriptor - user declines change"""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from embit.networks import NETWORKS
+
+    # Testnet singlesig descriptor matching TEST_12_WORD_MNEMONIC
+    TESTNET_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/1h/0h]tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s/<0;1>/*)"
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor? Yes
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_PAGE,  # Decline network change
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (TESTNET_SINGLESIG_DESCRIPTOR, FORMAT_PMOFN),
+    )
+    mocker.spy(wallet_descriptor, "_handle_policy_mismatch")
+
+    wallet_descriptor.wallet()
+
+    # Verify mismatch was handled
+    wallet_descriptor._handle_policy_mismatch.assert_called_once()
+    # Verify key was NOT changed (still mainnet)
+    assert ctx.wallet.key.network == NETWORKS["main"]
+    # Verify wallet was NOT loaded
+    assert not ctx.wallet.is_loaded()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_script_type_mismatch_p2wpkh_to_p2tr_accept(
+    mocker, m5stickv, tdata, wallet_tdata
+):
+    """Test: P2WPKH singlesig key loading P2TR descriptor - user accepts change"""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.key import P2TR, TYPE_SINGLESIG
+
+    # Taproot singlesig descriptor for same mnemonic (TEST_12_WORD_MNEMONIC)
+    TAPROOT_SINGLESIG_DESCRIPTOR = "tr([55f8fc5d/86h/0h/0h]xpub6CNGwJbVG9sQq4vfRxk6zpE4iiES3XsdVjn3SRkbHB8zDe66vhtPJUH7dCuVMmTcQ8fuozNYDYxcQJeJZE28eSD2sZYDHCYgC3Dq48kjbKy/<0;1>/*)"
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor? Yes
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # Accept script type change (P2WPKH -> P2TR)
+        BUTTON_ENTER,  # Accept wallet load
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (TAPROOT_SINGLESIG_DESCRIPTOR, FORMAT_PMOFN),
+    )
+    mocker.patch.object(
+        wallet_descriptor,
+        "display_qr_codes",
+        new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+    )
+    # Mock display_loading_wallet to avoid pagination button presses
+    mocker.patch.object(wallet_descriptor, "display_loading_wallet", return_value=None)
+    mocker.spy(wallet_descriptor, "_handle_policy_mismatch")
+
+    wallet_descriptor.wallet()
+
+    # Verify mismatch was handled
+    wallet_descriptor._handle_policy_mismatch.assert_called_once()
+    # Verify key was re-derived with P2TR script type
+    assert ctx.wallet.key.policy_type == TYPE_SINGLESIG
+    assert ctx.wallet.key.script_type == P2TR
+    # Verify wallet was loaded
+    assert ctx.wallet.is_loaded()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_combined_policy_and_network_mismatch_accept(mocker, m5stickv, tdata):
+    """Test: Combined policy and network mismatch - user accepts change"""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_PMOFN
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.key import TYPE_MINISCRIPT, P2WSH
+    from embit.networks import NETWORKS
+
+    # Testnet miniscript descriptor (different policy + different network)
+    # Key matches TEST_12_WORD_MNEMONIC at path 48'/1'/0'/2' on testnet
+    # Using simple wsh(pk(...)) which is a valid miniscript construct
+    TESTNET_MINISCRIPT_DESCRIPTOR = "wsh(pk([55f8fc5d/48h/1h/0h/2h]tpubDDyrxYEe6bifecFTgj8vzsoUhoJmtVWeARR5xRun6haVnVrC2oTAYhj7Ja2KTkcnkW1mZPPuWGDxEsHMtRf8aAf4WfrqhLDN7xi9zAZMphv/<0;1>/*))"
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load wallet descriptor? Yes
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # Accept combined policy + network change
+        BUTTON_ENTER,  # Accept wallet load
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (TESTNET_MINISCRIPT_DESCRIPTOR, FORMAT_PMOFN),
+    )
+    mocker.patch.object(
+        wallet_descriptor,
+        "display_qr_codes",
+        new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+    )
+    # Mock display_loading_wallet to avoid pagination button presses
+    mocker.patch.object(wallet_descriptor, "display_loading_wallet", return_value=None)
+    mocker.spy(wallet_descriptor, "_handle_policy_mismatch")
+
+    wallet_descriptor.wallet()
+
+    # Verify mismatch was handled
+    wallet_descriptor._handle_policy_mismatch.assert_called_once()
+    # Verify key was re-derived with miniscript policy AND testnet network
+    assert ctx.wallet.key.policy_type == TYPE_MINISCRIPT
+    assert ctx.wallet.key.script_type == P2WSH
+    assert ctx.wallet.key.network == NETWORKS["test"]
+    # Verify wallet was loaded
+    assert ctx.wallet.is_loaded()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)

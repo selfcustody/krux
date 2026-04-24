@@ -117,7 +117,10 @@ class Camera:
         if self.cam_id == OV5642_ID:
             sensor.set_hmirror(1)
         if self.cam_id == OV2640_ID:
-            sensor.set_vflip(1)
+            if kboard.is_embed_fire:
+                sensor.set_hmirror(0)
+            else:
+                sensor.set_vflip(1)
         if kboard.is_bit:
             # CIF mode will use central pixels and discard darker periphery
             sensor.set_framesize(sensor.CIF)
@@ -173,7 +176,7 @@ class Camera:
         # Center weight mode = 7, default=0x01 (center mode = 0)
         sensor.__write_reg(0x0C, 0x71)
 
-    def has_antiglare(self):
+    def has_mode_control(self):
         """Returns whether the camera has anti-glare functionality"""
         return self.cam_id in (OV7740_ID, OV2640_ID, GC2145_ID, GC0328_ID)
 

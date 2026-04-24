@@ -20,7 +20,7 @@ def k_mnemonic_bytes(mnemonic: str, ignore_checksum: bool = False, wordlist=WORD
     Verifies the mnemonic checksum and returns it in bytes
     Equivalent to embit.bip39.mnemonic_to_bytes
     """
-    words = mnemonic.strip().split()
+    words = mnemonic.split(" ")
     if len(words) % 3 != 0 or not 12 <= len(words) <= 24:
         raise ValueError("Invalid recovery phrase")
 

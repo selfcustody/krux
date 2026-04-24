@@ -10,6 +10,7 @@ from .shared_mocks import (
     board_yahboom,
     board_bit,
     board_wonder_k,
+    board_embed_fire,
     encode_to_string,
     encode,
     statvfs,
@@ -171,6 +172,15 @@ def wonder_k(monkeypatch, mp_modules):
     import sys
 
     monkeypatch.setitem(sys.modules, "board", board_wonder_k())
+    monkeypatch.setitem(sys.modules, "pmu", None)
+    reset_krux_modules()
+
+
+@pytest.fixture
+def embed_fire(monkeypatch, mp_modules):
+    import sys
+
+    monkeypatch.setitem(sys.modules, "board", board_embed_fire())
     monkeypatch.setitem(sys.modules, "pmu", None)
     reset_krux_modules()
 

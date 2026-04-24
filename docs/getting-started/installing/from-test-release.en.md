@@ -142,3 +142,21 @@ To Flash TZT you need to pass the `-B dan` parameter.
 ```pwsh
 .\ktool-win.exe -B dan -b 1500000 maixpy_tzt\kboot.kfpkg
 ```
+
+#### Embed Fire
+To Flash Embed Fire you need to pass the `-B dan` parameter and `-b 400000` (maximum supported baud rate).
+
+##### Linux
+```bash
+./ktool-linux -B dan -b 400000 maixpy_embed_fire/kboot.kfpkg
+```
+
+##### Mac
+```bash
+./ktool-mac -B dan -b 400000 maixpy_embed_fire/kboot.kfpkg
+```
+
+##### Windows
+```pwsh
+.\ktool-win.exe -B dan -b 400000 maixpy_embed_fire\kboot.kfpkg
+```

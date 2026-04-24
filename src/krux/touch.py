@@ -23,13 +23,14 @@
 
 import time
 
+from .kboard import kboard
 from .krux_settings import Settings
 
 IDLE = 0
 PRESSED = 1
 RELEASED = 2
 
-SWIPE_THRESHOLD = 50
+SWIPE_THRESHOLD = 35
 SWIPE_RIGHT = 1
 SWIPE_LEFT = 2
 SWIPE_UP = 3
@@ -54,7 +55,12 @@ class Touch:
         self.gesture = None
         self.state = IDLE
         self.width, self.height = width, height
-        if res_pin is not None:
+        if kboard.is_embed_fire:
+            from .touchscreens.cst816 import touch_control
+
+            self.touch_driver = touch_control
+            self.touch_driver.activate(irq_pin)
+        elif res_pin is not None:
             from .touchscreens.gt911 import touch_control
 
             self.touch_driver = touch_control

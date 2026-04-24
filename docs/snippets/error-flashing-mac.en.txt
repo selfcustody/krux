@@ -1,0 +1,6 @@
+**On macOS**, you may also run into flashing errors. This often happens when a proper CH34X USB driver is missing, preventing proper communication with the device.
+To fix it, install the CH341 driver. In a terminal, type:
+```
+brew install --cask wch-ch34x-usb-serial-driver
+```
+After installing, you may also need to approve driver's "extension" in macOS system settings, identified as CH34xVCPDriver.app"

@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        device: [maixpy_m5stickv, maixpy_amigo, maixpy_dock, maixpy_yahboom, maixpy_cube, maixpy_wonder_mv, maixpy_tzt]
+        device: [maixpy_m5stickv, maixpy_amigo, maixpy_dock, maixpy_yahboom, maixpy_cube, maixpy_wonder_mv, maixpy_tzt, maixpy_embed_fire, maixpy_wonder_k]
     runs-on: ubuntu-latest
     services:
       registry:
@@ -208,6 +208,54 @@ jobs:
         with:
           path: ${{ steps.extract-tzt.outputs.destination }}
           name: build-tzt
+
+      - name: Build for Embed Fire
+        if: matrix.device == 'maixpy_embed_fire'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          build-args: DEVICE=maixpy_embed_fire
+          push: true
+          tags: localhost:5000/selfcustody/krux-builder-embed-fire:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+      - name: Extract firmware for Embed Fire
+        id: extract-embed-fire
+        if: matrix.device == 'maixpy_embed_fire'
+        uses: shrink/actions-docker-extract@v3
+        with:
+          image: localhost:5000/selfcustody/krux-builder-embed-fire:latest
+          path: /src/firmware/Kboot/build/.
+      - name: Upload firmware for Embed Fire
+        if: matrix.device == 'maixpy_embed_fire'
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ steps.extract-embed-fire.outputs.destination }}
+          name: build-embed-fire
+
+      - name: Build for WonderK
+        if: matrix.device == 'maixpy_wonder_k'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          build-args: DEVICE=maixpy_wonder_k
+          push: true
+          tags: localhost:5000/selfcustody/krux-builder-wonder-k:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+      - name: Extract firmware for WonderK
+        id: extract-wonder-k
+        if: matrix.device == 'maixpy_wonder_k'
+        uses: shrink/actions-docker-extract@v3
+        with:
+          image: localhost:5000/selfcustody/krux-builder-wonder-k:latest
+          path: /src/firmware/Kboot/build/.
+      - name: Upload firmware for WonderK
+        if: matrix.device == 'maixpy_wonder_k'
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ steps.extract-wonder-k.outputs.destination }}
+          name: build-wonder-k
 
       - name: Move cache
         run: |

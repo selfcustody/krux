@@ -181,6 +181,7 @@ class QRPartParser:
                 from ur.ur_decoder import URDecoder
 
                 self.decoder = URDecoder()
+            data = data.decode() if isinstance(data, bytes) else data
             self.decoder.receive_part(data)
         elif self.format == FORMAT_BBQR:
             from .bbqr import parse_bbqr
@@ -209,9 +210,7 @@ class QRPartParser:
     def result(self):
         """Returns the combined part data"""
         if self.format == FORMAT_UR:
-            from ur.ur import UR
-
-            return UR(self.decoder.result.type, bytearray(self.decoder.result.cbor))
+            return self.decoder.result
 
         if self.format == FORMAT_BBQR:
             from .bbqr import decode_bbqr
@@ -261,7 +260,7 @@ def to_qr_codes(data, max_width, qr_format):
 
             encoder = UREncoder(data, part_size, 0)
             while True:
-                part = encoder.next_part()
+                part = encoder.next_part().upper()
                 code = qrcode.encode(part)
                 yield (code, encoder.fountain_encoder.seq_len())
         elif qr_format == FORMAT_BBQR:
@@ -372,6 +371,7 @@ def find_min_num_parts(data, max_width, qr_format):
 
 def parse_pmofn_qr_part(data):
     """Parses the QR as a P M-of-N part, extracting the part's content, index, and total"""
+    data = data.decode() if isinstance(data, bytes) else data
     of_index = data.index("of")
     space_index = data.index(" ")
     part_index = int(data[1:of_index])
@@ -383,6 +383,7 @@ def detect_format(data):
     """Detects the QR format of the given data"""
     qr_format = FORMAT_NONE
     try:
+        data = data.decode() if isinstance(data, bytes) else data
         if data.startswith("p"):
             header = data.split(" ")[0]
             if "of" in header and header[1:].split("of")[0].isdigit():

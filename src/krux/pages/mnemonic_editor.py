@@ -210,41 +210,38 @@ class MnemonicEditor(Page):
             x_padding = MINIMAL_PADDING
         while word_index < 12:
             paged_index = word_index + page * 12
+            font_color = word_color(paged_index)
+            bg_color = theme.bg_color
             if word_index == button_index and self.ctx.input.buttons_active:
-                self.ctx.display.draw_string(
-                    x_padding,
-                    y_region,
-                    str(paged_index + 1) + "." + self.current_mnemonic[paged_index],
-                    theme.bg_color,
-                    word_color(paged_index),
-                )
-            else:
-                self.ctx.display.draw_string(
-                    x_padding,
-                    y_region,
-                    str(paged_index + 1) + "." + self.current_mnemonic[paged_index],
-                    word_color(paged_index),
-                )
+                # Flip the color values for the selected word
+                bg_color = font_color
+                font_color = theme.bg_color
+            self.ctx.display.draw_string(
+                x_padding,
+                y_region,
+                "{:>2}".format(paged_index + 1)
+                + ". "
+                + self.current_mnemonic[paged_index],
+                color=font_color,
+                bg_color=bg_color,
+            )
             if self.mnemonic_length == 24 and not kboard.is_m5stickv:
+                # Display is wide enough; render the next 12 words on the right side
+                font_color = word_color(word_index + 12)
+                bg_color = theme.bg_color
                 if word_index + 12 == button_index and self.ctx.input.buttons_active:
-                    self.ctx.display.draw_string(
-                        MINIMAL_PADDING + self.ctx.display.width() // 2,
-                        y_region,
-                        str(word_index + 13)
-                        + "."
-                        + self.current_mnemonic[word_index + 12],
-                        theme.bg_color,
-                        word_color(word_index + 12),
-                    )
-                else:
-                    self.ctx.display.draw_string(
-                        MINIMAL_PADDING + self.ctx.display.width() // 2,
-                        y_region,
-                        str(word_index + 13)
-                        + "."
-                        + self.current_mnemonic[word_index + 12],
-                        word_color(word_index + 12),
-                    )
+                    # Flip the color values for the selected word
+                    bg_color = font_color
+                    font_color = theme.bg_color
+                self.ctx.display.draw_string(
+                    MINIMAL_PADDING + self.ctx.display.width() // 2,
+                    y_region,
+                    "{:>2}".format(word_index + 13)
+                    + ". "
+                    + self.current_mnemonic[word_index + 12],
+                    color=font_color,
+                    bg_color=bg_color,
+                )
             word_index += 1
             y_region += word_v_padding
 
@@ -326,7 +323,7 @@ class MnemonicEditor(Page):
                 if new_word is not None:
                     self.ctx.display.clear()
                     if self.prompt(
-                        str(button_index + 1) + ".\n\n" + new_word + "\n\n",
+                        str(button_index + page * 12 + 1) + ".\n\n" + new_word + "\n\n",
                         self.ctx.display.height() // 2,
                     ):
                         self.current_mnemonic[button_index + page * 12] = new_word

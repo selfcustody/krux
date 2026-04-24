@@ -457,6 +457,7 @@ def test_debounce_presses_with_greater_interval(mocker, m5stickv):
 
 def test_debounce_presses_with_smaller_interval(mocker, m5stickv):
     from krux.input import Input, RELEASED, PRESSED
+    from krux.krux_settings import Settings
 
     input = Input()
     interval = 10  # ms
@@ -473,9 +474,11 @@ def test_debounce_presses_with_smaller_interval(mocker, m5stickv):
     btn = input.wait_for_button()
     assert btn == 0
     assert input.entropy > 0
-    # Assert that the flush_events was called 10 times
+    # Assert that the flush_events was called debounce / interval times
     # meaning that the debounce time was respected
-    assert input.flush_events.call_count == 10
+    assert (
+        input.flush_events.call_count == Settings().hardware.buttons.debounce / interval
+    )
 
 
 def test_wait_for_button_blocks_until_enter_released(mocker, m5stickv):

@@ -300,7 +300,8 @@ class ButtonsSettings(SettingsNamespace):
     """Buttons debounce settings"""
 
     namespace = "settings.buttons"
-    debounce = NumberSetting(int, "debounce", 100, [100, 500])
+    default_deb = 50 if kboard.is_m5stickv else 80
+    debounce = NumberSetting(int, "debounce", default_deb, [20, 500])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -314,7 +315,7 @@ class TouchSettings(SettingsNamespace):
 
     namespace = "settings.touchscreen"
     default_th = 40 if kboard.is_wonder_k else 22
-    threshold = NumberSetting(int, "threshold", default_th, [10, 200])
+    threshold = NumberSetting(int, "threshold", default_th, [2, 200])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""

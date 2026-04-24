@@ -56,12 +56,12 @@ class AdafruitPrinter(Printer):
         fm.register(
             Settings().hardware.printer.thermal.adafruit.tx_pin,
             fm.fpioa.UART2_TX,
-            force=False,
+            force=True,
         )
         fm.register(
             Settings().hardware.printer.thermal.adafruit.rx_pin,
             fm.fpioa.UART2_RX,
-            force=False,
+            force=True,
         )
 
         self.uart_conn = UART(
