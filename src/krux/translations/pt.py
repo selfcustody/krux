@@ -298,6 +298,7 @@ translation_array = [
     "Assinatura:",
     "Mensagem assinada",
     "PSBT assinada",
+    "Assinando hash bruto. Prossiga somente se você confiar na fonte.",
     "Assinando…",
     "Single-sig",
     "Tamanho:",

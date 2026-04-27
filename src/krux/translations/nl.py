@@ -298,6 +298,7 @@ translation_array = [
     "Handtekening:",
     "Bericht ondertekend",
     "PSBT ondertekend",
+    "RAW-hash ondertekenen. Ga alleen verder als je de bron vertrouwt.",
     "Signing…",
     "Enkele sleutel",
     "Grootte:",

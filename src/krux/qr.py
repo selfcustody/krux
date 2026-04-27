@@ -369,6 +369,9 @@ def find_min_num_parts(data, max_width, qr_format):
     return num_parts, part_size
 
 
+PMOFN_MAX_PARTS = 99  # Matches the 2-digit generator limit
+
+
 def parse_pmofn_qr_part(data):
     """Parses the QR as a P M-of-N part, extracting the part's content, index, and total"""
     data = data.decode() if isinstance(data, bytes) else data
@@ -376,6 +379,10 @@ def parse_pmofn_qr_part(data):
     space_index = data.index(" ")
     part_index = int(data[1:of_index])
     part_total = int(data[of_index + 2 : space_index])
+    if part_total < 1 or part_total > PMOFN_MAX_PARTS:
+        raise ValueError("Invalid pMofN part total: %d" % part_total)
+    if part_index < 1 or part_index > part_total:
+        raise ValueError("Invalid pMofN part index: %d" % part_index)
     return data[space_index + 1 :], part_index, part_total
 
 

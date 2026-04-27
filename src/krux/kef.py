@@ -491,6 +491,11 @@ def unwrap(kef_bytes):
         iterations = kef_iterations * 10000
     else:
         iterations = kef_iterations
+    # Enforce a minimum PBKDF2 iteration count to prevent malicious envelopes
+    # from declaring a trivial work factor (e.g. 0 or 1) and bypassing the
+    # password-stretching that protects the encrypted payload.
+    if iterations < 10000:
+        raise ValueError("Invalid iterations")
 
     payload = kef_bytes[len_id + 5 :]
     extra = MODE_IVS.get(VERSIONS[version]["mode"], 0)
@@ -559,5 +564,7 @@ def _reinflate(data):
     try:
         with deflate.DeflateIO(io.BytesIO(data)) as d:
             return d.read()
+    except ValueError:
+        raise
     except:
         raise ValueError("Error decompressing")

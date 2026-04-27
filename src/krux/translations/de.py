@@ -298,6 +298,7 @@ translation_array = [
     "Signatur:",
     "Signierte Nachricht",
     "Signierte PSBT",
+    "Signieren von Roh-Hash. Fahren Sie nur fort, wenn Sie der Quelle vertrauen.",
     "Unterzeichnung…",
     "Single-Sig",
     "Größe:",

@@ -276,6 +276,7 @@
     "Signature:": "サイン:",
     "Signed Message": "サイン付きメッセージ",
     "Signed PSBT": "サインされたPSBT",
+    "Signing raw hash. Proceed only if you trust the source.": "生のハッシュに署名します.ソースを信頼している場合にのみ続行します.",
     "Signing…": "署名…",
     "Single-sig": "シングルサイン",
     "Size:": "サイズ:",

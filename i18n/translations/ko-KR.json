@@ -276,6 +276,7 @@
     "Signature:": "서명:",
     "Signed Message": "서명된 메시지",
     "Signed PSBT": "서명된 PSBT",
+    "Signing raw hash. Proceed only if you trust the source.": "원시 해시에 서명합니다. 소스를 신뢰하는 경우에만 진행합니다.",
     "Signing…": "서명…",
     "Single-sig": "단일서명",
     "Size:": "크기:",

@@ -298,6 +298,7 @@ translation_array = [
     "Signature\u2009:",
     "Message signé",
     "PSBT signé",
+    "Signature du hachage brut. Procédez uniquement si vous faites confiance à la source.",
     "Signature…",
     "Clé unique",
     "Capacité\u2009:",
