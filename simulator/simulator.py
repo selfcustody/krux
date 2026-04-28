@@ -108,6 +108,7 @@ if args.printer:
 
 from kruxsim.mocks import secp256k1
 from kruxsim.mocks import qrcode
+from kruxsim.mocks import uUR  # noqa: F401
 from kruxsim.mocks import sensor
 from kruxsim.mocks import shannon
 from kruxsim.mocks import ft6x36
