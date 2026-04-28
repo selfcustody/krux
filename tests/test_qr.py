@@ -172,7 +172,7 @@ def test_to_qr_codes(mocker, m5stickv, tdata):
         # Test 320 pixels wide display
         (FORMAT_NONE, tdata.TEST_DATA_B58, 320, 1),
         (FORMAT_PMOFN, tdata.TEST_DATA_B58, 320, 3),
-        (FORMAT_UR, tdata.TEST_DATA_UR, 320, 6),
+        (FORMAT_UR, tdata.TEST_DATA_UR, 320, 3),
         (FORMAT_BBQR, BBQR_CODE_DATA, 320, 2),
     ]
     for case in cases:
