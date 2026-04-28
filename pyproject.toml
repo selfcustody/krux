@@ -64,7 +64,6 @@ PyQRCode = "^1.2.1"
 pycryptodome = "^3.23.0"
 poethepoet = "^0.42.1"
 vulture = "^2.15"
-translate = "^3.8.0"
 urllib3 = ">=2.6.3"
 
 [tool.poetry.extras]

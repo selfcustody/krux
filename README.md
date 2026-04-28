@@ -255,12 +255,6 @@ poetry run poe i18n clean
 # Create a new translation file in JSON:
 poetry run poe i18n new tr-TR
 
-# Use Google translate to create missing translations, copy them to respective files, review phrases and commas.
-poetry run poe i18n fill
-
-# Create missing translations for a single language. Ex: Brazilian Portuguese
-poetry run poe i18n fill pt-BR
-
 # Make sure all files have this new translated message:
 poetry run poe i18n validate
 
