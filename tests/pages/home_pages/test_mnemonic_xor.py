@@ -743,7 +743,9 @@ def test_export_xor_fail_low_entropy(mocker, amigo, tdata):
         assert ctx.wallet.key.mnemonic == tdata.TEST_XOR_12_WORD_MNEMONIC_1
         assert ctx.wallet.key.fingerprint.hex() == "a70e2c26"
 
-        mocker.spy(ctx.display, "draw_hcentered_text")
+        from krux.themes import theme
+
+        mocker.spy(ctx.display, "draw_centered_text")
         mocker.patch.object(
             QRCodeCapture,
             "qr_capture_loop",
@@ -752,5 +754,8 @@ def test_export_xor_fail_low_entropy(mocker, amigo, tdata):
 
         m = MnemonicXOR(ctx)
         m.load_key()
-        assert mocker.call([case[2]]) in ctx.display.draw_hcentered_text.mock_calls
+        assert (
+            mocker.call(case[2], color=theme.error_color)
+            in ctx.display.draw_centered_text.mock_calls
+        )
         n += 1
