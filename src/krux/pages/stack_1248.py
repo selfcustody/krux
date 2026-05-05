@@ -41,9 +41,16 @@ STACKBIT_MAX_INDEX = 13
 BIT_WEIGHTS = (1, 2, 4, 8)
 BIT_LABELS = ("1", "2", "4", "8")
 
+VERT_N_DIGITS = 4
+VERT_N_BITS = 4
+VERT_N_CELLS = VERT_N_DIGITS * VERT_N_BITS
+VERT_ESC_INDEX = VERT_N_CELLS
+VERT_GO_INDEX = VERT_N_CELLS + 2
+VERT_INVALID_CELLS = tuple(VERT_N_DIGITS * i for i in (2, 3))
+
 
 class Stackbit(Page):
-    """Class for handling Stackbit 1248 fomat"""
+    """Class for handling Stackbit 1248 format"""
 
     def __init__(self, ctx):
         super().__init__(ctx, None)
@@ -710,6 +717,282 @@ class Stackbit(Page):
                     digits = self._toggle_bit(digits, index)
             else:
                 index = self.index(index, btn)
+            self.ctx.display.clear()
+        if len(words) in (12, 24):
+            return words
+        return None
+
+    def _layout_vertical(self, pad=DEFAULT_PADDING):
+        """Return geometry constants for the vertical input grid."""
+        # All positions are derived from two base measures so the layout
+        # scales cleanly across Amigo (320×480), Dock (240×320) and
+        # M5StickV (135×240).
+        label_w = FONT_WIDTH + pad  # breathing room between border and labels
+        gap = FONT_HEIGHT // 2
+
+        # Cell size: largest square that fits both the available width and the
+        # available height, so the grid uses the full screen on every device.
+        available_w = self.ctx.display.width() - 2 * pad - label_w
+        cell_w = available_w // VERT_N_DIGITS
+        max_cell_h = (self.ctx.display.height() - 4 * FONT_HEIGHT - pad - gap) // (
+            VERT_N_BITS + 1
+        )
+        cell_size = min(cell_w, max(max_cell_h, FONT_HEIGHT))
+
+        grid_w = VERT_N_DIGITS * cell_size
+        grid_h = VERT_N_BITS * cell_size
+
+        # Center the full block (labels + grid) horizontally on the display
+        total_w = label_w + grid_w
+        x_label = max(pad, (self.ctx.display.width() - total_w) // 2)
+        x_grid = x_label + label_w
+
+        total_h = 2 * FONT_HEIGHT + grid_h + gap + FONT_HEIGHT + cell_size
+        y_start = max(pad, (self.ctx.display.height() - total_h) // 2)
+        y_grid = y_start + 2 * FONT_HEIGHT
+        y_preview = y_grid + grid_h + gap
+        y_menu = y_preview + FONT_HEIGHT
+
+        return (
+            x_grid,
+            y_grid,
+            y_start,
+            y_menu,
+            cell_size,
+            cell_size,
+            grid_w,
+            x_label,
+            y_preview,
+        )
+
+    def _map_keys_array_vertical(self, x_grid, y_grid, cell_w, cell_h, y_menu):
+        """Set touch regions for the 4 × 4 grid plus the Esc / Go menu row."""
+        if not kboard.has_touchscreen:
+            return
+        self.ctx.input.touch.clear_regions()
+        x = x_grid
+        for _ in range(VERT_N_DIGITS + 1):
+            self.ctx.input.touch.x_regions.append(x)
+            x += cell_w
+        y = y_grid
+        for _ in range(VERT_N_BITS):
+            self.ctx.input.touch.y_regions.append(y)
+            y += cell_h
+        self.ctx.input.touch.y_regions.append(y_menu)
+        self.ctx.input.touch.y_regions.append(y_menu + cell_h)
+
+    def _draw_grid_vertical(self, x_grid, y_grid, cell_w, cell_h, grid_w):
+        """Draw the 4 × 4 cell borders, shading invalid cells in column 0."""
+        grid_h = VERT_N_BITS * cell_h
+        # Outer border
+        self.ctx.display.draw_line(
+            x_grid, y_grid, x_grid + grid_w, y_grid, theme.frame_color
+        )
+        self.ctx.display.draw_line(
+            x_grid, y_grid + grid_h, x_grid + grid_w, y_grid + grid_h, theme.frame_color
+        )
+        self.ctx.display.draw_line(
+            x_grid, y_grid, x_grid, y_grid + grid_h, theme.frame_color
+        )
+        self.ctx.display.draw_line(
+            x_grid + grid_w, y_grid, x_grid + grid_w, y_grid + grid_h, theme.frame_color
+        )
+        # Internal column dividers
+        for col in range(1, VERT_N_DIGITS):
+            x = x_grid + col * cell_w
+            self.ctx.display.draw_line(x, y_grid, x, y_grid + grid_h, theme.frame_color)
+        # Internal row dividers
+        for row in range(1, VERT_N_BITS):
+            y = y_grid + row * cell_h
+            self.ctx.display.draw_line(x_grid, y, x_grid + grid_w, y, theme.frame_color)
+        # Shade cells that are structurally unreachable (first digit, rows 2-3)
+        for row in range(2, VERT_N_BITS):
+            self.ctx.display.fill_rectangle(
+                x_grid, y_grid + row * cell_h, cell_w, cell_h, theme.disabled_color
+            )
+
+    def _draw_punched_vertical(self, digits, x_grid, y_grid, cell_w, cell_h):
+        """Draw filled circles for every bit that is set in the current digits."""
+        radius = max(min(cell_w, cell_h) // 3, 1)
+        for col, digit in enumerate(digits):
+            cx = x_grid + col * cell_w + cell_w // 2
+            for row, bit_val in enumerate(BIT_WEIGHTS):
+                if digit & bit_val:
+                    cy = y_grid + row * cell_h + cell_h // 2
+                    self.ctx.display.draw_circle(cx, cy, radius, theme.highlight_color)
+
+    def _draw_menu_vertical(self, x_grid, y_menu, grid_w, cell_h):
+        """Draw the Esc and Go buttons below the grid."""
+        label_y = y_menu + (cell_h - FONT_HEIGHT) // 2
+        half_w = grid_w // 2
+        esc_label = t("Esc")
+        go_label = t("Go")
+        esc_x = x_grid + (half_w - len(esc_label) * FONT_WIDTH) // 2
+        go_x = x_grid + half_w + (half_w - len(go_label) * FONT_WIDTH) // 2
+        self.ctx.display.draw_string(esc_x, label_y, esc_label, theme.no_esc_color)
+        self.ctx.display.draw_string(go_x, label_y, go_label, theme.go_color)
+        if kboard.has_touchscreen:
+            mid = x_grid + half_w
+            self.ctx.display.draw_line(
+                x_grid, y_menu, x_grid + grid_w, y_menu, theme.frame_color
+            )
+            self.ctx.display.draw_line(
+                x_grid,
+                y_menu + cell_h,
+                x_grid + grid_w,
+                y_menu + cell_h,
+                theme.frame_color,
+            )
+            self.ctx.display.draw_line(
+                x_grid, y_menu, x_grid, y_menu + cell_h, theme.frame_color
+            )
+            self.ctx.display.draw_line(
+                mid, y_menu, mid, y_menu + cell_h, theme.frame_color
+            )
+            self.ctx.display.draw_line(
+                x_grid + grid_w,
+                y_menu,
+                x_grid + grid_w,
+                y_menu + cell_h,
+                theme.frame_color,
+            )
+
+    def _draw_index_vertical(
+        self, index, x_grid, y_grid, cell_w, cell_h, y_menu, grid_w
+    ):
+        """Outline the currently focused cell or menu button."""
+        if index >= VERT_GO_INDEX:
+            x = x_grid + grid_w // 2
+            self.ctx.display.outline(x, y_menu, grid_w // 2, cell_h, theme.go_color)
+        elif index >= VERT_ESC_INDEX:
+            self.ctx.display.outline(
+                x_grid, y_menu, grid_w // 2, cell_h, theme.no_esc_color
+            )
+        else:
+            col = index % VERT_N_DIGITS
+            row = index // VERT_N_DIGITS
+            self.ctx.display.outline(
+                x_grid + col * cell_w,
+                y_grid + row * cell_h,
+                cell_w,
+                cell_h,
+                theme.fg_color,
+            )
+
+    def _toggle_bit_vertical(self, digits, index):
+        """Toggle the bit addressed by *index*, enforcing first-digit constraints."""
+        # The first BIP39 digit is 0-2, so bit weights 4 (row 2) and 8 (row 3)
+        # are invalid for column 0 and are silently ignored.
+        if index in VERT_INVALID_CELLS:
+            return digits
+        col = index % VERT_N_DIGITS
+        row = index // VERT_N_DIGITS
+        bit_val = BIT_WEIGHTS[row]
+        new_val = digits[col] ^ bit_val
+        if col == 0 and new_val > 2:
+            new_val = 0
+        elif col != 0 and new_val > 9:
+            new_val = 0
+        digits[col] = new_val
+        return digits
+
+    def _index_vertical(self, index, btn):
+        """Advance or rewind the focused cell index, skipping invalid cells."""
+        if btn in (BUTTON_PAGE, FAST_FORWARD):
+            index = 0 if index >= VERT_GO_INDEX else index + 1
+            if index in VERT_INVALID_CELLS:
+                index += 1
+        elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD):
+            index = VERT_GO_INDEX if index <= 0 else index - 1
+            if index in VERT_INVALID_CELLS:
+                index -= 1
+        return index
+
+    def enter_1248_vertical(self):
+        """UI to manually enter a seed from a vertical Stackbit 1248 card."""
+        x_grid, y_grid, y_start, y_menu, cell_w, cell_h, grid_w, x_label, y_preview = (
+            self._layout_vertical()
+        )
+        index = 0
+        digits = [0, 0, 0, 0]
+        word_index = 1
+        words = []
+        while word_index <= 24:
+            self._map_keys_array_vertical(x_grid, y_grid, cell_w, cell_h, y_menu)
+            self.ctx.display.draw_hcentered_text("Stackbit 1248", y_start)
+            self.ctx.display.fill_rectangle(
+                x_grid, y_start + FONT_HEIGHT, grid_w, FONT_HEIGHT, theme.disabled_color
+            )
+            self.ctx.display.draw_string(
+                x_grid + (grid_w - 2 * FONT_WIDTH) // 2,
+                y_start + FONT_HEIGHT,
+                "%02d" % word_index,
+                theme.fg_color,
+                theme.disabled_color,
+            )
+            for i, label in enumerate(BIT_LABELS):
+                self.ctx.display.draw_string(
+                    x_label, y_grid + i * cell_h, label, theme.fg_color
+                )
+            self._draw_grid_vertical(x_grid, y_grid, cell_w, cell_h, grid_w)
+            self._draw_menu_vertical(x_grid, y_menu, grid_w, cell_h)
+            if self.ctx.input.buttons_active:
+                self._draw_index_vertical(
+                    index, x_grid, y_grid, cell_w, cell_h, y_menu, grid_w
+                )
+            digits_str = "".join(str(d) for d in digits)
+            word = self.digits_to_word(digits)
+            if word is not None:
+                preview_str = digits_str + ": " + word
+                color = theme.fg_color
+            else:
+                preview_str = digits_str
+                color = theme.error_color
+            self.ctx.display.draw_hcentered_text(
+                preview_str, y_preview, color=color, highlight_prefix=":"
+            )
+            self._draw_punched_vertical(digits, x_grid, y_grid, cell_w, cell_h)
+            btn = self.ctx.input.wait_for_fastnav_button()
+            if btn == BUTTON_TOUCH:
+                btn = BUTTON_ENTER
+                index = self.ctx.input.touch.current_index()
+            if btn == BUTTON_ENTER:
+                if index >= VERT_GO_INDEX:
+                    word = self.digits_to_word(digits)
+                    if word is not None:
+                        prompt_str = (
+                            str(word_index)
+                            + ".\n\n"
+                            + "".join(str(d) for d in digits)
+                            + ": "
+                            + str(word)
+                            + "\n\n"
+                        )
+                        digits = [0, 0, 0, 0]
+                        index = 0
+                        self.ctx.display.clear()
+                        if self.prompt(
+                            prompt_str,
+                            self.ctx.display.height() // 2,
+                            highlight_prefix=":",
+                        ):
+                            words.append(word)
+                        else:
+                            self.ctx.display.clear()
+                            continue
+                        if word_index == 12:
+                            self.ctx.display.clear()
+                            if self.prompt(t("Done?"), self.ctx.display.height() // 2):
+                                break
+                        word_index += 1
+                elif index >= VERT_ESC_INDEX:
+                    self.ctx.display.clear()
+                    if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+                        break
+                else:
+                    digits = self._toggle_bit_vertical(digits, index)
+            else:
+                index = self._index_vertical(index, btn)
             self.ctx.display.clear()
         if len(words) in (12, 24):
             return words
