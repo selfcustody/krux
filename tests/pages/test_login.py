@@ -1396,7 +1396,8 @@ def test_load_12w_from_1248(m5stickv, mocker, mocker_printer):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
-        (
+        [BUTTON_ENTER]  # Select "Standard" from Standard/Vertical submenu
+        + (
             [BUTTON_ENTER]  # 1 press select first column num 1
             + [BUTTON_PAGE_PREV]  # 1 press to change to "Go"
             + [BUTTON_ENTER]  # 1 press to select Go

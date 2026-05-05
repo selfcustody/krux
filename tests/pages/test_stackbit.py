@@ -72,11 +72,7 @@ def test_export_mnemonic_stackbit_standard_amigo(mocker, amigo, tdata):
 
 
 def test_export_mnemonic_stackbit_vertical(mocker, amigo, tdata):
-    """Grouped layout on Amigo: 2 words/group, 4 words/page, 6 pages for 24-word mnemonic.
-
-    Amigo uses FONT_WIDTH=12, so 3 words/group would overflow the word name text.
-    The layout auto-selects 2 words/group → 4 words/page → 6 pages.
-    """
+    """Grouped layout on Amigo: 2 words/group, 4 words/page, 6 pages for 24-word mnemonic."""
     from krux.pages.home_pages.mnemonic_backup import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
@@ -113,10 +109,7 @@ def test_export_mnemonic_stackbit_vertical(mocker, amigo, tdata):
 
 
 def test_export_mnemonic_stackbit_vertical_compact(mocker, m5stickv, tdata):
-    """Dense layout on M5StickV: 6 words per page, 4 pages for 24-word mnemonic.
-
-    2 words side-by-side × 3 rows, no word names or BIP39 codes.
-    """
+    """Dense layout on M5StickV: 6 words per page, 4 pages for 24-word mnemonic."""
     from krux.pages.home_pages.mnemonic_backup import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
@@ -234,6 +227,115 @@ def test_esc_entering_stackbit(amigo, mocker):
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert words == None
+
+
+def test_load_key_from_1248_standard(m5stickv, mocker):
+    """Selecting Standard in the 1248 submenu calls _load_key_from_1248_standard."""
+    from krux.pages.mnemonic_loader import MnemonicLoader
+    from krux.pages import MENU_CONTINUE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Select "Standard"
+        # _load_key_from_1248_standard is patched, returns immediately
+        *([BUTTON_PAGE] * 2),  # Go to "Back" in submenu
+        BUTTON_ENTER,  # Select "Back"
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    loader = MnemonicLoader(ctx)
+    mocker.patch.object(
+        loader, "_load_key_from_1248_standard", return_value=MENU_CONTINUE
+    )
+    mocker.spy(loader, "_load_key_from_1248_vertical")
+    loader.load_key_from_1248()
+
+    loader._load_key_from_1248_standard.assert_called_once()
+    loader._load_key_from_1248_vertical.assert_not_called()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_load_key_from_1248_vertical(m5stickv, mocker):
+    """Selecting Vertical in the 1248 submenu calls _load_key_from_1248_vertical."""
+    from krux.pages.mnemonic_loader import MnemonicLoader
+    from krux.pages import MENU_CONTINUE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # Go to "Vertical"
+        BUTTON_ENTER,  # Select "Vertical"
+        # _load_key_from_1248_vertical is patched, returns immediately
+        BUTTON_PAGE,  # Go to "Back" in submenu
+        BUTTON_ENTER,  # Select "Back"
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    loader = MnemonicLoader(ctx)
+    mocker.patch.object(
+        loader, "_load_key_from_1248_vertical", return_value=MENU_CONTINUE
+    )
+    mocker.spy(loader, "_load_key_from_1248_standard")
+    loader.load_key_from_1248()
+
+    loader._load_key_from_1248_vertical.assert_called_once()
+    loader._load_key_from_1248_standard.assert_not_called()
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_enter_stackbit_vertical(m5stickv, mocker):
+    """Button navigation: enter 12 'language' words on a vertical 1248 grid."""
+    from krux.pages.stack_1248 import Stackbit
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        # Toggle bit-weight 1, jump to Go, confirm word
+        [BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER, BUTTON_ENTER] * 11
+        # 12th word: same plus confirm "Done?"
+        + [BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER]
+    )
+    TEST_12_WORDS = "language language language language language language language language language language language language"
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    stackbit = Stackbit(ctx)
+    words = stackbit.enter_1248_vertical()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert " ".join(words) == TEST_12_WORDS
+
+
+def test_enter_stackbit_vertical_touch(amigo, mocker):
+    """Touch navigation: enter 12 'language' words via touch screen."""
+    from krux.pages.stack_1248 import Stackbit, VERT_GO_INDEX
+    from krux.input import BUTTON_TOUCH
+
+    YES = 1
+    BTN_SEQUENCE = [BUTTON_TOUCH] * 3 * 12 + [BUTTON_TOUCH]
+    TOUCH_SEQUENCE = [0, VERT_GO_INDEX, YES] * 12 + [YES]
+    TEST_12_WORDS = "language language language language language language language language language language language language"
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=TOUCH_SEQUENCE)
+    stackbit = Stackbit(ctx)
+    words = stackbit.enter_1248_vertical()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert " ".join(words) == TEST_12_WORDS
+
+
+def test_esc_entering_stackbit_vertical(amigo, mocker):
+    """Pressing Esc from the vertical input grid returns None."""
+    from krux.pages.stack_1248 import Stackbit
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = (
+        # Move to Esc
+        [BUTTON_PAGE_PREV] * 3
+        + [BUTTON_ENTER]  # Select "Esc"
+        + [BUTTON_ENTER]  # Confirm
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    stackbit = Stackbit(ctx)
+    words = stackbit.enter_1248_vertical()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert words is None
 
 
 def test_entering_stackbit_buttons_turbo(mocker, m5stickv):
