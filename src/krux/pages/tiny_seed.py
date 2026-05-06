@@ -633,24 +633,6 @@ class TinyScanner(Page):
             img.draw_rectangle(outline, lcd.WHITE, thickness=thickness)
         return rect
 
-    def _draw_grid(self, img):
-        if not kboard.has_minimal_display:
-            for i in range(13):
-                img.draw_line(
-                    self.x_regions[i],
-                    self.y_regions[0],
-                    self.x_regions[i],
-                    self.y_regions[-1],
-                    lcd.WHITE,
-                )
-                img.draw_line(
-                    self.x_regions[0],
-                    self.y_regions[i],
-                    self.x_regions[-1],
-                    self.y_regions[i],
-                    lcd.WHITE,
-                )
-
     def _detect_and_draw_punches(self, img):
         """Detect punched bits on the grid and update the seed numbers accordingly."""
         page_seed_numbers = [0] * 12
@@ -811,7 +793,6 @@ class TinyScanner(Page):
                 self._gradient_corners(rect, img)
                 self._map_punches_region(rect, page)
                 page_seed_numbers = self._detect_and_draw_punches(img)
-                self._draw_grid(img)
             if kboard.is_m5stickv:
                 img.lens_corr(strength=1.0, zoom=0.56)
             if kboard.is_amigo:

@@ -1,3 +1,8 @@
+# Changelog XX.XX.X
+
+### Other Bug Fixes and Improvements
+- Improve scan TinySeed and other binary visibility by drawing punches only
+
 # Changelog 26.04.0 - April 2025
 
 ### Security Fixes
