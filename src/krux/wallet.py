@@ -250,6 +250,10 @@ class Wallet:
         elif self.descriptor.is_basic_multisig:
             m = int(str(self.descriptor.miniscript.args[0]))
             n = len(self.descriptor.keys)
+            if m < 1:
+                raise ValueError("multisig quorum m must be at least 1, got %d" % m)
+            if m > n:
+                raise ValueError("multisig quorum m (%d) exceeds n (%d)" % (m, n))
             cosigners = [key.key.to_base58() for key in self.descriptor.keys]
             if self.descriptor.is_sorted:
                 cosigners = sorted(cosigners)
@@ -265,32 +269,13 @@ class Wallet:
         elif self.descriptor.miniscript is not None or self.descriptor.taptree:
             if self.descriptor.taptree:
                 if not descriptor.keys[0].origin:
-                    import hashlib
                     from embit.ec import NUMS_PUBKEY
-                    from embit.bip32 import HDKey
 
-                    # In case internal key is disabled, check if NUMS is known
-
-                    # Hash all pubkeys, except internal, to compute deterministic chain code
-                    hasher = hashlib.sha256()
-                    for key in descriptor.keys[1:]:
-                        hasher.update(key.sec())
-                    det_chain_code = hasher.digest()
-
-                    # Create provably unspendable deterministic key
-                    version = self.descriptor.keys[0].key.version
-                    provably_unspendable = HDKey(
-                        NUMS_PUBKEY, det_chain_code, version=version
-                    )
-
+                    # Check if BIP-0341 NUMS was used
                     # Compare expected provably unspendable key with first descriptor key
-                    if (
-                        descriptor.keys[0].key.to_base58()
-                        != provably_unspendable.to_base58()
-                    ):
+                    if descriptor.keys[0].key.get_public_key() != NUMS_PUBKEY:
                         self.wallet_data = None
                         raise ValueError("Internal key not provably unspendable")
-
                 taproot_txt = "TR "
                 miniscript_type = P2TR
             else:
@@ -382,6 +367,11 @@ def parse_key_value_file(wallet_data):
         m = int(policy[: policy.index("of")].strip())
         n = int(policy[policy.index("of") + 2 :].strip())
 
+        if m < 1:
+            raise ValueError("multisig quorum m must be at least 1, got %d" % m)
+        if m > n:
+            raise ValueError("multisig quorum m (%d) exceeds n (%d)" % (m, n))
+
         keys = []
         for i in range(len(key_vals)):
             kv = key_vals[i]
@@ -433,26 +423,28 @@ def parse_wallet(wallet_data):
 
     # Check if wallet_data is a UR object without loading the UR module
     if wallet_data.__class__.__name__ == "UR":
-        import urtypes
-
         # Try to parse as a Crypto-Output type
         try:
-            output = urtypes.crypto.Output.from_cbor(wallet_data.cbor)
+            from urtypes.crypto.output import Output
+
+            output = Output.from_cbor(wallet_data.cbor)
             return Descriptor.from_string(output.descriptor()), None
         except:
             pass
 
         # Try to parse as a Crypto-Account type
         try:
-            account = urtypes.crypto.Account.from_cbor(
-                wallet_data.cbor
-            ).output_descriptors[0]
+            from urtypes.crypto.account import Account
+
+            account = Account.from_cbor(wallet_data.cbor).output_descriptors[0]
             return Descriptor.from_string(account.descriptor()), None
         except:
             pass
 
         # Treat the UR as a generic UR bytes object and extract the data for further processing
-        wallet_data = urtypes.Bytes.from_cbor(wallet_data.cbor).data
+        from urtypes.bytes import Bytes
+
+        wallet_data = Bytes.from_cbor(wallet_data.cbor).data
 
     # Process as a string
     wallet_data = (
@@ -479,6 +471,8 @@ def parse_wallet(wallet_data):
         descriptor, label = parse_key_value_file(wallet_data)
         if descriptor and label:
             return descriptor, label
+    except ValueError:
+        raise
     except:
         raise ValueError("invalid wallet format")
 

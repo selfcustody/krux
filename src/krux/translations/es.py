@@ -298,6 +298,7 @@ translation_array = [
     "Firma:",
     "Mensaje Firmado",
     "PSBT Firmado",
+    "Firmar hash sin procesar. Proceda solo si confía en la fuente.",
     "Firma…",
     "Single-sig",
     "Tamaño:",

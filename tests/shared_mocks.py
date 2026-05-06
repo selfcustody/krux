@@ -89,13 +89,29 @@ def mock_open(mock_file):
     return _open
 
 
+# Must match DEFLATEIO_MAX_DECOMPRESSED_SIZE in moddeflate.c
+MAX_DECOMPRESSED_SIZE = 100 * 1024  # 100 KB
+
+
 class DeflateIO:
     def __init__(self, stream) -> None:
         self.stream = stream
         self.data = stream.read()
+        self._total_out = 0
 
-    def read(self):
-        return zlib.decompress(self.data, wbits=-10)
+    def read(self, size=-1):
+        if not hasattr(self, "_decompressed"):
+            from io import BytesIO
+
+            self._decompressed = BytesIO(zlib.decompress(self.data, wbits=-10))
+        chunk = (
+            self._decompressed.read() if size == -1 else self._decompressed.read(size)
+        )
+        if chunk:
+            self._total_out += len(chunk)
+            if self._total_out > MAX_DECOMPRESSED_SIZE:
+                raise ValueError("decompressed data exceeds size limit")
+        return chunk
 
     def write(self, input_data):
         compressor = zlib.compressobj(wbits=-10)

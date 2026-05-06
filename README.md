@@ -313,6 +313,6 @@ Feel free to start a [new discussion](https://github.com/selfcustody/krux/discus
 **Note for PR's**: Checkout and branch off of the `develop` branch, please also make sure to explicitly target `develop`; `main` is the default branch for the latest version and also for downloading and installing Krux from source.
 
 # Support
-For technical support installing or using Krux, you can join our [Telegram chat](https://t.me/SC_Krux). Follow us on [X (Twitter)](https://x.com/selfcustodykrux) or send a message to the [Bitcoin Forum](https://bitcointalk.org/index.php?topic=5489022.0). Also check out the [DIYbitcoin chat](https://t.me/diybitcoin) on Telegram, a broader community of tinkerers, builders and hackers!
+For technical support installing or using Krux, you can join our [Telegram chat](https://t.me/KruxDIY). Follow us on [X (Twitter)](https://x.com/selfcustodykrux) or send a message to the [Bitcoin Forum](https://bitcointalk.org/index.php?topic=5489022.0). Also check out the [DIYbitcoin chat](https://t.me/diybitcoin) on Telegram, a broader community of tinkerers, builders and hackers!
 
 Please do not use issues for support requests. If necessary, you can use our [Discussions](https://github.com/selfcustody/krux/discussions) to post your question here on GitHub.

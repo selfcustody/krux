@@ -276,6 +276,7 @@
     "Signature:": "İmza:",
     "Signed Message": "İmzalı Mesaj",
     "Signed PSBT": "İmzalı PSBT",
+    "Signing raw hash. Proceed only if you trust the source.": "Ham karma imzalanıyor. Yalnızca kaynağa güveniyorsanız devam edin.",
     "Signing…": "İmzalama…",
     "Single-sig": "Tek-imza",
     "Size:": "Boyut:",

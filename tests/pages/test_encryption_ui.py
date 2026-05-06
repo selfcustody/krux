@@ -2,7 +2,6 @@ import pytest
 from unittest.mock import patch
 from . import create_ctx
 
-
 TEST_KEY = "test key"
 CBC_WORDS = "dog guitar hotel random owner gadget salute riot patrol work advice panic erode leader pass cross section laundry elder asset soul scale immune scatter"
 ECB_WORDS = "brass creek fuel snack era success impulse dirt caution purity lottery lizard boil festival neither case swift smooth range mail gravity sample never ivory"
@@ -702,6 +701,109 @@ def test_decrypt_kef(m5stickv, mocker):
     with pytest.raises(ValueError, match="Not decrypted"):
         decrypt_kef(ctx, "I am not a valid KEF envelope")
     assert ctx.input.wait_for_button.call_count == 0
+
+
+def test_unseal_ui_failed_attempts_backoff(m5stickv, mocker):
+    # A failed decrypt must bump KEFEnvelope._failed_attempts and the next
+    # attempt must wait via time.sleep_ms with an exponentially growing,
+    # capped delay. A successful decrypt resets the counter.
+    from krux import kef
+    from krux.pages.encryption_ui import decrypt_kef, KEFEnvelope
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    plaintext = b"super secret payload"
+    envelope = kef.wrap(
+        b"lbl", 0, 10000, kef.Cipher(b"correct", "lbl", 10000).encrypt(plaintext, 0)
+    )
+
+    KEFEnvelope._failed_attempts = 0
+    sleep_mock = mocker.patch("krux.pages.encryption_ui.time.sleep_ms")
+
+    # First attempt with wrong key, no prior failures so no sleep yet.
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Decrypt?
+        BUTTON_ENTER,  # enter key
+        BUTTON_ENTER,  # type "a"
+        BUTTON_PAGE_PREV,  # to "Go"
+        BUTTON_ENTER,  # Go
+        BUTTON_ENTER,  # confirm key
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    with pytest.raises(KeyError, match="Failed to decrypt"):
+        decrypt_kef(ctx, envelope)
+    assert KEFEnvelope._failed_attempts == 1
+    assert sleep_mock.call_count == 0
+
+    # Second attempt with wrong key: a 1000ms sleep must precede the work.
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    with pytest.raises(KeyError, match="Failed to decrypt"):
+        decrypt_kef(ctx, envelope)
+    assert KEFEnvelope._failed_attempts == 2
+    assert sleep_mock.call_args_list[-1].args[0] == 1000
+
+    # Third attempt: delay doubles to 2000ms.
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    with pytest.raises(KeyError, match="Failed to decrypt"):
+        decrypt_kef(ctx, envelope)
+    assert KEFEnvelope._failed_attempts == 3
+    assert sleep_mock.call_args_list[-1].args[0] == 2000
+
+    # The 30s cap applies for very large counters.
+    KEFEnvelope._failed_attempts = 50
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    with pytest.raises(KeyError, match="Failed to decrypt"):
+        decrypt_kef(ctx, envelope)
+    assert sleep_mock.call_args_list[-1].args[0] == 30000
+
+    KEFEnvelope._failed_attempts = 0
+
+
+def test_load_encrypted_mnemonic_shares_failed_attempts_backoff(m5stickv, mocker):
+    # LoadEncryptedMnemonic._load_encrypted_mnemonic must read and update the
+    # same KEFEnvelope._failed_attempts counter, so an attacker can not split
+    # brute force attempts across the stored mnemonic and KEFEnvelope paths.
+    from krux.input import BUTTON_ENTER
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.encryption_ui import KEFEnvelope, LoadEncryptedMnemonic
+
+    mocker.patch(
+        "krux.pages.encryption_ui.EncryptionKey.encryption_key",
+        mocker.MagicMock(return_value="wrong key"),
+    )
+    sleep_mock = mocker.patch("krux.pages.encryption_ui.time.sleep_ms")
+
+    # Start from a non zero counter set by a prior KEFEnvelope failure. The
+    # stored mnemonic flow must honour it and delay before its own attempt.
+    KEFEnvelope._failed_attempts = 1
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    with patch("krux.encryption.open", new=mocker.mock_open(read_data=SEEDS_JSON)):
+        page = LoadEncryptedMnemonic(ctx)
+        result = page._load_encrypted_mnemonic("ecbID")
+    assert result == MENU_CONTINUE
+    assert sleep_mock.call_args_list[-1].args[0] == 1000
+    assert KEFEnvelope._failed_attempts == 2
+
+    # A second wrong key doubles the delay to 2000ms.
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    with patch("krux.encryption.open", new=mocker.mock_open(read_data=SEEDS_JSON)):
+        page = LoadEncryptedMnemonic(ctx)
+        result = page._load_encrypted_mnemonic("ecbID")
+    assert result == MENU_CONTINUE
+    assert sleep_mock.call_args_list[-1].args[0] == 2000
+    assert KEFEnvelope._failed_attempts == 3
+
+    # A successful decrypt must reset the shared counter to 0.
+    mocker.patch(
+        "krux.pages.encryption_ui.EncryptionKey.encryption_key",
+        mocker.MagicMock(return_value=TEST_KEY),
+    )
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    with patch("krux.encryption.open", new=mocker.mock_open(read_data=SEEDS_JSON)):
+        page = LoadEncryptedMnemonic(ctx)
+        result = page._load_encrypted_mnemonic("ecbID")
+    assert result == ECB_WORDS.split()
+    assert KEFEnvelope._failed_attempts == 0
 
 
 def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):

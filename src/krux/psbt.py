@@ -22,8 +22,7 @@
 import gc
 from embit.psbt import PSBT, CompressMode
 from ur.ur import UR
-import urtypes
-from urtypes.crypto import CRYPTO_PSBT
+from urtypes.crypto.psbt import PSBT as URTYPE_PSBT, CRYPTO_PSBT
 from .baseconv import base_decode
 from .krux_settings import t
 from .settings import THIN_SPACE, ELLIPSIS
@@ -93,9 +92,7 @@ class PSBTSigner:
             self.base_encoding = 64  # In case it is exported as QR code
         elif isinstance(psbt_data, UR):
             try:
-                self.psbt = PSBT.parse(
-                    urtypes.crypto.PSBT.from_cbor(psbt_data.cbor).data
-                )
+                self.psbt = PSBT.parse(URTYPE_PSBT.from_cbor(psbt_data.cbor).data)
                 self.ur_type = CRYPTO_PSBT
                 # self.base_encoding = 64
             except:
@@ -286,10 +283,13 @@ class PSBTSigner:
         fee = inp_amount - out_amount
 
         # fee percent with 1 decimal precision using math.ceil (minimum of 0.1)
-        fee_percent = max(
-            0.1,
-            (((fee * 10000 // (out_amount)) + 9) // 10) / 10,
-        )
+        if out_amount > 0:
+            fee_percent = max(
+                0.1,
+                (((fee * 10000 // out_amount) + 9) // 10) / 10,
+            )
+        else:
+            fee_percent = 100.0
 
         resume_fee_str = (
             t("Fee:")
@@ -434,8 +434,26 @@ class PSBTSigner:
 
         return messages, fee_percent
 
+    def check_sighash(self):
+        """Check that all inputs use SIGHASH_ALL (or DEFAULT for taproot).
+
+        Refuse to sign if any input requests a non-standard sighash type
+        (SIGHASH_NONE, SIGHASH_SINGLE, ANYONECANPAY), as these can allow
+        an attacker to redirect funds after signing.
+        """
+        from embit.transaction import SIGHASH
+
+        safe_sighash = {None, SIGHASH.DEFAULT, SIGHASH.ALL}
+        for i, inp in enumerate(self.psbt.inputs):
+            if inp.sighash_type not in safe_sighash:
+                sighash_val = inp.sighash_type
+                raise ValueError(
+                    "Input %d has non-standard sighash type: 0x%02x" % (i, sighash_val)
+                )
+
     def add_signatures(self):
         """Add signatures to PSBT"""
+        self.check_sighash()
         sigs_added = self.psbt.sign_with(self.wallet.key.root)
         if sigs_added == 0:
             raise ValueError("cannot sign")
@@ -538,7 +556,7 @@ class PSBTSigner:
             return (
                 UR(
                     CRYPTO_PSBT.type,
-                    urtypes.crypto.PSBT(psbt_data).to_cbor(),
+                    URTYPE_PSBT(psbt_data).to_cbor(),
                 ),
                 self.qr_format,
             )
@@ -571,7 +589,13 @@ class PSBTSigner:
                 )
             elif len(descriptor_keys) > 1:
                 # Allow one descriptor key without origin data for taproot
-                # Pure taptree descriptors won't have origin data for internal key
+                # Pure taptree descriptors won't have origin data for internal key.
+                # Reject more than one origin-less key in a multi-key descriptor:
+                # otherwise unverifiable cosigners would be silently accepted.
+                if origin_less_xpub is not None:
+                    raise ValueError(
+                        "multiple xpubs without origin in multi-key descriptor"
+                    )
                 origin_less_xpub = descriptor_key.key
 
         return xpubs, origin_less_xpub

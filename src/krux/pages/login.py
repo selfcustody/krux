@@ -50,10 +50,6 @@ from ..key import (
 from ..krux_settings import t
 from ..kboard import kboard
 
-
-DIGITS_HEX = "0123456789ABCDEF"
-DIGITS_OCT = "01234567"
-
 DOUBLE_MNEMONICS_MAX_TRIES = 200
 MASK256 = (1 << 256) - 1
 MASK128 = (1 << 128) - 1

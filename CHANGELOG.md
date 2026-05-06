@@ -1,4 +1,24 @@
-# Changelog 25.XX.X - XXX 2025
+# Changelog XX.XX.X
+
+### Other Bug Fixes and Improvements
+- Improve scan TinySeed and other binary visibility by drawing punches only
+
+# Changelog 26.04.0 - April 2025
+
+### Security Fixes
+- Reject PSBT inputs with non-standard sighash types before signing
+- Warn user before signing raw hashes in message signing
+- Fix ZeroDivisionError in fee calculation for zero-value output PSBTs
+- Validate multisig quorum: reject m=0 and m>n in key-value wallet files
+- DeflateIO enforces 100KB max decompressed size, preventing zip bomb OOM via BBQR encoding "Z" or KEF decryption
+- Enforce part_total limits in pMofN (1–99) and BBQR (≥1) QR parsers, preventing OOM via unbounded part accumulation
+- Validate settings.json on load: enforce max file size and reject non-object payloads, preventing OOM and type-confusion via a malicious SD card
+- KEF: enforce minimum PBKDF2 iterations on unwrap, preventing malicious envelopes from declaring a trivial work factor and bypassing key stretching
+- PSBT: reject multi-key descriptors with more than one origin-less xpub, which would otherwise silently lose cosigner identity (taproot internal-key exception preserved)
+- File manager: filter "."/".." and entries containing path separators from SD listings, blocking directory traversal via crafted FAT entries
+- KEF decryption: in-session exponential backoff (1s, 2s, 4s … capped at 30s) on failed attempts, slowing interactive brute forcing without persisting lockout state to flash
+
+# Changelog 26.03.0 - March 2025
 
 ### New Device Support: Embed Fire
 This device shares similarities with the WonderMV but stands out with its larger 2.4" touchscreen.
@@ -25,7 +45,7 @@ Exported Uniform Resource (UR) QR codes, a widely adopted standard for exchangin
 - Bug Fix: Corrected handling of certain binary-encoded QR codes
 - Fix fingerprint unset warn message for rare case
 - Improved QR code decoding performance and added inverted color QR code detection
-- Improve scan TinySeed and other binary visibility by drawing punches only
+- Allow non deterministic chaincodes to be used with Taproot provably unspendable keys
 
 # Changelog 25.10.1 - October 2025
 

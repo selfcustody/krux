@@ -276,6 +276,7 @@
     "Signature:": "Signatur:",
     "Signed Message": "Signierte Nachricht",
     "Signed PSBT": "Signierte PSBT",
+    "Signing raw hash. Proceed only if you trust the source.": "Signieren von Roh-Hash. Fahren Sie nur fort, wenn Sie der Quelle vertrauen.",
     "Signing…": "Unterzeichnung…",
     "Single-sig": "Single-Sig",
     "Size:": "Größe:",

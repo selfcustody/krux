@@ -40,6 +40,8 @@ DEVICES = [
     "maixpy_cube",
     "maixpy_wonder_mv",
     "maixpy_tzt",
+    "maixpy_embed_fire",
+    "maixpy_wonder_k",
 ]
 
 

@@ -117,6 +117,48 @@ def test_string_stored_adafruit_printer_settings(mocker, m5stickv):
     assert ada.line_delay == 20
 
 
+def test_oversized_settings_file_is_rejected(mocker, m5stickv):
+    """A settings.json larger than MAX_SETTINGS_FILE_SIZE must be discarded."""
+    from krux.settings import MAX_SETTINGS_FILE_SIZE
+
+    # Build a syntactically valid JSON object whose serialized form exceeds the cap
+    padding = "A" * (MAX_SETTINGS_FILE_SIZE + 100)
+    stored_settings = (
+        '{"settings": {"i18n": {"locale": "pt-BR"}}, "junk": "%s"}' % padding
+    )
+    assert len(stored_settings) > MAX_SETTINGS_FILE_SIZE
+
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    from krux.settings import Store
+
+    store = Store()
+    # Oversized payload must be ignored: nothing loaded
+    assert store.settings == {}
+
+
+def test_non_dict_settings_file_is_rejected(mocker, m5stickv):
+    """A settings.json whose top-level JSON value isn't an object must be discarded."""
+    stored_settings = '["settings", "i18n", "pt-BR"]'
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    from krux.settings import Store
+
+    store = Store()
+    assert store.settings == {}
+
+
+def test_malformed_settings_file_is_rejected(mocker, m5stickv):
+    """Invalid JSON must not crash the loader and must leave settings empty."""
+    stored_settings = "{not valid json"
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    from krux.settings import Store
+
+    store = Store()
+    assert store.settings == {}
+
+
 def test_stored_cnc_settings(mocker, m5stickv):
     print("")
 
