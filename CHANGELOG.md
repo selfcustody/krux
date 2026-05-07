@@ -5,6 +5,7 @@ Switch from the pure-Python urtypes and foundation-ur-py packages to the new uUR
 
 ### Other Bug Fixes and Improvements
 - Improve scan TinySeed and other binary visibility by drawing punches only
+- Added `flash_success` method to standardize green success flashes across confirmation screens
 
 # Changelog 26.04.0 - April 2025
 
