@@ -38,7 +38,7 @@ def test_init(mocker, m5stickv, mock_page_cls):
 
 def test_flash_text(mocker, m5stickv, mock_page_cls):
     from krux.display import FLASH_MSG_TIME
-    from krux.themes import WHITE, RED
+    from krux.themes import WHITE, RED, GREEN
 
     ctx = mock_context(mocker)
     mocker.patch("time.ticks_ms", new=lambda: 0)
@@ -55,6 +55,13 @@ def test_flash_text(mocker, m5stickv, mock_page_cls):
     assert ctx.display.flash_text.call_count == 2
     ctx.display.flash_text.assert_called_with(
         "Error", RED, FLASH_MSG_TIME, highlight_prefix=""
+    )
+
+    page.flash_success("Done")
+
+    assert ctx.display.flash_text.call_count == 3
+    ctx.display.flash_text.assert_called_with(
+        "Done", GREEN, FLASH_MSG_TIME, highlight_prefix=""
     )
 
 

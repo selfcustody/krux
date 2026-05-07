@@ -86,7 +86,7 @@ class Bip85(Page):
             from ...wallet import Wallet
 
             self.ctx.wallet = Wallet(key)
-            self.flash_text(
+            self.flash_success(
                 t("%s: loaded!") % key.fingerprint_hex_str(True), highlight_prefix=":"
             )
 

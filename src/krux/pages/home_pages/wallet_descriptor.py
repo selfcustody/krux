@@ -359,7 +359,7 @@ class WalletDescriptor(Page):
         self.display_loading_wallet(wallet)
         if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
             self.ctx.wallet = wallet
-            self.flash_text(t("Wallet output descriptor loaded!"))
+            self.flash_success(t("Wallet output descriptor loaded!"))
 
         return MENU_CONTINUE
 

@@ -39,7 +39,7 @@ When you enable the *TC Flash Hash at Boot* feature, the device will require you
 Before being stored in the device’s flash, the *TC Code* is hashed together with the K210 chip’s unique ID and stretched using PBKDF2. This ensures the *TC Code* is not retrievable via a flash dump and can only be brute-forced outside the device if the attacker also has access to the device’s unique ID (UID). By allowing letters, special characters, and running 100k iterations of PBKDF2, brute-forcing the *TC Code* from dumped data becomes more time-consuming and resource-intensive.
 
 ### Enhancing Tamper Detection
-After setting the *TC Code*, you are prompted to fill empty flash memory blocks with random entropy from the camera. This process ensures that attackers cannot exploit unused memory space.
+Once the *TC Code* is stored, Krux briefly flashes a green *"Tamper check code set successfully"* confirmation. You are then prompted to fill empty flash memory blocks with random entropy from the camera. This process ensures that attackers cannot exploit unused memory space.
 
 ## Tamper Check Flash Hash (TC Flash Hash) - A Tamper Detection Tool
 

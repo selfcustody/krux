@@ -311,7 +311,7 @@ class Home(Page):
                         with open(SDHandler.PATH_STR % psbt_filename, "wb") as f:
                             # Write PSBT data directly to the file
                             signer.psbt.write_to(f)
-                    self.flash_text(
+                    self.flash_success(
                         t("Saved to SD card:") + "\n\n%s" % psbt_filename,
                         highlight_prefix=":",
                     )
