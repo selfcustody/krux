@@ -86,4 +86,11 @@ krux-*/ktool*
 
 # IDE files
 .vscode
-.claude
+
+# AI tooling local context (per maintainer policy, never commit)
+.agents/
+.codex/
+.claude/
+.cursorrules
+AGENT.md
+CLAUDE.md
