@@ -1,5 +1,8 @@
 # Changelog 26.05.0 - May 2025
 
+### Stackbit 1248 Vertical Layout
+Added vertical layout option for Stackbit 1248 backup display, allowing users to choose between Standard (horizontal) and Vertical (transposed) grid orientations.
+
 ### Migrate UR encoding to uUR MicroPython C module
 Switch from the pure-Python urtypes and foundation-ur-py packages to the new uUR C module, allowing faster UR QR codes decoding with a smaller RAM footprint.
 
