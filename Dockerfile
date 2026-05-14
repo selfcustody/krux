@@ -26,7 +26,7 @@
 # build-base
 # install kendryte (k210), cmake and python dependencies
 ############
-FROM gcc:9.5.0-bullseye AS build-base
+FROM gcc:12-bookworm AS build-base
 
 RUN apt-get update -y && \
     apt-get install --no-install-recommends -y -q \
