@@ -260,8 +260,8 @@ class MnemonicLoader(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Standard"), self._load_key_from_1248_standard),
-                (t("Vertical"), self._load_key_from_1248_vertical),
+                (t("Standard"), self._load_key_from_1248),
+                (t("Vertical"), lambda: self._load_key_from_1248(vertical=True)),
             ],
         )
         index, status = submenu.run_loop()
@@ -269,23 +269,12 @@ class MnemonicLoader(Page):
             return MENU_CONTINUE
         return status
 
-    def _load_key_from_1248_standard(self):
-        """Load key from horizontal Stackbit 1248 layout"""
+    def _load_key_from_1248(self, vertical=False):
+        """Load key from Stackbit 1248 layout (horizontal, or vertical when flag set)"""
         from .stack_1248 import Stackbit
 
         stackbit = Stackbit(self.ctx)
-        words = stackbit.enter_1248()
-        del stackbit
-        if words is not None:
-            return self._load_key_from_words(words)
-        return MENU_CONTINUE
-
-    def _load_key_from_1248_vertical(self):
-        """Load key from vertical Stackbit 1248 layout"""
-        from .stack_1248 import Stackbit
-
-        stackbit = Stackbit(self.ctx)
-        words = stackbit.enter_1248_vertical()
+        words = stackbit.enter_1248_vertical() if vertical else stackbit.enter_1248()
         del stackbit
         if words is not None:
             return self._load_key_from_words(words)
