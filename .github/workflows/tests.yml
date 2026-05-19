@@ -9,13 +9,19 @@ on:
 
 jobs:
   lint-black:
+    strategy:
+      matrix:
+        # minimum tested python version
+        # maximum python version
+        py-version: [ "3.11.5", "3.12.13"]
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.py-version }}
       - uses: psf/black@stable
         with:
           options: "--check --verbose"
@@ -38,13 +44,18 @@ jobs:
           src: "./tests"
           
   lint-pylint:
+    strategy:
+      matrix:
+        # minimum tested python version
+        # maximum python version
+        py-version: [ "3.11.5", "3.12.13"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.py-version }}
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
@@ -57,17 +68,27 @@ jobs:
           pylint src
 
   check-translations:
+    strategy:
+      matrix:
+        # minimum tested python version
+        # maximum python version
+        py-version: [ "3.11.5", "3.12.13"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.py-version }}
       - name: Validate translations
         run: cd i18n && python3 i18n.py validate
 
   run-tests:
+    strategy:
+      matrix:
+        # minimum tested python version
+        # maximum python version
+        py-version: [ "3.11.5", "3.12.13"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -76,7 +97,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.py-version }}
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
@@ -95,7 +116,8 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          # no need to use many coverages
+          python-version: 3.12.13
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip

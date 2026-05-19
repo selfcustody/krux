@@ -29,7 +29,7 @@ readme = "README.md"
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.12.3"
+python = ">=3.11.5, <3.13" # minimum and maximum supported
 embit = { path = "./vendor/embit/", develop = true }
 ur = { path = "./vendor/foundation-ur-py/", develop = true }
 urtypes = { path = "./vendor/urtypes/", develop = true }
