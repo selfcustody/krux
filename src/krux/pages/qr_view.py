@@ -460,10 +460,15 @@ class SeedQRView(Page):
             resolution *= 2
             if resolution <= 480:
                 bmp_resolutions.append(resolution)
-        self.ctx.display.clear()
-        self.ctx.display.draw_hcentered_text(
-            t("Res. - Format"), FONT_HEIGHT, info_box=True
-        )
+
+        def _print_infobox():
+            self.ctx.display.clear()
+            self.ctx.display.draw_hcentered_text(
+                t("Res. - Format"), FONT_HEIGHT, info_box=True
+            )
+
+        _print_infobox()
+
         qr_menu = []
         qr_menu.append(
             (
@@ -486,7 +491,13 @@ class SeedQRView(Page):
                 lambda: self.save_svg_image(suggested_file_name),
             )
         )
-        submenu = Menu(self.ctx, qr_menu, offset=2 * FONT_HEIGHT, back_label=None)
+        submenu = Menu(
+            self.ctx,
+            qr_menu,
+            offset=2 * FONT_HEIGHT,
+            back_label=None,
+            infobox_callback=_print_infobox,
+        )
         submenu.run_loop()
         return MENU_CONTINUE
         # return MENU_EXIT  # Use this to exit QR Viewer after saving

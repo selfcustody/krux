@@ -159,16 +159,19 @@ class Bip85(Page):
                     ),
                 ),
             ]
-            self.ctx.display.clear()
-            info_len = self.ctx.display.draw_hcentered_text(
-                info, info_box=True, highlight_prefix=":"
-            )
-            info_len *= FONT_HEIGHT
-            info_len += DEFAULT_PADDING
+
+            def _print_infobox():
+                self.ctx.display.clear()
+                return self.ctx.display.draw_hcentered_text(
+                    info, info_box=True, highlight_prefix=":"
+                )
+
+            info_len = _print_infobox()
             submenu = Menu(
                 self.ctx,
                 menu_items,
-                offset=info_len,
+                offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
+                infobox_callback=_print_infobox,
             )
             index, _ = submenu.run_loop()
             if index == submenu.back_index:

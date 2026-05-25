@@ -206,9 +206,24 @@ class WalletSettings(Page):
                 network_name, policy_type, script_type, derivation_path
             )
 
-            self.ctx.display.clear()
             derivation_path = self.fit_to_line(derivation_path, crop_middle=False)
-            info_len = self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
+
+            def _print_infobox():
+                self.ctx.display.clear()
+                n_lines = self.ctx.display.draw_hcentered_text(
+                    wallet_info, info_box=True
+                )
+
+                # draw network with highlight color
+                self.ctx.display.draw_hcentered_text(
+                    network_name,
+                    color=Utils.get_network_color(network_name),
+                    bg_color=theme.info_bg_color,
+                )
+
+                return n_lines
+
+            info_len = _print_infobox()
 
             # if the wallet is P2SH, we need to change
             # the "Account" label to "Cossiger Index"
@@ -227,13 +242,7 @@ class WalletSettings(Page):
                     (account_txt, lambda: None),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
-            )
-
-            # draw network with highlight color
-            self.ctx.display.draw_hcentered_text(
-                network_name,
-                color=Utils.get_network_color(network_name),
-                bg_color=theme.info_bg_color,
+                infobox_callback=_print_infobox,
             )
 
             index, _ = submenu.run_loop()

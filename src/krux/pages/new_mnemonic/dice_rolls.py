@@ -308,25 +308,31 @@ class DiceEntropy(Page):
             entropy = (
                 "".join(self.rolls) if self.num_sides < 10 else "-".join(self.rolls)
             )
-            self.ctx.display.clear()
             rolls_str = "\n\n%s" % entropy
             max_lines = TOTAL_LINES - 6  # room for menu
-            menu_offset = self.ctx.display.draw_hcentered_text(
-                rolls_str, info_box=True, max_lines=max_lines
-            )
-            self.ctx.display.draw_hcentered_text(
-                t("Rolls:"), color=theme.highlight_color, bg_color=theme.info_bg_color
-            )
-            menu_offset *= FONT_HEIGHT
-            menu_offset += DEFAULT_PADDING
+
+            def _print_infobox():
+                self.ctx.display.clear()
+                n_lines = self.ctx.display.draw_hcentered_text(
+                    rolls_str, info_box=True, max_lines=max_lines
+                )
+                self.ctx.display.draw_hcentered_text(
+                    t("Rolls:"),
+                    color=theme.highlight_color,
+                    bg_color=theme.info_bg_color,
+                )
+                return n_lines
+
+            menu_offset = _print_infobox()
             submenu = Menu(
                 self.ctx,
                 [
                     (t("Stats for Nerds"), lambda: MENU_EXIT),
                     (t("Generate Mnemonic"), lambda: MENU_EXIT),
                 ],
-                offset=menu_offset,
+                offset=menu_offset * FONT_HEIGHT + DEFAULT_PADDING,
                 back_label=None,
+                infobox_callback=_print_infobox,
             )
             index, _ = submenu.run_loop()
             if index == 0:
