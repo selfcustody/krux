@@ -50,6 +50,11 @@ class Addresses(Page):
             self.flash_error(t("Please load a wallet output descriptor"))
             return MENU_CONTINUE
 
+        if self.ctx.wallet.is_silent_payment():
+            addr = self.ctx.wallet.obtain_sp_address()
+            self.show_address(addr, title=format_address(addr))
+            return MENU_CONTINUE
+
         submenu = Menu(
             self.ctx,
             [
