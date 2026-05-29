@@ -161,8 +161,14 @@ class Utils(Page):
             TYPE_SINGLESIG,
             TYPE_MULTISIG,
             TYPE_MINISCRIPT,
+            TYPE_SILENT_PAYMENT,
         )
-        from ..key import NAME_SINGLE_SIG, NAME_MULTISIG, NAME_MINISCRIPT
+        from ..key import (
+            NAME_SINGLE_SIG,
+            NAME_MULTISIG,
+            NAME_MINISCRIPT,
+            NAME_SILENT_PAYMENT,
+        )
 
         wallet_info = network + "\n"
 
@@ -174,6 +180,8 @@ class Utils(Page):
             if is_login and script == P2TR:
                 wallet_info += "TR "
             wallet_info += NAME_MINISCRIPT
+        elif policy == TYPE_SILENT_PAYMENT:
+            wallet_info += NAME_SILENT_PAYMENT
 
         wallet_info += "\n"
 

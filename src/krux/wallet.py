@@ -21,6 +21,7 @@
 
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key
+from embit.descriptor.sp import SilentPaymentDescriptor
 from embit.networks import NETWORKS
 from .krux_settings import t
 from .qr import FORMAT_BBQR, FORMAT_NONE
@@ -35,6 +36,8 @@ from .key import (
     TYPE_SINGLESIG,
     TYPE_MULTISIG,
     TYPE_MINISCRIPT,
+    TYPE_SILENT_PAYMENT,
+    NAME_SILENT_PAYMENT,
 )
 
 
@@ -54,6 +57,7 @@ class Wallet:
         self.policy = None
         self.persisted = False
         self._network = None
+        self._sp_address = None
         if self.key and self.key.policy_type == TYPE_SINGLESIG:
             if self.key.script_type == P2PKH:
                 self.descriptor = Descriptor.from_string(
@@ -74,6 +78,14 @@ class Wallet:
                 )
             self.label = t("Single-sig")
             self.policy = {"type": self.get_scriptpubkey_type()}
+        elif self.key and self.key.policy_type == TYPE_SILENT_PAYMENT:
+            net_name = self.which_network()
+            self.descriptor = SilentPaymentDescriptor(
+                sp_key=self.key.sp_scan_key(net_name)
+            )
+            self.label = t(NAME_SILENT_PAYMENT)
+            self.policy = {"type": P2TR}
+            self._sp_address = self.key.sp_address(net_name)
 
     def get_scriptpubkey_type(self):
         """Returns the scriptpubkey type of the wallet descriptor"""
@@ -126,12 +138,25 @@ class Wallet:
             )
         return False
 
+    def is_silent_payment(self):
+        """Returns a boolean indicating whether or not the wallet is silent payment"""
+        if self.key:
+            return self.key.policy_type == TYPE_SILENT_PAYMENT
+        return False
+
+    def obtain_sp_address(self):
+        """Returns the cached silent payment address"""
+        return self._sp_address
+
     def is_loaded(self):
         """Returns a boolean indicating whether or not this wallet has been loaded"""
         return self.wallet_data is not None
 
     def _determine_descriptor_policy(self, descriptor):
         """Returns required policy type and script type from descriptor"""
+        if isinstance(descriptor, SilentPaymentDescriptor):
+            return TYPE_SILENT_PAYMENT, P2TR
+
         descriptor_is_multisig = descriptor.is_basic_multisig
         descriptor_is_miniscript = not descriptor_is_multisig and (
             descriptor.miniscript is not None or descriptor.taptree
@@ -171,6 +196,8 @@ class Wallet:
 
     def _validate_xpub_match(self, descriptor, descriptor_xpubs):
         """Validates that key's xpub matches the descriptor"""
+        if self.is_silent_payment():
+            return  # SP wallets use scan key, not xpub
         if self.is_multisig():
             if not descriptor.is_basic_multisig:
                 raise ValueError("not multisig")
@@ -223,6 +250,8 @@ class Wallet:
 
     def load(self, wallet_data, qr_format):
         """Loads the wallet from the given data"""
+        if self.is_silent_payment():
+            raise ValueError("SP wallets do not load external descriptors")
         descriptor, label = parse_wallet(wallet_data)
 
         # convert descriptor keys to 'xpub' on same network -- for comparison only
@@ -308,6 +337,11 @@ class Wallet:
         """Returns an iterator deriving addresses (default branch_index is receive)
         for the wallet up to the provided limit"""
 
+        if self.is_silent_payment():
+            if i == 0:
+                yield self._sp_address
+            return
+
         if self.descriptor is None:
             raise ValueError("No descriptor to derive addresses from")
 
@@ -321,7 +355,8 @@ class Wallet:
 
     def has_change_addr(self):
         """Returns if this wallet knows how to derive its change addresses"""
-
+        if self.is_silent_payment():
+            return False
         return self.descriptor.num_branches > 1
 
 
