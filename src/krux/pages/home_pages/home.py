@@ -33,7 +33,7 @@ from ...display import BOTTOM_PROMPT_LINE
 from ...qr import FORMAT_NONE, FORMAT_PMOFN
 from ...krux_settings import t, Settings
 from ...format import replace_decimal_separator
-from ...key import TYPE_SINGLESIG
+from ...key import TYPE_SINGLESIG, TYPE_SILENT_PAYMENT
 from ...kboard import kboard
 
 
@@ -350,9 +350,9 @@ class Home(Page):
 
     def _pre_load_psbt_warn(self):
         """Warns if descriptor is not loaded and wallet is multisig or miniscript"""
-        if (
-            not self.ctx.wallet.is_loaded()
-            and self.ctx.wallet.key.policy_type != TYPE_SINGLESIG
+        if not self.ctx.wallet.is_loaded() and self.ctx.wallet.key.policy_type not in (
+            TYPE_SINGLESIG,
+            TYPE_SILENT_PAYMENT,
         ):
             self.ctx.display.draw_centered_text(
                 t("Warning:")
@@ -389,9 +389,9 @@ class Home(Page):
 
         # Show the policy for multisig and miniscript PSBTs
         # in case the wallet descriptor is not loaded
-        if (
-            not self.ctx.wallet.is_loaded()
-            and not self.ctx.wallet.key.policy_type == TYPE_SINGLESIG
+        if not self.ctx.wallet.is_loaded() and self.ctx.wallet.key.policy_type not in (
+            TYPE_SINGLESIG,
+            TYPE_SILENT_PAYMENT,
         ):
             policy_str = signer.psbt_policy_string()
             self.ctx.display.clear()
