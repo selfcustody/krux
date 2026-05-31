@@ -411,6 +411,24 @@ class Home(Page):
 
         return True
 
+    def _sp_warn(self):
+        """Warns when SP outputs are present so the user verifies sp1/tsp1 addresses.
+
+        The on-chain destination for an SP output is a derived P2TR that the
+        recipient alone can recognize. The user must verify the sp1/tsp1 address
+        against what the recipient communicated — never the derived P2TR.
+        """
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(
+            t("Warning:")
+            + " "
+            + t("PSBT contains Silent Payment outputs.")
+            + "\n\n"
+            + t("Verify the sp1/tsp1 address with the recipient."),
+            highlight_prefix=":",
+        )
+        return self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE)
+
     def _fees_psbt_warn(self, fee_percent):
         """Warn if fees greater than 10% of what is spent"""
         if fee_percent >= 10.0:
@@ -511,6 +529,9 @@ class Home(Page):
         outputs, fee_percent = signer.outputs()
 
         if not self._fees_psbt_warn(fee_percent):
+            return MENU_CONTINUE
+
+        if signer.has_sp_outputs() and not self._sp_warn():
             return MENU_CONTINUE
 
         self._display_transaction_for_review(outputs)
