@@ -75,6 +75,41 @@ def mock_seed_qr_view(mocker):
     return mocker.patch("krux.pages.qr_view.SeedQRView")
 
 
+def test_silent_payment_scan_key_exports_descriptor(
+    mocker, m5stickv, tdata, mock_save_file, mock_seed_qr_view
+):
+    """Text/SD and QR exports must emit the same importable sp(...) descriptor"""
+    from krux.pages.home_pages.pub_key_view import PubkeyView
+    from krux.pages import MENU_EXIT
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    # save_file must return a non-MENU_CONTINUE status so the SD submenu exits
+    mock_save_file.return_value = MENU_EXIT
+
+    wallet = Wallet(tdata.SILENT_PAYMENT_KEY)
+    descriptor_str = str(wallet.descriptor)
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Outer menu: select "SPSCAN - Text"
+        BUTTON_ENTER,  # Text submenu: "Save to SD card"
+        BUTTON_PAGE,  # Outer menu: move to "SPSCAN - QR Code"
+        BUTTON_ENTER,  # select "SPSCAN - QR Code"
+        BUTTON_PAGE,  # Outer menu: move toward "Back"
+        BUTTON_PAGE,  # Outer menu: land on "Back"
+        BUTTON_ENTER,  # Leave the page
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
+    PubkeyView(ctx).public_key()
+
+    # The sp(...) descriptor is the importable form; both paths must use it
+    assert descriptor_str.startswith("sp(")
+    mock_save_file.assert_called_once()
+    assert mock_save_file.call_args.args[0] == descriptor_str
+    mock_seed_qr_view.assert_called_once()
+    assert mock_seed_qr_view.call_args.kwargs["data"] == descriptor_str
+
+
 def test_public_key_show_text(mocker, m5stickv, tdata):
     from krux.pages.home_pages.pub_key_view import PubkeyView
     from krux.wallet import Wallet

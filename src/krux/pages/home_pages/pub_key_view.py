@@ -55,7 +55,7 @@ class PubkeyView(Page):
                         None
                         if not self.has_sd_card()
                         else lambda: SaveFile(self.ctx).save_file(
-                            spscan,
+                            descriptor_str,
                             "SPSCAN",
                             "SPSCAN",
                             "SPSCAN:",
