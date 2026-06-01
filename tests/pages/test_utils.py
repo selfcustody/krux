@@ -49,3 +49,16 @@ def test_load_file_with_no_sd(m5stickv, mocker):
 
     assert file_name == ""
     assert data is None
+
+
+def test_generate_wallet_info_silent_payment(m5stickv, mocker):
+    from krux.pages.utils import Utils
+    from krux.key import TYPE_SILENT_PAYMENT, P2TR, NAME_SILENT_PAYMENT
+
+    ctx = create_ctx(mocker, None)
+    utils = Utils(ctx)
+    wallet_info = utils.generate_wallet_info(
+        "Testnet", TYPE_SILENT_PAYMENT, P2TR, "m/352h/1h/0h"
+    )
+
+    assert NAME_SILENT_PAYMENT in wallet_info

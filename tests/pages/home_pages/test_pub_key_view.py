@@ -972,3 +972,32 @@ def test_public_key_save_qr_codes_pbm_43(
 
         mock_save_file.assert_has_calls(sd_card_save_calls, any_order=True)
         assert ctx.input.wait_for_button.call_count == len(case[1])
+
+
+def test_public_key_silent_payment(
+    mocker, m5stickv, tdata, mock_save_file, mock_seed_qr_view
+):
+    from krux.pages.home_pages.pub_key_view import PubkeyView
+    from krux.pages import MENU_CONTINUE
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Enter "SPSCAN - Text"
+        BUTTON_ENTER,  # Select "Save to SD card"
+        BUTTON_PAGE,  # Move to "SPSCAN - QR Code"
+        BUTTON_ENTER,  # Enter "SPSCAN - QR Code"
+        BUTTON_PAGE_PREV,  # Move to Back
+        BUTTON_ENTER,  # Leave the page
+    ]
+
+    wallet = Wallet(tdata.SILENT_PAYMENT_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+    pub_key_viewer = PubkeyView(ctx)
+
+    assert pub_key_viewer.public_key() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    # the SPSCAN text was offered to be saved to SD card
+    mock_save_file.assert_called_once()
+    # the descriptor QR code was shown
+    mock_seed_qr_view.assert_called_once()
