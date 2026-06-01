@@ -90,11 +90,11 @@ def test_init_fail_unknown_policy_type(mocker, m5stickv, tdata):
     from krux.key import Key
 
     # Assuming that the policy type is an integer
-    # and that the valid types are 0, 1, and 2
-    # (TYPE_SINGLESIG, TYPE_MULTISIG, TYPE_MINISCRIPT)
-    # let's say that 3 is an unknown policy type,
+    # and that the valid types are 0, 1, 2 and 3
+    # (TYPE_SINGLESIG, TYPE_MULTISIG, TYPE_MINISCRIPT, TYPE_SILENT_PAYMENT)
+    # let's say that 4 is an unknown policy type,
     # not supported by the Key class.
-    UNKNOWN_POLICY_TYPE = 3
+    UNKNOWN_POLICY_TYPE = 4
 
     # It should raise a ValueError
     # when a non-supported policy type is passed
@@ -564,6 +564,28 @@ def test_init(mocker, m5stickv, tdata):
         assert key.derivation == case[1]["derivation"]
         assert key.account.to_base58() == case[1]["xpub"]
         n += 1
+
+
+def test_init_silent_payment(mocker, m5stickv, tdata):
+    mock_modules(mocker)
+    from embit.networks import NETWORKS
+    from krux.key import Key, TYPE_SILENT_PAYMENT, P2TR
+
+    key = Key(tdata.TEST_12_WORD_MNEMONIC, TYPE_SILENT_PAYMENT, NETWORKS["test"])
+
+    assert key.policy_type == TYPE_SILENT_PAYMENT
+    assert key.script_type == P2TR
+    assert key.derivation == "m/352h/1h/0h"
+    assert key.sp_keys.scan_privkey is not None
+    assert key.sp_keys.spend_pubkey is not None
+
+    address = key.sp_address("test")
+    assert address.startswith("tsp1")
+
+    spscan = key.sp_scan_key_encoded("test")
+    # key expression includes [fingerprint/derivation] prefix
+    assert "]tspscan1" in spscan
+    assert spscan.startswith("[")
 
 
 def test_xpub(mocker, m5stickv, tdata):
