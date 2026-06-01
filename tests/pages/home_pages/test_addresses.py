@@ -1183,16 +1183,42 @@ def test_list_change_addresses(mocker, m5stickv, tdata):
 
 def test_silent_payment_address(mocker, m5stickv, tdata):
     from krux.pages.home_pages.addresses import Addresses
-    from krux.pages import MENU_CONTINUE
+    from krux.pages import MENU_CONTINUE, MENU_EXIT
     from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     wallet = Wallet(tdata.SILENT_PAYMENT_KEY)
-    ctx = create_ctx(mocker, None, wallet, None)
+    addr = wallet.obtain_sp_address()
+
+    # SP address is too long to share a screen with its QR, so it is offered
+    # as a Text/QR menu (like the SP scan key and xpub views)
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Outer menu: select "Address - Text"
+        BUTTON_ENTER,  # Text submenu: "Save to SD card"
+        BUTTON_PAGE,  # Outer menu: move to "Address - QR Code"
+        BUTTON_ENTER,  # select "Address - QR Code"
+        BUTTON_PAGE,  # Outer menu: move toward "Back"
+        BUTTON_PAGE,  # Outer menu: land on "Back"
+        BUTTON_ENTER,  # Leave the page
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet, None)
     addresses_ui = Addresses(ctx)
+    mocker.patch.object(addresses_ui, "has_sd_card", return_value=True)
     mock_show_address = mocker.patch.object(addresses_ui, "show_address")
+    mock_save_file = mocker.patch("krux.pages.file_operations.SaveFile")
+    # save_file must return a non-MENU_CONTINUE status so the SD submenu exits
+    mock_save_file.return_value.save_file.return_value = MENU_EXIT
 
     assert addresses_ui.addresses_menu() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
-    # SP wallets show the single cached silent payment address
+    # QR path shows the full address with quick exit (no transcript tools)
+    # and no subtitle, since the address is too long to fit
     mock_show_address.assert_called_once()
-    assert mock_show_address.call_args.args[0] == wallet.obtain_sp_address()
+    assert mock_show_address.call_args.args[0] == addr
+    assert mock_show_address.call_args.kwargs["title"] == ""
+    assert mock_show_address.call_args.kwargs["quick_exit"] is True
+
+    # Text path offers the full address for saving to SD card
+    mock_save_file.return_value.save_file.assert_called_once()
+    assert mock_save_file.return_value.save_file.call_args.args[0] == addr
