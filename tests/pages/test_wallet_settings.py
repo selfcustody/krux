@@ -1049,3 +1049,54 @@ def test_change_derivation_path_not_hardened_node(amigo, mocker, tdata):
     assert ctx.wallet.key.derivation_str() == "m/48h/0h/0h/2"
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     wallet_settings.prompt.assert_has_calls(prompt_calls)
+
+
+def test_derivation_path_str_silent_payment(m5stickv, mocker):
+    from krux.pages.wallet_settings import WalletSettings
+    from krux.key import TYPE_SILENT_PAYMENT, P2TR
+    from embit.networks import NETWORKS
+
+    ctx = create_ctx(mocker, None)
+    wallet_settings = WalletSettings(ctx)
+
+    # Mainnet uses coin type 0, testnet uses coin type 1
+    assert (
+        wallet_settings._derivation_path_str(
+            TYPE_SILENT_PAYMENT, P2TR, NETWORKS["main"], 0
+        )
+        == "m/352h/0h/0h"
+    )
+    assert (
+        wallet_settings._derivation_path_str(
+            TYPE_SILENT_PAYMENT, P2TR, NETWORKS["test"], 0
+        )
+        == "m/352h/1h/0h"
+    )
+
+
+def test_change_to_silent_payment_policy(m5stickv, mocker, tdata):
+    from krux.pages.wallet_settings import WalletSettings
+    from krux.wallet import Wallet
+    from krux.key import TYPE_SILENT_PAYMENT, P2TR
+    from krux.pages import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # Go to "Policy Type"
+        BUTTON_ENTER,  # Enter "Policy Type"
+        *([BUTTON_PAGE] * 3),  # Change to Silent Payment
+        BUTTON_ENTER,  # Confirm Silent Payment
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, Wallet(tdata.SINGLESIG_12_WORD_KEY))
+    wallet_settings = WalletSettings(ctx)
+    network, policy_type, script_type, account, derivation_path = (
+        wallet_settings.customize_wallet(ctx.wallet.key)
+    )
+
+    # SP forces P2TR script type and the BIP-352 derivation
+    assert policy_type == TYPE_SILENT_PAYMENT
+    assert script_type == P2TR
+    assert derivation_path == "m/352h/0h/0h"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
