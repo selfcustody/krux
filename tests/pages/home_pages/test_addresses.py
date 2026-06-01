@@ -1179,3 +1179,20 @@ def test_list_change_addresses(mocker, m5stickv, tdata):
 
         # assert the number of calls to wait_for_button
         assert ctx.input.wait_for_button.call_count == len(sequence_buttons)
+
+
+def test_silent_payment_address(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.addresses import Addresses
+    from krux.pages import MENU_CONTINUE
+    from krux.wallet import Wallet
+
+    wallet = Wallet(tdata.SILENT_PAYMENT_KEY)
+    ctx = create_ctx(mocker, None, wallet, None)
+    addresses_ui = Addresses(ctx)
+    mock_show_address = mocker.patch.object(addresses_ui, "show_address")
+
+    assert addresses_ui.addresses_menu() == MENU_CONTINUE
+
+    # SP wallets show the single cached silent payment address
+    mock_show_address.assert_called_once()
+    assert mock_show_address.call_args.args[0] == wallet.obtain_sp_address()

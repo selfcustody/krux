@@ -20,6 +20,7 @@ def tdata(mocker):
         TYPE_SINGLESIG,
         TYPE_MULTISIG,
         TYPE_MINISCRIPT,
+        TYPE_SILENT_PAYMENT,
     )
 
     TEST_MNEMONIC1 = (
@@ -511,6 +512,68 @@ def test_init_miniscript(mocker, m5stickv, tdata):
     assert wallet.descriptor is None
     assert wallet.label is None
     assert wallet.policy is None
+
+
+def test_init_silent_payment(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.key import Key, TYPE_SILENT_PAYMENT, P2TR
+    from embit.networks import NETWORKS
+
+    key = Key(
+        "olympic term tissue route sense program under choose bean emerge velvet absurd",
+        TYPE_SILENT_PAYMENT,
+        NETWORKS["test"],
+    )
+    wallet = Wallet(key)
+
+    assert isinstance(wallet, Wallet)
+    assert wallet.is_silent_payment()
+    assert not wallet.is_multisig()
+    assert not wallet.is_miniscript()
+    assert wallet.has_change_addr() is False
+    assert wallet.label == "Single-sig SP"
+    assert wallet.policy == {"type": P2TR}
+    assert wallet.descriptor is not None
+
+    addresses = list(wallet.obtain_addresses(i=0, limit=1))
+    assert len(addresses) == 1
+    assert addresses[0].startswith("tsp1")
+
+    addresses_from_1 = list(wallet.obtain_addresses(i=1, limit=1))
+    assert len(addresses_from_1) == 0
+
+
+def test_silent_payment_load_rejected(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.key import Key, TYPE_SILENT_PAYMENT
+    from embit.networks import NETWORKS
+
+    key = Key(
+        "olympic term tissue route sense program under choose bean emerge velvet absurd",
+        TYPE_SILENT_PAYMENT,
+        NETWORKS["test"],
+    )
+    wallet = Wallet(key)
+
+    with pytest.raises(ValueError, match="SP wallets do not load external descriptors"):
+        wallet.load("some wallet data", 0)
+
+
+def test_determine_descriptor_policy_silent_payment(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.key import Key, TYPE_SILENT_PAYMENT, P2TR
+    from embit.networks import NETWORKS
+
+    key = Key(
+        "olympic term tissue route sense program under choose bean emerge velvet absurd",
+        TYPE_SILENT_PAYMENT,
+        NETWORKS["test"],
+    )
+    wallet = Wallet(key)
+
+    policy_type, script_type = wallet._determine_descriptor_policy(wallet.descriptor)
+    assert policy_type == TYPE_SILENT_PAYMENT
+    assert script_type == P2TR
 
 
 def test_is_multisig(mocker, m5stickv, tdata):
@@ -1982,3 +2045,36 @@ def test_wallet_load_rejects_descriptor_m_greater_than_n(mocker, m5stickv):
     wallet = Wallet(None)
     with pytest.raises(ValueError, match="m .* exceeds n"):
         wallet.load("fake_data", 0)
+
+
+def test_silent_payment_obtain_sp_address(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.key import Key, TYPE_SILENT_PAYMENT
+    from embit.networks import NETWORKS
+
+    key = Key(
+        "olympic term tissue route sense program under choose bean emerge velvet absurd",
+        TYPE_SILENT_PAYMENT,
+        NETWORKS["test"],
+    )
+    wallet = Wallet(key)
+
+    address = wallet.obtain_sp_address()
+    assert address == wallet._sp_address
+    assert address.startswith("tsp1")
+
+
+def test_silent_payment_validate_xpub_match_skipped(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.key import Key, TYPE_SILENT_PAYMENT
+    from embit.networks import NETWORKS
+
+    key = Key(
+        "olympic term tissue route sense program under choose bean emerge velvet absurd",
+        TYPE_SILENT_PAYMENT,
+        NETWORKS["test"],
+    )
+    wallet = Wallet(key)
+
+    # SP wallets validate via the scan key, not an xpub, so this returns without error
+    assert wallet._validate_xpub_match(wallet.descriptor, []) is None

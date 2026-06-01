@@ -20,6 +20,7 @@ def tdata(mocker):
         TYPE_MINISCRIPT,
         TYPE_MULTISIG,
         TYPE_SINGLESIG,
+        TYPE_SILENT_PAYMENT,
         Key,
         P2WPKH,
     )
@@ -121,6 +122,10 @@ def tdata(mocker):
         TEST_12_WORD_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["main"], script_type=P2TR
     )
 
+    SILENT_PAYMENT_KEY = Key(
+        TEST_12_WORD_MNEMONIC, TYPE_SILENT_PAYMENT, NETWORKS["test"]
+    )
+
     VAGUE_LEGACY1_XPUB = "xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE"
     VAGUE_NESTEDSW1_YPUB = "ypub6XQGbwTMQ46bb391kD2QM9APJ9JC8JhxF1J4qAULysM82Knmnp8YEZ6YbTvEUJPWhcdv6xWtwFzM6mvgFFXGWpq7WPsq1LZcsHo9R97uuE4"
     VAGUE_NATIVESW1_ZPUB = "zpub6s3t4jJ6fCirkdeAcGCSWpUCjEoWdSjwr5Nja522s2puPB8riPi8MdVJrDrZ9G8FSUNRBoxebGNuMa9nXrUAUQGAFNTKdm6pWskYrMahu1i"
@@ -184,6 +189,7 @@ def tdata(mocker):
             "TAPROOT1_KEY",
             "MINISCRIPT_NATIVESW1_KEY",
             "MINISCRIPT_TAPROOT1_KEY",
+            "SILENT_PAYMENT_KEY",
             "VAGUE_LEGACY1_XPUB",
             "VAGUE_NESTEDSW1_YPUB",
             "VAGUE_NATIVESW1_ZPUB",
@@ -239,6 +245,7 @@ def tdata(mocker):
         TAPROOT1_KEY,
         MINISCRIPT_NATIVESW1_KEY,
         MINISCRIPT_TAPROOT1_KEY,
+        SILENT_PAYMENT_KEY,
         VAGUE_LEGACY1_XPUB,
         VAGUE_NESTEDSW1_YPUB,
         VAGUE_NATIVESW1_ZPUB,
