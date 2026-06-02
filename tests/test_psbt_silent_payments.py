@@ -281,3 +281,322 @@ def test_silent_payment_eligibility_rejections(mocker, m5stickv):
 
     # An eligible single-sig policy passes (no exception).
     validate_eligibility({"type": P2WPKH})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BIP-376: spend FROM a silent payment UTXO.
+#
+# Spending a UTXO previously received at our SP address. A BIP-376 coordinator
+# hands Krux a PSBT whose input is the on-chain P2TR key P_k = B_spend + t*G,
+# carrying the per-input sp_tweak and sp_spend_bip32_derivations; the embit
+# fork's _sign_sp_spends derives the wallet's spend key, applies the tweak and
+# signs. The tests below pin both the working path and Krux's deliberate
+# behaviour at the edges:
+#
+#   Confirmed working:
+#     * load + policy: the input is recognized as p2tr; no policy mismatch
+#       because an SP wallet is never "loaded" with a descriptor
+#     * review: input amount, spend amount and fee are reported correctly
+#     * signing: a valid 64-byte BIP-340 key signature is produced for the
+#       correct, wallet-owned tweaked spend key (and only that key)
+#     * export: the signed PSBT round-trips as v2 and keeps the signature
+#
+#   Deliberate behaviour (asserted so an embit bump can't silently change it):
+#     * Krux does not finalize on-device (no final_scriptwitness): the same
+#       sign-don't-finalize rule it applies to every policy. The coordinator
+#       finalizes the key-path spend from the returned signature.
+#     * the trim drops sp_tweak / sp_spend_bip32_derivations: the coordinator
+#       authored those and only needs the signature back, exactly like Krux
+#       drops ordinary input bip32_derivations after signing.
+#     * ownership: Krux signs only inputs it provably owns. embit checks both
+#       the spend-key derivation and that B_spend + t*G equals the input's
+#       output key, so a foreign tweak or derivation yields no signature and
+#       Krux refuses the PSBT ("cannot sign").
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Arbitrary but valid per-output tweak t_k used to forge the received UTXO's key.
+SP_SPEND_TWEAK = bytes([0x11] * 32)
+
+
+def _build_sp_spend_psbt(wallet):
+    """Builds a base64 PSBTv2 that spends one SP-received P2TR UTXO.
+
+    Mirrors a BIP-376 coordinator: the input is the on-chain P2TR output key
+    P_k = B_spend + tweak*G, and the PSBT carries the per-input ``sp_tweak`` plus
+    ``sp_spend_bip32_derivations`` pointing at the wallet's m/352h/.../0h/0 spend
+    key. The single destination output is an ordinary P2WPKH (no SP data), so
+    has_sp_outputs() is False and only the BIP-376 spend path is exercised.
+    """
+    from embit import script
+    from embit.psbt import DerivationPath
+    from embit.bip32 import parse_path
+    from embit.transaction import TransactionOutput
+    from embit.script import Script
+    from embit.silent_payments import SilentPaymentsPSBT
+    from embit.silent_payments.psbt import SPInputScope, SPOutputScope
+
+    key = wallet.key
+    root = key.root
+    spend_priv = key.sp_keys.spend_privkey
+    spend_pub = key.sp_keys.spend_pubkey
+
+    # Full path from the master to the spend key, as a coordinator would record
+    # it in PSBT_IN_SP_V0_SPEND_DERIVATION (key.derivation is m/352h/<coin>h/0h).
+    spend_path = parse_path(key.derivation + "/0h/0")
+
+    # The on-chain output key is the tweaked spend key, exactly what
+    # sign_input_with_sp_tweak re-derives and checks before signing.
+    output_xonly = spend_priv.sp_spend_tweak(SP_SPEND_TWEAK).xonly()
+
+    psbt = SilentPaymentsPSBT.create_v2()
+
+    inp = SPInputScope()
+    inp.txid = bytes([0xCD] * 32)
+    inp.vout = 0
+    inp.sequence = 0xFFFFFFFE
+    inp.witness_utxo = TransactionOutput(
+        value=100_000, script_pubkey=Script(b"\x51\x20" + output_xonly)
+    )
+    inp.sp_tweak = SP_SPEND_TWEAK
+    inp.sp_spend_bip32_derivations[spend_pub.sec()] = DerivationPath(
+        root.my_fingerprint, spend_path
+    )
+    psbt.add_input(inp)
+
+    # Ordinary destination output (not a silent payment).
+    dest_pub = root.derive([84 + 2**31, 1 + 2**31, 0 + 2**31, 0, 0]).get_public_key()
+    out = SPOutputScope()
+    out.value = 95_000
+    out.script_pubkey = script.p2wpkh(dest_pub)
+    psbt.add_output(out)
+
+    psbt.tx_modifiable_flags = 0
+    return psbt.to_string()
+
+
+def test_sign_spend_from_sp(mocker, m5stickv):
+    """Happy path: sign a BIP-376 spend-from PSBT for a wallet-owned SP UTXO."""
+    import base64
+    from embit import ec
+    from embit.networks import NETWORKS
+    from embit.silent_payments import SilentPaymentsPSBT
+    from krux.psbt import PSBTSigner
+    from krux.key import P2TR, Key, TYPE_SILENT_PAYMENT
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(TEST_MNEMONIC, TYPE_SILENT_PAYMENT, NETWORKS["test"]))
+    psbt_b64 = _build_sp_spend_psbt(wallet)
+
+    signer = PSBTSigner(wallet, psbt_b64, FORMAT_NONE)
+
+    # --- WORKS: load + policy. The SP-spend input is recognized as p2tr, and
+    # this is a spend-FROM so there are no SP *outputs*. ---
+    assert signer.policy["type"] == P2TR
+    assert not signer.has_sp_outputs()
+
+    # --- WORKS: the review screen the sign UI shows reports correct amounts. ---
+    out_strs, fee_percent = signer.outputs()
+    assert round(fee_percent, 1) == 5.3  # 5_000 fee on a 95_000 spend
+    assert any("0.00 095 000" in s for s in out_strs)  # spend amount
+
+    # --- WORKS: signing produces a valid 64-byte BIP-340 signature for the
+    # correct, wallet-owned tweaked spend key. ---
+    signer.sign(trim=False)
+    sig = signer.psbt.inputs[0].taproot_key_sig
+    assert sig is not None and len(sig) == 64
+    output_xonly = signer.psbt.inputs[0].witness_utxo.script_pubkey.data[2:34]
+    msg = signer.psbt.sighash(0, sighash=0)  # SIGHASH_DEFAULT
+    pubkey = ec.PublicKey.from_xonly(output_xonly)
+    assert pubkey.schnorr_verify(ec.SchnorrSig(sig), msg)
+    expected_key = wallet.key.sp_keys.spend_privkey.sp_spend_tweak(SP_SPEND_TWEAK)
+    assert output_xonly == expected_key.xonly()
+
+    # --- WORKS: production trim/export round-trips as v2 and keeps the sig. ---
+    signer2 = PSBTSigner(wallet, _build_sp_spend_psbt(wallet), FORMAT_NONE)
+    signer2.sign()  # trim=True
+    exported, _ = signer2.psbt_qr()
+    out_psbt = SilentPaymentsPSBT.parse(base64.b64decode(exported))
+    assert out_psbt.version == 2
+    assert out_psbt.inputs[0].taproot_key_sig is not None
+
+    # --- Deliberate behaviour (sign-don't-finalize, minimal artifact). ---
+    # Krux does not finalize on-device for any policy: the coordinator builds the
+    # witness from taproot_key_sig.
+    assert out_psbt.inputs[0].final_scriptwitness is None
+    # The trim returns only the signature; the coordinator already holds the
+    # tweak and derivation it authored.
+    assert getattr(out_psbt.inputs[0], "sp_tweak", None) is None
+    assert not getattr(out_psbt.inputs[0], "sp_spend_bip32_derivations", {})
+
+
+def _spend_input(witness_value, output_xonly, sp_tweak, derivation):
+    """A BIP-376 spend-from P2TR input with the given output key, tweak, origin."""
+    from embit.transaction import TransactionOutput
+    from embit.script import Script
+    from embit.silent_payments.psbt import SPInputScope
+
+    inp = SPInputScope()
+    inp.txid = bytes([0xCD] * 32)
+    inp.vout = 0
+    inp.sequence = 0xFFFFFFFE
+    inp.witness_utxo = TransactionOutput(
+        value=witness_value, script_pubkey=Script(b"\x51\x20" + output_xonly)
+    )
+    inp.sp_tweak = sp_tweak
+    inp.sp_spend_bip32_derivations[derivation[0]] = derivation[1]
+    return inp
+
+
+def _p2wpkh_dest(root, value):
+    """An ordinary (non-SP) destination output paying a wallet-derived key."""
+    from embit import script
+    from embit.silent_payments.psbt import SPOutputScope
+
+    out = SPOutputScope()
+    out.value = value
+    out.script_pubkey = script.p2wpkh(root.derive(INPUT_PATH).get_public_key())
+    return out
+
+
+def test_spend_from_sp_foreign_tweak_refused(mocker, m5stickv):
+    """A tweak that doesn't reproduce the input's output key yields no signature.
+
+    embit recomputes B_spend + t*G and refuses unless it equals the input's
+    output xonly. Here the PSBT's sp_tweak differs from the tweak baked into the
+    on-chain key, so the input is left unsigned and Krux refuses the PSBT.
+    """
+    from embit.psbt import DerivationPath
+    from embit.bip32 import parse_path
+    from embit.networks import NETWORKS
+    from embit.silent_payments import SilentPaymentsPSBT
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SILENT_PAYMENT
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(TEST_MNEMONIC, TYPE_SILENT_PAYMENT, NETWORKS["test"]))
+    key = wallet.key
+    root = key.root
+    spend_pub = key.sp_keys.spend_pubkey
+
+    # On-chain key commits to one tweak; the PSBT carries a different one.
+    output_xonly = key.sp_keys.spend_privkey.sp_spend_tweak(bytes([0x11] * 32)).xonly()
+    derivation = (
+        spend_pub.sec(),
+        DerivationPath(root.my_fingerprint, parse_path(key.derivation + "/0h/0")),
+    )
+
+    psbt = SilentPaymentsPSBT.create_v2()
+    psbt.add_input(_spend_input(100_000, output_xonly, bytes([0x22] * 32), derivation))
+    psbt.add_output(_p2wpkh_dest(root, 95_000))
+    psbt.tx_modifiable_flags = 0
+
+    signer = PSBTSigner(wallet, psbt.to_string(), FORMAT_NONE)
+    with pytest.raises(ValueError, match="cannot sign"):  # nothing was signed
+        signer.sign(trim=False)
+    assert signer.psbt.inputs[0].taproot_key_sig is None
+
+
+def test_spend_from_sp_foreign_derivation_refused(mocker, m5stickv):
+    """A spend derivation Krux can't match leaves the owned-looking input unsigned.
+
+    The on-chain key is the wallet's correctly tweaked spend key, but the
+    sp_spend_bip32_derivations references a foreign master fingerprint, so
+    _sign_sp_spends finds no key to derive and the input is not signed.
+    """
+    from embit.psbt import DerivationPath
+    from embit.bip32 import parse_path
+    from embit.networks import NETWORKS
+    from embit.silent_payments import SilentPaymentsPSBT
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SILENT_PAYMENT
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(TEST_MNEMONIC, TYPE_SILENT_PAYMENT, NETWORKS["test"]))
+    key = wallet.key
+    root = key.root
+    spend_pub = key.sp_keys.spend_pubkey
+
+    sp_tweak = bytes([0x11] * 32)
+    output_xonly = key.sp_keys.spend_privkey.sp_spend_tweak(sp_tweak).xonly()
+    # Correct path, but a fingerprint that is not this wallet's master.
+    derivation = (
+        spend_pub.sec(),
+        DerivationPath(b"\xff\xff\xff\xff", parse_path(key.derivation + "/0h/0")),
+    )
+
+    psbt = SilentPaymentsPSBT.create_v2()
+    psbt.add_input(_spend_input(100_000, output_xonly, sp_tweak, derivation))
+    psbt.add_output(_p2wpkh_dest(root, 95_000))
+    psbt.tx_modifiable_flags = 0
+
+    signer = PSBTSigner(wallet, psbt.to_string(), FORMAT_NONE)
+    with pytest.raises(ValueError, match="cannot sign"):  # derivation never matched
+        signer.sign(trim=False)
+    assert signer.psbt.inputs[0].taproot_key_sig is None
+
+
+def test_sign_spend_from_sp_with_normal_taproot_input(mocker, m5stickv):
+    """An SP-spend input and an ordinary key-path P2TR input both get signed.
+
+    Confirms embit's _sign_sp_spends and the base taproot signing coexist in one
+    PSBT: input 0 is signed via sp_tweak, input 1 via its BIP-86 derivation. Both
+    inputs are p2tr, so Krux's single-policy check is satisfied.
+    """
+    from embit import script
+    from embit.psbt import DerivationPath
+    from embit.bip32 import parse_path
+    from embit.transaction import TransactionOutput
+    from embit.networks import NETWORKS
+    from embit.silent_payments import SilentPaymentsPSBT
+    from embit.silent_payments.psbt import SPInputScope
+    from krux.psbt import PSBTSigner
+    from krux.key import P2TR, Key, TYPE_SILENT_PAYMENT
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(TEST_MNEMONIC, TYPE_SILENT_PAYMENT, NETWORKS["test"]))
+    key = wallet.key
+    root = key.root
+
+    sp_tweak = bytes([0x11] * 32)
+    output_xonly = key.sp_keys.spend_privkey.sp_spend_tweak(sp_tweak).xonly()
+    sp_derivation = (
+        key.sp_keys.spend_pubkey.sec(),
+        DerivationPath(root.my_fingerprint, parse_path(key.derivation + "/0h/0")),
+    )
+
+    psbt = SilentPaymentsPSBT.create_v2()
+    # input 0: spend FROM the silent payment UTXO.
+    psbt.add_input(_spend_input(100_000, output_xonly, sp_tweak, sp_derivation))
+
+    # input 1: ordinary BIP-86 key-path P2TR owned by the same wallet.
+    tap_path = parse_path("m/86h/1h/0h/0/0")
+    internal_pub = root.derive(tap_path).get_public_key()
+    norm_in = SPInputScope()
+    norm_in.txid = bytes([0xEF] * 32)
+    norm_in.vout = 1
+    norm_in.sequence = 0xFFFFFFFE
+    norm_in.witness_utxo = TransactionOutput(
+        value=50_000, script_pubkey=script.p2tr(internal_pub)
+    )
+    norm_in.taproot_bip32_derivations[internal_pub] = (
+        [],
+        DerivationPath(root.my_fingerprint, tap_path),
+    )
+    psbt.add_input(norm_in)
+
+    psbt.add_output(_p2wpkh_dest(root, 145_000))
+    psbt.tx_modifiable_flags = 0
+
+    signer = PSBTSigner(wallet, psbt.to_string(), FORMAT_NONE)
+    assert signer.policy["type"] == P2TR
+    assert not signer.has_sp_outputs()
+
+    signer.sign(trim=False)
+
+    # Both inputs carry a key-path signature.
+    assert signer.psbt.inputs[0].taproot_key_sig is not None  # SP-spend path
+    assert signer.psbt.inputs[1].taproot_key_sig is not None  # ordinary taproot
