@@ -787,7 +787,11 @@ class PSBTSigner:
 
     def sign(self, trim=True):
         """Signs the PSBT and preserves necessary fields for the final transaction"""
-        if self.has_sp_outputs():
+        # Computed once: each call scans every output and lazily imports the SP
+        # module. The trim below preserves sp_data, so this also holds for the
+        # rebuilt PSBT.
+        has_sp = self.has_sp_outputs()
+        if has_sp:
             # Populate per-input ECDH shares + DLEQ proofs with Krux entropy.
             # Incoming SP fields are discarded inside
             # _populate_silent_payment_outputs.
@@ -848,7 +852,7 @@ class PSBTSigner:
             trimmed_psbt.inputs[i].sp_ecdh_shares = inp.sp_ecdh_shares
             trimmed_psbt.inputs[i].sp_dleq_proofs = inp.sp_dleq_proofs
 
-        if self.has_sp_outputs():
+        if has_sp:
             # Preserve BIP-375 global SP fields on the trimmed PSBT.
             trimmed_psbt.sp_ecdh_shares = self.psbt.sp_ecdh_shares
             trimmed_psbt.sp_dleq_proofs = self.psbt.sp_dleq_proofs
@@ -868,7 +872,7 @@ class PSBTSigner:
 
         self.psbt = trimmed_psbt
 
-        if self.has_sp_outputs():
+        if has_sp:
             # Re-validate the trimmed PSBT: the pre-sign check (above) covered the
             # populated PSBT; this confirms the trim/rebuild preserved every SP
             # field on the artifact that actually leaves the device.
