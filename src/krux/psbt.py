@@ -526,11 +526,13 @@ class PSBTSigner:
     def _eligible_input_privkeys(self):
         """Returns (secret, is_xonly) for each eligible input owned by the wallet.
 
-        Walks the BIP-375-eligible inputs, matches each input's BIP-32
-        derivation to the wallet root (fingerprint + x-only pubkey, the same
-        match embit's _sign_with_sp uses), and yields the derived private key.
-        Shared by global-share population and output-script derivation so the
-        two stay in lock-step.
+        Resolution is delegated to embit's _resolve_input_privkey so every SP
+        consumer (per-input ECDH share, global share and output-script
+        derivation) sums the exact same secret. For taproot inputs that secret
+        is already even-Y normalized per BIP-352: ordinary BIP-86 keys via the
+        taproot tweak, BIP-376 spend-from inputs via the spend-key tweak. The
+        non-taproot types resolve through their BIP-32 derivations as before.
+        is_xonly marks taproot inputs so create_outputs treats them as x-only.
         """
         from embit.silent_payments.ecdh import get_eligible_inputs
 
@@ -539,18 +541,15 @@ class PSBTSigner:
         privkeys = []
         for i in get_eligible_inputs(self.psbt.inputs, has_sp_outputs=True):
             inp = self.psbt.inputs[i]
+            # pylint: disable=protected-access
+            secret = self.psbt._resolve_input_privkey(inp, root, fingerprint)
+            if secret is None:
+                continue
             is_xonly = (
                 inp.script_pubkey is not None
                 and inp.script_pubkey.script_type() == "p2tr"
             )
-            for pub, derivation in inp.bip32_derivations.items():
-                if derivation.fingerprint != fingerprint:
-                    continue
-                hdkey = root.derive(derivation.derivation)
-                if hdkey.xonly() != pub.xonly():
-                    continue
-                privkeys.append((hdkey.key.secret, is_xonly))
-                break
+            privkeys.append((secret, is_xonly))
         return privkeys
 
     def _populate_silent_payment_outputs(self):
@@ -658,19 +657,21 @@ class PSBTSigner:
                 % "; ".join(types)
             )
 
-        fingerprint = self.wallet.key.root.my_fingerprint
+        # Each eligible input must resolve to a wallet-owned private key, since
+        # BIP-352 requires every eligible input to contribute to the shared
+        # secret. _resolve_input_privkey handles all eligible types: non-taproot
+        # via BIP-32 derivations, BIP-86 taproot via the taproot tweak, and
+        # BIP-376 spend-from inputs via the spend-key tweak.
+        root = self.wallet.key.root
+        fingerprint = root.my_fingerprint
         for i in eligible:
             inp = self.psbt.inputs[i]
-            if not inp.bip32_derivations:
+            # pylint: disable=protected-access
+            if self.psbt._resolve_input_privkey(inp, root, fingerprint) is None:
                 raise ValueError(
-                    "Silent Payment signing failed: input %d has no BIP-32 "
-                    "derivations" % i
-                )
-            if not any(
-                d.fingerprint == fingerprint for d in inp.bip32_derivations.values()
-            ):
-                raise ValueError(
-                    "Silent Payment signing failed: input %d fingerprint mismatch" % i
+                    "Silent Payment signing failed: input %d key could not be "
+                    "derived from this wallet (check the BIP-32 / SP spend "
+                    "derivation and fingerprint)" % i
                 )
 
     def _derive_sp_output_scripts(self):

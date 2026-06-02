@@ -31,7 +31,7 @@ Imports from the SP-aware Embit fork are lazy so SP-naive PSBT flows do not
 pay the module-load cost on K210.
 """
 
-from .key import P2PKH, P2SH_P2WPKH, P2WPKH
+from .key import P2PKH, P2SH_P2WPKH, P2TR, P2WPKH
 
 
 def has_sp_outputs(psbt):
@@ -83,14 +83,16 @@ def validate(psbt, skip_output_scripts=True):
 
 
 def validate_eligibility(policy):
-    """Rejects policies that are not BIP-375 eligible for SP-sending.
+    """Rejects policies that are not BIP-352 eligible for SP-sending.
 
-    BIP-375 allows only P2PKH, P2WPKH, and P2SH-P2WPKH inputs alongside SP
-    outputs. Multisig and miniscript are also rejected: SP derives the
-    recipient script from the sum of input private keys, which requires a
-    single signer with access to every contributing key.
+    BIP-352 eligible single-key input types are P2PKH, P2WPKH, P2SH-P2WPKH and
+    P2TR. P2TR covers both ordinary BIP-86 inputs and BIP-376 spend-from inputs
+    (a previously received SP UTXO funding a new SP output); per-input NUMS and
+    Segwit>v1 exclusions are enforced downstream by get_eligible_inputs.
 
-    Multisig / miniscript are detected structurally (presence of ``m`` or
+    Multisig and miniscript are rejected: SP derives the recipient script from
+    the sum of input private keys, which requires a single signer with access to
+    every contributing key. They are detected structurally (presence of ``m`` or
     ``miniscript`` keys in the policy dict) to avoid importing the predicate
     helpers from psbt.py, which would create a circular import.
     """
@@ -99,5 +101,7 @@ def validate_eligibility(policy):
             "Silent Payments are not supported with multisig or miniscript"
         )
     policy_type = policy.get("type") if policy else None
-    if policy_type not in (P2PKH, P2WPKH, P2SH_P2WPKH):
-        raise ValueError("Silent Payments require P2PKH, P2WPKH, or P2SH-P2WPKH inputs")
+    if policy_type not in (P2PKH, P2WPKH, P2SH_P2WPKH, P2TR):
+        raise ValueError(
+            "Silent Payments require P2PKH, P2WPKH, P2SH-P2WPKH, or P2TR inputs"
+        )
