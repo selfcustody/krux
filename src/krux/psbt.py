@@ -491,17 +491,12 @@ class PSBTSigner:
                     "Input %d has non-standard sighash type: 0x%02x" % (i, sighash_val)
                 )
 
-    def _sp_aux_rand(self):
+    def _sp_aux_rand(self, wallet_nonce):
         """Generate 32-byte auxiliary randomness for DLEQ proof generation.
 
-        Mixes time.ticks_us() with a wallet-keyed nonce (sha256 of the private
-        key material over the serialized PSBT) so the output is unpredictable
-        to any observer who does not know the wallet root private key — even if
-        the timer source is weak or predictable.
-
-        Uses psbt.serialize() (not psbt.tx.serialize()) because SP outputs may
-        have None script_pubkeys before derivation, which would cause
-        TransactionOutput.write_to() to crash.
+        Mixes time.ticks_us() with a pre-computed wallet_nonce so the output is
+        unpredictable to any observer who does not know the wallet root private
+        key — even if the timer source is weak or predictable.
         """
         import hashlib
         import time
@@ -513,15 +508,22 @@ class PSBTSigner:
 
         tick = (tick_val & 0xFFFFFFFF).to_bytes(4, "little")
 
-        # wallet_nonce = sha256(root_secret || fingerprint || sha256(psbt_bytes))
-        # Binding to root.secret ensures entropy is secret to external observers.
-        key_secret = self.wallet.key.root.secret
-        psbt_hash = hashlib.sha256(self.psbt.serialize()).digest()
-        wallet_nonce = hashlib.sha256(
-            key_secret + self.wallet.key.fingerprint + psbt_hash
-        ).digest()
-
         return hashlib.sha256(tick + wallet_nonce).digest()
+
+    def _sp_wallet_nonce(self):
+        """Compute a wallet-keyed nonce from the serialized PSBT.
+
+        sha256(root_secret || fingerprint || sha256(psbt_bytes)).
+        Uses psbt.serialize() (not psbt.tx.serialize()) because SP outputs may
+        have None script_pubkeys before derivation, which would cause
+        TransactionOutput.write_to() to crash.
+        """
+        import hashlib
+
+        psbt_hash = hashlib.sha256(self.psbt.serialize()).digest()
+        return hashlib.sha256(
+            self.wallet.key.root.secret + self.wallet.key.fingerprint + psbt_hash
+        ).digest()
 
     def _eligible_input_privkeys(self):
         """Returns (secret, is_xonly) for each eligible input owned by the wallet.
@@ -552,7 +554,7 @@ class PSBTSigner:
             privkeys.append((secret, is_xonly))
         return privkeys
 
-    def _populate_silent_payment_outputs(self):
+    def _populate_silent_payment_outputs(self, input_privkeys):
         """Discard incoming SP fields and compute fresh ECDH shares + DLEQ proofs.
 
         Incoming SP data is explicitly cleared before derivation — Krux is
@@ -577,8 +579,10 @@ class PSBTSigner:
 
         self._validate_sp_signing_inputs()
 
+        wallet_nonce = self._sp_wallet_nonce()
+
         pairs_added = self.psbt._sign_with_sp(  # pylint: disable=protected-access
-            self.wallet.key.root, aux_rand=self._sp_aux_rand()
+            self.wallet.key.root, aux_rand=self._sp_aux_rand(wallet_nonce)
         )
         gc.collect()
 
@@ -591,14 +595,14 @@ class PSBTSigner:
         # SP fields. _sign_with_sp silently skips inputs whose derivation
         # matching fails; catch that here before the QR is rendered.
         eligible = get_eligible_inputs(self.psbt.inputs, has_sp_outputs=True)
-        scan_keys_bytes = set()
+        scan_key_objects = {}
         for out in self.psbt.outputs:
             if out.sp_data is not None:
-                scan_keys_bytes.add(out.sp_data.scan_key.sec())
+                scan_key_objects[out.sp_data.scan_key.sec()] = out.sp_data.scan_key
         for i in eligible:
             inp = self.psbt.inputs[i]
-            missing_share = any(sk not in inp.sp_ecdh_shares for sk in scan_keys_bytes)
-            missing_proof = any(sk not in inp.sp_dleq_proofs for sk in scan_keys_bytes)
+            missing_share = any(sk not in inp.sp_ecdh_shares for sk in scan_key_objects)
+            missing_proof = any(sk not in inp.sp_dleq_proofs for sk in scan_key_objects)
             if missing_share or missing_proof:
                 raise ValueError(
                     "Silent Payment signing failed: input %d is eligible but is "
@@ -610,14 +614,10 @@ class PSBTSigner:
         # Populate PSBT-global ECDH shares + DLEQ proofs. Coordinators such as
         # Sparrow check global fields first and skip per-input checks when they
         # are present, and the global fields survive per-input finalization.
-        priv_keys = [secret for secret, _ in self._eligible_input_privkeys()]
+        priv_keys = [secret for secret, _ in input_privkeys]
 
         if priv_keys:
-            scan_key_objects = {}
-            for out in self.psbt.outputs:
-                if out.sp_data is not None:
-                    scan_key_objects[out.sp_data.scan_key.sec()] = out.sp_data.scan_key
-            global_aux = self._sp_aux_rand()
+            global_aux = self._sp_aux_rand(wallet_nonce)
             for sk_bytes, scan_key in scan_key_objects.items():
                 global_share = compute_global_ecdh_share(priv_keys, scan_key)
                 if global_share is not None:
@@ -674,7 +674,7 @@ class PSBTSigner:
                     "derivation and fingerprint)" % i
                 )
 
-    def _derive_sp_output_scripts(self):
+    def _derive_sp_output_scripts(self, input_privkeys):
         """Derive P2TR scripts for SP outputs that have script_pubkey=None.
 
         Krux holds the input private keys, so output derivation uses the
@@ -704,13 +704,12 @@ class PSBTSigner:
         if not pending:
             return
 
+        if not input_privkeys:
+            return
+
         # Per BIP-352 the input hash mixes every transaction outpoint, so all
         # inputs contribute outpoints while only eligible inputs contribute keys.
         outpoints = [COutPoint(inp.txid, inp.vout) for inp in self.psbt.inputs]
-        input_privkeys = self._eligible_input_privkeys()
-
-        if not input_privkeys:
-            return
 
         recipients = [
             self._silent_payment_address_from_output(out) for _, out in pending
@@ -724,15 +723,14 @@ class PSBTSigner:
         # output key, so the scriptPubKey is a raw "OP_1 <32-byte x-only>" — no
         # additional BIP-341 taproot tweak (which p2tr() would apply).
         cursor = {}
-        for _, out in pending:
-            address = self._silent_payment_address_from_output(out)
-            derived = outputs_map.get(address)
-            pos = cursor.get(address, 0)
+        for addr, (_, out) in zip(recipients, pending):
+            derived = outputs_map.get(addr)
+            pos = cursor.get(addr, 0)
             if not derived or pos >= len(derived):
                 continue
             xonly = unhexlify(derived[pos])
             out.script_pubkey = Script(b"\x51\x20" + xonly)
-            cursor[address] = pos + 1
+            cursor[addr] = pos + 1
 
         # Every pending SP output must now have a script; an undelivered output
         # would otherwise reach add_signatures() with a None script and crash
@@ -793,15 +791,17 @@ class PSBTSigner:
         # rebuilt PSBT.
         has_sp = self.has_sp_outputs()
         if has_sp:
+            input_privkeys = self._eligible_input_privkeys()
+
             # Populate per-input ECDH shares + DLEQ proofs with Krux entropy.
             # Incoming SP fields are discarded inside
             # _populate_silent_payment_outputs.
-            self._populate_silent_payment_outputs()
+            self._populate_silent_payment_outputs(input_privkeys)
 
             # Derive P2TR output scripts for SP outputs that are still empty.
             # Coordinators omit PSBT_OUT_SCRIPT for SP outputs per BIP-375; the
             # signer must derive them before sighash computation.
-            self._derive_sp_output_scripts()
+            self._derive_sp_output_scripts(input_privkeys)
 
             self._validate_silent_payment(skip_output_scripts=False)
 
