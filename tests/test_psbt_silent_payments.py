@@ -270,17 +270,19 @@ def test_silent_payment_eligibility_rejections(mocker, m5stickv):
     from krux.silent_payments import validate_eligibility
     from krux.key import P2WPKH, P2TR, P2WSH
 
-    # Multisig (m/n present) and miniscript are rejected.
+    # Multisig (m/n present) and miniscript are rejected, even on a P2TR type.
     with pytest.raises(ValueError):
         validate_eligibility({"type": P2WSH, "m": 2, "n": 3})
     with pytest.raises(ValueError):
-        validate_eligibility({"type": P2WSH, "miniscript": True})
-    # Non-eligible single-sig script types (BIP-375 forbids Segwit v>1).
+        validate_eligibility({"type": P2TR, "miniscript": True})
+    # A non-eligible single-sig type (P2WSH key-path is not a BIP-352 input).
     with pytest.raises(ValueError):
-        validate_eligibility({"type": P2TR})
+        validate_eligibility({"type": P2WSH})
 
-    # An eligible single-sig policy passes (no exception).
+    # Eligible single-sig policies pass (no exception). P2TR is eligible per
+    # BIP-352 and covers ordinary BIP-86 and BIP-376 spend-from inputs.
     validate_eligibility({"type": P2WPKH})
+    validate_eligibility({"type": P2TR})
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -600,3 +602,178 @@ def test_sign_spend_from_sp_with_normal_taproot_input(mocker, m5stickv):
     # Both inputs carry a key-path signature.
     assert signer.psbt.inputs[0].taproot_key_sig is not None  # SP-spend path
     assert signer.psbt.inputs[1].taproot_key_sig is not None  # ordinary taproot
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# P2TR inputs funding SP outputs (BIP-352 eligible input type).
+#
+# A taproot input must contribute its even-Y output key to the BIP-352 shared
+# secret. taproot_tweak already returns an even-Y key; sp_spend_tweak does not,
+# so the spend-from path normalizes explicitly. Both tests cross-check the
+# derived P2TR output against an independent create_outputs run using the same
+# input key, so a missing or mis-normalized contribution is caught.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _tsp_address(scan_pub, spend_pub):
+    """Encode a tsp1 silent payment address from a scan + spend pubkey."""
+    from embit import bech32
+
+    payload = scan_pub.sec() + spend_pub.sec()
+    data = bech32.convertbits(payload, 8, 5)
+    return bech32.bech32_encode(bech32.Encoding.BECH32M, "tsp", [0] + data)
+
+
+def _expected_sp_script(input_privkeys, txid, scan_pub, spend_pub):
+    """Independently derive the P2TR script for one SP recipient, one outpoint."""
+    from embit import script
+    from embit.transaction import COutPoint
+    from embit.silent_payments import create_outputs
+
+    address = _tsp_address(scan_pub, spend_pub)
+    outputs_map = create_outputs(input_privkeys, [COutPoint(txid, 0)], [address])
+    return script.Script(b"\x51\x20" + bytes.fromhex(outputs_map[address][0])).data.hex()
+
+
+def test_sign_sp_output_from_taproot_input(mocker, m5stickv):
+    """Send to an SP address funded by an ordinary BIP-86 taproot input.
+
+    Regression for P2TR send-side eligibility: the taproot input's even-Y output
+    key must be summed into the shared secret. Asserts the derived output matches
+    an independent derivation including that key, and the input is signed.
+    """
+    from embit import bip32, bip39, ec, script
+    from embit.psbt import DerivationPath
+    from embit.transaction import TransactionOutput
+    from embit.networks import NETWORKS
+    from embit.silent_payments import SilentPaymentsPSBT
+    from embit.silent_payments.psbt import SPInputScope, SPOutputScope
+    from embit.silent_payments.fields import SilentPaymentData
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    root = bip32.HDKey.from_seed(bip39.mnemonic_to_seed(TEST_MNEMONIC))
+    tap_path = [86 + 2**31, 1 + 2**31, 0 + 2**31, 0, 0]
+    internal_pub = root.derive(tap_path).get_public_key()
+
+    scan_pub = ec.PublicKey.parse(bytes.fromhex(SCAN_HEX))
+    spend_pub = ec.PublicKey.parse(bytes.fromhex(SPEND_HEX))
+
+    txid = bytes([0xAB] * 32)
+    psbt = SilentPaymentsPSBT.create_v2()
+    inp = SPInputScope()
+    inp.txid = txid
+    inp.vout = 0
+    inp.sequence = 0xFFFFFFFE
+    inp.witness_utxo = TransactionOutput(
+        value=100_000, script_pubkey=script.p2tr(internal_pub)
+    )
+    inp.taproot_bip32_derivations[internal_pub] = (
+        [],
+        DerivationPath(root.my_fingerprint, tap_path),
+    )
+    psbt.add_input(inp)
+
+    out = SPOutputScope()
+    out.value = 95_000
+    out.script_pubkey = None
+    out.sp_data = SilentPaymentData(scan_pub, spend_pub)
+    psbt.add_output(out)
+    psbt.tx_modifiable_flags = 0
+
+    wallet = Wallet(Key(TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, psbt.to_string(), FORMAT_NONE)
+    assert signer.has_sp_outputs()
+    signer.sign(trim=False)
+
+    # taproot_tweak yields the even-Y output key BIP-352 sums.
+    in_priv = root.derive(tap_path).key.taproot_tweak(b"")
+    expected = _expected_sp_script([(in_priv.secret, True)], txid, scan_pub, spend_pub)
+    assert signer.psbt.outputs[0].script_pubkey.data.hex() == expected
+    assert signer.psbt.inputs[0].taproot_key_sig is not None
+
+
+def test_self_transfer_sp_to_sp(mocker, m5stickv):
+    """Self-transfer: spend a received SP UTXO into a new SP output.
+
+    The P2TR spend-from input's even-Y tweaked spend key must be summed into the
+    shared secret of the new SP output. The tweak is chosen so the tweaked key
+    has odd Y, exercising the even-Y normalization (a missing negation would make
+    the per-input DLEQ proof fail validation or derive the wrong output).
+    """
+    from embit import ec, script
+    from embit.psbt import DerivationPath
+    from embit.bip32 import parse_path
+    from embit.transaction import TransactionOutput, SIGHASH
+    from embit.script import Script
+    from embit.networks import NETWORKS
+    from embit.silent_payments import SilentPaymentsPSBT
+    from embit.silent_payments.psbt import SPInputScope, SPOutputScope
+    from embit.silent_payments.fields import SilentPaymentData
+    from krux.psbt import PSBTSigner
+    from krux.key import P2TR, Key, TYPE_SILENT_PAYMENT
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(TEST_MNEMONIC, TYPE_SILENT_PAYMENT, NETWORKS["test"]))
+    key = wallet.key
+    root = key.root
+    spend_priv = key.sp_keys.spend_privkey
+    spend_pub = key.sp_keys.spend_pubkey
+
+    # Pick a tweak whose tweaked spend key has odd Y, to exercise the negation.
+    sp_tweak = None
+    for b in range(1, 256):
+        cand = bytes([b] * 32)
+        if spend_priv.sp_spend_tweak(cand).sec()[0] == 0x03:
+            sp_tweak = cand
+            break
+    assert sp_tweak is not None, "no odd-Y tweak found"
+
+    output_xonly = spend_priv.sp_spend_tweak(sp_tweak).xonly()
+
+    # Destination SP recipient (external scan/spend keys).
+    scan_pub = ec.PublicKey.parse(bytes.fromhex(SCAN_HEX))
+    dest_spend_pub = ec.PublicKey.parse(bytes.fromhex(SPEND_HEX))
+
+    txid = bytes([0xCD] * 32)
+    psbt = SilentPaymentsPSBT.create_v2()
+    inp = SPInputScope()
+    inp.txid = txid
+    inp.vout = 0
+    inp.sequence = 0xFFFFFFFE
+    inp.witness_utxo = TransactionOutput(
+        value=100_000, script_pubkey=Script(b"\x51\x20" + output_xonly)
+    )
+    inp.sp_tweak = sp_tweak
+    inp.sp_spend_bip32_derivations[spend_pub.sec()] = DerivationPath(
+        root.my_fingerprint, parse_path(key.derivation + "/0h/0")
+    )
+    # Coordinators set SIGHASH_DEFAULT (0x00) on taproot inputs; the SP
+    # validator must accept it as SIGHASH_ALL-equivalent.
+    inp.sighash_type = SIGHASH.DEFAULT
+    psbt.add_input(inp)
+
+    out = SPOutputScope()
+    out.value = 95_000
+    out.script_pubkey = None
+    out.sp_data = SilentPaymentData(scan_pub, dest_spend_pub)
+    psbt.add_output(out)
+    psbt.tx_modifiable_flags = 0
+
+    signer = PSBTSigner(wallet, psbt.to_string(), FORMAT_NONE)
+    assert signer.has_sp_outputs()
+    assert signer.policy["type"] == P2TR
+    signer.sign(trim=False)
+
+    # Independent derivation: input key is the even-Y of (b_spend + t).
+    in_priv = spend_priv.sp_spend_tweak(sp_tweak).even_y()
+    expected = _expected_sp_script(
+        [(in_priv.secret, True)], txid, scan_pub, dest_spend_pub
+    )
+    derived = signer.psbt.outputs[0].script_pubkey
+    assert derived is not None and derived.data.hex() == expected
+    # The SP UTXO is signed via the BIP-376 spend path.
+    assert signer.psbt.inputs[0].taproot_key_sig is not None
