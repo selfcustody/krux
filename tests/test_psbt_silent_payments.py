@@ -146,9 +146,10 @@ def test_sign_silent_payment_output_trimmed(mocker, m5stickv):
 def _build_sp_psbt_two_outputs(spend2_hex):
     """One P2WPKH input, two SP outputs sharing a scan key, different spend keys.
 
-    The two outputs are placed in the PSBT in descending spend-key order so the
-    on-chain order is the reverse of the spend-key-sorted order the validator
-    uses — exercising the derivation's spend-key sort.
+    The two outputs are placed in the PSBT in descending spend-key order, so a
+    derivation that (incorrectly) sorted recipients by spend key would assign
+    the BIP-352 counter k in the opposite order to the validator and be
+    rejected — this exercises that the derivation uses output-index order.
     """
     from embit import bip32, bip39, ec, script
     from embit.psbt import DerivationPath
@@ -193,7 +194,14 @@ def _build_sp_psbt_two_outputs(spend2_hex):
 
 
 def _expected_scripts_two(spend2_hex):
-    """Independently derives the expected set of P2TR scripts for both outputs."""
+    """Independently derives the expected P2TR scripts, in output-index order.
+
+    The BIP-352 counter k is assigned per scan-key group in the order the
+    outputs appear in the transaction, which is the order the BIP-375 validator
+    re-derives in. _build_sp_psbt_two_outputs places the two outputs in
+    descending spend-key order, so we derive in that same order and return the
+    scripts as a list indexed by output position.
+    """
     from embit import bip32, bip39, ec, script, bech32
     from embit.transaction import COutPoint
     from embit.silent_payments import create_outputs
@@ -202,11 +210,14 @@ def _expected_scripts_two(spend2_hex):
     child = root.derive(INPUT_PATH)
     scan_pub = ec.PublicKey.parse(bytes.fromhex(SCAN_HEX))
 
-    # Same spend-key-ascending order Krux derives in, so the BIP-352 counter k
-    # lines up (k assignment, and thus each script, depends on this order).
+    # Match the on-chain output order built by _build_sp_psbt_two_outputs
+    # (descending spend key) so the BIP-352 counter k lines up with the value
+    # the validator re-derives — k depends on output-index position, not on the
+    # spend keys' sort order.
     spend_pubs = sorted(
         (ec.PublicKey.parse(bytes.fromhex(h)) for h in (SPEND_HEX, spend2_hex)),
         key=lambda p: p.sec(),
+        reverse=True,
     )
     addresses = []
     for spend_pub in spend_pubs:
@@ -218,21 +229,23 @@ def _expected_scripts_two(spend2_hex):
 
     outpoints = [COutPoint(bytes([0xAB] * 32), 0)]
     outputs_map = create_outputs([(child.key.secret, False)], outpoints, addresses)
-    scripts = set()
-    for outs in outputs_map.values():
-        for xonly_hex in outs:
-            scripts.add(
-                script.Script(b"\x51\x20" + bytes.fromhex(xonly_hex)).data.hex()
-            )
-    return scripts
+    # addresses are distinct (different spend keys), so each maps to one script;
+    # keep them in output-index order.
+    return [
+        script.Script(b"\x51\x20" + bytes.fromhex(outputs_map[addr][0])).data.hex()
+        for addr in addresses
+    ]
 
 
 def test_sign_two_sp_outputs_same_scan_key(mocker, m5stickv):
-    """Two SP outputs sharing a scan key derive to the correct script set.
+    """Two SP outputs sharing a scan key derive to the correct per-output scripts.
 
     Regression for the k-ordering bug: create_outputs assigns the BIP-352
-    counter in recipient order while the validator checks in spend-key order, so
-    the derivation must sort by spend key for the two to agree.
+    counter k in recipient-list order while the validator re-derives k in
+    output-index order, so the derivation must feed recipients in output-index
+    order (not sorted by spend key) for the two to agree. Asserts each output's
+    script position-by-position so a wrong k assignment is caught even when the
+    set of scripts would otherwise match.
     """
     from embit import ec
     from embit.networks import NETWORKS
@@ -248,7 +261,7 @@ def test_sign_two_sp_outputs_same_scan_key(mocker, m5stickv):
     signer = PSBTSigner(wallet, psbt_b64, FORMAT_NONE)
     signer.sign(trim=False)
 
-    on_chain = {out.script_pubkey.data.hex() for out in signer.psbt.outputs}
+    on_chain = [out.script_pubkey.data.hex() for out in signer.psbt.outputs]
     assert on_chain == _expected_scripts_two(spend2_hex)
 
 

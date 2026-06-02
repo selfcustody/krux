@@ -686,17 +686,19 @@ class PSBTSigner:
         from embit.script import Script
         from binascii import unhexlify
 
-        # SP outputs still awaiting their derived P2TR script. Sorted by spend
-        # key so the BIP-352 derivation counter k that create_outputs assigns
-        # (in recipient order) matches the spend-key order the BIP-375 validator
-        # uses when it re-derives and checks the scripts — otherwise two outputs
-        # sharing a scan key could be assigned mismatched k values.
+        # SP outputs still awaiting their derived P2TR script, in output (vout)
+        # index order. create_outputs assigns the BIP-352 derivation counter k
+        # in recipient-list order within each scan-key group, and the BIP-375
+        # validator re-derives k in output-index order within each scan-key
+        # group — so recipients MUST be passed in output-index order for the two
+        # to agree. (Sorting by spend key here would assign mismatched k values
+        # to two outputs sharing a scan key, e.g. labeled addresses of the same
+        # recipient, and the validator would reject the PSBT.)
         pending = [
             (i, out)
             for i, out in enumerate(self.psbt.outputs)
             if out.sp_data is not None and out.script_pubkey is None
         ]
-        pending.sort(key=lambda item: item[1].sp_data.spend_key.sec())
 
         if not pending:
             return
