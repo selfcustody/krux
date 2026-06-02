@@ -42,7 +42,6 @@ class PubkeyView(Page):
         """Handler for showing the BIP-352 scan key for SP wallets"""
         net_name = self.ctx.wallet.which_network()
         spscan = self.ctx.wallet.key.sp_scan_key_encoded(net_name)
-        descriptor_str = str(self.ctx.wallet.descriptor)
 
         def _show_text():
             from ...themes import theme
@@ -54,8 +53,11 @@ class PubkeyView(Page):
                     (
                         None
                         if not self.has_sd_card()
+                        # SD exports the scan key with its origin (not the full
+                        # sp(...) descriptor), matching the QR and what the
+                        # Sparrow coordinator expects.
                         else lambda: SaveFile(self.ctx).save_file(
-                            descriptor_str,
+                            spscan,
                             "SPSCAN",
                             "SPSCAN",
                             "SPSCAN:",
@@ -91,7 +93,7 @@ class PubkeyView(Page):
         def _show_qr():
             from ..qr_view import SeedQRView
 
-            SeedQRView(self.ctx, data=descriptor_str, title="SPSCAN").display_qr(
+            SeedQRView(self.ctx, data=spscan, title="SPSCAN").display_qr(
                 allow_export=True, transcript_tools=False
             )
 

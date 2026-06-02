@@ -75,10 +75,11 @@ def mock_seed_qr_view(mocker):
     return mocker.patch("krux.pages.qr_view.SeedQRView")
 
 
-def test_silent_payment_scan_key_exports_descriptor(
+def test_silent_payment_scan_key_exports(
     mocker, m5stickv, tdata, mock_save_file, mock_seed_qr_view
 ):
-    """Text/SD and QR exports must emit the same importable sp(...) descriptor"""
+    """Both Text/SD and QR export the scan key with its origin (the form the
+    Sparrow coordinator expects), not the full sp(...) descriptor."""
     from krux.pages.home_pages.pub_key_view import PubkeyView
     from krux.pages import MENU_EXIT
     from krux.wallet import Wallet
@@ -88,7 +89,7 @@ def test_silent_payment_scan_key_exports_descriptor(
     mock_save_file.return_value = MENU_EXIT
 
     wallet = Wallet(tdata.SILENT_PAYMENT_KEY)
-    descriptor_str = str(wallet.descriptor)
+    spscan = wallet.key.sp_scan_key_encoded(wallet.which_network())
 
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # Outer menu: select "SPSCAN - Text"
@@ -102,12 +103,14 @@ def test_silent_payment_scan_key_exports_descriptor(
     ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
     PubkeyView(ctx).public_key()
 
-    # The sp(...) descriptor is the importable form; both paths must use it
-    assert descriptor_str.startswith("sp(")
+    # Both paths export the scan key with its [origin] prefix, not the
+    # full sp(...) descriptor.
+    assert not spscan.startswith("sp(")
+    assert spscan.startswith("[")
     mock_save_file.assert_called_once()
-    assert mock_save_file.call_args.args[0] == descriptor_str
+    assert mock_save_file.call_args.args[0] == spscan
     mock_seed_qr_view.assert_called_once()
-    assert mock_seed_qr_view.call_args.kwargs["data"] == descriptor_str
+    assert mock_seed_qr_view.call_args.kwargs["data"] == spscan
 
 
 def test_public_key_show_text(mocker, m5stickv, tdata):
