@@ -816,6 +816,7 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     from krux.baseconv import base_encode
     from krux.pages.encryption_ui import decrypt_kef, KEFEnvelope
     from krux.input import BUTTON_PAGE_PREV
+    from krux.themes import theme
 
     # setup data: a fake kef envelope, non-kef data, decrypt-evidence, and responding "No" to "Decrypt?"
     fake_kef = kef.wrap(b"", 0, 10000, bytes([i * 8 for i in range(32)]))
@@ -830,7 +831,9 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    ctx.display.to_lines.assert_called_with(evidence)
+    ctx.display.draw_hcentered_text.assert_called_with(
+        evidence, 120, theme.fg_color, theme.bg_color, highlight_prefix=""
+    )
 
     print("test w/ non-kef bytes")
     ctx = create_ctx(mocker, [])
@@ -839,7 +842,7 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == 0
-    ctx.display.to_lines.assert_not_called()
+    ctx.display.draw_hcentered_text.assert_not_called()
 
     print("test w/ kef hex")
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -848,7 +851,9 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    ctx.display.to_lines.assert_called_with(evidence)
+    ctx.display.draw_hcentered_text.assert_called_with(
+        evidence, 120, theme.fg_color, theme.bg_color, highlight_prefix=""
+    )
 
     print("test with non-kef hex")
     ctx = create_ctx(mocker, [])
@@ -857,7 +862,7 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == 0
-    ctx.display.to_lines.assert_not_called()
+    ctx.display.draw_hcentered_text.assert_not_called()
 
     print("test with invalid hex-ish str")
     ctx = create_ctx(mocker, [])
@@ -866,7 +871,7 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == 0
-    ctx.display.to_lines.assert_not_called()
+    ctx.display.draw_hcentered_text.assert_not_called()
 
     print("test with kef HEX")
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -875,7 +880,9 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    ctx.display.to_lines.assert_called_with(evidence)
+    ctx.display.draw_hcentered_text.assert_called_with(
+        evidence, 120, theme.fg_color, theme.bg_color, highlight_prefix=""
+    )
 
     print("test with non-kef HEX")
     ctx = create_ctx(mocker, [])
@@ -884,7 +891,7 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == 0
-    ctx.display.to_lines.assert_not_called()
+    ctx.display.draw_hcentered_text.assert_not_called()
 
     print("test with invalid HEX-ish str")
     ctx = create_ctx(mocker, [])
@@ -893,7 +900,7 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == 0
-    ctx.display.to_lines.assert_not_called()
+    ctx.display.draw_hcentered_text.assert_not_called()
 
     print("test with kef base32")
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -902,7 +909,9 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    ctx.display.to_lines.assert_called_with(evidence)
+    ctx.display.draw_hcentered_text.assert_called_with(
+        evidence, 120, theme.fg_color, theme.bg_color, highlight_prefix=""
+    )
 
     print("test with non-kef base32")
     ctx = create_ctx(mocker, [])
@@ -911,7 +920,7 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == 0
-    ctx.display.to_lines.assert_not_called()
+    ctx.display.draw_hcentered_text.assert_not_called()
 
     print("test with invalid base32-ish str")
     ctx = create_ctx(mocker, [])
@@ -920,7 +929,7 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == 0
-    ctx.display.to_lines.assert_not_called()
+    ctx.display.draw_hcentered_text.assert_not_called()
 
     print("test with kef base43")
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -929,7 +938,9 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    ctx.display.to_lines.assert_called_with(evidence)
+    ctx.display.draw_hcentered_text.assert_called_with(
+        evidence, 120, theme.fg_color, theme.bg_color, highlight_prefix=""
+    )
 
     print("test with non-kef base43")
     ctx = create_ctx(mocker, [])
@@ -938,7 +949,7 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == 0
-    ctx.display.to_lines.assert_not_called()
+    ctx.display.draw_hcentered_text.assert_not_called()
 
     print("test with invalid base43-ish str")
     ctx = create_ctx(mocker, [])
@@ -947,7 +958,7 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == 0
-    ctx.display.to_lines.assert_not_called()
+    ctx.display.draw_hcentered_text.assert_not_called()
 
     print("test with kef base64")
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -956,7 +967,9 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    ctx.display.to_lines.assert_called_with(evidence)
+    ctx.display.draw_hcentered_text.assert_called_with(
+        evidence, 120, theme.fg_color, theme.bg_color, highlight_prefix=""
+    )
 
     print("test with non-kef base64")
     ctx = create_ctx(mocker, [])
@@ -965,7 +978,7 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == 0
-    ctx.display.to_lines.assert_not_called()
+    ctx.display.draw_hcentered_text.assert_not_called()
 
     print("test with invalid base64-ish str")
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -974,7 +987,7 @@ def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     except ValueError:
         pass
     assert ctx.input.wait_for_button.call_count == 0
-    ctx.display.to_lines.assert_not_called()
+    ctx.display.draw_hcentered_text.assert_not_called()
 
 
 def test_prompt_for_text_update_dflt_via_yes(m5stickv, mocker):

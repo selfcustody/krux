@@ -28,6 +28,7 @@ from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
     BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
     SWIPE_RIGHT,
     SWIPE_LEFT,
     SWIPE_UP,
@@ -256,11 +257,19 @@ class Keypad:
     def touch_to_physical(self):
         """Convert a touch press in button press"""
         self.cur_key_index = self.ctx.input.touch.current_index()
-        actual_button = None
+        if self.cur_key_index < 0:
+            self.cur_key_index = 0
+            return BUTTON_TOUCH
+
+        special_keys = [self.del_index, self.esc_index, self.go_index]
+        if self.has_more_key():
+            special_keys.append(self.more_index)
+
+        actual_button = BUTTON_TOUCH
         if self.cur_key_index < len(self.keys):
             if self.keys[self.cur_key_index] in self.possible_keys:
                 actual_button = BUTTON_ENTER
-        elif self.cur_key_index < self.layout.max_index:
+        elif self.cur_key_index in special_keys:
             actual_button = BUTTON_ENTER
         else:
             self.cur_key_index = 0

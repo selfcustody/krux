@@ -122,6 +122,16 @@ def test_run_loop_on_amigo_tft(mocker, amigo):
     assert status == MENU_SHUTDOWN
     assert ctx.input.wait_for_fastnav_button.call_count == call_count
 
+    # Check invalid touch index don't change result
+    BTN_SEQUENCE.insert(1, BUTTON_TOUCH)
+    call_count += len(BTN_SEQUENCE)
+    # invalid touch index
+    mocker.patch.object(ctx.input.touch, "current_index", new=lambda: -1)
+    ctx.input.wait_for_fastnav_button.side_effect = BTN_SEQUENCE
+    index, status = menu.run_loop()
+    assert status == MENU_SHUTDOWN
+    assert ctx.input.wait_for_fastnav_button.call_count == call_count
+
     mocker.patch.object(ctx.input.touch, "current_index", new=lambda: 1)
     mocker.patch.object(ctx.input, "buttons_active", False)
 
