@@ -215,16 +215,17 @@ class Store:
             pass
 
     def get(self, namespace, setting_name, default_value):
-        """Returns a setting value under the given namespace, or default value if not set"""
-        s = json.loads(
-            json.dumps(self.settings)
-        )  # deepcopy to avoid building out namespaces
+        """Returns a setting value under the given namespace, or default value if not set.
+
+        Read-only walk: never mutates self.settings, so no defensive copy is
+        needed. A missing or non-dict intermediate namespace returns the default.
+        """
+        s = self.settings
         for level in namespace.split("."):
-            s[level] = s.get(level, {})
-            s = s[level]
-        if setting_name not in s:
-            return default_value
-        return s[setting_name]
+            s = s.get(level)
+            if not isinstance(s, dict):
+                return default_value
+        return s.get(setting_name, default_value)
 
     def set(self, namespace, setting_name, setting_value):
         """Stores a setting value under the given namespace if new/changed.

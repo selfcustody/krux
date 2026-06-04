@@ -265,6 +265,46 @@ def test_store_get():
         assert s.get(case[0], case[1], case[3]) == case[2]
 
 
+def test_store_get_malformed_namespace_returns_default():
+    """A non-dict intermediate namespace must return the default, not raise.
+
+    Covers BOTH a non-dict at the first level AND a non-dict reached after a
+    valid descent (proves traversal stays safe mid-walk). Only reachable via a
+    corrupted/hand-edited settings file; set() never creates this state.
+    Approved behavior change: graceful degradation.
+    """
+    from krux.settings import Store
+
+    s = Store()
+
+    # Case 1: non-dict at the very first level.
+    s.settings = {"settings": "not_a_dict"}
+    assert s.get("settings.i18n", "locale", "en-US") == "en-US"
+    assert s.settings == {"settings": "not_a_dict"}  # no mutation
+
+    # Case 2: non-dict reached AFTER successfully descending a valid dict.
+    s.settings = {"settings": {"printer": "not_a_dict"}}
+    assert s.get("settings.printer.thermal", "baudrate", 9600) == 9600
+    assert s.settings == {"settings": {"printer": "not_a_dict"}}  # no mutation
+
+
+def test_store_get_deep_nesting():
+    """A 4-level namespace returns stored value when set, default when unset."""
+    from krux.settings import Store
+
+    s = Store()
+    ns = "settings.printer.thermal.adafruit"
+
+    # Unset -> default.
+    assert s.get(ns, "tx_pin", 35) == 35
+    # Getter must not populate the settings dict on a miss.
+    assert s.settings == {}
+
+    # Set then get returns the stored value, ignoring the default.
+    s.set(ns, "tx_pin", 21)
+    assert s.get(ns, "tx_pin", 35) == 21
+
+
 def test_store_set():
     from krux.settings import Store
 
