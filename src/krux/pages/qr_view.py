@@ -529,7 +529,10 @@ class SeedQRView(Page):
                         self.qr_foreground = None
 
                 self.draw_grided_qr(mode)
-                if self.ctx.display.height() > self.ctx.display.width():
+                if self.ctx.display.height() > self.ctx.display.width() and mode in (
+                    STANDARD_MODE,
+                    TRANSCRIBE_MODE,
+                ):
                     y_offset = self.ctx.display.qr_offset() + DEFAULT_PADDING
                     self.ctx.display.draw_hcentered_text(
                         label,
