@@ -294,7 +294,7 @@ class Page:
         while not done:
             try:
                 code, num_parts = next(code_generator)
-            except:
+            except StopIteration:
                 code_generator = to_qr_codes(data, qr_data_width, qr_format)
                 code, num_parts = next(code_generator)
 
