@@ -671,3 +671,24 @@ def test_fit_to_line_not_crop_middle(mocker, multiple_devices, mock_page_cls):
         formatted_text = page.fit_to_line(case[TXT], case[PREFIX], crop_middle=False)
         assert len(formatted_text) <= max_chars_in_line
         assert formatted_text == case[device_type]
+
+
+def test_has_sd_card_handles_errors_and_propagates_signals(
+    mocker, m5stickv, mock_page_cls
+):
+    """has_sd_card returns False on genuine SD errors, but must NOT swallow
+    BaseException-level signals like KeyboardInterrupt.
+
+    Regression for narrowing the bare except to `except Exception`.
+    """
+    ctx = create_ctx(mocker, [])
+    page = mock_page_cls(ctx)
+
+    # Genuine SD failure (OSError) -> reported as "no SD card".
+    mocker.patch("krux.pages.SDHandler", side_effect=OSError("no card"))
+    assert page.has_sd_card() is False
+
+    # Shutdown signal during the check -> propagates, not swallowed into False.
+    mocker.patch("krux.pages.SDHandler", side_effect=KeyboardInterrupt)
+    with pytest.raises(KeyboardInterrupt):
+        page.has_sd_card()
