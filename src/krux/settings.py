@@ -170,11 +170,7 @@ class Store:
         self._load_settings()
 
         # Define location based on what was loaded or default undefined
-        self.file_location = (
-            self.settings.get("settings", {})
-            .get("persist", {})
-            .get("location", "undefined")
-        )
+        self.file_location = self._persisted_location("undefined")
 
         # Settings not found on SD, or 'persist.location' key not defined
         if SD_PATH not in self.file_location:
@@ -184,10 +180,25 @@ class Store:
 
         # Settings persist location will point to SD (if defined) else defaults to flash
         self.file_location = Store.get_vfs_location(
-            self.settings.get("settings", {})
-            .get("persist", {})
-            .get("location", FLASH_PATH)
+            self._persisted_location(FLASH_PATH)
         )
+
+    def _persisted_location(self, default):
+        """Reads settings.persist.location from a possibly-malformed settings dict.
+
+        The persisted file is only validated to be a top-level dict on load, so a
+        hand-edited/corrupted file may have a non-dict where a namespace is
+        expected. Walk defensively and fall back to the default instead of
+        raising during construction.
+        """
+        node = self.settings
+        for level in ("settings", "persist"):
+            if not isinstance(node, dict):
+                return default
+            node = node.get(level)
+        if not isinstance(node, dict):
+            return default
+        return node.get("location", default)
 
     @classmethod
     def get_vfs_location(cls, location):
