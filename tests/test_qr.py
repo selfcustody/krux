@@ -244,3 +244,19 @@ def test_parse_pmofn_rejects_invalid_index(m5stickv):
 
     with pytest.raises(ValueError, match="Invalid pMofN part index"):
         parse_pmofn_qr_part("p4of3 data")
+
+
+def test_detect_format_propagates_base_exceptions(mocker, m5stickv):
+    """detect_format catches genuine parsing errors (returns FORMAT_NONE) but
+    must NOT swallow BaseException-level signals like KeyboardInterrupt.
+
+    Regression for narrowing the bare except to ``except Exception``.
+    """
+    from krux.qr import detect_format
+
+    class Boom:
+        def startswith(self, _):
+            raise KeyboardInterrupt
+
+    with pytest.raises(KeyboardInterrupt):
+        detect_format(Boom())
