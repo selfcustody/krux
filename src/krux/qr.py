@@ -308,7 +308,7 @@ def max_qr_bytes(max_width, encoding="byte"):
 
     try:
         return capacity_list[qr_version - 1]
-    except:
+    except IndexError:
         # Limited to version 20
         return capacity_list[-1]
 
@@ -406,6 +406,6 @@ def detect_format(data):
                     bbqr_encoding = data[2]
                     return FORMAT_BBQR, BBQrCode(None, bbqr_encoding, bbqr_file_type)
 
-    except:
+    except Exception:
         pass
     return qr_format, None
