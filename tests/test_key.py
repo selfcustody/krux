@@ -728,3 +728,18 @@ def test_classmethod_extract_fingerprint(mocker, m5stickv, tdata):
     fingerprint = Key.extract_fingerprint("this is not a mnemonic", pretty=False)
 
     assert fingerprint == ""
+
+
+def test_extract_fingerprint_propagates_base_exceptions(mocker, m5stickv):
+    """extract_fingerprint catches genuine errors (returns "") but must NOT
+    swallow BaseException-level signals like KeyboardInterrupt.
+
+    Regression for narrowing the bare except to ``except Exception``.
+    """
+    import pytest
+    from krux.key import Key
+
+    mocker.patch.object(Key, "extract_root", side_effect=KeyboardInterrupt)
+
+    with pytest.raises(KeyboardInterrupt):
+        Key.extract_fingerprint("any mnemonic", pretty=False)
