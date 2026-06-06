@@ -260,3 +260,19 @@ def test_detect_format_propagates_base_exceptions(mocker, m5stickv):
 
     with pytest.raises(KeyboardInterrupt):
         detect_format(Boom())
+
+
+def test_max_qr_bytes_caps_at_last_version(mocker, m5stickv):
+    """A width beyond the supported version range falls back to the largest
+    capacity (exercises the narrowed `except IndexError`)."""
+    from krux.qr import max_qr_bytes, QR_CAPACITY_BYTE
+
+    assert max_qr_bytes(200) == QR_CAPACITY_BYTE[-1]
+
+
+def test_detect_format_returns_none_on_undecodable_data(mocker, m5stickv):
+    """Genuine parse errors (e.g. undecodable bytes) are caught and reported as
+    FORMAT_NONE (exercises the narrowed `except Exception`)."""
+    from krux.qr import detect_format, FORMAT_NONE
+
+    assert detect_format(b"\xff\xfe\xfd") == (FORMAT_NONE, None)
