@@ -307,6 +307,33 @@ def test_store_init_survives_non_dict_settings_namespace(mocker, m5stickv):
     assert store.get("settings.i18n", "locale", "en-US") == "en-US"
 
 
+def test_store_init_survives_bogus_persist_location(mocker, m5stickv):
+    """Store.__init__ must not crash on a bogus persist.location value.
+
+    The structure is well-formed but `location` holds an unexpected value
+    (non-string, or an unknown string). `_persisted_location` must return only a
+    known location (SD/flash) and otherwise fall back to the default, so the
+    `SD_PATH not in self.file_location` membership test never sees a non-string.
+    """
+    from krux.settings import Store, FLASH_PATH
+
+    # Non-string location (would raise "argument of type 'int' is not iterable").
+    mocker.patch(
+        "builtins.open",
+        mocker.mock_open(read_data='{"settings": {"persist": {"location": 123}}}'),
+    )
+    store = Store()  # must not raise
+    assert FLASH_PATH in store.file_location
+
+    # Unknown string location -> also falls back to flash.
+    mocker.patch(
+        "builtins.open",
+        mocker.mock_open(read_data='{"settings": {"persist": {"location": "xyz"}}}'),
+    )
+    store = Store()  # must not raise
+    assert FLASH_PATH in store.file_location
+
+
 def test_store_get_recovers_from_malformed_persisted_namespace(mocker, m5stickv):
     """End-to-end: a persisted settings file with a well-formed top level but a
     non-dict nested namespace loads, and reads through it degrade gracefully.

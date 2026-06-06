@@ -188,8 +188,8 @@ class Store:
 
         The persisted file is only validated to be a top-level dict on load, so a
         hand-edited/corrupted file may have a non-dict where a namespace is
-        expected. Walk defensively and fall back to the default instead of
-        raising during construction.
+        expected, or a bogus location value. Walk defensively and return only a
+        known location (SD_PATH/FLASH_PATH); otherwise fall back to the default.
         """
         node = self.settings
         for level in ("settings", "persist"):
@@ -198,7 +198,10 @@ class Store:
             node = node.get(level)
         if not isinstance(node, dict):
             return default
-        return node.get("location", default)
+        location = node.get("location", default)
+        if location not in (SD_PATH, FLASH_PATH):
+            return default
+        return location
 
     @classmethod
     def get_vfs_location(cls, location):
