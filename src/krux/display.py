@@ -244,20 +244,14 @@ class Display:
     def to_landscape(self):
         """Changes the rotation of the display to landscape"""
         if self.portrait:
-            hardware = Settings().hardware
-            flipped = hasattr(hardware, "display") and getattr(
-                hardware.display, "flipped_orientation", False
-            )
+            flipped = Settings().is_flipped_orientation()
             lcd.rotation((LANDSCAPE + 2) % 4 if flipped else LANDSCAPE)
             self.portrait = False
 
     def to_portrait(self):
         """Changes the rotation of the display to portrait"""
         if not self.portrait:
-            hardware = Settings().hardware
-            flipped = hasattr(hardware, "display") and getattr(
-                hardware.display, "flipped_orientation", False
-            )
+            flipped = Settings().is_flipped_orientation()
             lcd.rotation((PORTRAIT + 2) % 4 if flipped else PORTRAIT)
             self.portrait = True
 
