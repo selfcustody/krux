@@ -5,7 +5,7 @@ hide:
 
 ## Ways you can help
 ### Development
-Audit the code, file an issue, make a pull request, or do all three :smiley:.
+Audit the code, file an issue, make a pull request, or do all three :material-emoticon-happy:.
 
 ### Documentation
 *"I'd like to see Krux help as many people as possible, and to do that, good documentation is needed. If you identify a better way to say something, please make a PR, any help is appreciated."* - Jeff
