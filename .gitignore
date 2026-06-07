@@ -25,6 +25,10 @@
 ######################
 build/
 build-*/
+# mkdocs site output (site_dir: public)
+public/
+# pytest-cov HTML report
+htmlcov/
 
 # Test failure outputs
 ######################
