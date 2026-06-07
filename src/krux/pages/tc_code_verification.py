@@ -27,8 +27,17 @@ from . import (
     UPPERCASE_LETTERS,
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
+    Menu,
 )
-from ..krux_settings import t, TC_CODE_PATH, TC_CODE_PBKDF2_ITERATIONS
+from ..krux_settings import (
+    t,
+    TC_CODE_PATH,
+    TC_CODE_PBKDF2_ITERATIONS,
+    Settings,
+    TAMPER_CHECK_INPUT_SCAN_QR,
+    TAMPER_CHECK_INPUT_MANUAL,
+    TAMPER_CHECK_INPUT_ASK_EVERY_TIME,
+)
 
 
 class TCCodeVerification(Page):
@@ -43,15 +52,16 @@ class TCCodeVerification(Page):
         import uhashlib_hw
         from machine import unique_id
 
-        label = (
-            t("Current Tamper Check Code")
-            if changing_tc_code
-            else t("Tamper Check Code")
-        )
-        tc_code = self.capture_from_keypad(
-            label, [NUM_SPECIAL_1, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2]
-        )
-        if tc_code == ESC_KEY:
+        method = self._select_input_method(changing_tc_code)
+        if method is None:
+            return False
+
+        if method == "qr":
+            tc_code = self._capture_from_qr()
+        else:
+            tc_code = self._capture_from_keypad(changing_tc_code)
+
+        if not tc_code:
             return False
         # Hashes the tamper check code
         tc_code_bytes = tc_code.encode()
@@ -76,3 +86,68 @@ class TCCodeVerification(Page):
 
         self.flash_error(t("Invalid Tamper Check Code"))
         return False
+
+    def _select_input_method(self, changing_tc_code):
+        if changing_tc_code:
+            return "manual"
+
+        mode = Settings().security.tamper_check_code_input_mode
+        if mode == TAMPER_CHECK_INPUT_ASK_EVERY_TIME:
+            return self._prompt_input_method()
+        if mode == TAMPER_CHECK_INPUT_SCAN_QR:
+            return "qr"
+        return "manual"
+
+    def _prompt_input_method(self):
+        menu = Menu(
+            self.ctx,
+            [
+                (t("Scan QR"), lambda: "qr"),
+                (t("Manual"), lambda: "manual"),
+            ],
+            back_label=None,
+        )
+        _, status = menu.run_loop()
+        if status == ESC_KEY:
+            return None
+        return status
+
+    def _capture_from_keypad(self, changing_tc_code):
+        label = (
+            t("Current Tamper Check Code")
+            if changing_tc_code
+            else t("Tamper Check Code")
+        )
+        tc_code = self.capture_from_keypad(
+            label, [NUM_SPECIAL_1, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2]
+        )
+        if tc_code == ESC_KEY:
+            return False
+        return tc_code
+
+    def _capture_from_qr(self):
+        from .qr_capture import QRCodeCapture
+
+        self.flash_text(t("Point camera at TC Code QR"))
+        qr_capture = QRCodeCapture(self.ctx)
+        data, _ = qr_capture.qr_capture_loop()
+        tc_code = self._sanitize_tc_code(data)
+        if tc_code:
+            return tc_code
+        return False
+
+    def _sanitize_tc_code(self, tc_code):
+        if tc_code is None:
+            return None
+        if isinstance(tc_code, bytes):
+            try:
+                tc_code = tc_code.decode()
+            except:
+                return None
+        if not isinstance(tc_code, str):
+            return None
+
+        cleaned = "".join(tc_code.splitlines()).strip()
+        if cleaned == "":
+            return None
+        return cleaned
