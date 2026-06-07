@@ -22,6 +22,9 @@ extra_css:
 
 theme:
   name: material
+  custom_dir: overrides
+  # Use the system font stack instead of fetching Roboto from Google Fonts.
+  font: false
   logo: img/favicon.png
   favicon: img/favicon.png
   palette:
@@ -113,7 +116,6 @@ nav:
       - Tamper Detection: getting-started/features/tamper-detection.en.md
       - Mnemonic XOR: getting-started/features/mnemonic-xor.en.md
     - Interface:
-      - Navigation overview: getting-started/navigation.en.md
       - Settings: getting-started/settings.en.md
       - Templates: getting-started/templates/templates.en.md
   - Video Tutorials: video-tutorials.en.md
