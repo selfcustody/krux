@@ -6,6 +6,14 @@
   margin: 0 !important;
 }
 
+/* Pre-rendered display equations (see render_docs_math.py). Centered blocks,
+   never wider than the column on small screens. */
+.md-typeset img.math-display {
+  display: block;
+  margin: 0.8em auto !important;
+  max-width: 100%;
+}
+
 .md-typeset h5 {
   color: black;
   text-transform: none;
