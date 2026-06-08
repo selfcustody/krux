@@ -244,10 +244,15 @@ class Store:
     def set(self, namespace, setting_name, setting_value):
         """Stores a setting value under the given namespace if new/changed.
         Does NOT automatically save settings to flash or sd!
+
+        A non-dict intermediate level (from a corrupted/hand-edited file) is
+        replaced with a fresh dict, so writing a setting cannot raise and also
+        repairs the malformed structure.
         """
         s = self.settings
         for level in namespace.split("."):
-            s[level] = s.get(level, {})
+            if not isinstance(s.get(level), dict):
+                s[level] = {}
             s = s[level]
         old_value = s.get(setting_name, None)
         if old_value != setting_value:
@@ -261,7 +266,8 @@ class Store:
         s = self.settings
         levels = []
         for level in namespace.split("."):
-            s[level] = s.get(level, {})
+            if not isinstance(s.get(level), dict):
+                s[level] = {}
             levels.append([s, level])
             s = s[level]
         if setting_name in s:

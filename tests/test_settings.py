@@ -288,6 +288,39 @@ def test_store_get_malformed_namespace_returns_default():
     assert s.settings == {"settings": {"printer": "not_a_dict"}}  # no mutation
 
 
+def test_store_set_repairs_non_dict_namespace(mocker, m5stickv):
+    """Store.set must not crash when an intermediate namespace is a non-dict
+    (e.g. a corrupted file like {"settings": "broken"}); it replaces the bad
+    level with a dict, stores the value, and repairs the structure.
+    """
+    from krux.settings import Store
+
+    s = Store()
+    s.settings = {"settings": "broken"}
+
+    # Pre-fix this raised AttributeError: 'str' object has no attribute 'get'.
+    s.set("settings.appearance", "theme", "dark")
+
+    assert s.settings["settings"]["appearance"]["theme"] == "dark"
+    assert s.dirty is True
+    # Read-back through the repaired structure returns the stored value.
+    assert s.get("settings.appearance", "theme", "light") == "dark"
+
+
+def test_store_delete_survives_non_dict_namespace(mocker, m5stickv):
+    """Store.delete must not crash when an intermediate namespace is a non-dict."""
+    from krux.settings import Store
+
+    s = Store()
+    s.settings = {"settings": "broken"}
+
+    # Pre-fix this raised AttributeError walking into the string "broken".
+    s.delete("settings.appearance", "theme")  # nothing to delete, must not raise
+    # The non-dict "broken" must no longer be present (repaired, then the empty
+    # levels cleaned up by delete's own pruning).
+    assert s.settings.get("settings") != "broken"
+
+
 def test_store_init_survives_non_dict_settings_namespace(mocker, m5stickv):
     """Store.__init__ must not crash when the persisted 'settings' value is a
     non-dict.
