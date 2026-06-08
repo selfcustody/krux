@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{#
+  Content-Security-Policy hardening.
+
+  The docs reference no third party assets: fonts use the system stack, emoji
+  and icons render as inline Material SVG, and math is pre rendered to local
+  SVG. So the published site loads no remote scripts, styles, or fonts, and this
+  policy enforces that at the browser level. A CDN compromise, or an accidental
+  re-introduction of a remote <script> (as happened with the polyfill.io
+  incident), cannot execute on the docs.
+
+  'unsafe-inline' is required only for the small inline <script>/<style> that
+  Material emits; it still forbids loading scripts from any other origin, which
+  is the actual supply chain risk. The site embeds no third party frames, so
+  frame-src is 'none'.
+
+  Note: frame-ancestors and X-Frame-Options require real HTTP response headers
+  and are ignored when set from a static <meta> tag on GitHub Pages.
+#}
+{% block extrahead %}
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
+{% endblock %}
