@@ -117,7 +117,8 @@ nav:
       - Mnemonic XOR: getting-started/features/mnemonic-xor.en.md
     - Interface:
       - Settings: getting-started/settings.en.md
-      - Templates: getting-started/templates/templates.en.md
+      - Templates:
+        - getting-started/templates/index.en.md
   - Video Tutorials: video-tutorials.en.md
   - Devices and Parts List: parts.en.md
   - FAQ: faq.en.md
