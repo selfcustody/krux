@@ -45,17 +45,9 @@
     
     
       
-        
-        
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-      
     
     
       <link rel="stylesheet" href="../../../css/custom.css">
-    
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.css">
     
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -63,6 +55,8 @@
 
     
     
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
+
   </head>
   
   
@@ -2021,8 +2015,6 @@
       
         
       
-        
-      
     
     
     
@@ -2072,34 +2064,6 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../navigation/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Navigation overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -2348,21 +2312,14 @@
 </ul>
 <p>While thermodynamics entropy deals with physical systems, Shannon's entropy focuses on information content, and cryptographic entropy emphasizes security through randomness.</p>
 <h3 id="measuring-dice-rolls-entropy">Measuring Dice Rolls Entropy<a class="headerlink" href="#measuring-dice-rolls-entropy" title="Permanent link">&para;</a></h3>
-<p>Entropy is a theoretical measure and is not directly measurable from a single roll but rather from the probability distribution of outcomes over many rolls. We can use Shannon's formula for theoretical and empirical calculations. Entropy <span class="arithmatex"><span class="MathJax_Preview">S</span><script type="math/tex">S</script></span> can be quantified with:</p>
-<div class="arithmatex">
-<div class="MathJax_Preview">
-S = -\sum_{i=1}^{n} p_i \log(p_i)
-</div>
-<script type="math/tex; mode=display">
-S = -\sum_{i=1}^{n} p_i \log(p_i)
-</script>
-</div>
+<p>Entropy is a theoretical measure and is not directly measurable from a single roll but rather from the probability distribution of outcomes over many rolls. We can use Shannon's formula for theoretical and empirical calculations. Entropy <em>S</em> can be quantified with:</p>
+<p><img alt="S = -\sum_{i=1}^{n} p_i \log(p_i)" class="math-display" src="../img/math/eq-01.svg" /></p>
 <ol>
 <li>
 <p><strong>Empirical Measurement:</strong></p>
 <ul>
 <li>Roll the dice a large number of times to observe the frequency of each outcome.</li>
-<li>Estimate the probabilities <span class="arithmatex"><span class="MathJax_Preview">p_i</span><script type="math/tex">p_i</script></span> based on observed frequencies.</li>
+<li>Estimate the probabilities <em>p<sub>i</sub></em> based on observed frequencies.</li>
 </ul>
 </li>
 <li>
@@ -2374,41 +2331,33 @@ S = -\sum_{i=1}^{n} p_i \log(p_i)
 </ol>
 <p>where:</p>
 <ul>
-<li><span class="arithmatex"><span class="MathJax_Preview">p_i</span><script type="math/tex">p_i</script></span> is the probability of each possible outcome (or state) of the system.</li>
-<li><span class="arithmatex"><span class="MathJax_Preview">n</span><script type="math/tex">n</script></span> is the number of possible outcomes.</li>
+<li><em>p<sub>i</sub></em> is the probability of each possible outcome (or state) of the system.</li>
+<li><em>n</em> is the number of possible outcomes.</li>
 </ul>
 <h2 id="empirical-real-vs-theoretical-entropy-in-dice-rolls">Empirical (Real) vs. Theoretical Entropy in Dice Rolls<a class="headerlink" href="#empirical-real-vs-theoretical-entropy-in-dice-rolls" title="Permanent link">&para;</a></h2>
 <p>When calculating the entropy of dice rolls, the difference between real and theoretical results arises from the assumption of perfect fairness and uniformity versus the inherent imperfections in real-world experiments.</p>
 <h3 id="theoretical-entropy">Theoretical Entropy<a class="headerlink" href="#theoretical-entropy" title="Permanent link">&para;</a></h3>
 <p>The theoretical entropy calculation assumes that the dice are perfectly fair, meaning each face has an equal probability of landing face up.</p>
-<p>Consider a fair six-sided die. The possible outcomes when rolling one die are {1, 2, 3, 4, 5, 6}, each with an equal probability of <span class="arithmatex"><span class="MathJax_Preview">\frac{1}{6}</span><script type="math/tex">\frac{1}{6}</script></span>.</p>
+<p>Consider a fair six-sided die. The possible outcomes when rolling one die are {1, 2, 3, 4, 5, 6}, each with an equal probability of 1/6.</p>
 <ol>
 <li>
 <p><strong>Single Die Roll:</strong></p>
 <ul>
-<li>Each outcome has a probability <span class="arithmatex"><span class="MathJax_Preview">p_i = \frac{1}{6}</span><script type="math/tex">p_i = \frac{1}{6}</script></span>.</li>
-<li>The entropy <span class="arithmatex"><span class="MathJax_Preview">S</span><script type="math/tex">S</script></span> for one die roll is calculated as:
-$$
-S = - \sum_{i=1}^{6} \left( \frac{1}{6} \log_2 \left( \frac{1}{6} \right) \right)
-$$
-Since <span class="arithmatex"><span class="MathJax_Preview">\log_2(1/6) = -\log_2(6)</span><script type="math/tex">\log_2(1/6) = -\log_2(6)</script></span> :
-$$
-S = -6 \left( \frac{1}{6} \times -\log_2(6) \right) = \log_2(6) \approx 2.585 \text{ bits}
-$$</li>
+<li>Each outcome has a probability <em>p<sub>i</sub></em> = 1/6.</li>
+<li>The entropy <em>S</em> for one die roll is calculated as:
+<img alt="S = - \sum_{i=1}^{6} \left( \frac{1}{6} \log_2 \left( \frac{1}{6} \right) \right)" class="math-display" src="../img/math/eq-02.svg" />
+Since log₂(1/6) = −log₂(6) :
+<img alt="S = -6 \left( \frac{1}{6} \times -\log_2(6) \right) = \log_2(6) \approx 2.585 \text{ bits}" class="math-display" src="../img/math/eq-03.svg" /></li>
 </ul>
 </li>
 <li>
 <p><strong>Multiple Dice Rolls:</strong></p>
 <ul>
-<li>For multiple dice, the entropy increases as the number of possible outcomes increases. For <span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span> fair dice, the number of possible outcomes is <span class="arithmatex"><span class="MathJax_Preview">6^k</span><script type="math/tex">6^k</script></span>.</li>
-<li>The entropy <span class="arithmatex"><span class="MathJax_Preview">S</span><script type="math/tex">S</script></span> for <span class="arithmatex"><span class="MathJax_Preview">k</span><script type="math/tex">k</script></span> dice is:
-$$
-S = \log_2(6^k) = k \log_2(6) \approx 2.585k \text{ bits}
-$$</li>
+<li>For multiple dice, the entropy increases as the number of possible outcomes increases. For <em>k</em> fair dice, the number of possible outcomes is 6<sup>k</sup>.</li>
+<li>The entropy <em>S</em> for <em>k</em> dice is:
+<img alt="S = \log_2(6^k) = k \log_2(6) \approx 2.585k \text{ bits}" class="math-display" src="../img/math/eq-04.svg" /></li>
 <li>For example, entropy for the roll of 50 fair dice is calculated as:
-$$
-S = \log_2(6^{50}) = 50 \log_2(6) \approx 2.585 \times 50 \approx 129.25 \text{ bits}
-$$</li>
+<img alt="S = \log_2(6^{50}) = 50 \log_2(6) \approx 2.585 \times 50 \approx 129.25 \text{ bits}" class="math-display" src="../img/math/eq-05.svg" /></li>
 </ul>
 </li>
 </ol>
@@ -2420,15 +2369,8 @@ $$</li>
 <li><strong>Rolling Conditions</strong>: The way the dice are rolled, the surface they land on, and even air currents can introduce slight biases.</li>
 <li><strong>Finite Sample Size</strong>: When rolling dice a finite number of times, the observed frequencies of each face will naturally deviate from the expected uniform distribution due to random variations. This phenomenon is more pronounced with smaller sample sizes.</li>
 </ol>
-<p>When you roll a die multiple times and observe the outcomes, you can calculate the empirical probabilities <span class="arithmatex"><span class="MathJax_Preview">p_i</span><script type="math/tex">p_i</script></span> of each face. Using these probabilities, the entropy is calculated as:</p>
-<div class="arithmatex">
-<div class="MathJax_Preview">
-S = - \sum_{i=1}^{6} p_i \log_2(p_i)
-</div>
-<script type="math/tex; mode=display">
-S = - \sum_{i=1}^{6} p_i \log_2(p_i)
-</script>
-</div>
+<p>When you roll a die multiple times and observe the outcomes, you can calculate the empirical probabilities <em>p<sub>i</sub></em> of each face. Using these probabilities, the entropy is calculated as:</p>
+<p><img alt="S = - \sum_{i=1}^{6} p_i \log_2(p_i)" class="math-display" src="../img/math/eq-06.svg" /></p>
 <h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h3>
 <p>Suppose you roll a six-sided die 50 times and get the following results:</p>
 <ul>
@@ -2443,69 +2385,35 @@ S = - \sum_{i=1}^{6} p_i \log_2(p_i)
 <h4 id="step-1-calculate-probabilities">Step 1: Calculate Probabilities<a class="headerlink" href="#step-1-calculate-probabilities" title="Permanent link">&para;</a></h4>
 <ul>
 <li>Total number of rolls:
-$$
-N = 4 + 9 + 7 + 10 + 12 + 8 = 50
-$$</li>
+<img alt="N = 4 + 9 + 7 + 10 + 12 + 8 = 50" class="math-display" src="../img/math/eq-07.svg" /></li>
 <li>Probabilities for each outcome:
-$$
-p_1 = \frac{4}{50} = 0.08 
-$$
-$$
-p_2 = \frac{9}{50} = 0.18 
-$$
-$$
-p_3 = \frac{7}{50} = 0.14 
-$$
-$$
-p_4 = \frac{10}{50} = 0.2 
-$$
-$$
-p_5 = \frac{12}{50} = 0.24 
-$$
-$$
-p_6 = \frac{8}{50} = 0.16 
-$$</li>
+<img alt="p_1 = \frac{4}{50} = 0.08" class="math-display" src="../img/math/eq-08.svg" />
+<img alt="p_2 = \frac{9}{50} = 0.18" class="math-display" src="../img/math/eq-09.svg" />
+<img alt="p_3 = \frac{7}{50} = 0.14" class="math-display" src="../img/math/eq-10.svg" />
+<img alt="p_4 = \frac{10}{50} = 0.2" class="math-display" src="../img/math/eq-11.svg" />
+<img alt="p_5 = \frac{12}{50} = 0.24" class="math-display" src="../img/math/eq-12.svg" />
+<img alt="p_6 = \frac{8}{50} = 0.16" class="math-display" src="../img/math/eq-13.svg" /></li>
 </ul>
 <h4 id="step-2-compute-entropy">Step 2: Compute Entropy<a class="headerlink" href="#step-2-compute-entropy" title="Permanent link">&para;</a></h4>
 <ul>
 <li>Using Shannon's entropy formula:
-$$
-S = -\sum_{i=1}^{n} p_i \log_2(p_i)
-$$</li>
+<img alt="S = -\sum_{i=1}^{n} p_i \log_2(p_i)" class="math-display" src="../img/math/eq-14.svg" /></li>
 <li>Calculate each term:
-$$
-S_1 = -p_1 \log_2(p_1) = -0.08 \log_2(0.08) = -0.08 \times (-3.64386) = 0.291509
-$$
-$$
-S_2 = -p_2 \log_2(p_2) = -0.18 \log_2(0.18) = -0.18 \times (-2.47393) = 0.445307
-$$
-$$
-S_3 = -p_3 \log_2(p_3) = -0.14 \log_2(0.14) = -0.14 \times (-2.8365) = 0.39711
-$$
-$$
-S_4 = -p_4 \log_2(p_4) = -0.2 \log_2(0.2) = -0.2 \times (-2.32193) = 0.464386
-$$
-$$
-S_5 = -p_5 \log_2(p_5) = -0.24 \log_2(0.24) = -0.24 \times (-2.05889) = 0.494132
-$$
-$$
-S_6 = -p_6 \log_2(p_6) = -0.16 \log_2(0.16) = -0.16 \times (-2.64386) = 0.423018
-$$</li>
+<img alt="S_1 = -p_1 \log_2(p_1) = -0.08 \log_2(0.08) = -0.08 \times (-3.64386) = 0.291509" class="math-display" src="../img/math/eq-15.svg" />
+<img alt="S_2 = -p_2 \log_2(p_2) = -0.18 \log_2(0.18) = -0.18 \times (-2.47393) = 0.445307" class="math-display" src="../img/math/eq-16.svg" />
+<img alt="S_3 = -p_3 \log_2(p_3) = -0.14 \log_2(0.14) = -0.14 \times (-2.8365) = 0.39711" class="math-display" src="../img/math/eq-17.svg" />
+<img alt="S_4 = -p_4 \log_2(p_4) = -0.2 \log_2(0.2) = -0.2 \times (-2.32193) = 0.464386" class="math-display" src="../img/math/eq-18.svg" />
+<img alt="S_5 = -p_5 \log_2(p_5) = -0.24 \log_2(0.24) = -0.24 \times (-2.05889) = 0.494132" class="math-display" src="../img/math/eq-19.svg" />
+<img alt="S_6 = -p_6 \log_2(p_6) = -0.16 \log_2(0.16) = -0.16 \times (-2.64386) = 0.423018" class="math-display" src="../img/math/eq-20.svg" /></li>
 <li>
 <p>Sum the contributions:
-$$
-S = S_1 + S_2 + S_3 + S_4 + S_5 + S_6 
-$$
-$$
-S = 0.291509 + 0.445307 + 0.39711 + 0.464386 + 0.494132 + 0.423018 = 2.515462
-$$
-Thus, the Shannon's entropy for the given distribution of dice rolls is approximately <span class="arithmatex"><span class="MathJax_Preview">2.52</span><script type="math/tex">2.52</script></span> bits per roll. This will give you a different value than <span class="arithmatex"><span class="MathJax_Preview">\log_2(6)</span><script type="math/tex">\log_2(6)</script></span> due to the deviations in the empirical probabilities.</p>
+<img alt="S = S_1 + S_2 + S_3 + S_4 + S_5 + S_6" class="math-display" src="../img/math/eq-21.svg" />
+<img alt="S = 0.291509 + 0.445307 + 0.39711 + 0.464386 + 0.494132 + 0.423018 = 2.515462" class="math-display" src="../img/math/eq-22.svg" />
+Thus, the Shannon's entropy for the given distribution of dice rolls is approximately 2.52 bits per roll. This will give you a different value than log₂(6) due to the deviations in the empirical probabilities.</p>
 </li>
 <li>
-<p>The total entropy for the <span class="arithmatex"><span class="MathJax_Preview">N = 50</span><script type="math/tex">N = 50</script></span> rolls is:
-$$
-S_{total} = S \times N = 2.515 + 50 \approx 125.8 \text{ bits}
-$$</p>
+<p>The total entropy for the <em>N</em> = 50 rolls is:
+<img alt="S_{total} = S \times N = 2.515 + 50 \approx 125.8 \text{ bits}" class="math-display" src="../img/math/eq-23.svg" /></p>
 </li>
 </ul>
 <h4 id="shannons-entropy-in-practice">Shannon's Entropy in Practice<a class="headerlink" href="#shannons-entropy-in-practice" title="Permanent link">&para;</a></h4>
@@ -2665,10 +2573,6 @@ $$</p>
     
     
       <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
-      
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-      
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
       
     
   </body>
