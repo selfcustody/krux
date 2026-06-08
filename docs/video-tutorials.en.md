@@ -19,6 +19,10 @@ Most people prefer to learn by watching videos, and we are fortunate to have exc
 - [Faça sua hardware wallet em casa com a KRUX!](https://www.youtube.com/watch?v=1V6Lp0m8esc) — CAIOVSKI (Jun 2024)
 - [MAIX CUBE + KRUX É UMA BOA CARTEIRA?](https://www.youtube.com/watch?v=8k2RivwnHUc) — DIG P2P - Bitcoin Para Iniciantes! (Nov 2025)
 
+## Spanish
+
+- [Cómo instalar Krux en Yahboom K210 + guía completa de uso](https://www.youtube.com/watch?v=jrYJD0VllYs) — Cripto Novedad (Mar 2026)
+
 ## Korean
 
 - [Krux 월렛 설치 및 검증 방법(feat : 원더케이 비트코인 전용 하드월렛)](https://www.youtube.com/watch?v=7H1bI0A2y0w) — 봉현이형 (Oct 2024)
