@@ -21,11 +21,16 @@
 # THE SOFTWARE.
 import gc
 import time
+from krux.settings import REGTEST_TXT, SIGNET_TXT, TEST_TXT
 import lcd
 import _thread
 from ..context import Context
 from .keypads import Keypad
-from ..themes import theme, WHITE, GREEN, DARKGREY
+from ..themes import (
+    theme,
+    WHITE,
+    DARKGREY,
+)
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -910,21 +915,32 @@ class Menu:
 
     def draw_network_indicator(self):
         """Draws test at top if testnet is enabled"""
-        if self.ctx.is_logged_in() and self.ctx.wallet.key.network["name"] == "Testnet":
+        if self.ctx.is_logged_in():
+            netname = self.ctx.wallet.key.network["name"].lower()
+
+            if netname == TEST_TXT:
+                color = theme.test_color
+            elif netname == SIGNET_TXT:
+                color = theme.signet_color
+            elif netname == REGTEST_TXT:
+                color = theme.regtest_color
+            else:
+                color = theme.main_color
+
             if not kboard.is_m5stickv:
                 self.ctx.display.draw_string(
                     12,
                     STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
-                    "Test",
-                    GREEN,
+                    netname,
+                    color,
                     theme.info_bg_color,
                 )
             else:
                 self.ctx.display.draw_string(
                     6,
                     STATUS_BAR_HEIGHT - FONT_HEIGHT - 1,
-                    "T",
-                    GREEN,
+                    netname[0] if netname != "" else "",
+                    color,
                     theme.info_bg_color,
                 )
 

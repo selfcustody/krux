@@ -34,6 +34,7 @@ DARKWHITE = 0x1CE7
 WHITE = 0xFFFF
 GREEN = 0xE007
 DARKGREEN = 0x8005
+LIGHT_GREEN = 0x1005
 RED = 0x00F8
 LIGHT_PINK = 0xDFFC
 PINK = 0x1FF8
@@ -44,9 +45,6 @@ YELLOW = 0x85F6
 BLUE = 0xF800
 LIGHTBLUE = 0xBD0E
 CYAN = 0xFF07
-
-MAIN_TXT_COLOR = ORANGE
-TEST_TXT_COLOR = GREEN
 
 
 THEMES = {
@@ -62,6 +60,10 @@ THEMES = {
         "toggle": CYAN,
         "error": RED,
         "highlight": LIGHTBLUE,
+        "main": WHITE,
+        "test": GREEN,
+        "signet": LIGHT_PINK,
+        "regtest": LIGHT_GREEN,
     },
     ThemeSettings.LIGHT_THEME_NAME: {
         "background": WHITE,
@@ -75,6 +77,10 @@ THEMES = {
         "toggle": BLUE,
         "error": RED,
         "highlight": BLUE,
+        "main": BLACK,
+        "test": DARKGREEN,
+        "signet": PURPLE,
+        "regtest": BLUE,
     },
     ThemeSettings.ORANGE_THEME_NAME: {
         "background": BLACK,
@@ -88,6 +94,10 @@ THEMES = {
         "toggle": CYAN,
         "error": RED,
         "highlight": YELLOW,
+        "main": ORANGE,
+        "test": GREEN,
+        "signet": LIGHT_PINK,
+        "regtest": LIGHT_GREEN,
     },
     ThemeSettings.PINK_THEME_NAME: {
         "background": BLACK,
@@ -101,6 +111,10 @@ THEMES = {
         "toggle": CYAN,
         "error": RED,
         "highlight": PINK,
+        "main": LIGHT_PINK,
+        "test": GREEN,
+        "signet": PINK,
+        "regtest": LIGHT_GREEN,
     },
     ThemeSettings.GREEN_THEME_NAME: {
         "background": BLACK,
@@ -114,10 +128,15 @@ THEMES = {
         "toggle": CYAN,
         "error": RED,
         "highlight": CYAN,
+        "main": GREEN,
+        "test": CYAN,
+        "signet": LIGHT_PINK,
+        "regtest": LIGHT_GREEN,
     },
 }
 
 
+# pylint: disable=too-many-instance-attributes
 class Theme:
     """Themes handler"""
 
@@ -141,6 +160,10 @@ class Theme:
         self.toggle_color = THEMES[current_theme]["toggle"]
         self.error_color = THEMES[current_theme]["error"]
         self.highlight_color = THEMES[current_theme]["highlight"]
+        self.main_color = THEMES[current_theme]["main"]
+        self.test_color = THEMES[current_theme]["test"]
+        self.signet_color = THEMES[current_theme]["signet"]
+        self.regtest_color = THEMES[current_theme]["regtest"]
 
 
 theme = Theme()
