@@ -184,13 +184,9 @@ class Store:
         )
 
     def _persisted_location(self, default):
-        """Reads settings.persist.location from a possibly-malformed settings dict.
-
-        The persisted file is only validated to be a top-level dict on load, so a
-        hand-edited/corrupted file may have a non-dict where a namespace is
-        expected, or a bogus location value. Walk defensively and return only a
-        known location (SD_PATH/FLASH_PATH); otherwise fall back to the default.
-        """
+        """Reads persist.location defensively; returns a known path or default."""
+        # A corrupted/hand-edited file may have a non-dict at any namespace level
+        # or a bogus location value — walk defensively and validate before returning.
         node = self.settings
         for level in ("settings", "persist"):
             if not isinstance(node, dict):
@@ -229,11 +225,7 @@ class Store:
             pass
 
     def get(self, namespace, setting_name, default_value):
-        """Returns a setting value under the given namespace, or default value if not set.
-
-        Read-only walk: never mutates self.settings, so no defensive copy is
-        needed. A missing or non-dict intermediate namespace returns the default.
-        """
+        """Returns setting value under the given namespace, or default_value if not set."""
         s = self.settings
         for level in namespace.split("."):
             s = s.get(level)
@@ -242,13 +234,9 @@ class Store:
         return s.get(setting_name, default_value)
 
     def set(self, namespace, setting_name, setting_value):
-        """Stores a setting value under the given namespace if new/changed.
-        Does NOT automatically save settings to flash or sd!
-
-        A non-dict intermediate level (from a corrupted/hand-edited file) is
-        replaced with a fresh dict, so writing a setting cannot raise and also
-        repairs the malformed structure.
-        """
+        """Stores a setting value under the given namespace if new/changed. Does not auto-save."""
+        # A non-dict intermediate level is replaced with a fresh dict,
+        # repairing malformed structure.
         s = self.settings
         for level in namespace.split("."):
             if not isinstance(s.get(level), dict):
