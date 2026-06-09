@@ -265,6 +265,145 @@ def test_store_get():
         assert s.get(case[0], case[1], case[3]) == case[2]
 
 
+def test_store_get_malformed_namespace_returns_default():
+    """A non-dict intermediate namespace must return the default, not raise.
+
+    Covers BOTH a non-dict at the first level AND a non-dict reached after a
+    valid descent (proves traversal stays safe mid-walk). Only reachable via a
+    corrupted/hand-edited settings file; set() never creates this state.
+    Approved behavior change: graceful degradation.
+    """
+    from krux.settings import Store
+
+    s = Store()
+
+    # Case 1: non-dict at the very first level.
+    s.settings = {"settings": "not_a_dict"}
+    assert s.get("settings.i18n", "locale", "en-US") == "en-US"
+    assert s.settings == {"settings": "not_a_dict"}  # no mutation
+
+    # Case 2: non-dict reached AFTER successfully descending a valid dict.
+    s.settings = {"settings": {"printer": "not_a_dict"}}
+    assert s.get("settings.printer.thermal", "baudrate", 9600) == 9600
+    assert s.settings == {"settings": {"printer": "not_a_dict"}}  # no mutation
+
+
+def test_store_set_repairs_non_dict_namespace(mocker, m5stickv):
+    """Store.set must not crash when an intermediate namespace is a non-dict
+    (e.g. a corrupted file like {"settings": "broken"}); it replaces the bad
+    level with a dict, stores the value, and repairs the structure.
+    """
+    from krux.settings import Store
+
+    s = Store()
+    s.settings = {"settings": "broken"}
+
+    # Pre-fix this raised AttributeError: 'str' object has no attribute 'get'.
+    s.set("settings.appearance", "theme", "dark")
+
+    assert s.settings["settings"]["appearance"]["theme"] == "dark"
+    assert s.dirty is True
+    # Read-back through the repaired structure returns the stored value.
+    assert s.get("settings.appearance", "theme", "light") == "dark"
+
+
+def test_store_delete_survives_non_dict_namespace(mocker, m5stickv):
+    """Store.delete must not crash when an intermediate namespace is a non-dict."""
+    from krux.settings import Store
+
+    s = Store()
+    s.settings = {"settings": "broken"}
+
+    # Pre-fix this raised AttributeError walking into the string "broken".
+    s.delete("settings.appearance", "theme")  # nothing to delete, must not raise
+    # The non-dict "broken" must no longer be present (repaired, then the empty
+    # levels cleaned up by delete's own pruning).
+    assert s.settings.get("settings") != "broken"
+
+
+def test_store_init_survives_non_dict_settings_namespace(mocker, m5stickv):
+    """Store.__init__ must not crash when the persisted 'settings' value is a
+    non-dict.
+
+    The loader only validates the top level is a dict, so a corrupted file like
+    {"settings": "not_a_dict"} passes load. The location read in __init__ walks
+    settings.persist.location and must degrade gracefully instead of raising
+    AttributeError. Reads through the malformed namespace return defaults.
+    """
+    stored_settings = '{"settings": "not_a_dict"}'
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    from krux.settings import Store, FLASH_PATH
+
+    store = Store()  # must not raise
+    assert FLASH_PATH in store.file_location
+    assert store.get("settings.i18n", "locale", "en-US") == "en-US"
+
+
+def test_store_init_survives_bogus_persist_location(mocker, m5stickv):
+    """Store.__init__ must not crash on a bogus persist.location value.
+
+    The structure is well-formed but `location` holds an unexpected value
+    (non-string, or an unknown string). `_persisted_location` must return only a
+    known location (SD/flash) and otherwise fall back to the default, so the
+    `SD_PATH not in self.file_location` membership test never sees a non-string.
+    """
+    from krux.settings import Store, FLASH_PATH
+
+    # Non-string location (would raise "argument of type 'int' is not iterable").
+    mocker.patch(
+        "builtins.open",
+        mocker.mock_open(read_data='{"settings": {"persist": {"location": 123}}}'),
+    )
+    store = Store()  # must not raise
+    assert FLASH_PATH in store.file_location
+
+    # Unknown string location -> also falls back to flash.
+    mocker.patch(
+        "builtins.open",
+        mocker.mock_open(read_data='{"settings": {"persist": {"location": "xyz"}}}'),
+    )
+    store = Store()  # must not raise
+    assert FLASH_PATH in store.file_location
+
+
+def test_store_get_recovers_from_malformed_persisted_namespace(mocker, m5stickv):
+    """End-to-end: a persisted settings file with a well-formed top level but a
+    non-dict nested namespace loads, and reads through it degrade gracefully.
+
+    The top level, `settings`, and `settings.persist` are well-formed (the
+    constructor reads `persist` to pick the file location), but the `i18n`
+    namespace is a string instead of a dict. get() must return the default
+    rather than raising. Covers the file -> __init__ -> get() chain, not just
+    direct Store.get() calls.
+    """
+    stored_settings = '{"settings": {"i18n": "not_a_dict"}}'
+    mocker.patch("builtins.open", mocker.mock_open(read_data=stored_settings))
+
+    from krux.settings import Store
+
+    store = Store()
+    assert store.settings == {"settings": {"i18n": "not_a_dict"}}
+    assert store.get("settings.i18n", "locale", "en-US") == "en-US"
+
+
+def test_store_get_deep_nesting():
+    """A 4-level namespace returns stored value when set, default when unset."""
+    from krux.settings import Store
+
+    s = Store()
+    ns = "settings.printer.thermal.adafruit"
+
+    # Unset -> default.
+    assert s.get(ns, "tx_pin", 35) == 35
+    # Getter must not populate the settings dict on a miss.
+    assert s.settings == {}
+
+    # Set then get returns the stored value, ignoring the default.
+    s.set(ns, "tx_pin", 21)
+    assert s.get(ns, "tx_pin", 35) == 21
+
+
 def test_store_set():
     from krux.settings import Store
 

@@ -170,11 +170,7 @@ class Store:
         self._load_settings()
 
         # Define location based on what was loaded or default undefined
-        self.file_location = (
-            self.settings.get("settings", {})
-            .get("persist", {})
-            .get("location", "undefined")
-        )
+        self.file_location = self._persisted_location("undefined")
 
         # Settings not found on SD, or 'persist.location' key not defined
         if SD_PATH not in self.file_location:
@@ -184,10 +180,24 @@ class Store:
 
         # Settings persist location will point to SD (if defined) else defaults to flash
         self.file_location = Store.get_vfs_location(
-            self.settings.get("settings", {})
-            .get("persist", {})
-            .get("location", FLASH_PATH)
+            self._persisted_location(FLASH_PATH)
         )
+
+    def _persisted_location(self, default):
+        """Reads persist.location defensively; returns a known path or default."""
+        # A corrupted/hand-edited file may have a non-dict at any namespace level
+        # or a bogus location value — walk defensively and validate before returning.
+        node = self.settings
+        for level in ("settings", "persist"):
+            if not isinstance(node, dict):
+                return default
+            node = node.get(level)
+        if not isinstance(node, dict):
+            return default
+        location = node.get("location", default)
+        if location not in (SD_PATH, FLASH_PATH):
+            return default
+        return location
 
     @classmethod
     def get_vfs_location(cls, location):
@@ -215,24 +225,22 @@ class Store:
             pass
 
     def get(self, namespace, setting_name, default_value):
-        """Returns a setting value under the given namespace, or default value if not set"""
-        s = json.loads(
-            json.dumps(self.settings)
-        )  # deepcopy to avoid building out namespaces
-        for level in namespace.split("."):
-            s[level] = s.get(level, {})
-            s = s[level]
-        if setting_name not in s:
-            return default_value
-        return s[setting_name]
-
-    def set(self, namespace, setting_name, setting_value):
-        """Stores a setting value under the given namespace if new/changed.
-        Does NOT automatically save settings to flash or sd!
-        """
+        """Returns setting value under the given namespace, or default_value if not set."""
         s = self.settings
         for level in namespace.split("."):
-            s[level] = s.get(level, {})
+            s = s.get(level)
+            if not isinstance(s, dict):
+                return default_value
+        return s.get(setting_name, default_value)
+
+    def set(self, namespace, setting_name, setting_value):
+        """Stores a setting value under the given namespace if new/changed. Does not auto-save."""
+        # A non-dict intermediate level is replaced with a fresh dict,
+        # repairing malformed structure.
+        s = self.settings
+        for level in namespace.split("."):
+            if not isinstance(s.get(level), dict):
+                s[level] = {}
             s = s[level]
         old_value = s.get(setting_name, None)
         if old_value != setting_value:
@@ -246,7 +254,8 @@ class Store:
         s = self.settings
         levels = []
         for level in namespace.split("."):
-            s[level] = s.get(level, {})
+            if not isinstance(s.get(level), dict):
+                s[level] = {}
             levels.append([s, level])
             s = s[level]
         if setting_name in s:
