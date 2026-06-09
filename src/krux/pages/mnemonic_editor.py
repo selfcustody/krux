@@ -316,7 +316,10 @@ class MnemonicEditor(Page):
                 if button_index == ESC_INDEX:
                     # Cancel
                     self.ctx.display.clear()
-                    if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+                    if self.prompt(
+                        t("Back to Menu") + "\n\n" + t("Are you sure?"),
+                        self.ctx.display.height() >> 1,
+                    ):
                         return None
                     continue
                 new_word = self.edit_word(button_index + page * 12)
