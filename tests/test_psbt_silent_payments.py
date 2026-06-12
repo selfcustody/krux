@@ -632,7 +632,9 @@ def _expected_sp_script(input_privkeys, txid, scan_pub, spend_pub):
 
     address = _tsp_address(scan_pub, spend_pub)
     outputs_map = create_outputs(input_privkeys, [COutPoint(txid, 0)], [address])
-    return script.Script(b"\x51\x20" + bytes.fromhex(outputs_map[address][0])).data.hex()
+    return script.Script(
+        b"\x51\x20" + bytes.fromhex(outputs_map[address][0])
+    ).data.hex()
 
 
 def test_sign_sp_output_from_taproot_input(mocker, m5stickv):

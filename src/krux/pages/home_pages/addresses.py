@@ -189,7 +189,7 @@ class Addresses(Page):
                             addr,
                             "address",
                             "address",
-                            t("Address:") + " ",
+                            t("Address") + ": ",
                             ADDRESSES_FILE_EXTENSION,
                             save_as_binary=False,
                         )
