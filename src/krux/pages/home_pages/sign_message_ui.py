@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from embit import bip32, compact, script
+from embit import bip32, script
 from embit.networks import NETWORKS
 import hashlib
 import binascii
@@ -36,11 +36,12 @@ from ...display import (
 )
 from ...baseconv import base_encode
 from ...krux_settings import t
-from ...qr import FORMAT_NONE
+from ...qr import FORMAT_NONE, FORMAT_BBQR, FORMAT_UR
 from ...sd_card import (
     SIGNATURE_FILE_EXTENSION,
     SIGNED_FILE_SUFFIX,
     PUBKEY_FILE_EXTENSION,
+    PSBT_FILE_EXTENSION,
 )
 from ...settings import TEST_TXT, MAIN_TXT
 from ...kboard import kboard
@@ -59,9 +60,15 @@ class SignMessage(Utils):
 
         if load_method == LOAD_FROM_CAMERA:
             from ..qr_capture import QRCodeCapture
+            from uUR import UR, Types
 
             qr_capture = QRCodeCapture(self.ctx)
             data, qr_format = qr_capture.qr_capture_loop()
+            if isinstance(data, UR):
+                try:
+                    data = Types.psbt_from_cbor(data.cbor)
+                except Exception:
+                    data = None
             return (data, qr_format, "")
         if load_method == LOAD_FROM_SD:
             message_filename, data = self.load_file(prompt=False)
@@ -133,7 +140,8 @@ class SignMessage(Utils):
         return addr
 
     def _sign_at_address(self, message, derivation_str, address=""):
-        """Signs a message at a derived Bitcoin address"""
+        """Signs a BIP137 message at a derived Bitcoin address"""
+        from ... import bip137
 
         derivation = bip32.parse_path(derivation_str)
         self._display_message_sign_prompt(
@@ -143,15 +151,8 @@ class SignMessage(Utils):
         if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
             return None
 
-        message_hash = hashlib.sha256(
-            hashlib.sha256(
-                b"\x18Bitcoin Signed Message:\n"
-                + compact.to_bytes(len(message))
-                + message
-            ).digest()
-        ).digest()
-
-        sig = self.ctx.wallet.key.sign_at(derivation, message_hash)
+        script_type = self.get_script_type_from_path(derivation_str) or "p2pkh"
+        _, sig = bip137.sign(message, self.ctx.wallet.key, derivation, script_type)
         self._display_signature(base_encode(sig, 64))
         return sig
 
@@ -234,6 +235,8 @@ class SignMessage(Utils):
 
     def sign_standard_message(self, data):
         """Signs a standard message"""
+        from krux import bip137
+
         message_hash, is_raw_hash = self._compute_message_hash(data)
         if message_hash is None:
             return ""
@@ -257,7 +260,10 @@ class SignMessage(Utils):
         if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
             return ""
 
-        sig = self.ctx.wallet.key.sign(message_hash).serialize()
+        key = self.ctx.wallet.key
+        _, sig = bip137.sign(
+            data, key, bip32.parse_path(key.derivation), key.script_type
+        )
         self._display_signature(base_encode(sig, 64))
         return sig
 
@@ -279,6 +285,8 @@ class SignMessage(Utils):
         message_filename="",
         message="",
         address="",
+        sd_binary_extension="",
+        qr_payload=None,
     ):
         """Exports the message signature to a QR code or SD card"""
         submenu = Menu(
@@ -300,10 +308,22 @@ class SignMessage(Utils):
         pubkey = binascii.hexlify(self.ctx.wallet.key.account.sec()).decode()
 
         if index == 0:  # QR
-            at_address = address != ""
-            self._export_to_qr(sig, pubkey, qr_format, at_address)
+            if qr_payload is not None:
+                title = t("Signed Message")
+                self.display_qr_codes(qr_payload, qr_format, title)
+                self.print_standard_qr(qr_payload, qr_format, title)
+            else:
+                at_address = address != ""
+                self._export_to_qr(sig, pubkey, qr_format, at_address)
         elif self.has_sd_card():  # SD
-            self._export_to_sd(sig, pubkey, message_filename, message, address)
+            self._export_to_sd(
+                sig,
+                pubkey,
+                message_filename,
+                message,
+                address,
+                sd_binary_extension,
+            )
         return MENU_CONTINUE
 
     def _export_to_qr(self, sig, pubkey, qr_format, at_address=False):
@@ -328,11 +348,32 @@ class SignMessage(Utils):
         self.display_qr_codes(pubkey, qr_format, title)
         self.print_standard_qr(pubkey, qr_format, title)
 
-    def _export_to_sd(self, sig, pubkey, message_filename, message="", address=""):
+    def _export_to_sd(
+        self,
+        sig,
+        pubkey,
+        message_filename,
+        message="",
+        address="",
+        sd_binary_extension="",
+    ):
         """Exports the signature and public key to SD card"""
         from ..file_operations import SaveFile
 
         save_page = SaveFile(self.ctx)
+        if sd_binary_extension:
+            save_page.save_file(
+                sig,
+                "message",
+                message_filename,
+                t("Signature:"),
+                sd_binary_extension,
+                SIGNED_FILE_SUFFIX,
+                prompt=False,
+                save_as_binary=True,
+            )
+            return
+
         if address:
             file_content = ""
             file_content = SD_MESSAGE_HEADER + "\n"
@@ -352,6 +393,7 @@ class SignMessage(Utils):
             extension,
             SIGNED_FILE_SUFFIX,
             prompt=False,
+            save_as_binary=not bool(address),
         )
 
         if not address:
@@ -366,14 +408,89 @@ class SignMessage(Utils):
                 False,
             )
 
+    # pylint: disable=too-many-return-statements,too-many-branches
     def sign_message(self):
-        """Sign message user interface"""
-        data, qr_format, message_filename = self._load_message()
+        """Sign message using sparrow Raw/Electrum/Trezor(BIP137) and BIP322 modes"""
+        from embit.psbt import PSBT
+        from krux import bip137, bip322
 
+        data, qr_format, message_filename = self._load_message()
         if data is None:
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
 
+        # Treat message as psbt (BIP322)
+        parsed_psbt = None
+        try:
+            if isinstance(data, str):
+                parsed_psbt = PSBT.from_base64(data)
+            else:
+                try:
+                    parsed_psbt = PSBT.parse(data)
+                except Exception:
+                    parsed_psbt = PSBT.from_base64(data.decode("ascii"))
+        except Exception:
+            parsed_psbt = None
+
+        if parsed_psbt is not None:
+            if not bip322.check_bip322_psbt(parsed_psbt):
+                raise ValueError("Invalid BIP-322 PSBT")
+
+            spk = parsed_psbt.inputs[0].witness_utxo.script_pubkey
+            script_type = spk.script_type()
+            script_type = "p2sh-p2wpkh" if script_type == "p2sh" else script_type
+            message = parsed_psbt.unknown[b"\x09"]
+            address = spk.address(network=self.ctx.wallet.key.network)
+
+            derivations = (
+                parsed_psbt.inputs[0].taproot_bip32_derivations
+                if script_type == "p2tr"
+                else parsed_psbt.inputs[0].bip32_derivations
+            )
+
+            self._display_message_sign_prompt(message, self.fit_to_line(address))
+            if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
+                return MENU_CONTINUE
+
+            if script_type in ("p2pkh", "p2sh-p2wpkh"):
+                _, derivation_path = next(iter(derivations.items()))
+                _, sig = bip137.sign(
+                    message,
+                    self.ctx.wallet.key,
+                    derivation_path.derivation,
+                    script_type,
+                )
+                self._export_signature(
+                    sig, qr_format, message_filename, message.decode(), address
+                )
+            else:
+                bip322.sign(parsed_psbt, self.ctx.wallet.key)
+                serialized = bip322.serialize_bip322(parsed_psbt)
+                if qr_format == FORMAT_BBQR:
+                    from ...bbqr import encode_bbqr
+
+                    qr_payload = encode_bbqr(serialized, encoding="H", file_type="P")
+                elif qr_format == FORMAT_UR:
+                    from uUR import UR, Types
+
+                    qr_payload = UR(
+                        Types.CRYPTO_PSBT_TYPE, Types.psbt_to_cbor(serialized)
+                    )
+                else:
+                    qr_payload = base_encode(serialized, 64)
+                self._export_signature(
+                    serialized,
+                    qr_format,
+                    message_filename,
+                    message.decode(),
+                    address,
+                    sd_binary_extension=PSBT_FILE_EXTENSION,
+                    qr_payload=qr_payload,
+                )
+            return MENU_CONTINUE
+
+        # Treat as message simple txt
+        # (raw, Electrum, Trezor(BIP137) modes on Sparrow)
         if message_filename:
             signature_data = self._sign_at_address_from_sd(data)
             if signature_data:
@@ -383,13 +500,21 @@ class SignMessage(Utils):
                 )
                 return MENU_CONTINUE
 
-        data = data.encode() if isinstance(data, str) else data
-        signature_data = self._sign_at_address_from_qr(data)
+        # If `data` is still anything other than str/bytes here (e.g. a
+        # stray UR that wasn't unwrapped at `_load_message`), the text
+        # fallback cannot handle it — fail loudly with a flash rather
+        # than crashing inside `data.startswith(...)`.
+        if not isinstance(data, (str, bytes, bytearray)):
+            self.flash_error(t("Failed to load"))
+            return MENU_CONTINUE
+
+        bytes_data = data.encode() if isinstance(data, str) else data
+        signature_data = self._sign_at_address_from_qr(bytes_data)
         if signature_data:
             sig, message, address = signature_data
             self._export_signature(sig, qr_format, message_filename, message, address)
             return MENU_CONTINUE
-        sig = self.sign_standard_message(data)
+        sig = self.sign_standard_message(bytes_data)
         if sig:
             self._export_signature(sig, qr_format, message_filename)
         return MENU_CONTINUE

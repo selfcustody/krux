@@ -11,6 +11,7 @@ Switch from the pure-Python urtypes and foundation-ur-py packages to the new uUR
 - Added `flash_success` method to standardize green success flashes across confirmation screens
 - Update Embit to latest - 3ae0ef2
 - Replace custom quirc (library to decode QR codes from images) with k_quirc
+- Added support to BIP-322 (legacy and simple message signing)
 
 # Changelog 26.04.0 - April 2025
 
