@@ -137,6 +137,31 @@ def test_display_qr_code(mocker, m5stickv, mock_page_cls):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_display_qr_code_propagates_real_errors(mocker, m5stickv, mock_page_cls):
+    """A non-StopIteration error from the QR generator must propagate and must
+    NOT trigger a silent generator restart.
+
+    Regression for narrowing the bare ``except`` to ``except StopIteration``.
+    With the old bare except, a real error was swallowed and ``to_qr_codes``
+    was called a second time; now it surfaces immediately.
+    """
+    from krux.qr import FORMAT_NONE
+
+    def boom(*args, **kwargs):
+        raise ValueError("bad qr data")
+        yield  # pragma: no cover - makes boom a generator function
+
+    mocked = mocker.patch("krux.pages.to_qr_codes", side_effect=boom)
+    ctx = create_ctx(mocker, [])
+    page = mock_page_cls(ctx)
+
+    with pytest.raises(ValueError):
+        page.display_qr_codes(TEST_QR_DATA, FORMAT_NONE)
+
+    # The error surfaced on the first generator; no silent restart attempt.
+    assert mocked.call_count == 1
+
+
 def test_display_qr_code_light_theme(mocker, m5stickv, mock_page_cls):
     from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_NONE
@@ -646,3 +671,24 @@ def test_fit_to_line_not_crop_middle(mocker, multiple_devices, mock_page_cls):
         formatted_text = page.fit_to_line(case[TXT], case[PREFIX], crop_middle=False)
         assert len(formatted_text) <= max_chars_in_line
         assert formatted_text == case[device_type]
+
+
+def test_has_sd_card_handles_errors_and_propagates_signals(
+    mocker, m5stickv, mock_page_cls
+):
+    """has_sd_card returns False on genuine SD errors, but must NOT swallow
+    BaseException-level signals like KeyboardInterrupt.
+
+    Regression for narrowing the bare except to `except Exception`.
+    """
+    ctx = create_ctx(mocker, [])
+    page = mock_page_cls(ctx)
+
+    # Genuine SD failure (OSError) -> reported as "no SD card".
+    mocker.patch("krux.pages.SDHandler", side_effect=OSError("no card"))
+    assert page.has_sd_card() is False
+
+    # Shutdown signal during the check -> propagates, not swallowed into False.
+    mocker.patch("krux.pages.SDHandler", side_effect=KeyboardInterrupt)
+    with pytest.raises(KeyboardInterrupt):
+        page.has_sd_card()

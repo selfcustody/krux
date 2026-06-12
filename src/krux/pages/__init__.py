@@ -294,7 +294,7 @@ class Page:
         while not done:
             try:
                 code, num_parts = next(code_generator)
-            except:
+            except StopIteration:
                 code_generator = to_qr_codes(data, qr_data_width, qr_format)
                 code, num_parts = next(code_generator)
 
@@ -523,7 +523,7 @@ class Page:
             # Check for SD hot-plug
             with SDHandler():
                 return True
-        except:
+        except Exception:
             return False
 
     def shutdown(self):
