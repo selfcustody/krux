@@ -382,6 +382,12 @@ class Display:
             x -= width
         lcd.fill_rectangle(x, y, width, height, color, radius)
 
+    def draw_circle(self, x, y, radius, color=theme.fg_color):
+        """Draws a filled circle to the screen"""
+        if self.flipped_x_coordinates:
+            x = self.width() - x - 1
+        lcd.draw_circle(x, y, radius, 0, color)
+
     def draw_line(self, x_0, y_0, x_1, y_1, color=theme.fg_color):
         """Draws a line to the screen"""
         if self.flipped_x_coordinates:

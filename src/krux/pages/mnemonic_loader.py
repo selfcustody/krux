@@ -257,10 +257,24 @@ class MnemonicLoader(Page):
 
     def load_key_from_1248(self):
         """Menu handler to load key from Stackbit 1248 sheet metal storage method"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Standard"), self._load_key_from_1248),
+                (t("Vertical"), lambda: self._load_key_from_1248(vertical=True)),
+            ],
+        )
+        index, status = submenu.run_loop()
+        if index == submenu.back_index:
+            return MENU_CONTINUE
+        return status
+
+    def _load_key_from_1248(self, vertical=False):
+        """Load key from Stackbit 1248 layout (horizontal, or vertical when flag set)"""
         from .stack_1248 import Stackbit
 
         stackbit = Stackbit(self.ctx)
-        words = stackbit.enter_1248()
+        words = stackbit.enter_1248_vertical() if vertical else stackbit.enter_1248()
         del stackbit
         if words is not None:
             return self._load_key_from_words(words)

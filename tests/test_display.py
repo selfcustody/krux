@@ -671,6 +671,35 @@ def test_fill_rectangle_on_inverted_display(mocker, amigo):
     )
 
 
+def test_draw_circle(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+
+    d.draw_circle(50, 50, 10, krux.display.lcd.WHITE)
+
+    krux.display.lcd.draw_circle.assert_called_with(
+        50, 50, 10, 0, krux.display.lcd.WHITE
+    )
+
+
+def test_draw_circle_on_inverted_display(mocker, amigo):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 480)
+
+    d.draw_circle(50, 50, 10, krux.display.lcd.WHITE)
+
+    krux.display.lcd.draw_circle.assert_called_with(
+        480 - 50 - 1, 50, 10, 0, krux.display.lcd.WHITE
+    )
+
+
 def test_draw_string(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
