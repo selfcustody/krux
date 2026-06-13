@@ -283,7 +283,14 @@ class PSBTSigner:
         if getattr(out, "sp_data", None) is not None:
             from .silent_payments import own_sp_output_type
 
-            own = own_sp_output_type(out, getattr(self.wallet.key, "sp_keys", None))
+            # SP keys are derived from the seed even for non-SP wallets, so own
+            # change/self-transfer is recognized regardless of the loaded
+            # policy type (e.g. when the wallet was loaded as plain single-sig).
+            key = self.wallet.key
+            sp_keys = (
+                key.sp_detection_keys() if hasattr(key, "sp_detection_keys") else None
+            )
+            own = own_sp_output_type(out, sp_keys)
             if own == "change":
                 return CHANGE
             if own == "self":
