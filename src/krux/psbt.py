@@ -504,7 +504,12 @@ class PSBTSigner:
         return hashlib.sha256(tick + wallet_nonce).digest()
 
     def _sp_wallet_nonce(self):
-        """Returns sha256(root_secret || fingerprint || sha256(psbt_bytes))."""
+        """Returns sha256(root_secret || fingerprint || sha256(psbt_bytes)).
+
+        Uses psbt.serialize() (not psbt.tx.serialize()) because SP outputs may
+        have None script_pubkeys before derivation, which would crash
+        TransactionOutput.write_to().
+        """
         import hashlib
 
         psbt_hash = hashlib.sha256(self.psbt.serialize()).digest()
@@ -513,7 +518,13 @@ class PSBTSigner:
         ).digest()
 
     def _populate_silent_payment_outputs(self, input_privkeys, eligible):
-        """Compute fresh ECDH shares and DLEQ proofs for SP outputs."""
+        """Compute fresh ECDH shares and DLEQ proofs for SP outputs.
+
+        Incoming SP fields are explicitly cleared first: Krux is canonically
+        the sender and never trusts coordinator-supplied SP fields. Do NOT
+        inherit this clearing behaviour if receive-side support is ever added;
+        a future receive module must derive its own logic.
+        """
         from embit.silent_payments.ecdh import (
             compute_global_ecdh_share,
             compute_global_dleq_proof,
