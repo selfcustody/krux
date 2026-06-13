@@ -1,4 +1,4 @@
-# Compiled Sources
+z# Compiled Sources
 ###################
 *.o
 *.a
@@ -96,5 +96,6 @@ krux-*/ktool*
 .codex/
 .claude/
 .cursorrules
+.tokensave
 AGENT.md
 CLAUDE.md
