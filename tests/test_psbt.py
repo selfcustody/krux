@@ -1519,7 +1519,7 @@ def test_sign_fails_with_0_sigs_added(mocker, m5stickv, tdata):
 
     with pytest.raises(ValueError):
         signer.sign()
-    signer.psbt.sign_with.assert_called_with(wallet.key.root)
+    signer.psbt.sign_with.assert_called_with(wallet.key.root, with_sp_shares=False)
 
 
 def test_check_sighash_rejects_sighash_none(mocker, m5stickv, tdata):
