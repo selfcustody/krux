@@ -55,6 +55,48 @@ def address_from_output(out, network):
     return bech32.bech32_encode(bech32.Encoding.BECH32M, hrp, [0] + data)
 
 
+def own_sp_output_type(out, sp_keys):
+    """Classifies an SP output against the wallet's own BIP-352 keys.
+
+    Returns "change" when the output pays the wallet's label-0 (change)
+    address, "self" when it pays the wallet's unlabeled or labeled receive
+    address, and None when it pays someone else. Ownership requires BOTH the
+    scan key and the (label-tweaked) spend key to match — matching the scan
+    key alone is not enough, since a malicious coordinator could pair the
+    wallet's scan key with a foreign spend key to disguise a spend as change.
+    """
+    if sp_keys is None:
+        return None
+
+    sp_data = out.sp_data
+    if sp_data.scan_key != sp_keys.scan_privkey.get_public_key():
+        return None
+
+    label = out.sp_label
+    if label is None:
+        expected_spend = sp_keys.spend_pubkey
+    else:
+        # BIP-352 labeled spend key: B_spend + hash(b_scan || m)·G, with the
+        # label m serialized as 4 big-endian bytes (m = 0 is change).
+        from embit import ec
+        from embit.hashes import tagged_hash
+        from embit.util import secp256k1
+
+        tweak = tagged_hash(
+            "BIP0352/Label",
+            sp_keys.scan_privkey.secret + label.to_bytes(4, "big"),
+        )
+        expected_spend = ec.PublicKey(
+            secp256k1.ec_pubkey_add(
+                secp256k1.ec_pubkey_parse(sp_keys.spend_pubkey.sec()), tweak
+            )
+        )
+
+    if sp_data.spend_key != expected_spend:
+        return None
+    return "change" if label == 0 else "self"
+
+
 def output_address(psbt, index, out, network):
     """Returns the human-readable destination address for a PSBT output.
 
