@@ -19,18 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Silent Payments (BIP-352 / BIP-375) helpers for Krux.
-
-This module centralizes the sender-side Silent Payment logic that the rest of
-the firmware needs: detection, address rendering for review screens, and
-BIP-375 validation. Keeping it isolated means src/krux/psbt.py stays focused
-on the existing v0/v2 signing pipeline, and a future receive-side module (if
-ever) does not need to disentangle send-only assumptions from shared code.
-
-Imports from the SP-aware Embit fork are lazy so SP-naive PSBT flows do not
-pay the module-load cost on K210.
-"""
-
 from .key import P2PKH, P2SH_P2WPKH, P2TR, P2WPKH
 
 
@@ -40,12 +28,7 @@ def has_sp_outputs(psbt):
 
 
 def address_from_output(out, network):
-    """Encodes the sp1/tsp1 address (BIP-352) for an output's sp_data.
-
-    Used during review so the user verifies the human-readable recipient
-    address, not the derived P2TR script that lands in script_pubkey at
-    signing time.
-    """
+    """Returns the BIP-352 sp1/tsp1 bech32m address for an output's sp_data."""
     from embit import bech32
 
     sp_data = out.sp_data
@@ -56,15 +39,7 @@ def address_from_output(out, network):
 
 
 def own_sp_output_type(out, sp_keys):
-    """Classifies an SP output against the wallet's own BIP-352 keys.
-
-    Returns "change" when the output pays the wallet's label-0 (change)
-    address, "self" when it pays the wallet's unlabeled or labeled receive
-    address, and None when it pays someone else. Ownership requires BOTH the
-    scan key and the (label-tweaked) spend key to match — matching the scan
-    key alone is not enough, since a malicious coordinator could pair the
-    wallet's scan key with a foreign spend key to disguise a spend as change.
-    """
+    """Returns "change", "self", or None for an SP output vs the wallet's keys."""
     if sp_keys is None:
         return None
 
@@ -76,8 +51,6 @@ def own_sp_output_type(out, sp_keys):
     if label is None:
         expected_spend = sp_keys.spend_pubkey
     else:
-        # BIP-352 labeled spend key: B_spend + hash(b_scan || m)·G, with the
-        # label m serialized as 4 big-endian bytes (m = 0 is change).
         from embit import ec
         from embit.hashes import tagged_hash
         from embit.util import secp256k1
@@ -98,24 +71,14 @@ def own_sp_output_type(out, sp_keys):
 
 
 def output_address(psbt, index, out, network):
-    """Returns the human-readable destination address for a PSBT output.
-
-    For Silent Payment outputs (sp_data set), always returns the sp1/tsp1
-    address — even after derivation has populated script_pubkey — so the user
-    never verifies against a derived P2TR they cannot independently recognize.
-    """
+    """Returns the human-readable destination address for a PSBT output."""
     if getattr(out, "sp_data", None) is not None:
         return address_from_output(out, network)
     return psbt.tx.vout[index].script_pubkey.address(network=network)
 
 
 def validate(psbt, skip_output_scripts=True):
-    """Runs the BIP-375 validator and remaps SPValidationError to ValueError.
-
-    skip_output_scripts is True at load time because received SP PSBTs
-    typically have empty script_pubkeys until the sender derives them. The
-    sender re-runs full validation after derivation while signing.
-    """
+    """Runs the BIP-375 validator, remapping SPValidationError to ValueError."""
     from embit.silent_payments import BIP375Validator, SPValidationError
 
     try:
@@ -125,19 +88,7 @@ def validate(psbt, skip_output_scripts=True):
 
 
 def validate_eligibility(policy):
-    """Rejects policies that are not BIP-352 eligible for SP-sending.
-
-    BIP-352 eligible single-key input types are P2PKH, P2WPKH, P2SH-P2WPKH and
-    P2TR. P2TR covers both ordinary BIP-86 inputs and BIP-376 spend-from inputs
-    (a previously received SP UTXO funding a new SP output); per-input NUMS and
-    Segwit>v1 exclusions are enforced downstream by get_eligible_inputs.
-
-    Multisig and miniscript are rejected: SP derives the recipient script from
-    the sum of input private keys, which requires a single signer with access to
-    every contributing key. They are detected structurally (presence of ``m`` or
-    ``miniscript`` keys in the policy dict) to avoid importing the predicate
-    helpers from psbt.py, which would create a circular import.
-    """
+    """Raises ValueError if the policy is not BIP-352 eligible for SP-sending."""
     if policy and ("m" in policy or "miniscript" in policy):
         raise ValueError(
             "Silent Payments are not supported with multisig or miniscript"
