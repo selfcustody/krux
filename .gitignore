@@ -96,5 +96,6 @@ krux-*/ktool*
 .codex/
 .claude/
 .cursorrules
+.tokensave
 AGENT.md
 CLAUDE.md

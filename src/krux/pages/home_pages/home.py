@@ -33,7 +33,7 @@ from ...display import BOTTOM_PROMPT_LINE
 from ...qr import FORMAT_NONE, FORMAT_PMOFN
 from ...krux_settings import t, Settings
 from ...format import replace_decimal_separator
-from ...key import TYPE_SINGLESIG
+from ...key import TYPE_SINGLESIG, TYPE_SILENT_PAYMENT
 from ...kboard import kboard
 
 
@@ -350,9 +350,9 @@ class Home(Page):
 
     def _pre_load_psbt_warn(self):
         """Warns if descriptor is not loaded and wallet is multisig or miniscript"""
-        if (
-            not self.ctx.wallet.is_loaded()
-            and self.ctx.wallet.key.policy_type != TYPE_SINGLESIG
+        if not self.ctx.wallet.is_loaded() and self.ctx.wallet.key.policy_type not in (
+            TYPE_SINGLESIG,
+            TYPE_SILENT_PAYMENT,
         ):
             self.ctx.display.draw_centered_text(
                 t("Warning:")
@@ -389,9 +389,9 @@ class Home(Page):
 
         # Show the policy for multisig and miniscript PSBTs
         # in case the wallet descriptor is not loaded
-        if (
-            not self.ctx.wallet.is_loaded()
-            and not self.ctx.wallet.key.policy_type == TYPE_SINGLESIG
+        if not self.ctx.wallet.is_loaded() and self.ctx.wallet.key.policy_type not in (
+            TYPE_SINGLESIG,
+            TYPE_SILENT_PAYMENT,
         ):
             policy_str = signer.psbt_policy_string()
             self.ctx.display.clear()
@@ -410,6 +410,24 @@ class Home(Page):
                 return False
 
         return True
+
+    def _sp_warn(self):
+        """Warns when SP outputs are present so the user verifies sp1/tsp1 addresses.
+
+        The on-chain destination for an SP output is a derived P2TR that the
+        recipient alone can recognize. The user must verify the sp1/tsp1 address
+        against what the recipient communicated — never the derived P2TR.
+        """
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(
+            t("Warning:")
+            + " "
+            + t("PSBT contains Silent Payment outputs.")
+            + "\n\n"
+            + t("Verify the sp1/tsp1 address with the recipient."),
+            highlight_prefix=":",
+        )
+        return self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE)
 
     def _fees_psbt_warn(self, fee_percent):
         """Warn if fees greater than 10% of what is spent"""
@@ -511,6 +529,9 @@ class Home(Page):
         outputs, fee_percent = signer.outputs()
 
         if not self._fees_psbt_warn(fee_percent):
+            return MENU_CONTINUE
+
+        if signer.has_sp_outputs() and not self._sp_warn():
             return MENU_CONTINUE
 
         self._display_transaction_for_review(outputs)

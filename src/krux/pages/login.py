@@ -38,12 +38,14 @@ from ..key import (
     P2WPKH,
     P2WSH,
     P2SH,
+    P2TR,
     SINGLESIG_SCRIPT_MAP,
     MULTISIG_SCRIPT_MAP,
     MINISCRIPT_SCRIPT_MAP,
     TYPE_SINGLESIG,
     TYPE_MULTISIG,
     TYPE_MINISCRIPT,
+    TYPE_SILENT_PAYMENT,
     POLICY_TYPE_IDS,
     NAME_MULTISIG,
 )
@@ -252,6 +254,9 @@ class Login(MnemonicLoader):
             script_type = MINISCRIPT_SCRIPT_MAP.get(
                 Settings().wallet.script_type, P2WSH
             )
+
+        if policy_type == TYPE_SILENT_PAYMENT:
+            script_type = P2TR
 
         derivation_path = ""
 

@@ -75,6 +75,44 @@ def mock_seed_qr_view(mocker):
     return mocker.patch("krux.pages.qr_view.SeedQRView")
 
 
+def test_silent_payment_scan_key_exports(
+    mocker, m5stickv, tdata, mock_save_file, mock_seed_qr_view
+):
+    """Both Text/SD and QR export the scan key with its origin (the form the
+    Sparrow coordinator expects), not the full sp(...) descriptor."""
+    from krux.pages.home_pages.pub_key_view import PubkeyView
+    from krux.pages import MENU_EXIT
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    # save_file must return a non-MENU_CONTINUE status so the SD submenu exits
+    mock_save_file.return_value = MENU_EXIT
+
+    wallet = Wallet(tdata.SILENT_PAYMENT_KEY)
+    spscan = wallet.key.sp_scan_key_encoded(wallet.which_network())
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Outer menu: select "SPSCAN - Text"
+        BUTTON_ENTER,  # Text submenu: "Save to SD card"
+        BUTTON_PAGE,  # Outer menu: move to "SPSCAN - QR Code"
+        BUTTON_ENTER,  # select "SPSCAN - QR Code"
+        BUTTON_PAGE,  # Outer menu: move toward "Back"
+        BUTTON_PAGE,  # Outer menu: land on "Back"
+        BUTTON_ENTER,  # Leave the page
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
+    PubkeyView(ctx).public_key()
+
+    # Both paths export the scan key with its [origin] prefix, not the
+    # full sp(...) descriptor.
+    assert not spscan.startswith("sp(")
+    assert spscan.startswith("[")
+    mock_save_file.assert_called_once()
+    assert mock_save_file.call_args.args[0] == spscan
+    mock_seed_qr_view.assert_called_once()
+    assert mock_seed_qr_view.call_args.kwargs["data"] == spscan
+
+
 def test_public_key_show_text(mocker, m5stickv, tdata):
     from krux.pages.home_pages.pub_key_view import PubkeyView
     from krux.wallet import Wallet
@@ -972,3 +1010,32 @@ def test_public_key_save_qr_codes_pbm_43(
 
         mock_save_file.assert_has_calls(sd_card_save_calls, any_order=True)
         assert ctx.input.wait_for_button.call_count == len(case[1])
+
+
+def test_public_key_silent_payment(
+    mocker, m5stickv, tdata, mock_save_file, mock_seed_qr_view
+):
+    from krux.pages.home_pages.pub_key_view import PubkeyView
+    from krux.pages import MENU_CONTINUE
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Enter "SPSCAN - Text"
+        BUTTON_ENTER,  # Select "Save to SD card"
+        BUTTON_PAGE,  # Move to "SPSCAN - QR Code"
+        BUTTON_ENTER,  # Enter "SPSCAN - QR Code"
+        BUTTON_PAGE_PREV,  # Move to Back
+        BUTTON_ENTER,  # Leave the page
+    ]
+
+    wallet = Wallet(tdata.SILENT_PAYMENT_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet=wallet)
+    pub_key_viewer = PubkeyView(ctx)
+
+    assert pub_key_viewer.public_key() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    # the SPSCAN text was offered to be saved to SD card
+    mock_save_file.assert_called_once()
+    # the descriptor QR code was shown
+    mock_seed_qr_view.assert_called_once()

@@ -36,10 +36,12 @@ from .key import (
     NAME_SINGLE_SIG,
     NAME_MULTISIG,
     NAME_MINISCRIPT,
+    NAME_SILENT_PAYMENT,
     POLICY_TYPE_NAMES,
     SINGLESIG_SCRIPT_NAMES,
     MULTISIG_SCRIPT_NAMES,
     MINISCRIPT_SCRIPT_NAMES,
+    SILENT_PAYMENT_SCRIPT_NAMES,
 )
 
 from .kboard import kboard
@@ -162,6 +164,11 @@ class DefaultWallet(SettingsNamespace):
         lambda input, l_set: (
             (MINISCRIPT_SCRIPT_NAMES, MINISCRIPT_SCRIPT_NAMES[0])
             if input == NAME_MINISCRIPT
+            else (l_set.categories, l_set.default_value)
+        ),
+        lambda input, l_set: (
+            (SILENT_PAYMENT_SCRIPT_NAMES, SILENT_PAYMENT_SCRIPT_NAMES[0])
+            if input == NAME_SILENT_PAYMENT
             else (l_set.categories, l_set.default_value)
         ),
     )
