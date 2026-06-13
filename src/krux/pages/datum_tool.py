@@ -171,7 +171,7 @@ def detect_encodings(str_data, verify=True):
     # pylint: disable=R0912,R0915
     from binascii import unhexlify
     from krux.baseconv import base_decode, base_encode
-    from embit.bech32 import bech32_decode, Encoding
+    from embit.bech32 import bech32_decode, Encoding, Bech32DecodeError
 
     encodings = []
 
@@ -222,7 +222,10 @@ def detect_encodings(str_data, verify=True):
         encoding = None
         if max_chr <= "Z":
             if verify:
-                encoding, _, _ = bech32_decode(str_data)
+                try:
+                    encoding, _, _ = bech32_decode(str_data)
+                except Bech32DecodeError:
+                    encoding = None
                 wdt.feed()
             if encoding == Encoding.BECH32:
                 encodings.append("BECH32")
@@ -230,7 +233,10 @@ def detect_encodings(str_data, verify=True):
                 encodings.append("BECH32M")
         elif max_chr <= "z":
             if verify:
-                encoding, _, _ = bech32_decode(str_data)
+                try:
+                    encoding, _, _ = bech32_decode(str_data)
+                except Bech32DecodeError:
+                    encoding = None
             if encoding == Encoding.BECH32:
                 encodings.append("bech32")
             elif encoding == Encoding.BECH32M:
