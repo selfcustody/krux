@@ -1062,7 +1062,9 @@ def test_sp_change_detected_when_loaded_as_singlesig(mocker, m5stickv):
     inp.txid = bytes([0xAB] * 32)
     inp.vout = 0
     inp.sequence = 0xFFFFFFFE
-    inp.witness_utxo = TransactionOutput(value=100_000, script_pubkey=script.p2wpkh(pub))
+    inp.witness_utxo = TransactionOutput(
+        value=100_000, script_pubkey=script.p2wpkh(pub)
+    )
     inp.bip32_derivations[pub] = DerivationPath(root.my_fingerprint, INPUT_PATH)
     psbt.add_input(inp)
 
