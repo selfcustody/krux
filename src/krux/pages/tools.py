@@ -32,6 +32,7 @@ from . import (
     # NUM_SPECIAL_2,
 )
 from ..krux_settings import t
+import sys
 
 # TODO: re-enable "Create a QR Code" (and keypads ^^^) once encryption is possible w/o Datum Tool
 
@@ -40,11 +41,14 @@ class Tools(Page):
     """Krux generic tools"""
 
     def __init__(self, ctx):
+        self.ctx = ctx
+
         super().__init__(
             ctx,
             Menu(
                 ctx,
                 [
+                    (t("Load Krux app"), self.load_krux_app),
                     (t("Datum Tool"), self.datum_tool),
                     (t("Device Tests"), self.device_tests),
                     # (t("Create QR Code"), self.create_qr),
@@ -54,7 +58,26 @@ class Tools(Page):
                 ],
             ),
         )
-        self.ctx = ctx
+
+    def load_krux_app(self):
+        """Handler for the 'Load Krux app' menu item"""
+
+        # Check if Krux app is enabled
+        from krux.krux_settings import Settings
+
+        if not Settings().security.allow_kapp:
+            self.flash_error(t("Allow in settings first!"))
+            return MENU_CONTINUE
+
+        from krux.pages.kapps import Kapps
+
+        Kapps(self.ctx).run()
+
+        # Unimport kapps
+        sys.modules.pop("krux.pages.kapps")
+        del sys.modules["krux.pages"].kapps
+
+        return MENU_CONTINUE
 
     def flash_tools(self):
         """Handler for the 'Flash Tools' menu item"""
@@ -78,7 +101,6 @@ class Tools(Page):
 
     def datum_tool(self):
         """Handler for the 'Datum Tool' menu item"""
-        import sys
         from .datum_tool import DatumToolMenu
 
         while True:
@@ -122,7 +144,6 @@ class Tools(Page):
 
     def device_tests(self):
         """Handler for the 'Device Tests' menu item"""
-        import sys
         from .device_tests import DeviceTests
 
         page = DeviceTests(self.ctx)
