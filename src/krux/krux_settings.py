@@ -502,8 +502,8 @@ class Settings(SettingsNamespace):
 
     def is_flipped_orientation(self):
         """Returns flipped orientation setting"""
-        return hasattr(Settings().hardware, "display") and getattr(
-            Settings().hardware.display, "flipped_orientation", False
+        return hasattr(self.hardware, "display") and getattr(
+            self.hardware.display, "flipped_orientation", False
         )
 
     def label(self, attr):
