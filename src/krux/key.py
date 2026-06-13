@@ -212,6 +212,8 @@ class Key:
             )
         else:
             self.sp_keys = None
+        # Lazily-derived SP keys for own-output detection in non-SP wallets.
+        self._sp_detection_keys = None
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -316,6 +318,30 @@ class Key:
         return generate_silent_payment_address(
             self.sp_keys.scan_privkey, self.sp_keys.spend_pubkey, network=network_name
         )
+
+    def sp_detection_keys(self):
+        """Returns the wallet's BIP-352 keys for own SP-output detection.
+
+        The scan/spend keys are deterministic from the seed, so they are
+        derived even when the wallet was not loaded in Silent Payments policy
+        type. This lets the review screen recognize SP change/self-transfer
+        outputs regardless of the loaded policy type. Derivation assumes the
+        default SP account matching this wallet's account index; a different
+        SP account fails the ownership check safely (output stays a spend).
+        The derived keys are cached.
+        """
+        if self.sp_keys is not None:
+            return self.sp_keys
+        if self._sp_detection_keys is None:
+            sp_derivation = Key.get_default_derivation(
+                TYPE_SILENT_PAYMENT, self.network, self.account_index
+            )
+            scan_privkey = self.root.derive(sp_derivation + "/1h/0").key
+            spend_privkey = self.root.derive(sp_derivation + "/0h/0").key
+            self._sp_detection_keys = SilentPaymentKeys(
+                scan_privkey, spend_privkey, spend_privkey.get_public_key()
+            )
+        return self._sp_detection_keys
 
     @staticmethod
     def pick_final_word(entropy, words):
