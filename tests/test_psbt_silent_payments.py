@@ -1,6 +1,16 @@
 import pytest
+from embit import bip32, bip39, ec, script
+from embit.bip32 import parse_path
+from embit.hashes import tagged_hash
+from embit.networks import NETWORKS
+from embit.psbt import DerivationPath
+from embit.script import Script
+from embit.silent_payments import SilentPaymentsPSBT, create_outputs
+from embit.silent_payments.fields import SilentPaymentData
+from embit.silent_payments.psbt import SPInputScope, SPOutputScope
+from embit.transaction import COutPoint, TransactionOutput
+from embit.util.key import SECP256K1_ORDER
 
-# Standard BIP-39 test mnemonic (fingerprint 73c5da0a / root 0x...).
 TEST_MNEMONIC = (
     "abandon abandon abandon abandon abandon abandon abandon abandon "
     "abandon abandon abandon about"
@@ -789,13 +799,6 @@ def test_self_transfer_sp_to_sp(mocker, m5stickv):
 def _build_sp_psbt_spend_list(spend_pubs):
     """One P2WPKH input and one SP output per entry of spend_pubs (in order),
     all sharing SCAN_HEX's scan key. Repeated entries are allowed."""
-    from embit import bip32, bip39, ec, script
-    from embit.psbt import DerivationPath
-    from embit.transaction import TransactionOutput
-    from embit.silent_payments import SilentPaymentsPSBT
-    from embit.silent_payments.psbt import SPInputScope, SPOutputScope
-    from embit.silent_payments.fields import SilentPaymentData
-
     root = bip32.HDKey.from_seed(bip39.mnemonic_to_seed(TEST_MNEMONIC))
     child = root.derive(INPUT_PATH)
     pub = child.get_public_key()
@@ -834,11 +837,6 @@ def test_sign_interleaved_sp_outputs_same_scan_key(mocker, m5stickv):
     output-index order (A→k0, B→k1, A→k2), so a valid PSBT paying two
     addresses of the same scan key interleaved was rejected at signing.
     """
-    from embit import ec, script
-    from embit.networks import NETWORKS
-    from embit.transaction import COutPoint
-    from embit.silent_payments import create_outputs
-    from embit import bip32, bip39
     from krux.psbt import PSBTSigner
     from krux.key import Key, TYPE_SINGLESIG
     from krux.wallet import Wallet
@@ -883,10 +881,6 @@ def test_sign_interleaved_sp_outputs_same_scan_key(mocker, m5stickv):
 def _labeled_spend_pub(sp_keys, label):
     """Independently derive the wallet's BIP-352 labeled spend pubkey via
     private-key arithmetic: (b_spend + hash(b_scan || m)) · G."""
-    from embit import ec
-    from embit.hashes import tagged_hash
-    from embit.util.key import SECP256K1_ORDER
-
     tweak = tagged_hash(
         "BIP0352/Label", sp_keys.scan_privkey.secret + label.to_bytes(4, "big")
     )
@@ -899,10 +893,6 @@ def _labeled_spend_pub(sp_keys, label):
 
 def test_own_sp_output_type_classification(mocker, m5stickv):
     """own_sp_output_type: change/self only when scan AND spend keys match."""
-    from embit import ec
-    from embit.networks import NETWORKS
-    from embit.silent_payments.fields import SilentPaymentData
-    from embit.silent_payments.psbt import SPOutputScope
     from krux.silent_payments import own_sp_output_type
     from krux.key import Key, TYPE_SILENT_PAYMENT
 
@@ -965,15 +955,6 @@ def test_sp_change_classified_as_change(mocker, m5stickv):
     count only the foreign output as spend, so the user sees the real payment
     amount rather than payment + change.
     """
-    from embit import ec
-    from embit.psbt import DerivationPath
-    from embit.bip32 import parse_path
-    from embit.transaction import TransactionOutput
-    from embit.script import Script
-    from embit.networks import NETWORKS
-    from embit.silent_payments import SilentPaymentsPSBT
-    from embit.silent_payments.psbt import SPInputScope, SPOutputScope
-    from embit.silent_payments.fields import SilentPaymentData
     from krux.psbt import PSBTSigner
     from krux.key import Key, TYPE_SILENT_PAYMENT
     from krux.wallet import Wallet
