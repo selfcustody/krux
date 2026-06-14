@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 
 from .krux_settings import Settings, ThemeSettings
-from .kboard import kboard
 
 # To create new colors from RGB values use firmware/scripts/rgbconv.py script
 
@@ -34,19 +33,22 @@ DARKWHITE = 0x1CE7
 WHITE = 0xFFFF
 GREEN = 0xE007
 DARKGREEN = 0x8005
+DARKERGREEN = 0x4004
 RED = 0x00F8
+DARKERRED = 0x00C0
 LIGHT_PINK = 0xDFFC
 PINK = 0x1FF8
 PURPLE = 0x0F78
 ORANGE = 0x20FD
 DARKORANGE = 0xA0CA
+DARKERORANGE = 0xE0B2
 YELLOW = 0x85F6
 BLUE = 0xF800
 LIGHTBLUE = 0xBD0E
 CYAN = 0xFF07
 
-MAIN_TXT_COLOR = ORANGE
-TEST_TXT_COLOR = GREEN
+MAIN_TXT_COLOR = DARKERORANGE
+TEST_TXT_COLOR = DARKERGREEN
 
 
 THEMES = {
@@ -67,13 +69,13 @@ THEMES = {
         "background": WHITE,
         "info_background": DARKWHITE,
         "foreground": BLACK,
-        "frame": LIGHTGREY,
+        "frame": DARKGREY,
         "disabled": DARKWHITE,
-        "go": DARKGREEN,
+        "go": DARKERGREEN,
         "esc_no": RED,
         "del": DARKORANGE,
         "toggle": BLUE,
-        "error": RED,
+        "error": DARKERRED,
         "highlight": BLUE,
     },
     ThemeSettings.ORANGE_THEME_NAME: {
@@ -93,7 +95,7 @@ THEMES = {
         "background": BLACK,
         "info_background": LIGHTBLACK,
         "foreground": LIGHT_PINK,
-        "frame": PURPLE,
+        "frame": DARKGREY,
         "disabled": DARKGREY,
         "go": PINK,
         "esc_no": RED,
@@ -129,9 +131,6 @@ class Theme:
         current_theme = Settings().appearance.theme
         self.bg_color = THEMES[current_theme]["background"]
         self.info_bg_color = THEMES[current_theme]["info_background"]
-        if kboard.is_amigo:
-            # Amigo has darker grays, so we will use a lighter one
-            self.info_bg_color = THEMES[current_theme]["disabled"]
         self.fg_color = THEMES[current_theme]["foreground"]
         self.frame_color = THEMES[current_theme]["frame"]
         self.disabled_color = THEMES[current_theme]["disabled"]

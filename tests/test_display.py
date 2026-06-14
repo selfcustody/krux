@@ -843,7 +843,7 @@ def test_draw_hcentered_text_on_inverted_display(mocker, amigo):
 
 def test_draw_infobox(mocker, amigo):
     from krux.display import Display, DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
-    from krux.themes import WHITE, BLACK, DARKGREY
+    from krux.themes import WHITE, BLACK, LIGHTBLACK
 
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     mocker.patch("krux.display.lcd.string_width_px", side_effect=string_width_px)
@@ -860,7 +860,7 @@ def test_draw_infobox(mocker, amigo):
         DEFAULT_PADDING - 1,
         d.width() - 2 * DEFAULT_PADDING + 6,
         FONT_HEIGHT + 2,
-        DARKGREY,
+        LIGHTBLACK,
         FONT_WIDTH,
     )
     d.draw_string.assert_called_with(
@@ -868,7 +868,7 @@ def test_draw_infobox(mocker, amigo):
         DEFAULT_PADDING,
         "Hello world",
         WHITE,
-        DARKGREY,
+        LIGHTBLACK,
     )
 
 

@@ -7,6 +7,8 @@ Added vertical layout option for Stackbit 1248 backup display, allowing users to
 Switch from the pure-Python urtypes and foundation-ur-py packages to the new uUR C module, allowing faster UR QR codes decoding with a smaller RAM footprint.
 
 ### Other Bug Fixes and Improvements
+- Fix default theme contrast failures for Light, CypherPink, network
+  indicators, and Amigo info panels
 - Improve scan TinySeed and other binary visibility by drawing punches only
 - Added `flash_success` method to standardize green success flashes across confirmation screens
 - Update Embit to latest - 3ae0ef2
