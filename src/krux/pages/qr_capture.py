@@ -196,7 +196,10 @@ class QRCodeCapture(Page):
 
             self._qr_frame_count = (self._qr_frame_count + 1) % QR_SCAN_FRAME_SKIP
             if self._qr_frame_count == 0:
-                res = img.find_qrcodes(find_inverted=True)
+                # Try normal QR first (faster), then inverted if not found
+                res = img.find_qrcodes(find_inverted=False)
+                if not res:
+                    res = img.find_qrcodes(find_inverted=True)
             else:
                 res = None
             if res:
