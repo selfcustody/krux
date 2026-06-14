@@ -328,6 +328,9 @@ class Key:
         formatted_txt = FINGERPRINT_SYMBOL + THIN_SPACE + "%s" if pretty else "%s"
         return formatted_txt % hexlify(fingerprint).decode("utf-8")
 
+    # Cache for get_final_word_candidates keyed by (word_count, first_11_words_tuple)
+    _FINAL_WORD_CACHE = {}
+
     @staticmethod
     def get_final_word_candidates(words):
         """Returns a list of valid final words"""
@@ -343,14 +346,20 @@ class Key:
         len_needed = len_target - (len(words) * 11)
         len_cksum = len_target // 32
 
+        cache_key = (len(words), tuple(words[:12]))
+        if cache_key in Key._FINAL_WORD_CACHE:
+            return Key._FINAL_WORD_CACHE[cache_key]
+
         candidates = []
+        entropy_bytes = len_target // 8
         for i in range(2**len_needed):
             entropy = (accu << len_needed) + i
-            ck_bytes = sha256(entropy.to_bytes(len_target // 8, "big")).digest()
+            ck_bytes = sha256(entropy.to_bytes(entropy_bytes, "big")).digest()
             cksum = int.from_bytes(ck_bytes, "big") >> 256 - len_cksum
             last_word = WORDLIST[(i << len_cksum) + cksum]
             candidates.append(last_word)
 
+        Key._FINAL_WORD_CACHE[cache_key] = candidates
         return candidates
 
 

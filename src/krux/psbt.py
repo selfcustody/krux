@@ -153,12 +153,23 @@ class PSBTSigner:
         except:
             # Expected to fail to get xpubs from Miniscript PSBT
             pass
+        policy_cache = {}
         for inp in self.psbt.inputs:
             # get policy of the input
             try:
-                inp_policy = self.get_policy_from_psbt_input(
-                    inp, xpubs, origin_less_xpub
-                )
+                scriptpubkey = None
+                if inp.witness_utxo:
+                    scriptpubkey = inp.witness_utxo.script_pubkey
+                elif inp.non_witness_utxo:
+                    scriptpubkey = inp.non_witness_utxo.vout[inp.vout].script_pubkey
+                if scriptpubkey is not None and scriptpubkey in policy_cache:
+                    inp_policy = policy_cache[scriptpubkey]
+                else:
+                    inp_policy = self.get_policy_from_psbt_input(
+                        inp, xpubs, origin_less_xpub
+                    )
+                    if scriptpubkey is not None:
+                        policy_cache[scriptpubkey] = inp_policy
             except:
                 raise ValueError("Unable to get policy")
             # if policy is None - assign current

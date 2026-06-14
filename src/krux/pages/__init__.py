@@ -727,8 +727,11 @@ class Menu:
         if start_from_index is not None:
             start_from_submenu = True
             selected_item_index = start_from_index
+        _gc_counter = 0
         while True:
-            gc.collect()
+            _gc_counter = (_gc_counter + 1) % 5
+            if _gc_counter == 0:
+                gc.collect()
             if self.menu_offset > STATUS_BAR_HEIGHT:
                 # Clear only the menu area
                 self.ctx.display.fill_rectangle(

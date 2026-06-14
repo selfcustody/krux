@@ -75,7 +75,7 @@ def t(slug):
         return slug
     slug_id = binascii.crc32(slug.encode("utf-8"))
     try:
-        translation_index = locale_control.reference.index(slug_id)
+        translation_index = locale_control.reference_dict[slug_id]
     except:
         return slug
     return locale_control.translation[translation_index]
@@ -86,6 +86,7 @@ class LocaleControl:
 
     def __init__(self):
         self.reference = None
+        self.reference_dict = {}
         self.translation = None
         self.locales = []
         self.update_locales()
@@ -116,6 +117,9 @@ class LocaleControl:
             from .translations import ref_array
 
             self.reference = ref_array
+            self.reference_dict = dict(
+                zip(self.reference, range(len(self.reference)))
+            )
 
 
 locale_control = LocaleControl()

@@ -55,6 +55,11 @@ class Touch:
         self.gesture = None
         self.state = IDLE
         self.width, self.height = width, height
+        self._sum_x = 0
+        self._sum_y = 0
+        self.flipped = hasattr(Settings().hardware, "display") and getattr(
+            Settings().hardware.display, "flipped_orientation", False
+        )
         if kboard.is_embed_fire:
             from .touchscreens.cst816 import touch_control
 
@@ -93,9 +98,7 @@ class Touch:
     def valid_position(self, data):
         """Checks if touch position is within buttons area"""
 
-        if hasattr(Settings().hardware, "display") and getattr(
-            Settings().hardware.display, "flipped_orientation", False
-        ):
+        if self.flipped:
             data = (self.height - data[0], self.width - data[1])
 
         if self.x_regions and data[0] < self.x_regions[0]:
@@ -187,11 +190,9 @@ class Touch:
             self.y_regions = []
 
     def _store_points(self, data):
-        """Store pressed points and calculare an average pressed point"""
+        """Store pressed points and calculate an average pressed point"""
 
-        if hasattr(Settings().hardware, "display") and getattr(
-            Settings().hardware.display, "flipped_orientation", False
-        ):
+        if self.flipped:
             new_y = max(0, self.height - data[0])
             new_y = min(new_y, self.height - 1)
             new_x = max(0, self.width - data[1])
@@ -201,19 +202,15 @@ class Touch:
         if self.state == IDLE:
             self.state = PRESSED
             self.press_point = [data]
-            self.index = self._extract_index(self.press_point[0])
-        # Calculare an average (max. 10 samples) pressed point to increase precision
+            self._sum_x = data[0]
+            self._sum_y = data[1]
+            self.index = self._extract_index(data)
         elif self.state == PRESSED and len(self.press_point) < 10:
             self.press_point.append(data)
-            len_press = len(self.press_point)
-            x = 0
-            y = 0
-            for n in range(len_press):
-                x += self.press_point[n][0]
-                y += self.press_point[n][1]
-            x //= len_press
-            y //= len_press
-            self.index = self._extract_index((x, y))
+            self._sum_x += data[0]
+            self._sum_y += data[1]
+            count = len(self.press_point)
+            self.index = self._extract_index((self._sum_x // count, self._sum_y // count))
         self.release_point = data
 
     def current_state(self):

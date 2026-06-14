@@ -21,7 +21,6 @@
 # THE SOFTWARE.
 import sys
 from unittest import mock
-from pyzbar.pyzbar import decode
 from cv2 import split, VideoCapture, cvtColor, COLOR_BGR2RGB, COLOR_BGR2LAB
 from numpy import std
 from PIL import Image
@@ -94,9 +93,13 @@ def run(on):
 
 def find_qrcodes(img):
     codes = []
-    data = decode(img)
-    if data:
-        codes.append(Mockqrcode(data[0].data.decode()))
+    try:
+        from pyzbar.pyzbar import decode as zbar_decode
+        data = zbar_decode(img)
+        if data:
+            codes.append(Mockqrcode(data[0].data.decode()))
+    except ImportError:
+        pass
     return codes
 
 

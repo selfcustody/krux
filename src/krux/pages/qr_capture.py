@@ -34,6 +34,7 @@ from ..kboard import kboard
 ANTI_GLARE_WAIT_TIME = 500
 MESSAGE_DISPLAY_PERIOD = 5000
 PROGRESS_BAR_HEIGHT = 15
+QR_SCAN_FRAME_SKIP = 2
 
 
 class QRCodeCapture(Page):
@@ -45,6 +46,7 @@ class QRCodeCapture(Page):
         self.progress_bar_offset_y = {"cube": 225, "m5stickv": 210, "amigo": 380}.get(
             board.config["type"], 305
         )
+        self._qr_frame_count = 0
 
     def light_control(self):
         """Controls the light based on the user input"""
@@ -151,8 +153,6 @@ class QRCodeCapture(Page):
 
         # Cache end time for message display to avoid repeated addition
         message_end_time = start_time + MESSAGE_DISPLAY_PERIOD
-        first_frame = True
-
         while True:
             wdt.feed()
 
@@ -194,9 +194,12 @@ class QRCodeCapture(Page):
             else:
                 self.ctx.display.render_image(img)
 
-            res = img.find_qrcodes(find_inverted=first_frame)
+            self._qr_frame_count = (self._qr_frame_count + 1) % QR_SCAN_FRAME_SKIP
+            if self._qr_frame_count == 0:
+                res = img.find_qrcodes(find_inverted=True)
+            else:
+                res = None
             if res:
-                first_frame = False
                 new_part = parser.parse(res[0].payload())
 
                 if (

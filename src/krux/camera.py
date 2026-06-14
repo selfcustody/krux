@@ -109,11 +109,12 @@ class Camera:
             sensor.set_hmirror(1)
             sensor.set_vflip(1)
         self.mode = mode
-        if mode == BINARY_GRID_MODE:
-            # Binary grid mode uses grayscale except for GC2145
-            sensor.set_pixformat(sensor.GRAYSCALE)
-        else:
+        if mode == ENTROPY_MODE:
+            # Entropy mode needs color for dice visualization
             sensor.set_pixformat(sensor.RGB565)
+        else:
+            # QR modes only need luminance - saves memory and speeds up detection
+            sensor.set_pixformat(sensor.GRAYSCALE)
         if self.cam_id == OV5642_ID:
             sensor.set_hmirror(1)
         if self.cam_id == OV2640_ID:
@@ -349,7 +350,7 @@ class Camera:
                 sensor.run(1)
             elif self.cam_id == OV7740_ID:
                 sensor.__write_reg(0xD5, 0x30)
-            sensor.skip_frames()
+            sensor.skip_frames(20)
             # Go back to standard mode
             self.mode = QR_SCAN_MODE
         else:

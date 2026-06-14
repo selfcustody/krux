@@ -79,6 +79,9 @@ class Display:
             )
         else:
             self.flipped_x_coordinates = False
+        self.flipped_orientation = hasattr(Settings().hardware, "display") and getattr(
+            Settings().hardware.display, "flipped_orientation", False
+        )
         self.blk_ctrl = None
         if kboard.has_backlight:
             self.gpio_backlight_ctrl(Settings().hardware.display.brightness)
@@ -244,10 +247,7 @@ class Display:
         """Changes the rotation of the display to landscape"""
         if self.portrait:
             lcd.rotation(
-                (LANDSCAPE + 2) % 4
-                if hasattr(Settings().hardware, "display")
-                and getattr(Settings().hardware.display, "flipped_orientation", False)
-                else LANDSCAPE
+                (LANDSCAPE + 2) % 4 if self.flipped_orientation else LANDSCAPE
             )
             self.portrait = False
 
@@ -255,10 +255,7 @@ class Display:
         """Changes the rotation of the display to portrait"""
         if not self.portrait:
             lcd.rotation(
-                (PORTRAIT + 2) % 4
-                if hasattr(Settings().hardware, "display")
-                and getattr(Settings().hardware.display, "flipped_orientation", False)
-                else PORTRAIT
+                (PORTRAIT + 2) % 4 if self.flipped_orientation else PORTRAIT
             )
             self.portrait = True
 
