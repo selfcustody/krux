@@ -51,6 +51,7 @@ class Tools(Page):
                     (t("Descriptor Addresses"), self.descriptor_addresses),
                     (t("Flash Tools"), self.flash_tools),
                     (t("Remove Mnemonic"), self.rm_stored_mnemonic),
+                    (t("QR Benchmark"), self.qr_benchmark),
                 ],
             ),
         )
@@ -129,4 +130,79 @@ class Tools(Page):
         page.run()
         sys.modules.pop("krux.pages.device_tests")
         del sys.modules["krux.pages"].device_tests
+        return MENU_CONTINUE
+
+    def qr_benchmark(self):
+        """Handler for the 'QR Benchmark' menu item"""
+        import time
+        import sensor
+
+        FRAME_COUNT = 30
+        results = []
+
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("QR Benchmark") + "\n\n" + t("Starting..."))
+
+        # Test 1: find_qrcodes() per frame
+        sensor.reset()
+        sensor.set_pixformat(sensor.RGB565)
+        sensor.set_framesize(sensor.QVGA)
+        sensor.run(1)
+        time.sleep_ms(500)
+
+        times = []
+        for i in range(FRAME_COUNT):
+            img = sensor.snapshot()
+            start = time.ticks_us()
+            img.find_qrcodes()
+            elapsed = time.ticks_diff(time.ticks_us(), start)
+            times.append(elapsed)
+
+        avg_rgb = sum(times) // len(times)
+        results.append("RGB565: %d ms" % (avg_rgb // 1000))
+
+        # Test 2: GRAYSCALE
+        sensor.reset()
+        sensor.set_pixformat(sensor.GRAYSCALE)
+        sensor.set_framesize(sensor.QVGA)
+        sensor.run(1)
+        time.sleep_ms(500)
+
+        times = []
+        for i in range(FRAME_COUNT):
+            img = sensor.snapshot()
+            start = time.ticks_us()
+            img.find_qrcodes()
+            elapsed = time.ticks_diff(time.ticks_us(), start)
+            times.append(elapsed)
+
+        avg_gray = sum(times) // len(times)
+        results.append("GRAYSCALE: %d ms" % (avg_gray // 1000))
+
+        # Calculate improvement
+        if avg_rgb > 0:
+            improvement = (avg_rgb - avg_gray) * 100 // avg_rgb
+            results.append("Improvement: %d%%" % improvement)
+
+        # Test 3: Mode switch time
+        from krux.camera import Camera, QR_SCAN_MODE, ANTI_GLARE_MODE
+
+        cam = Camera()
+        start = time.ticks_ms()
+        cam.initialize_run(QR_SCAN_MODE)
+        t1 = time.ticks_diff(time.ticks_ms(), start)
+
+        start = time.ticks_ms()
+        cam.initialize_run(ANTI_GLARE_MODE)
+        t2 = time.ticks_diff(time.ticks_ms(), start)
+
+        results.append("Mode switch: %d ms" % t1)
+
+        # Show results
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(
+            t("QR Benchmark") + "\n\n" + "\n".join(results)
+        )
+        time.sleep(5)
+
         return MENU_CONTINUE
