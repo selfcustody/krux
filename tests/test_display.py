@@ -843,7 +843,8 @@ def test_draw_hcentered_text_on_inverted_display(mocker, amigo):
 
 def test_draw_infobox(mocker, amigo):
     from krux.display import Display, DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
-    from krux.themes import WHITE, BLACK, LIGHTBLACK
+    from krux.krux_settings import Settings
+    from krux.themes import WHITE, BLACK, THEMES, theme
 
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     mocker.patch("krux.display.lcd.string_width_px", side_effect=string_width_px)
@@ -853,23 +854,39 @@ def test_draw_infobox(mocker, amigo):
     mocker.spy(d, "fill_rectangle")
     mocker.spy(d, "draw_string")
 
-    d.draw_hcentered_text("Hello world", DEFAULT_PADDING, WHITE, BLACK, info_box=True)
+    cases = (
+        "Dark",
+        "Light",
+        "Orange",
+        "CypherPink",
+        "CypherPunk",
+    )
+    for theme_name in cases:
+        Settings().appearance.theme = theme_name
+        theme.update()
+        info_bg_color = THEMES[theme_name]["info_background"]
 
-    d.fill_rectangle.assert_called_with(
-        DEFAULT_PADDING - 3,
-        DEFAULT_PADDING - 1,
-        d.width() - 2 * DEFAULT_PADDING + 6,
-        FONT_HEIGHT + 2,
-        LIGHTBLACK,
-        FONT_WIDTH,
-    )
-    d.draw_string.assert_called_with(
-        (d.width() - len("Hello world") * FONT_WIDTH) // 2,
-        DEFAULT_PADDING,
-        "Hello world",
-        WHITE,
-        LIGHTBLACK,
-    )
+        d.fill_rectangle.reset_mock()
+        d.draw_string.reset_mock()
+        d.draw_hcentered_text(
+            "Hello world", DEFAULT_PADDING, WHITE, BLACK, info_box=True
+        )
+
+        d.fill_rectangle.assert_called_with(
+            DEFAULT_PADDING - 3,
+            DEFAULT_PADDING - 1,
+            d.width() - 2 * DEFAULT_PADDING + 6,
+            FONT_HEIGHT + 2,
+            info_bg_color,
+            FONT_WIDTH,
+        )
+        d.draw_string.assert_called_with(
+            (d.width() - len("Hello world") * FONT_WIDTH) // 2,
+            DEFAULT_PADDING,
+            "Hello world",
+            WHITE,
+            info_bg_color,
+        )
 
 
 def test_draw_centered_text(mocker, m5stickv):

@@ -57,34 +57,60 @@ def contrast_ratio(relative_luminance):
 def test_text_and_status_colors_meet_normal_text_contrast(amigo, contrast_ratio):
     from krux.themes import THEMES
 
-    cases = ("Dark", "Light", "Orange", "CypherPink", "CypherPunk")
-    pairs = (
-        ("foreground", "background"),
-        ("foreground", "info_background"),
-        ("go", "background"),
-        ("error", "background"),
+    cases = (
+        ("Dark", "foreground", "background"),
+        ("Dark", "foreground", "info_background"),
+        ("Dark", "go", "background"),
+        ("Dark", "error", "background"),
+        ("Light", "foreground", "background"),
+        ("Light", "foreground", "info_background"),
+        ("Light", "go", "background"),
+        ("Light", "error", "background"),
+        ("Orange", "foreground", "background"),
+        ("Orange", "foreground", "info_background"),
+        ("Orange", "go", "background"),
+        ("Orange", "error", "background"),
+        ("CypherPink", "foreground", "background"),
+        ("CypherPink", "foreground", "info_background"),
+        ("CypherPink", "go", "background"),
+        ("CypherPink", "error", "background"),
+        ("CypherPunk", "foreground", "background"),
+        ("CypherPunk", "foreground", "info_background"),
+        ("CypherPunk", "go", "background"),
+        ("CypherPunk", "error", "background"),
     )
-    for case in cases:
-        palette = THEMES[case]
-        for foreground, background in pairs:
-            assert contrast_ratio(palette[foreground], palette[background]) >= 4.5
+    for theme_name, foreground, background in cases:
+        palette = THEMES[theme_name]
+        assert contrast_ratio(palette[foreground], palette[background]) >= 4.5
 
 
 def test_frames_meet_non_text_contrast(amigo, contrast_ratio):
     from krux.themes import THEMES
 
-    cases = ("Dark", "Light", "Orange", "CypherPink", "CypherPunk")
-    for case in cases:
-        palette = THEMES[case]
+    cases = (
+        "Dark",
+        "Light",
+        "Orange",
+        "CypherPink",
+        "CypherPunk",
+    )
+    for theme_name in cases:
+        palette = THEMES[theme_name]
         assert contrast_ratio(palette["frame"], palette["background"]) >= 3
 
 
 def test_network_colors_are_readable_on_theme_backgrounds(amigo, contrast_ratio):
     from krux.themes import MAIN_TXT_COLOR, TEST_TXT_COLOR, THEMES
 
-    cases = ("Dark", "Light", "Orange", "CypherPink", "CypherPunk")
-    for case in cases:
-        background = THEMES[case]["background"]
+    cases = (
+        "Dark",
+        "Light",
+        "Orange",
+        "CypherPink",
+        "CypherPunk",
+    )
+    for theme_name in cases:
+        background = THEMES[theme_name]["background"]
         assert contrast_ratio(MAIN_TXT_COLOR, background) >= 4.5
         assert contrast_ratio(TEST_TXT_COLOR, background) >= 4.5
 
@@ -93,8 +119,14 @@ def test_amigo_uses_theme_info_background(amigo):
     from krux.krux_settings import Settings
     from krux.themes import THEMES, Theme
 
-    cases = ("Dark", "Light", "Orange", "CypherPink", "CypherPunk")
-    for case in cases:
-        Settings().appearance.theme = case
+    cases = (
+        "Dark",
+        "Light",
+        "Orange",
+        "CypherPink",
+        "CypherPunk",
+    )
+    for theme_name in cases:
+        Settings().appearance.theme = theme_name
 
-        assert Theme().info_bg_color == THEMES[case]["info_background"]
+        assert Theme().info_bg_color == THEMES[theme_name]["info_background"]
