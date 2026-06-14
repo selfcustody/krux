@@ -305,6 +305,21 @@ poetry run poe docs
 - [MicroPython](https://github.com/micropython/micropython), a lean and efficient Python implementation for microcontrollers and constrained systems
 - [Kboot](https://github.com/loboris/Kboot) and [ktool](https://github.com/loboris/ktool)
 
+# Optimizations
+This fork includes the following performance and memory optimizations:
+
+- **Store deep-copy removed**: `store.get()` returns default immediately instead of re-serializing via `json.dumps()` on every call (O(1) vs O(n)).
+- **QR frame skip**: Only every other frame is scanned for QR codes (`QR_SCAN_FRAME_SKIP = 2`), halving `find_qrcodes()` CPU usage. Animated URs still decode correctly due to fountain code redundancy.
+- **GRAYSCALE mode**: Camera uses `sensor.GRAYSCALE` for QR scan, anti-glare, zoomed, and binary grid modes (ENTROPY mode keeps RGB565). Saves ~77KB per frame (153KB → 76KB).
+- **Reduced skip_frames**: `sensor.skip_frames()` reduced from 100 (~3s) to 20 (~0.6s) for camera mode switches.
+- **Cached display orientation**: `flipped_orientation` is read once at `Display.__init__()` instead of accessed via `Settings()` chain on every `to_portrait()`/`to_landscape()` call (~15-30ms each).
+- **Translation dict O(1)**: `t()` changed from `list.index()` on 378 elements (O(n)) to dict lookup keyed by crc32 `slug_id` (O(1)). The `reference_dict` is built once in `load_locale()`.
+- **Final word cache**: `_FINAL_WORD_CACHE` in `Key` avoids redundant SHA256 computation for repeated calls with the same partial mnemonic. Keyed by `(word_count, first_12_words)`.
+- **GC throttle**: `gc.collect()` in the main menu loop now runs every 5 frames instead of every frame.
+- **PSBT policy cache**: Multi-input PSBTs cache `get_policy_from_psbt_input` results per `script_pubkey`, skipping redundant derivation for identical inputs.
+- **Touch running average**: `_store_points()` uses cumulative `_sum_x`/`_sum_y` with integer division instead of O(n) re-summing all 10 historical points each sample.
+- **Simulator**: `pyzbar` import made lazy (try/except) so the simulator runs without the native zbar C library installed.
+
 # Contributing
 Issues and pull requests welcome! Let's make this as good as it can be.
 
