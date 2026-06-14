@@ -202,7 +202,7 @@ class Key:
                 Key.extract_root(mnemonic, passphrase, network).child(0).fingerprint,
                 pretty,
             )
-        except:
+        except (ValueError, TypeError):
             pass
         return ""
 
@@ -271,7 +271,12 @@ class Key:
         if len(words) != 11 and len(words) != 23:
             raise ValueError("must provide 11 or 23 words")
 
-        random.seed(int(time.ticks_ms() + entropy))
+        # Use SHA256 of entropy + ticks for a more unpredictable seed
+        seed_data = sha256(entropy.to_bytes(32, "big")).digest()
+        tick_bytes = time.ticks_ms().to_bytes(4, "big")
+        seed_hash = sha256(seed_data + tick_bytes).digest()
+        seed = int.from_bytes(seed_hash[:4], "big")
+        random.seed(seed)
         return random.choice(Key.get_final_word_candidates(words))
 
     @staticmethod

@@ -33,6 +33,9 @@ FLASH_PATH_STR = "/" + FLASH_PATH + "/%s"
 QR_CODE_ITER_MULTIPLE = 10000
 
 
+MAX_SEEDS_FILE_SIZE = 8192
+
+
 class MnemonicStorage:
     """Handler of stored encrypted seeds"""
 
@@ -42,12 +45,15 @@ class MnemonicStorage:
         try:
             with SDHandler() as sd:
                 self.stored_sd = json.loads(sd.read(MNEMONICS_FILE))
-        except:
+        except (OSError, ValueError, KeyError):
             pass
         try:
             with open(FLASH_PATH_STR % MNEMONICS_FILE, "r") as f:
-                self.stored = json.loads(f.read())
-        except:
+                contents = f.read(MAX_SEEDS_FILE_SIZE + 1)
+                if len(contents) > MAX_SEEDS_FILE_SIZE:
+                    return
+                self.stored = json.loads(contents)
+        except (OSError, ValueError, KeyError):
             pass
 
     def _deprecated_decrypt(self, key, salt, iterations, mode, payload):
@@ -72,7 +78,7 @@ class MnemonicStorage:
             # pylint: disable=W0212
             plaintext = kef._unpad(decryptor.decrypt(payload), pkcs_pad=False)
             return plaintext.decode()
-        except:
+        except (ValueError, UnicodeError):
             return None
 
     def list_mnemonics(self, sd_card=False):
@@ -90,7 +96,7 @@ class MnemonicStorage:
                 stored_value = self.stored_sd.get(mnemonic_id)
             else:
                 stored_value = self.stored.get(mnemonic_id)
-        except:
+        except (TypeError, AttributeError):
             return None
 
         if stored_value.get("b64_kef"):
@@ -119,7 +125,7 @@ class MnemonicStorage:
                     contents = sd.read(MNEMONICS_FILE)
                     orig_len = len(contents)
                     mnemonics = json.loads(contents)
-            except:
+            except (OSError, ValueError, KeyError):
                 orig_len = 0
 
             # save the new MNEMONICS_FILE
@@ -131,21 +137,28 @@ class MnemonicStorage:
                     if len(contents) < orig_len:
                         contents += " " * (orig_len - len(contents))
                     sd.write(MNEMONICS_FILE, contents)
-            except:
+            except (OSError, ValueError):
                 return False
         else:
             try:
                 # load current MNEMONICS_FILE
                 with open(FLASH_PATH_STR % MNEMONICS_FILE, "r") as f:
-                    mnemonics = json.loads(f.read())
-            except:
+                    contents = f.read(MAX_SEEDS_FILE_SIZE + 1)
+                    if len(contents) <= MAX_SEEDS_FILE_SIZE:
+                        mnemonics = json.loads(contents)
+            except (OSError, ValueError, KeyError):
                 pass
             try:
-                # save the new MNEMONICS_FILE
-                with open(FLASH_PATH_STR % MNEMONICS_FILE, "w") as f:
-                    mnemonics[mnemonic_id] = {"b64_kef": b64_kef}
+                # save the new MNEMONICS_FILE using temp file for atomicity
+                mnemonics[mnemonic_id] = {"b64_kef": b64_kef}
+                tmp_path = FLASH_PATH_STR % (MNEMONICS_FILE + ".tmp")
+                final_path = FLASH_PATH_STR % MNEMONICS_FILE
+                with open(tmp_path, "w") as f:
                     f.write(json.dumps(mnemonics))
-            except:
+                # MicroPython os.rename may not be available, overwrite directly
+                import os
+                os.rename(tmp_path, final_path)
+            except (OSError, ValueError):
                 return False
         return True
 
@@ -162,5 +175,13 @@ class MnemonicStorage:
                 sd.write(MNEMONICS_FILE, contents)
         else:
             self.stored.pop(mnemonic_id)
-            with open(FLASH_PATH_STR % MNEMONICS_FILE, "w") as f:
-                f.write(json.dumps(self.stored))
+            # Atomic write using temp file
+            try:
+                tmp_path = FLASH_PATH_STR % (MNEMONICS_FILE + ".tmp")
+                final_path = FLASH_PATH_STR % MNEMONICS_FILE
+                with open(tmp_path, "w") as f:
+                    f.write(json.dumps(self.stored))
+                import os
+                os.rename(tmp_path, final_path)
+            except (OSError, ValueError):
+                pass

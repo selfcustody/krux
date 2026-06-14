@@ -314,7 +314,7 @@ def upgrade():
     pubkey = None
     try:
         pubkey = ec.PublicKey.from_string(SIGNER_PUBKEY)
-    except:
+    except (ValueError, KeyError):
         display.flash_text("Invalid public key", theme.error_color)
         return False
 
@@ -331,7 +331,7 @@ def upgrade():
     try:
         with open(firmware_path + ".sig", "rb") as sig_file:
             sig = sig_file.read()
-    except:
+    except OSError:
         display.flash_text(t("Missing signature file"), theme.error_color)
         return False
 
@@ -343,7 +343,7 @@ def upgrade():
         if not pubkey.verify(sig, firmware_hash):
             display.flash_text(t("Bad signature"), theme.error_color)
             return False
-    except:
+    except (ValueError, TypeError):
         display.flash_text(t("Bad signature"), theme.error_color)
         return False
 

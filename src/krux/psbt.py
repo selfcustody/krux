@@ -70,7 +70,7 @@ class PSBTSigner:
                 with open(file_path, "rb") as file:
                     self.psbt = PSBT.read_from(file)
                 self.validate()
-            except:
+            except (OSError, ValueError) as e1:
                 try:
                     self.policy = None  # Reset policy
                     self.is_b64_file = self.file_is_base64_encoded(file_path)
@@ -87,39 +87,41 @@ class PSBTSigner:
                             self.psbt = PSBT.read_from(
                                 file, compress=CompressMode.CLEAR_ALL
                             )
-                except Exception as e:
-                    raise ValueError("Error loading PSBT file: %s" % e)
+                except Exception as e2:
+                    raise ValueError("Error loading PSBT file: %s" % e2)
             self.base_encoding = 64  # In case it is exported as QR code
         elif isinstance(psbt_data, UR):
             try:
                 self.psbt = PSBT.parse(URTYPE_PSBT.from_cbor(psbt_data.cbor).data)
                 self.ur_type = CRYPTO_PSBT
                 # self.base_encoding = 64
-            except:
+            except (ValueError, KeyError) as e:
                 raise ValueError("invalid PSBT")
         else:
-            try:
-                self.psbt = PSBT.parse(psbt_data)
-                if self.qr_format == FORMAT_PMOFN:
-                    # We can't return the PSBT as a multi-part sequence of bytes, so convert to
-                    # base64 first
-                    self.base_encoding = 64
-            except:
+            # Try multiple encodings: raw, base64, base58, base43
+            parsed = False
+            for encoding, decoder in [
+                (None, None),
+                (64, lambda d: base_decode(d, 64)),
+                (58, lambda d: base_decode(d, 58)),
+            ]:
                 try:
-                    self.psbt = PSBT.parse(base_decode(psbt_data, 64))
-                    self.base_encoding = 64
-                except:
-                    try:
-                        self.psbt = PSBT.parse(base_decode(psbt_data, 58))
-                        self.base_encoding = 58
-                    except:
-                        try:
-                            import base43
-
-                            self.psbt = PSBT.parse(base43.decode(psbt_data))
-                            self.base_encoding = 43
-                        except:
-                            raise ValueError("invalid PSBT")
+                    if decoder:
+                        self.psbt = PSBT.parse(decoder(psbt_data))
+                    else:
+                        self.psbt = PSBT.parse(psbt_data)
+                    self.base_encoding = encoding
+                    parsed = True
+                    break
+                except (ValueError, KeyError, TypeError):
+                    continue
+            if not parsed:
+                try:
+                    import base43
+                    self.psbt = PSBT.parse(base43.decode(psbt_data))
+                    self.base_encoding = 43
+                except (ValueError, KeyError, ImportError, TypeError) as e:
+                    raise ValueError("invalid PSBT")
         if self.policy is None:
             # If not yet validated (e.g. from file and compressed), validate now
             try:
@@ -150,7 +152,7 @@ class PSBTSigner:
         origin_less_xpub = None
         try:
             xpubs, origin_less_xpub = self.xpubs()
-        except:
+        except (ValueError, KeyError):
             # Expected to fail to get xpubs from Miniscript PSBT
             pass
         policy_cache = {}
@@ -170,7 +172,7 @@ class PSBTSigner:
                     )
                     if scriptpubkey is not None:
                         policy_cache[scriptpubkey] = inp_policy
-            except:
+            except (ValueError, KeyError, AttributeError) as e:
                 raise ValueError("Unable to get policy")
             # if policy is None - assign current
             if self.policy is None:
@@ -788,7 +790,7 @@ def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
             # check pubkeys are derived from cosigners
             cosigners = get_cosigners(pubkeys, scope.bip32_derivations, xpubs)
             policy.update({"cosigners": cosigners})
-        except:
+        except Exception:
             pass
 
     if P2WSH in script_type:
@@ -803,7 +805,7 @@ def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
             # check pubkeys are derived from cosigners
             cosigners = get_cosigners(pubkeys, scope.bip32_derivations, xpubs)
             policy.update({"cosigners": cosigners})
-        except:
+        except Exception:
             try:
                 # Try to parse as miniscript
                 policy.update({"miniscript": P2WSH})
@@ -811,7 +813,7 @@ def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
                 # Will succeed to verify cosigners only if the descriptor is loaded
                 cosigners = get_cosigners_miniscript(scope.bip32_derivations, xpubs)
                 policy.update({"cosigners": cosigners})
-            except:
+            except Exception:
                 pass
 
     if script_type == P2TR:
@@ -830,7 +832,7 @@ def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
             # otherwise it probably is single-sig taproot
             if len(cosigners) > 1:
                 policy.update({"cosigners": cosigners})
-        except:
+        except Exception:
             pass
 
     return policy
