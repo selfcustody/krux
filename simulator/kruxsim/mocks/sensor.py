@@ -94,9 +94,9 @@ def run(on):
 
 def find_qrcodes(img):
     codes = []
-    data = decode(img)
+    data = decode(img, binary=True)
     if data:
-        codes.append(Mockqrcode(data[0].data.decode()))
+        codes.append(Mockqrcode(data[0].data))
     return codes
 
 
