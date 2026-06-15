@@ -982,7 +982,7 @@ def test_render_image(mocker, multiple_devices):
         assert krux.display.lcd.display.call_args.kwargs["roi"] == (68, 52, 185, 135)
     elif board.config["type"] == "amigo":
         krux.display.lcd.display.assert_called_once_with(
-            img, oft=(40, 40), roi=(0, 0, 320, 240)
+            img, oft=(0, 0), roi=(0, 0, 320, 240)
         )
     elif board.config["type"] == "dock":
         krux.display.lcd.display.assert_called_once_with(
@@ -1011,7 +1011,7 @@ def test_render_image_with_title(mocker, multiple_devices):
         assert krux.display.lcd.display.call_args.kwargs["roi"] == (92, 52, 161, 135)
     elif board.config["type"] == "amigo":
         krux.display.lcd.display.assert_called_once_with(
-            img, oft=(40, 40), roi=(0, 0, 320, 240)
+            img, oft=(0, 0), roi=(0, 0, 320, 240)
         )
     elif board.config["type"] == "dock":
         krux.display.lcd.display.assert_called_once_with(
@@ -1044,7 +1044,7 @@ def test_render_image_with_double_subtitle(mocker, multiple_devices):
         assert krux.display.lcd.display.call_args.kwargs["roi"] == (92, 52, 161, 135)
     elif board.config["type"] == "amigo":
         krux.display.lcd.display.assert_called_once_with(
-            img, oft=(40, 40), roi=(0, 0, 320, 240)
+            img, oft=(0, 0), roi=(0, 0, 320, 240)
         )
     elif board.config["type"] == "dock":
         krux.display.lcd.display.assert_called_once_with(

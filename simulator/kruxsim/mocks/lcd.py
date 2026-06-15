@@ -99,8 +99,13 @@ def zoom_out(img, factor=0.6):
 
 def display(img, oft=(0, 0), roi=None):
 
-    image_width = 240
-    image_height = 320
+    # Derive target dimensions from ROI (matches real device behavior)
+    if roi:
+        image_width = roi[2]
+        image_height = roi[3]
+    else:
+        image_width = width()
+        image_height = height()
 
     # Swap and adjust oft axis
     if portrait:
@@ -112,40 +117,36 @@ def display(img, oft=(0, 0), roi=None):
             frame = img.get_frame()
             if isinstance(frame, mock.MagicMock):
                 return # avoid exception when img still not ready
-            
-            # Fix aspect ration by cutting the image
-            if frame.shape[1] / frame.shape[0] > image_width / image_height:
-                frame = frame[
-                    :,
-                    int(
-                        (frame.shape[1] - frame.shape[0] * image_width / image_height)
-                        / 2
-                    ) : int(
-                        (frame.shape[1] + frame.shape[0] * image_width / image_height)
-                        / 2
-                    ),
-                ]
-            else:
-                frame = frame[
-                    int(
-                        (frame.shape[0] - frame.shape[1] * image_height / image_width)
-                        / 2
-                    ) : int(
-                        (frame.shape[0] + frame.shape[1] * image_height / image_width)
-                        / 2
-                    ),
-                    :,
-                ]
-            frame = cv2.resize(
-                frame,
-                (image_width, image_height),
-                interpolation=cv2.INTER_AREA,
-            )
-            # If roi width < 240, zoom out keeping canvas size
-            # Case for M5StickV
+            if frame is None:
+                return
+
+            # frame is numpy (h, w, c), camera gives landscape e.g. (240, 320, 3)
+            # image_width/image_height target aspect = roi w/h (e.g. 320/240 for Amigo)
+
+            # Crop to target aspect ratio (center crop)
+            target_ratio = image_width / image_height
+            src_ratio = frame.shape[1] / frame.shape[0]
+            if src_ratio > target_ratio:
+                # Source is wider: crop sides
+                new_w = int(frame.shape[0] * target_ratio)
+                offset = (frame.shape[1] - new_w) // 2
+                frame = frame[:, offset:offset + new_w]
+            elif src_ratio < target_ratio:
+                # Source is taller: crop top/bottom
+                new_h = int(frame.shape[1] / target_ratio)
+                offset = (frame.shape[0] - new_h) // 2
+                frame = frame[offset:offset + new_h, :]
+
+            # Resize to target dimensions (cv2 expects width, height)
+            frame = cv2.resize(frame, (image_width, image_height), interpolation=cv2.INTER_AREA)
+
+            # If roi width < 240, zoom out keeping canvas size (M5StickV)
             if roi and roi[2] < 240:
                 frame = zoom_out(frame, 0.6)
+
+            # Swap to pygame format (w, h, c)
             frame = frame.swapaxes(0, 1)
+
         except Exception as e:
             print(f"Error: {e}")
             return
@@ -153,7 +154,7 @@ def display(img, oft=(0, 0), roi=None):
         # Cut image according to region of interest
         if roi:
             x, y, w, h = roi
-            frame = frame[y : y + h, x : x + w]
+            frame = frame[x:x + w, y:y + h]
 
         # Create a surface for the frame
         frame_surface = pg.surfarray.make_surface(frame)
