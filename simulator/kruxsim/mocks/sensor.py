@@ -20,7 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import sys
+import platform
+import threading
 from unittest import mock
+import cv2
 from cv2 import split, VideoCapture, cvtColor, COLOR_BGR2RGB, COLOR_BGR2LAB
 from numpy import std
 from PIL import Image
@@ -31,6 +34,8 @@ THREAD_DROP_PERIOD = 0.01
 sequence_executor = None
 camera_index = None
 capturer = None
+
+IS_MACOS = platform.system() == "Darwin"
 
 
 def register_sequence_executor(s):
@@ -44,20 +49,58 @@ def set_camera_index(index):
     camera_index = index
 
 
+def _try_read(cap):
+    """Try to read a frame in a thread with timeout (macOS workaround)"""
+    result = [None, None]
+
+    def _read():
+        try:
+            result[0], result[1] = cap.read()
+        except Exception:
+            pass
+
+    t = threading.Thread(target=_read, daemon=True)
+    t.start()
+    t.join(timeout=3.0)
+    if t.is_alive():
+        return False, None
+    return result[0], result[1]
+
+
 def find_available_cameras(max_test=4):
-    """Probe for available cameras and return list of working indices"""
+    """Probe for available cameras and return list of working indices.
+    On macOS uses thread-based read with timeout to avoid VideoCapture hangs."""
     available = []
     for i in range(max_test):
         try:
-            cap = VideoCapture(i)
-            if cap.isOpened():
-                ret, _ = cap.read()
-                if ret:
-                    available.append(i)
+            if IS_MACOS:
+                cap = VideoCapture(i, cv2.CAP_AVFOUNDATION)
+            else:
+                cap = VideoCapture(i)
+            if not cap.isOpened():
                 cap.release()
+                continue
+
+            if IS_MACOS:
+                ret, _ = _try_read(cap)
+            else:
+                ret, _ = cap.read()
+
+            if ret:
+                available.append(i)
+            cap.release()
         except Exception:
             pass
     return available
+
+
+def _open_capture(index):
+    """Open VideoCapture with macOS-specific settings"""
+    if IS_MACOS:
+        cap = VideoCapture(index, cv2.CAP_AVFOUNDATION)
+    else:
+        cap = VideoCapture(index)
+    return cap
 
 
 def init_camera(index=None):
@@ -66,7 +109,7 @@ def init_camera(index=None):
 
     if index is not None:
         try:
-            cap = VideoCapture(index)
+            cap = _open_capture(index)
             if cap.isOpened():
                 capturer = cap
                 return True
@@ -78,7 +121,7 @@ def init_camera(index=None):
     available = find_available_cameras()
     if available:
         try:
-            capturer = VideoCapture(available[0])
+            capturer = _open_capture(available[0])
             if capturer.isOpened():
                 return True
         except Exception:
@@ -191,14 +234,16 @@ def snapshot():
             m.height.return_value = frame.shape[0]
             m.lens_corr.return_value = m
             if m.find_qrcodes.return_value:
-                # Clear the camera image if a QR code is found
-                # Otherwise keep the camera image if it's to create entropy
                 sequence_executor.camera_image = None
     else:
         if capturer is None or not capturer.isOpened():
             return create_empty_frame()
 
-        ret, frame = capturer.read()
+        if IS_MACOS:
+            ret, frame = _try_read(capturer)
+        else:
+            ret, frame = capturer.read()
+
         if not ret or frame is None:
             return create_empty_frame()
 
