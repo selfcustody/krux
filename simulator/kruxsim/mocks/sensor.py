@@ -29,11 +29,61 @@ import time
 THREAD_DROP_PERIOD = 0.01
 
 sequence_executor = None
+camera_index = None
+capturer = None
 
 
 def register_sequence_executor(s):
     global sequence_executor
     sequence_executor = s
+
+
+def set_camera_index(index):
+    """Set camera index for webcam capture"""
+    global camera_index
+    camera_index = index
+
+
+def find_available_cameras(max_test=4):
+    """Probe for available cameras and return list of working indices"""
+    available = []
+    for i in range(max_test):
+        try:
+            cap = VideoCapture(i)
+            if cap.isOpened():
+                ret, _ = cap.read()
+                if ret:
+                    available.append(i)
+                cap.release()
+        except Exception:
+            pass
+    return available
+
+
+def init_camera(index=None):
+    """Initialize camera with auto-detection or specified index"""
+    global capturer
+
+    if index is not None:
+        try:
+            cap = VideoCapture(index)
+            if cap.isOpened():
+                capturer = cap
+                return True
+        except Exception:
+            pass
+        return False
+
+    # Auto-detect
+    available = find_available_cameras()
+    if available:
+        try:
+            capturer = VideoCapture(available[0])
+            if capturer.isOpened():
+                return True
+        except Exception:
+            pass
+    return False
 
 
 class MockStatistics:
@@ -72,9 +122,6 @@ class Mockqrcode:
         return self.data
 
 
-capturer = None
-
-
 def reset(freq=None, dual_buff=False):
     pass
 
@@ -85,10 +132,12 @@ def run(on):
         return
 
     if on:
-        capturer = VideoCapture(0)
+        if capturer is None or not capturer.isOpened():
+            init_camera(camera_index)
     else:
         if capturer:
             capturer.release()
+            capturer = None
 
 
 def find_qrcodes(img):
@@ -101,6 +150,24 @@ def find_qrcodes(img):
     except ImportError:
         pass
     return codes
+
+
+def create_empty_frame():
+    """Create a blank frame when camera is not available"""
+    m = mock.MagicMock()
+    m.get_frame.return_value = None
+    m.find_qrcodes.return_value = None
+    m.to_bytes.return_value = b""
+    stats = mock.MagicMock()
+    stats.l_stdev.return_value = 0
+    stats.a_stdev.return_value = 0
+    stats.b_stdev.return_value = 0
+    stats.median.return_value = 0
+    m.get_statistics.return_value = stats
+    m.width.return_value = 320
+    m.height.return_value = 240
+    m.lens_corr.return_value = m
+    return m
 
 
 def snapshot():
@@ -128,18 +195,27 @@ def snapshot():
                 # Otherwise keep the camera image if it's to create entropy
                 sequence_executor.camera_image = None
     else:
-        _, frame = capturer.read()
-        rgb_frame = cvtColor(frame, COLOR_BGR2RGB)
-        lab_frame = cvtColor(frame, COLOR_BGR2LAB)
-        img = Image.fromarray(rgb_frame)
+        if capturer is None or not capturer.isOpened():
+            return create_empty_frame()
 
-        m.get_frame.return_value = rgb_frame
-        m.find_qrcodes.return_value = find_qrcodes(img)
-        m.to_bytes.return_value = frame.tobytes()
-        m.get_statistics.return_value = MockStatistics(lab_frame)
-        m.width.return_value = frame.shape[1]
-        m.height.return_value = frame.shape[0]
-        m.lens_corr.return_value = m
+        ret, frame = capturer.read()
+        if not ret or frame is None:
+            return create_empty_frame()
+
+        try:
+            rgb_frame = cvtColor(frame, COLOR_BGR2RGB)
+            lab_frame = cvtColor(frame, COLOR_BGR2LAB)
+            img = Image.fromarray(rgb_frame)
+
+            m.get_frame.return_value = rgb_frame
+            m.find_qrcodes.return_value = find_qrcodes(img)
+            m.to_bytes.return_value = frame.tobytes()
+            m.get_statistics.return_value = MockStatistics(lab_frame)
+            m.width.return_value = frame.shape[1]
+            m.height.return_value = frame.shape[0]
+            m.lens_corr.return_value = m
+        except Exception:
+            return create_empty_frame()
     return m
 
 

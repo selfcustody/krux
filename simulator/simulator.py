@@ -74,6 +74,13 @@ parser.add_argument(
     required=False,
     action=argparse.BooleanOptionalAction,
 )
+parser.add_argument(
+    "--camera",
+    type=int,
+    default=None,
+    required=False,
+    help="Camera index for webcam (default: auto-detect)",
+)
 
 args = parser.parse_args()
 
@@ -115,6 +122,10 @@ from kruxsim.mocks import gt911
 from kruxsim.mocks import cst816
 from kruxsim.mocks import buttons
 from kruxsim.mocks import rotary
+
+# Set camera index if specified
+if args.camera is not None:
+    sensor.set_camera_index(args.camera)
 from kruxsim.sequence import SequenceExecutor
 from kruxsim.mocks import uhashlib_hw
 from kruxsim.mocks import baseconv
