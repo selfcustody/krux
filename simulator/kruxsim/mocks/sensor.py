@@ -207,9 +207,34 @@ def run(on):
 _cv2_qr_detector = None
 
 
+def _init_pyzbar():
+    """Initialize pyzbar with patched find_library for macOS"""
+    import os
+    from ctypes.util import find_library
+    import ctypes.util
+
+    pyzbar_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')
+    # Resolve to actual site-packages path
+    try:
+        import pyzbar
+        pyzbar_dir = os.path.dirname(pyzbar.__file__)
+    except ImportError:
+        pass
+
+    lib_path = os.path.join(pyzbar_dir, 'libzbar.0.dylib')
+    if os.path.exists(lib_path):
+        _original = find_library
+        def _patched(name):
+            if name == 'zbar':
+                return lib_path
+            return _original(name)
+        ctypes.util.find_library = _patched
+
+
 def find_qrcodes(img):
     codes = []
     try:
+        _init_pyzbar()
         from pyzbar.pyzbar import decode as zbar_decode
         data = zbar_decode(img)
         if data:
@@ -230,10 +255,8 @@ def find_qrcodes(img):
             img_array = img
         data_str, points, _ = _cv2_qr_detector.detectAndDecode(img_array)
         if data_str:
-            # Try to interpret as binary (CompactSeedQR is raw bytes)
             try:
                 data_bytes = data_str.encode("latin-1")
-                # If it's a valid Compact SeedQR length, keep as bytes
                 if len(data_bytes) in (16, 32):
                     codes.append(Mockqrcode(data_bytes))
                 else:
