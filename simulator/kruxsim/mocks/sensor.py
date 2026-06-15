@@ -213,22 +213,25 @@ def _init_pyzbar():
     from ctypes.util import find_library
     import ctypes.util
 
-    pyzbar_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')
-    # Resolve to actual site-packages path
+    # Try to find libzbar in simulator/lib first, then pyzbar package
+    candidates = []
+    sim_lib = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib')
+    candidates.append(os.path.join(sim_lib, 'libzbar.0.dylib'))
     try:
         import pyzbar
-        pyzbar_dir = os.path.dirname(pyzbar.__file__)
+        candidates.append(os.path.join(os.path.dirname(pyzbar.__file__), 'libzbar.0.dylib'))
     except ImportError:
         pass
 
-    lib_path = os.path.join(pyzbar_dir, 'libzbar.0.dylib')
-    if os.path.exists(lib_path):
-        _original = find_library
-        def _patched(name):
-            if name == 'zbar':
-                return lib_path
-            return _original(name)
-        ctypes.util.find_library = _patched
+    for lib_path in candidates:
+        if os.path.exists(lib_path):
+            _original = find_library
+            def _patched(name):
+                if name == 'zbar':
+                    return lib_path
+                return _original(name)
+            ctypes.util.find_library = _patched
+            return
 
 
 def find_qrcodes(img):
