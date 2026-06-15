@@ -204,6 +204,9 @@ def run(on):
             capturer = None
 
 
+_cv2_qr_detector = None
+
+
 def find_qrcodes(img):
     codes = []
     try:
@@ -211,7 +214,24 @@ def find_qrcodes(img):
         data = zbar_decode(img)
         if data:
             codes.append(Mockqrcode(data[0].data.decode()))
-    except ImportError:
+            return codes
+    except (ImportError, Exception):
+        pass
+
+    # Fallback: use OpenCV QRCodeDetector
+    global _cv2_qr_detector
+    if _cv2_qr_detector is None:
+        _cv2_qr_detector = cv2.QRCodeDetector()
+    try:
+        import numpy as np
+        if isinstance(img, Image.Image):
+            img_array = np.array(img)
+        else:
+            img_array = img
+        data, points, _ = _cv2_qr_detector.detectAndDecode(img_array)
+        if data:
+            codes.append(Mockqrcode(data))
+    except Exception:
         pass
     return codes
 
