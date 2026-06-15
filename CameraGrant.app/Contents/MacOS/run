@@ -1,0 +1,18 @@
+#!/usr/bin/env swift
+import AVFoundation
+import Foundation
+let group = DispatchGroup()
+group.enter()
+switch AVCaptureDevice.authorizationStatus(for: .video) {
+case .authorized: print("AUTHORIZED"); group.leave()
+case .notDetermined:
+    print("Requesting...")
+    AVCaptureDevice.requestAccess(for: .video) { granted in
+        print(granted ? "GRANTED" : "DENIED")
+        group.leave()
+    }
+case .denied: print("DENIED"); group.leave()
+case .restricted: print("RESTRICTED"); group.leave()
+@unknown default: print("UNKNOWN"); group.leave()
+}
+_ = group.wait(timeout: .now() + 30)

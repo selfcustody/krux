@@ -354,10 +354,6 @@ class MnemonicLoader(Page):
                     except:
                         pass
 
-                import sys
-                print("DEBUG: data type:", type(data), "repr:", repr(data)[:200], file=sys.stderr)
-                print("DEBUG: data_bytes type:", type(data_bytes), "len:", len(data_bytes), file=sys.stderr)
-
                 # CompactSeedQR format
                 if len(data_bytes) in (16, 32):
                     from embit.bip39 import mnemonic_from_bytes
