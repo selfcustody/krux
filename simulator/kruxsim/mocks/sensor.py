@@ -213,7 +213,7 @@ def find_qrcodes(img):
         from pyzbar.pyzbar import decode as zbar_decode
         data = zbar_decode(img)
         if data:
-            codes.append(Mockqrcode(data[0].data.decode()))
+            codes.append(Mockqrcode(data[0].data))
             return codes
     except (ImportError, Exception):
         pass
@@ -228,9 +228,18 @@ def find_qrcodes(img):
             img_array = np.array(img)
         else:
             img_array = img
-        data, points, _ = _cv2_qr_detector.detectAndDecode(img_array)
-        if data:
-            codes.append(Mockqrcode(data))
+        data_str, points, _ = _cv2_qr_detector.detectAndDecode(img_array)
+        if data_str:
+            # Try to interpret as binary (CompactSeedQR is raw bytes)
+            try:
+                data_bytes = data_str.encode("latin-1")
+                # If it's a valid Compact SeedQR length, keep as bytes
+                if len(data_bytes) in (16, 32):
+                    codes.append(Mockqrcode(data_bytes))
+                else:
+                    codes.append(Mockqrcode(data_str))
+            except (UnicodeDecodeError, OverflowError):
+                codes.append(Mockqrcode(data_str))
     except Exception:
         pass
     return codes
