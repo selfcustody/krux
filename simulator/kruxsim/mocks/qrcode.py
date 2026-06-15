@@ -53,7 +53,8 @@ def encode(data):
         for x in range(size):
             bit_index = y * size + x
             bit_string_index = y * (size + 1) + x
-            if code_str[bit_string_index] == "1":
+            # Invert: pyqrcode '1' = dark module = 0 bit (black on screen)
+            if code_str[bit_string_index] == "0":
                 binary_qr[bit_index >> 3] |= 1 << (bit_index % 8)
     return binary_qr
 
