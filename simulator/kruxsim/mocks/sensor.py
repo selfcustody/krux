@@ -67,65 +67,105 @@ def _try_read(cap):
     return result[0], result[1]
 
 
+def _try_open_and_read(index):
+    """Try to open camera and read a frame in current thread. Returns (cap, ret)"""
+    if IS_MACOS:
+        cap = VideoCapture(index, cv2.CAP_AVFOUNDATION)
+    else:
+        cap = VideoCapture(index)
+    if not cap.isOpened():
+        cap.release()
+        return None, False
+    ret, _ = cap.read()
+    return cap, ret
+
+
 def find_available_cameras(max_test=4):
     """Probe for available cameras and return list of working indices.
-    On macOS uses thread-based read with timeout to avoid VideoCapture hangs."""
+    On macOS wraps open+read in thread with timeout to avoid VideoCapture hangs."""
     available = []
     for i in range(max_test):
         try:
             if IS_MACOS:
-                cap = VideoCapture(i, cv2.CAP_AVFOUNDATION)
-            else:
-                cap = VideoCapture(i)
-            if not cap.isOpened():
+                result = [None, False]
+                def _probe(idx=i):
+                    cap, ret = _try_open_and_read(idx)
+                    result[0] = cap
+                    result[1] = ret
+                t = threading.Thread(target=_probe)
+                t.daemon = True
+                t.start()
+                t.join(timeout=4)
+                if t.is_alive():
+                    continue
+                cap, ret = result
+                if cap is None:
+                    continue
+                if ret:
+                    available.append(i)
                 cap.release()
-                continue
-
-            if IS_MACOS:
-                ret, _ = _try_read(cap)
             else:
-                ret, _ = cap.read()
-
-            if ret:
-                available.append(i)
-            cap.release()
+                cap, ret = _try_open_and_read(i)
+                if cap is not None:
+                    if ret:
+                        available.append(i)
+                    cap.release()
         except Exception:
             pass
     return available
 
 
-def _open_capture(index):
-    """Open VideoCapture with macOS-specific settings"""
-    if IS_MACOS:
-        cap = VideoCapture(index, cv2.CAP_AVFOUNDATION)
-    else:
-        cap = VideoCapture(index)
-    return cap
-
-
 def init_camera(index=None):
-    """Initialize camera with auto-detection or specified index"""
+    """Initialize camera with auto-detection or specified index.
+    On macOS wraps VideoCapture creation in thread with timeout."""
     global capturer
 
+    def _open(idx):
+        return _try_open_and_read(idx)
+
     if index is not None:
-        try:
-            cap = _open_capture(index)
-            if cap.isOpened():
+        if IS_MACOS:
+            result = [None, False]
+            def _init():
+                cap, ret = _open(idx)
+                result[0] = cap
+                result[1] = ret
+            t = threading.Thread(target=_init)
+            t.daemon = True
+            t.start()
+            t.join(timeout=4)
+            if t.is_alive() or result[0] is None:
+                return False
+            capturer = result[0]
+            return True
+        else:
+            cap, _ = _open(index)
+            if cap is not None:
                 capturer = cap
                 return True
-        except Exception:
-            pass
         return False
 
     # Auto-detect
     available = find_available_cameras()
     if available:
-        try:
-            capturer = _open_capture(available[0])
-            if capturer.isOpened():
+        if IS_MACOS:
+            result = [None, False]
+            def _init():
+                cap, ret = _open(available[0])
+                result[0] = cap
+                result[1] = ret
+            t = threading.Thread(target=_init)
+            t.daemon = True
+            t.start()
+            t.join(timeout=4)
+            if not t.is_alive() and result[0] is not None:
+                capturer = result[0]
                 return True
-        except Exception:
-            pass
+        else:
+            cap, _ = _open(available[0])
+            if cap is not None:
+                capturer = cap
+                return True
     return False
 
 
