@@ -120,52 +120,33 @@ def init_camera(index=None):
     On macOS wraps VideoCapture creation in thread with timeout."""
     global capturer
 
-    def _open(idx):
-        return _try_open_and_read(idx)
-
     if index is not None:
-        if IS_MACOS:
-            result = [None, False]
-            def _init():
-                cap, ret = _open(idx)
-                result[0] = cap
-                result[1] = ret
-            t = threading.Thread(target=_init)
-            t.daemon = True
-            t.start()
-            t.join(timeout=4)
-            if t.is_alive() or result[0] is None:
-                return False
-            capturer = result[0]
-            return True
-        else:
-            cap, _ = _open(index)
-            if cap is not None:
-                capturer = cap
-                return True
-        return False
+        target_idx = index
+    else:
+        available = find_available_cameras()
+        if not available:
+            return False
+        target_idx = available[0]
 
-    # Auto-detect
-    available = find_available_cameras()
-    if available:
-        if IS_MACOS:
-            result = [None, False]
-            def _init():
-                cap, ret = _open(available[0])
-                result[0] = cap
-                result[1] = ret
-            t = threading.Thread(target=_init)
-            t.daemon = True
-            t.start()
-            t.join(timeout=4)
-            if not t.is_alive() and result[0] is not None:
-                capturer = result[0]
-                return True
-        else:
-            cap, _ = _open(available[0])
-            if cap is not None:
-                capturer = cap
-                return True
+    if IS_MACOS:
+        result = [None, False]
+        def _init(idx=target_idx):
+            cap, ret = _try_open_and_read(idx)
+            result[0] = cap
+            result[1] = ret
+        t = threading.Thread(target=_init)
+        t.daemon = True
+        t.start()
+        t.join(timeout=4)
+        if t.is_alive() or result[0] is None:
+            return False
+        capturer = result[0]
+        return True
+    else:
+        cap, _ = _try_open_and_read(target_idx)
+        if cap is not None:
+            capturer = cap
+            return True
     return False
 
 
