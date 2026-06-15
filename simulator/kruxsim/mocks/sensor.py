@@ -76,8 +76,12 @@ def _try_open_and_read(index):
     if not cap.isOpened():
         cap.release()
         return None, False
-    ret, _ = cap.read()
-    return cap, ret
+    for _ in range(3):
+        ret, _ = cap.read()
+        if ret:
+            return cap, True
+        time.sleep(0.1)
+    return cap, False
 
 
 def find_available_cameras(max_test=4):
@@ -298,10 +302,12 @@ def find_qrcodes(img, find_inverted=False):
 
 def create_empty_frame():
     """Create a blank frame when camera is not available"""
+    from numpy import zeros
+    blank = zeros((240, 320, 3), dtype="uint8")
     m = mock.MagicMock()
-    m.get_frame.return_value = None
+    m.get_frame.return_value = blank
     m.find_qrcodes = lambda find_inverted=False: []
-    m.to_bytes.return_value = b""
+    m.to_bytes.return_value = blank.tobytes()
     stats = mock.MagicMock()
     stats.l_stdev.return_value = 0
     stats.a_stdev.return_value = 0

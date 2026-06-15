@@ -365,6 +365,20 @@ class MnemonicLoader(Page):
                         WORDLIST[int(data_bytes[i : i + 4])]
                         for i in range(0, len(data_bytes), 4)
                     ]
+                # pyzbar on macOS may return extra bytes - try trimming
+                elif len(data_bytes) > 16:
+                    from embit.bip39 import mnemonic_from_bytes
+
+                    for trim_len in (16, 32):
+                        if len(data_bytes) >= trim_len:
+                            try:
+                                words = mnemonic_from_bytes(
+                                    data_bytes[:trim_len]
+                                ).split()
+                                if len(words) in (12, 24):
+                                    break
+                            except Exception:
+                                pass
 
         if not words or (len(words) != 12 and len(words) != 24):
             self.flash_error(t("Invalid mnemonic length"))
