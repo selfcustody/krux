@@ -205,6 +205,7 @@ def run(on):
 
 
 _cv2_qr_detector = None
+_last_pyzbar = None
 
 
 def _init_pyzbar():
@@ -234,14 +235,33 @@ def _init_pyzbar():
             return
 
 
-def find_qrcodes(img):
+def find_qrcodes(img, find_inverted=False):
+    global _last_pyzbar
+
     codes = []
+
+    # Try pyzbar first (handles binary QR like CompactSeedQR correctly)
     try:
         _init_pyzbar()
         from pyzbar.pyzbar import decode as zbar_decode
-        data = zbar_decode(img)
+        import numpy as np
+
+        if isinstance(img, Image.Image):
+            img_array = np.array(img)
+        else:
+            img_array = img
+
+        if find_inverted:
+            img_array = 255 - img_array
+
+        pil_img = Image.fromarray(img_array) if not isinstance(img, Image.Image) else img
+        if find_inverted:
+            pil_img = Image.fromarray(255 - np.array(pil_img))
+
+        data = zbar_decode(pil_img)
         if data:
             codes.append(Mockqrcode(data[0].data))
+            _last_pyzbar = True
             return codes
     except (ImportError, Exception):
         pass
@@ -256,8 +276,13 @@ def find_qrcodes(img):
             img_array = np.array(img)
         else:
             img_array = img
+
+        if find_inverted:
+            img_array = 255 - img_array
+
         data_str, points, _ = _cv2_qr_detector.detectAndDecode(img_array)
         if data_str:
+            _last_pyzbar = False
             try:
                 data_bytes = data_str.encode("latin-1")
                 if len(data_bytes) in (16, 32):
@@ -275,7 +300,7 @@ def create_empty_frame():
     """Create a blank frame when camera is not available"""
     m = mock.MagicMock()
     m.get_frame.return_value = None
-    m.find_qrcodes.return_value = None
+    m.find_qrcodes = lambda find_inverted=False: []
     m.to_bytes.return_value = b""
     stats = mock.MagicMock()
     stats.l_stdev.return_value = 0
@@ -294,7 +319,33 @@ def snapshot():
     time.sleep(THREAD_DROP_PERIOD)
 
     m = mock.MagicMock()
-    m.find_qrcodes.return_value = None
+
+    def _find_qrcodes(find_inverted=False):
+        if sequence_executor:
+            if sequence_executor.camera_image is not None:
+                frame = sequence_executor.camera_image
+                rgb_frame = cvtColor(frame, COLOR_BGR2RGB)
+                img = Image.fromarray(rgb_frame)
+                return find_qrcodes(img, find_inverted=find_inverted)
+        else:
+            if capturer is None or not capturer.isOpened():
+                return []
+
+            if IS_MACOS:
+                ret, frame = _try_read(capturer)
+            else:
+                ret, frame = capturer.read()
+
+            if not ret or frame is None:
+                return []
+
+            rgb_frame = cvtColor(frame, COLOR_BGR2RGB)
+            img = Image.fromarray(rgb_frame)
+            return find_qrcodes(img, find_inverted=find_inverted)
+        return []
+
+    m.find_qrcodes = _find_qrcodes
+
     if sequence_executor:
         if sequence_executor.camera_image is not None:
             frame = sequence_executor.camera_image
@@ -303,13 +354,14 @@ def snapshot():
             rgb_frame = cvtColor(img, COLOR_BGR2RGB)
             lab_frame = cvtColor(rgb_frame, COLOR_BGR2LAB)
             m.get_frame.return_value = frame
-            m.find_qrcodes.return_value = find_qrcodes(img)
             m.to_bytes.return_value = frame.tobytes()
             m.get_statistics.return_value = MockStatistics(lab_frame)
             m.width.return_value = frame.shape[1]
             m.height.return_value = frame.shape[0]
             m.lens_corr.return_value = m
-            if m.find_qrcodes.return_value:
+            # Clear camera image if QR found
+            test_qr = find_qrcodes(Image.fromarray(rgb_frame))
+            if test_qr:
                 sequence_executor.camera_image = None
     else:
         if capturer is None or not capturer.isOpened():
@@ -329,7 +381,6 @@ def snapshot():
             img = Image.fromarray(rgb_frame)
 
             m.get_frame.return_value = rgb_frame
-            m.find_qrcodes.return_value = find_qrcodes(img)
             m.to_bytes.return_value = frame.tobytes()
             m.get_statistics.return_value = MockStatistics(lab_frame)
             m.width.return_value = frame.shape[1]
