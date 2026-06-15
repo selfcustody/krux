@@ -494,8 +494,18 @@ class Settings(SettingsNamespace):
     """The top-level settings namespace under which other namespaces reside"""
 
     namespace = "settings"
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
 
     def __init__(self):
+        if self._initialized:
+            return
+        self._initialized = True
         self.wallet = DefaultWallet()
         self.security = SecuritySettings()
         self.hardware = HardwareSettings()
