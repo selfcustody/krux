@@ -560,8 +560,7 @@ class Display:
         region_x, region_y, region_w, region_h = 8, 0, 304, 240
 
         if kboard.is_amigo:
-            offset_x = 40 if self.flipped_x_coordinates else 120
-            offset_y = 40
+            offset_x, offset_y = 0, 0
             region_x, region_y, region_w, region_h = 0, 0, 320, 240
         elif kboard.is_m5stickv:
             # Apply lens correction and update img reference
