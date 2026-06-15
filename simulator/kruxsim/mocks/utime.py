@@ -31,5 +31,19 @@ def ticks():
     return (time.time() * 1000) - start_time
 
 
+def ticks_us():
+    return int((time.time() * 1000000) - (start_time * 1000))
+
+
+def ticks_diff(a, b):
+    return a - b
+
+
 if not getattr(time, "ticks_ms", None):
     setattr(time, "ticks_ms", ticks)
+
+if not getattr(time, "ticks_us", None):
+    setattr(time, "ticks_us", ticks_us)
+
+if not getattr(time, "ticks_diff", None):
+    setattr(time, "ticks_diff", ticks_diff)
