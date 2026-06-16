@@ -24,7 +24,7 @@ from embit import ec, bip39
 from embit.bech32 import bech32_encode, convertbits, Encoding
 from ..krux_settings import t
 from ..qr import FORMAT_NONE
-from .. import (
+from . import (
     Page,
     Menu,
     MENU_CONTINUE,
