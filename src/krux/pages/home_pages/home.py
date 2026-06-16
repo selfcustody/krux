@@ -193,10 +193,18 @@ class Home(Page):
                 (t("Customize"), self.customize),
                 ("BIP85", self.bip85),
                 (t("Mnemonic XOR"), self.mnemonic_xor),
+                (t("Miniscript Tools"), self.miniscript_tools),
             ],
         )
         submenu.run_loop()
         return MENU_CONTINUE
+
+    def miniscript_tools(self):
+        """Handler for the 'Miniscript Tools' menu item"""
+        from .miniscript_tools import MiniscriptTools
+
+        tools = MiniscriptTools(self.ctx)
+        return tools.miniscript_menu()
 
     def create_descriptor(self):
         """Handler for the 'Create Descriptor' menu item"""
