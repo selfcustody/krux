@@ -57,18 +57,25 @@ DATUM_DESCRIPTOR = "DESC"
 DATUM_PSBT = "PSBT"
 DATUM_XPUB = "XPUB"
 DATUM_ADDRESS = "ADDR"
+DATUM_SEED = "SEED"
+DATUM_TXN = "TXN"
+DATUM_WIF = "WIF"
 
 DATUM_UR_TYPES = {
-    # DATUM_DESCRIPTOR: ["crypto-account", "crypto-output"],
+    DATUM_DESCRIPTOR: ["crypto-output"],
     DATUM_PSBT: ["crypto-psbt"],
-    # DATUM_XPUB: ["crypto-account"],
-    # DATUM_ADDRESS: ["crypto-account"],
+    DATUM_XPUB: ["crypto-account"],
+    DATUM_ADDRESS: ["crypto-account"],
+    DATUM_SEED: ["crypto-bip39"],
 }
 DATUM_BBQR_TYPES = {
     DATUM_DESCRIPTOR: ["U"],
     DATUM_PSBT: ["P"],
     DATUM_XPUB: ["U"],
     DATUM_ADDRESS: ["U"],
+    DATUM_SEED: ["U"],
+    DATUM_TXN: ["T"],
+    DATUM_WIF: ["U"],
 }
 
 STATIC_QR_MAX_SIZE = 4  # version 5 - 37x37
@@ -82,6 +89,7 @@ def urobj_to_data(ur_obj):
     from urtypes.crypto.account import Account
     from urtypes.crypto.output import Output
     from urtypes.crypto.psbt import PSBT
+    from urtypes.crypto.hd_key import HDKey
     from urtypes.bytes import Bytes
 
     if ur_obj.type.upper() == "CRYPTO-BIP39":
@@ -93,6 +101,8 @@ def urobj_to_data(ur_obj):
         data = Output.from_cbor(ur_obj.cbor).descriptor()
     elif ur_obj.type.upper() == "CRYPTO-PSBT":
         data = PSBT.from_cbor(ur_obj.cbor).data
+    elif ur_obj.type.upper() == "CRYPTO-HDKEY":
+        data = HDKey.from_cbor(ur_obj.cbor).bip32_key()
     elif ur_obj.type.upper() == "BYTES":
         data = Bytes.from_cbor(ur_obj.cbor).data
     else:
@@ -129,38 +139,50 @@ def convert_encoding(contents, conversion):
                     return contents.upper()
                 if contents == contents.upper():
                     return contents.lower()
-    except:
+    except (ValueError, TypeError, UnicodeDecodeError):
         pass
     return None
 
 
 def identify_datum(data, encodings=None):
-    """Determine which "datum" type this is; ie: PSBT, XPUB, DESC, ADDR"""
+    """Determine which "datum" type this is; ie: PSBT, XPUB, DESC, ADDR, SEED, TXN, WIF"""
 
     # TODO: more samples and fewer false-positives
     datum = None
     if isinstance(data, bytes):
         if data[:5] == b"psbt\xff":
             datum = DATUM_PSBT
-    elif len(data) > 33:
+        elif len(data) >= 4 and data[:1] in (b"\x00", b"\x02"):
+            datum = DATUM_TXN
+    elif isinstance(data, str):
         if encodings is None:
             encodings = detect_encodings(data)
 
-        if data[:1] in "xyzYZtuvUV" and data[1:4] == "pub" and 58 in encodings:
-            datum = DATUM_XPUB
-        elif (
-            data[:1] == "["
-            and data.split("]")[1][:1] in "xyzYZtuvUV"
-            and data.split("]")[1][1:4] == "pub"
+        # Mnemonic: 12 or 24 words
+        if len(data.split()) in (12, 24) and all(
+            c.isalpha() or c == " " for c in data[:256]
         ):
-            datum = DATUM_XPUB
-        elif data.split("(")[0] in ("pkh", "sh", "wpkh", "wsh", "tr"):
-            datum = DATUM_DESCRIPTOR
-        elif (data[:1] in ("1", "3", "n", "2", "m") and 58 in encodings) or (
-            data[:4].lower() in ("bc1p", "bc1q", "tb1p", "tb1q")
-            and "bech32" in [x.lower()[:6] for x in encodings if isinstance(x, str)]
-        ):
-            datum = DATUM_ADDRESS
+            datum = DATUM_SEED
+        # WIF: starts with 5, K, or L and is 51-52 chars base58
+        elif len(data) in (51, 52) and data[0] in "5KL" and 58 in encodings:
+            datum = DATUM_WIF
+        elif len(data) > 33:
+            if data[:1] in "xyzYZtuvUV" and data[1:4] == "pub" and 58 in encodings:
+                datum = DATUM_XPUB
+            elif (
+                data[:1] == "["
+                and data.split("]")[1][:1] in "xyzYZtuvUV"
+                and data.split("]")[1][1:4] == "pub"
+            ):
+                datum = DATUM_XPUB
+            elif data.split("(")[0] in ("pkh", "sh", "wpkh", "wsh", "tr"):
+                datum = DATUM_DESCRIPTOR
+            elif (data[:1] in ("1", "3", "n", "2", "m") and 58 in encodings) or (
+                data[:4].lower() in ("bc1p", "bc1q", "tb1p", "tb1q")
+                and "bech32"
+                in [x.lower()[:6] for x in encodings if isinstance(x, str)]
+            ):
+                datum = DATUM_ADDRESS
 
     return datum
 
@@ -196,7 +218,7 @@ def detect_encodings(str_data, verify=True):
                 try:
                     unhexlify(str_data)
                     encodings.append("HEX")
-                except:
+                except (ValueError, TypeError):
                     pass
             else:
                 encodings.append("HEX")
@@ -205,7 +227,7 @@ def detect_encodings(str_data, verify=True):
                 try:
                     unhexlify(str_data)
                     encodings.append("hex")
-                except:
+                except (ValueError, TypeError):
                     pass
             else:
                 encodings.append("hex")
@@ -216,7 +238,7 @@ def detect_encodings(str_data, verify=True):
             try:
                 base_decode(str_data, 32)
                 encodings.append(32)
-            except:
+            except (ValueError, TypeError):
                 pass
         else:
             encodings.append(32)
@@ -247,7 +269,7 @@ def detect_encodings(str_data, verify=True):
                 base_decode(str_data, 43)
                 wdt.feed()
                 encodings.append(43)
-            except:
+            except (ValueError, TypeError):
                 pass
         else:
             encodings.append(43)
@@ -259,7 +281,7 @@ def detect_encodings(str_data, verify=True):
                 base_decode(str_data, 58)
                 wdt.feed()
                 encodings.append(58)
-            except:
+            except (ValueError, TypeError):
                 pass
         else:
             encodings.append(58)
@@ -273,7 +295,7 @@ def detect_encodings(str_data, verify=True):
                 if base_encode(as_bytes, 64) == str_data:
                     encodings.append(64)
                 del as_bytes
-            except:
+            except (ValueError, TypeError):
                 pass
         else:
             encodings.append(64)
@@ -329,7 +351,7 @@ class DatumToolMenu(Page):
         if isinstance(contents, bytes):
             try:
                 contents = contents.decode()
-            except:
+            except (UnicodeDecodeError, ValueError):
                 pass
 
         page = DatumTool(self.ctx)
@@ -391,7 +413,7 @@ class DatumToolMenu(Page):
             contents = contents.decode()
             if contents[-1:] == "\n":
                 contents = contents[:-1]
-        except:
+        except (UnicodeDecodeError, ValueError):
             pass
 
         page = DatumTool(self.ctx)
@@ -519,7 +541,28 @@ class DatumTool(Page):
                         encoded = UR(ur_type, Bytes(encoded).to_cbor())
                     elif ur_type == "crypto-psbt":
                         encoded = UR(ur_type, PSBT(encoded).to_cbor())
-                    # TODO: other urtypes
+                    elif ur_type == "crypto-account":
+                        from urtypes.crypto.account import Account
+                        from urtypes.crypto.output import Output
+                        from urtypes.crypto.keypath import Keypath, Component
+
+                        # Create a simple account with the xpub as output descriptor
+                        descriptor = "pkh(%s)" % self.contents
+                        output = Output(descriptor)
+                        account = Account([output])
+                        encoded = UR(ur_type, account.to_cbor())
+                    elif ur_type == "crypto-output":
+                        from urtypes.crypto.output import Output
+
+                        descriptor = self.contents
+                        output = Output(descriptor)
+                        encoded = UR(ur_type, output.to_cbor())
+                    elif ur_type == "crypto-bip39":
+                        from urtypes.crypto.bip39 import BIP39
+
+                        words = self.contents.split()
+                        bip39 = BIP39(words)
+                        encoded = UR(ur_type, bip39.to_cbor())
 
             try:
                 self.display_qr_codes(
@@ -673,7 +716,7 @@ class DatumTool(Page):
                 if suggestion != "utf8":
                     suggestion = suggestion + "_via_utf8"
                 self.encodings = [suggestion + "?"]
-            except:
+            except (UnicodeDecodeError, ValueError, IndexError):
                 self.encodings = []
 
             # does it look like 128 or 256 bits of mnemonic entropy / CompactSeedQR?
@@ -695,10 +738,10 @@ class DatumTool(Page):
             if len(self.contents[:256].split()) in (12, 24):
                 self.sensitive = True
 
-            # does it look like a 12 or 24 word decimal mnemonic / StandadardSeedQR?
+            # does it look like a 12 or 24 word decimal mnemonic / StandardSeedQR?
             elif (
                 len(self.contents) in (12 * 4, 24 * 4)
-                and len(set((x in "0123456789" for x in self.contents))) == 1
+                and self.contents.isdigit()
             ):
                 self.sensitive = True
 
@@ -724,7 +767,7 @@ class DatumTool(Page):
                 break
             try:
                 self.title = kef.label.decode()
-            except:
+            except (UnicodeDecodeError, ValueError):
                 self.title = "0x" + hexlify(kef.label).decode()
 
             self.title = self.fit_to_line(self.title)
@@ -758,11 +801,13 @@ class DatumTool(Page):
                 if len(self.contents) <= SLOW_ENCODING_MAX_SIZE * 5.42 / 8:
                     # 5.42 slightly less than log2(43); adjusts for base43 bloat
                     menu.append((t("to base43"), lambda: 43))
+                if len(self.contents) <= SLOW_ENCODING_MAX_SIZE * 5.42 / 8:
+                    menu.append((t("to base58"), lambda: 58))
                 menu.append((t("to base64"), lambda: 64))
                 try:
                     self.contents.decode()
                     menu.append((t("to utf8"), lambda: "utf8"))
-                except:
+                except (UnicodeDecodeError, ValueError):
                     pass
                 menu.append((t("Encrypt"), lambda: "encrypt"))
 
@@ -779,6 +824,8 @@ class DatumTool(Page):
                     menu.append((t("from base32"), lambda: 32))
                 if 43 in self.encodings:
                     menu.append((t("from base43"), lambda: 43))
+                if 58 in self.encodings:
+                    menu.append((t("from base58"), lambda: 58))
                 if 64 in self.encodings:
                     menu.append((t("from base64"), lambda: 64))
                 if "utf8" in self.encodings:

@@ -31,7 +31,7 @@ KNOWN_ENCODINGS = {"H", "2", "Z"}
 # File types
 # P='PSBT', T='Transaction', J='JSON', C='CBOR'
 # U='Unicode Text', X='Executable', B='Binary'
-KNOWN_FILETYPES = {"P", "T", "J", "U"}
+KNOWN_FILETYPES = {"P", "T", "J", "C", "U", "X", "B"}
 
 BBQR_ALWAYS_COMPRESS_THRESHOLD = 5000  # bytes
 
