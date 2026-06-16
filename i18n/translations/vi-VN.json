@@ -202,8 +202,6 @@
     "Medium": "Trung bình",
     "Message": "Tin nhắn",
     "Message:": "Tin nhắn:",
-    "Miniscript": "Chi tiết nhỏ",
-    "Miniscript Policy": "Chính sách Miniscript",
     "Mirror X Coordinates": "Tọa độ gương X",
     "Missing signature file": "Thiếu tập tin chữ ký",
     "Mnemonic": "Mã mnemonic",
@@ -216,7 +214,6 @@
     "New firmware detected.": "Phát hiện phần sụn mới.",
     "No": "Không",
     "No Passphrase": "Không có cụm mật khẩu",
-    "No miniscript found in policy": "Không tìm thấy miniscript trong chính sách",
     "No passphrases stored": "Không có mật khẩu lưu trữ",
     "No wallet loaded": "Chưa tải ví",
     "Non-ASCII characters were detected in your passphrase. Krux cannot guarantee that other wallets will derive the same key.": "Các ký tự không phải ASCII đã được phát hiện trong cụm mật khẩu của bạn. Krux không thể đảm bảo rằng các ví khác sẽ lấy được cùng một khóa.",
@@ -224,7 +221,6 @@
     "Nostr Keys": "Khóa Nostr",
     "Nostr Private Key": "Khóa riêng Nostr",
     "Nostr Public Key": "Khóa công khai Nostr",
-    "Not a miniscript wallet": "Không phải ví miniscript",
     "Not enough rolls!": "Không đủ số lần quay!",
     "Number of Bytes": "Số byte",
     "Numbers": "Số",
@@ -461,5 +457,9 @@
     "to hex": "thành hex",
     "to utf8": "đến utf8",
     "unknown": "không rõ",
-    "was NOT FOUND in the first %d addresses": "kHÔNG TÌM THẤY trong %d địa chỉ đầu tiên"
+    "was NOT FOUND in the first %d addresses": "kHÔNG TÌM THẤY trong %d địa chỉ đầu tiên",
+    "Advanced": "Chi tiết nhỏ",
+    "Advanced Policy": "Chính sách Miniscript",
+    "Not an advanced wallet": "Không phải ví miniscript",
+    "No policy found": "Không tìm thấy miniscript trong chính sách"
 }

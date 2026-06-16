@@ -202,8 +202,6 @@
     "Medium": "中等",
     "Message": "消息",
     "Message:": "消息:",
-    "Miniscript": "Miniscript",
-    "Miniscript Policy": "Miniscript 策略",
     "Mirror X Coordinates": "镜像X坐标",
     "Missing signature file": "缺少签名文件",
     "Mnemonic": "助记词",
@@ -216,7 +214,6 @@
     "New firmware detected.": "检测到新固件.",
     "No": "否",
     "No Passphrase": "无 Passphrase ",
-    "No miniscript found in policy": "策略中未找到 miniscript",
     "No passphrases stored": "没有存储的密码短语",
     "No wallet loaded": "未加载钱包",
     "Non-ASCII characters were detected in your passphrase. Krux cannot guarantee that other wallets will derive the same key.": "在您的密码短语中检测到非ASCII字符.Krux无法保证其他钱包将获得相同的密钥.",
@@ -224,7 +221,6 @@
     "Nostr Keys": "Nostr 密钥",
     "Nostr Private Key": "Nostr 私钥",
     "Nostr Public Key": "Nostr 公钥",
-    "Not a miniscript wallet": "非 miniscript 钱包",
     "Not enough rolls!": "投掷次数不足！",
     "Number of Bytes": "字节数",
     "Numbers": "数字",
@@ -461,5 +457,9 @@
     "to hex": "成为十六进制",
     "to utf8": "to_utf8()",
     "unknown": "未知",
-    "was NOT FOUND in the first %d addresses": "在前 %d 个地址中未找到"
+    "was NOT FOUND in the first %d addresses": "在前 %d 个地址中未找到",
+    "Advanced": "Miniscript",
+    "Advanced Policy": "Miniscript 策略",
+    "Not an advanced wallet": "非 miniscript 钱包",
+    "No policy found": "策略中未找到 miniscript"
 }

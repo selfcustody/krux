@@ -194,7 +194,7 @@ class Home(Page):
                 (t("Create Descriptor"), self.create_descriptor),
                 (t("Customize"), self.customize),
                 (t("Mnemonic XOR"), self.mnemonic_xor),
-                (t("Miniscript Tools"), self.miniscript_tools),
+                (t("Advanced Tools"), self.miniscript_tools),
             ],
         )
         submenu.run_loop()

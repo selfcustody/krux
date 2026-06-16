@@ -71,7 +71,7 @@ P2TR = "p2tr"
 # Policy types
 NAME_SINGLE_SIG = "Single-sig"
 NAME_MULTISIG = "Multisig"
-NAME_MINISCRIPT = "Miniscript"
+NAME_MINISCRIPT = "Advanced"
 
 # Policy types names
 POLICY_TYPE_NAMES = [

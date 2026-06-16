@@ -282,7 +282,7 @@ class Wallet:
                 taproot_txt = ""
                 miniscript_type = P2WSH
             if not self.label:
-                self.label = taproot_txt + t("Miniscript")
+                self.label = taproot_txt + t("Advanced")
             cosigners = [key.key.to_base58() for key in self.descriptor.keys]
             cosigners = sorted(cosigners)
             self.policy = {

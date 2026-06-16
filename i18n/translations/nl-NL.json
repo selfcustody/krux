@@ -202,8 +202,6 @@
     "Medium": "Gemiddeld",
     "Message": "Bericht",
     "Message:": "Bericht:",
-    "Miniscript": "Miniscript",
-    "Miniscript Policy": "Miniscript-beleid",
     "Mirror X Coordinates": "X-coördinaten spiegelen",
     "Missing signature file": "Handtekening bestand mist",
     "Mnemonic": "Geheugensteun",
@@ -216,7 +214,6 @@
     "New firmware detected.": "Nieuwe firmware gevonden.",
     "No": "Nee",
     "No Passphrase": "Geen wachtwoordzin",
-    "No miniscript found in policy": "Geen miniscript gevonden in beleid",
     "No passphrases stored": "Geen wachtwoordzinnen opgeslagen",
     "No wallet loaded": "Geen portemonnee geladen",
     "Non-ASCII characters were detected in your passphrase. Krux cannot guarantee that other wallets will derive the same key.": "Er zijn niet-ASCII-tekens gedetecteerd in uw wachtwoordzin. Krux kan niet garanderen dat andere portefeuilles dezelfde sleutel zullen afleiden.",
@@ -224,7 +221,6 @@
     "Nostr Keys": "Nostr-sleutels",
     "Nostr Private Key": "Privé Nostr-sleutel",
     "Nostr Public Key": "Publieke Nostr-sleutel",
-    "Not a miniscript wallet": "Geen miniscript-portemonnee",
     "Not enough rolls!": "Niet genoeg gedobbeld!",
     "Number of Bytes": "Aantal bytes",
     "Numbers": "Nummers",
@@ -461,5 +457,9 @@
     "to hex": "om te hexeren",
     "to utf8": "naar utf8",
     "unknown": "onbekend",
-    "was NOT FOUND in the first %d addresses": "werd NIET GEVONDEN in de eerste %d adressen"
+    "was NOT FOUND in the first %d addresses": "werd NIET GEVONDEN in de eerste %d adressen",
+    "Advanced": "Miniscript",
+    "Advanced Policy": "Miniscript-beleid",
+    "Not an advanced wallet": "Geen miniscript-portemonnee",
+    "No policy found": "Geen miniscript gevonden in beleid"
 }

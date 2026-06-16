@@ -37,7 +37,7 @@ class MiniscriptTools(Page):
             return MENU_CONTINUE
 
         if not self.ctx.wallet.is_miniscript():
-            self.flash_error(t("Not a miniscript wallet"))
+            self.flash_error(t("Not an advanced wallet"))
             return MENU_CONTINUE
 
         policy = self.ctx.wallet.policy
@@ -55,7 +55,7 @@ class MiniscriptTools(Page):
                 else:
                     self.flash_text(t("Policy format check passed"))
             else:
-                self.flash_error(t("No miniscript found in policy"))
+                self.flash_error(t("No policy found"))
         except Exception as e:
             self.flash_error(t("Invalid policy") + ": " + str(e))
 
@@ -68,13 +68,13 @@ class MiniscriptTools(Page):
             return MENU_CONTINUE
 
         if not self.ctx.wallet.is_miniscript():
-            self.flash_error(t("Not a miniscript wallet"))
+            self.flash_error(t("Not an advanced wallet"))
             return MENU_CONTINUE
 
         policy = self.ctx.wallet.policy
         self.ctx.display.clear()
 
-        info = t("Miniscript Policy") + "\n\n"
+        info = t("Advanced Policy") + "\n\n"
 
         if "type" in policy:
             info += t("Type") + ": " + str(policy["type"]) + "\n"

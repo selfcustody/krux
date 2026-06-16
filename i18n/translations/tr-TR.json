@@ -202,8 +202,6 @@
     "Medium": "Orta",
     "Message": "Mesaj",
     "Message:": "Mesaj:",
-    "Miniscript": "Mini senaryo",
-    "Miniscript Policy": "Miniscript Politikası",
     "Mirror X Coordinates": "Ayna X Koordinatları",
     "Missing signature file": "İmza dosyası eksik",
     "Mnemonic": "Mnemonic",
@@ -216,7 +214,6 @@
     "New firmware detected.": "Yeni donanım yazılımı tespit edildi.",
     "No": "Hayır",
     "No Passphrase": "Parola Yok",
-    "No miniscript found in policy": "Politikada miniscript bulunamadı",
     "No passphrases stored": "Kayıtlı parola yok",
     "No wallet loaded": "Cüzdan yüklenmedi",
     "Non-ASCII characters were detected in your passphrase. Krux cannot guarantee that other wallets will derive the same key.": "Parolanızda ASCII olmayan karakterler algılandı. Krux, diğer cüzdanların aynı anahtarı türeteceğini garanti edemez.",
@@ -224,7 +221,6 @@
     "Nostr Keys": "Nostr Anahtarları",
     "Nostr Private Key": "Nostr Özel Anahtarı",
     "Nostr Public Key": "Nostr Genel Anahtarı",
-    "Not a miniscript wallet": "Miniscript cüzdanı değil",
     "Not enough rolls!": "Yeterli zar atışı yok!",
     "Number of Bytes": "Bayt sayısı",
     "Numbers": "Numaralar",
@@ -461,5 +457,9 @@
     "to hex": "to hex",
     "to utf8": "utf8 'e",
     "unknown": "bilinmiyor",
-    "was NOT FOUND in the first %d addresses": "ilk %d adreste BULUNAMADI"
+    "was NOT FOUND in the first %d addresses": "ilk %d adreste BULUNAMADI",
+    "Advanced": "Mini senaryo",
+    "Advanced Policy": "Miniscript Politikası",
+    "Not an advanced wallet": "Miniscript cüzdanı değil",
+    "No policy found": "Politikada miniscript bulunamadı"
 }

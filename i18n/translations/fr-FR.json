@@ -202,8 +202,6 @@
     "Medium": "Moyen",
     "Message": "Message",
     "Message:": "Message :",
-    "Miniscript": "Miniscript",
-    "Miniscript Policy": "Politique Miniscript",
     "Mirror X Coordinates": "Refléter coordonnées X",
     "Missing signature file": "Fichier de signature manquant",
     "Mnemonic": "Mnémonique",
@@ -216,7 +214,6 @@
     "New firmware detected.": "Nouveau micrologiciel détecté.",
     "No": "Non",
     "No Passphrase": "Pas de phrase secrète",
-    "No miniscript found in policy": "Aucun miniscript trouvé dans la politique",
     "No passphrases stored": "Aucune phrase secrète stockée",
     "No wallet loaded": "Aucun portefeuille chargé",
     "Non-ASCII characters were detected in your passphrase. Krux cannot guarantee that other wallets will derive the same key.": "Des caractères non ASCII ont été détectés dans votre phrase secrète. Krux ne peut garantir que d'autres portefeuilles obtiendront la même clé.",
@@ -224,7 +221,6 @@
     "Nostr Keys": "Clés Nostr",
     "Nostr Private Key": "Clé privée Nostr",
     "Nostr Public Key": "Clé publique Nostr",
-    "Not a miniscript wallet": "Pas un portefeuille miniscript",
     "Not enough rolls!": "Pas assez de jets !",
     "Number of Bytes": "Nombre d'octets",
     "Numbers": "Nombres",
@@ -461,5 +457,9 @@
     "to hex": "vers hexa.",
     "to utf8": "vers utf8",
     "unknown": "inconnu",
-    "was NOT FOUND in the first %d addresses": "INTROUVABLE dans les %d premières adresses"
+    "was NOT FOUND in the first %d addresses": "INTROUVABLE dans les %d premières adresses",
+    "Advanced": "Miniscript",
+    "Advanced Policy": "Politique Miniscript",
+    "Not an advanced wallet": "Pas un portefeuille miniscript",
+    "No policy found": "Aucun miniscript trouvé dans la politique"
 }

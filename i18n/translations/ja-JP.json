@@ -202,8 +202,6 @@
     "Medium": "中間",
     "Message": "メッセージ",
     "Message:": "メッセージ:",
-    "Miniscript": "ミニスクリプト",
-    "Miniscript Policy": "Miniscriptポリシー",
     "Mirror X Coordinates": "ミラーX座標",
     "Missing signature file": "署名ファイルが欠落しています",
     "Mnemonic": "Mnemonic",
@@ -216,7 +214,6 @@
     "New firmware detected.": "新しいファームウェアが検出されました.",
     "No": "いいえ",
     "No Passphrase": "パスフレーズなし",
-    "No miniscript found in policy": "ポリシーにminiscriptが見つかりません",
     "No passphrases stored": "保存されたパスフレーズなし",
     "No wallet loaded": "ウォレット未読み込み",
     "Non-ASCII characters were detected in your passphrase. Krux cannot guarantee that other wallets will derive the same key.": "パスフレーズに非ASCII文字が検出されました.Kruxは、他のウォレットが同じキーを取得することを保証することはできません.",
@@ -224,7 +221,6 @@
     "Nostr Keys": "Nostr鍵",
     "Nostr Private Key": "Nostr秘密鍵",
     "Nostr Public Key": "Nostr公開鍵",
-    "Not a miniscript wallet": "miniscriptウォレットではありません",
     "Not enough rolls!": "ロールが足りません!",
     "Number of Bytes": "バイト数",
     "Numbers": "数字",
@@ -461,5 +457,9 @@
     "to hex": "16進数に",
     "to utf8": "utf 8へ",
     "unknown": "不明",
-    "was NOT FOUND in the first %d addresses": "最初の%dアドレスに見つかりませんでした"
+    "was NOT FOUND in the first %d addresses": "最初の%dアドレスに見つかりませんでした",
+    "Advanced": "ミニスクリプト",
+    "Advanced Policy": "Miniscriptポリシー",
+    "Not an advanced wallet": "miniscriptウォレットではありません",
+    "No policy found": "ポリシーにminiscriptが見つかりません"
 }
