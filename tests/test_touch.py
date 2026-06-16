@@ -7,8 +7,8 @@ def mock_settings(mocker):
     """Mock Settings to avoid dependency on hardware config"""
     mock_settings_obj = mocker.MagicMock()
     mock_settings_obj.hardware.touch.threshold = 40
-    # Ensure hardware doesn't have display attribute to avoid coordinate flipping
-    del mock_settings_obj.hardware.display
+    # Default to no coordinate flipping
+    mock_settings_obj.is_flipped_orientation.return_value = False
     mock_settings_class = mocker.patch("krux.touch.Settings")
     mock_settings_class.return_value = mock_settings_obj
     return mock_settings_obj
