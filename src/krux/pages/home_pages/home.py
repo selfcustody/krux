@@ -47,6 +47,9 @@ class Home(Page):
             Menu(
                 ctx,
                 [
+                    (t("Sign"), self.sign),
+                    (t("Address"), self.addresses_menu),
+                    (t("Wallet"), self.wallet),
                     (
                         t("Backup Mnemonic"),
                         (
@@ -56,9 +59,6 @@ class Home(Page):
                         ),
                     ),
                     (t("Extended Public Key"), self.public_key),
-                    (t("Wallet"), self.wallet),
-                    (t("Address"), self.addresses_menu),
-                    (t("Sign"), self.sign),
                     (shtn_reboot_label, self.shutdown),
                 ],
                 back_label=None,
@@ -188,11 +188,11 @@ class Home(Page):
             self.ctx,
             [
                 (t("Wallet Descriptor"), self.wallet_descriptor),
-                (t("Create Descriptor"), self.create_descriptor),
                 (t("Passphrase"), self.passphrase),
-                (t("Passphrase Manager"), self.passphrase_manager),
-                (t("Customize"), self.customize),
                 ("BIP85", self.bip85),
+                (t("Passphrase Manager"), self.passphrase_manager),
+                (t("Create Descriptor"), self.create_descriptor),
+                (t("Customize"), self.customize),
                 (t("Mnemonic XOR"), self.mnemonic_xor),
                 (t("Miniscript Tools"), self.miniscript_tools),
             ],

@@ -45,15 +45,14 @@ class Tools(Page):
             Menu(
                 ctx,
                 [
+                    (t("QR Benchmark"), self.qr_benchmark),
                     (t("Datum Tool"), self.datum_tool),
-                    (t("Device Tests"), self.device_tests),
-                    # (t("Create QR Code"), self.create_qr),
                     (t("Descriptor Addresses"), self.descriptor_addresses),
-                    (t("Flash Tools"), self.flash_tools),
                     (t("Nostr Keys"), self.nostr_keys),
+                    (t("Device Tests"), self.device_tests),
+                    (t("Flash Tools"), self.flash_tools),
                     (t("Security"), self.security_menu),
                     (t("Remove Mnemonic"), self.rm_stored_mnemonic),
-                    (t("QR Benchmark"), self.qr_benchmark),
                 ],
             ),
         )

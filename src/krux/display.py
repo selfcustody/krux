@@ -543,7 +543,7 @@ class Display:
 
     def max_menu_lines(self, line_offset=STATUS_BAR_HEIGHT, menu_lines=None):
         """Maximum menu items the display can fit"""
-        one_line_fit_value = (self.height() - line_offset) // (2 * FONT_HEIGHT)
+        one_line_fit_value = (self.height() - line_offset) // (3 * FONT_HEIGHT)
 
         # avoid edge cases where exist menu items with two lines
         if menu_lines:
