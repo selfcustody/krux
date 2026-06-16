@@ -888,7 +888,7 @@ class Menu:
         )
 
     def draw_storage_indicator(self):
-        """Draws a small circle that blinks red when flash free space < 5%"""
+        """Draws a mini storage bar in the status bar, blinks red when < 5% free"""
         try:
             import uos
             import time
@@ -896,23 +896,28 @@ class Menu:
             stat = uos.statvfs("/flash")
             total = stat[2] * stat[1]
             free = stat[4] * stat[1]
-            ratio = free / total if total > 0 else 1
+            ratio = min(1.0, free / total) if total > 0 else 1
             low = ratio < 0.05
-            size = FONT_HEIGHT - 2
-            width = self.ctx.display.width()
-            x_padding = FONT_HEIGHT // 3
-            x_pos = width - x_padding - BATTERY_WIDTH - STORAGE_GAP - size
-            y_pos = (STATUS_BAR_HEIGHT - size) // 2
             if low:
-                color = (
+                bar_color = (
                     theme.error_color
                     if time.ticks_ms() // 500 % 2 == 0
                     else theme.info_bg_color
                 )
             else:
-                color = theme.fg_color
+                bar_color = theme.fg_color
+            bar_w = 12
+            bar_h = 5
+            width = self.ctx.display.width()
+            x_padding = FONT_HEIGHT // 3
+            x_pos = width - x_padding - BATTERY_WIDTH - STORAGE_GAP - bar_w
+            y_pos = (STATUS_BAR_HEIGHT - bar_h) // 2
+            self.ctx.display.outline(
+                x_pos, y_pos, bar_w, bar_h, bar_color
+            )
+            fill_w = max(1, int((bar_w - 2) * ratio))
             self.ctx.display.fill_rectangle(
-                x_pos, y_pos, size, size, color, radius=size // 2
+                x_pos + 1, y_pos + 1, fill_w, bar_h - 2, bar_color
             )
         except Exception:
             pass
