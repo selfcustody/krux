@@ -72,7 +72,6 @@ DIGITS = "1234567890"
 
 BATTERY_WIDTH = 22
 BATTERY_HEIGHT = 7
-STORAGE_GAP = 4
 
 LOAD_FROM_CAMERA = 0
 LOAD_FROM_SD = 1
@@ -816,7 +815,6 @@ class Menu:
             )
             self.draw_network_indicator()
             self.draw_wallet_indicator()
-            _thread.start_new_thread(self.draw_storage_indicator, ())
             if kboard.has_battery:
                 _thread.start_new_thread(self.draw_battery_indicator, ())
 
@@ -886,41 +884,6 @@ class Menu:
             BATTERY_HEIGHT - 3,
             battery_color,
         )
-
-    def draw_storage_indicator(self):
-        """Draws a mini storage bar in the status bar, blinks red when < 5% free"""
-        try:
-            import uos
-            import time
-
-            stat = uos.statvfs("/flash")
-            total = stat[2] * stat[1]
-            free = stat[4] * stat[1]
-            ratio = min(1.0, free / total) if total > 0 else 1
-            low = ratio < 0.05
-            if low:
-                bar_color = (
-                    theme.error_color
-                    if time.ticks_ms() // 500 % 2 == 0
-                    else theme.info_bg_color
-                )
-            else:
-                bar_color = theme.fg_color
-            bar_w = 12
-            bar_h = 5
-            width = self.ctx.display.width()
-            x_padding = FONT_HEIGHT // 3
-            x_pos = width - x_padding - BATTERY_WIDTH - STORAGE_GAP - bar_w
-            y_pos = (STATUS_BAR_HEIGHT - bar_h) // 2
-            self.ctx.display.outline(
-                x_pos, y_pos, bar_w, bar_h, bar_color
-            )
-            fill_w = max(1, int((bar_w - 2) * ratio))
-            self.ctx.display.fill_rectangle(
-                x_pos + 1, y_pos + 1, fill_w, bar_h - 2, bar_color
-            )
-        except Exception:
-            pass
 
     def draw_wallet_indicator(self):
         """Draws wallet fingerprint or BIP85 child at top if wallet is loaded"""
