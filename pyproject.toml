@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-# Copyright (c) 2021-2023 Krux contributors
+# Copyright (c) 2021-2026 Krux contributors
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,57 +20,67 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-[tool.poetry]
+[project]
 name = "krux"
 version = "26.04.0"
 description = "Open-source signing device firmware for Bitcoin"
-authors = ["Jeff S <jeffreesun@protonmail.com>"]
+authors = [{ name = "Jeff S", email = "jeffreesun@protonmail.com" }]
 readme = "README.md"
-license = "MIT"
+license = { text = "MIT" }
+requires-python = ">=3.11.5, <3.13"
+dependencies = [
+    "embit",
+    "ur",
+    "urtypes",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.11.5, <3.13" # minimum and maximum supported
-embit = { path = "./vendor/embit/", develop = true }
-ur = { path = "./vendor/foundation-ur-py/", develop = true }
-urtypes = { path = "./vendor/urtypes/", develop = true }
+[project.optional-dependencies]
+docs = [
+    "mkdocs>=1.6.1,<2",
+    "mkdocs-material>=9.7.5,<10",
+    "mkdocs-static-i18n>=1.3.1,<2",
+    "pymdown-extensions>=10.21,<11",
+    "mkdocs-macros-plugin>=1.5.0,<2",
+]
+simulator = [
+    "numpy>=2.4.3,<3",
+    "opencv-python>=4.13.0.92,<5",
+    "Pillow>=12.2.0,<13",
+    "pygame>=2.6.1,<3",
+    "pyzbar>=0.1.9,<1",
+]
+flash = [
+    "pyserial>=3.5,<4",
+]
+sign = [
+    "qrcode>=8.2,<9",
+]
 
-# Docs site dependencies. Optional extras
-mkdocs = { version = "^1.6.1", optional = true }
-mkdocs-material = { version = "^9.7.5", optional = true }
-mkdocs-static-i18n = { version = "^1.3.1", optional = true }
-pymdown-extensions = { version = "^10.21", optional = true }
-mkdocs-macros-plugin = { version = "^1.5.0", optional = true }
+[dependency-groups]
+dev = [
+    "black>=26.3.1,<27",
+    "pylint>=4.0.5,<5",
+    "pytest>=9.0.2,<10",
+    "pytest-cov>=7.0.0,<8",
+    "pytest-mock>=3.15.1,<4",
+    "PyQRCode>=1.2.1,<2",
+    "pycryptodome>=3.23.0,<4",
+    "poethepoet>=0.42.1,<1",
+    "vulture>=2.15,<3",
+    "urllib3>=2.6.3",
+]
 
-# Simulator dependencies. Optional extras
-numpy = { version = "^2.4.3", optional = true }
-opencv-python = { version = "^4.13.0.92", optional = true }
-Pillow = { version = "^12.2.0", optional = true }
-pygame = { version = "^2.6.1", optional = true }
-pyzbar = { version = "^0.1.9", optional = true }
+# krux is firmware, not a distributable Python package
+[tool.uv]
+package = false
 
-# Flash dependencies. Optional extras
-pyserial = { version = "^3.5", optional = true }
+[tool.uv.sources]
+embit = { path = "vendor/embit", editable = true }
+ur = { path = "vendor/foundation-ur-py", editable = true }
+urtypes = { path = "vendor/urtypes", editable = true }
 
-# Sign release script via QR Codes. Optional extras
-qrcode = { version = "^8.2", optional = true }
-
-[tool.poetry.group.dev.dependencies]
-black = "^26.3.1"
-pylint = "^4.0.5"
-pytest = "^9.0.2"
-pytest-cov = "^7.0.0"
-pytest-mock = "^3.15.1"
-PyQRCode = "^1.2.1"
-pycryptodome = "^3.23.0"
-poethepoet = "^0.42.1"
-vulture = "^2.15"
-urllib3 = ">=2.6.3"
-
-[tool.poetry.extras]
-docs = ["mkdocs", "mkdocs-material", "mkdocs-static-i18n", "pymdown-extensions", "mkdocs-macros-plugin"]
-simulator = ["numpy", "opencv-python", "Pillow", "pygame", "pyzbar"]
-flash = ["pyserial"]
-sign = ["qrcode"]
+[tool.pytest.ini_options]
+pythonpath = ["src"]
 
 [tool.poe.tasks]
 # format tasks
@@ -110,7 +120,7 @@ pre-commit = ["format", "lint", "i18n validate", "vulture", "test-simple"]
 pre-release = ["format", "lint", "i18n validate", "i18n-build", "update-glyphs", "vulture", "test-simple"]
 
 # run docs locally
-docs = "poetry run mkdocs serve --livereload"
+docs = "mkdocs serve --livereload"
 
 # translations tasks
 i18n = "python i18n/i18n.py"
@@ -147,7 +157,7 @@ git-update = "git submodule update --init --recursive"
 git-pull = "git pull git@github.com:selfcustody/krux.git"
 git-pull-https = "git pull https://github.com/selfcustody/krux.git"
 
-# ktool tasks 
+# ktool tasks
 ktool-cmd = "python firmware/Kboot/build/ktool.py -b 2000000"
 flash-cmd.ref = "ktool-cmd build/kboot.kfpkg"
 flash.ref = "flash-cmd -B goE"
