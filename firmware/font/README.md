@@ -3,7 +3,7 @@ Krux uses a [custom fork](https://github.com/bachan/terminus-font-vietnamese) of
 
 To rebuild the font for all devices, run:
 ```python
-poetry run python bdftokff.py True
+uv run python bdftokff.py True
 ```
 
 If the `True` argument was passed, the Python script will automatically overwrite the contents of the `font_device.h` file in each of the projects `../MaixPy/projects/*/compile/overrides/components/micropython/port/src/omv/img/include/font_device.h`, otherwise the script will produce 3 files: `m5stickv_font_device.h`, `amigo_font_device.h` and `bit_dock_yahboom_font_device.h`. Use these files to manually replace the contents of the `font_device.h` file in each of your projects.
