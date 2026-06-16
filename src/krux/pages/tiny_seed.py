@@ -814,10 +814,7 @@ class TinyScanner(Page):
                 self._draw_grid(img)
             if kboard.is_m5stickv:
                 img.lens_corr(strength=1.0, zoom=0.56)
-            if kboard.is_amigo:
-                lcd.display(img, oft=(80, 40))
-            else:
-                lcd.display(img)
+            lcd.display(img)
             if page_seed_numbers and self._valid_numbers(page_seed_numbers):
                 if w24:
                     if page == 0:
