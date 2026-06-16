@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import hmac
+import hashlib
 from embit import ec, bip39
 from embit.bech32 import bech32_encode, convertbits, Encoding
 from ..krux_settings import t
@@ -50,7 +51,7 @@ class NostrKeys(Page):
         try:
             mnemonic = self.ctx.wallet.key.mnemonic
             seed = bip39.mnemonic_to_seed(mnemonic)
-            priv_bytes = hmac.new(b"nostr", seed, digestmod="sha256").digest()
+            priv_bytes = hmac.new(b"nostr", seed, hashlib.sha256).digest()
             priv_key = ec.PrivateKey(priv_bytes)
             pub_key = priv_key.get_public_key()
 
