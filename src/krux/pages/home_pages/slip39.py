@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from embit.slip39 import ShareSet
+from embit.slip39 import ShareSet, Share
 from ...qr import FORMAT_NONE
 from ...display import BOTTOM_PROMPT_LINE, FONT_HEIGHT, DEFAULT_PADDING
 from ...krux_settings import t
@@ -189,6 +189,16 @@ class Slip39(Page):
     def restore(self):
         """Restore a mnemonic from SLIP-39 shares"""
         shares = []
+        return self._restore_loop(shares)
+
+    def restore_with_first_share(self, first_share):
+        """Restore a mnemonic from SLIP-39 shares, starting with an already-detected share"""
+        shares = [first_share]
+        self.flash_text(t("Share") + " 1 %s" % t("added"))
+        return self._restore_loop(shares)
+
+    def _restore_loop(self, shares):
+        """Core SLIP-39 share collection and recovery loop"""
         min_shares = 2
 
         self.ctx.display.clear()

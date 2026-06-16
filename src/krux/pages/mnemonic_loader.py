@@ -54,9 +54,8 @@ class MnemonicLoader(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Via Camera"), self.load_key_from_camera),
+                (t("Camera"), self.load_key_from_camera_unified),
                 (t("Via Manual Input"), self.load_key_from_manual_input),
-                (t("SLIP-39 Shares"), self.load_from_slip39),
                 (t("From Storage"), self.load_mnemonic_from_storage),
             ],
         )
@@ -71,6 +70,35 @@ class MnemonicLoader(Page):
 
         slip39 = Slip39(self.ctx)
         return slip39.restore()
+
+    def load_key_from_camera_unified(self):
+        """Unified camera: auto-detects QR (BIP39/SLIP-39/SeedQR/UR) or plate type"""
+        result = self.load_key_from_qr_unified()
+        if result != MENU_CONTINUE:
+            return result
+
+        return self.load_key_from_camera_plate()
+
+    def load_key_from_camera_plate(self):
+        """Fallback: user selects plate type when no QR was found"""
+        submenu = Menu(
+            self.ctx,
+            [
+                ("Tinyseed", lambda: self.load_key_from_tiny_seed_image("Tinyseed")),
+                (
+                    "OneKey KeyTag",
+                    lambda: self.load_key_from_tiny_seed_image("OneKey KeyTag"),
+                ),
+                (
+                    t("Binary Grid"),
+                    lambda: self.load_key_from_tiny_seed_image("Binary Grid"),
+                ),
+            ],
+        )
+        index, status = submenu.run_loop()
+        if index == submenu.back_index:
+            return MENU_CONTINUE
+        return status
 
     def load_key_from_camera(self):
         """Handler for the 'load mnemonic'>'via camera' menu item"""
@@ -392,6 +420,124 @@ class MnemonicLoader(Page):
             self.flash_error(t("Invalid mnemonic length"))
             return MENU_CONTINUE
         return self._load_key_from_words(words)
+
+    def load_key_from_qr_unified(self):
+        """Unified QR scanner that auto-detects BIP39, SLIP-39, CompactSeedQR, SeedQR"""
+        from .qr_capture import QRCodeCapture
+        from .encryption_ui import decrypt_kef
+
+        qr_capture = QRCodeCapture(self.ctx)
+        data, qr_format = qr_capture.qr_capture_loop()
+        if data is None:
+            self.flash_error(t("Failed to load"))
+            return MENU_CONTINUE
+
+        try:
+            data = decrypt_kef(self.ctx, data)
+        except KeyError:
+            self.flash_error(t("Failed to decrypt"))
+            return MENU_CONTINUE
+        except ValueError:
+            pass
+
+        if qr_format == FORMAT_UR:
+            from urtypes.crypto.bip39 import BIP39
+
+            words = BIP39.from_cbor(data.cbor).words
+            return self._load_key_from_words(words)
+
+        words = self._detect_words_from_qr(data)
+        if words:
+            return self._load_key_from_words(words)
+
+        share_text = self._detect_slip39_share(data)
+        if share_text is not None:
+            return self._collect_slip39_shares(share_text)
+
+        self.flash_error(t("Failed to load"))
+        return MENU_CONTINUE
+
+    def _detect_words_from_qr(self, data):
+        """Try to detect BIP39 words, CompactSeedQR, or SeedQR from QR data"""
+        words = []
+        try:
+            data_str = data.decode() if not isinstance(data, str) else data
+            words = data_str.split() if " " in data_str else []
+            if len(words) in (12, 24):
+                words = self.auto_complete_qr_words(words)
+            elif len(words) >= 20:
+                return None
+            else:
+                words = []
+        except:
+            pass
+
+        if not words:
+            data_bytes = ""
+            try:
+                data_bytes = (
+                    data.encode("latin-1") if isinstance(data, str) else data
+                )
+            except:
+                try:
+                    data_bytes = (
+                        data.encode("shift-jis") if isinstance(data, str) else data
+                    )
+                except:
+                    pass
+
+            if len(data_bytes) in (16, 32):
+                from embit.bip39 import mnemonic_from_bytes
+
+                words = mnemonic_from_bytes(data_bytes).split()
+            elif len(data_bytes) in (48, 96):
+                words = [
+                    WORDLIST[int(data_bytes[i : i + 4])]
+                    for i in range(0, len(data_bytes), 4)
+                ]
+            elif len(data_bytes) > 16:
+                from embit.bip39 import mnemonic_from_bytes
+
+                for trim_len in (16, 32):
+                    if len(data_bytes) >= trim_len:
+                        try:
+                            words = mnemonic_from_bytes(
+                                data_bytes[:trim_len]
+                            ).split()
+                            if len(words) in (12, 24):
+                                break
+                        except Exception:
+                            pass
+
+        if words and len(words) in (12, 24):
+            return words
+        return None
+
+    def _detect_slip39_share(self, data):
+        """Try to detect a SLIP-39 share from QR data. Returns share text or None."""
+        try:
+            data_str = data.decode() if not isinstance(data, str) else data
+            words = data_str.split() if " " in data_str else []
+        except:
+            return None
+
+        if len(words) < 20:
+            return None
+
+        try:
+            from embit.slip39 import Share
+
+            Share.parse(data_str)
+            return data_str
+        except Exception:
+            return None
+
+    def _collect_slip39_shares(self, first_share):
+        """Collect SLIP-39 shares starting from the first detected share"""
+        from .home_pages.slip39 import Slip39
+
+        slip39 = Slip39(self.ctx)
+        return slip39.restore_with_first_share(first_share)
 
     def _load_key_from_keypad(
         self,
