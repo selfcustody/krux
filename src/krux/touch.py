@@ -57,6 +57,8 @@ class Touch:
         self.width, self.height = width, height
         self._sum_x = 0
         self._sum_y = 0
+        # Dynamic swipe threshold: 15% of screen height, min 20px, max 35px
+        self.swipe_threshold = max(20, min(35, height // 7))
         self.flipped = hasattr(Settings().hardware, "display") and getattr(
             Settings().hardware.display, "flipped_orientation", False
         )
@@ -225,19 +227,19 @@ class Touch:
             elif self.state == PRESSED:
                 if self.release_point is not None:
                     lateral_lenght = self.release_point[0] - self.press_point[0][0]
-                    if lateral_lenght > SWIPE_THRESHOLD:
+                    if lateral_lenght > self.swipe_threshold:
                         self.gesture = SWIPE_RIGHT
-                    elif -lateral_lenght > SWIPE_THRESHOLD:
+                    elif -lateral_lenght > self.swipe_threshold:
                         self.gesture = SWIPE_LEFT
                         lateral_lenght *= -1  # make it positive value
                     vertical_lenght = self.release_point[1] - self.press_point[0][1]
                     if (
-                        vertical_lenght > SWIPE_THRESHOLD
+                        vertical_lenght > self.swipe_threshold
                         and vertical_lenght > lateral_lenght
                     ):
                         self.gesture = SWIPE_DOWN
                     elif (
-                        -vertical_lenght > SWIPE_THRESHOLD
+                        -vertical_lenght > self.swipe_threshold
                         and -vertical_lenght > lateral_lenght
                     ):
                         self.gesture = SWIPE_UP

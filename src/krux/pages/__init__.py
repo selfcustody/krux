@@ -928,9 +928,24 @@ class Menu:
     def _draw_touch_menu(self, selected_item_index):
         # map regions with dynamic height to fill screen
         self.ctx.input.touch.clear_regions()
+
+        # Calculate minimum touch target height (48px recommended)
+        available_height = self.ctx.display.height() - self.menu_offset - DEFAULT_PADDING
+        num_items = len(self.menu_view)
+        min_touch_height = min(48, available_height // max(num_items, 1))
+
+        # Truncate menu items to fit one line for better touch targets
+        truncated_items = []
+        for menu_item in self.menu_view:
+            text = menu_item[0]
+            max_chars = self.ctx.display.ascii_chars_per_line()
+            if len(text) > max_chars:
+                text = text[: max_chars - 1] + "…"
+            truncated_items.append((text, menu_item[1]))
+
         offset_y = 0
         y_keypad_map = [offset_y]
-        for menu_item in self.menu_view:
+        for menu_item in truncated_items:
             offset_y += len(self.ctx.display.to_lines(menu_item[0])) + 1
             y_keypad_map.append(offset_y)
         height_multiplier = (
@@ -939,6 +954,13 @@ class Menu:
         y_keypad_map = [
             int(n * height_multiplier) + self.menu_offset for n in y_keypad_map
         ]
+
+        # Enforce minimum touch target height
+        for i in range(1, len(y_keypad_map) - 1):
+            region_height = y_keypad_map[i + 1] - y_keypad_map[i]
+            if region_height < min_touch_height:
+                y_keypad_map[i + 1] = y_keypad_map[i] + min_touch_height
+
         # Expand first region to fill the screen if there's nothing above it
         if y_keypad_map[0] < STATUS_BAR_HEIGHT:
             y_keypad_map[0] = 0
@@ -954,7 +976,7 @@ class Menu:
                 )
 
         # draw centralized strings in regions
-        for i, menu_item in enumerate(self.menu_view):
+        for i, menu_item in enumerate(truncated_items):
             menu_item_lines = self.ctx.display.to_lines(menu_item[0])
             region_height = y_keypad_map[i + 1] - y_keypad_map[i]
             offset_y_item = (
@@ -982,14 +1004,23 @@ class Menu:
                     )
 
     def _draw_menu(self, selected_item_index):
+        # Truncate menu items to fit one line for better readability on small screens
+        truncated_items = []
+        for menu_item in self.menu_view:
+            text = menu_item[0]
+            max_chars = self.ctx.display.ascii_chars_per_line()
+            if len(text) > max_chars:
+                text = text[: max_chars - 1] + "…"
+            truncated_items.append((text, menu_item[1]))
+
         extra_lines = sum(
-            len(self.ctx.display.to_lines(item[0])) - 1 for item in self.menu_view
+            len(self.ctx.display.to_lines(item[0])) - 1 for item in truncated_items
         )
         if self.menu_offset > STATUS_BAR_HEIGHT:
             offset_y = self.menu_offset + FONT_HEIGHT
         else:
             offset_y = self.ctx.display.height() - (
-                (len(self.menu_view) * 2 + extra_lines) * FONT_HEIGHT
+                (len(truncated_items) * 2 + extra_lines) * FONT_HEIGHT
             )
             offset_y //= 2
             offset_y += FONT_HEIGHT // 2
@@ -999,12 +1030,12 @@ class Menu:
         items_pad = max(
             self.ctx.display.height()
             - STATUS_BAR_HEIGHT
-            - (len(self.menu_view) + extra_lines) * FONT_HEIGHT,
+            - (len(truncated_items) + extra_lines) * FONT_HEIGHT,
             0,
         )
-        items_pad //= max(len(self.menu_view) - 1, 1)
+        items_pad //= max(len(truncated_items) - 1, 1)
         items_pad = min(items_pad, FONT_HEIGHT)
-        for i, menu_item in enumerate(self.menu_view):
+        for i, menu_item in enumerate(truncated_items):
             fg_color = (
                 theme.fg_color if menu_item[1] is not None else theme.disabled_color
             )
