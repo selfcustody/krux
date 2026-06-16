@@ -56,6 +56,7 @@ class MnemonicLoader(Page):
             [
                 (t("Via Camera"), self.load_key_from_camera),
                 (t("Via Manual Input"), self.load_key_from_manual_input),
+                (t("SLIP-39 Shares"), self.load_from_slip39),
                 (t("From Storage"), self.load_mnemonic_from_storage),
             ],
         )
@@ -63,6 +64,13 @@ class MnemonicLoader(Page):
         if index == submenu.back_index:
             return MENU_CONTINUE
         return status
+
+    def load_from_slip39(self):
+        """Handler for loading mnemonic from SLIP-39 shares"""
+        from .home_pages.slip39 import Slip39
+
+        slip39 = Slip39(self.ctx)
+        return slip39.restore()
 
     def load_key_from_camera(self):
         """Handler for the 'load mnemonic'>'via camera' menu item"""

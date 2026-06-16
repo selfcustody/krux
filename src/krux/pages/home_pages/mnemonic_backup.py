@@ -40,11 +40,19 @@ class MnemonicsView(Page):
             [
                 (t("QR Code"), self.qr_code_backup),
                 (t("Encrypted"), self.encrypt_mnemonic_menu),
+                (t("SLIP-39 Shamir"), self.slip39_backup),
                 (t("Other Formats"), self.other_backup_formats),
             ],
         )
         submenu.run_loop()
         return MENU_CONTINUE
+
+    def slip39_backup(self):
+        """Handler for SLIP-39 Shamir backup"""
+        from .slip39 import Slip39
+
+        slip39 = Slip39(self.ctx)
+        return slip39.backup()
 
     def qr_code_backup(self):
         """Handler for the 'QR Code Backup' menu item"""
