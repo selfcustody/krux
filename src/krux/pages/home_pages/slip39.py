@@ -192,14 +192,16 @@ class Slip39(Page):
         return self._restore_loop(shares)
 
     def restore_with_first_share(self, first_share):
-        """Restore a mnemonic from SLIP-39 shares, starting with an already-detected share"""
+        """Restore a mnemonic from SLIP-39 shares, starting with an already-validated share"""
         shares = [first_share]
+        self._first_share_pre_validated = True
         self.flash_text(t("Share") + " 1 %s" % t("added"))
         return self._restore_loop(shares)
 
     def _restore_loop(self, shares):
         """Core SLIP-39 share collection and recovery loop"""
         min_shares = 2
+        pre_validated = getattr(self, "_first_share_pre_validated", False)
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
@@ -214,7 +216,10 @@ class Slip39(Page):
                 break
 
             try:
-                Share.parse(share_text)
+                if not pre_validated:
+                    Share.parse(share_text)
+                else:
+                    pre_validated = False
                 if share_text in shares:
                     self.flash_error(t("Duplicate share"))
                     continue

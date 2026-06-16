@@ -450,11 +450,13 @@ class MnemonicLoader(Page):
         if words:
             return self._load_key_from_words(words)
 
-        share_text = self._detect_slip39_share(data)
-        if share_text is not None:
-            return self._collect_slip39_shares(share_text)
+        share = self._detect_slip39_share(data)
+        if share is not None:
+            return self._collect_slip39_shares(share)
 
-        self.flash_error(t("Failed to load"))
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("QR not recognized") + "\n\n" + t("as a mnemonic"))
+        self.ctx.input.wait_for_button()
         return MENU_CONTINUE
 
     def _detect_words_from_qr(self, data):
@@ -533,7 +535,7 @@ class MnemonicLoader(Page):
             return None
 
     def _collect_slip39_shares(self, first_share):
-        """Collect SLIP-39 shares starting from the first detected share"""
+        """Collect SLIP-39 shares starting from the first detected (parsed) share"""
         from .home_pages.slip39 import Slip39
 
         slip39 = Slip39(self.ctx)

@@ -22,7 +22,7 @@
 import board
 import time
 from . import Page
-from ..display import FONT_HEIGHT, MINIMAL_PADDING, BOTTOM_LINE
+from ..display import FONT_HEIGHT, MINIMAL_PADDING, BOTTOM_LINE, BOTTOM_PROMPT_LINE
 from ..buttons import PRESSED
 from ..themes import theme
 from ..qr import QRPartParser, FORMAT_UR
@@ -35,6 +35,7 @@ ANTI_GLARE_WAIT_TIME = 500
 MESSAGE_DISPLAY_PERIOD = 5000
 PROGRESS_BAR_HEIGHT = 15
 QR_SCAN_FRAME_SKIP = 2
+QR_SCAN_TIMEOUT_MS = 30000
 
 
 class QRCodeCapture(Page):
@@ -153,8 +154,17 @@ class QRCodeCapture(Page):
 
         # Cache end time for message display to avoid repeated addition
         message_end_time = start_time + MESSAGE_DISPLAY_PERIOD
+        scan_timeout_time = start_time + QR_SCAN_TIMEOUT_MS
         while True:
             wdt.feed()
+
+            if time.ticks_ms() >= scan_timeout_time:
+                self.ctx.display.clear()
+                self.ctx.display.draw_centered_text(t("Scan timed out"))
+                if self.prompt(t("Retry?"), BOTTOM_PROMPT_LINE):
+                    scan_timeout_time = time.ticks_ms() + QR_SCAN_TIMEOUT_MS
+                else:
+                    break
 
             if self.ctx.light:
                 self.light_control()
