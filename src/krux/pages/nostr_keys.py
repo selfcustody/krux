@@ -20,11 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import hmac
-import hashlib
 from embit import ec, bip39
 from embit.bech32 import bech32_encode, convertbits, Encoding
-from ...krux_settings import t
-from ...qr import FORMAT_NONE
+from ..krux_settings import t
+from ..qr import FORMAT_NONE
 from .. import (
     Page,
     Menu,
@@ -48,16 +47,20 @@ class NostrKeys(Page):
             self.flash_error(t("No wallet loaded"))
             return MENU_CONTINUE
 
-        mnemonic = self.ctx.wallet.key.mnemonic
-        seed = bip39.mnemonic_to_seed(mnemonic)
-        priv_bytes = hmac.new(b"nostr", seed, hashlib.sha256).digest()
-        priv_key = ec.PrivateKey(priv_bytes)
-        pub_key = priv_key.get_public_key()
+        try:
+            mnemonic = self.ctx.wallet.key.mnemonic
+            seed = bip39.mnemonic_to_seed(mnemonic)
+            priv_bytes = hmac.new(b"nostr", seed, digestmod="sha256").digest()
+            priv_key = ec.PrivateKey(priv_bytes)
+            pub_key = priv_key.get_public_key()
 
-        nsec_data = convertbits(priv_bytes, 8, 5)
-        nsec = bech32_encode(Encoding.BECH32, NOSTR_HRP, nsec_data)
-        npub_data = convertbits(pub_key.serialize()[1:], 8, 5)
-        npub = bech32_encode(Encoding.BECH32, NOSTR_PUB_HRP, npub_data)
+            nsec_data = convertbits(priv_bytes, 8, 5)
+            nsec = bech32_encode(Encoding.BECH32, NOSTR_HRP, nsec_data)
+            npub_data = convertbits(pub_key.serialize()[1:], 8, 5)
+            npub = bech32_encode(Encoding.BECH32, NOSTR_PUB_HRP, npub_data)
+        except Exception as e:
+            self.flash_error(str(e))
+            return MENU_CONTINUE
 
         info = t("Public Key") + ":\n" + npub
         info += "\n\n" + t("Private Key") + ":\n" + nsec
@@ -68,7 +71,7 @@ class NostrKeys(Page):
                 info, info_box=True
             )
 
-            from ...display import FONT_HEIGHT, DEFAULT_PADDING
+            from ..display import FONT_HEIGHT, DEFAULT_PADDING
             info_len *= FONT_HEIGHT
             info_len += DEFAULT_PADDING
 

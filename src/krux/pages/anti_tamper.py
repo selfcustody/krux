@@ -19,10 +19,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from ...krux_settings import t, Settings
-from ...display import FONT_HEIGHT, DEFAULT_PADDING
-from ...themes import theme
-from .. import (
+from ..krux_settings import t, Settings
+from ..display import FONT_HEIGHT, DEFAULT_PADDING
+from ..themes import theme
+from . import (
     Page,
     Menu,
     MENU_CONTINUE,
@@ -76,7 +76,7 @@ class AntiTamper(Page):
         boot_hash_enabled = False
 
         try:
-            from ...krux_settings import TC_CODE_PATH
+            from ..krux_settings import TC_CODE_PATH
             import os
 
             tc_code_set = os.path.exists(TC_CODE_PATH)

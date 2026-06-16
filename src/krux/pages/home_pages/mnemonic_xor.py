@@ -54,7 +54,7 @@ class MnemonicXOR(MnemonicLoader):
         return out
 
     @staticmethod
-    def _validate_entropy(entropy: bytes | bytearray) -> None:
+    def _validate_entropy(entropy):
         """Check for low entropy (all zeros or all ones)"""
         # TODO: apply a shannon low entropy check for XOR
         all_zeros = bytes(len(entropy))

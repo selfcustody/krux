@@ -72,6 +72,7 @@ DIGITS = "1234567890"
 
 BATTERY_WIDTH = 22
 BATTERY_HEIGHT = 7
+STORAGE_GAP = 4
 
 LOAD_FROM_CAMERA = 0
 LOAD_FROM_SD = 1
@@ -815,6 +816,7 @@ class Menu:
             )
             self.draw_network_indicator()
             self.draw_wallet_indicator()
+            _thread.start_new_thread(self.draw_storage_indicator, ())
             if kboard.has_battery:
                 _thread.start_new_thread(self.draw_battery_indicator, ())
 
@@ -884,6 +886,30 @@ class Menu:
             BATTERY_HEIGHT - 3,
             battery_color,
         )
+
+    def draw_storage_indicator(self):
+        """Draws flash free space in the status bar next to the battery"""
+        try:
+            import uos
+
+            stat = uos.statvfs("/flash")
+            free_bytes = stat[4] * stat[1]
+            if free_bytes >= 1048576:
+                text = "%dm" % (free_bytes // 1048576)
+            elif free_bytes >= 1024:
+                text = "%dk" % (free_bytes // 1024)
+            else:
+                text = "0"
+            width = self.ctx.display.width()
+            x_padding = FONT_HEIGHT // 3
+            text_width = lcd.string_width_px(text)
+            x_pos = width - x_padding - BATTERY_WIDTH - STORAGE_GAP - text_width
+            y_pos = (STATUS_BAR_HEIGHT - FONT_HEIGHT) // 2
+            self.ctx.display.draw_string(
+                x_pos, y_pos, text, theme.fg_color, theme.info_bg_color
+            )
+        except Exception:
+            pass
 
     def draw_wallet_indicator(self):
         """Draws wallet fingerprint or BIP85 child at top if wallet is loaded"""

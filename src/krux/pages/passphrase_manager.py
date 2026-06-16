@@ -20,9 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import json
-from ...krux_settings import t, Settings
-from ...sd_card import JSON_FILE_EXTENSION
-from .. import (
+from ..krux_settings import t, Settings
+from ..sd_card import JSON_FILE_EXTENSION
+from . import (
     Page,
     Menu,
     MENU_CONTINUE,
@@ -115,7 +115,7 @@ class PassphraseManager(Page):
         if passphrase is None:
             return MENU_CONTINUE
 
-        from ...key import Key
+        from ..key import Key
 
         fingerprint = Key.extract_fingerprint(
             self.ctx.wallet.key.mnemonic, passphrase
@@ -179,8 +179,8 @@ class PassphraseManager(Page):
         """Apply passphrase at given index"""
         if index < len(self.passphrases):
             passphrase = self.passphrases[index].get("passphrase", "")
-            from ...key import Key
-            from ...wallet import Wallet
+            from ..key import Key
+            from ..wallet import Wallet
 
             key = Key(
                 self.ctx.wallet.key.mnemonic,
