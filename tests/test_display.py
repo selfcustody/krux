@@ -864,7 +864,7 @@ def test_draw_infobox(mocker, amigo):
     for theme_name in cases:
         Settings().appearance.theme = theme_name
         theme.update()
-        info_bg_color = THEMES[theme_name]["info_background"]
+        info_bg_color = THEMES[theme_name]["disabled"]
 
         d.fill_rectangle.reset_mock()
         d.draw_string.reset_mock()

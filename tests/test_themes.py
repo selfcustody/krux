@@ -115,7 +115,7 @@ def test_network_colors_are_readable_on_theme_backgrounds(amigo, contrast_ratio)
         assert contrast_ratio(TEST_TXT_COLOR, background) >= 4.5
 
 
-def test_amigo_uses_theme_info_background(amigo):
+def test_amigo_uses_disabled_color_for_info_background(amigo):
     from krux.krux_settings import Settings
     from krux.themes import THEMES, Theme
 
@@ -129,4 +129,4 @@ def test_amigo_uses_theme_info_background(amigo):
     for theme_name in cases:
         Settings().appearance.theme = theme_name
 
-        assert Theme().info_bg_color == THEMES[theme_name]["info_background"]
+        assert Theme().info_bg_color == THEMES[theme_name]["disabled"]

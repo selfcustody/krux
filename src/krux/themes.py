@@ -21,6 +21,7 @@
 # THE SOFTWARE.
 
 from .krux_settings import Settings, ThemeSettings
+from .kboard import kboard
 
 # To create new colors from RGB values use firmware/scripts/rgbconv.py script
 
@@ -131,6 +132,9 @@ class Theme:
         current_theme = Settings().appearance.theme
         self.bg_color = THEMES[current_theme]["background"]
         self.info_bg_color = THEMES[current_theme]["info_background"]
+        if kboard.is_amigo:
+            # Amigo has darker grays, so we will use a lighter one
+            self.info_bg_color = THEMES[current_theme]["disabled"]
         self.fg_color = THEMES[current_theme]["foreground"]
         self.frame_color = THEMES[current_theme]["frame"]
         self.disabled_color = THEMES[current_theme]["disabled"]
