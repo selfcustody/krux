@@ -558,10 +558,11 @@ class Display:
         # Initialize offset and region components
         offset_x, offset_y = 0, 0
         region_x, region_y, region_w, region_h = 8, 0, 304, 240
+        use_roi = True
 
         if kboard.is_amigo:
             offset_x, offset_y = 0, 0
-            region_x, region_y, region_w, region_h = 0, 0, 320, 240
+            use_roi = False
         elif kboard.is_m5stickv:
             # Apply lens correction and update img reference
             img = img.lens_corr(strength=1.0, zoom=0.56)
@@ -582,9 +583,13 @@ class Display:
                 region_w -= FONT_HEIGHT
 
         # Pass precomputed values as tuples
-        lcd.display(
-            img, oft=(offset_x, offset_y), roi=(region_x, region_y, region_w, region_h)
-        )
+        if use_roi:
+            lcd.display(
+                img, oft=(offset_x, offset_y),
+                roi=(region_x, region_y, region_w, region_h)
+            )
+        else:
+            lcd.display(img, oft=(offset_x, offset_y))
 
 
 display = Display()
