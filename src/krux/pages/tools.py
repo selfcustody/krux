@@ -48,7 +48,6 @@ class Tools(Page):
                     (t("QR Benchmark"), self.qr_benchmark),
                     (t("Datum Tool"), self.datum_tool),
                     (t("Descriptor Addresses"), self.descriptor_addresses),
-                    (t("Nostr Keys"), self.nostr_keys),
                     (t("Device Tests"), self.device_tests),
                     (t("Flash Tools"), self.flash_tools),
                     (t("Security"), self.security_menu),
@@ -73,13 +72,6 @@ class Tools(Page):
 
         anti_tamper = AntiTamper(self.ctx)
         return anti_tamper.security_menu()
-
-    def nostr_keys(self):
-        """Handler for the 'Nostr Keys' menu item"""
-        from .nostr_keys import NostrKeys
-
-        nostr = NostrKeys(self.ctx)
-        return nostr.nostr_menu()
 
     def rm_stored_mnemonic(self):
         """Lists and allow deletion of stored mnemonics"""

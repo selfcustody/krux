@@ -195,6 +195,7 @@ class Home(Page):
                 (t("Customize"), self.customize),
                 (t("Mnemonic XOR"), self.mnemonic_xor),
                 (t("Advanced Tools"), self.miniscript_tools),
+                (t("Nostr Keys"), self.nostr_keys),
             ],
         )
         submenu.run_loop()
@@ -213,6 +214,13 @@ class Home(Page):
 
         tools = MiniscriptTools(self.ctx)
         return tools.miniscript_menu()
+
+    def nostr_keys(self):
+        """Handler for the 'Nostr Keys' menu item"""
+        from ..nostr_keys import NostrKeys
+
+        nostr = NostrKeys(self.ctx)
+        return nostr.nostr_menu()
 
     def create_descriptor(self):
         """Handler for the 'Create Descriptor' menu item"""
