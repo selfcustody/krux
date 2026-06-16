@@ -66,61 +66,53 @@ To build and flash the firmware:
 The first time, the build can take around an hour or so to complete. Subsequent builds should take only a few minutes. If all goes well, you should see a new `build` folder containing `firmware.bin` and `kboot.kfpkg` files when the build completes.
 
 ## Install Krux and dev tools
-Krux uses [Poetry](https://python-poetry.org/) as Python packaging and dependency management. This cmd installs development dependencies like [embit](https://github.com/diybitcoinhardware/embit), [ur](https://github.com/selfcustody/foundation-ur-py) and [urtypes](https://github.com/selfcustody/urtypes), and tools to run [tests](https://docs.pytest.org), review code with [pylint](https://pypi.org/project/pylint/), format code with [black](https://github.com/psf/black) and a lib to help handle i18n translations.
+Krux uses [uv](https://docs.astral.sh/uv/) for Python packaging and environment management. Install uv by following its [installation guide](https://docs.astral.sh/uv/getting-started/installation/), then sync the project to install runtime deps ([embit](https://github.com/diybitcoinhardware/embit), [ur](https://github.com/selfcustody/foundation-ur-py), [urtypes](https://github.com/selfcustody/urtypes)) along with the `dev` group ([pytest](https://docs.pytest.org), [pylint](https://pypi.org/project/pylint/), [black](https://github.com/psf/black) and i18n helpers):
 ```bash
-pip install poetry
-poetry install
+uv sync
 ```
 
-If you have a problem installing Poetry on Linux OS:
-```bash
-# we considered the name of the venv .krux
-python -m venv .krux
-source .krux/bin/activate
-```
-The result will be something like:
-```bash
-(.krux) username:~/directory name$ 
-```
-Now you can run normaly the pip of the poetry:
-```bash
-pip install poetry
-poetry install
-```
+`uv sync` creates a `.venv` in the project root, resolves `uv.lock` if needed, and installs everything — this is the day-to-day command. When dependencies in `pyproject.toml` change but you only want to refresh `uv.lock` without touching the venv, run `uv lock` instead; `uv sync` will then pick the new pins on its next run.
 
-Note: when changing the dependencies in `pyptoject.toml` you need to generate a new `poetry.lock` file using the cmd: `poetry lock --no-update`.
+> **CI uses `uv sync --frozen`** The workflows refuse to silently re-resolve when `uv.lock` drifts (we value a lot reproducible builds). Whenever you edit `pyproject.toml` (add, remove, or bump a dependency), run `uv lock` (or `uv sync`) and commit `uv.lock` (in same change). Otherwise CI will fail.
+
+### Migrating from a previous Poetry clone
+If your clone was set up with Poetry, remove the old environment before the first `uv sync` so the two managers do not shadow each other:
+```bash
+rm -rf .venv poetry.lock
+uv sync
+```
 
 ## Format code
 ```bash
-poetry run poe format
+uv run poe format
 ```
 
 ## Review code
 ```bash
-poetry run poe lint
+uv run poe lint
 ```
 
 ## Run tests with coverage
 ```bash
-poetry run poe test
+uv run poe test
 ```
 
 Note: The coverage report will be created at the `htmlcov` folder `file:///path/to/krux/htmlcov/index.html`. 
 
 For more verbose output (e.g., to see the output of print statements):
 ```bash
-poetry run poe test-verbose
+uv run poe test-verbose
 ```
 
 To run just a specific test from a specific file:
 ```bash
-poetry run pytest --cache-clear ./tests/pages/test_login.py -k 'test_load_key_from_hexadecimal'
+uv run pytest --cache-clear ./tests/pages/test_login.py -k 'test_load_key_from_hexadecimal'
 ```
 
 ## Use the Python interpreter (REPL)
 This is useful for rapid development of non-visual code:
 ```bash
-poetry run python
+uv run python
 ```
 ```
 Python 3.9.1
@@ -134,37 +126,37 @@ Type "help", "copyright", "credits" or "license" for more information.
 ## Run the device simulator
 This is useful for rapid code development that utilizes UI/UX. It is also good for newcomers to try Krux before purchasing a device. However, the simulator does not behave exactly as the HW device and may not have all features implemented (e.g. scanning via camera a TinySeed currently only works on the HW device).
 
-Before executing, make sure you have installed the poetry extras:
+Before executing, make sure you have synced the simulator extras:
 ```bash
-# This cmd will uninstall other extras
-poetry install --extras simulator
+# This cmd installs the simulator extras alongside the dev group
+uv sync --extra simulator
 
 # To install all extras, use:
-poetry install --all-extras
+uv sync --all-extras
 ```
 
 Run the simulator:
 ```bash
 # Run simulator with the touch device Amigo, then use mouse to navigate
-poetry run poe simulator
+uv run poe simulator
 
 # Run simulator with SD enabled (folder `simulator/sd`) on the small button-only device M5stickV, then use keyboard (arrow keys UP or DOWN and ENTER)
-poetry run poe simulator-m5stickv --sd
+uv run poe simulator-m5stickv --sd
 
 # Run simulator on the device dock, then use keyboard (arrow keys UP or DOWN and ENTER)
-poetry run poe simulator-dock
+uv run poe simulator-dock
 
 # Run simulator with the touch device yahboom, then use mouse to navigate
-poetry run poe simulator-yahboom
+uv run poe simulator-yahboom
 
 # Run simulator on the device cube, then use keyboard (arrow keys UP or DOWN and ENTER)
-poetry run poe simulator-cube
+uv run poe simulator-cube
 
 # Run simulator with the touch device wonderMV, then use mouse to navigate
-poetry run poe simulator-wonder-mv
+uv run poe simulator-wonder-mv
 
 # Run simulator with the touch device tzt, then use mouse to navigate
-poetry run poe simulator-tzt
+uv run poe simulator-tzt
 ```
 
 Note: With emulated SD card it is possible to store settings, encrypted mnemonics, also drop and sign PSBTs. After some time running, the simulator may become slow. If that happens, just close and open again!
@@ -192,10 +184,10 @@ cd simulator
 ./generate-all-screenshots.sh
 
 # Run a specific sequence for a specific device's with SD enabled (folder `simulator/sd`)
-poetry run poe simulator --sequence sequences/about.txt --sd
+uv run poe simulator --sequence sequences/about.txt --sd
 
 # Sequence screenshots are scaled to fit in docs. Use --no-screenshot-scale to get full size
-poetry run poe simulator --sequence sequences/home-options.txt --no-screenshot-scale
+uv run poe simulator --sequence sequences/home-options.txt --no-screenshot-scale
 ```
 
 ## Live debug a device (Linux)
@@ -250,19 +242,19 @@ The project has lots of translations [here](i18n/translations), if you add new e
 
 ```bash
 # Clean unused translations:
-poetry run poe i18n clean
+uv run poe i18n clean
 
 # Create a new translation file in JSON:
-poetry run poe i18n new tr-TR
+uv run poe i18n new tr-TR
 
 # Make sure all files have this new translated message:
-poetry run poe i18n validate
+uv run poe i18n validate
 
 # Format translation files properly:
-poetry run poe i18n prettify
+uv run poe i18n prettify
 
 # Create the compiled table for krux translations.py
-poetry run poe i18n bake
+uv run poe i18n bake
 ```
 
 ## Fonts
@@ -272,21 +264,21 @@ Learn about how to setup fonts [here](firmware/font/README.md)
 Use [this script](firmware/scripts/rgbconv.py) to generate device compatible colors from RGB values (usefull for color themes).
 
 ## Documentation
-Before change documentation, and run the mkdocs server, make sure you have installed the poetry extras:
+Before change documentation, and run the mkdocs server, make sure you have synced the docs extras:
 
 ```bash
-# This cmd will uninstall other extras
-poetry install --extras docs
+# This cmd installs the docs extras alongside the dev group
+uv sync --extra docs
 
 # To install all extras, use:
-poetry install --all-extras
+uv sync --all-extras
 ```
 
 To change lateral and upper menus on documentation, see `mkdocs.yml` file on `nav` section. To create or edit translations (TODO: need help!), read [here](i18n/README.md).
 
 Create the documentation site locally - `http://127.0.0.1:8000/krux/`:
 ```bash
-poetry run poe docs
+uv run poe docs
 ```
 
 # Inspired by these similar projects

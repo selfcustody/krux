@@ -142,7 +142,7 @@ to reviewers with proven commitment or domain expertise.
 ## Coding conventions
 
 A few rules keep the code readable and maintainable. Most are checked by
-`poetry run poe lint` and `poetry run poe format`, and enforced by CI.
+`uv run poe lint` and `uv run poe format`, and enforced by CI.
 
 ### Python
 
@@ -185,7 +185,7 @@ rules enforced by CI:
 ## Testing
 
 We aim for high test coverage (95% or more) on each PR. Run the tests with
-`poetry run poe test`, and list all available tasks with `poetry run poe`.
+`uv run poe test`, and list all available tasks with `uv run poe`.
 
 ---
 
