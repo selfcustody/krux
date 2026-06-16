@@ -50,6 +50,7 @@ class Tools(Page):
                     # (t("Create QR Code"), self.create_qr),
                     (t("Descriptor Addresses"), self.descriptor_addresses),
                     (t("Flash Tools"), self.flash_tools),
+                    (t("Security"), self.security_menu),
                     (t("Remove Mnemonic"), self.rm_stored_mnemonic),
                     (t("QR Benchmark"), self.qr_benchmark),
                 ],
@@ -65,6 +66,13 @@ class Tools(Page):
         flash_tools = FlashTools(self.ctx)
         flash_tools.flash_tools_menu()
         return MENU_CONTINUE
+
+    def security_menu(self):
+        """Handler for the 'Security' menu item"""
+        from .anti_tamper import AntiTamper
+
+        anti_tamper = AntiTamper(self.ctx)
+        return anti_tamper.security_menu()
 
     def rm_stored_mnemonic(self):
         """Lists and allow deletion of stored mnemonics"""
