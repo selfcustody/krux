@@ -665,9 +665,11 @@ class Menu:
             # Always disable status bar if menu has non standard offset
             self.disable_statusbar = True
             self.menu_offset = offset if offset >= 0 else DEFAULT_PADDING
-        max_viewable = min(
-            self.ctx.display.max_menu_lines(self.menu_offset, self.menu), len(self.menu)
-        )
+        max_lines = self.ctx.display.max_menu_lines(self.menu_offset, self.menu)
+        max_viewable = min(max_lines, len(self.menu))
+        # Reserve last visible slot for Back button when menu overflows
+        if len(self.menu) > max_viewable and max_viewable > 1:
+            max_viewable -= 1
         self.menu_view = ListView(self.menu, max_viewable)
 
     @property
