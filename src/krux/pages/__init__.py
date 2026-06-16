@@ -25,7 +25,7 @@ import lcd
 import _thread
 from ..context import Context
 from .keypads import Keypad
-from ..themes import theme, WHITE, GREEN, DARKGREY, YELLOW, ORANGE, RED
+from ..themes import theme, WHITE, GREEN, DARKGREY
 from ..input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -72,8 +72,6 @@ DIGITS = "1234567890"
 
 BATTERY_WIDTH = 22
 BATTERY_HEIGHT = 7
-STORAGE_GAP = 4
-STORAGE_DOT_SIZE = 6
 
 LOAD_FROM_CAMERA = 0
 LOAD_FROM_SD = 1
@@ -817,7 +815,6 @@ class Menu:
             )
             self.draw_network_indicator()
             self.draw_wallet_indicator()
-            _thread.start_new_thread(self.draw_storage_indicator, ())
             if kboard.has_battery:
                 _thread.start_new_thread(self.draw_battery_indicator, ())
 
@@ -887,41 +884,6 @@ class Menu:
             BATTERY_HEIGHT - 3,
             battery_color,
         )
-
-    def draw_storage_indicator(self):
-        """Draws a color-coded dot for flash free space: green→yellow→orange→red"""
-        try:
-            import uos
-            import time
-
-            stat = uos.statvfs("/flash")
-            total = stat[2] * stat[1]
-            free = stat[4] * stat[1]
-            ratio = min(1.0, free / total) if total > 0 else 1
-            if ratio >= 0.5:
-                dot_color = GREEN
-            elif ratio >= 0.2:
-                dot_color = YELLOW
-            elif ratio >= 0.05:
-                dot_color = ORANGE
-            else:
-                dot_color = (
-                    RED if time.ticks_ms() // 500 % 2 == 0 else theme.info_bg_color
-                )
-            width = self.ctx.display.width()
-            x_padding = FONT_HEIGHT // 3
-            x_pos = width - x_padding - BATTERY_WIDTH - STORAGE_GAP - STORAGE_DOT_SIZE
-            y_pos = (STATUS_BAR_HEIGHT - STORAGE_DOT_SIZE) // 2
-            self.ctx.display.fill_rectangle(
-                x_pos,
-                y_pos,
-                STORAGE_DOT_SIZE,
-                STORAGE_DOT_SIZE,
-                dot_color,
-                radius=STORAGE_DOT_SIZE // 2,
-            )
-        except Exception:
-            pass
 
     def draw_wallet_indicator(self):
         """Draws wallet fingerprint or BIP85 child at top if wallet is loaded"""
