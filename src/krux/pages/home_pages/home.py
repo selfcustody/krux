@@ -188,6 +188,7 @@ class Home(Page):
             self.ctx,
             [
                 (t("Wallet Descriptor"), self.wallet_descriptor),
+                (t("Create Descriptor"), self.create_descriptor),
                 (t("Passphrase"), self.passphrase),
                 (t("Customize"), self.customize),
                 ("BIP85", self.bip85),
@@ -196,6 +197,13 @@ class Home(Page):
         )
         submenu.run_loop()
         return MENU_CONTINUE
+
+    def create_descriptor(self):
+        """Handler for the 'Create Descriptor' menu item"""
+        from .descriptor_create import DescriptorCreator
+
+        creator = DescriptorCreator(self.ctx)
+        return creator.create()
 
     def addresses_menu(self):
         """Handler for the 'address' menu item"""
