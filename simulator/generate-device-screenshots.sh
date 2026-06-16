@@ -42,45 +42,45 @@ echo "$encrypted_mnemonics" > sd/seeds.json
 # Sequences
 
 # Login
-poetry run poe simulator --sequence sequences/logo.txt  --device $device
-poetry run poe simulator --sequence sequences/about.txt --sd --device $device
-poetry run poe simulator --sequence sequences/load-mnemonic-options.txt --sd --device $device
-poetry run poe simulator --sequence sequences/new-mnemonic-options.txt  --sd --device $device
-poetry run poe simulator --sequence sequences/load-mnemonic-sequence.txt  --sd --device $device
-poetry run poe simulator --sequence sequences/load-mnemonic-double-mnemonic.txt  --sd --device $device
-poetry run poe simulator --sequence sequences/edit-mnemonic.txt  --sd --device $device
+uv run poe simulator --sequence sequences/logo.txt  --device $device
+uv run poe simulator --sequence sequences/about.txt --sd --device $device
+uv run poe simulator --sequence sequences/load-mnemonic-options.txt --sd --device $device
+uv run poe simulator --sequence sequences/new-mnemonic-options.txt  --sd --device $device
+uv run poe simulator --sequence sequences/load-mnemonic-sequence.txt  --sd --device $device
+uv run poe simulator --sequence sequences/load-mnemonic-double-mnemonic.txt  --sd --device $device
+uv run poe simulator --sequence sequences/edit-mnemonic.txt  --sd --device $device
 
 # Home
-poetry run poe simulator --sequence sequences/home-options.txt --sd --device $device
-poetry run poe simulator --sequence sequences/encrypt-mnemonic.txt --sd --device $device
-poetry run poe simulator --sequence sequences/extended-public-key-wpkh.txt --sd --device $device
-poetry run poe simulator --sequence sequences/extended-public-key-wsh.txt --sd --device $device
-poetry run poe simulator --sequence sequences/wallet-descriptor-wsh.txt --sd --device $device
-# poetry run poe simulator --sequence sequences/wallet-descriptor-wpkh.txt --sd --device $device
-poetry run poe simulator --sequence sequences/wallet-descriptor-exp-tr-minis.txt  --sd --device $device
-poetry run poe simulator --sequence sequences/bip85.txt --sd --device $device
-poetry run poe simulator --sequence sequences/mnemonic-xor.txt --sd --device $device
-poetry run poe simulator --sequence sequences/scan-address.txt --sd --device $device
-poetry run poe simulator --sequence sequences/list-address.txt --sd --device $device
-poetry run poe simulator --sequence sequences/export-address.txt --sd --device $device
-poetry run poe simulator --sequence sequences/sign-psbt.txt  --sd --device $device
-poetry run poe simulator --sequence sequences/sign-message.txt --sd  --device $device
-poetry run poe simulator --sequence sequences/sign-message-at-address.txt  --device $device
+uv run poe simulator --sequence sequences/home-options.txt --sd --device $device
+uv run poe simulator --sequence sequences/encrypt-mnemonic.txt --sd --device $device
+uv run poe simulator --sequence sequences/extended-public-key-wpkh.txt --sd --device $device
+uv run poe simulator --sequence sequences/extended-public-key-wsh.txt --sd --device $device
+uv run poe simulator --sequence sequences/wallet-descriptor-wsh.txt --sd --device $device
+# uv run poe simulator --sequence sequences/wallet-descriptor-wpkh.txt --sd --device $device
+uv run poe simulator --sequence sequences/wallet-descriptor-exp-tr-minis.txt  --sd --device $device
+uv run poe simulator --sequence sequences/bip85.txt --sd --device $device
+uv run poe simulator --sequence sequences/mnemonic-xor.txt --sd --device $device
+uv run poe simulator --sequence sequences/scan-address.txt --sd --device $device
+uv run poe simulator --sequence sequences/list-address.txt --sd --device $device
+uv run poe simulator --sequence sequences/export-address.txt --sd --device $device
+uv run poe simulator --sequence sequences/sign-psbt.txt  --sd --device $device
+uv run poe simulator --sequence sequences/sign-message.txt --sd  --device $device
+uv run poe simulator --sequence sequences/sign-message-at-address.txt  --device $device
 
 # Tools
-poetry run poe simulator --sequence sequences/tools-datum-tool.txt  --sd --device $device
-poetry run poe simulator --sequence sequences/tools-check-sd.txt  --sd --device $device
-poetry run poe simulator --sequence sequences/tools-create-QR.txt  --sd --device $device
-# poetry run poe simulator --sequence sequences/tools-mnemonic.txt  --sd --device $device
-poetry run poe simulator --sequence sequences/tools-device-tests-test-suite.txt  --sd --device $device
-poetry run poe simulator --sequence sequences/tools-print-test-qr.txt  --sd --device $device
-poetry run poe simulator --sequence sequences/tools-descriptor-addresses.txt --sd --device $device
-poetry run poe simulator --sequence sequences/tools-flash.txt  --sd --device $device
-poetry run poe simulator --sequence sequences/tc-flash-hash.txt --sd --device $device
+uv run poe simulator --sequence sequences/tools-datum-tool.txt  --sd --device $device
+uv run poe simulator --sequence sequences/tools-check-sd.txt  --sd --device $device
+uv run poe simulator --sequence sequences/tools-create-QR.txt  --sd --device $device
+# uv run poe simulator --sequence sequences/tools-mnemonic.txt  --sd --device $device
+uv run poe simulator --sequence sequences/tools-device-tests-test-suite.txt  --sd --device $device
+uv run poe simulator --sequence sequences/tools-print-test-qr.txt  --sd --device $device
+uv run poe simulator --sequence sequences/tools-descriptor-addresses.txt --sd --device $device
+uv run poe simulator --sequence sequences/tools-flash.txt  --sd --device $device
+uv run poe simulator --sequence sequences/tc-flash-hash.txt --sd --device $device
 
 # Settings
-poetry run poe simulator --sequence sequences/all-settings.txt --sd --device $device
+uv run poe simulator --sequence sequences/all-settings.txt --sd --device $device
 
 # Other
-poetry run poe simulator --sequence sequences/qr-transcript.txt --sd --printer --device $device
-poetry run poe simulator --sequence sequences/print-qr.txt --sd --printer --device $device
+uv run poe simulator --sequence sequences/qr-transcript.txt --sd --printer --device $device
+uv run poe simulator --sequence sequences/print-qr.txt --sd --printer --device $device
