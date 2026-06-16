@@ -235,10 +235,18 @@ class Home(Page):
             [
                 ("PSBT", self.sign_psbt),
                 (t("Message"), self.sign_message),
+                (t("PSBTv2 Tools"), self.psbtv2_tools),
             ],
         )
         submenu.run_loop()
         return MENU_CONTINUE
+
+    def psbtv2_tools(self):
+        """Handler for the 'PSBTv2 Tools' menu item"""
+        from ..psbt_v2_tools import PSBTv2Tools
+
+        tools = PSBTv2Tools(self.ctx)
+        return tools.psbtv2_menu()
 
     def load_psbt(self):
         """Loads a PSBT from camera or SD card"""
