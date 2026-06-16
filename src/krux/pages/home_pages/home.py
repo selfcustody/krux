@@ -190,6 +190,7 @@ class Home(Page):
                 (t("Wallet Descriptor"), self.wallet_descriptor),
                 (t("Create Descriptor"), self.create_descriptor),
                 (t("Passphrase"), self.passphrase),
+                (t("Passphrase Manager"), self.passphrase_manager),
                 (t("Customize"), self.customize),
                 ("BIP85", self.bip85),
                 (t("Mnemonic XOR"), self.mnemonic_xor),
@@ -198,6 +199,13 @@ class Home(Page):
         )
         submenu.run_loop()
         return MENU_CONTINUE
+
+    def passphrase_manager(self):
+        """Handler for the 'Passphrase Manager' menu item"""
+        from ..passphrase_manager import PassphraseManager
+
+        manager = PassphraseManager(self.ctx)
+        return manager.manager_menu()
 
     def miniscript_tools(self):
         """Handler for the 'Miniscript Tools' menu item"""
