@@ -25,6 +25,7 @@ from embit import ec, bip39
 from embit.bech32 import bech32_encode, convertbits, Encoding
 from ..krux_settings import t
 from ..qr import FORMAT_NONE
+from ..wdt import wdt
 from . import (
     Page,
     Menu,
@@ -50,17 +51,20 @@ class NostrKeys(Page):
 
         try:
             mnemonic = self.ctx.wallet.key.mnemonic
+            wdt.feed()
             seed = bip39.mnemonic_to_seed(mnemonic)
+            wdt.feed()
             priv_bytes = hmac.new(b"nostr", seed, hashlib.sha256).digest()
             priv_key = ec.PrivateKey(priv_bytes)
             pub_key = priv_key.get_public_key()
+            wdt.feed()
 
             nsec_data = convertbits(priv_bytes, 8, 5)
             nsec = bech32_encode(Encoding.BECH32, NOSTR_HRP, nsec_data)
             npub_data = convertbits(pub_key.serialize()[1:], 8, 5)
             npub = bech32_encode(Encoding.BECH32, NOSTR_PUB_HRP, npub_data)
         except Exception as e:
-            self.flash_error(str(e))
+            self.flash_error(str(e) if str(e) else "Derive error")
             return MENU_CONTINUE
 
         info = t("Public Key") + ":\n" + npub
