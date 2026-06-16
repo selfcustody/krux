@@ -3,6 +3,16 @@ Here are some useful tools that are available as soon as Krux starts! These are 
 <img src="../../../img/maixpy_amigo/tools-options-300.png" class="amigo">
 <img src="../../../img/maixpy_m5stickv/tools-options-250.png" class="m5stickv">
 
+### Load Krux app
+<img src="../../../img/maixpy_m5stickv/krux-apps-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/krux-apps-300.png" align="right" class="amigo">
+
+Run developer-signed Krux applications (Kapps) that are not suited to be part of the main firmware. Copy its `.mpy` file and corresponding signature to an SD card to load it onto the device. When executed, the Kapp is stored in the user's flash memory (just like custom settings) and this process modifies the last two words of the [Tamper Detection](tamper-detection.md#tamper-check-flash-hash-tc-flash-hash-a-tamper-detection-tool) (User's Region).
+
+For example, the **Nostr Kapp** allows converting a mnemonic into a Nostr `nsec` key and air-gapped event signing.
+
+<div style="clear: both"></div>
+
 ### Datum Tool
 <img src="../../../img/maixpy_m5stickv/tools-datum-tool-load-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/tools-datum-tool-load-300.png" align="right" class="amigo">

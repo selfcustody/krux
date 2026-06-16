@@ -115,6 +115,7 @@ def mp_modules(mocker, monkeypatch):
     import json
 
     monkeypatch.setitem(sys.modules, "ujson", json)
+    monkeypatch.setitem(sys.modules, "vfs", mocker.MagicMock())
 
 
 @pytest.fixture
