@@ -424,10 +424,10 @@ class Bip85(Page):
             [
                 (t("BIP39 Mnemonic"), self._derive_mnemonic),
                 (t("Base64 Password"), self._derive_base64_password),
-                ("WIF Private Key", self._derive_wif),
-                ("XPRV Extended Key", self._derive_xprv),
-                ("Hex Entropy", self._derive_hex),
-                ("Nostr (NIP-06)", self._derive_nostr),
+                (t("WIF Private Key"), self._derive_wif),
+                (t("XPRV Extended Key"), self._derive_xprv),
+                (t("Hex Entropy"), self._derive_hex),
+                (t("Nostr (NIP-06)"), self._derive_nostr),
             ],
         )
         submenu.run_loop()

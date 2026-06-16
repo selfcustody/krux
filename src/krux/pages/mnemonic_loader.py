@@ -84,9 +84,9 @@ class MnemonicLoader(Page):
         submenu = Menu(
             self.ctx,
             [
-                ("Tinyseed", lambda: self.load_key_from_tiny_seed_image("Tinyseed")),
+                (t("Tinyseed"), lambda: self.load_key_from_tiny_seed_image("Tinyseed")),
                 (
-                    "OneKey KeyTag",
+                    t("OneKey KeyTag"),
                     lambda: self.load_key_from_tiny_seed_image("OneKey KeyTag"),
                 ),
                 (
@@ -106,9 +106,9 @@ class MnemonicLoader(Page):
             self.ctx,
             [
                 (t("QR Code"), self.load_key_from_qr_code),
-                ("Tinyseed", lambda: self.load_key_from_tiny_seed_image("Tinyseed")),
+                (t("Tinyseed"), lambda: self.load_key_from_tiny_seed_image("Tinyseed")),
                 (
-                    "OneKey KeyTag",
+                    t("OneKey KeyTag"),
                     lambda: self.load_key_from_tiny_seed_image("OneKey KeyTag"),
                 ),
                 (
@@ -129,8 +129,8 @@ class MnemonicLoader(Page):
             [
                 (t("Words"), self.load_key_from_text),
                 (t("Word Numbers"), self.pre_load_key_from_digits),
-                ("Tinyseed (Bits)", self.load_key_from_tiny_seed),
-                ("Stackbit 1248", self.load_key_from_1248),
+                (t("Tinyseed (Bits)"), self.load_key_from_tiny_seed),
+                (t("Stackbit 1248"), self.load_key_from_1248),
             ],
         )
         index, status = submenu.run_loop()
