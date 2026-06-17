@@ -10,6 +10,7 @@ def mocker_printer(mocker):
 @pytest.fixture
 def mock_retro_compatibility(mocker, amigo):
     from krux.settings import CategorySetting
+    from krux.krux_settings import Settings
 
     class MockDefaultWallet:
         namespace = "settings.wallet"
@@ -24,6 +25,10 @@ def mock_retro_compatibility(mocker, amigo):
         "krux.krux_settings.DefaultWallet",
         mocker.MagicMock(return_value=MockDefaultWallet()),
     )
+    # Settings caches its namespace tree, which may already have been built
+    # (e.g. via krux.themes at import). Drop the cache so the next Settings()
+    # rebuilds with the patched DefaultWallet.
+    mocker.patch.object(Settings, "_instance", None)
 
 
 ################### Test menus
