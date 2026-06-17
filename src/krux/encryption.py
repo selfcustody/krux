@@ -42,12 +42,14 @@ class MnemonicStorage:
         try:
             with SDHandler() as sd:
                 self.stored_sd = json.loads(sd.read(MNEMONICS_FILE))
-        except:
+        except (OSError, ValueError):
+            # missing/unreadable SD card or malformed JSON -> start empty
             pass
         try:
             with open(FLASH_PATH_STR % MNEMONICS_FILE, "r") as f:
                 self.stored = json.loads(f.read())
-        except:
+        except (OSError, ValueError):
+            # missing/unreadable flash file or malformed JSON -> start empty
             pass
 
     def _deprecated_decrypt(self, key, salt, iterations, mode, payload):
@@ -73,6 +75,8 @@ class MnemonicStorage:
             plaintext = kef._unpad(decryptor.decrypt(payload), pkcs_pad=False)
             return plaintext.decode()
         except:
+            # broad on purpose: any failure here means a wrong key or
+            # incompatible legacy ciphertext -> return None
             return None
 
     def list_mnemonics(self, sd_card=False):
@@ -119,7 +123,8 @@ class MnemonicStorage:
                     contents = sd.read(MNEMONICS_FILE)
                     orig_len = len(contents)
                     mnemonics = json.loads(contents)
-            except:
+            except (OSError, ValueError):
+                # no existing/readable file or malformed JSON -> write fresh
                 orig_len = 0
 
             # save the new MNEMONICS_FILE
@@ -132,13 +137,15 @@ class MnemonicStorage:
                         contents += " " * (orig_len - len(contents))
                     sd.write(MNEMONICS_FILE, contents)
             except:
+                # broad on purpose: any failure to save means the store failed
                 return False
         else:
             try:
                 # load current MNEMONICS_FILE
                 with open(FLASH_PATH_STR % MNEMONICS_FILE, "r") as f:
                     mnemonics = json.loads(f.read())
-            except:
+            except (OSError, ValueError):
+                # no existing/readable file or malformed JSON -> write fresh
                 pass
             try:
                 # save the new MNEMONICS_FILE
@@ -146,6 +153,7 @@ class MnemonicStorage:
                     mnemonics[mnemonic_id] = {"b64_kef": b64_kef}
                     f.write(json.dumps(mnemonics))
             except:
+                # broad on purpose: any failure to save means the store failed
                 return False
         return True
 
