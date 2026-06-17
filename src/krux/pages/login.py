@@ -86,6 +86,31 @@ class Login(MnemonicLoader):
             ),
         )
 
+    def load_key(self):
+        """Load Mnemonic menu, extended with threshold-share restore"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Via Camera"), self.load_key_from_camera),
+                (t("Via Manual Input"), self.load_key_from_manual_input),
+                (t("From Storage"), self.load_mnemonic_from_storage),
+                (t("Restore from shares"), self.restore_from_threshold),
+            ],
+        )
+        index, status = submenu.run_loop()
+        if index == submenu.back_index:
+            return MENU_CONTINUE
+        return status
+
+    def restore_from_threshold(self):
+        """Restore a mnemonic from Kurihara threshold shares, then load it"""
+        from .home_pages.threshold_backup import ThresholdBackup
+
+        recovered = ThresholdBackup(self.ctx).restore()
+        if recovered is None:
+            return MENU_CONTINUE
+        return self._load_key_from_words(recovered.split())
+
     def new_key(self):
         """Handler for the 'new mnemonic' menu item"""
         submenu = Menu(

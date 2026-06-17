@@ -41,10 +41,17 @@ class MnemonicsView(Page):
                 (t("QR Code"), self.qr_code_backup),
                 (t("Encrypted"), self.encrypt_mnemonic_menu),
                 (t("Other Formats"), self.other_backup_formats),
+                (t("Threshold Split"), self.threshold_split),
             ],
         )
         submenu.run_loop()
         return MENU_CONTINUE
+
+    def threshold_split(self):
+        """Handler for the 'Threshold Split' backup item (Kurihara n-of-m)"""
+        from .threshold_backup import ThresholdBackup
+
+        return ThresholdBackup(self.ctx).split()
 
     def qr_code_backup(self):
         """Handler for the 'QR Code Backup' menu item"""

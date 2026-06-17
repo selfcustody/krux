@@ -21,6 +21,7 @@ def test_export_mnemonic_stackbit_standard(mocker, m5stickv, tdata):
             BUTTON_ENTER,  # Select "Back" from Stackbit submenu
             *([BUTTON_PAGE] * 2),  # Go to "Back" in Other Formats
             BUTTON_ENTER,  # Select "Back" from Other Formats
+            BUTTON_PAGE,  # Go to "Threshold Split" in mnemonic menu
             BUTTON_PAGE,  # Go to "Back" in mnemonic menu
             BUTTON_ENTER,  # Select "Back"
         ],
@@ -57,6 +58,7 @@ def test_export_mnemonic_stackbit_standard_amigo(mocker, amigo, tdata):
             BUTTON_ENTER,  # Select "Back" from Stackbit submenu
             *([BUTTON_PAGE] * 2),  # Go to "Back" in Other Formats
             BUTTON_ENTER,  # Select "Back" from Other Formats
+            BUTTON_PAGE,  # Go to "Threshold Split" in mnemonic menu
             BUTTON_PAGE,  # Go to "Back" in mnemonic menu
             BUTTON_ENTER,  # Select "Back"
         ],
@@ -96,6 +98,7 @@ def test_export_mnemonic_stackbit_vertical(mocker, amigo, tdata):
             BUTTON_ENTER,  # Select "Back" from Stackbit submenu
             *([BUTTON_PAGE] * 2),  # Go to "Back" in Other Formats
             BUTTON_ENTER,  # Select "Back" from Other Formats
+            BUTTON_PAGE,  # Go to "Threshold Split" in mnemonic menu
             BUTTON_PAGE,  # Go to "Back" in mnemonic menu
             BUTTON_ENTER,  # Select "Back"
         ],
@@ -136,6 +139,7 @@ def test_export_mnemonic_stackbit_vertical_compact(mocker, m5stickv, tdata):
             BUTTON_ENTER,  # Select "Back" from Stackbit submenu
             *([BUTTON_PAGE] * 2),  # Go to "Back" in Other Formats
             BUTTON_ENTER,  # Select "Back" from Other Formats
+            BUTTON_PAGE,  # Go to "Threshold Split" in mnemonic menu
             BUTTON_PAGE,  # Go to "Back" in mnemonic menu
             BUTTON_ENTER,  # Select "Back"
         ],

@@ -38,6 +38,7 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Leave Page 1
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_ENTER,  # click on back to return to Mnemonic Backup
+                BUTTON_PAGE,  # to Threshold Split
                 BUTTON_PAGE,  # change to btn Back
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
@@ -55,6 +56,7 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Leave Page 2
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_ENTER,  # click on back to return to Mnemonic Backup
+                BUTTON_PAGE,  # to Threshold Split
                 BUTTON_PAGE,  # change to btn Back
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
@@ -73,6 +75,7 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Print
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_ENTER,  # click on back to return to Mnemonic Backup
+                BUTTON_PAGE,  # to Threshold Split
                 BUTTON_PAGE,  # change to btn Back
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
@@ -365,7 +368,7 @@ def test_mnemonic_standard_qr_touch(mocker, amigo, tdata):
             + [
                 # 0,  # QR code leave press won't read index
                 4,  # Back to Mnemonic Backup
-                3,  # Back to home init screen
+                4,  # Back to home init screen
             ],
         ),
         (
@@ -378,7 +381,7 @@ def test_mnemonic_standard_qr_touch(mocker, amigo, tdata):
             + [
                 # 0,  # QR code leave press won't read index
                 4,  # Back to Mnemonic Backup
-                3,  # Back to home init screen
+                4,  # Back to home init screen
             ],
         ),
         # Print
@@ -393,7 +396,7 @@ def test_mnemonic_standard_qr_touch(mocker, amigo, tdata):
                 # 0,  # QR code leave press won't read index
                 0,  # Print
                 4,  # Back to Mnemonic Backup
-                3,  # Back to home init screen
+                4,  # Back to home init screen
             ],
         ),
         (
@@ -407,7 +410,7 @@ def test_mnemonic_standard_qr_touch(mocker, amigo, tdata):
                 # 0,  # QR code leave press won't read index
                 0,  # Print
                 4,  # Back to Mnemonic Backup
-                3,  # Back to home init screen
+                4,  # Back to home init screen
             ],
         ),
         # Decline to print
@@ -422,7 +425,7 @@ def test_mnemonic_standard_qr_touch(mocker, amigo, tdata):
                 # 0,  # QR code leave press won't read index
                 1,  # Decline to print
                 4,  # Back to Mnemonic Backup
-                3,  # Back to home init screen
+                4,  # Back to home init screen
             ],
         ),
         (
@@ -436,7 +439,7 @@ def test_mnemonic_standard_qr_touch(mocker, amigo, tdata):
                 # 0,  # QR code leave press won't read index
                 1,  # Decline to print
                 4,  # Back to Mnemonic Backup
-                3,  # Back to home init screen
+                4,  # Back to home init screen
             ],
         ),
     ]
