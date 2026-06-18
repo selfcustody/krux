@@ -36,18 +36,23 @@ QR_CODE_ITER_MULTIPLE = 10000
 class MnemonicStorage:
     """Handler of stored encrypted seeds"""
 
+    @staticmethod
+    def _load_mnemonics(contents):
+        mnemonics = json.loads(contents)
+        return mnemonics if isinstance(mnemonics, dict) else {}
+
     def __init__(self) -> None:
         self.stored = {}
         self.stored_sd = {}
         try:
             with SDHandler() as sd:
-                self.stored_sd = json.loads(sd.read(MNEMONICS_FILE))
+                self.stored_sd = self._load_mnemonics(sd.read(MNEMONICS_FILE))
         except (OSError, ValueError):
             # missing/unreadable SD card or malformed JSON -> start empty
             pass
         try:
             with open(FLASH_PATH_STR % MNEMONICS_FILE, "r") as f:
-                self.stored = json.loads(f.read())
+                self.stored = self._load_mnemonics(f.read())
         except (OSError, ValueError):
             # missing/unreadable flash file or malformed JSON -> start empty
             pass
@@ -89,12 +94,10 @@ class MnemonicStorage:
 
     def decrypt(self, key, mnemonic_id, sd_card=False):
         """Decrypt a selected encrypted mnemonic from a file"""
-        try:
-            if sd_card:
-                stored_value = self.stored_sd.get(mnemonic_id)
-            else:
-                stored_value = self.stored.get(mnemonic_id)
-        except:
+        source = self.stored_sd if sd_card else self.stored
+        stored_value = source.get(mnemonic_id) if isinstance(source, dict) else None
+        if not isinstance(stored_value, dict):
+            # unknown id, or a corrupt/non-dict storage entry -> nothing to decrypt
             return None
 
         if stored_value.get("b64_kef"):
@@ -122,7 +125,7 @@ class MnemonicStorage:
                 with SDHandler() as sd:
                     contents = sd.read(MNEMONICS_FILE)
                     orig_len = len(contents)
-                    mnemonics = json.loads(contents)
+                    mnemonics = self._load_mnemonics(contents)
             except (OSError, ValueError):
                 # no existing/readable file or malformed JSON -> write fresh
                 orig_len = 0
@@ -143,7 +146,7 @@ class MnemonicStorage:
             try:
                 # load current MNEMONICS_FILE
                 with open(FLASH_PATH_STR % MNEMONICS_FILE, "r") as f:
-                    mnemonics = json.loads(f.read())
+                    mnemonics = self._load_mnemonics(f.read())
             except (OSError, ValueError):
                 # no existing/readable file or malformed JSON -> write fresh
                 pass
