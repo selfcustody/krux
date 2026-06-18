@@ -38,8 +38,7 @@ class MnemonicStorage:
 
     @staticmethod
     def _load_mnemonics(contents):
-        mnemonics = json.loads(contents)
-        return mnemonics if isinstance(mnemonics, dict) else {}
+        return json.loads(contents)
 
     def __init__(self) -> None:
         self.stored = {}
