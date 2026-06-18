@@ -247,6 +247,36 @@ def test_scan_address(mocker, m5stickv, tdata):
             [],
             False,
         ),
+        # 21 - Single-sig testnet, not loaded, owned address, search successful
+        (
+            tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH,
+            None,
+            False,
+            "tb1q4fhuxhrmz26kkuxxwataqw323cs2l3mgerz6kp",
+            True,
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            True,
+        ),
+        # 22 - Single-sig signet, not loaded, owned address, search successful
+        (
+            tdata.SINGLESIG_ACTION_KEY_SIGNET_P2WPKH,
+            None,
+            False,
+            "tb1q4fhuxhrmz26kkuxxwataqw323cs2l3mgerz6kp",
+            True,
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            True,
+        ),
+        # 23 - Single-sig regtest, not loaded, owned address, search successful
+        (
+            tdata.SINGLESIG_ACTION_KEY_REGTEST_P2WPKH,
+            None,
+            False,
+            "bcrt1q4fhuxhrmz26kkuxxwataqw323cs2l3mgm2mhpg",
+            True,
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            True,
+        ),
     ]
     case_num = 0
     for case in cases:
@@ -564,23 +594,44 @@ def test_export_address(mocker, m5stickv, tdata):
         BUTTON_PAGE,  # move to back
         BUTTON_ENTER,  # exit screen
     ]
-    wallet = Wallet(tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH)
-    ctx = create_ctx(mocker, btn_seq, wallet, None)
-    addresses_ui = Addresses(ctx)
 
-    # SDHandler
-    mocker.patch(
-        "os.listdir",
-        return_value=["somefile", "otherfile"],
-    )
+    cases = [
+        (
+            tdata.SINGLESIG_ACTION_KEY,
+            "49,bc1qlrznrpahpuxmtsattnexgka5p27xrzlsftl8jf\n",
+        ),
+        (
+            tdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH,
+            "49,tb1q8e9cxkrvg2d3q72wp9t33739pcnygrdyp2dm38\n",
+        ),
+        (
+            tdata.SINGLESIG_ACTION_KEY_SIGNET_P2WPKH,
+            "49,tb1q8e9cxkrvg2d3q72wp9t33739pcnygrdyp2dm38\n",
+        ),
+        (
+            tdata.SINGLESIG_ACTION_KEY_REGTEST_P2WPKH,
+            "49,bcrt1q8e9cxkrvg2d3q72wp9t33739pcnygrdyrr5kxw\n",
+        ),
+    ]
 
-    mocker.spy(addresses_ui, "export_address")
+    for i, case in enumerate(cases):
+        print(f"Case {i}:")
+        wallet = Wallet(case[0])
+        ctx = create_ctx(mocker, btn_seq, wallet, None)
+        addresses_ui = Addresses(ctx)
 
-    m = mock_open()
-    with patch("builtins.open", m):
-        addresses_ui.addresses_menu()
-        m().write.assert_any_call("0,tb1q4fhuxhrmz26kkuxxwataqw323cs2l3mgerz6kp\n")
-        m().write.assert_any_call("49,tb1q8e9cxkrvg2d3q72wp9t33739pcnygrdyp2dm38\n")
+        # SDHandler
+        mocker.patch(
+            "os.listdir",
+            return_value=["somefile", "otherfile"],
+        )
+
+        mocker.spy(addresses_ui, "export_address")
+
+        m = mock_open()
+        with patch("builtins.open", m):
+            addresses_ui.addresses_menu()
+            m().write.assert_any_call(case[1])
 
     addresses_ui.export_address.assert_called()
 

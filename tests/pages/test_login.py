@@ -13,7 +13,9 @@ def mock_retro_compatibility(mocker, amigo):
 
     class MockDefaultWallet:
         namespace = "settings.wallet"
-        network = CategorySetting("network", "main", ["main", "test"])
+        network = CategorySetting(
+            "network", "main", ["main", "test", "signet", "regtest"]
+        )
         script_type = CategorySetting("script_type", "test", ["test"])
         multisig = CategorySetting("multisig", True, [True, False])
 

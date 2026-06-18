@@ -1,3 +1,4 @@
+from re import S
 import pytest
 from ur.ur_decoder import URDecoder
 
@@ -9,6 +10,7 @@ def tdata(mocker):
     from ur.ur import UR
     from krux.bbqr import encode_bbqr
     from embit.networks import NETWORKS
+    from krux.settings import MAIN_TXT, TEST_TXT, SIGNET_TXT, REGTEST_TXT
     from krux.key import (
         Key,
         P2PKH,
@@ -28,15 +30,48 @@ def tdata(mocker):
     TEST_MNEMONIC2 = "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     TEST_MNEMONIC3 = "range fatigue into stadium endless kitchen royal present rally welcome scatter twice"
 
-    SINGLESIG_KEY = Key(
-        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"]
-    )  # default account=0, script=P2WPKH
-    LEGACY1_KEY = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"], "", 1, P2PKH)
-    NESTEDSW1_KEY = Key(
-        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"], "", 1, P2SH_P2WPKH
-    )
-    TAPROOT1_KEY = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"], "", 1, P2TR)
+    SINGLESIG_KEY = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[MAIN_TXT])
+    SINGLESIG_KEY_TESTNET = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[TEST_TXT])
+    SINGLESIG_KEY_SIGNET = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[SIGNET_TXT])
+    SINGLESIG_KEY_REGTEST = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[REGTEST_TXT])
+    # default account=0, script=P2WPKH
 
+    LEGACY1_KEY = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[MAIN_TXT], "", 1, P2PKH)
+    LEGACY1_KEY_TESTNET = Key(
+        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[TEST_TXT], "", 1, P2PKH
+    )
+    LEGACY1_KEY_SIGNET = Key(
+        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[SIGNET_TXT], "", 1, P2PKH
+    )
+    LEGACY1_KEY_REGTEST = Key(
+        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[REGTEST_TXT], "", 1, P2PKH
+    )
+    # default account=1, script=P2PKH
+
+    NESTEDSW1_KEY = Key(
+        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[MAIN_TXT], "", 1, P2SH_P2WPKH
+    )
+    NESTEDSW1_KEY_TESTNET = Key(
+        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[TEST_TXT], "", 1, P2SH_P2WPKH
+    )
+    NESTEDSW1_KEY_SIGNET = Key(
+        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[SIGNET_TXT], "", 1, P2SH_P2WPKH
+    )
+    NESTEDSW1_KEY_REGTEST = Key(
+        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[REGTEST_TXT], "", 1, P2SH_P2WPKH
+    )
+    # default account=1, script=P2WSH_P2WPKH
+
+    TAPROOT1_KEY = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[MAIN_TXT], "", 1, P2TR)
+    TAPROOT1_KEY_TESTNET = Key(
+        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[TEST_TXT], "", 1, P2TR
+    )
+    TAPROOT1_KEY_SIGNET = Key(
+        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[SIGNET_TXT], "", 1, P2TR
+    )
+    TAPROOT1_KEY_REGTEST = Key(
+        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS[REGTEST_TXT], "", 1, P2TR
+    )
     # p2sh wallet without cosigner indexes
     MULTISIG_LEGACY_NO_COSIGNER_1 = Key(
         TEST_MNEMONIC1, TYPE_MULTISIG, NETWORKS["main"], "", None, P2SH
@@ -93,6 +128,7 @@ def tdata(mocker):
     # MULTISIG_NATIVE_SW_3 [d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv
 
     KRUX_LEGACY1_DESCRIPTOR = "pkh([55f8fc5d/44h/0h/1h]xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE)"
+    KRUX_LEGACY1_DESCRIPTOR_TESTNET = "pkh([55f8fc5d/44h/1h/1h]tpubDCxMZswvJHvfY7cXBB1DusWNpcc6MV2Dv6eTFAYfY4xPewEbzCUUhfRiYaga2u71R3dbVx4PijdjpNRdxxvvjcZq3aMYcDASTZzYK44fegG/<0;1>/*)"
     KRUX_LEGACY1_XPUB = "[55f8fc5d/44h/0h/1h]xpub6C1dUaopHgps6X75i61KaJEDm4qkFeqjhm4by1ebvpgAsKDaEhGLgNX88bvuWPm4rSVe7GsYvQLDAXXLnxNsAbd3VwRihgM3q1kEkixBAbE"
 
     # This is a non-extended pubkey (the first-one) derived from KRUX_LEGACY1_DESCRIPTOR
@@ -101,6 +137,7 @@ def tdata(mocker):
     )
 
     KRUX_NESTEDSW1_DESCRIPTOR = "sh(wpkh([55f8fc5d/49h/0h/1h]xpub6Ca1JGnSFNZ7jjwturEn944t8B9kBgiTKtmr3maTbryEyDyYY9xycVSQaFxeUPjbHyX7MUvLUbdoDVK7XZ7Fib9We4BQRRk8bZjW2UPRjHV))"
+    KRUX_NESTEDSW1_DESCRIPTOR_TESTNET = "sh(wpkh([55f8fc5d/49h/1h/1h]tpubDDYHYR15Go9atMZsjP6yuGBdL8qJJGHbfbJQBssrGPmaJYaLhoqchx4mn5tLwziyWXyML37NpbF5goGPEcfvtiKR1UJhMk4ArVh28wGmU98/<0;1>/*))"
     KRUX_NESTEDSW1_XPUB = "[55f8fc5d/49h/0h/1h]xpub6Ca1JGnSFNZ7jjwturEn944t8B9kBgiTKtmr3maTbryEyDyYY9xycVSQaFxeUPjbHyX7MUvLUbdoDVK7XZ7Fib9We4BQRRk8bZjW2UPRjHV"
     KRUX_NESTEDSW1_YPUB = "[55f8fc5d/49h/0h/1h]ypub6XQGbwTMQ46bb391kD2QM9APJ9JC8JhxF1J4qAULysM82Knmnp8YEZ6YbTvEUJPWhcdv6xWtwFzM6mvgFFXGWpq7WPsq1LZcsHo9R97uuE4"
     KRUX_NESTEDSW1_YPUB_DESCRIPTOR = "sh(wpkh(" + KRUX_NESTEDSW1_YPUB + "))"
@@ -109,8 +146,8 @@ def tdata(mocker):
     KRUX_NATIVESW1_XPUB = "[55f8fc5d/84h/0h/1h]xpub6DPMTPxGMqdu43FvwYdC6eHCPJWckCkx1rLJ1HEG7259GyWQD5P17WB2oowP9SpQdC8ogrmXfwfoazvf6Te8svtxWh4UTwTqyRdG5G54FxW"
     KRUX_NATIVESW1_ZPUB = "[55f8fc5d/84h/0h/1h]zpub6s3t4jJ6fCirkdeAcGCSWpUCjEoWdSjwr5Nja522s2puPB8riPi8MdVJrDrZ9G8FSUNRBoxebGNuMa9nXrUAUQGAFNTKdm6pWskYrMahu1i"
     KRUX_NATIVESW1_ZPUB_DESCRIPTOR = "wpkh(" + KRUX_NATIVESW1_ZPUB + ")"
-
     KRUX_TAPROOT1_DESCRIPTOR = "tr([55f8fc5d/86h/0h/1h]xpub6CNGwJbVG9sQsJjtwLiemRFAfvDafL8zRthnHWNQbRz1PwAm28T1v5hLmJhFft71oEDCbA3xHemnScW5VWheP1BxXNVnoYboyw6t4wuKu5q)"
+    KRUX_TAPROOT1_DESCRIPTOR_TESTNET = "tr([55f8fc5d/86h/1h/1h]tpubDD6e1Di1uHy5PizN7knRiWgfiHQCY7iLM1a7N5ie1XXAe6GGjhJTJgZjVA38E4HsUVtFqWU6m2QhtgB5YiRMdV324yRjGoXRuT3yLFsvqiG/<0;1>/*)"
     KRUX_TAPROOT1_XPUB = "[55f8fc5d/86h/0h/1h]xpub6CNGwJbVG9sQsJjtwLiemRFAfvDafL8zRthnHWNQbRz1PwAm28T1v5hLmJhFft71oEDCbA3xHemnScW5VWheP1BxXNVnoYboyw6t4wuKu5q"
 
     SPECTER_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/0/*)"
@@ -213,7 +250,7 @@ def tdata(mocker):
     xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu
 
     d3a80c8b:
-    xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv
+    xpub6FKYY6y3oVi7ihSCszFKRSSINGLESIG_KEY_TESTNET eZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv
     """
 
     BLUEWALLET_MULTISIG_WALLET_DATA_INVALID_KEYS = """
@@ -260,8 +297,8 @@ def tdata(mocker):
     )
 
     UNAMBIGUOUS_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA/<0;1>/*)"
+    UNAMBIGUOUS_SINGLESIG_DESCRIPTOR_TESTNET = "wpkh([55f8fc5d/84h/1h/0h]tpubDCDuqu5HtBX2aD7wxvnHcj1DgFN1UVgzLkA1Ms4Va4P7TpJ3jDknkPLwWT2SqrKXNNAtJBCPcbJ8Tcpm6nLxgFapCZyhKgqwcEGv1BVpD7s/<0;1>/*)"
     AMBIGUOUS_SINGLESIG_DESCRIPTOR = "wpkh([55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA)"
-
     UNAMBIGUOUS_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*))"
     AMBIGUOUS_MULTISIG_DESCRIPTOR = "wsh(sortedmulti(2,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv))"
 
@@ -283,9 +320,21 @@ def tdata(mocker):
             "TEST_MNEMONIC2",
             "TEST_MNEMONIC3",
             "SINGLESIG_KEY",
+            "SINGLESIG_KEY_TESTNET",
+            "SINGLESIG_KEY_SIGNET",
+            "SINGLESIG_KEY_REGTEST",
             "LEGACY1_KEY",
+            "LEGACY1_KEY_TESTNET",
+            "LEGACY1_KEY_SIGNET",
+            "LEGACY1_KEY_REGTEST",
             "NESTEDSW1_KEY",
+            "NESTEDSW1_KEY_TESTNET",
+            "NESTEDSW1_KEY_SIGNET",
+            "NESTEDSW1_KEY_REGTEST",
             "TAPROOT1_KEY",
+            "TAPROOT1_KEY_TESTNET",
+            "TAPROOT1_KEY_SIGNET",
+            "TAPROOT1_KEY_REGTEST",
             "MULTISIG_LEGACY_NO_COSIGNER_1",
             "MULTISIG_LEGACY_NO_COSIGNER_2",
             "MULTISIG_LEGACY_NO_COSIGNER_3",
@@ -301,9 +350,11 @@ def tdata(mocker):
             "MINISCRIPT_KEY",
             "TAP_MINISCRIPT_KEY",
             "KRUX_LEGACY1_DESCRIPTOR",
+            "KRUX_LEGACY1_DESCRIPTOR_TESTNET",
             "KRUX_LEGACY1_XPUB",
             "KRUX_LEGACY1_RAW_PUBKEY",
             "KRUX_NESTEDSW1_DESCRIPTOR",
+            "KRUX_NESTEDSW1_DESCRIPTOR_TESTNET",
             "KRUX_NESTEDSW1_XPUB",
             "KRUX_NESTEDSW1_YPUB",
             "KRUX_NESTEDSW1_YPUB_DESCRIPTOR",
@@ -312,6 +363,7 @@ def tdata(mocker):
             "KRUX_NATIVESW1_ZPUB",
             "KRUX_NATIVESW1_ZPUB_DESCRIPTOR",
             "KRUX_TAPROOT1_DESCRIPTOR",
+            "KRUX_TAPROOT1_DESCRIPTOR_TESTNET",
             "KRUX_TAPROOT1_XPUB",
             "SPECTER_SINGLESIG_DESCRIPTOR",
             "SPECTER_SINGLESIG_WALLET_DATA",
@@ -341,6 +393,7 @@ def tdata(mocker):
             "UR_BYTES_MULTISIG_DESCRIPTOR",
             "UR_BYTES_MULTISIG_WALLET_DATA",
             "UNAMBIGUOUS_SINGLESIG_DESCRIPTOR",
+            "UNAMBIGUOUS_SINGLESIG_DESCRIPTOR_TESTNET",
             "AMBIGUOUS_SINGLESIG_DESCRIPTOR",
             "UNAMBIGUOUS_MULTISIG_DESCRIPTOR",
             "AMBIGUOUS_MULTISIG_DESCRIPTOR",
@@ -358,9 +411,21 @@ def tdata(mocker):
         TEST_MNEMONIC2,
         TEST_MNEMONIC3,
         SINGLESIG_KEY,
+        SINGLESIG_KEY_TESTNET,
+        SINGLESIG_KEY_SIGNET,
+        SINGLESIG_KEY_REGTEST,
         LEGACY1_KEY,
+        LEGACY1_KEY_TESTNET,
+        LEGACY1_KEY_SIGNET,
+        LEGACY1_KEY_REGTEST,
         NESTEDSW1_KEY,
+        NESTEDSW1_KEY_TESTNET,
+        NESTEDSW1_KEY_SIGNET,
+        NESTEDSW1_KEY_REGTEST,
         TAPROOT1_KEY,
+        TAPROOT1_KEY_TESTNET,
+        TAPROOT1_KEY_SIGNET,
+        TAPROOT1_KEY_REGTEST,
         MULTISIG_LEGACY_NO_COSIGNER_1,
         MULTISIG_LEGACY_NO_COSIGNER_2,
         MULTISIG_LEGACY_NO_COSIGNER_3,
@@ -376,9 +441,11 @@ def tdata(mocker):
         MINISCRIPT_KEY,
         TAP_MINISCRIPT_KEY,
         KRUX_LEGACY1_DESCRIPTOR,
+        KRUX_LEGACY1_DESCRIPTOR_TESTNET,
         KRUX_LEGACY1_XPUB,
         KRUX_LEGACY1_RAW_PUBKEY,
         KRUX_NESTEDSW1_DESCRIPTOR,
+        KRUX_NESTEDSW1_DESCRIPTOR_TESTNET,
         KRUX_NESTEDSW1_XPUB,
         KRUX_NESTEDSW1_YPUB,
         KRUX_NESTEDSW1_YPUB_DESCRIPTOR,
@@ -387,6 +454,7 @@ def tdata(mocker):
         KRUX_NATIVESW1_ZPUB,
         KRUX_NATIVESW1_ZPUB_DESCRIPTOR,
         KRUX_TAPROOT1_DESCRIPTOR,
+        KRUX_TAPROOT1_DESCRIPTOR_TESTNET,
         KRUX_TAPROOT1_XPUB,
         SPECTER_SINGLESIG_DESCRIPTOR,
         SPECTER_SINGLESIG_WALLET_DATA,
@@ -416,6 +484,7 @@ def tdata(mocker):
         UR_BYTES_MULTISIG_DESCRIPTOR,
         UR_BYTES_MULTISIG_WALLET_DATA,
         UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
+        UNAMBIGUOUS_SINGLESIG_DESCRIPTOR_TESTNET,
         AMBIGUOUS_SINGLESIG_DESCRIPTOR,
         UNAMBIGUOUS_MULTISIG_DESCRIPTOR,
         AMBIGUOUS_MULTISIG_DESCRIPTOR,
@@ -432,51 +501,159 @@ def tdata(mocker):
 
 def test_init_singlesig(mocker, m5stickv, tdata):
     from embit.descriptor import Descriptor
+    from krux.key import get_network_name
     from krux.wallet import Wallet, to_unambiguous_descriptor
+    from krux.settings import MAIN_TXT, TEST_TXT, SIGNET_TXT, REGTEST_TXT
+    from embit.networks import NETWORKS
 
     cases = [
-        # key, descriptor, label, policy
-        (None, None, None, None),
+        # key, descriptor, label, policy, network
+        # Case 0: All None
+        (None, None, None, None, None),
+        # Case 1: Single sig, p2wpkh, mainnet
         (
             tdata.SINGLESIG_KEY,
             tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
             "Single-sig",
             {"type": "p2wpkh"},
+            NETWORKS[MAIN_TXT],
         ),
+        # Case 2: Single sig, p2wpkh, testnet
+        (
+            tdata.SINGLESIG_KEY_TESTNET,
+            tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR_TESTNET,
+            "Single-sig",
+            {"type": "p2wpkh"},
+            NETWORKS[TEST_TXT],
+        ),
+        # Case 3: Single sig, p2wpkh, signet
+        (
+            tdata.SINGLESIG_KEY_SIGNET,
+            tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR_TESTNET,
+            "Single-sig",
+            {"type": "p2wpkh"},
+            NETWORKS[SIGNET_TXT],
+        ),
+        # Case 4: Single sig, p2wpkh, regtest
+        (
+            tdata.SINGLESIG_KEY_REGTEST,
+            tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR_TESTNET,
+            "Single-sig",
+            {"type": "p2wpkh"},
+            NETWORKS[REGTEST_TXT],
+        ),
+        # Case 5: Single sig, p2pkh, mainnet
         (
             tdata.LEGACY1_KEY,
             tdata.KRUX_LEGACY1_DESCRIPTOR,
             "Single-sig",
             {"type": "p2pkh"},
+            NETWORKS[MAIN_TXT],
         ),
+        # Case 6: Single sig, p2pkh, testnet
+        (
+            tdata.LEGACY1_KEY_TESTNET,
+            tdata.KRUX_LEGACY1_DESCRIPTOR_TESTNET,
+            "Single-sig",
+            {"type": "p2pkh"},
+            NETWORKS[TEST_TXT],
+        ),
+        # Case 7: Single sig, p2pkh, signet
+        (
+            tdata.LEGACY1_KEY_SIGNET,
+            tdata.KRUX_LEGACY1_DESCRIPTOR_TESTNET,
+            "Single-sig",
+            {"type": "p2pkh"},
+            NETWORKS[SIGNET_TXT],
+        ),
+        # Case 8: Single sig, p2pkh, regtest
+        (
+            tdata.LEGACY1_KEY_REGTEST,
+            tdata.KRUX_LEGACY1_DESCRIPTOR_TESTNET,
+            "Single-sig",
+            {"type": "p2pkh"},
+            NETWORKS[REGTEST_TXT],
+        ),
+        # Case 9: Single sig, p2sh-p2wpkh, mainnet
         (
             tdata.NESTEDSW1_KEY,
             tdata.KRUX_NESTEDSW1_DESCRIPTOR,
             "Single-sig",
             {"type": "p2sh-p2wpkh"},
+            NETWORKS[MAIN_TXT],
         ),
+        # Case 10: Single sig, p2sh-p2wpkh, testnet
+        (
+            tdata.NESTEDSW1_KEY_TESTNET,
+            tdata.KRUX_NESTEDSW1_DESCRIPTOR_TESTNET,
+            "Single-sig",
+            {"type": "p2sh-p2wpkh"},
+            NETWORKS[TEST_TXT],
+        ),
+        # Case 11: Single sig, p2sh-p2wpkh, signet
+        (
+            tdata.NESTEDSW1_KEY_SIGNET,
+            tdata.KRUX_NESTEDSW1_DESCRIPTOR_TESTNET,
+            "Single-sig",
+            {"type": "p2sh-p2wpkh"},
+            NETWORKS[SIGNET_TXT],
+        ),
+        # Case 12: Single sig, p2sh-p2wpkh, regtest
+        (
+            tdata.NESTEDSW1_KEY_REGTEST,
+            tdata.KRUX_NESTEDSW1_DESCRIPTOR_TESTNET,
+            "Single-sig",
+            {"type": "p2sh-p2wpkh"},
+            NETWORKS[REGTEST_TXT],
+        ),
+        # Case 13: Single sig, p2tr, mainnet
         (
             tdata.TAPROOT1_KEY,
             tdata.KRUX_TAPROOT1_DESCRIPTOR,
             "Single-sig",
             {"type": "p2tr"},
+            NETWORKS[MAIN_TXT],
+        ),
+        # Case 14: Single sig, p2tr, testnet
+        (
+            tdata.TAPROOT1_KEY_TESTNET,
+            tdata.KRUX_TAPROOT1_DESCRIPTOR_TESTNET,
+            "Single-sig",
+            {"type": "p2tr"},
+            NETWORKS[TEST_TXT],
+        ),
+        # Case 15: Single sig, p2tr, sigtnet
+        (
+            tdata.TAPROOT1_KEY_SIGNET,
+            tdata.KRUX_TAPROOT1_DESCRIPTOR_TESTNET,
+            "Single-sig",
+            {"type": "p2tr"},
+            NETWORKS[SIGNET_TXT],
+        ),
+        # Case 16: Single sig, p2tr, regtest
+        (
+            tdata.TAPROOT1_KEY_REGTEST,
+            tdata.KRUX_TAPROOT1_DESCRIPTOR_TESTNET,
+            "Single-sig",
+            {"type": "p2tr"},
+            NETWORKS[REGTEST_TXT],
         ),
     ]
 
-    for _case in cases:
+    for i, _case in enumerate(cases):
+        print(f"Case {i}")
         wallet = Wallet(_case[0])
-        assert isinstance(wallet, Wallet)
         if wallet.descriptor:
             # don't fail simply because of a difference between ambiguous and unambiguous
-            try:
-                assert wallet.descriptor.to_string() == _case[1]
-            except AssertionError:
-                test_descr = to_unambiguous_descriptor(
-                    Descriptor.from_string(_case[1])
-                ).to_string()
-                assert wallet.descriptor.to_string() == test_descr
+            test_descr = to_unambiguous_descriptor(
+                Descriptor.from_string(_case[1])
+            ).to_string()
+            assert wallet.descriptor.to_string() == test_descr
         assert wallet.label == _case[2]
         assert wallet.policy == _case[3]
+
+        if wallet.key:
+            assert get_network_name(wallet.key.network) == _case[4]["name"]
 
 
 def test_init_multisig(mocker, m5stickv, tdata):

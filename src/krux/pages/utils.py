@@ -189,6 +189,15 @@ class Utils(Page):
     @staticmethod
     def get_network_color(network_name: str):
         """Returns the correct theme color to write network"""
-        from ..themes import TEST_TXT_COLOR, MAIN_TXT_COLOR
+        from ..themes import theme
 
-        return MAIN_TXT_COLOR if network_name == "Mainnet" else TEST_TXT_COLOR
+        if network_name == "Testnet":
+            return theme.test_color
+
+        if network_name == "Signet":
+            return theme.signet_color
+
+        if network_name == "Regtest":
+            return theme.regtest_color
+
+        return theme.main_color

@@ -791,7 +791,7 @@ def board_embed_fire():
     )
 
 
-def mock_context(mocker):
+def mock_context(mocker: MagicMock):
     import board
 
     if board.config["type"] == "m5stickv":

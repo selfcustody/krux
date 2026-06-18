@@ -360,7 +360,13 @@ def get_policy_type_name(policy_type):
 
 
 def get_network_name(network):
-    """Returns human-readable name for a network object (Mainnet or Testnet)"""
+    """Returns human-readable name for a network object"""
     if not network:
         return None
-    return "Mainnet" if network == NETWORKS["main"] else "Testnet"
+    if network == NETWORKS["test"]:
+        return "Testnet"
+    if network == NETWORKS["signet"]:
+        return "Signet"
+    if network == NETWORKS["regtest"]:
+        return "Regtest"
+    return "Mainnet"
