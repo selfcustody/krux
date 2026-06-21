@@ -511,7 +511,9 @@ class PSBTSigner:
         if not trim:
             return
 
-        trimmed_psbt = PSBT(self.psbt.tx)
+        trimmed_psbt = PSBT(self.psbt.tx, version=self.psbt.version)
+        trimmed_psbt.tx_version = self.psbt.tx_version
+        trimmed_psbt.locktime = self.psbt.locktime
         for i, inp in enumerate(self.psbt.inputs):
             # Copy the final_scriptwitness if present
             if inp.final_scriptwitness:
@@ -544,6 +546,21 @@ class PSBTSigner:
             # Preserve taproot script path sigs
             if inp.taproot_sigs:
                 trimmed_psbt.inputs[i].taproot_sigs = inp.taproot_sigs
+
+            # Preserve PSBTv2 input fields
+            if inp.txid is not None:
+                trimmed_psbt.inputs[i].txid = inp.txid
+            if inp.vout is not None:
+                trimmed_psbt.inputs[i].vout = inp.vout
+            if inp.sequence is not None:
+                trimmed_psbt.inputs[i].sequence = inp.sequence
+
+        for i, out in enumerate(self.psbt.outputs):
+            # Preserve PSBTv2 output fields
+            if out.value is not None:
+                trimmed_psbt.outputs[i].value = out.value
+            if out.script_pubkey is not None:
+                trimmed_psbt.outputs[i].script_pubkey = out.script_pubkey
 
         self.psbt = trimmed_psbt
 
