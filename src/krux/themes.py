@@ -39,6 +39,7 @@ RED = 0x00F8
 DARKERRED = 0x00C0
 LIGHT_PINK = 0xDFFC
 PINK = 0x1FF8
+DARKPINK = 0x1AD0
 PURPLE = 0x0F78
 ORANGE = 0x20FD
 DARKORANGE = 0xA0CA
@@ -96,7 +97,7 @@ THEMES = {
         "background": BLACK,
         "info_background": LIGHTBLACK,
         "foreground": LIGHT_PINK,
-        "frame": DARKGREY,
+        "frame": DARKPINK,
         "disabled": DARKGREY,
         "go": PINK,
         "esc_no": RED,

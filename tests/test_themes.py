@@ -1,7 +1,3 @@
-# The MIT License (MIT)
-
-# Copyright (c) 2021-2026 Krux contributors
-
 import pytest
 
 
@@ -97,6 +93,15 @@ def test_frames_meet_non_text_contrast(amigo, contrast_ratio):
     for theme_name in cases:
         palette = THEMES[theme_name]
         assert contrast_ratio(palette["frame"], palette["background"]) >= 3
+
+
+def test_cypherpink_frame_keeps_theme_identity(amigo, contrast_ratio):
+    from krux.themes import THEMES
+
+    palette = THEMES["CypherPink"]
+
+    assert palette["frame"] != palette["disabled"]
+    assert contrast_ratio(palette["frame"], palette["background"]) >= 4.5
 
 
 def test_network_colors_are_readable_on_theme_backgrounds(amigo, contrast_ratio):
