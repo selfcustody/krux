@@ -104,20 +104,28 @@ def test_cypherpink_frame_keeps_theme_identity(amigo, contrast_ratio):
     assert contrast_ratio(palette["frame"], palette["background"]) >= 4.5
 
 
-def test_network_colors_are_readable_on_theme_backgrounds(amigo, contrast_ratio):
-    from krux.themes import MAIN_TXT_COLOR, TEST_TXT_COLOR, THEMES
+def test_network_colors_use_light_theme_variants_only_on_light_theme(
+    amigo, contrast_ratio
+):
+    from krux.krux_settings import Settings
+    from krux.pages.utils import Utils
+    from krux.themes import DARKERGREEN, DARKERORANGE, GREEN, ORANGE, THEMES
 
     cases = (
-        "Dark",
-        "Light",
-        "Orange",
-        "CypherPink",
-        "CypherPunk",
+        ("Dark", ORANGE, GREEN),
+        ("Light", DARKERORANGE, DARKERGREEN),
+        ("Orange", ORANGE, GREEN),
+        ("CypherPink", ORANGE, GREEN),
+        ("CypherPunk", ORANGE, GREEN),
     )
-    for theme_name in cases:
+    for theme_name, main_color, test_color in cases:
+        Settings().appearance.theme = theme_name
         background = THEMES[theme_name]["background"]
-        assert contrast_ratio(MAIN_TXT_COLOR, background) >= 4.5
-        assert contrast_ratio(TEST_TXT_COLOR, background) >= 4.5
+
+        assert Utils.get_network_color("Mainnet") == main_color
+        assert Utils.get_network_color("Testnet") == test_color
+        assert contrast_ratio(main_color, background) >= 4.5
+        assert contrast_ratio(test_color, background) >= 4.5
 
 
 def test_amigo_uses_disabled_color_for_info_background(amigo):
