@@ -734,6 +734,8 @@ class PSBTSigner:
             return
 
         trimmed_psbt = PSBT(self.psbt.tx, version=self.psbt.version)
+        trimmed_psbt.tx_version = self.psbt.tx_version
+        trimmed_psbt.locktime = self.psbt.locktime
         for i, inp in enumerate(self.psbt.inputs):
             if inp.final_scriptwitness:
                 trimmed_psbt.inputs[i].final_scriptwitness = inp.final_scriptwitness
@@ -751,9 +753,21 @@ class PSBTSigner:
                 trimmed_psbt.inputs[i].taproot_key_sig = inp.taproot_key_sig
             if inp.taproot_sigs:
                 trimmed_psbt.inputs[i].taproot_sigs = inp.taproot_sigs
+            if inp.txid is not None:
+                trimmed_psbt.inputs[i].txid = inp.txid
+            if inp.vout is not None:
+                trimmed_psbt.inputs[i].vout = inp.vout
+            if inp.sequence is not None:
+                trimmed_psbt.inputs[i].sequence = inp.sequence
             if not self.psbt.sp_ecdh_shares:
                 trimmed_psbt.inputs[i].sp_ecdh_shares = inp.sp_ecdh_shares
                 trimmed_psbt.inputs[i].sp_dleq_proofs = inp.sp_dleq_proofs
+
+        for i, out in enumerate(self.psbt.outputs):
+            if out.value is not None:
+                trimmed_psbt.outputs[i].value = out.value
+            if out.script_pubkey is not None:
+                trimmed_psbt.outputs[i].script_pubkey = out.script_pubkey
 
         if has_sp:
             trimmed_psbt.sp_ecdh_shares = self.psbt.sp_ecdh_shares
