@@ -68,6 +68,14 @@ class KeypadLayout:
         if kboard.has_touchscreen:
             ctx.input.touch.set_regions(self.x_keypad_map, self.y_keypad_map)
 
+        # Pre-compute cell pixel positions for fast drawing
+        self.cell_positions = []
+        for row_y in self.y_keypad_map[:-1]:
+            for col_x in self.x_keypad_map[:-1]:
+                cx = MINIMAL_PADDING if col_x == 0 else col_x
+                cy = row_y + (key_v_spacing - FONT_HEIGHT) // 2
+                self.cell_positions.append((cx, cy))
+
 
 class Keypad:
     """Controls keypad creation and management."""
@@ -86,6 +94,47 @@ class Keypad:
         self.moving_forward = True
         self.possible_keys_fn = possible_keys_fn
         self.possible_keys = self.keys
+
+        # Pre-compute key labels, x-offsets, and colors for each cell
+        self._key_labels = [None] * self.layout.max_index
+        self._key_offsets_x = [0] * self.layout.max_index
+        self._key_colors = [None] * self.layout.max_index
+        self._key_is_letter = [False] * self.layout.max_index
+        self._build_key_cache()
+
+    def _build_key_cache(self):
+        """Pre-compute key labels, x-offsets, and colors for all cells."""
+        keys = self.keys
+        layout = self.layout
+        for idx in range(layout.max_index):
+            key = None
+            custom_color = None
+            is_letter = False
+
+            if idx < len(keys):
+                key = keys[idx]
+                is_letter = True
+            elif idx == self.del_index:
+                key = "<"
+                custom_color = theme.del_color
+            elif idx == self.esc_index:
+                key = t("Esc")
+                custom_color = theme.no_esc_color
+            elif idx == self.go_index:
+                key = t("Go")
+                custom_color = theme.go_color
+            elif self.has_more_key() and idx == self.more_index:
+                key = self.keysets[self._move_keyset_index()][:3]
+                custom_color = theme.toggle_color
+
+            self._key_labels[idx] = key
+            self._key_is_letter[idx] = is_letter
+            self._key_colors[idx] = custom_color
+            if key is not None:
+                cx, cy = layout.cell_positions[idx]
+                self._key_offsets_x[idx] = (
+                    layout.key_h_spacing - lcd.string_width_px(key)
+                ) // 2 + cx
 
     @property
     def keys(self):
@@ -137,6 +186,7 @@ class Keypad:
         self.cur_key_index = 0
         self.possible_keys = self.keys
         self.moving_forward = True
+        self._build_key_cache()
 
     def compute_possible_keys(self, buffer):
         """Computes the possible keys for the current keypad"""
@@ -144,94 +194,81 @@ class Keypad:
             self.possible_keys = self.possible_keys_fn(buffer)
 
     def draw_keys(self):
-        """Draws keypad on the screen"""
-        key_index = 0
-        for y in self.layout.y_keypad_map[:-1]:
-            offset_y = y + (self.layout.key_v_spacing - FONT_HEIGHT) // 2
-            for x in self.layout.x_keypad_map[:-1]:
-                x = MINIMAL_PADDING if x == 0 else x
-                key = None
-                custom_color = None
-                if key_index < len(self.keys):
-                    key = self.keys[key_index]
-                elif key_index == self.del_index:
-                    key = "<"
-                    custom_color = theme.del_color
-                elif key_index == self.esc_index:
-                    key = t("Esc")
-                    custom_color = theme.no_esc_color
-                elif key_index == self.go_index:
-                    key = t("Go")
-                    custom_color = theme.go_color
-                elif self.has_more_key() and key_index == self.more_index:
-                    key = self.keysets[self._move_keyset_index()][:3]
-                    custom_color = theme.toggle_color
+        """Draws keypad with clean contour style and pre-computed cache."""
+        layout = self.layout
+        display = self.ctx.display
+        cell_w = layout.key_h_spacing
+        cell_h = layout.key_v_spacing
+        text_half = FONT_HEIGHT // 2
+        margin = 2
+        radius = min(4, (cell_h - margin * 2) // 4)
 
-                if key is not None:
-                    offset_x = x
-                    key_offset_x = (
-                        self.layout.key_h_spacing - lcd.string_width_px(key)
-                    ) // 2 + offset_x
-                    if (
-                        key_index < len(self.keys)
-                        and self.keys[key_index] not in self.possible_keys
-                    ):
-                        # faded text
-                        self.ctx.display.draw_string(
-                            key_offset_x, offset_y, key, theme.disabled_color
-                        )
-                    else:
-                        if kboard.has_touchscreen:
-                            self.ctx.display.outline(
-                                offset_x + 1,
-                                y + 1,
-                                self.layout.key_h_spacing - 2,
-                                self.layout.key_v_spacing - 2,
-                                theme.frame_color,
-                            )
-                        if custom_color:
-                            self.ctx.display.draw_string(
-                                key_offset_x, offset_y, key, custom_color
-                            )
-                        else:
-                            self.ctx.display.draw_string(key_offset_x, offset_y, key)
-                    if (
-                        key_index == self.cur_key_index
-                        and self.ctx.input.buttons_active
-                    ):
-                        if kboard.has_touchscreen:
-                            self.ctx.display.outline(
-                                offset_x + 1,
-                                y + 1,
-                                self.layout.key_h_spacing - 2,
-                                self.layout.key_v_spacing - 2,
-                            )
-                        else:
-                            self.ctx.display.outline(
-                                offset_x - 2,
-                                y,
-                                self.layout.key_h_spacing + 1,
-                                self.layout.key_v_spacing - 1,
-                            )
-                key_index += 1
+        for idx in range(layout.max_index):
+            key = self._key_labels[idx]
+            if key is None:
+                continue
+
+            cx, cy = layout.cell_positions[idx]
+            off_x = self._key_offsets_x[idx]
+            is_disabled = self._key_is_letter[idx] and key not in self.possible_keys
+            is_selected = (
+                idx == self.cur_key_index and self.ctx.input.buttons_active
+            )
+
+            # Key rectangle position (centered in cell with margin)
+            kx = cx - margin
+            ky = cy - text_half - margin
+            kw = cell_w - margin * 2
+            kh = cell_h - margin * 2
+
+            if is_disabled:
+                display.outline(kx, ky, kw, kh, theme.disabled_color)
+                display.draw_string(off_x, cy, key, theme.disabled_color)
+            elif is_selected:
+                if kboard.has_touchscreen:
+                    display.fill_rectangle(
+                        kx, ky, kw, kh, theme.highlight_color, radius
+                    )
+                    display.draw_string(off_x, cy, key, theme.bg_color)
+                else:
+                    display.outline(
+                        kx - 1, ky - 1, kw + 2, kh + 2, theme.highlight_color
+                    )
+                    display.outline(kx, ky, kw, kh, theme.highlight_color)
+                    display.draw_string(off_x, cy, key, theme.highlight_color)
+            else:
+                frame_color = (
+                    self._key_colors[idx]
+                    if self._key_colors[idx]
+                    else theme.frame_color
+                )
+                display.outline(kx, ky, kw, kh, frame_color)
+                label_color = (
+                    self._key_colors[idx]
+                    if self._key_colors[idx]
+                    else theme.fg_color
+                )
+                display.draw_string(off_x, cy, key, label_color)
 
     def draw_keyset_index(self):
-        """Indicates the current keyset index with a small rectangle"""
+        """Draws keyset indicator with larger, more visible bars."""
         if not self.has_more_key():
             return
-        bar_height = FONT_HEIGHT // 6
-        bar_length = FONT_WIDTH
-        bar_padding = FONT_WIDTH // 3
-        x_offset = (
-            self.ctx.display.width() - (bar_length + bar_padding) * len(self.keysets)
+        bar_h = FONT_HEIGHT // 4
+        bar_w = FONT_WIDTH * 2
+        bar_pad = FONT_WIDTH // 2
+        n = len(self.keysets)
+        x_start = (
+            self.ctx.display.width() - (bar_w + bar_pad) * n + bar_pad
         ) // 2
-        for i in range(len(self.keysets)):
+        bar_y = self.layout.y_keypad_map[-1] + 2
+        for i in range(n):
             color = theme.fg_color if i == self.keyset_index else theme.frame_color
             self.ctx.display.fill_rectangle(
-                x_offset + (bar_length + bar_padding) * i,
-                self.layout.y_keypad_map[-1] + 2,
-                bar_length,
-                bar_height,
+                x_start + (bar_w + bar_pad) * i,
+                bar_y,
+                bar_w,
+                bar_h,
                 color,
             )
 
@@ -293,15 +330,31 @@ class Keypad:
             self.cur_key_index = (self.cur_key_index - 1) % self.layout.max_index
 
     def next_keyset(self):
-        """Change keys for the next keyset"""
-        if self.has_more_key():
-            self.keyset_index = self._move_keyset_index()
+        """Switch to next number/symbol keyset (skipping letter keysets)."""
+        if len(self.keysets) > 2:
+            if self.keyset_index < 2:
+                self.keyset_index = 2
+            else:
+                self.keyset_index = (self.keyset_index + 1) % len(self.keysets)
+                if self.keyset_index < 2:
+                    self.keyset_index = 2
             self.reset()
 
     def previous_keyset(self):
-        """Change keys for the previous keyset"""
-        if self.has_more_key():
-            self.keyset_index = self._move_keyset_index(False)
+        """Switch to previous number/symbol keyset (skipping letter keysets)."""
+        if len(self.keysets) > 2:
+            if self.keyset_index < 2:
+                self.keyset_index = len(self.keysets) - 1
+            else:
+                self.keyset_index -= 1
+                if self.keyset_index < 2:
+                    self.keyset_index = len(self.keysets) - 1
+            self.reset()
+
+    def toggle_case(self):
+        """Toggle between first two keysets (lowercase <-> uppercase)."""
+        if len(self.keysets) >= 2:
+            self.keyset_index = 1 if self.keyset_index == 0 else 0
             self.reset()
 
     def _move_keyset_index(self, forward=True):
