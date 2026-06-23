@@ -615,7 +615,7 @@ class EncryptMnemonic(Page):
     def store_mnemonic_on_memory(self, sd_card=False):
         """Save encrypted mnemonic on flash or sd_card"""
 
-        from ..encryption import MnemonicStorage
+        from ..encryption import MnemonicStorage, StorageCorruptedError
 
         encrypted_data, mnemonic_id = self._encrypt_mnemonic_with_label()
         if encrypted_data is None:
@@ -629,7 +629,23 @@ class EncryptMnemonic(Page):
             del mnemonic_storage
             return
 
-        if mnemonic_storage.store_encrypted_kef(mnemonic_id, encrypted_data, sd_card):
+        try:
+            stored = mnemonic_storage.store_encrypted_kef(
+                mnemonic_id, encrypted_data, sd_card
+            )
+        except StorageCorruptedError:
+            self.ctx.display.clear()
+            # English-only: rare corruption guard, not worth translating
+            self.ctx.display.draw_centered_text(
+                "Stored seeds file is corrupted and was preserved.\n"
+                "Encrypted mnemonic was not stored.",
+                theme.error_color,
+            )
+            self.ctx.input.wait_for_button()
+            del mnemonic_storage
+            return
+
+        if stored:
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("Encrypted mnemonic stored with ID:") + " " + mnemonic_id,

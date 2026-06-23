@@ -726,21 +726,35 @@ def test_store_sd_read_oserror_still_writes(m5stickv, mocker, mock_file_operatio
     m().write.assert_called_once_with(KEF_ECBENTROPY_ONLY_JSON)
 
 
-def test_store_sd_read_malformed_json_still_writes(
+def test_store_sd_read_malformed_json_raises_and_preserves(
     m5stickv, mocker, mock_file_operations
 ):
     from krux.krux_settings import Settings
-    from krux.encryption import MnemonicStorage
+    from krux.encryption import MnemonicStorage, StorageCorruptedError
 
     storage = MnemonicStorage()
     Settings().encryption.version = "AES-ECB"
     mocker.patch("krux.sd_card.SDHandler.read", return_value="not valid json {{{")
     with patch("krux.sd_card.open", new=mocker.mock_open(read_data="{}")) as m:
-        success = storage.store_encrypted_kef(
-            "KEFecbID", KEF_ENVELOPE_ECB, sd_card=True
-        )
-    assert success is True
-    m().write.assert_called_once_with(KEF_ECBENTROPY_ONLY_JSON)
+        with pytest.raises(StorageCorruptedError):
+            storage.store_encrypted_kef("KEFecbID", KEF_ENVELOPE_ECB, sd_card=True)
+    # existing (corrupt-but-recoverable) file must not be overwritten
+    m().write.assert_not_called()
+
+
+def test_store_sd_read_non_dict_json_raises_and_preserves(
+    m5stickv, mocker, mock_file_operations
+):
+    from krux.krux_settings import Settings
+    from krux.encryption import MnemonicStorage, StorageCorruptedError
+
+    storage = MnemonicStorage()
+    Settings().encryption.version = "AES-ECB"
+    mocker.patch("krux.sd_card.SDHandler.read", return_value="[1, 2, 3]")
+    with patch("krux.sd_card.open", new=mocker.mock_open(read_data="{}")) as m:
+        with pytest.raises(StorageCorruptedError):
+            storage.store_encrypted_kef("KEFecbID", KEF_ENVELOPE_ECB, sd_card=True)
+    m().write.assert_not_called()
 
 
 # --- store_encrypted_kef flash read-before-write ---
@@ -779,22 +793,24 @@ def test_store_flash_read_oserror_still_writes(m5stickv, mocker):
     write_handle().write.assert_called_once_with(KEF_ECBENTROPY_ONLY_JSON)
 
 
-def test_store_flash_read_malformed_json_still_writes(m5stickv, mocker):
+def test_store_flash_read_malformed_json_raises_and_preserves(m5stickv, mocker):
     from krux.krux_settings import Settings
-    from krux.encryption import MnemonicStorage
+    from krux.encryption import MnemonicStorage, StorageCorruptedError
 
     with patch("krux.encryption.open", new=mocker.mock_open(read_data="{}")):
         storage = MnemonicStorage()
     Settings().encryption.version = "AES-ECB"
     read_handle = mocker.mock_open(read_data="not valid json {{{")
     write_handle = mocker.mock_open()
-    mocker.patch(
+    open_mock = mocker.patch(
         "krux.encryption.open",
         side_effect=[read_handle.return_value, write_handle.return_value],
     )
-    success = storage.store_encrypted_kef("KEFecbID", KEF_ENVELOPE_ECB, sd_card=False)
-    assert success is True
-    write_handle().write.assert_called_once_with(KEF_ECBENTROPY_ONLY_JSON)
+    with pytest.raises(StorageCorruptedError):
+        storage.store_encrypted_kef("KEFecbID", KEF_ENVELOPE_ECB, sd_card=False)
+    # file opened for read only; never opened for write (no truncation)
+    assert open_mock.call_count == 1
+    write_handle().write.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
@@ -825,3 +841,52 @@ def test_decrypt_non_dict_storage_returns_none(m5stickv, mocker):
         storage = MnemonicStorage()
     assert storage.stored == [1, 2, 3]
     assert storage.decrypt("any-key", "any-id", sd_card=False) is None
+
+
+# list_mnemonics() returns [] for non-dict storage instead of iterating it
+# (a list would yield junk ids; a non-iterable like null would raise).
+
+
+def test_list_mnemonics_non_dict_storage_returns_empty(m5stickv, mocker):
+    from krux.encryption import MnemonicStorage
+
+    mocker.patch("krux.encryption.SDHandler", side_effect=OSError)
+    with patch("krux.encryption.open", new=mocker.mock_open(read_data="[1, 2, 3]")):
+        storage = MnemonicStorage()
+    assert storage.stored == [1, 2, 3]
+    assert storage.list_mnemonics(sd_card=False) == []
+
+
+def test_list_mnemonics_non_iterable_storage_returns_empty(m5stickv, mocker):
+    from krux.encryption import MnemonicStorage
+
+    mocker.patch("krux.encryption.SDHandler", side_effect=OSError)
+    # JSON "null" loads to None, which is not iterable -> must not raise
+    with patch("krux.encryption.open", new=mocker.mock_open(read_data="null")):
+        storage = MnemonicStorage()
+    assert storage.stored is None
+    assert storage.list_mnemonics(sd_card=False) == []
+
+
+# store_encrypted_kef() raises before opening "w" on a non-dict flash file,
+# so the existing (recoverable) data is never truncated.
+
+
+def test_store_flash_read_non_dict_json_raises_and_preserves(m5stickv, mocker):
+    from krux.krux_settings import Settings
+    from krux.encryption import MnemonicStorage, StorageCorruptedError
+
+    with patch("krux.encryption.open", new=mocker.mock_open(read_data="{}")):
+        storage = MnemonicStorage()
+    Settings().encryption.version = "AES-ECB"
+    read_handle = mocker.mock_open(read_data="[1, 2, 3]")
+    write_handle = mocker.mock_open()
+    open_mock = mocker.patch(
+        "krux.encryption.open",
+        side_effect=[read_handle.return_value, write_handle.return_value],
+    )
+    with pytest.raises(StorageCorruptedError):
+        storage.store_encrypted_kef("KEFecbID", KEF_ENVELOPE_ECB, sd_card=False)
+    # file opened for read only; never opened for write (no truncation)
+    assert open_mock.call_count == 1
+    write_handle().write.assert_not_called()

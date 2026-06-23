@@ -33,6 +33,11 @@ FLASH_PATH_STR = "/" + FLASH_PATH + "/%s"
 QR_CODE_ITER_MULTIPLE = 10000
 
 
+class StorageCorruptedError(Exception):
+    """Stored mnemonics file exists but is not a valid object; it is left
+    untouched instead of being overwritten, so its data can be recovered."""
+
+
 class MnemonicStorage:
     """Handler of stored encrypted seeds"""
 
@@ -85,11 +90,11 @@ class MnemonicStorage:
 
     def list_mnemonics(self, sd_card=False):
         """List all seeds stored on a file"""
-        mnemonic_ids = []
         source = self.stored_sd if sd_card else self.stored
-        for mnemonic_id in source:
-            mnemonic_ids.append(mnemonic_id)
-        return mnemonic_ids
+        if not isinstance(source, dict):
+            # corrupt/non-dict storage -> nothing to list
+            return []
+        return list(source)
 
     def decrypt(self, key, mnemonic_id, sd_card=False):
         """Decrypt a selected encrypted mnemonic from a file"""
@@ -120,14 +125,21 @@ class MnemonicStorage:
         mnemonics = {}
         if sd_card:
             # load current MNEMONICS_FILE
+            orig_len = 0
             try:
                 with SDHandler() as sd:
                     contents = sd.read(MNEMONICS_FILE)
                     orig_len = len(contents)
                     mnemonics = self._load_mnemonics(contents)
-            except (OSError, ValueError):
-                # no existing/readable file or malformed JSON -> write fresh
-                orig_len = 0
+            except OSError:
+                # missing file -> write a fresh store
+                pass
+            except ValueError as exc:
+                # corrupt JSON -> preserve for recovery
+                raise StorageCorruptedError(MNEMONICS_FILE) from exc
+            if not isinstance(mnemonics, dict):
+                # wrong shape -> preserve for recovery
+                raise StorageCorruptedError(MNEMONICS_FILE)
 
             # save the new MNEMONICS_FILE
             try:
@@ -146,9 +158,15 @@ class MnemonicStorage:
                 # load current MNEMONICS_FILE
                 with open(FLASH_PATH_STR % MNEMONICS_FILE, "r") as f:
                     mnemonics = self._load_mnemonics(f.read())
-            except (OSError, ValueError):
-                # no existing/readable file or malformed JSON -> write fresh
+            except OSError:
+                # missing file -> write a fresh store
                 pass
+            except ValueError as exc:
+                # corrupt JSON -> preserve for recovery
+                raise StorageCorruptedError(MNEMONICS_FILE) from exc
+            if not isinstance(mnemonics, dict):
+                # wrong shape -> preserve for recovery
+                raise StorageCorruptedError(MNEMONICS_FILE)
             try:
                 # save the new MNEMONICS_FILE
                 with open(FLASH_PATH_STR % MNEMONICS_FILE, "w") as f:
