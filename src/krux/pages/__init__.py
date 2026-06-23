@@ -157,19 +157,15 @@ class Page:
         """
         buffer = starting_buffer
         pad = Keypad(self.ctx, keysets, possible_keys_fn)
-        swipe_has_not_been_used = True
-        show_swipe_hint = False
         while True:
             self.ctx.display.clear()
-            self._print_keypad_header(title, show_swipe_hint, buffer, buffer_title)
+            self._print_keypad_header(title, False, buffer, buffer_title)
             if progress_bar_fn:
                 progress_bar_fn()
             pad.compute_possible_keys(buffer)
             pad.get_valid_index()
             pad.draw_keys()
             pad.draw_keyset_index()
-            show_swipe_hint = False  # unless overridden by a particular key,
-            # don't show the swipe hint after a key press
 
             btn = self.ctx.input.wait_for_fastnav_button()
             if btn == BUTTON_TOUCH:
@@ -193,10 +189,7 @@ class Page:
                 elif pad.cur_key_index == pad.go_index:
                     break
                 elif pad.cur_key_index == pad.more_index:
-                    swipeable = kboard.has_touchscreen
-                    if swipeable and swipe_has_not_been_used:
-                        show_swipe_hint = True
-                    pad.next_keyset()
+                    pad.toggle_case()
                 elif pad.cur_key_index < len(pad.keys):
                     buffer += pad.keys[pad.cur_key_index]
                     changed = True
@@ -211,8 +204,6 @@ class Page:
                 if changed and go_on_change:
                     break
             else:
-                if btn in (SWIPE_UP, SWIPE_LEFT, SWIPE_DOWN, SWIPE_RIGHT):
-                    swipe_has_not_been_used = False
                 pad.navigate(btn)
         if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
