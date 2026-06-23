@@ -11,6 +11,8 @@ Switch from the pure-Python urtypes and foundation-ur-py packages to the new uUR
 - Added `flash_success` method to standardize green success flashes across confirmation screens
 - Update Embit to latest - 3ae0ef2
 - Replace custom quirc (library to decode QR codes from images) with k_quirc
+- Fix default theme contrast failures for Light, CypherPink, network
+  indicators, and Amigo info panels
 
 # Changelog 26.04.0 - April 2025
 
