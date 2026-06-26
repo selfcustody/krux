@@ -453,7 +453,10 @@ def parse_wallet(wallet_data):
         raise KeyError('"descriptor" key not found in JSON')
     except KeyError:
         raise ValueError("invalid wallet format")
-    except:
+    except Exception:
+        # Untrusted input: any non-KeyError parse failure (bad JSON, bad
+        # descriptor) falls through to the next format. KeyboardInterrupt/
+        # SystemExit are no longer swallowed.
         pass
 
     # Try to parse as a key-value file
@@ -463,14 +466,18 @@ def parse_wallet(wallet_data):
             return descriptor, label
     except ValueError:
         raise
-    except:
+    except Exception:
+        # Untrusted input: an unexpected parse failure means "invalid wallet";
+        # interrupts (KeyboardInterrupt/SystemExit) still propagate.
         raise ValueError("invalid wallet format")
 
     # Try to parse directly as a descriptor
     try:
         descriptor = Descriptor.from_string(wallet_data.strip())
         return descriptor, None
-    except:
+    except Exception:
+        # Untrusted input: not a bare descriptor either; fall through to the final
+        # raise. KeyboardInterrupt/SystemExit are no longer swallowed.
         pass
 
     raise ValueError("invalid wallet format")
