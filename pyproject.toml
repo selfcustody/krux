@@ -82,6 +82,9 @@ urtypes = { path = "vendor/urtypes", editable = true }
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 
+[tool.poe.env]
+PYTHONPATH = "${POE_ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}"
+
 [tool.poe.tasks]
 # format tasks
 format-src = "black src"
