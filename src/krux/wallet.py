@@ -482,7 +482,7 @@ def parse_address(address_data):
 
     If the address cannot be derived, an exception is raised.
     """
-    from embit.script import Script, address_to_scriptpubkey
+    from embit.script import Script, address_to_scriptpubkey, EmbitError
 
     addr = address_data
     sc = None
@@ -498,13 +498,13 @@ def parse_address(address_data):
             sc = address_to_scriptpubkey(addr.lower())
             if isinstance(sc, Script):
                 return addr.lower()
-        except:
+        except EmbitError:
             pass
 
     if not isinstance(sc, Script):
         try:
             address_to_scriptpubkey(addr)
-        except:
+        except EmbitError:
             raise ValueError("invalid address")
 
     return addr
