@@ -1773,8 +1773,8 @@ def test_parse_address_raises_errors(mocker, m5stickv, tdata):
 
 
 def test_parse_address_propagates_keyboardinterrupt(mocker, m5stickv):
-    """KeyboardInterrupt must propagate, never be swallowed (line 501) or
-    relabeled 'invalid address' (line 507).
+    """KeyboardInterrupt must propagate: never swallowed by the bech32-uppercase
+    fallback, nor relabeled 'invalid address' by the final attempt.
 
     parse_address imports address_to_scriptpubkey *inside* the function, so the
     patch target is embit.script.address_to_scriptpubkey — there is no
@@ -1784,13 +1784,41 @@ def test_parse_address_propagates_keyboardinterrupt(mocker, m5stickv):
 
     mocker.patch("embit.script.address_to_scriptpubkey", side_effect=KeyboardInterrupt)
 
-    # Uppercase input exercises the bech32-uppercase branch (line 501)
+    # Uppercase input exercises the bech32-uppercase fallback branch
     with pytest.raises(KeyboardInterrupt):
         parse_address("BC1QX2ZUDAY8D6J4UFH4DF6E9TTD06LNFMN2CUZ0VN")
 
-    # Mixed-case input skips that branch and exercises the final attempt (line 507)
+    # Mixed-case input skips that branch and exercises the final attempt
     with pytest.raises(KeyboardInterrupt):
         parse_address("bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn")
+
+
+def test_parse_wallet_propagates_keyboardinterrupt(mocker, m5stickv):
+    """KeyboardInterrupt must propagate from each parse_wallet fallback: never
+    swallowed by the JSON or raw-descriptor fallbacks, nor relabeled 'invalid
+    wallet format' by the key-value fallback."""
+    import krux.wallet
+    from krux.wallet import parse_wallet
+
+    # JSON branch: valid JSON with a 'descriptor' key; the Descriptor.from_string
+    # call is interrupted.
+    mocker.patch.object(
+        krux.wallet.Descriptor, "from_string", side_effect=KeyboardInterrupt
+    )
+    with pytest.raises(KeyboardInterrupt):
+        parse_wallet('{"descriptor": "x"}')
+
+    # Key-value branch: parse_key_value_file is interrupted. (json.loads of a
+    # non-JSON string fails first and is correctly caught by the JSON branch.)
+    mocker.patch("krux.wallet.parse_key_value_file", side_effect=KeyboardInterrupt)
+    with pytest.raises(KeyboardInterrupt):
+        parse_wallet("invalid wallet format")
+
+    # Raw-descriptor branch: key-value returns nothing (so we fall through), and
+    # the Descriptor.from_string call is interrupted (still patched from above).
+    mocker.patch("krux.wallet.parse_key_value_file", return_value=(None, None))
+    with pytest.raises(KeyboardInterrupt):
+        parse_wallet("wpkh(tpubraw/0/*)")
 
 
 def test_to_unambiguous_descriptor(mocker, m5stickv, tdata):
