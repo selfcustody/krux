@@ -1772,6 +1772,27 @@ def test_parse_address_raises_errors(mocker, m5stickv, tdata):
             parse_address(case)
 
 
+def test_parse_address_propagates_keyboardinterrupt(mocker, m5stickv):
+    """KeyboardInterrupt must propagate, never be swallowed (line 501) or
+    relabeled 'invalid address' (line 507).
+
+    parse_address imports address_to_scriptpubkey *inside* the function, so the
+    patch target is embit.script.address_to_scriptpubkey — there is no
+    krux.wallet.address_to_scriptpubkey to patch.
+    """
+    from krux.wallet import parse_address
+
+    mocker.patch("embit.script.address_to_scriptpubkey", side_effect=KeyboardInterrupt)
+
+    # Uppercase input exercises the bech32-uppercase branch (line 501)
+    with pytest.raises(KeyboardInterrupt):
+        parse_address("BC1QX2ZUDAY8D6J4UFH4DF6E9TTD06LNFMN2CUZ0VN")
+
+    # Mixed-case input skips that branch and exercises the final attempt (line 507)
+    with pytest.raises(KeyboardInterrupt):
+        parse_address("bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn")
+
+
 def test_to_unambiguous_descriptor(mocker, m5stickv, tdata):
     from embit.descriptor import Descriptor
     from krux.wallet import to_unambiguous_descriptor
