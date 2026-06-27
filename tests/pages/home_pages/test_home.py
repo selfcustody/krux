@@ -266,6 +266,52 @@ def tdata(mocker):
     )
 
 
+def test_home_has_settings_before_shutdown(mocker, amigo):
+    from krux.pages.home_pages.home import Home
+
+    ctx = create_ctx(mocker, [])
+    home = Home(ctx)
+
+    labels = [item[0] for item in home.menu.menu]
+
+    assert labels[-2] == "Settings"
+    assert labels[-1] in ("Shutdown", "Reboot")
+
+
+def test_home_settings_shortcut_uses_printer_and_encryption_namespaces(mocker, amigo):
+    from krux.krux_settings import EncryptionSettings, PrinterSettings
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.home_pages.home import Home
+    from krux.pages.settings_page import SettingsPage
+
+    ctx = create_ctx(mocker, [])
+    home = Home(ctx)
+    handlers = []
+    settings_exit_check = mocker.patch.object(
+        SettingsPage, "_settings_exit_check", return_value=MENU_CONTINUE
+    )
+
+    def namespace(_settings_page, settings_namespace):
+        handlers.append(settings_namespace)
+        return lambda: MENU_CONTINUE
+
+    mocker.patch.object(SettingsPage, "namespace", namespace)
+
+    def run_loop():
+        shortcut_menu.call_args.kwargs["back_status"]()
+        return (0, MENU_CONTINUE)
+
+    shortcut_menu = mocker.patch("krux.pages.home_pages.home.Menu")
+    shortcut_menu.return_value.run_loop.side_effect = run_loop
+
+    assert home.settings() == MENU_CONTINUE
+    assert [namespace.__class__ for namespace in handlers] == [
+        PrinterSettings,
+        EncryptionSettings,
+    ]
+    settings_exit_check.assert_called_once()
+
+
 def test_load_mnemonic_view(mocker, amigo):
     from krux.pages.home_pages.home import Home
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV

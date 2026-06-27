@@ -247,6 +247,10 @@ class SettingsPage(Page):
 
         return MENU_EXIT
 
+    def settings_exit_check(self):
+        """Handler for leaving settings from a shortcut"""
+        return self._settings_exit_check()
+
     def namespace(self, settings_namespace):
         """Handler for navigating a particular settings namespace"""
 

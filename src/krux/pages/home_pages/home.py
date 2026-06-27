@@ -59,6 +59,7 @@ class Home(Page):
                     (t("Wallet"), self.wallet),
                     (t("Address"), self.addresses_menu),
                     (t("Sign"), self.sign),
+                    (t("Settings"), self.settings),
                     (shtn_reboot_label, self.shutdown),
                 ],
                 back_label=None,
@@ -212,6 +213,29 @@ class Home(Page):
                 ("PSBT", self.sign_psbt),
                 (t("Message"), self.sign_message),
             ],
+        )
+        submenu.run_loop()
+        return MENU_CONTINUE
+
+    def settings(self):
+        """Handler for the Home-screen settings shortcut"""
+        from ..settings_page import SettingsPage
+        from ...krux_settings import EncryptionSettings, PrinterSettings
+
+        settings_page = SettingsPage(self.ctx)
+        submenu = Menu(
+            self.ctx,
+            [
+                (
+                    t("Printer"),
+                    settings_page.namespace(PrinterSettings()),
+                ),
+                (
+                    t("Encryption"),
+                    settings_page.namespace(EncryptionSettings()),
+                ),
+            ],
+            back_status=settings_page.settings_exit_check,
         )
         submenu.run_loop()
         return MENU_CONTINUE
