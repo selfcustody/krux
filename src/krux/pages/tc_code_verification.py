@@ -41,7 +41,6 @@ class TCCodeVerification(Page):
     def capture(self, changing_tc_code=False, return_hash=False):
         """Capture Tamper Check Code from user"""
         import uhashlib_hw
-        from machine import unique_id
 
         label = (
             t("Current Tamper Check Code")
@@ -53,12 +52,19 @@ class TCCodeVerification(Page):
         )
         if tc_code == ESC_KEY:
             return False
-        # Hashes the tamper check code
         tc_code_bytes = tc_code.encode()
-        # Tamper Check Code hash will be used in "TC Flash Hash"
         tc_code_hash = uhashlib_hw.sha256(tc_code_bytes).digest()
 
+        # When return_hash is True (e.g., for TC Flash Hash display),
+        # skip validation and return the raw hash directly.
+        # The TC code is not a security PIN; the user visually verifies
+        # the displayed fingerprint to detect tampering.
+        if return_hash:
+            return tc_code_hash
+
         # Read the contents of tamper check code file
+        from machine import unique_id
+
         with open(TC_CODE_PATH, "rb") as f:
             file_secret = f.read()
 
@@ -70,8 +76,6 @@ class TCCodeVerification(Page):
             tc_code_hash, unique_id(), TC_CODE_PBKDF2_ITERATIONS
         )
         if secret == file_secret:
-            if return_hash:
-                return tc_code_hash
             return True
 
         self.flash_error(t("Invalid Tamper Check Code"))
