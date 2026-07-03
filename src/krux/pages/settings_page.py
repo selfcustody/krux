@@ -416,6 +416,16 @@ class SettingsPage(Page):
         elif setting.attr == "bgr_colors":
             if new_category is not None:
                 lcd.bgr_to_rgb(new_category)
+        elif setting.attr == "boot_flash_hash":
+            if new_category is True and not self.ctx.tc_code_enabled:
+                import os
+                from ..krux_settings import TC_CODE_PATH
+
+                try:
+                    os.stat(TC_CODE_PATH)
+                except OSError:
+                    setting.__set__(settings_namespace, False)
+                    self.flash_error(t("Set a tamper check code first"))
         elif setting.attr == "inverted_colors":
             if new_category is not None:
                 lcd.init(
