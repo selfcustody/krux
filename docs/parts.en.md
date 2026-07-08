@@ -63,14 +63,7 @@ Krux was first ported to this device in March 2022. Featuring the smallest scree
 ### Maix Amigo
 <img src="../img/maixpy_amigo/logo-300.png" align="right" style="width: 20%;">
 
-Krux has supported this device since its second version in August 2022. It offers the largest screen size and resolution, a touchscreen, and a built-in battery. Below is a list of distributors where it is available:
-
-- [AliExpress](https://www.aliexpress.com/w/wholesale-sipeed-amigo.html)
-- [Seeed Studio](https://www.seeedstudio.com/Sipeed-Maix-Amigo-p-4689.html)
-- [Digi-Key](https://www.digikey.com/en/products/detail/seeed-technology-co-ltd/102110463/13168813)
-- [Mouser](https://www.mouser.com/c/?q=sipeed)
-- [Electromaker](https://www.electromaker.io/shop/search/sipeed)
-- [スイッチサイエンス](https://www.switch-science.com/search?q=maix+amigo)
+Krux has supported this device since its second version in August 2022. It offers the largest screen size and resolution, a touchscreen, and a built-in battery. This device has been discontinued and is no longer available for sale, but Krux continues to support it.
 
 <div style="clear: both"></div>
 
