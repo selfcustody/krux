@@ -167,7 +167,7 @@
     "Loading…": "로드 중…",
     "Locale": "언어 설정",
     "Location": "기본 저장소",
-    "Max leak sats": "최대 누출 sats",
+    "Max fee rate sat/vB": "최대 누출 sats",
     "Max rounds": "최대 라운드",
     "Medium": "중간",
     "Message": "메시지",

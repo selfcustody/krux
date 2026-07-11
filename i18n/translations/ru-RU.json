@@ -167,7 +167,7 @@
     "Loading…": "Идет загрузка…",
     "Locale": "Локаль",
     "Location": "Расположение",
-    "Max leak sats": "Макс. утечка sats",
+    "Max fee rate sat/vB": "Макс. ставка sat/vB",
     "Max rounds": "Макс. раундов",
     "Medium": "Средний",
     "Message": "Сообщение",

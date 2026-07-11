@@ -167,7 +167,7 @@
     "Loading…": "加载中…",
     "Locale": "语言环境",
     "Location": "位置",
-    "Max leak sats": "最大泄漏 sats",
+    "Max fee rate sat/vB": "最大泄漏 sats",
     "Max rounds": "最大轮数",
     "Medium": "中等",
     "Message": "消息",

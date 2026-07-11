@@ -496,15 +496,15 @@ class CoinJoinSettings(SettingsNamespace):
     namespace = "settings.security.coinjoin"
     enabled = CategorySetting("enabled", False, [False, True])
     min_self_transfer_pct = NumberSetting(int, "min_self_transfer_pct", 95, [0, 100])
-    max_leak_sats = NumberSetting(int, "max_leak_sats", 0, [0, 2100000000000000])
-    max_rounds = NumberSetting(int, "max_rounds", 0, [0, 1000000])
+    max_fee_rate_sat_vb = NumberSetting(int, "max_fee_rate_sat_vb", 5, [0, 1000000])
+    max_rounds = NumberSetting(int, "max_rounds", 210, [0, 10000])
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
         return {
             "enabled": t("Enabled"),
             "min_self_transfer_pct": t("Min self-transfer %"),
-            "max_leak_sats": t("Max leak sats"),
+            "max_fee_rate_sat_vb": t("Max fee rate sat/vB"),
             "max_rounds": t("Max rounds"),
         }[attr]
 

@@ -473,7 +473,7 @@ class PSBTSigner:
             "allowed_scripts": (P2WPKH, P2TR),
             "allowed_account_prefix": self.wallet.key.derivation,
             "min_self_transfer_pct": settings.min_self_transfer_pct,
-            "max_leak_sats": settings.max_leak_sats,
+            "max_fee_rate_sat_vb": settings.max_fee_rate_sat_vb,
         }
 
     def _coinjoin_derivations(self, scope, script_type):
@@ -520,6 +520,14 @@ class PSBTSigner:
             if script_type == P2TR and inp.sighash_type not in (None, SIGHASH.DEFAULT):
                 raise ValueError("coinjoin input %d must use SIGHASH_DEFAULT" % i)
 
+    def _coinjoin_input_vbytes_x100(self, script_type):
+        """Returns signed owned-input vbytes multiplied by 100."""
+        if script_type == P2WPKH:
+            return int(SatsVB.P2WPKH_IN_SIZE * 100)
+        if script_type == P2TR:
+            return int(SatsVB.P2TR_IN_SIZE * 100)
+        raise ValueError("unsupported coinjoin input script")
+
     def coinjoin_amounts(self, policy=None):
         """Validates CoinJoin policy and returns own input/return/leak amounts."""
         policy = self._coinjoin_policy(policy)
@@ -534,6 +542,7 @@ class PSBTSigner:
             "allowed_account_prefix", self.wallet.key.derivation
         )
         own_input_value = 0
+        own_input_vbytes_x100 = 0
         own_self_transfer_value = 0
         input_types = []
 
@@ -546,6 +555,7 @@ class PSBTSigner:
             input_types.append(script_type)
             if self._coinjoin_scope_is_own(inp, script_type, account_prefix):
                 own_input_value += inp.witness_utxo.value
+                own_input_vbytes_x100 += self._coinjoin_input_vbytes_x100(script_type)
 
         if own_input_value <= 0:
             raise ValueError("coinjoin PSBT has no own inputs")
@@ -567,9 +577,11 @@ class PSBTSigner:
             raise ValueError("coinjoin self-transfer policy out of range")
         if own_self_transfer_value * min_denominator < own_input_value * min_threshold:
             raise ValueError("coinjoin self-transfer below policy")
-        max_leak = policy.get("max_leak_sats", 0)
-        if max_leak and leak > max_leak:
-            raise ValueError("coinjoin leak above policy")
+        max_fee_rate = policy.get("max_fee_rate_sat_vb", 5)
+        if max_fee_rate < 0:
+            raise ValueError("coinjoin fee rate policy out of range")
+        if max_fee_rate and leak * 100 > own_input_vbytes_x100 * max_fee_rate:
+            raise ValueError("coinjoin fee rate above policy")
 
         self._check_coinjoin_sighashes(input_types)
         return {

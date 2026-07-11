@@ -35,9 +35,27 @@ The policy can limit:
 - the account path;
 - the allowed script types;
 - the minimum self-transfer percentage;
-- the maximum value that may be lost.
+- the maximum effective fee rate for your own registered inputs.
 
 The `Min self-transfer %` setting defaults to 95. That means Krux expects at least 95% of your own input value to return to your own wallet unless you configure a stricter or looser policy.
+
+## CoinJoin Process
+
+A CoinJoin flow usually has these steps:
+
+1. Your wallet asks Krux to prove that it controls the coins being registered.
+2. The coordinator builds a round with inputs and outputs from several people.
+3. Your wallet sends the CoinJoin PSBT to Krux.
+4. Krux checks the transaction against your CoinJoin policy.
+5. Krux signs only if the transaction stays inside your limits.
+
+You can personalize the policy with:
+
+- `Max fee rate sat/vB`: the highest effective fee rate Krux allows for your own registered inputs. The default is 5 sat/vB.
+- `Max rounds`: the maximum number of CoinJoin rounds your setup may run before asking you to approve again. The default is 210.
+- `Min self-transfer %`: the minimum share of your own input value that must return to your own wallet. Higher values are stricter. The default is 95%.
+
+If any step goes outside these limits, Krux refuses to sign.
 
 ## Ownership Proofs
 

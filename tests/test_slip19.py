@@ -256,7 +256,7 @@ def test_coinjoin_policy_signs_and_rejects_low_self_transfer(m5stickv):
         "allowed_scripts": (P2WPKH,),
         "allowed_account_prefix": "m/84h/1h/0h",
         "min_self_transfer_pct": 95,
-        "max_leak_sats": 500,
+        "max_fee_rate_sat_vb": 6,
     }
 
     assert signer.coinjoin_amounts(policy) == {
@@ -268,6 +268,12 @@ def test_coinjoin_policy_signs_and_rejects_low_self_transfer(m5stickv):
     assert signer.psbt.inputs[0].partial_sigs
 
     strict_policy = dict(policy)
+    strict_policy["max_fee_rate_sat_vb"] = 5
+    signer = PSBTSigner(wallet, _coinjoin_psbt(key).serialize(), None)
+    with pytest.raises(ValueError, match="fee rate above"):
+        signer.sign_coinjoin(strict_policy)
+
+    strict_policy = dict(policy)
     strict_policy["min_self_transfer_pct"] = 99
     signer = PSBTSigner(wallet, _coinjoin_psbt(key).serialize(), None)
     with pytest.raises(ValueError, match="self-transfer below"):
@@ -277,4 +283,10 @@ def test_coinjoin_policy_signs_and_rejects_low_self_transfer(m5stickv):
     invalid_policy["min_self_transfer_pct"] = -1
     signer = PSBTSigner(wallet, _coinjoin_psbt(key).serialize(), None)
     with pytest.raises(ValueError, match="policy out of range"):
+        signer.sign_coinjoin(invalid_policy)
+
+    invalid_policy = dict(policy)
+    invalid_policy["max_fee_rate_sat_vb"] = -1
+    signer = PSBTSigner(wallet, _coinjoin_psbt(key).serialize(), None)
+    with pytest.raises(ValueError, match="fee rate policy out of range"):
         signer.sign_coinjoin(invalid_policy)
