@@ -210,11 +210,16 @@ class Home(Page):
             self.ctx,
             [
                 ("PSBT", self.sign_psbt),
+                ("%s PSBT" % t("CoinJoin"), self.sign_coinjoin_psbt),
                 (t("Message"), self.sign_message),
             ],
         )
         submenu.run_loop()
         return MENU_CONTINUE
+
+    def sign_coinjoin_psbt(self):
+        """Handler for the 'sign coinjoin psbt' menu item"""
+        return self.sign_psbt(coinjoin=True)
 
     def load_psbt(self):
         """Loads a PSBT from camera or SD card"""
@@ -243,7 +248,7 @@ class Home(Page):
         )
         return (None, FORMAT_NONE, psbt_filename)
 
-    def _sign_menu(self, signer, psbt_filename, outputs):
+    def _sign_menu(self, signer, psbt_filename, outputs, coinjoin=False):
         submenu = Menu(
             self.ctx,
             [
@@ -272,9 +277,10 @@ class Home(Page):
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Signing…"))
+        sign_method = signer.sign_coinjoin if coinjoin else signer.sign
 
         if index == 1:  # Sign to QR code
-            signer.sign()
+            sign_method()
             signed_psbt, qr_format = signer.psbt_qr()
 
             # memory management
@@ -295,7 +301,7 @@ class Home(Page):
                     return MENU_CONTINUE
 
         # index == 2: Sign to SD card
-        signer.sign(trim=False)
+        sign_method(trim=False)
         psbt_filename = self._format_psbt_file_extension(psbt_filename)
         gc.collect()
 
@@ -462,7 +468,7 @@ class Home(Page):
 
             self.ctx.input.wait_for_button()
 
-    def sign_psbt(self):
+    def sign_psbt(self, coinjoin=False):
         """Handler for the 'sign psbt' menu item"""
 
         # pre load warns
@@ -516,7 +522,7 @@ class Home(Page):
         self._display_transaction_for_review(outputs)
 
         # sign menu
-        return self._sign_menu(signer, psbt_filename, outputs)
+        return self._sign_menu(signer, psbt_filename, outputs, coinjoin)
 
     def sign_message(self):
         """Handler for the 'sign message' menu item"""
