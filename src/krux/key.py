@@ -263,6 +263,33 @@ class Key:
         )
         return ser
 
+    def slip21_key(self, labels):
+        """Returns a SLIP-21 symmetric key for the loaded mnemonic."""
+        from .slip19 import slip21_key
+
+        seed = bip39.mnemonic_to_seed(self.mnemonic, self.passphrase)
+        return slip21_key(seed, labels)
+
+    def slip19_ownership_id(self, script_pubkey):
+        """Returns the SLIP-19 ownership id for a scriptPubKey."""
+        from .slip19 import ownership_id
+
+        ownership_key = self.slip21_key(
+            ["SLIP-0019", "Ownership identification key"]
+        )
+        return ownership_id(ownership_key, script_pubkey)
+
+    def sign_slip19_p2wpkh(self, derivation, message_hash):
+        """Signs a SLIP-19 P2WPKH digest at a derivation path."""
+        child = self.root.derive(derivation)
+        return child.sign(message_hash), child.key.get_public_key()
+
+    def sign_slip19_p2tr(self, derivation, message_hash):
+        """Signs a SLIP-19 P2TR digest with the BIP-86 tweaked output key."""
+        child = self.root.derive(derivation)
+        tweaked = child.taproot_tweak()
+        return tweaked.schnorr_sign(message_hash), child.key.get_public_key()
+
     @staticmethod
     def pick_final_word(entropy, words):
         """Returns a random final word with a valid checksum for the given list of

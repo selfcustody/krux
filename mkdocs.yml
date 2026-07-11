@@ -109,6 +109,7 @@ nav:
         - Printing: getting-started/features/printing/printing.en.md
         - CNC Engraving: getting-started/features/printing/cnc.en.md
       - SD Card Updates: getting-started/features/sd-card-update.en.md
+      - CoinJoin Signing: getting-started/features/coinjoin.en.md
       - Tools: getting-started/features/tools.en.md
       - Transcribing QR Codes: getting-started/features/QR-transcript-tools.en.md
       - Tiny Seed and other metal plates: getting-started/features/tinyseed.en.md

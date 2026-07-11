@@ -460,6 +460,123 @@ class PSBTSigner:
         if sigs_added == 0:
             raise ValueError("cannot sign")
 
+    def _coinjoin_policy(self, policy):
+        """Returns an explicit or persisted CoinJoin signing policy."""
+        if policy is not None:
+            return policy
+        from .krux_settings import Settings
+
+        settings = Settings().security.coinjoin
+        return {
+            "enabled": settings.enabled,
+            "wallet_fingerprint": None,
+            "allowed_scripts": (P2WPKH, P2TR),
+            "allowed_account_prefix": self.wallet.key.derivation,
+            "min_self_transfer_bps": settings.min_self_transfer_bps,
+            "max_leak_sats": settings.max_leak_sats,
+        }
+
+    def _coinjoin_derivations(self, scope, script_type):
+        """Returns derivation entries relevant to the script type."""
+        if script_type == P2TR:
+            return [
+                (pub, der_info[1])
+                for pub, der_info in scope.taproot_bip32_derivations.items()
+            ]
+        return list(scope.bip32_derivations.items())
+
+    def _own_coinjoin_derivation(self, pub, derivation, script_type, account_prefix):
+        """Checks fingerprint, account prefix, and derived pubkey."""
+        from embit import bip32
+
+        if derivation.fingerprint != self.wallet.key.fingerprint:
+            return False
+
+        prefix = bip32.parse_path(account_prefix)
+        full_path = derivation.derivation
+        if full_path[: len(prefix)] != prefix:
+            return False
+
+        derived = self.wallet.key.root.derive(full_path)
+        if script_type == P2TR:
+            return derived.xonly() == pub.xonly()
+        return derived.key.sec() == pub.sec()
+
+    def _coinjoin_scope_is_own(self, scope, script_type, account_prefix):
+        """Returns true when a PSBT input/output scope belongs to the wallet."""
+        for pub, der in self._coinjoin_derivations(scope, script_type):
+            if self._own_coinjoin_derivation(pub, der, script_type, account_prefix):
+                return True
+        return False
+
+    def _check_coinjoin_sighashes(self, input_types):
+        """CoinJoin mode only allows ALL for P2WPKH and DEFAULT for P2TR."""
+        from embit.transaction import SIGHASH
+
+        for i, inp in enumerate(self.psbt.inputs):
+            script_type = input_types[i]
+            if script_type == P2WPKH and inp.sighash_type not in (None, SIGHASH.ALL):
+                raise ValueError("coinjoin input %d must use SIGHASH_ALL" % i)
+            if script_type == P2TR and inp.sighash_type not in (None, SIGHASH.DEFAULT):
+                raise ValueError("coinjoin input %d must use SIGHASH_DEFAULT" % i)
+
+    def coinjoin_amounts(self, policy=None):
+        """Validates CoinJoin policy and returns own input/return/leak amounts."""
+        policy = self._coinjoin_policy(policy)
+        if not policy.get("enabled", False):
+            raise ValueError("coinjoin policy disabled")
+        wallet_fingerprint = policy.get("wallet_fingerprint")
+        if wallet_fingerprint and wallet_fingerprint != self.wallet.key.fingerprint:
+            raise ValueError("coinjoin wallet fingerprint mismatch")
+
+        allowed_scripts = policy.get("allowed_scripts", (P2WPKH, P2TR))
+        account_prefix = policy.get(
+            "allowed_account_prefix", self.wallet.key.derivation
+        )
+        own_input_value = 0
+        own_self_transfer_value = 0
+        input_types = []
+
+        for i, inp in enumerate(self.psbt.inputs):
+            if not inp.witness_utxo:
+                raise ValueError("coinjoin input %d missing witness UTXO" % i)
+            script_type = inp.witness_utxo.script_pubkey.script_type()
+            if script_type not in allowed_scripts:
+                raise ValueError("unsupported coinjoin input script")
+            input_types.append(script_type)
+            if self._coinjoin_scope_is_own(inp, script_type, account_prefix):
+                own_input_value += inp.witness_utxo.value
+
+        if own_input_value <= 0:
+            raise ValueError("coinjoin PSBT has no own inputs")
+
+        for i, out in enumerate(self.psbt.outputs):
+            script_type = self.psbt.tx.vout[i].script_pubkey.script_type()
+            if script_type not in allowed_scripts:
+                raise ValueError("unsupported coinjoin output script")
+            if self._coinjoin_scope_is_own(out, script_type, account_prefix):
+                own_self_transfer_value += self.psbt.tx.vout[i].value
+
+        leak = own_input_value - own_self_transfer_value
+        min_bps = policy.get("min_self_transfer_bps", 9500)
+        if own_self_transfer_value * 10000 < own_input_value * min_bps:
+            raise ValueError("coinjoin self-transfer below policy")
+        max_leak = policy.get("max_leak_sats", 0)
+        if max_leak and leak > max_leak:
+            raise ValueError("coinjoin leak above policy")
+
+        self._check_coinjoin_sighashes(input_types)
+        return {
+            "own_input_value": own_input_value,
+            "own_self_transfer_value": own_self_transfer_value,
+            "fee_leak": leak,
+        }
+
+    def sign_coinjoin(self, policy=None, trim=True):
+        """Signs a policy-approved CoinJoin PSBT."""
+        self.coinjoin_amounts(policy)
+        self.sign(trim=trim)
+
     def fill_zero_fingerprint(self):
         """Fix for zeroes in fingerprint that happen when user imports the wallet
         with XPUB only (without derivation path)
