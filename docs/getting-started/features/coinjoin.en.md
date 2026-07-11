@@ -37,7 +37,7 @@ The policy can limit:
 - the minimum self-transfer percentage;
 - the maximum value that may be lost.
 
-The default safety target is 95% self-transfer. That means Krux expects at least 95% of your own input value to return to your own wallet unless you configure a stricter or looser policy.
+The `Min self-transfer %` setting defaults to 95. That means Krux expects at least 95% of your own input value to return to your own wallet unless you configure a stricter or looser policy.
 
 ## Ownership Proofs
 

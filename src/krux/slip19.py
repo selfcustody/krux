@@ -25,12 +25,11 @@ from io import BytesIO
 
 from embit import compact, ec, script
 
-from .key import P2TR, P2WPKH
-
-
 MAGIC = b"\x53\x4c\x00\x19"
 USER_CONFIRMATION = 1
 RESERVED_FLAGS = 0xFE
+P2WPKH = "p2wpkh"
+P2TR = "p2tr"
 
 
 def _script_bytes(script_pubkey):
@@ -62,8 +61,11 @@ def proof_body(flags, ownership_ids):
     """Builds a single SLIP-19 proof body."""
     if flags & RESERVED_FLAGS:
         raise ValueError("reserved SLIP-19 flags set")
-    return MAGIC + bytes([flags]) + compact.to_bytes(len(ownership_ids)) + b"".join(
-        ownership_ids
+    return (
+        MAGIC
+        + bytes([flags])
+        + compact.to_bytes(len(ownership_ids))
+        + b"".join(ownership_ids)
     )
 
 

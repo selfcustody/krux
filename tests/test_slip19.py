@@ -1,6 +1,5 @@
 import pytest
 
-
 MNEMONIC_ALL = "all all all all all all all all all all all all"
 MNEMONIC_ABANDON = (
     "abandon abandon abandon abandon abandon abandon abandon abandon abandon "
@@ -76,6 +75,125 @@ def test_p2tr_proof_uses_tweaked_key(m5stickv):
         verify_proof(bad_proof, script_pubkey, commitment)
 
 
+def test_slip19_rejects_malformed_proofs(m5stickv):
+    from embit import script
+    from krux.slip19 import MAGIC, parse_proof, proof_body, proof_digest
+
+    with pytest.raises(ValueError, match="reserved"):
+        proof_body(0xFE, [])
+    with pytest.raises(ValueError, match="missing commitment"):
+        proof_digest(proof_body(0, []), b"", None)
+    with pytest.raises(ValueError, match="magic"):
+        parse_proof(b"bad")
+    with pytest.raises(ValueError, match="reserved"):
+        parse_proof(MAGIC + b"\xfe\x00")
+    with pytest.raises(ValueError, match="non-minimal"):
+        parse_proof(MAGIC + b"\x00\xfd\x00\x00")
+    with pytest.raises(ValueError, match="ownership id"):
+        parse_proof(MAGIC + b"\x00\x01" + b"\x00" * 31)
+
+    proof = proof_body(0, []) + script.Script().serialize()
+    proof += script.Witness([]).serialize() + b"\x00"
+    with pytest.raises(ValueError, match="signature proof"):
+        parse_proof(proof)
+
+
+def test_slip19_rejects_invalid_create_requests(m5stickv):
+    from embit import script
+    from embit.networks import NETWORKS
+    from krux.key import Key, P2WPKH, TYPE_SINGLESIG
+    from krux.slip19 import create_proof
+
+    key = Key(
+        MNEMONIC_ALL,
+        TYPE_SINGLESIG,
+        NETWORKS["main"],
+        script_type=P2WPKH,
+    )
+    path = "m/84h/0h/0h/1/0"
+    pubkey = key.root.derive("m/84h/0h/0h/1/1").key.get_public_key()
+
+    with pytest.raises(ValueError, match="unsupported"):
+        create_proof(key, "p2sh", script.p2wpkh(pubkey), path, b"")
+    with pytest.raises(ValueError, match="missing commitment"):
+        create_proof(key, P2WPKH, script.p2wpkh(pubkey), path, None)
+    with pytest.raises(ValueError, match="derivation"):
+        create_proof(key, P2WPKH, script.p2wpkh(pubkey), path, b"")
+
+
+def test_slip19_rejects_invalid_p2wpkh_verification(m5stickv):
+    from embit import script
+    from embit.networks import NETWORKS
+    from krux.key import Key, P2WPKH, TYPE_SINGLESIG
+    from krux.slip19 import create_proof, parse_proof, verify_proof
+
+    key = Key(
+        MNEMONIC_ALL,
+        TYPE_SINGLESIG,
+        NETWORKS["main"],
+        script_type=P2WPKH,
+    )
+    path = "m/84h/0h/0h/1/0"
+    pubkey = key.root.derive(path).key.get_public_key()
+    script_pubkey = script.p2wpkh(pubkey)
+    proof = create_proof(key, P2WPKH, script_pubkey, path, b"")
+    body, _, _, _, witness = parse_proof(proof)
+
+    with pytest.raises(ValueError, match="lacks user confirmation"):
+        verify_proof(proof, script_pubkey, b"", require_confirmation=True)
+
+    bad_script_sig = script.Script(b"\x51").serialize()
+    bad_proof = body + bad_script_sig + witness.serialize()
+    with pytest.raises(ValueError, match="scriptSig"):
+        verify_proof(bad_proof, script_pubkey, b"")
+
+    bad_proof = body + script.Script().serialize() + script.Witness([]).serialize()
+    with pytest.raises(ValueError, match="P2WPKH.*witness"):
+        verify_proof(bad_proof, script_pubkey, b"")
+
+    bad_sig = bytearray(witness.items[0])
+    bad_sig[-1] = 2
+    bad_witness = script.Witness([bytes(bad_sig), witness.items[1]])
+    bad_proof = body + script.Script().serialize() + bad_witness.serialize()
+    with pytest.raises(ValueError, match="sighash"):
+        verify_proof(bad_proof, script_pubkey, b"")
+
+    other_pubkey = key.root.derive("m/84h/0h/0h/1/1").key.get_public_key()
+    with pytest.raises(ValueError, match="does not match"):
+        verify_proof(proof, script.p2wpkh(other_pubkey), b"")
+
+    with pytest.raises(ValueError, match="invalid P2WPKH"):
+        verify_proof(proof, script_pubkey, b"wrong")
+
+    with pytest.raises(ValueError, match="unsupported"):
+        verify_proof(
+            body + script.Script().serialize() + witness.serialize(), b"\x6a", b""
+        )
+
+
+def test_slip19_rejects_invalid_p2tr_witness(m5stickv):
+    from embit import script
+    from embit.networks import NETWORKS
+    from krux.key import Key, P2TR, TYPE_SINGLESIG
+    from krux.slip19 import create_proof, parse_proof, verify_proof
+
+    key = Key(
+        MNEMONIC_ALL,
+        TYPE_SINGLESIG,
+        NETWORKS["main"],
+        script_type=P2TR,
+    )
+    path = "m/86h/0h/0h/1/0"
+    pubkey = key.root.derive(path).key.get_public_key()
+    script_pubkey = script.p2tr(pubkey)
+    proof = create_proof(key, P2TR, script_pubkey, path, b"")
+    body, _, _, _, _ = parse_proof(proof)
+
+    bad_proof = body + script.Script().serialize() + script.Witness([]).serialize()
+    with pytest.raises(ValueError, match="P2TR.*witness"):
+        verify_proof(bad_proof, script_pubkey, b"")
+
+
 def _coinjoin_psbt(key):
     from embit import bip32, script
     from embit.psbt import DerivationPath, PSBT
@@ -137,7 +255,7 @@ def test_coinjoin_policy_signs_and_rejects_low_self_transfer(m5stickv):
         "enabled": True,
         "allowed_scripts": (P2WPKH,),
         "allowed_account_prefix": "m/84h/1h/0h",
-        "min_self_transfer_bps": 9500,
+        "min_self_transfer_pct": 95,
         "max_leak_sats": 500,
     }
 
@@ -150,7 +268,13 @@ def test_coinjoin_policy_signs_and_rejects_low_self_transfer(m5stickv):
     assert signer.psbt.inputs[0].partial_sigs
 
     strict_policy = dict(policy)
-    strict_policy["min_self_transfer_bps"] = 9900
+    strict_policy["min_self_transfer_pct"] = 99
     signer = PSBTSigner(wallet, _coinjoin_psbt(key).serialize(), None)
     with pytest.raises(ValueError, match="self-transfer below"):
         signer.sign_coinjoin(strict_policy)
+
+    invalid_policy = dict(policy)
+    invalid_policy["min_self_transfer_pct"] = -1
+    signer = PSBTSigner(wallet, _coinjoin_psbt(key).serialize(), None)
+    with pytest.raises(ValueError, match="policy out of range"):
+        signer.sign_coinjoin(invalid_policy)

@@ -274,9 +274,7 @@ class Key:
         """Returns the SLIP-19 ownership id for a scriptPubKey."""
         from .slip19 import ownership_id
 
-        ownership_key = self.slip21_key(
-            ["SLIP-0019", "Ownership identification key"]
-        )
+        ownership_key = self.slip21_key(["SLIP-0019", "Ownership identification key"])
         return ownership_id(ownership_key, script_pubkey)
 
     def sign_slip19_p2wpkh(self, derivation, message_hash):

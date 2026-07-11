@@ -472,7 +472,7 @@ class PSBTSigner:
             "wallet_fingerprint": None,
             "allowed_scripts": (P2WPKH, P2TR),
             "allowed_account_prefix": self.wallet.key.derivation,
-            "min_self_transfer_bps": settings.min_self_transfer_bps,
+            "min_self_transfer_pct": settings.min_self_transfer_pct,
             "max_leak_sats": settings.max_leak_sats,
         }
 
@@ -558,8 +558,14 @@ class PSBTSigner:
                 own_self_transfer_value += self.psbt.tx.vout[i].value
 
         leak = own_input_value - own_self_transfer_value
-        min_bps = policy.get("min_self_transfer_bps", 9500)
-        if own_self_transfer_value * 10000 < own_input_value * min_bps:
+        min_threshold = policy.get("min_self_transfer_pct", 95)
+        min_denominator = 100
+        if "min_self_transfer_bps" in policy:
+            min_threshold = policy["min_self_transfer_bps"]
+            min_denominator = 10000
+        if not 0 <= min_threshold <= min_denominator:
+            raise ValueError("coinjoin self-transfer policy out of range")
+        if own_self_transfer_value * min_denominator < own_input_value * min_threshold:
             raise ValueError("coinjoin self-transfer below policy")
         max_leak = policy.get("max_leak_sats", 0)
         if max_leak and leak > max_leak:
