@@ -610,6 +610,7 @@ def test_all_labels(mocker, m5stickv):
         HardwareSettings,
         SecuritySettings,
         Settings,
+        CoinJoinSettings,
     )
 
     wallet = DefaultWallet()
@@ -629,6 +630,7 @@ def test_all_labels(mocker, m5stickv):
     appearance = ThemeSettings()
     security = SecuritySettings()
     settings = Settings()
+    coinjoin = CoinJoinSettings()
 
     assert wallet.label("network")
     assert i18n.label("locale")
@@ -648,3 +650,4 @@ def test_all_labels(mocker, m5stickv):
     assert hardware.label("printer")
     assert security.label("auto_shutdown")
     assert settings.label("persist")
+    assert coinjoin.label("enabled")

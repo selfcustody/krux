@@ -223,25 +223,57 @@ def _coinjoin_psbt(key):
     return psbt
 
 
+def _coinjoin_p2tr_psbt(key):
+    from embit import bip32, script
+    from embit.psbt import DerivationPath, PSBT
+    from embit.transaction import Transaction, TransactionInput, TransactionOutput
+
+    input_path = bip32.parse_path("m/86h/1h/0h/0/0")
+    output_path = bip32.parse_path("m/86h/1h/0h/1/0")
+    input_pub = key.root.derive(input_path).key.get_public_key()
+    output_pub = key.root.derive(output_path).key.get_public_key()
+    external_pub = key.root.derive("m/86h/1h/1h/0/0").key.get_public_key()
+
+    tx = Transaction(
+        vin=[TransactionInput(b"\x01" * 32, 0)],
+        vout=[
+            TransactionOutput(9600, script.p2tr(output_pub)),
+            TransactionOutput(300, script.p2tr(external_pub)),
+        ],
+    )
+    psbt = PSBT(tx)
+    psbt.inputs[0].witness_utxo = TransactionOutput(10000, script.p2tr(input_pub))
+    psbt.inputs[0].taproot_bip32_derivations[input_pub] = (
+        [],
+        DerivationPath(key.fingerprint, input_path),
+    )
+    psbt.outputs[0].taproot_bip32_derivations[output_pub] = (
+        [],
+        DerivationPath(key.fingerprint, output_path),
+    )
+    return psbt
+
+
+class FakeWallet:
+    def __init__(self, key, policy_type):
+        self.key = key
+        self.policy = {"type": policy_type}
+        self.descriptor = None
+
+    def is_miniscript(self):
+        return False
+
+    def is_multisig(self):
+        return False
+
+    def is_loaded(self):
+        return True
+
+
 def test_coinjoin_policy_signs_and_rejects_low_self_transfer(m5stickv):
     from embit.networks import NETWORKS
     from krux.key import Key, P2WPKH, TYPE_SINGLESIG
     from krux.psbt import PSBTSigner
-
-    class FakeWallet:
-        def __init__(self, key):
-            self.key = key
-            self.policy = {"type": P2WPKH}
-            self.descriptor = None
-
-        def is_miniscript(self):
-            return False
-
-        def is_multisig(self):
-            return False
-
-        def is_loaded(self):
-            return True
 
     key = Key(
         MNEMONIC_ABANDON,
@@ -249,7 +281,7 @@ def test_coinjoin_policy_signs_and_rejects_low_self_transfer(m5stickv):
         NETWORKS["test"],
         script_type=P2WPKH,
     )
-    wallet = FakeWallet(key)
+    wallet = FakeWallet(key, P2WPKH)
     signer = PSBTSigner(wallet, _coinjoin_psbt(key).serialize(), None)
     policy = {
         "enabled": True,
@@ -290,3 +322,120 @@ def test_coinjoin_policy_signs_and_rejects_low_self_transfer(m5stickv):
     signer = PSBTSigner(wallet, _coinjoin_psbt(key).serialize(), None)
     with pytest.raises(ValueError, match="fee rate policy out of range"):
         signer.sign_coinjoin(invalid_policy)
+
+
+def test_coinjoin_policy_rejects_invalid_psbts(m5stickv):
+    from embit import script
+    from embit.networks import NETWORKS
+    from embit.psbt import DerivationPath
+    from embit.transaction import SIGHASH
+    from krux.key import Key, P2WPKH, TYPE_SINGLESIG
+    from krux.psbt import PSBTSigner
+
+    key = Key(
+        MNEMONIC_ABANDON,
+        TYPE_SINGLESIG,
+        NETWORKS["test"],
+        script_type=P2WPKH,
+    )
+    wallet = FakeWallet(key, P2WPKH)
+    policy = {
+        "enabled": True,
+        "allowed_scripts": (P2WPKH,),
+        "allowed_account_prefix": "m/84h/1h/0h",
+        "min_self_transfer_pct": 95,
+        "max_fee_rate_sat_vb": 6,
+    }
+
+    signer = PSBTSigner(wallet, _coinjoin_psbt(key).serialize(), None)
+    assert signer._coinjoin_policy(None)["allowed_account_prefix"] == key.derivation
+    with pytest.raises(ValueError, match="policy disabled"):
+        signer.coinjoin_amounts({"enabled": False})
+    with pytest.raises(ValueError, match="wallet fingerprint mismatch"):
+        signer.coinjoin_amounts(dict(policy, wallet_fingerprint=b"\x00" * 4))
+
+    signer = PSBTSigner(wallet, _coinjoin_psbt(key).serialize(), None)
+    signer.psbt.inputs[0].witness_utxo = None
+    with pytest.raises(ValueError, match="missing witness UTXO"):
+        signer.coinjoin_amounts(policy)
+
+    signer = PSBTSigner(wallet, _coinjoin_psbt(key).serialize(), None)
+    with pytest.raises(ValueError, match="unsupported coinjoin input script"):
+        signer.coinjoin_amounts(dict(policy, allowed_scripts=()))
+
+    psbt = _coinjoin_psbt(key)
+    psbt.outputs[0].script_pubkey = script.Script(b"\x51")
+    signer = PSBTSigner(wallet, psbt.serialize(), None)
+    with pytest.raises(ValueError, match="unsupported coinjoin output script"):
+        signer.coinjoin_amounts(policy)
+
+    signer = PSBTSigner(wallet, _coinjoin_psbt(key).serialize(), None)
+    with pytest.raises(ValueError, match="has no own inputs"):
+        signer.coinjoin_amounts(dict(policy, allowed_account_prefix="m/84h/1h/1h"))
+
+    signer = PSBTSigner(wallet, _coinjoin_psbt(key).serialize(), None)
+    pub = next(iter(signer.psbt.inputs[0].bip32_derivations))
+    signer.psbt.inputs[0].bip32_derivations[pub] = DerivationPath(
+        b"\x00" * 4, signer.psbt.inputs[0].bip32_derivations[pub].derivation
+    )
+    with pytest.raises(ValueError, match="has no own inputs"):
+        signer.coinjoin_amounts(policy)
+
+    signer = PSBTSigner(wallet, _coinjoin_psbt(key).serialize(), None)
+    signer.psbt.inputs[0].sighash_type = SIGHASH.NONE
+    with pytest.raises(ValueError, match="SIGHASH_ALL"):
+        signer.coinjoin_amounts(policy)
+
+    with pytest.raises(ValueError, match="unsupported coinjoin input script"):
+        signer._coinjoin_input_vbytes_x100("bad")
+
+
+def test_coinjoin_policy_supports_taproot_and_legacy_bps(m5stickv):
+    from embit.networks import NETWORKS
+    from embit.transaction import SIGHASH
+    from krux.key import Key, P2TR, P2WPKH, TYPE_SINGLESIG
+    from krux.psbt import PSBTSigner
+
+    p2wpkh_key = Key(
+        MNEMONIC_ABANDON,
+        TYPE_SINGLESIG,
+        NETWORKS["test"],
+        script_type=P2WPKH,
+    )
+    p2wpkh_signer = PSBTSigner(
+        FakeWallet(p2wpkh_key, P2WPKH), _coinjoin_psbt(p2wpkh_key).serialize(), None
+    )
+    assert p2wpkh_signer.coinjoin_amounts(
+        {
+            "enabled": True,
+            "allowed_scripts": (P2WPKH,),
+            "allowed_account_prefix": "m/84h/1h/0h",
+            "min_self_transfer_bps": 9500,
+            "max_fee_rate_sat_vb": 6,
+        }
+    )["own_self_transfer_value"] == 9600
+
+    p2tr_key = Key(
+        MNEMONIC_ABANDON,
+        TYPE_SINGLESIG,
+        NETWORKS["test"],
+        script_type=P2TR,
+    )
+    p2tr_policy = {
+        "enabled": True,
+        "allowed_scripts": (P2TR,),
+        "allowed_account_prefix": "m/86h/1h/0h",
+        "min_self_transfer_pct": 95,
+        "max_fee_rate_sat_vb": 7,
+    }
+    p2tr_signer = PSBTSigner(
+        FakeWallet(p2tr_key, P2TR), _coinjoin_p2tr_psbt(p2tr_key).serialize(), None
+    )
+    assert p2tr_signer.coinjoin_amounts(p2tr_policy)["fee_leak"] == 400
+
+    p2tr_signer = PSBTSigner(
+        FakeWallet(p2tr_key, P2TR), _coinjoin_p2tr_psbt(p2tr_key).serialize(), None
+    )
+    p2tr_signer.psbt.inputs[0].sighash_type = SIGHASH.ALL
+    with pytest.raises(ValueError, match="SIGHASH_DEFAULT"):
+        p2tr_signer.coinjoin_amounts(p2tr_policy)
