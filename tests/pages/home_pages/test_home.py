@@ -664,9 +664,7 @@ def test_sign_menu_shows_coinjoin_only_when_enabled(mocker, amigo):
         home_module,
         "Settings",
         lambda: SimpleNamespace(
-            security=SimpleNamespace(
-                coinjoin=SimpleNamespace(enabled=coinjoin_enabled)
-            )
+            security=SimpleNamespace(coinjoin=SimpleNamespace(enabled=coinjoin_enabled))
         ),
     )
     home.sign()
