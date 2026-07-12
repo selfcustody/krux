@@ -405,15 +405,18 @@ def test_coinjoin_policy_supports_taproot_and_legacy_bps(m5stickv):
     p2wpkh_signer = PSBTSigner(
         FakeWallet(p2wpkh_key, P2WPKH), _coinjoin_psbt(p2wpkh_key).serialize(), None
     )
-    assert p2wpkh_signer.coinjoin_amounts(
-        {
-            "enabled": True,
-            "allowed_scripts": (P2WPKH,),
-            "allowed_account_prefix": "m/84h/1h/0h",
-            "min_self_transfer_bps": 9500,
-            "max_fee_rate_sat_vb": 6,
-        }
-    )["own_self_transfer_value"] == 9600
+    assert (
+        p2wpkh_signer.coinjoin_amounts(
+            {
+                "enabled": True,
+                "allowed_scripts": (P2WPKH,),
+                "allowed_account_prefix": "m/84h/1h/0h",
+                "min_self_transfer_bps": 9500,
+                "max_fee_rate_sat_vb": 6,
+            }
+        )["own_self_transfer_value"]
+        == 9600
+    )
 
     p2tr_key = Key(
         MNEMONIC_ABANDON,
