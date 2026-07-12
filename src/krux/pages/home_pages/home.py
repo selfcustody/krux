@@ -206,13 +206,13 @@ class Home(Page):
 
     def sign(self):
         """Handler for the 'sign' menu item"""
+        sign_options = [("PSBT", self.sign_psbt)]
+        if Settings().security.coinjoin.enabled:
+            sign_options.append(("%s PSBT" % t("CoinJoin"), self.sign_coinjoin_psbt))
+        sign_options.append((t("Message"), self.sign_message))
         submenu = Menu(
             self.ctx,
-            [
-                ("PSBT", self.sign_psbt),
-                ("%s PSBT" % t("CoinJoin"), self.sign_coinjoin_psbt),
-                (t("Message"), self.sign_message),
-            ],
+            sign_options,
         )
         submenu.run_loop()
         return MENU_CONTINUE

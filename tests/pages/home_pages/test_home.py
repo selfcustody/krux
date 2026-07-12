@@ -639,6 +639,44 @@ def test_sign_menu(mocker, amigo, tdata):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_sign_menu_shows_coinjoin_only_when_enabled(mocker, amigo):
+    from types import SimpleNamespace
+
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.home_pages import home as home_module
+    from krux.pages.home_pages.home import Home
+
+    ctx = create_ctx(mocker, [])
+    home = Home(ctx)
+    captured = []
+
+    class FakeMenu:
+        def __init__(self, ctx, menu, **kwargs):
+            captured.append([label for label, _ in menu])
+
+        def run_loop(self):
+            return 0, MENU_CONTINUE
+
+    mocker.patch.object(home_module, "Menu", FakeMenu)
+    coinjoin_enabled = False
+
+    mocker.patch.object(
+        home_module,
+        "Settings",
+        lambda: SimpleNamespace(
+            security=SimpleNamespace(
+                coinjoin=SimpleNamespace(enabled=coinjoin_enabled)
+            )
+        ),
+    )
+    home.sign()
+    assert captured[-1] == ["PSBT", "Message"]
+
+    coinjoin_enabled = True
+    home.sign()
+    assert captured[-1] == ["PSBT", "CoinJoin PSBT", "Message"]
+
+
 def test_load_sign_message_menu(mocker, amigo):
     from krux.pages.home_pages.home import Home
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
