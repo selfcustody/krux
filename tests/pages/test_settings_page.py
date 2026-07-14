@@ -16,7 +16,7 @@ class RebootException(Exception):
 def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.krux_settings import Settings, CategorySetting, NumberSetting
+    from krux.krux_settings import Settings, CategorySetting
     from krux.translations import available_languages
 
     index_pt = available_languages.index("pt-BR")
@@ -370,7 +370,7 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
 def test_change_display_type_on_amigo(amigo, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.krux_settings import Settings, CategorySetting, NumberSetting
+    from krux.krux_settings import Settings, CategorySetting
 
     BTN_SEQUENCE = [
         *([BUTTON_PAGE] * 2),  # Move to "Hardware"
@@ -412,7 +412,7 @@ def test_change_display_type_on_amigo(amigo, mocker):
 def test_change_display_lcd_on_amigo(amigo, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.krux_settings import Settings, CategorySetting, NumberSetting
+    from krux.krux_settings import Settings, CategorySetting
 
     BTN_SEQUENCE = [
         *([BUTTON_PAGE] * 2),  # Move to "Hardware"

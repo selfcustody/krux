@@ -1,4 +1,3 @@
-import pytest
 from ...shared_mocks import MockPrinter
 from .. import create_ctx, assert_not_flashed
 from .test_home import tdata

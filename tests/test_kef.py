@@ -1873,7 +1873,7 @@ def test_grind_alternate_decryption_key(m5stickv):
     correct key (if strong), can be found soon-ish, resulting in "garbage"
     bytes which are not the original secret.
     """
-    from datetime import datetime, timedelta
+    from datetime import datetime
     from embit import bip39, bip32
     from krux import kef
     from krux.baseconv import base_encode
