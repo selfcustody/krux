@@ -1,4 +1,3 @@
-import pytest
 from .. import assert_not_flashed
 from .test_home import tdata, create_ctx
 
