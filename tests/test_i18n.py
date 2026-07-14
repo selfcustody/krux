@@ -1,6 +1,3 @@
-import pytest
-
-
 def test_translations(mocker, m5stickv):
     from krux.krux_settings import t, locale_control
     from krux.translations import available_languages, ref_array

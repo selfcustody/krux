@@ -5,7 +5,6 @@ from . import create_ctx
 def test_fill_flash(amigo, mocker):
     from krux.pages.fill_flash import (
         FillFlash,
-        BLOCK_SIZE,
         IMAGE_BYTES_SIZE,
         TOTAL_BLOCKS,
     )
