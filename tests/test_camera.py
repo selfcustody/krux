@@ -1,5 +1,4 @@
 import pytest
-from tests.conftest import wonder_k
 
 
 def test_init(mocker, m5stickv):

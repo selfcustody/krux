@@ -288,7 +288,7 @@ class Addresses(Page):
     def scan_address(self, addr_type=0):
         """Handler for the 'receive' or 'change' menu item"""
         from ..qr_capture import QRCodeCapture
-        from ..encryption_ui import decrypt_kef
+        from ..encryption_ui import try_decrypt_kef
 
         qr_capture = QRCodeCapture(self.ctx)
         data, qr_format = qr_capture.qr_capture_loop()
@@ -298,21 +298,13 @@ class Addresses(Page):
             self.flash_error(t("Failed to load"))
             return MENU_CONTINUE
 
-        try:
-            data = decrypt_kef(self.ctx, data)
-
-            # Cpython raises UnicodeDecodeError, MaixPy raises TypeError
-            try:
-                data = data.decode()
-            except:
-                self.flash_error(t("Failed to load"))
-                return MENU_CONTINUE
-        except KeyError:
+        data, error = try_decrypt_kef(self.ctx, data)
+        if error == "decrypt":
             self.flash_error(t("Failed to decrypt"))
             return MENU_CONTINUE
-        except ValueError:
-            # ValueError=not KEF or declined to decrypt
-            pass
+        if error == "load":
+            self.flash_error(t("Failed to load"))
+            return MENU_CONTINUE
 
         addr = None
         data = data.decode() if isinstance(data, bytes) else data

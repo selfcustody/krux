@@ -116,6 +116,31 @@ def decrypt_kef(ctx, data):
             return data
 
 
+def try_decrypt_kef(ctx, data, decode=True):
+    """Wraps decrypt_kef, mapping its exceptions to an error tag.
+
+    Returns a (data, error) tuple where error is one of:
+      None        decrypted, or not KEF / user declined (data unchanged)
+      "decrypt"   KEF envelope found but decryption failed
+      "load"      decrypted but the result could not be decoded
+    """
+    try:
+        data = decrypt_kef(ctx, data)
+    except KeyError:
+        return None, "decrypt"
+    except ValueError:
+        # ValueError=not KEF or declined to decrypt
+        return data, None
+
+    if decode:
+        # Cpython raises UnicodeDecodeError, MaixPy raises TypeError
+        try:
+            data = data.decode()
+        except:
+            return None, "load"
+    return data, None
+
+
 def prompt_for_text_update(
     ctx,
     dflt_value,

@@ -139,28 +139,20 @@ class PassphraseEditor(Page):
 
     def _load_qr_passphrase(self):
         from .qr_capture import QRCodeCapture
-        from .encryption_ui import decrypt_kef
+        from .encryption_ui import try_decrypt_kef
 
         qr_capture = QRCodeCapture(self.ctx)
         data, _ = qr_capture.qr_capture_loop()
         if data is None:  # user left the QR scanner
             return MENU_CONTINUE
 
-        try:
-            data = decrypt_kef(self.ctx, data)
-
-            # Cpython raises UnicodeDecodeError, MaixPy raises TypeError
-            try:
-                data = data.decode()
-            except:
-                self.flash_error(t("Failed to load"))
-                return MENU_CONTINUE
-        except KeyError:
+        data, error = try_decrypt_kef(self.ctx, data)
+        if error == "decrypt":
             self.flash_error(t("Failed to decrypt"))
             return MENU_CONTINUE
-        except ValueError:
-            # ValueError=not KEF or declined to decrypt
-            pass
+        if error == "load":
+            self.flash_error(t("Failed to load"))
+            return MENU_CONTINUE
 
         if len(data) > PASSPHRASE_MAX_LEN:
             raise ValueError("Maximum length exceeded (%s)" % PASSPHRASE_MAX_LEN)

@@ -496,17 +496,8 @@ class Home(Page):
             return MENU_CONTINUE
         data, qr_format, psbt_filename = loaded
 
-        # DISABLED to avoid false "Decrypt?" on normal PSBTs as KEF
-        # try:
-        #     from ..encryption_ui import decrypt_kef
-        #
-        #     data = decrypt_kef(self.ctx, data)
-        # except KeyError:
-        #     self.flash_error(t("Failed to decrypt"))
-        #     return MENU_CONTINUE
-        # except ValueError:
-        #     # ValueError=not KEF or declined to decrypt
-        #     pass
+        # KEF decryption is intentionally NOT attempted here, to avoid
+        # prompting a false "Decrypt?" when loading normal PSBTs.
 
         # PSBT read OK! Will try to sign
         self.ctx.display.clear()

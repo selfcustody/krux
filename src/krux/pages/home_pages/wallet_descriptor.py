@@ -159,23 +159,15 @@ class WalletDescriptor(Page):
         self.ctx.display.draw_centered_text(t("Processing…"))
 
         # Decrypt if needed
-        from ..encryption_ui import decrypt_kef
+        from ..encryption_ui import try_decrypt_kef
 
-        try:
-            wallet_data = decrypt_kef(self.ctx, wallet_data)
-
-            # Cpython raises UnicodeDecodeError, MaixPy raises TypeError
-            try:
-                wallet_data = wallet_data.decode()
-            except:
-                self.flash_error(t("Failed to load"))
-                return None
-        except KeyError:
+        wallet_data, error = try_decrypt_kef(self.ctx, wallet_data)
+        if error == "decrypt":
             self.flash_error(t("Failed to decrypt"))
             return None
-        except ValueError:
-            # ValueError=not KEF or declined to decrypt
-            pass
+        if error == "load":
+            self.flash_error(t("Failed to load"))
+            return None
 
         return wallet_data, qr_format, persisted
 

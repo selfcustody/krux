@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import patch
-from Crypto.Cipher import AES
 import base64
 
 TEST_KEY = "test key"
