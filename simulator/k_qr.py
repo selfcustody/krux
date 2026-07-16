@@ -1,1 +1,0 @@
-../kapps/k_qr.py

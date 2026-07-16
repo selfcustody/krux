@@ -136,19 +136,21 @@ def home(ctx_home):
 
 
 def startup_kapp(ctx_app):
-    """Check for startup kapp needs to run before firmware"""
+    """Runs the configured startup kapp, if any. Must only be called after
+    the TC code / flash-hash integrity checks: the kapp lives in the same
+    flash region those checks are meant to attest. The kapp signature is
+    (re)verified inside execute_flash_kapp, and the device restarts after
+    the kapp exits."""
     from krux.krux_settings import Settings
 
     app_name = Settings().security.startup_kapp
     if app_name == "none":
-        return False
+        return
 
     from krux.pages.kapps import Kapps
 
     kapps = Kapps(ctx_app)
     kapps.execute_flash_kapp(app_name, prompt=False)
-
-    return True
 
 
 # ------
@@ -157,17 +159,17 @@ def startup_kapp(ctx_app):
 
 display.initialize_lcd()
 
-if not startup_kapp(ctx):
-    preimport_ticks = time.ticks_ms()
-    draw_splash(display)
-    check_for_updates()
-    gc.collect()
+preimport_ticks = time.ticks_ms()
+draw_splash(display)
+# Never skipped: SD firmware updates must not require disabling a startup kapp
+check_for_updates()
+gc.collect()
 
-    # If importing happened too fast, sleep the difference so the logo
-    # will be shown
-    postimport_ticks = time.ticks_ms()
-    if preimport_ticks + MIN_SPLASH_WAIT_TIME > postimport_ticks:
-        time.sleep_ms(preimport_ticks + MIN_SPLASH_WAIT_TIME - postimport_ticks)
+# If importing happened too fast, sleep the difference so the logo
+# will be shown
+postimport_ticks = time.ticks_ms()
+if preimport_ticks + MIN_SPLASH_WAIT_TIME > postimport_ticks:
+    time.sleep_ms(preimport_ticks + MIN_SPLASH_WAIT_TIME - postimport_ticks)
 
 
 from krux.auto_shutdown import auto_shutdown
@@ -177,6 +179,10 @@ auto_shutdown.add_ctx(ctx)
 
 if not tc_code_verification(ctx):
     power_manager.shutdown()
+# Startup kapp runs only after the flash-integrity checks above; if one runs,
+# the device restarts when it exits (no fall-through into login with kapp
+# residue). If none is configured this is a no-op.
+startup_kapp(ctx)
 login(ctx)
 gc.collect()
 home(ctx)

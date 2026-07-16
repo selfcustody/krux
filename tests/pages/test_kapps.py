@@ -90,7 +90,7 @@ def test_valid_signature(m5stickv, mocker):
     ########################################
     print("Case 1: invalid pubkey()")
 
-    mocker.patch("krux.firmware.get_pubkey", new=lambda: None)
+    mocker.patch("krux.firmware.get_kapp_pubkeys", new=lambda: [])
 
     with pytest.raises(ValueError, match="Invalid public key"):
         kapps.valid_signature(None, None)
@@ -98,7 +98,7 @@ def test_valid_signature(m5stickv, mocker):
     ########################################
     print("Case 2: valid signature")
 
-    mocker.patch("krux.firmware.get_pubkey", new=lambda: "Valid pubkey")
+    mocker.patch("krux.firmware.get_kapp_pubkeys", new=lambda: ["Valid pubkey"])
     mocker.patch("krux.firmware.check_signature", new=lambda pubk, sig, hash: True)
 
     sig = kapps.valid_signature(None, None)
@@ -144,6 +144,10 @@ def test_execute_flash_kapp(m5stickv, mocker):
     #########################################
     print("Case 2: Continue to execut the app, skip error msg")
 
+    # Signature of the flash copy is re-verified on every execution now;
+    # this test exercises the execution flow, not the signature gate
+    mocker.patch.object(kapps, "_verify_flash_kapp", return_value=True)
+
     mocker.patch(
         "os.chdir",
         new=mocker.MagicMock(),
@@ -182,7 +186,7 @@ def test_execute_flash_kapp(m5stickv, mocker):
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
     print(dir_path)
-    sys.path.append(dir_path.rsplit("/", 1)[0] + "/files")
+    sys.path.append(os.path.join(os.path.dirname(dir_path), "files"))
 
     kapps.execute_flash_kapp("kapp")
     assert os.chdir.called
@@ -463,7 +467,14 @@ def test_load_sd_kapp_not_found_allow_store_in_flash(m5stickv, mocker):
     def sha_return(firmware_size):
         return values_list.pop()
 
-    values_list = [b"sha256hash_OTHER_value", b"sha256hashvalue", b"sha256hashvalue"]
+    # popped from the end: parse (init), sd data_hash, flash scan (mismatch),
+    # post-copy flash verification (must match the sd data_hash)
+    values_list = [
+        b"sha256hashvalue",
+        b"sha256hash_OTHER_value",
+        b"sha256hashvalue",
+        b"sha256hashvalue",
+    ]
     mocker.patch(
         "krux.firmware.sha256",
         new=sha_return,

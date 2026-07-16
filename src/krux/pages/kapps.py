@@ -20,6 +20,37 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+"""Krux apps (kapps) manager: install, verify and run developer-signed apps.
+
+Kapp contract
+-------------
+A kapp is a single ``.mpy`` module (compiled with the firmware's ``mpy-cross``)
+accompanied by a detached ``.mpy.sig`` signature. A kapp must expose:
+
+- ``run(ctx)``  -- entry point; receives the Krux ``ctx`` and returns when done.
+
+and may optionally expose:
+
+- ``ALLOW_STARTUP``  -- truthy to permit being set as a boot startup kapp;
+- ``NAME`` / ``VERSION``  -- human-readable metadata.
+
+Security model
+--------------
+- Kapps are verified against the dedicated ``KAPP_SIGNER_PUBKEYS`` (never the
+  firmware signer key). A kapp is accepted only if a trusted key signed the
+  exact bytes present in flash.
+- The signature is re-verified against the flash copy on *every* execution
+  (menu and startup paths alike): flash content is never trusted from an
+  earlier check.
+- A kapp's module-level code runs on import. This only happens after signature
+  verification, so importing is gated on the kapp being trusted.
+- Imports are sandboxed (``vfs.exec_allowed`` and a chdir into flash) and the
+  sandbox is always torn down afterwards, dropping the module from
+  ``sys.modules`` so nothing it patched survives into the session.
+- The device reboots after any kapp exits, so a misbehaving kapp cannot leave
+  poisoned state driving login, tamper checks or wallet handling.
+"""
+
 from krux.pages import (
     Page,
     Menu,
@@ -33,7 +64,11 @@ from krux.settings import FLASH_PATH, STARTUP_APPS_FILE
 import os
 
 READABLEBUFFER_SIZE = 128
-STARTUP_ATTR = "ALLOW_STARTUP"
+# Kapp module contract
+RUN_ATTR = "run"  # required: run(ctx) entry point
+STARTUP_ATTR = "ALLOW_STARTUP"  # optional: may be set as a startup kapp
+# Refuse .mpy files larger than this before copying to flash
+MAX_KAPP_SIZE = 256 * 1024
 
 
 class Kapps(Page):
@@ -72,20 +107,23 @@ class Kapps(Page):
         flash_path_prefix = "/%s/" % FLASH_PATH
         for file in os.listdir(flash_path_prefix):
             if file.endswith(MPY_FILE_EXTENSION):
-                # Check if signature file exists for the .mpy file
+                # Check if signature file exists for the .mpy file.
+                # Only a missing/unreadable file means "unsigned"; a failure
+                # inside signature verification is an error and must surface,
+                # not silently classify the app as unsigned.
                 try:
-                    sig_data = None
                     with open(
                         flash_path_prefix + file + SIGNATURE_FILE_EXTENSION,
                         "rb",
                         buffering=0,
                     ) as sigfile:
                         sig_data = sigfile.read()
-                    if self.valid_signature(sig_data, sha256(flash_path_prefix + file)):
-                        signed_apps += [file]
-                    else:
-                        unsigned_apps += [file]
-                except:
+                except OSError:
+                    unsigned_apps += [file]
+                    continue
+                if self.valid_signature(sig_data, sha256(flash_path_prefix + file)):
+                    signed_apps += [file]
+                else:
                     unsigned_apps += [file]
 
         if len(unsigned_apps) > 0:
@@ -102,22 +140,113 @@ class Kapps(Page):
             # Delete any .mpy files from flash VFS to avoid malicious code import/execution
             for app in unsigned_apps:
                 os.remove(flash_path_prefix + app)
+                self._remove_from_startup(app[: -len(MPY_FILE_EXTENSION)])
 
         return signed_apps
 
     def valid_signature(self, sig, data_hash):
-        """Return if signature of data_hash is valid"""
+        """Return if any trusted kapp signer key signed data_hash"""
 
-        from krux.firmware import get_pubkey, check_signature
+        from krux.firmware import get_kapp_pubkeys, check_signature
 
-        pubkey = get_pubkey()
-        if pubkey is None:
+        pubkeys = get_kapp_pubkeys()
+        if not pubkeys:
+            # No kapp key provisioned or all malformed: fail closed
             raise ValueError("Invalid public key")
 
-        if not check_signature(pubkey, sig, data_hash):
-            return False
+        for pubkey in pubkeys:
+            if check_signature(pubkey, sig, data_hash):
+                return True
 
-        return True
+        return False
+
+    def _verify_flash_kapp(self, app_name):
+        """Verify the signature of a kapp as it exists in flash right now.
+        Called on every execution so flash content is never trusted from an
+        earlier check (boot, install or menu listing)."""
+
+        from krux.firmware import sha256
+
+        flash_path_prefix = "/%s/" % FLASH_PATH
+        mpy_path = flash_path_prefix + app_name + MPY_FILE_EXTENSION
+        try:
+            with open(mpy_path + SIGNATURE_FILE_EXTENSION, "rb", buffering=0) as f:
+                sig_data = f.read()
+        except OSError:
+            return False
+        return self.valid_signature(sig_data, sha256(mpy_path))
+
+    def _load_startup_apps(self):
+        """Reads the set of startup apps from flash (empty on any error)"""
+
+        import ujson as json
+
+        try:
+            with open("/%s/%s" % (FLASH_PATH, STARTUP_APPS_FILE), "r") as f:
+                return set(json.load(f))
+        except (OSError, ValueError):
+            return set()
+
+    def _save_startup_apps(self, startup_apps):
+        """Persists the set of startup apps to flash"""
+
+        import ujson as json
+
+        with open("/%s/%s" % (FLASH_PATH, STARTUP_APPS_FILE), "w") as f:
+            json.dump(list(startup_apps), f)
+
+    def _add_to_startup(self, app_name):
+        """Registers an app as a startup kapp"""
+
+        startup_apps = self._load_startup_apps()
+        if app_name not in startup_apps:
+            startup_apps.add(app_name)
+            self._save_startup_apps(startup_apps)
+
+    def _remove_from_startup(self, app_name):
+        """Drops an app from the startup apps file, if present"""
+
+        startup_apps = self._load_startup_apps()
+        if app_name in startup_apps:
+            startup_apps.discard(app_name)
+            self._save_startup_apps(startup_apps)
+
+    def _with_flash_kapp(self, app_name, callback):
+        """Import a signature-verified kapp from flash, run callback(module),
+        and always tear the import sandbox down afterwards.
+
+        The kapp's module-level code runs on import; callers must verify the
+        signature first. The sandbox (flash import + chdir) and sys.modules are
+        restored in a finally block even if import or the callback raises, so
+        nothing the kapp loaded or patched survives this call."""
+
+        import vfs
+        import sys
+        import gc
+
+        vfs.exec_allowed(True)
+        os.chdir("/" + FLASH_PATH)
+        try:
+            module = __import__(app_name)
+            return callback(module)
+        finally:
+            vfs.exec_allowed(False)
+            os.chdir("/")
+            sys.modules.pop(app_name, None)
+            gc.collect()
+
+    def _invoke_kapp(self, module):
+        """Validate the kapp contract and run its entry point"""
+
+        entry = getattr(module, RUN_ATTR, None)
+        if not callable(entry):
+            raise ValueError("Not a Krux app")
+        entry(self.ctx)
+
+    def _flash_copy_matches(self, expected_hash, actual_hash):
+        """Return if the hash of the bytes written to flash matches the hash
+        the user approved (guards the SD->flash copy against TOCTOU/corruption)"""
+        return expected_hash == actual_hash
 
     def execute_flash_kapp(self, app_name, from_sd=False, prompt=True):
         """Prompt user to load and 'execute' a .mpy Krux app"""
@@ -128,22 +257,21 @@ class Kapps(Page):
         ):
             return MENU_EXIT if from_sd else MENU_CONTINUE
 
-        # Allows import of files in flash VFS
-        import vfs
+        # Re-verify the signature of the flash copy on every execution, on the
+        # menu path and the startup path alike. Anyone with flash write access
+        # could have swapped the .mpy since it was last checked.
+        if not self._verify_flash_kapp(app_name):
+            self.flash_error(t("Bad signature"))
+            return MENU_EXIT if from_sd else MENU_CONTINUE
 
-        vfs.exec_allowed(True)
-        os.chdir("/" + FLASH_PATH)
-
-        # Import and exec the kapp
-        i_kapp = None
+        # Import and run inside the flash sandbox; the helper always tears the
+        # sandbox down and drops the module afterwards, even on error.
         try:
-            i_kapp = __import__(app_name)
-            i_kapp.run(self.ctx)
-        except:
-            # avoids importing from flash VSF
-            vfs.exec_allowed(False)
-            os.chdir("/")
+            self._with_flash_kapp(app_name, self._invoke_kapp)
+        except Exception as e:
+            import sys
 
+            sys.print_exception(e)
             from krux.themes import theme
 
             self.ctx.display.to_portrait()
@@ -154,15 +282,9 @@ class Kapps(Page):
             )
             self.ctx.input.wait_for_button()
 
-        # avoids importing from flash VSF
-        vfs.exec_allowed(False)
-        os.chdir("/")
-
-        # Avoid restart when forced execution (startup)
-        if not prompt:
-            return None
-
-        # After execution restart Krux (better safe than sorry)
+        # After any execution reboot Krux (better safe than sorry) - startup
+        # kapps included: a misbehaving kapp must not leave a poisoned module
+        # state driving login, TC checks and wallet handling.
         from ..power import power_manager
 
         power_manager.shutdown()
@@ -185,6 +307,16 @@ class Kapps(Page):
         import binascii
 
         sd_path_prefix = "/%s/" % SD_PATH
+
+        # Refuse oversized files before hashing or copying anything
+        try:
+            file_size = os.stat(sd_path_prefix + filename)[6]
+        except OSError:
+            file_size = 0
+        if file_size > MAX_KAPP_SIZE:
+            self.flash_error(t("File too large"))
+            return MENU_CONTINUE
+
         data_hash = sha256(sd_path_prefix + filename)
 
         # Confirm hash string
@@ -203,7 +335,7 @@ class Kapps(Page):
                 sd_path_prefix + filename + SIGNATURE_FILE_EXTENSION, "rb", buffering=0
             ) as sigfile:
                 sig_data = sigfile.read()
-        except:
+        except OSError:
             self.flash_error(t("Missing signature file"))
             return MENU_CONTINUE
 
@@ -249,6 +381,16 @@ class Kapps(Page):
                             break
                         flash_file.write(chunk)
 
+            # Verify the bytes actually written to flash against the hash the
+            # user approved: the SD file could have changed between the hash
+            # prompt and this copy (TOCTOU), or the copy could be corrupted.
+            if not self._flash_copy_matches(
+                data_hash, sha256(flash_path_prefix + filename_flash)
+            ):
+                os.remove(flash_path_prefix + filename_flash)
+                self.flash_error(t("Bad signature"))
+                return MENU_CONTINUE
+
             # Save SIG .mpy.sig
             with open(
                 flash_path_prefix + filename_flash + SIGNATURE_FILE_EXTENSION,
@@ -257,45 +399,19 @@ class Kapps(Page):
             ) as kapp_sig_file:
                 kapp_sig_file.write(sig_data)
 
-            # Load Kapp to check for ALLOW_STARTUP flag
-            import vfs
-            import ujson as json
-
-            # Allows import of files in flash VFS
-            vfs.exec_allowed(True)
-            os.chdir(flash_path_prefix)
-
-            # Import kapp
-            i_kapp = None
+            # Register the app as a startup kapp if it opts in (ALLOW_STARTUP).
+            # The flash copy is signature-verified above, so importing it in the
+            # sandbox to read the flag is gated on the kapp being trusted.
             app_name = filename_flash[:-4]
             try:
-                i_kapp = __import__(app_name)
-                if getattr(i_kapp, STARTUP_ATTR, False):
-                    # Load or create startup apps file
-                    try:
-                        with open(flash_path_prefix + STARTUP_APPS_FILE, "r") as f:
-                            startup_apps = set(json.load(f))
-                    except:
-                        startup_apps = set()
-
-                    # update
-                    startup_apps.add(app_name)
-
-                    # save
-                    with open(flash_path_prefix + STARTUP_APPS_FILE, "w") as f:
-                        json.dump(list(startup_apps), f)
-
-                # Unimport kapp
+                self._with_flash_kapp(
+                    app_name,
+                    lambda module: self._register_startup_flag(module, app_name),
+                )
+            except Exception as e:
                 import sys
 
-                del sys.modules[app_name]
-                del i_kapp
-            except:
-                pass
-
-            # avoids importing from flash VSF
-            vfs.exec_allowed(False)
-            os.chdir("/")
+                sys.print_exception(e)
 
         del sig_data
         import gc
@@ -303,3 +419,9 @@ class Kapps(Page):
         gc.collect()
 
         return self.execute_flash_kapp(filename_flash[:-4], install_from_sd)
+
+    def _register_startup_flag(self, module, app_name):
+        """Records the app as a startup kapp when it declares ALLOW_STARTUP"""
+
+        if getattr(module, STARTUP_ATTR, False):
+            self._add_to_startup(app_name)

@@ -207,6 +207,20 @@ def get_pubkey():
         return None
 
 
+def get_kapp_pubkeys():
+    """Construct the trusted kapp signer pubkeys from Krux metadata"""
+
+    from .metadata import KAPP_SIGNER_PUBKEYS
+
+    pubkeys = []
+    for pubkey_str in KAPP_SIGNER_PUBKEYS:
+        try:
+            pubkeys.append(ec.PublicKey.from_string(pubkey_str))
+        except:
+            pass
+    return pubkeys
+
+
 def find_all_occurrences(data, pattern):
     """Find all occurrences of the pattern in the data"""
     positions = []

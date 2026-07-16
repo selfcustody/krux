@@ -21,3 +21,12 @@
 # THE SOFTWARE.
 VERSION = "26.04.0"
 SIGNER_PUBKEY = "03339e883157e45891e61ca9df4cd3bb895ef32d475b8e793559ea10a36766689b"
+
+# Trusted keys for signing Krux apps (kapps), deliberately distinct from the
+# firmware signer key so a kapp-signing compromise cannot ship firmware and
+# vice versa. Multiple keys are supported so different kapps can be signed by
+# different maintainers; a kapp is accepted when ANY key here signed it.
+# Empty means "no kapp key provisioned": verification fails closed and no
+# kapp will run.
+# @TODO: To be filled with the Kapps maintainers' pubkeys.
+KAPP_SIGNER_PUBKEYS = ()

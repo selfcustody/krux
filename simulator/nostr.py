@@ -1,1 +1,0 @@
-../kapps/nostr.py

@@ -35,9 +35,16 @@ Switch from the pure-Python urtypes and foundation-ur-py packages to the new uUR
 This device shares similarities with the WonderMV but stands out with its larger 2.4" touchscreen.
 
 ### Krux apps (Kapps)
-New tool for executing developer-signed utility apps that extend Krux functionality. Includes two initial Kapps: 
-- Nostr: Create or load your key using NIP-06 or NIP-19, and airgap-sign events
-- Steganography: Concel data within BMP image files
+New tool for executing developer-signed utility apps that extend Krux functionality. Kapps are not bundled with the firmware: each Kapp lives in its own repository and is distributed signed via [selfcustody/kapps](https://github.com/selfcustody/kapps).
+
+Security hardening of the Kapps framework:
+- Kapps are verified against dedicated trusted kapp signer keys (`KAPP_SIGNER_PUBKEYS`), never the firmware signer key; multiple keys supported, fails closed when none provisioned
+- The kapp signature is re-verified against the flash copy on every execution, on the menu path and the startup path alike
+- The startup kapp runs only after TC code / flash-hash verification, and does not skip the SD firmware-update check
+- The device always restarts after a kapp executes (startup kapps included) and the kapp module is removed from `sys.modules`
+- A cryptographic failure during signature verification surfaces as an error instead of classifying the app as unsigned
+- SD-to-flash installs re-hash the bytes actually written to flash before accepting them, refuse `.mpy` files over 256 KiB, and deleting an unsigned app also drops it from the startup apps file
+- Flash-import is unified in a single sandboxed loader whose teardown (close import sandbox, chdir out of flash, drop the module) is guaranteed even when the kapp raises; a `.mpy` without a callable `run` entry point is refused with a clear error; the Kapp contract and security model are documented
 
 ### New Device Support: WonderK PRO
 From the wonderful land of Korea, a new creation arrives: the WonderK PRO. Created by an entrepreneur who loves the Krux project, the WonderK follows in the footsteps of the WonderMV, but boasts a larger 2.8" display! Computer simulator for the WonderK device is also included.
@@ -132,7 +139,7 @@ Wallet fingerprint, network, keypad titles, settings categories, and prefix text
 ### Enhanced Settings Category Colors
 Boolean settings (True/False) are now displayed with color (Green/Red) for improved visibility.
 
-### Enhanced Address Verification 
+### Enhanced Address Verification
 To facilitate comparison, addresses are displayed in space-separated groups of 4 characters with alternating colors.
 
 ### Export Wallet Addresses
@@ -196,7 +203,7 @@ Exported QR codes can now be saved as SVG images.
 ### Easter Eggs Reveal
 Hints were added to unveil hidden features, such as swiping sideways to change the keypad keyset, switching camera modes, and adjusting QR code brightness.
 
-### Rearranged Keypad Keysets 
+### Rearranged Keypad Keysets
 Keypad keysets were organized to group similar keys and help with visibility. Also the *"ABC"* key now changes to *"123"*, *"<>."* and *"abc"* according to the next keyset.
 
 ### More Camera Modes
@@ -267,7 +274,7 @@ Several code improvements for better reliability and efficiency.
 # Changelog 24.09.1 - September 26, 2024
 
 ### Fix Camera Orientation on Cube
-Fix for the camera, that was being started upside-down on Maix Cube devices 
+Fix for the camera, that was being started upside-down on Maix Cube devices
 
 
 # Changelog 24.09.0 - September 25, 2024
@@ -308,7 +315,7 @@ When generating a new mnemonic using the camera, users can now choose to create 
 ### Increased Valid Touch Surface
 To improve touch accuracy, especially on small touchscreens, the touch surface area of buttons has been increased to make better use of the available screen space.
 
-### Add Account Descriptor Type Support 
+### Add Account Descriptor Type Support
 Krux now accepts urtype.Account type QR code descriptors.
 
 ### Enhanced File Exploring
@@ -599,9 +606,9 @@ This release is to fix a bug that would have prevented Amigos from performing ai
 
 # Version 22.08.0 - August 10, 2022
 
-This latest version of Krux is brought to you by @odudex, who tirelessly worked for months to get Krux working on three new devices: the Maix Amigo, Maix Bit, and Maix Dock. Thank you for all your hard work! 
+This latest version of Krux is brought to you by @odudex, who tirelessly worked for months to get Krux working on three new devices: the Maix Amigo, Maix Bit, and Maix Dock. Thank you for all your hard work!
 
-Many other improvements to Krux were made along the way which will be listed below. 
+Many other improvements to Krux were made along the way which will be listed below.
 
 Enjoy!
 
@@ -613,7 +620,7 @@ To perform an airgapped upgrade (with a microSD card) from a previous signed rel
 ## Changes
 ### ¡Three Amigos!
 Krux now supports three new devices: Maix Amigo, Maix Bit, and Maix Dock. The Amigo is an all-in-one device with a touchscreen display, while the Dock and Bit are more DIY-focused kits where some assembly is required.
- 
+
 ### New touchscreen UI + UX enhancements
 Along with being usable on multiple devices now, Krux also has native touchscreen support and many refinements to its UI to make better use of the screen space it has. More work has gone into improving UX including the ability to escape out of the mnemonic loading or creation screens at any point.
 
@@ -633,7 +640,7 @@ Support has been added for BIP39 passphrases. After loading a mnemonic, you will
 You can now save a signed PSBT to microSD which should help users having trouble getting their webcams to read the tiny QR codes on the M5StickV. Furthermore, Krux supports loading a PSBT from microSD as well if you want to forgo QR codes entirely.
 
 ### Better mnemonic generation
-The flow for entering rolls has been streamlined to allow more rapid input, with your string of rolls now being visible along the top of the screen as you go. We also introduced a change to how the D6 roll string is built, no longer including "-" between rolls prior to hashing to have consistency with ColdCard and SeedSigner. 
+The flow for entering rolls has been streamlined to allow more rapid input, with your string of rolls now being visible along the top of the screen as you go. We also introduced a change to how the D6 roll string is built, no longer including "-" between rolls prior to hashing to have consistency with ColdCard and SeedSigner.
 
 Note: We continue to use a "-" separator between D20 rolls to avoid reducing state space due to collisions (e.g., rolling 1-17 and 11-7 would result in the same 117 string without a separator, and would thus have the same hash)
 
