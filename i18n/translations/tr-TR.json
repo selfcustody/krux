@@ -109,6 +109,7 @@
     "Failed to store mnemonic": "Mnemonic depolama başarısız",
     "Fee:": "Ücret:",
     "Feed Rate": "Besleme Hızı",
+    "File too large": "Dosya çok büyük",
     "Filename": "Dosya adı",
     "Filename %s exists on SD card.": "%s dosya adı SD kartta var.",
     "Fill the flash with entropy from camera?": "Flash'ı kameradan gelen entropi ile doldur?",
