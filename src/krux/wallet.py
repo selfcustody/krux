@@ -508,8 +508,12 @@ def parse_address(address_data):
 
     if not isinstance(sc, Script):
         try:
-            address_to_scriptpubkey(addr)
+            sc = address_to_scriptpubkey(addr)
         except EmbitError:
+            raise ValueError("invalid address")
+        # A base58 address with a valid checksum but an unknown version byte
+        # returns None here instead of raising, so verify a Script came back.
+        if not isinstance(sc, Script):
             raise ValueError("invalid address")
 
     return addr

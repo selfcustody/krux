@@ -1772,6 +1772,21 @@ def test_parse_address_raises_errors(mocker, m5stickv, tdata):
             parse_address(case)
 
 
+def test_parse_address_rejects_unknown_base58_version(m5stickv):
+    """A base58 address with a valid checksum but an unknown version byte must be
+    rejected. address_to_scriptpubkey returns None (no exception) for such an
+    address, so parse_address must check the returned Script, not only catch
+    errors.
+    """
+    from embit import base58
+    from krux.wallet import parse_address
+
+    # Valid base58check payload; version byte 0xFF matches no network p2pkh/p2sh
+    unknown_version_address = base58.encode_check(b"\xff" + b"\x00" * 20)
+    with pytest.raises(ValueError):
+        parse_address(unknown_version_address)
+
+
 def test_parse_address_propagates_keyboardinterrupt(mocker, m5stickv):
     """KeyboardInterrupt must propagate: never swallowed by the bech32-uppercase
     fallback, nor relabeled 'invalid address' by the final attempt.
