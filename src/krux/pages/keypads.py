@@ -40,6 +40,20 @@ from ..kboard import kboard
 
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets.
 
+QR_GLYPH = (
+    "11101100111",
+    "10101000101",
+    "11101010111",
+    "00000010000",
+    "10110110110",
+    "01001101001",
+    "10110010100",
+    "00001001110",
+    "11100101011",
+    "10101011110",
+    "11100110101",
+)
+
 
 class KeypadLayout:
     """Groups layout-related attributes for Keypad."""
@@ -72,20 +86,25 @@ class KeypadLayout:
 class Keypad:
     """Controls keypad creation and management."""
 
-    def __init__(self, ctx, keysets, possible_keys_fn=None):
+    def __init__(self, ctx, keysets, possible_keys_fn=None, has_scan_key=False):
         self.ctx = ctx
         self.keysets = keysets
         self.keyset_index = 0
-        max_keys_count = (
-            max(len(keyset) for keyset in keysets)
+        self._has_scan_key = has_scan_key
+        max_keys_count = max(
+            len(keyset)
             + FIXED_KEYS
             + (1 if len(keysets) > 1 else 0)
+            + (1 if has_scan_key and index == len(keysets) - 1 else 0)
+            for index, keyset in enumerate(keysets)
         )
         self.layout = KeypadLayout(ctx, max_keys_count)
         self.cur_key_index = 0
         self.moving_forward = True
         self.possible_keys_fn = possible_keys_fn
         self.possible_keys = self.keys
+        self._qr_glyph_cache_key = None
+        self._qr_glyph_image = None
 
     @property
     def keys(self):
@@ -95,7 +114,17 @@ class Keypad:
     @property
     def total_keys(self):
         """Returns the total number of keys in the current keyset, including fixed"""
-        return len(self.keys) + FIXED_KEYS + self.count_more_key()
+        return (
+            len(self.keys) + FIXED_KEYS + self.count_more_key() + self.count_scan_key()
+        )
+
+    def has_scan_key(self):
+        """Whether the QR scan key is available in the current keyset."""
+        return self._has_scan_key and self.keyset_index == len(self.keysets) - 1
+
+    def count_scan_key(self):
+        """Count 1 if the QR scan key is available in the current keyset."""
+        return 1 if self.has_scan_key() else 0
 
     @property
     def more_index(self):
@@ -105,9 +134,21 @@ class Keypad:
         return None
 
     @property
+    def scan_index(self):
+        """Returns the index of the QR scan key."""
+        if self.has_scan_key():
+            return self.del_index - self.count_more_key() - 1
+        return None
+
+    @property
     def del_index(self):
         """Returns the index of the "Del" key"""
-        return len(self.keys) + self.empty_keys + self.count_more_key()
+        return (
+            len(self.keys)
+            + self.empty_keys
+            + self.count_more_key()
+            + self.count_scan_key()
+        )
 
     def has_more_key(self):
         """If keypad has "ABC" key"""
@@ -151,9 +192,12 @@ class Keypad:
             for x in self.layout.x_keypad_map[:-1]:
                 x = MINIMAL_PADDING if x == 0 else x
                 key = None
+                is_scan_key = False
                 custom_color = None
                 if key_index < len(self.keys):
                     key = self.keys[key_index]
+                elif key_index == self.scan_index:
+                    is_scan_key = True
                 elif key_index == self.del_index:
                     key = "<"
                     custom_color = theme.del_color
@@ -167,11 +211,13 @@ class Keypad:
                     key = self.keysets[self._move_keyset_index()][:3]
                     custom_color = theme.toggle_color
 
-                if key is not None:
+                if key is not None or is_scan_key:
                     offset_x = x
-                    key_offset_x = (
-                        self.layout.key_h_spacing - lcd.string_width_px(key)
-                    ) // 2 + offset_x
+                    key_offset_x = offset_x
+                    if key is not None:
+                        key_offset_x = (
+                            self.layout.key_h_spacing - lcd.string_width_px(key)
+                        ) // 2 + offset_x
                     if (
                         key_index < len(self.keys)
                         and self.keys[key_index] not in self.possible_keys
@@ -189,7 +235,9 @@ class Keypad:
                                 self.layout.key_v_spacing - 2,
                                 theme.frame_color,
                             )
-                        if custom_color:
+                        if is_scan_key:
+                            self.draw_qr_glyph(offset_x, y)
+                        elif custom_color:
                             self.ctx.display.draw_string(
                                 key_offset_x, offset_y, key, custom_color
                             )
@@ -214,6 +262,46 @@ class Keypad:
                                 self.layout.key_v_spacing - 1,
                             )
                 key_index += 1
+
+    def draw_qr_glyph(self, key_x, key_y):
+        """Draws the QR scan glyph centered in a keypad cell."""
+        import image
+
+        module_size = max(1, FONT_HEIGHT // len(QR_GLYPH))
+        glyph_size = len(QR_GLYPH) * module_size
+        offset_x = key_x + (self.layout.key_h_spacing - glyph_size) // 2
+        offset_y = key_y + (self.layout.key_v_spacing - glyph_size) // 2
+        cache_key = (module_size, theme.fg_color, theme.bg_color)
+        if getattr(self, "_qr_glyph_cache_key", None) != cache_key:
+            glyph_image = image.Image(size=(glyph_size, glyph_size), copy_to_fb=False)
+            glyph_image.draw_rectangle(
+                0,
+                0,
+                glyph_size,
+                glyph_size,
+                theme.bg_color,
+                fill=True,
+            )
+            for row, modules in enumerate(QR_GLYPH):
+                column = 0
+                while column < len(modules):
+                    if modules[column] == "0":
+                        column += 1
+                        continue
+                    run_start = column
+                    while column < len(modules) and modules[column] == "1":
+                        column += 1
+                    glyph_image.draw_rectangle(
+                        run_start * module_size,
+                        row * module_size,
+                        (column - run_start) * module_size,
+                        module_size,
+                        theme.fg_color,
+                        fill=True,
+                    )
+            self._qr_glyph_cache_key = cache_key
+            self._qr_glyph_image = glyph_image
+        lcd.display(self._qr_glyph_image, oft=(offset_x, offset_y))
 
     def draw_keyset_index(self):
         """Indicates the current keyset index with a small rectangle"""

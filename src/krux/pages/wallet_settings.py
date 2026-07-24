@@ -27,7 +27,6 @@ from ..krux_settings import t
 from . import (
     Page,
     Menu,
-    MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
     LETTERS,
@@ -68,19 +67,11 @@ class PassphraseEditor(Page):
         self.ctx = ctx
 
     def load_passphrase_menu(self, mnemonic):
-        """Load a passphrase from keypad or QR code"""
+        """Load a passphrase from the keypad, with optional QR scanning."""
         passphrase = ""
         while True:
-            submenu = Menu(
-                self.ctx,
-                [
-                    (t("Type BIP39 Passphrase"), self._load_passphrase),
-                    (t("Scan BIP39 Passphrase"), self._load_qr_passphrase),
-                ],
-                disable_statusbar=True,
-            )
-            _, passphrase = submenu.run_loop()
-            if passphrase in (ESC_KEY, MENU_EXIT):
+            passphrase = self._load_passphrase(passphrase)
+            if passphrase == ESC_KEY:
                 return None
 
             # Decode passphrase in case it's a "bytes" object
@@ -128,10 +119,13 @@ class PassphraseEditor(Page):
             ):
                 return passphrase
 
-    def _load_passphrase(self):
+    def _load_passphrase(self, data=""):
         """Loads and returns a passphrase from keypad"""
         data = self.capture_from_keypad(
-            t("Passphrase"), [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2]
+            t("Passphrase"),
+            [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
+            starting_buffer=data,
+            scan_fn=self._load_qr_passphrase,
         )
         if len(str(data)) > PASSPHRASE_MAX_LEN:
             raise ValueError("Maximum length exceeded (%s)" % PASSPHRASE_MAX_LEN)
@@ -145,7 +139,7 @@ class PassphraseEditor(Page):
         data, _ = qr_capture.qr_capture_loop()
         if data is None:
             self.flash_error(t("Failed to load"))
-            return MENU_CONTINUE
+            return None
 
         try:
             data = decrypt_kef(self.ctx, data)
@@ -155,16 +149,17 @@ class PassphraseEditor(Page):
                 data = data.decode()
             except:
                 self.flash_error(t("Failed to load"))
-                return MENU_CONTINUE
+                return None
         except KeyError:
             self.flash_error(t("Failed to decrypt"))
-            return MENU_CONTINUE
+            return None
         except ValueError:
             # ValueError=not KEF or declined to decrypt
             pass
 
         if len(data) > PASSPHRASE_MAX_LEN:
-            raise ValueError("Maximum length exceeded (%s)" % PASSPHRASE_MAX_LEN)
+            self.flash_error(t("Failed to load"))
+            return None
         return data
 
 
