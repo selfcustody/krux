@@ -49,8 +49,7 @@ def test_load_key_from_keypad(m5stickv, mocker):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
-        [BUTTON_ENTER]  # choose to type key
-        + [BUTTON_PAGE]  # go to letter b
+        [BUTTON_PAGE]  # go to letter b
         + [BUTTON_ENTER]  # enter letter b
         + [BUTTON_PAGE_PREV] * 2  # move to "Go"
         + [BUTTON_ENTER]  # Go
@@ -69,8 +68,7 @@ def test_load_key_from_keypad_when_creating(m5stickv, mocker):
     from krux.themes import RED
 
     BTN_SEQUENCE = (
-        [BUTTON_ENTER]  # choose to type key
-        + [BUTTON_PAGE]  # go to letter b
+        [BUTTON_PAGE]  # go to letter b
         + [BUTTON_ENTER]  # enter letter b
         + [BUTTON_PAGE_PREV] * 2  # move to "Go"
         + [BUTTON_ENTER]  # Go
@@ -93,8 +91,7 @@ def test_esc_loading_key_from_keypad_is_none(m5stickv, mocker):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
-        [BUTTON_ENTER]  # choose to type key
-        + [BUTTON_PAGE_PREV] * 2  # go to ESC
+        [BUTTON_PAGE_PREV] * 2  # go to ESC
         + [BUTTON_ENTER]  # ESC
         + [BUTTON_ENTER]  # Confirm
     )
@@ -107,17 +104,18 @@ def test_esc_loading_key_from_keypad_is_none(m5stickv, mocker):
 
 def test_load_key_from_qr_code(m5stickv, mocker):
     from krux.pages.encryption_ui import EncryptionKey, ENCRYPTION_KEY_MAX_LEN
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER
     from krux.pages.qr_capture import QRCodeCapture
 
     print("case 1: load_key_from_qr_code")
-    BTN_SEQUENCE = (
-        [BUTTON_PAGE]  # move to QR code key
-        + [BUTTON_ENTER]  # choose QR code key
-        + [BUTTON_ENTER]  # Confirm
-    )
+    BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     key_generator = EncryptionKey(ctx)
+    mocker.patch.object(
+        key_generator,
+        "capture_from_keypad",
+        side_effect=lambda *args, **kwargs: kwargs["scan_fn"](),
+    )
     mocker.patch.object(
         QRCodeCapture, "qr_capture_loop", new=lambda self: ("qr key", None)
     )
@@ -125,13 +123,14 @@ def test_load_key_from_qr_code(m5stickv, mocker):
     assert key == "qr key"
 
     print("case 2: load_key_from_qr_code")
-    BTN_SEQUENCE = (
-        [BUTTON_PAGE]  # move to QR code key
-        + [BUTTON_ENTER]  # choose QR code key
-        + [BUTTON_ENTER]  # Confirm
-    )
+    BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     key_generator = EncryptionKey(ctx)
+    mocker.patch.object(
+        key_generator,
+        "capture_from_keypad",
+        side_effect=lambda *args, **kwargs: kwargs["scan_fn"](),
+    )
     mocker.patch.object(
         QRCodeCapture,
         "qr_capture_loop",
@@ -141,13 +140,14 @@ def test_load_key_from_qr_code(m5stickv, mocker):
     assert key == "decodable bytes qr key"
 
     print("case 3: load_key_from_qr_code")
-    BTN_SEQUENCE = (
-        [BUTTON_PAGE]  # move to QR code key
-        + [BUTTON_ENTER]  # choose QR code key
-        + [BUTTON_ENTER]  # Confirm
-    )
+    BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     key_generator = EncryptionKey(ctx)
+    mocker.patch.object(
+        key_generator,
+        "capture_from_keypad",
+        side_effect=lambda *args, **kwargs: kwargs["scan_fn"](),
+    )
     mocker.patch.object(
         QRCodeCapture, "qr_capture_loop", new=lambda self: (b"\xde\xad\xbe\xef", None)
     )
@@ -158,13 +158,7 @@ def test_load_key_from_qr_code(m5stickv, mocker):
 
     print("case 4: load_key_from_qr_code")
     # Repeat with too much characters >ENCRYPTION_KEY_MAX_LEN
-    BTN_SEQUENCE = [
-        BUTTON_PAGE,  # move to QR code key
-        BUTTON_ENTER,  # read too long text
-        BUTTON_ENTER,  # click to pass error
-        BUTTON_ENTER,  # enter to read normal text
-        BUTTON_ENTER,  # enter to accept "short text"
-    ]  # choose QR code key
+    BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm "short text"
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     key_generator = EncryptionKey(ctx)
     too_long_text = "l" * (ENCRYPTION_KEY_MAX_LEN + 1)
@@ -173,11 +167,33 @@ def test_load_key_from_qr_code(m5stickv, mocker):
     def qr_return(self):
         return values_list.pop(), None
 
+    def capture_until_valid(*args, **kwargs):
+        result = None
+        while result is None:
+            result = kwargs["scan_fn"]()
+        return result
+
     mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=qr_return)
+    mocker.patch.object(
+        key_generator, "capture_from_keypad", side_effect=capture_until_valid
+    )
     key = key_generator.encryption_key()
     assert key == "short text"
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    ctx.display.flash_text.assert_called_with(
+        "Failed to load", 248, 2000, highlight_prefix=""
+    )
+
+
+def test_load_qr_key_for_keypad_cancelled(m5stickv, mocker):
+    from krux.pages.encryption_ui import EncryptionKey
+
+    key_generator = EncryptionKey(create_ctx(mocker, []))
+    mocker.patch.object(key_generator, "load_qr_encryption_key", return_value=None)
+
+    assert key_generator._load_qr_key_for_keypad() is None
+    key_generator.load_qr_encryption_key.assert_called_once_with()
 
 
 def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
@@ -694,14 +710,12 @@ def test_decrypt_kef(m5stickv, mocker):
 
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # external envelope "Decrypt?"
-        BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # "a" as key
         BUTTON_ENTER,  # "aa" as key
         BUTTON_PAGE_PREV,  # move to "Go"
         BUTTON_ENTER,  # Go
         BUTTON_ENTER,  # Confirm "aa" as key
         BUTTON_ENTER,  # internal envelope "Decrypt?"
-        BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # "a" as key
         BUTTON_PAGE_PREV,  # move to "Go"
         BUTTON_ENTER,  # Go
@@ -717,7 +731,6 @@ def test_decrypt_kef(m5stickv, mocker):
     # callers decrypt_kef() can not catch KeyError and instead allow it to bubble up
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # external envelope "Decrypt?"
-        BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # "a" as key
         BUTTON_PAGE_PREV,  # move to "Go"
         BUTTON_ENTER,  # Go
@@ -765,7 +778,6 @@ def test_unseal_ui_failed_attempts_backoff(m5stickv, mocker):
     # First attempt with wrong key, no prior failures so no sleep yet.
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # Decrypt?
-        BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # type "a"
         BUTTON_PAGE_PREV,  # to "Go"
         BUTTON_ENTER,  # Go
@@ -1253,12 +1265,17 @@ def test_kefenvelope_parse(m5stickv, mocker):
 
 def test_kefenvelope_input_key_ui(m5stickv, mocker):
     from krux.pages.encryption_ui import KEFEnvelope
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, SWIPE_RIGHT
     from krux.pages.qr_capture import QRCodeCapture
+
+    scan_key_sequence = [
+        SWIPE_RIGHT,
+        *([BUTTON_PAGE_PREV] * 5),
+        BUTTON_ENTER,
+    ]
 
     print('returns True if a key (ie: "a") was gathered')
     BTN_SEQUENCE = [
-        BUTTON_ENTER,
         BUTTON_ENTER,
         BUTTON_PAGE_PREV,
         BUTTON_ENTER,
@@ -1270,10 +1287,10 @@ def test_kefenvelope_input_key_ui(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
     print('returns True if a key (ie: "a") was scanned')
-    BTN_SEQUENCE = [
-        BUTTON_PAGE,
-        BUTTON_ENTER,
-        BUTTON_ENTER,
+    BTN_SEQUENCE = scan_key_sequence + [
+        *([BUTTON_PAGE] * 4),
+        BUTTON_ENTER,  # Go
+        BUTTON_ENTER,  # confirm key
     ]
     mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: ("a", None))
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -1282,11 +1299,7 @@ def test_kefenvelope_input_key_ui(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
     print("returns True if a binary key (ie: 0x8f) was scanned")
-    BTN_SEQUENCE = [
-        BUTTON_PAGE,
-        BUTTON_ENTER,
-        BUTTON_ENTER,
-    ]
+    BTN_SEQUENCE = scan_key_sequence + [BUTTON_ENTER]  # confirm binary key
     mocker.patch.object(
         QRCodeCapture, "qr_capture_loop", new=lambda self: (b"\x8f", None)
     )
@@ -1296,11 +1309,8 @@ def test_kefenvelope_input_key_ui(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
     print("returns True if an encrypted binary key (ie: 0x8f) was scanned/decrypted")
-    BTN_SEQUENCE = [
-        BUTTON_PAGE,  # select scan
-        BUTTON_ENTER,  # scan key
+    BTN_SEQUENCE = scan_key_sequence + [
         BUTTON_ENTER,  # confirm decrypt
-        BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # key is "a"
         BUTTON_PAGE_PREV,  # move to Go
         BUTTON_ENTER,  # select Go
@@ -1321,28 +1331,28 @@ def test_kefenvelope_input_key_ui(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
     print("returns None if wrong key")
-    BTN_SEQUENCE = [
-        BUTTON_PAGE,  # select scan
-        BUTTON_ENTER,  # scan key
+    BTN_SEQUENCE = scan_key_sequence + [
         BUTTON_ENTER,  # confirm decrypt
-        BUTTON_ENTER,  # enter key
         BUTTON_PAGE,  # move to "b"
         BUTTON_ENTER,  # key is "b"
         BUTTON_PAGE_PREV,  # move to "a"
         BUTTON_PAGE_PREV,  # move to Go
         BUTTON_ENTER,  # select Go
         BUTTON_ENTER,  # confirm key "b"
+        *([BUTTON_PAGE] * 3),  # move from QR to Esc
+        BUTTON_ENTER,  # Esc
+        BUTTON_ENTER,  # confirm Esc
     ]
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = KEFEnvelope(ctx)
     assert page.input_key_ui() == bool(None)
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    ctx.display.flash_text.assert_called_with(
+    ctx.display.flash_text.assert_any_call(
         "Failed to decrypt", 248, 2000, highlight_prefix=""
     )
 
     print("returns False if no key was gathered")
-    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    BTN_SEQUENCE = [BUTTON_PAGE_PREV, BUTTON_ENTER]
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = KEFEnvelope(ctx)
     assert page.input_key_ui() == False
@@ -1668,7 +1678,6 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
 
     print("default is to seal plaintext using defaults w/ least interaction")
     BTN_SEQUENCE = [
-        BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # key is "a"
         BUTTON_PAGE_PREV,  # back to Go
         BUTTON_ENTER,  # select Go
@@ -1692,7 +1701,6 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
 
     print("returns None if key not captured")
     BTN_SEQUENCE = [
-        BUTTON_ENTER,  # enter key
         BUTTON_PAGE_PREV,  # back to Go
         BUTTON_ENTER,  # select go w/o key
     ]
@@ -1703,7 +1711,6 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
 
     print("overrides param is a list, ie: [OVERRIDE_LABEL]")
     BTN_SEQUENCE = [
-        BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # key is "a"
         BUTTON_PAGE_PREV,  # back to Go
         BUTTON_ENTER,  # select go
@@ -1728,7 +1735,6 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
         "overrides param is a list, ie: [OVERRIDE_MODE, OVERRIDE_ITERATIONS, OVERRIDE_LABEL]"
     )
     BTN_SEQUENCE = [
-        BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # key is "a"
         BUTTON_PAGE_PREV,  # back to Go
         BUTTON_ENTER,  # select go
@@ -1764,7 +1770,6 @@ def test_kefenvelope_seal_ui(m5stickv, mocker):
         "overrides param is a list, ie: [OVERRIDE_ITERATIONS, OVERRIDE_VERSION, OVERRIDE_LABEL]"
     )
     BTN_SEQUENCE = [
-        BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # key is "a"
         BUTTON_PAGE_PREV,  # back to Go
         BUTTON_ENTER,  # select go
@@ -1823,7 +1828,6 @@ def test_kefenvelope_unseal_ui(m5stickv, mocker):
     )
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # accept decrypt
-        BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # key is "a"
         BUTTON_PAGE_PREV,  # back to Go
         BUTTON_ENTER,  # select Go
@@ -1875,7 +1879,7 @@ def test_kefenvelope_unseal_ui(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
     print("if user decryption key is not captured: returns None")
-    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
+    BTN_SEQUENCE = [BUTTON_ENTER, BUTTON_PAGE_PREV, BUTTON_ENTER]
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = KEFEnvelope(ctx)
     page.parse(sealed_text)
@@ -1885,7 +1889,6 @@ def test_kefenvelope_unseal_ui(m5stickv, mocker):
     print("if decryption key is wrong, raises KeyError(Failed to decrypt)")
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # accept decrypt
-        BUTTON_ENTER,  # enter key
         BUTTON_ENTER,  # key is "a"
         BUTTON_ENTER,  # key is "aa"
         BUTTON_PAGE_PREV,  # back to Go

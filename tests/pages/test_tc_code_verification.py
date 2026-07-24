@@ -32,6 +32,13 @@ def test_tc_code_verification(amigo, mocker):
             False,
         ),
         (
+            " secret ",
+            b"\xb5\xa0\x88z\x98\xb8_\\\xf9`>\xb6\xf5\xefo\x82Q\x8a\xea!A\x8a\xc0\xf6\xd2\x96R\x1f\x7f,\xfa\xd3",
+            True,
+            False,
+            False,
+        ),
+        (
             "aBcDeF%@14",
             b"\x98\x99kJ\x03\x98r\xec \x9d\xd6\xbaG\xc2P\xbb9\x00\xe53(\x98\xb9\x1a,\x13-.\x1e\xe6Z\xc8",
             True,
@@ -74,6 +81,7 @@ def test_tc_code_verification(amigo, mocker):
         tc_verifier.capture_from_keypad.assert_called_once_with(
             keypad_label,
             [NUM_SPECIAL_1, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2],
+            scan_fn=(None if case[3] else tc_verifier._load_qr_tc_code),
         )
 
 
@@ -110,3 +118,41 @@ def test_tc_code_verification_esc_key(amigo, mocker):
 
         assert result == False
         assert ctx.input.wait_for_button.call_count == len(case)
+
+
+def test_tc_code_qr_sanitization(amigo, mocker):
+    from krux.pages.tc_code_verification import TCCodeVerification
+
+    tc_verifier = TCCodeVerification(create_ctx(mocker, []))
+    cases = [
+        ("aBcDeF%@14", "aBcDeF%@14"),
+        (b"  aBcDeF%@14  ", "  aBcDeF%@14  "),
+        (b"  aBcDeF%@14\r\n", None),
+        (None, None),
+        (b"\xff", None),
+        ("", None),
+        ("first\nsecond", None),
+        ("unexpected-á", None),
+        (123456, None),
+    ]
+
+    for qr_data, expected in cases:
+        assert tc_verifier._sanitize_qr_tc_code(qr_data) == expected
+
+
+def test_load_qr_tc_code(amigo, mocker):
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages.tc_code_verification import TCCodeVerification
+
+    tc_verifier = TCCodeVerification(create_ctx(mocker, []))
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        side_effect=[(" qr-code ", None), ("first\nsecond", None)],
+    )
+
+    assert tc_verifier._load_qr_tc_code() == " qr-code "
+    assert tc_verifier._load_qr_tc_code() is None
+    tc_verifier.ctx.display.flash_text.assert_called_once_with(
+        "Failed to load", 248, 2000, highlight_prefix=""
+    )

@@ -284,6 +284,103 @@ def test_keypad_esc_no_exit(mocker, amigo):
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
 
 
+def test_keypad_scan_replaces_buffer_and_returns_for_editing(mocker, amigo):
+    from krux.input import BUTTON_TOUCH, SWIPE_RIGHT
+    from krux.pages import Page
+    from krux.pages.keypads import Keypad
+
+    keysets = ["a" * 26, "b" * 23]
+    layout_ctx = create_ctx(mocker, [])
+    pad = Keypad(layout_ctx, keysets, has_scan_key=True)
+    pad.next_keyset()
+    ctx = create_ctx(
+        mocker,
+        [SWIPE_RIGHT, BUTTON_TOUCH, BUTTON_TOUCH],
+        touch_seq=[pad.scan_index, pad.go_index],
+    )
+    page = Page(ctx)
+    scan_fn = mocker.MagicMock(return_value="scanned value")
+
+    result = page.capture_from_keypad("test", keysets, scan_fn=scan_fn)
+
+    assert result == "scanned value"
+    scan_fn.assert_called_once_with()
+
+
+def test_keypad_scan_returns_binary_without_editing(mocker, amigo):
+    from krux.input import BUTTON_TOUCH, SWIPE_RIGHT
+    from krux.pages import Page
+    from krux.pages.keypads import Keypad
+
+    keysets = ["a" * 26, "b" * 23]
+    layout_ctx = create_ctx(mocker, [])
+    pad = Keypad(layout_ctx, keysets, has_scan_key=True)
+    pad.next_keyset()
+    ctx = create_ctx(
+        mocker,
+        [SWIPE_RIGHT, BUTTON_TOUCH],
+        touch_seq=[pad.scan_index],
+    )
+    page = Page(ctx)
+
+    result = page.capture_from_keypad(
+        "test", keysets, scan_fn=lambda: b"\xde\xad\xbe\xef"
+    )
+
+    assert result == b"\xde\xad\xbe\xef"
+    ctx.input.touch.clear_regions.assert_called_once_with()
+
+
+def test_keypad_scan_preserves_buffer_when_overwrite_declined(mocker, amigo):
+    from krux.input import BUTTON_TOUCH, SWIPE_RIGHT
+    from krux.pages import Page
+    from krux.pages.keypads import Keypad
+
+    keysets = ["a" * 26, "b" * 23]
+    layout_ctx = create_ctx(mocker, [])
+    pad = Keypad(layout_ctx, keysets, has_scan_key=True)
+    pad.next_keyset()
+    ctx = create_ctx(
+        mocker,
+        [SWIPE_RIGHT, BUTTON_TOUCH, BUTTON_TOUCH],
+        touch_seq=[pad.scan_index, pad.go_index],
+    )
+    page = Page(ctx)
+    page.prompt = mocker.MagicMock(return_value=False)
+    scan_fn = mocker.MagicMock()
+
+    result = page.capture_from_keypad(
+        "test", keysets, starting_buffer="typed", scan_fn=scan_fn
+    )
+
+    assert result == "typed"
+    scan_fn.assert_not_called()
+
+
+def test_keypad_scan_preserves_buffer_when_scan_is_cancelled(mocker, amigo):
+    from krux.input import BUTTON_TOUCH, SWIPE_RIGHT
+    from krux.pages import Page
+    from krux.pages.keypads import Keypad
+
+    keysets = ["a" * 26, "b" * 23]
+    layout_ctx = create_ctx(mocker, [])
+    pad = Keypad(layout_ctx, keysets, has_scan_key=True)
+    pad.next_keyset()
+    ctx = create_ctx(
+        mocker,
+        [SWIPE_RIGHT, BUTTON_TOUCH, BUTTON_TOUCH],
+        touch_seq=[pad.scan_index, pad.go_index],
+    )
+    page = Page(ctx)
+    page.prompt = mocker.MagicMock(return_value=True)
+
+    result = page.capture_from_keypad(
+        "test", keysets, starting_buffer="typed", scan_fn=lambda: None
+    )
+
+    assert result == "typed"
+
+
 def test_keypad_swipe_hint_is_shown_after_more_keypress_and_cleared_after_other_keypress(
     mocker, amigo, mock_page_cls
 ):

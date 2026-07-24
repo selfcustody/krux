@@ -199,7 +199,6 @@ def test_wallet_load_fails_on_encrypted_non_ascii_bytes(mocker, m5stickv, tdata)
         BUTTON_ENTER,  # confirm load
         BUTTON_ENTER,  # go load from camera
         BUTTON_ENTER,  # confirm decrypt
-        BUTTON_ENTER,  # type key
         BUTTON_ENTER,  # enter "a"
         BUTTON_PAGE_PREV,  # back to Go
         BUTTON_ENTER,  # go Go
