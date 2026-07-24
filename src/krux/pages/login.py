@@ -286,11 +286,18 @@ class Login(MnemonicLoader):
             self.ctx.display.clear()
             submenu = Menu(
                 self.ctx,
-                [
-                    (t("Load Wallet"), lambda: None),
-                    (t("Passphrase"), lambda: None),
-                    (t("Customize"), lambda: None),
-                ],
+                (
+                    [
+                        (t("Continue"), lambda: None),
+                        (t("Wallet Options"), lambda: None),
+                    ]
+                    if new
+                    else [
+                        (t("Load Wallet"), lambda: None),
+                        (t("Passphrase"), lambda: None),
+                        (t("Customize"), lambda: None),
+                    ]
+                ),
                 offset=(
                     self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
                     * FONT_HEIGHT
@@ -318,8 +325,40 @@ class Login(MnemonicLoader):
                 if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
                     del key
                     return MENU_CONTINUE
+                continue
             if index == 0:
                 break
+            if new and index == 1:
+                self.ctx.display.clear()
+                submenu = Menu(
+                    self.ctx,
+                    [
+                        (t("Passphrase"), lambda: None),
+                        (t("Customize"), lambda: None),
+                    ],
+                    offset=(
+                        self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
+                        * FONT_HEIGHT
+                        + DEFAULT_PADDING
+                    ),
+                )
+
+                self.ctx.display.draw_hcentered_text(
+                    key.fingerprint_hex_str(True),
+                    color=theme.highlight_color,
+                    bg_color=theme.info_bg_color,
+                )
+                self.ctx.display.draw_hcentered_text(
+                    network_name,
+                    DEFAULT_PADDING + FONT_HEIGHT,
+                    color=Utils.get_network_color(network_name),
+                    bg_color=theme.info_bg_color,
+                )
+
+                index, _ = submenu.run_loop()
+                if index == submenu.back_index:
+                    continue
+                index += 1
             if index == 1:
                 from .wallet_settings import PassphraseEditor
 
