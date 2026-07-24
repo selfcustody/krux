@@ -46,6 +46,7 @@ uv run poe simulator --sequence sequences/logo.txt  --device $device
 uv run poe simulator --sequence sequences/about.txt --sd --device $device
 uv run poe simulator --sequence sequences/load-mnemonic-options.txt --sd --device $device
 uv run poe simulator --sequence sequences/new-mnemonic-options.txt  --sd --device $device
+uv run poe simulator --sequence sequences/new-mnemonic-wallet-options.txt --sd --device $device
 uv run poe simulator --sequence sequences/load-mnemonic-sequence.txt  --sd --device $device
 uv run poe simulator --sequence sequences/load-mnemonic-double-mnemonic.txt  --sd --device $device
 uv run poe simulator --sequence sequences/edit-mnemonic.txt  --sd --device $device
