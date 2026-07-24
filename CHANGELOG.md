@@ -13,6 +13,8 @@ Switch from the pure-Python urtypes and foundation-ur-py packages to the new uUR
 - Replace custom quirc (library to decode QR codes from images) with k_quirc
 - Fix default theme contrast failures for Light, CypherPink, network
   indicators, and Amigo info panels
+- Simplify generated-mnemonic confirmation with `Continue` and grouped
+  `Wallet Options`
 
 # Changelog 26.04.0 - April 2025
 
