@@ -82,8 +82,12 @@ After sufficient entropy is given, you can manually add custom entropy by editin
 
 On the next screen, review the wallet attributes. Select `Continue` to load
 the wallet with the displayed settings, or select `Wallet Options` to set a
-`Passphrase` or `Customize` the wallet. For more details, see
-[Loading a Mnemonic -> Confirm Wallet Attributes](./loading-a-mnemonic.md/#confirm-wallet-attributes).
+`Passphrase` or `Customize` the wallet.
+
+<img src="../../../img/maixpy_amigo/new-mnemonic-wallet-summary-300.png" class="amigo">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-wallet-summary-250.png" class="m5stickv">
+<img src="../../../img/maixpy_amigo/new-mnemonic-wallet-options-300.png" class="amigo">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-wallet-options-250.png" class="m5stickv">
 
 <div style="clear: both"></div>
 
