@@ -1,5 +1,11 @@
 # Changelog 26.05.0 - May 2025
 
+### QR Scanning from Text Keypads
+Passphrases, encryption keys, and Tamper Check Codes can now be scanned from a
+QR key on the last symbols keypad. Scanned text returns to the keypad for review
+and editing, removing the extra Type or Scan selection screen. Creating or
+changing a Tamper Check Code remains manual.
+
 ### Stackbit 1248 Vertical Layout
 Added vertical layout option for Stackbit 1248 backup display, allowing users to choose between Standard (horizontal) and Vertical (transposed) grid orientations.
 

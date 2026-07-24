@@ -8,7 +8,14 @@ During encryption, users may be prompted to override their preferences or select
 <img src="../../../../img/maixpy_m5stickv/load-mnemonic-kef-via-qr-250.png" align="right" class="m5stickv">
 <img src="../../../../img/maixpy_amigo/load-mnemonic-kef-via-qr-300.png" align="right" class="amigo">
 
-When Krux detects data resembling a KEF-encrypted envelope, it prompts the user to *"Decrypt?"*, showing the KEF version, envelope ID (or label), and the PBKDF2 iteration count used during creation. To decrypt, the same key (typed or scanned) must be provided. Once unlocked, Krux uses the plaintext within context. If decryption is declined, the raw envelope is used instead—usually resulting in an error, since KEF data is meaningless without decryption.
+When Krux detects data resembling a KEF-encrypted envelope, it prompts the user
+to *"Decrypt?"*, showing the KEF version, envelope ID (or label), and the PBKDF2
+iteration count used during creation. To decrypt, provide the same key by typing
+it or selecting the QR glyph on the last symbols keypad. Scanned text returns to
+the keypad for review and editing; binary keys remain binary and proceed to
+confirmation. Once unlocked, Krux uses the plaintext within context. If
+decryption is declined, the raw envelope is used instead—usually resulting in an
+error, since KEF data is meaningless without decryption.
 
 <div style="clear: both"></div>
 
@@ -95,4 +102,3 @@ While all KEF envelopes share the above format, each version differs - offering 
 Storage of encrypted secrets on the device or SD cards are meant for convenience only and should not be considered a long-term form of backup. Always make a physical backup of your keys that is independent from electronic devices and test recovering your wallet from this backup before you send funds to it. Flash storage can degrade over time and may be subject to permanent damage, resulting in the loss of stored information.
 
 Remember that any encrypted secret is protected by the key you defined to encrypt it. If the defined [key is weak](https://www.hivesystems.com/blog/are-your-passwords-in-the-green), your encrypted mnemonic and other secrets will **not be protected**. If you have stored sensitive secrets in the device's internal flash memory using a [weak key](https://www.hivesystems.com/blog/are-your-passwords-in-the-green), the best way to undo this is to [erase user's data](../tools.md/#erase-users-data).
-
