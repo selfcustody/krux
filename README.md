@@ -97,6 +97,16 @@ uv run poe lint
 uv run poe test
 ```
 
+Before the first run, build the `libsecp256k1` that the `embit` submodule pins (needs `gcc` and `make`):
+```bash
+uv run poe secp256k1-build
+```
+
+Without it `embit` falls back to its pure Python EC implementation, which is slower and does not always match the C library the firmware runs, so some signature paths get exercised differently than on device. CI builds it and fails if the fallback is in use. To check your own setup:
+```bash
+uv run poe secp256k1-check
+```
+
 Note: The coverage report will be created at the `htmlcov` folder `file:///path/to/krux/htmlcov/index.html`. 
 
 For more verbose output (e.g., to see the output of print statements):
