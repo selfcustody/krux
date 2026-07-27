@@ -38,6 +38,18 @@ def reset_krux_modules():
             del sys.modules[name]
 
 
+@pytest.fixture(autouse=True)
+def no_gc_collect(monkeypatch):
+    """Krux calls gc.collect() often to manage the device's small heap.
+    On CPython each call walks the much bigger test heap (mostly mock objects)
+    and does nothing useful, costing about a third of the suite runtime.
+    Tests that assert on gc.collect patch it themselves, over this one.
+    """
+    import gc
+
+    monkeypatch.setattr(gc, "collect", lambda *args: 0)
+
+
 @pytest.fixture
 def mp_modules(mocker, monkeypatch):
     from embit.util import secp256k1
