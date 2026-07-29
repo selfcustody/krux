@@ -25,9 +25,7 @@ def mock_file_operations(mocker):
 def test_urobj_to_data(m5stickv, mocker):
     """Test that urobj_to_data returns flattened data from UR objects."""
     from krux.pages.datum_tool import urobj_to_data
-    from ur.ur import UR
-    from urtypes.crypto.psbt import PSBT
-    from urtypes.bytes import Bytes
+    from uUR import UR, Types
 
     UR_BIP39_WORDS_BYTES = b"\xa2\x01\x8cfshieldegroupeerodeeawakedlockgsausagedcasheglaredwavedcreweflameeglove\x02ben"
     MNEMONIC = "shield group erode awake lock sausage cash glare wave crew flame glove"
@@ -42,15 +40,15 @@ def test_urobj_to_data(m5stickv, mocker):
             "expected": MULTISIG_DESCR,
         },
         {
-            "control": UR("crypto-psbt", PSBT(P2PKH_PSBT_BYTES).to_cbor()),
+            "control": UR("crypto-psbt", Types.psbt_to_cbor(P2PKH_PSBT_BYTES)),
             "expected": P2PKH_PSBT_BYTES,
         },
         {
-            "control": UR("bytes", Bytes(MULTISIG_DESCR.encode()).to_cbor()),
+            "control": UR("bytes", Types.bytes_to_cbor(MULTISIG_DESCR.encode())),
             "expected": MULTISIG_DESCR.encode(),
         },
         {
-            "control": UR("bytes", Bytes(P2PKH_PSBT_BYTES).to_cbor()),
+            "control": UR("bytes", Types.bytes_to_cbor(P2PKH_PSBT_BYTES)),
             "expected": P2PKH_PSBT_BYTES,
         },
     ]
@@ -316,12 +314,11 @@ def test_datumtoolmenu_scan_qr_abort(m5stickv, mocker):
     page = DatumToolMenu(ctx).run()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
-    from ur.ur import UR
-    from urtypes.bytes import Bytes
+    from uUR import UR, Types
 
     # scan UR-QR (for coverage), then back out of datum tool
     MULTISIG_DESCR = "wsh(multi(1,xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB/1/0/*,xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH/0/0/*))#t2zpj2eu"
-    ur_obj = UR("bytes", Bytes(MULTISIG_DESCR.encode()).to_cbor())
+    ur_obj = UR("bytes", Types.bytes_to_cbor(MULTISIG_DESCR.encode()))
     mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (ur_obj, 2))
     BTN_SEQUENCE = (
         BUTTON_ENTER,  # go Scan QR

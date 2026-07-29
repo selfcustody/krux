@@ -267,8 +267,7 @@ version = "26.4.0"
 source = { virtual = "." }
 dependencies = [
     { name = "embit" },
-    { name = "ur" },
-    { name = "urtypes" },
+    { name = "uur" },
 ]
 
 [package.optional-dependencies]
@@ -322,8 +321,7 @@ requires-dist = [
     { name = "pyserial", marker = "extra == 'flash'", specifier = ">=3.5,<4" },
     { name = "pyzbar", marker = "extra == 'simulator'", specifier = ">=0.1.9,<1" },
     { name = "qrcode", marker = "extra == 'sign'", specifier = ">=8.2,<9" },
-    { name = "ur", editable = "vendor/foundation-ur-py" },
-    { name = "urtypes", editable = "vendor/urtypes" },
+    { name = "uur", directory = "firmware/MaixPy/components/micropython/port/src/bc-ur" },
 ]
 provides-extras = ["docs", "simulator", "flash", "sign"]
 
@@ -953,11 +951,6 @@ wheels = [
 ]
 
 [[package]]
-name = "ur"
-version = "0.1.0"
-source = { editable = "vendor/foundation-ur-py" }
-
-[[package]]
 name = "urllib3"
 version = "2.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -967,9 +960,9 @@ wheels = [
 ]
 
 [[package]]
-name = "urtypes"
+name = "uur"
 version = "0.1.0"
-source = { editable = "vendor/urtypes" }
+source = { directory = "firmware/MaixPy/components/micropython/port/src/bc-ur" }
 
 [[package]]
 name = "vulture"

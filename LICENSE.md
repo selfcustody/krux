@@ -7,8 +7,7 @@ All the source code in this repository is either MIT or Apache v2.0 licensed. Mo
 The source code for the `MaixPy` firmware (which has been modified by the repository owner) is under the Apache v2.0 license. The source code within it related to `MicroPython` and `OpenMV` is released separately under the MIT license.
 
 The source code for the `embit` library is under the MIT license.
-The source code for the `urtypes` library is under the MIT license.
-The source code for the `foundation-ur-py` library is under the BSD-2-Clause Plus Patent license.
+The source code for the `cUR` library, which provides the `uUR` UR encoder/decoder module, is under the BSD-2-Clause Plus Patent license.
 The source code for the `Adafruit Thermal Printer` library is under the MIT license.
 The source code for the `Kboot` bootloader is under the Apache v2.0 license.
 
