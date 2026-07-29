@@ -1,11 +1,3 @@
-import os
-import sys
-
-# Make the simulator's mock packages importable so tests can reuse the uUR shim.
-_SIMULATOR_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "simulator")
-if _SIMULATOR_DIR not in sys.path:
-    sys.path.insert(0, _SIMULATOR_DIR)
-
 from Crypto.Cipher import AES
 import pytest
 from .shared_mocks import (
@@ -57,9 +49,9 @@ def mp_modules(mocker, monkeypatch):
     import time
     import sys
     import hashlib
-    from kruxsim.mocks import uUR as uur_shim
 
-    monkeypatch.setitem(sys.modules, "uUR", uur_shim)
+    # uUR is the native BC-UR extension, installed as a real dependency, so it
+    # needs no mock: tests exercise the same module the firmware does.
     monkeypatch.setitem(
         sys.modules,
         "qrcode",

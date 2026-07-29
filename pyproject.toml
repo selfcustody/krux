@@ -30,8 +30,7 @@ license = { text = "MIT" }
 requires-python = ">=3.11.5, <3.13"
 dependencies = [
     "embit",
-    "ur",
-    "urtypes",
+    "uUR",
 ]
 
 [project.optional-dependencies]
@@ -76,8 +75,10 @@ package = false
 
 [tool.uv.sources]
 embit = { path = "vendor/embit", editable = true }
-ur = { path = "vendor/foundation-ur-py", editable = true }
-urtypes = { path = "vendor/urtypes", editable = true }
+# Native BC-UR module, the same cUR sources the devices run. Not editable: it is
+# a C extension, so it has to be rebuilt (uv sync --reinstall-package uUR) after
+# changing the submodule anyway.
+uUR = { path = "firmware/MaixPy/components/micropython/port/src/bc-ur" }
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

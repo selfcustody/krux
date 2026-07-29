@@ -513,7 +513,7 @@ def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
     from krux.qr import FORMAT_UR
     from krux.pages.qr_capture import QRCodeCapture
     import binascii
-    from ur.ur import UR
+    from uUR import UR
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words

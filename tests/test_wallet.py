@@ -1,12 +1,20 @@
 import pytest
-from ur.ur_decoder import URDecoder
+import uUR
+
+
+def decode_single_part_ur(part):
+    """uUR's decoder is a state machine with no single-shot decode() helper,
+    so feed the lone part and hand back the assembled UR."""
+    decoder = uUR.URDecoder()
+    assert decoder.receive_part(part) == uUR.DECODER_OK
+    return decoder.result
 
 
 @pytest.fixture
 def tdata(mocker):
     import binascii
     from collections import namedtuple
-    from ur.ur import UR
+    from uUR import UR
     from krux.bbqr import encode_bbqr
     from embit.networks import NETWORKS
     from krux.key import (
@@ -1096,7 +1104,7 @@ def test_load_multisig(mocker, m5stickv, tdata):
             },
         ),
     ]
-    from ur.ur import UR
+    from uUR import UR
 
     n = 0
     for case in cases:
@@ -1669,7 +1677,7 @@ def test_provably_unspendable_non_deterministic_chain_code(mocker, m5stickv, tda
 
 def test_parse_wallet_raises_errors(mocker, m5stickv, tdata):
     from krux.wallet import parse_wallet
-    from ur.ur import UR
+    from uUR import UR
 
     cases = [
         tdata.BLUEWALLET_MULTISIG_WALLET_DATA_MISSING_KEYS,
@@ -1907,7 +1915,7 @@ def test_parse_wallet_via_ur_output(mocker, m5stickv):
     ]
 
     for i, QRDATUM in enumerate(QRDATA):
-        wallet_data = URDecoder().decode(QRDATUM)
+        wallet_data = decode_single_part_ur(QRDATUM)
         descriptor, label = parse_wallet(wallet_data)
         assert str(descriptor) == DESCRIPTORS[i]
         print(DESCRIPTORS[i])
@@ -1935,7 +1943,7 @@ def test_parse_wallet_via_ur_account(mocker, m5stickv):
     ]
 
     for i, QRDATUM in enumerate(QRDATA):
-        wallet_data = URDecoder().decode(QRDATUM)
+        wallet_data = decode_single_part_ur(QRDATUM)
         descriptor, label = parse_wallet(wallet_data)
         assert str(descriptor) == DESCRIPTORS[i]
         print(DESCRIPTORS[i])
