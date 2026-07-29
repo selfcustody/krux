@@ -156,6 +156,29 @@ def test_parser(mocker, m5stickv, tdata):
             assert res == tdata.TEST_DATA_B58
 
 
+def test_parser_ur_decoder_states(mocker, m5stickv, tdata):
+    """Transient UR decoder errors are ignored, terminal ones abort the parsing"""
+
+    import uUR
+    from krux.qr import QRPartParser
+
+    first_part = tdata.TEST_PARTS_FORMAT_MULTIPART_UR[0]
+
+    # Transient errors are expected while scanning, parsing goes on
+    parser = QRPartParser()
+    mocker.patch.object(
+        uUR.URDecoder, "receive_part", return_value=uUR.DECODER_ERR_INVALID_PART
+    )
+    parser.parse(first_part)
+    assert not parser.is_complete()
+
+    for terminal_state in (uUR.DECODER_NO_RESULT, uUR.DECODER_ERR_INVALID_CHECKSUM):
+        parser = QRPartParser()
+        mocker.patch.object(uUR.URDecoder, "receive_part", return_value=terminal_state)
+        with pytest.raises(ValueError):
+            parser.parse(first_part)
+
+
 def test_to_qr_codes(mocker, m5stickv, tdata):
     from krux.qr import to_qr_codes, FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR, FORMAT_BBQR
     from krux.display import Display

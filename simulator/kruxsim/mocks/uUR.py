@@ -46,10 +46,54 @@ class UREncoder(_UREncoder):
         return super().next_part().upper()
 
 
+# Decoder states, mirroring uUR's DECODER_* constants (ur_decoder_state_t)
+DECODER_OK = 0
+DECODER_PROCESSING = 1
+DECODER_NO_RESULT = 2
+DECODER_ERR_INVALID_SCHEME = 16
+DECODER_ERR_INVALID_TYPE = 17
+DECODER_ERR_INVALID_PATH_LENGTH = 18
+DECODER_ERR_INVALID_SEQUENCE_COMPONENT = 19
+DECODER_ERR_INVALID_FRAGMENT = 20
+DECODER_ERR_INVALID_PART = 21
+DECODER_ERR_INVALID_CHECKSUM = 22
+DECODER_ERR_MEMORY = 23
+DECODER_ERR_NULL_POINTER = 24
+
+_TERMINAL_STATES = (DECODER_OK, DECODER_NO_RESULT, DECODER_ERR_INVALID_CHECKSUM)
+
+
 class URDecoder(_URDecoder):
     """uUR exposes expected_part_count and processed_parts_count as plain
-    int attributes (zero for single-part URs). Mirror that here so the same
-    qr.py logic works against both decoders."""
+    int attributes (zero for single-part URs), and reports progress through a
+    state machine instead of is_complete()/is_success(). Mirror that here so
+    the same qr.py logic works against both decoders.
+
+    The Python decoder swallows the reason a part was rejected, so transient
+    errors are all reported as DECODER_ERR_INVALID_PART."""
+
+    def __init__(self):
+        super().__init__()
+        self._state = DECODER_PROCESSING
+
+    @property
+    def state(self):
+        return self._state
+
+    def receive_part(self, part):
+        # Terminal states are permanent: the part is not processed
+        if self._state in _TERMINAL_STATES:
+            return self._state
+        received = super().receive_part(part)
+        if isinstance(self.result, Exception):
+            self._state = DECODER_ERR_INVALID_CHECKSUM
+        elif self.result is not None:
+            self._state = DECODER_OK
+        elif not received:
+            self._state = DECODER_ERR_INVALID_PART
+        else:
+            self._state = DECODER_PROCESSING
+        return self._state
 
     @property
     def expected_part_count(self):
