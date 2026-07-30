@@ -138,7 +138,7 @@ class SettingsPage(Page):
 
     def enter_modify_tc_code(self):
         """Handler for the 'Tamper Check Code' menu item"""
-        import uhashlib_hw
+        from ..hashes import sha256_hw, pbkdf2_hmac_sha256_hw
         from machine import unique_id
         from ..krux_settings import TC_CODE_PATH, TC_CODE_PBKDF2_ITERATIONS
 
@@ -182,9 +182,9 @@ class SettingsPage(Page):
         self.ctx.display.draw_centered_text(t("Processing…"))
         # Hashes the Tamper Check Code once
         tc_code_bytes = tamper_check_code.encode()
-        tc_code_hash = uhashlib_hw.sha256(tc_code_bytes).digest()
+        tc_code_hash = sha256_hw(tc_code_bytes).digest()
         # Than uses hash to generate a stretched secret, with unique_id as salt
-        secret = uhashlib_hw.pbkdf2_hmac_sha256(
+        secret = pbkdf2_hmac_sha256_hw(
             tc_code_hash, unique_id(), TC_CODE_PBKDF2_ITERATIONS
         )
         # Saves the stretched Tamper Check Code in a file
@@ -212,7 +212,7 @@ class SettingsPage(Page):
 
         tc_code_bytes = tamper_check_code.encode()
         # Tamper Check Code hash will be used in "TC Flash Hash"
-        tc_code_hash = uhashlib_hw.sha256(tc_code_bytes).digest()
+        tc_code_hash = sha256_hw(tc_code_bytes).digest()
         flash_hash = FlashHash(self.ctx, tc_code_hash)
         flash_hash.generate()
 

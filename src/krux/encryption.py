@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 import ujson as json
-import hashlib
+from .hashes import pbkdf2_hmac_sha256
 from krux import kef
 from .baseconv import base_encode, base_decode
 from .sd_card import SDHandler
@@ -67,7 +67,7 @@ class MnemonicStorage:
         def stretch_key(key, salt, iterations):
             key = key if isinstance(key, bytes) else key.encode()
             salt = salt if isinstance(salt, bytes) else salt.encode()
-            return hashlib.pbkdf2_hmac("sha256", key, salt, iterations)
+            return pbkdf2_hmac_sha256(key, salt, iterations)
 
         if not (isinstance(iterations, int) and isinstance(payload, bytes)):
             return None
