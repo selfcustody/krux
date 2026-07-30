@@ -147,6 +147,8 @@ class PSBTSigner:
 
     def validate(self):
         """Validates the PSBT"""
+        # Any non_witness_utxo present must really hash to the prevout txid.
+        self.psbt.verify(ignore_missing=True)
         # From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L110
         xpubs = []
         origin_less_xpub = None
@@ -156,6 +158,10 @@ class PSBTSigner:
             # Expected to fail to get xpubs from Miniscript PSBT
             pass
         for inp in self.psbt.inputs:
+            # Legacy sighashes do not commit to the input amount, so the full
+            # previous transaction is mandatory for non-segwit inputs.
+            if not inp.is_verified and not is_segwit_input(inp):
+                raise ValueError("missing non_witness_utxo on a legacy input")
             # get policy of the input
             try:
                 inp_policy = self.get_policy_from_psbt_input(
@@ -189,15 +195,13 @@ class PSBTSigner:
 
     def get_policy_from_psbt_input(self, tx_input, xpubs, origin_less_xpub=None):
         """Extracts the scriptPubKey from an input's UTXO and determines the policy."""
-        if tx_input.witness_utxo:
-            scriptpubkey = tx_input.witness_utxo.script_pubkey
-        elif tx_input.non_witness_utxo:
-            # Retrieve the scriptPubKey from the specified output in the non_witness_utxo
-            scriptpubkey = tx_input.non_witness_utxo.vout[tx_input.vout].script_pubkey
-        else:
+        # Same UTXO object the signer commits to, so policy, displayed amount
+        # and sighash can never be read from different fields
+        utxo = tx_input.utxo
+        if utxo is None:
             raise ValueError("No UTXO information available in the input.")
 
-        return get_policy(tx_input, scriptpubkey, xpubs, origin_less_xpub)
+        return get_policy(tx_input, utxo.script_pubkey, xpubs, origin_less_xpub)
 
     def path_mismatch(self):
         """Verifies if the PSBT key path matches loaded keys's derivation path"""
@@ -327,11 +331,8 @@ class PSBTSigner:
 
         inp_amount = 0
         for inp in self.psbt.inputs:
-            if inp.witness_utxo:
-                inp_amount += inp.witness_utxo.value
-            elif inp.non_witness_utxo:  # Legacy
-                # Retrieve the value from the specified output in the non_witness_utxo
-                inp_amount += inp.non_witness_utxo.vout[inp.vout].value
+            # Use exactly the same UTXO object the signer commits to
+            inp_amount += inp.utxo.value
         resume_inputs_str = (
             (t("Inputs (%d):") % len(self.psbt.inputs))
             + self._btc_render(inp_amount)
@@ -822,3 +823,22 @@ def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
             pass
 
     return policy
+
+
+def is_segwit_input(inp):
+    """True if the input's sighash commits to the input amount (BIP143/BIP341).
+
+    Only the scriptPubKey and the redeem script are consulted. A declared
+    witness_script is not enough on its own, otherwise attaching one to a
+    legacy input would be enough to skip the previous transaction requirement.
+    """
+    if inp.utxo is not None and inp.utxo.script_pubkey.script_type() in (
+        P2WPKH,
+        P2WSH,
+        P2TR,
+    ):
+        return True
+    return inp.redeem_script is not None and inp.redeem_script.script_type() in (
+        P2WPKH,
+        P2WSH,
+    )
