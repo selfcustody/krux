@@ -1,7 +1,7 @@
-from ...shared_mocks import MockPrinter
-from .. import create_ctx, assert_not_flashed
-from .test_home import tdata
-from ...test_wallet import tdata as wallet_tdata
+from tests.shared_mocks import MockPrinter
+from tests.pages import create_ctx, assert_not_flashed
+from tests.pages.home_pages.test_home import tdata
+from tests.test_wallet import tdata as wallet_tdata
 
 
 def test_wallet(mocker, m5stickv, tdata):

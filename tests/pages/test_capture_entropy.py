@@ -1,4 +1,9 @@
-from ..shared_mocks import mock_context, snapshot_generator, SNAP_SUCCESS, IMAGE_TO_HASH
+from tests.shared_mocks import (
+    mock_context,
+    snapshot_generator,
+    SNAP_SUCCESS,
+    IMAGE_TO_HASH,
+)
 import hashlib
 import random
 

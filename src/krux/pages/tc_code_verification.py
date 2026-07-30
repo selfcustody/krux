@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from . import (
+from krux.pages import (
     Page,
     ESC_KEY,
     LETTERS,
@@ -28,7 +28,7 @@ from . import (
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
-from ..krux_settings import t, TC_CODE_PATH, TC_CODE_PBKDF2_ITERATIONS
+from krux.krux_settings import t, TC_CODE_PATH, TC_CODE_PBKDF2_ITERATIONS
 
 
 class TCCodeVerification(Page):
@@ -40,7 +40,7 @@ class TCCodeVerification(Page):
 
     def capture(self, changing_tc_code=False, return_hash=False):
         """Capture Tamper Check Code from user"""
-        from ..hashes import sha256_hw, pbkdf2_hmac_sha256_hw
+        from krux.hashes import sha256_hw, pbkdf2_hmac_sha256_hw
         from machine import unique_id
 
         label = (

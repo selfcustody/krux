@@ -22,13 +22,13 @@
 
 import qrcode
 from embit.wordlists.bip39 import WORDLIST
-from . import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY
-from ..themes import theme, WHITE, BLACK, DARKGREY
-from ..krux_settings import t
-from ..settings import THIN_SPACE
-from ..qr import get_size
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, M5STICKV_WIDTH
-from ..input import (
+from krux.pages import Page, Menu, MENU_CONTINUE, MENU_EXIT, ESC_KEY
+from krux.themes import theme, WHITE, BLACK, DARKGREY
+from krux.krux_settings import t
+from krux.settings import THIN_SPACE
+from krux.qr import get_size
+from krux.display import DEFAULT_PADDING, FONT_HEIGHT, M5STICKV_WIDTH
+from krux.input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
     BUTTON_PAGE_PREV,
@@ -38,7 +38,7 @@ from ..input import (
     SWIPE_LEFT,
     SWIPE_UP,
 )
-from ..kboard import kboard
+from krux.kboard import kboard
 
 STANDARD_MODE = 0
 LINE_MODE = 1
@@ -308,8 +308,8 @@ class SeedQRView(Page):
 
     def save_pbm_image(self, file_name):
         """Saves QR code image as compact B&W bitmap format file"""
-        from ..sd_card import PBM_IMAGE_EXTENSION
-        from .file_operations import SaveFile
+        from krux.sd_card import PBM_IMAGE_EXTENSION
+        from krux.pages.file_operations import SaveFile
 
         code, size = self.add_frame(self.code, self.qr_size)
         pbm_data = bytearray()
@@ -337,8 +337,8 @@ class SeedQRView(Page):
 
     def save_bmp_image(self, file_name, resolution):
         """Save QR code image as .bmp file"""
-        from ..sd_card import SDHandler, BMP_IMAGE_EXTENSION
-        from .file_operations import SaveFile
+        from krux.sd_card import SDHandler, BMP_IMAGE_EXTENSION
+        from krux.pages.file_operations import SaveFile
 
         try:
             with SDHandler():
@@ -384,8 +384,8 @@ class SeedQRView(Page):
 
     def save_svg_image(self, file_name):
         """Save QR code image as .svg file"""
-        from ..sd_card import SVG_IMAGE_EXTENSION
-        from .file_operations import SaveFile
+        from krux.sd_card import SVG_IMAGE_EXTENSION
+        from krux.pages.file_operations import SaveFile
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing…"))
@@ -493,7 +493,7 @@ class SeedQRView(Page):
 
     def print_qr(self):
         "Printer handler"
-        from .utils import Utils
+        from krux.pages.utils import Utils
 
         utils = Utils(self.ctx)
         title = self.title.replace(THIN_SPACE, " ")  # Replaces thin spaces
