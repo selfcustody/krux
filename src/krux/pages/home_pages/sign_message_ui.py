@@ -22,8 +22,8 @@
 
 from embit import bip32, compact, script
 from embit.networks import NETWORKS
-import hashlib
 import binascii
+from ...hashes import sha256, sha256d
 from .. import MENU_CONTINUE, LOAD_FROM_CAMERA, LOAD_FROM_SD, Menu
 from ..utils import Utils
 from ...key import SINGLESIG_SCRIPT_PURPOSE, P2PKH, P2WPKH, P2TR, P2SH_P2WPKH
@@ -147,13 +147,10 @@ class SignMessage(Utils):
         if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
             return None
 
-        message_hash = hashlib.sha256(
-            hashlib.sha256(
-                b"\x18Bitcoin Signed Message:\n"
-                + compact.to_bytes(len(message))
-                + message
-            ).digest()
-        ).digest()
+        # BIP-137 signs a double hash; not the single hash shown elsewhere
+        message_hash = sha256d(
+            b"\x18Bitcoin Signed Message:\n" + compact.to_bytes(len(message)) + message
+        )
 
         sig = self.ctx.wallet.key.sign_at(derivation, message_hash)
         self._display_signature(base_encode(sig, 64))
@@ -274,7 +271,7 @@ class SignMessage(Utils):
                 return binascii.unhexlify(data), True
             except:
                 pass
-        return hashlib.sha256(data).digest(), False
+        return sha256(data).digest(), False
 
     def _export_signature(
         self,
