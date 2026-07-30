@@ -1,5 +1,5 @@
-from . import create_ctx
-from ..shared_mocks import MockPrinter
+from tests.pages import create_ctx
+from tests.shared_mocks import MockPrinter
 from unittest.mock import patch
 
 TEST_QR_DATA = "Krux Printer Test QR"

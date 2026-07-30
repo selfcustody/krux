@@ -22,9 +22,9 @@
 
 import math
 import lcd
-from ..krux_settings import t
-from ..themes import theme
-from ..input import (
+from krux.krux_settings import t
+from krux.themes import theme
+from krux.input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
     BUTTON_PAGE_PREV,
@@ -35,8 +35,8 @@ from ..input import (
     FAST_FORWARD,
     FAST_BACKWARD,
 )
-from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
-from ..kboard import kboard
+from krux.display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
+from krux.kboard import kboard
 
 FIXED_KEYS = 3  # 'More' key only appears when there are multiple keysets.
 

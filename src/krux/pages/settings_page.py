@@ -22,9 +22,9 @@
 # pylint: disable=C2801
 
 import lcd
-from ..display import FONT_HEIGHT, FONT_WIDTH, PORTRAIT
-from ..themes import theme, MAIN_TXT_COLOR, TEST_TXT_COLOR
-from ..settings import (
+from krux.display import FONT_HEIGHT, FONT_WIDTH, PORTRAIT
+from krux.themes import theme, MAIN_TXT_COLOR, TEST_TXT_COLOR
+from krux.settings import (
     CategorySetting,
     NumberSetting,
     store,
@@ -32,7 +32,7 @@ from ..settings import (
     FLASH_PATH,
     SETTINGS_FILENAME,
 )
-from ..krux_settings import (
+from krux.krux_settings import (
     Settings,
     MAIN_TXT,
     TEST_TXT,
@@ -41,9 +41,9 @@ from ..krux_settings import (
     t,
     locale_control,
 )
-from ..input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
-from ..sd_card import SDHandler
-from . import (
+from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+from krux.sd_card import SDHandler
+from krux.pages import (
     Page,
     Menu,
     DIGITS,
@@ -57,7 +57,7 @@ from . import (
     DEFAULT_PADDING,
 )
 import os
-from ..kboard import kboard
+from krux.kboard import kboard
 
 PERSIST_MSG_TIME = 2500
 DISPLAY_TEST_TIME = 5000  # 5 seconds
@@ -138,12 +138,12 @@ class SettingsPage(Page):
 
     def enter_modify_tc_code(self):
         """Handler for the 'Tamper Check Code' menu item"""
-        from ..hashes import sha256_hw, pbkdf2_hmac_sha256_hw
+        from krux.hashes import sha256_hw, pbkdf2_hmac_sha256_hw
         from machine import unique_id
-        from ..krux_settings import TC_CODE_PATH, TC_CODE_PBKDF2_ITERATIONS
+        from krux.krux_settings import TC_CODE_PATH, TC_CODE_PBKDF2_ITERATIONS
 
         if self.ctx.tc_code_enabled:
-            from .tc_code_verification import TCCodeVerification
+            from krux.pages.tc_code_verification import TCCodeVerification
 
             tc_code_verification = TCCodeVerification(self.ctx)
             if not tc_code_verification.capture(changing_tc_code=True):
@@ -193,7 +193,7 @@ class SettingsPage(Page):
         self.ctx.tc_code_enabled = True
         self.flash_success(t("Tamper check code set successfully"))
 
-        from .fill_flash import FillFlash
+        from krux.pages.fill_flash import FillFlash
 
         flash_filler = FillFlash(self.ctx)
         flash_filler.fill_flash_with_camera_entropy()
@@ -208,7 +208,7 @@ class SettingsPage(Page):
             store.save_settings()
 
         # Shows TC Flash Hash
-        from .flash_tools import FlashHash
+        from krux.pages.flash_tools import FlashHash
 
         tc_code_bytes = tamper_check_code.encode()
         # Tamper Check Code hash will be used in "TC Flash Hash"
@@ -330,7 +330,7 @@ class SettingsPage(Page):
         # Update buttons debounce time
         self.ctx.input.debounce_value = Settings().hardware.buttons.debounce
         if kboard.has_encoder:
-            from ..rotary import encoder
+            from krux.rotary import encoder
 
             encoder.debounce = Settings().hardware.buttons.debounce
 
@@ -475,7 +475,7 @@ class SettingsPage(Page):
                 theme.update()
             if setting.attr == "flipped_orientation":
                 # need to recreate camera singleton
-                from ..camera import Camera
+                from krux.camera import Camera
 
                 self.ctx.display.clear()
                 self.ctx.display.draw_centered_text(t("Processing…"))
@@ -528,7 +528,7 @@ class SettingsPage(Page):
             )
 
         if setting.attr == "auto_shutdown" and starting_value != new_value:
-            from ..auto_shutdown import auto_shutdown
+            from krux.auto_shutdown import auto_shutdown
 
             auto_shutdown.init_timer(new_value)
 

@@ -21,12 +21,12 @@
 # THE SOFTWARE.
 
 import ujson as json
-from .hashes import pbkdf2_hmac_sha256
+from krux.hashes import pbkdf2_hmac_sha256
 from krux import kef
-from .baseconv import base_encode, base_decode
-from .sd_card import SDHandler
+from krux.baseconv import base_encode, base_decode
+from krux.sd_card import SDHandler
 from embit import bip39
-from .settings import FLASH_PATH, MNEMONICS_FILE
+from krux.settings import FLASH_PATH, MNEMONICS_FILE
 
 FLASH_PATH_STR = "/" + FLASH_PATH + "/%s"
 

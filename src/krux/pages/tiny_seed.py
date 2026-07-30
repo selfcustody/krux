@@ -25,18 +25,18 @@ import image
 import sensor
 import time
 from embit.wordlists.bip39 import WORDLIST
-from . import Page, FLASH_MSG_TIME
-from ..themes import theme
-from ..wdt import wdt
-from ..krux_settings import t
-from ..display import (
+from krux.pages import Page, FLASH_MSG_TIME
+from krux.themes import theme
+from krux.wdt import wdt
+from krux.krux_settings import t
+from krux.display import (
     DEFAULT_PADDING,
     MINIMAL_PADDING,
     FONT_HEIGHT,
     FONT_WIDTH,
 )
-from ..camera import BINARY_GRID_MODE
-from ..input import (
+from krux.camera import BINARY_GRID_MODE
+from krux.input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
     BUTTON_PAGE_PREV,
@@ -44,8 +44,8 @@ from ..input import (
     FAST_FORWARD,
     FAST_BACKWARD,
 )
-from ..bip39 import entropy_checksum
-from ..kboard import kboard
+from krux.bip39 import entropy_checksum
+from krux.kboard import kboard
 
 # Tinyseed last bit index positions according to checksums
 TS_LAST_BIT_NO_CS = 143
@@ -161,7 +161,7 @@ class TinySeed(Page):
 
     def print_tiny_seed(self):
         """Creates a bitmap image of a punched Tinyseed and sends it to a thermal printer"""
-        from ..printers import create_printer
+        from krux.printers import create_printer
 
         self.printer = create_printer()
         words = self.ctx.wallet.key.mnemonic.split(" ")

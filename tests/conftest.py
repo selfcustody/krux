@@ -1,6 +1,6 @@
 from Crypto.Cipher import AES
 import pytest
-from .shared_mocks import (
+from tests.shared_mocks import (
     DeflateIO,
     board_amigo,
     board_dock,

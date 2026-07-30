@@ -297,7 +297,7 @@ def test_deflate_decompress_size_limit(m5stickv):
     """C4: deflate decompression must reject data exceeding DeflateIO size limit"""
     import zlib
     from krux.bbqr import deflate_decompress
-    from .shared_mocks import MAX_DECOMPRESSED_SIZE
+    from tests.shared_mocks import MAX_DECOMPRESSED_SIZE
 
     # Create data larger than the limit
     big_data = b"\x00" * (MAX_DECOMPRESSED_SIZE + 1)

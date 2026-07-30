@@ -23,8 +23,8 @@
 import time
 from Maix import GPIO
 from fpioa_manager import fm
-from . import Touchscreen
-from ..i2c import i2c_bus
+from krux.touchscreens import Touchscreen
+from krux.i2c import i2c_bus
 
 CST816S_TOUCH_DATA = 0x01
 CST816S_VERSION = 0x15

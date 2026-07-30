@@ -20,14 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ...display import FONT_HEIGHT
-from ...krux_settings import t, Settings, THERMAL_ADAFRUIT_TXT
-from .. import (
+from krux.display import FONT_HEIGHT
+from krux.krux_settings import t, Settings, THERMAL_ADAFRUIT_TXT
+from krux.pages import (
     Page,
     Menu,
     MENU_CONTINUE,
 )
-from ...kboard import kboard
+from krux.kboard import kboard
 
 
 class MnemonicsView(Page):
@@ -81,14 +81,14 @@ class MnemonicsView(Page):
 
     def encrypt_mnemonic_menu(self):
         """Handler for Mnemonic > Encrypt Mnemonic menu item"""
-        from ..encryption_ui import EncryptMnemonic
+        from krux.pages.encryption_ui import EncryptMnemonic
 
         encrypt_mnemonic_menu = EncryptMnemonic(self.ctx)
         return encrypt_mnemonic_menu.encrypt_menu()
 
     def encrypt_qr_code(self):
         """Handler for Encrypted QR Code menu item"""
-        from ..encryption_ui import EncryptMnemonic
+        from krux.pages.encryption_ui import EncryptMnemonic
 
         encrypt_qr_code = EncryptMnemonic(self.ctx)
         return encrypt_qr_code.encrypted_qr_code()
@@ -107,7 +107,7 @@ class MnemonicsView(Page):
                 t("Print?") + "\n\n" + Settings().hardware.printer.driver + "\n\n",
                 self.ctx.display.height() // 2,
             ):
-                from ..print_page import PrintPage
+                from krux.pages.print_page import PrintPage
 
                 print_page = PrintPage(self.ctx)
                 mnemonic = display_mnemonic or mnemonic
@@ -116,8 +116,8 @@ class MnemonicsView(Page):
 
     def display_mnemonic_numbers(self):
         """Handler for the 'numbers' menu item"""
-        from ..utils import Utils
-        from .. import BASE_DEC_SUFFIX, BASE_HEX_SUFFIX, BASE_OCT_SUFFIX
+        from krux.pages.utils import Utils
+        from krux.pages import BASE_DEC_SUFFIX, BASE_HEX_SUFFIX, BASE_OCT_SUFFIX
 
         submenu = Menu(
             self.ctx,
@@ -163,7 +163,7 @@ class MnemonicsView(Page):
         data = self.ctx.wallet.key.mnemonic
         self.display_qr_codes(data, title=title)
 
-        from ..utils import Utils
+        from krux.pages.utils import Utils
 
         utils = Utils(self.ctx)
         utils.print_standard_qr(data, title=title)
@@ -172,7 +172,7 @@ class MnemonicsView(Page):
     def display_seed_qr(self, binary=False):
         """Display Seed QR with with different view modes"""
 
-        from ..qr_view import SeedQRView
+        from krux.pages.qr_view import SeedQRView
 
         seed_qr_view = SeedQRView(self.ctx, binary)
         return seed_qr_view.display_qr()
@@ -191,7 +191,7 @@ class MnemonicsView(Page):
 
     def _stackbit_standard(self):
         """Displays Stackbit 1248 in standard (horizontal) format — 6 words per page"""
-        from ..stack_1248 import Stackbit
+        from krux.pages.stack_1248 import Stackbit
 
         stackbit = Stackbit(self.ctx)
         word_index = 1
@@ -218,7 +218,7 @@ class MnemonicsView(Page):
 
     def _stackbit_vertical_default(self):
         """Draws vertical Stackbit 1248 layout with 2 words per group, 4 words per page"""
-        from ..stack_1248 import Stackbit
+        from krux.pages.stack_1248 import Stackbit
 
         stackbit = Stackbit(self.ctx)
         words = self.ctx.wallet.key.mnemonic.split(" ")
@@ -251,7 +251,7 @@ class MnemonicsView(Page):
 
     def _stackbit_vertical_compact(self):
         """Draws compact Stackbit 1248 layout for M5StickV, 6 words per page"""
-        from ..stack_1248 import Stackbit
+        from krux.pages.stack_1248 import Stackbit
 
         stackbit = Stackbit(self.ctx)
         words = self.ctx.wallet.key.mnemonic.split(" ")
@@ -273,7 +273,7 @@ class MnemonicsView(Page):
 
     def tiny_seed(self):
         """Displays the seed in Tinyseed format"""
-        from ..tiny_seed import TinySeed
+        from krux.pages.tiny_seed import TinySeed
 
         tiny_seed = TinySeed(self.ctx)
         tiny_seed.export()

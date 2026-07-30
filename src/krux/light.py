@@ -22,7 +22,7 @@
 import board
 from Maix import GPIO
 from fpioa_manager import fm
-from .kboard import kboard
+from krux.kboard import kboard
 
 
 class IOCircuit:

@@ -22,10 +22,10 @@
 import lcd
 import board
 import time
-from .themes import theme
-from .krux_settings import Settings
-from .settings import THIN_SPACE, ELLIPSIS
-from .kboard import kboard
+from krux.themes import theme
+from krux.krux_settings import Settings
+from krux.settings import THIN_SPACE, ELLIPSIS
+from krux.kboard import kboard
 
 DEFAULT_PADDING = 10
 MINIMAL_PADDING = 5
@@ -527,7 +527,7 @@ class Display:
     def set_pmu_backlight(self, level):
         """Sets the backlight of the display to the given power level, from 0 to 8"""
 
-        from .power import power_manager
+        from krux.power import power_manager
 
         # Translate 5 levels to 1-8 range = 1,2,3,5,8
         translated_level = int(level)

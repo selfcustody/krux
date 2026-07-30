@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from . import (
+from krux.pages import (
     Page,
     Menu,
     MENU_CONTINUE,
@@ -31,7 +31,7 @@ from . import (
     # NUM_SPECIAL_1,
     # NUM_SPECIAL_2,
 )
-from ..krux_settings import t
+from krux.krux_settings import t
 
 # TODO: re-enable "Create a QR Code" (and keypads ^^^) once encryption is possible w/o Datum Tool
 
@@ -59,7 +59,7 @@ class Tools(Page):
     def flash_tools(self):
         """Handler for the 'Flash Tools' menu item"""
 
-        from .flash_tools import FlashTools
+        from krux.pages.flash_tools import FlashTools
 
         flash_tools = FlashTools(self.ctx)
         flash_tools.flash_tools_menu()
@@ -67,7 +67,7 @@ class Tools(Page):
 
     def rm_stored_mnemonic(self):
         """Lists and allow deletion of stored mnemonics"""
-        from .encryption_ui import LoadEncryptedMnemonic
+        from krux.pages.encryption_ui import LoadEncryptedMnemonic
 
         encrypted_mnemonics = LoadEncryptedMnemonic(self.ctx)
         while True:
@@ -79,7 +79,7 @@ class Tools(Page):
     def datum_tool(self):
         """Handler for the 'Datum Tool' menu item"""
         import sys
-        from .datum_tool import DatumToolMenu
+        from krux.pages.datum_tool import DatumToolMenu
 
         while True:
             if DatumToolMenu(self.ctx).run() == MENU_EXIT:
@@ -110,9 +110,9 @@ class Tools(Page):
 
     def descriptor_addresses(self):
         """Handler for the 'Descriptor Addresses' menu item"""
-        from .home_pages.wallet_descriptor import WalletDescriptor
-        from .home_pages.addresses import Addresses
-        from ..wallet import Wallet
+        from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+        from krux.pages.home_pages.addresses import Addresses
+        from krux.wallet import Wallet
 
         self.ctx.wallet = Wallet(None)
         menu_result = WalletDescriptor(self.ctx).wallet()
@@ -123,7 +123,7 @@ class Tools(Page):
     def device_tests(self):
         """Handler for the 'Device Tests' menu item"""
         import sys
-        from .device_tests import DeviceTests
+        from krux.pages.device_tests import DeviceTests
 
         page = DeviceTests(self.ctx)
         page.run()
