@@ -33,12 +33,18 @@ def format_btc(amount):
     while still using the idea behind the Satcomma standard
     """
 
+    # Floor division and modulo round towards minus infinity, so the sign has
+    # to be taken out before splitting the amount
+    sign = "-" if amount < 0 else ""
+    amount = abs(amount)
+
     btc_without_decimal = amount // SATS_PER_BTC
     btc_decimal_only = amount % SATS_PER_BTC
     btc_decimal_8char = ("{:0>" + BTC_SATS_LEN + "}").format(btc_decimal_only)
 
     return (
-        generate_thousands_separator(btc_without_decimal)
+        sign
+        + generate_thousands_separator(btc_without_decimal)
         + render_decimal_separator()
         + btc_decimal_8char[:2]
         + THOUSANDS_SEPARATOR
