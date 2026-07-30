@@ -189,7 +189,7 @@ class QRPartParser:
             ):
                 raise ValueError("Failed to decode UR")
         elif self.format == FORMAT_BBQR:
-            from .bbqr import parse_bbqr, BBQR_MAX_PAYLOAD_LEN
+            from krux.bbqr import parse_bbqr, BBQR_MAX_PAYLOAD_LEN
 
             part, index, total = parse_bbqr(data)
             # Only the first part is passed to detect_format, and its encoding and
@@ -234,7 +234,7 @@ class QRPartParser:
             return self.decoder.result
 
         if self.format == FORMAT_BBQR:
-            from .bbqr import decode_bbqr
+            from krux.bbqr import decode_bbqr
 
             return decode_bbqr(self.parts, self.bbqr.encoding, self.bbqr.file_type)
 
@@ -285,7 +285,7 @@ def to_qr_codes(data, max_width, qr_format):
                 code = qrcode.encode(part)
                 yield (code, encoder.fountain_encoder.seq_len())
         elif qr_format == FORMAT_BBQR:
-            from .bbqr import int2base36
+            from krux.bbqr import int2base36
 
             part_index = 0
             while True:
@@ -419,7 +419,7 @@ def detect_format(data):
         elif data.lower().startswith("ur:"):
             qr_format = FORMAT_UR
         elif data.startswith("B$"):
-            from .bbqr import BBQrCode, KNOWN_ENCODINGS, KNOWN_FILETYPES
+            from krux.bbqr import BBQrCode, KNOWN_ENCODINGS, KNOWN_FILETYPES
 
             if data[3] in KNOWN_FILETYPES:
                 bbqr_file_type = data[3]

@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 import gc
-from .. import (
+from krux.pages import (
     Page,
     Menu,
     MENU_CONTINUE,
@@ -29,12 +29,12 @@ from .. import (
     LOAD_FROM_CAMERA,
     LOAD_FROM_SD,
 )
-from ...display import BOTTOM_PROMPT_LINE
-from ...qr import FORMAT_NONE, FORMAT_PMOFN
-from ...krux_settings import t, Settings
-from ...format import replace_decimal_separator
-from ...key import TYPE_SINGLESIG
-from ...kboard import kboard
+from krux.display import BOTTOM_PROMPT_LINE
+from krux.qr import FORMAT_NONE, FORMAT_PMOFN
+from krux.krux_settings import t, Settings
+from krux.format import replace_decimal_separator
+from krux.key import TYPE_SINGLESIG
+from krux.kboard import kboard
 
 
 class Home(Page):
@@ -67,21 +67,21 @@ class Home(Page):
 
     def backup_mnemonic(self):
         """Handler for the 'Backup Mnemonic' menu item"""
-        from .mnemonic_backup import MnemonicsView
+        from krux.pages.home_pages.mnemonic_backup import MnemonicsView
 
         mnemonics_viewer = MnemonicsView(self.ctx)
         return mnemonics_viewer.mnemonic()
 
     def public_key(self):
         """Handler for the 'xpub' menu item"""
-        from .pub_key_view import PubkeyView
+        from krux.pages.home_pages.pub_key_view import PubkeyView
 
         pubkey_viewer = PubkeyView(self.ctx)
         return pubkey_viewer.public_key()
 
     def wallet_descriptor(self):
         """Handler for the 'wallet descriptor' menu item"""
-        from .wallet_descriptor import WalletDescriptor
+        from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
 
         wallet_descriptor = WalletDescriptor(self.ctx)
         return wallet_descriptor.wallet()
@@ -93,9 +93,9 @@ class Home(Page):
         ):
             return MENU_CONTINUE
 
-        from ..wallet_settings import PassphraseEditor
-        from ...key import Key
-        from ...wallet import Wallet
+        from krux.pages.wallet_settings import PassphraseEditor
+        from krux.key import Key
+        from krux.wallet import Wallet
 
         passphrase_editor = PassphraseEditor(self.ctx)
         passphrase = passphrase_editor.load_passphrase_menu(
@@ -129,9 +129,9 @@ class Home(Page):
         if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
             return MENU_CONTINUE
 
-        from ..wallet_settings import WalletSettings
-        from ...key import Key
-        from ...wallet import Wallet
+        from krux.pages.wallet_settings import WalletSettings
+        from krux.key import Key
+        from krux.wallet import Wallet
 
         prev_key = self.ctx.wallet.key
 
@@ -157,7 +157,7 @@ class Home(Page):
         if not self.prompt(t("Derive BIP85 entropy?"), self.ctx.display.height() // 2):
             return MENU_CONTINUE
 
-        from .bip85 import Bip85
+        from krux.pages.home_pages.bip85 import Bip85
 
         bip85 = Bip85(self.ctx)
         bip85.export()
@@ -174,7 +174,7 @@ class Home(Page):
         ):
             return MENU_CONTINUE
 
-        from .mnemonic_xor import MnemonicXOR
+        from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
 
         mnemonic_xor = MnemonicXOR(self.ctx)
         mnemonic_xor.load_key()
@@ -199,7 +199,7 @@ class Home(Page):
 
     def addresses_menu(self):
         """Handler for the 'address' menu item"""
-        from .addresses import Addresses
+        from krux.pages.home_pages.addresses import Addresses
 
         adresses = Addresses(self.ctx)
         return adresses.addresses_menu()
@@ -225,7 +225,7 @@ class Home(Page):
             return None  # user chose Back
 
         if load_method == LOAD_FROM_CAMERA:
-            from ..qr_capture import QRCodeCapture
+            from krux.pages.qr_capture import QRCodeCapture
 
             qr_capture = QRCodeCapture(self.ctx)
             data, qr_format = qr_capture.qr_capture_loop()
@@ -234,8 +234,8 @@ class Home(Page):
             return (data, qr_format, "")
 
         # If load_method == LOAD_FROM_SD
-        from ..utils import Utils
-        from ...sd_card import PSBT_FILE_EXTENSION, B64_FILE_EXTENSION
+        from krux.pages.utils import Utils
+        from krux.sd_card import PSBT_FILE_EXTENSION, B64_FILE_EXTENSION
 
         utils = Utils(self.ctx)
         psbt_filename, _ = utils.load_file(
@@ -285,7 +285,7 @@ class Home(Page):
             del signer
             gc.collect()
 
-            from ..utils import Utils
+            from krux.pages.utils import Utils
 
             utils = Utils(self.ctx)
 
@@ -303,7 +303,7 @@ class Home(Page):
         psbt_filename = self._format_psbt_file_extension(psbt_filename)
         gc.collect()
 
-        from ...sd_card import SDHandler
+        from krux.sd_card import SDHandler
 
         if psbt_filename and psbt_filename != ESC_KEY:
             try:
@@ -327,12 +327,12 @@ class Home(Page):
 
     def _format_psbt_file_extension(self, psbt_filename=""):
         """Formats the PSBT filename"""
-        from ...sd_card import (
+        from krux.sd_card import (
             PSBT_FILE_EXTENSION,
             B64_FILE_EXTENSION,
             SIGNED_FILE_SUFFIX,
         )
-        from ..file_operations import SaveFile
+        from krux.pages.file_operations import SaveFile
 
         if psbt_filename.endswith(B64_FILE_EXTENSION):
             # Remove chained extensions
@@ -452,7 +452,7 @@ class Home(Page):
 
     def _display_transaction_for_review(self, outputs):
         """Display all transaction info on screen for verification"""
-        from ..utils import Utils
+        from krux.pages.utils import Utils
 
         utils = Utils(self.ctx)
 
@@ -504,7 +504,7 @@ class Home(Page):
         self.ctx.display.draw_centered_text(t("Loading…"))
 
         qr_format = FORMAT_PMOFN if qr_format == FORMAT_NONE else qr_format
-        from ...psbt import PSBTSigner
+        from krux.psbt import PSBTSigner
 
         signer = PSBTSigner(self.ctx.wallet, data, qr_format, psbt_filename)
 
@@ -533,7 +533,7 @@ class Home(Page):
 
     def sign_message(self):
         """Handler for the 'sign message' menu item"""
-        from .sign_message_ui import SignMessage
+        from krux.pages.home_pages.sign_message_ui import SignMessage
 
         message_signer = SignMessage(self.ctx)
         return message_signer.sign_message()

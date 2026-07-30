@@ -20,9 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from . import Page, DIGITS, ESC_KEY
-from ..krux_settings import t
-from ..qr import FORMAT_NONE
+from krux.pages import Page, DIGITS, ESC_KEY
+from krux.krux_settings import t
+from krux.qr import FORMAT_NONE
 
 
 class Utils(Page):
@@ -47,14 +47,14 @@ class Utils(Page):
         """Loads printer driver and UI"""
         # Only loads printer related modules if needed
         if self.print_prompt(t("Print as QR?"), check_printer):
-            from .print_page import PrintPage
+            from krux.pages.print_page import PrintPage
 
             print_page = PrintPage(self.ctx)
             print_page.print_qr(data, qr_format, title, width, is_qr)
 
     def load_file(self, file_ext="", prompt=True, only_get_filename=False):
         """Load a file from SD card"""
-        from ..sd_card import SDHandler
+        from krux.sd_card import SDHandler
 
         # Callers read an empty filename as "user cancelled", so every failure
         # has to report itself here or it would be swallowed silently.
@@ -68,7 +68,7 @@ class Utils(Page):
                 if not prompt or self.prompt(
                     t("Load from SD card?") + "\n\n", self.ctx.display.height() // 2
                 ):
-                    from .file_manager import FileManager
+                    from krux.pages.file_manager import FileManager
 
                     file_manager = FileManager(self.ctx)
                     filename = file_manager.select_file(
@@ -109,8 +109,8 @@ class Utils(Page):
         self, y_offset, x_offset, line, line_index, highlight, addr_prefix=None
     ):
         """Local helper function to highlight addresses"""
-        from ..display import FONT_HEIGHT
-        from ..themes import theme
+        from krux.display import FONT_HEIGHT
+        from krux.themes import theme
         import lcd
 
         x_addr_offset = 0
@@ -163,14 +163,14 @@ class Utils(Page):
 
     def generate_wallet_info(self, network, policy, script, derivation, is_login=False):
         """Helper to create wallet details infobox"""
-        from ..key import (
+        from krux.key import (
             Key,
             P2TR,
             TYPE_SINGLESIG,
             TYPE_MULTISIG,
             TYPE_MINISCRIPT,
         )
-        from ..key import NAME_SINGLE_SIG, NAME_MULTISIG, NAME_MINISCRIPT
+        from krux.key import NAME_SINGLE_SIG, NAME_MULTISIG, NAME_MINISCRIPT
 
         wallet_info = network + "\n"
 
@@ -197,8 +197,8 @@ class Utils(Page):
     @staticmethod
     def get_network_color(network_name: str):
         """Returns the correct theme color to write network"""
-        from ..krux_settings import Settings, ThemeSettings
-        from ..themes import (
+        from krux.krux_settings import Settings, ThemeSettings
+        from krux.themes import (
             DARKERGREEN,
             DARKERORANGE,
             MAIN_TXT_COLOR,

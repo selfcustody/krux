@@ -183,7 +183,7 @@ wheels = [
 
 [[package]]
 name = "embit"
-version = "0.8.1"
+version = "0.8.0"
 source = { editable = "vendor/embit" }
 
 [package.metadata]
@@ -197,7 +197,6 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-cov", marker = "extra == 'dev'" },
     { name = "requests", marker = "extra == 'dev'" },
-    { name = "ruff", marker = "extra == 'dev'" },
 ]
 provides-extras = ["dev"]
 

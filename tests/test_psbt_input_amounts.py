@@ -6,7 +6,7 @@ hash to the outpoint being spent.
 """
 
 import pytest
-from .shared_mocks import MockFile, mock_open
+from tests.shared_mocks import MockFile, mock_open
 
 TEST_MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 

@@ -1,6 +1,6 @@
 import pytest
-from ..shared_mocks import mock_context
-from . import create_ctx
+from tests.shared_mocks import mock_context
+from tests.pages import create_ctx
 
 TEST_QR_DATA = "test"
 TEST_QR_DATA_IMAGE = bytearray(

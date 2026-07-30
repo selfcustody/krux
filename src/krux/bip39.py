@@ -1,7 +1,7 @@
 # Mnemonic convertion to seed and to/from bytes
 # pylint: disable=W0102
 
-from .hashes import sha256
+from krux.hashes import sha256
 from embit.wordlists.bip39 import WORDLIST
 
 WORDINDEX = {word: i for i, word in enumerate(WORDLIST)}

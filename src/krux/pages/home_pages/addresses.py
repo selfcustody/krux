@@ -21,18 +21,18 @@
 # THE SOFTWARE.
 
 import gc
-from ...display import BOTTOM_PROMPT_LINE
-from ...krux_settings import t
-from ...settings import THIN_SPACE
-from ...qr import FORMAT_NONE
-from .. import (
+from krux.display import BOTTOM_PROMPT_LINE
+from krux.krux_settings import t
+from krux.settings import THIN_SPACE
+from krux.qr import FORMAT_NONE
+from krux.pages import (
     Page,
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
     ESC_KEY,
 )
-from ...format import format_address
+from krux.format import format_address
 
 SCAN_ADDRESS_LIMIT = 50
 EXPORT_ADDRESS_LIMIT = SCAN_ADDRESS_LIMIT * 100
@@ -147,7 +147,7 @@ class Addresses(Page):
     def _qr_highlight_addr(self, formatted_text, y_offset):
         """Case highlight address for QR"""
 
-        from ..utils import Utils
+        from krux.pages.utils import Utils
 
         utils = Utils(self.ctx)
 
@@ -167,7 +167,7 @@ class Addresses(Page):
 
     def show_address(self, addr, title="", quick_exit=False):
         """Show addr provided as a QRCode"""
-        from ..qr_view import SeedQRView
+        from krux.pages.qr_view import SeedQRView
 
         seed_qr_view = SeedQRView(self.ctx, data=addr, title=title)
         seed_qr_view.display_qr(
@@ -199,10 +199,10 @@ class Addresses(Page):
 
     def export_address(self, addr_type=0):
         """Allow user to export addresses to SD card"""
-        from ..utils import Utils
-        from ...sd_card import SDHandler, ADDRESSES_FILE_EXTENSION
-        from ..file_operations import SaveFile
-        from ...wdt import wdt
+        from krux.pages.utils import Utils
+        from krux.sd_card import SDHandler, ADDRESSES_FILE_EXTENSION
+        from krux.pages.file_operations import SaveFile
+        from krux.wdt import wdt
 
         utils = Utils(self.ctx)
 
@@ -263,7 +263,7 @@ class Addresses(Page):
 
     def _scan_highlight_addr(self, result_message):
         """Case highlight address for scan"""
-        from ..utils import Utils
+        from krux.pages.utils import Utils
 
         utils = Utils(self.ctx)
 
@@ -287,8 +287,8 @@ class Addresses(Page):
 
     def scan_address(self, addr_type=0):
         """Handler for the 'receive' or 'change' menu item"""
-        from ..qr_capture import QRCodeCapture
-        from ..encryption_ui import try_decrypt_kef
+        from krux.pages.qr_capture import QRCodeCapture
+        from krux.pages.encryption_ui import try_decrypt_kef
 
         qr_capture = QRCodeCapture(self.ctx)
         data, qr_format = qr_capture.qr_capture_loop()
@@ -309,7 +309,7 @@ class Addresses(Page):
         addr = None
         data = data.decode() if isinstance(data, bytes) else data
         try:
-            from ...wallet import parse_address
+            from krux.wallet import parse_address
 
             addr = parse_address(data)
         except:

@@ -21,12 +21,12 @@
 # THE SOFTWARE.
 
 import gc
-from . import Page, Menu, MENU_EXIT, MENU_CONTINUE, MENU_RESTART
-from ..sd_card import SDHandler
-from ..krux_settings import t
-from ..format import generate_thousands_separator, render_decimal_separator
-from ..display import BOTTOM_PROMPT_LINE
-from ..settings import SD_PATH, SETTINGS_FILENAME, MNEMONICS_FILE
+from krux.pages import Page, Menu, MENU_EXIT, MENU_CONTINUE, MENU_RESTART
+from krux.sd_card import SDHandler
+from krux.krux_settings import t
+from krux.format import generate_thousands_separator, render_decimal_separator
+from krux.display import BOTTOM_PROMPT_LINE
+from krux.settings import SD_PATH, SETTINGS_FILENAME, MNEMONICS_FILE
 
 SD_ROOT_PATH = "/" + SD_PATH
 
@@ -170,8 +170,8 @@ class FileManager(Page):
         """Display the file details on the device's screen"""
         import uos
         import time
-        from ..display import DEFAULT_PADDING, FONT_HEIGHT
-        from ..themes import theme
+        from krux.display import DEFAULT_PADDING, FONT_HEIGHT
+        from krux.themes import theme
 
         stats = uos.stat(file)
         size_KB = stats[6] / 1024
