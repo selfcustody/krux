@@ -144,6 +144,51 @@ def test_rejects_legacy_input_without_previous_tx(m5stickv):
         PSBTSigner(_wallet(), psbt.serialize(), FORMAT_NONE)
 
 
+def _segwit_psbt(root, input_value, output_value):
+    """Single input p2wpkh PSBT with the given declared amounts"""
+    from embit import script
+    from embit.psbt import PSBT
+    from embit.transaction import Transaction, TransactionInput, TransactionOutput
+
+    pubkey, derivation = _key_at(root, "m/84h/1h/0h/0/0")
+    tx = Transaction(
+        vin=[TransactionInput(b"\x99" * 32, 0)],
+        vout=[
+            TransactionOutput(
+                output_value, script.p2wpkh(_key_at(root, "m/84h/1h/0h/0/7")[0])
+            )
+        ],
+    )
+    psbt = PSBT(tx)
+    psbt.inputs[0].witness_utxo = TransactionOutput(input_value, script.p2wpkh(pubkey))
+    psbt.inputs[0].bip32_derivations[pubkey] = derivation
+    return psbt.serialize()
+
+
+def test_rejects_outputs_exceeding_inputs(m5stickv):
+    """A negative fee is impossible on chain and must not reach the review screen.
+
+    It would render as a small negative amount and fee_percent clamps to 0.1,
+    so the high fee warning would not fire either.
+    """
+    from krux.psbt import PSBTSigner
+    from krux.qr import FORMAT_NONE
+
+    root = _root()
+    with pytest.raises(ValueError, match="outputs exceed inputs"):
+        PSBTSigner(_wallet(), _segwit_psbt(root, 99000, 100000), FORMAT_NONE)
+
+
+def test_accepts_zero_fee(m5stickv):
+    """A zero fee is unusual but valid, only a negative one is impossible"""
+    from krux.psbt import PSBTSigner
+    from krux.qr import FORMAT_NONE
+
+    root = _root()
+    signer = PSBTSigner(_wallet(), _segwit_psbt(root, 100000, 100000), FORMAT_NONE)
+    assert isinstance(signer, PSBTSigner)
+
+
 def _compressed_psbt_with_contradicting_amounts(root, real_value, declared_value):
     """Builds a PSBT that forces the compressed parse and lies in witness_utxo.
 

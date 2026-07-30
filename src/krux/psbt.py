@@ -178,6 +178,13 @@ class PSBTSigner:
                 if self.policy != inp_policy:
                     raise ValueError("mixed inputs in the tx")
 
+        # A transaction spending more than it funds is invalid and would render
+        # as a negative fee, which reads like a cheap transaction on screen
+        if sum(out.value for out in self.psbt.outputs) > sum(
+            inp.utxo.value for inp in self.psbt.inputs
+        ):
+            raise ValueError("outputs exceed inputs")
+
         if self.wallet.is_miniscript():
             if not is_miniscript(self.policy):
                 raise ValueError("Not a miniscript PSBT")
