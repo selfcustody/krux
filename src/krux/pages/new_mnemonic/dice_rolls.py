@@ -332,19 +332,17 @@ class DiceEntropy(Page):
             if index == 0:
                 self.stats_for_nerds()
 
-            import hashlib
             import binascii
+            from ...hashes import sha256
 
             entropy_bytes = entropy.encode()
-            entropy_hash = binascii.hexlify(
-                hashlib.sha256(entropy_bytes).digest()
-            ).decode()
+            entropy_hash = binascii.hexlify(sha256(entropy_bytes).digest()).decode()
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("SHA256 of rolls:") + "\n\n%s" % entropy_hash, highlight_prefix=":"
             )
             self.ctx.input.wait_for_button()
             num_bytes = 32 if len_mnemonic == 24 else 16
-            return hashlib.sha256(entropy_bytes).digest()[:num_bytes]
+            return sha256(entropy_bytes).digest()[:num_bytes]
 
         return None
