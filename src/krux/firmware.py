@@ -22,19 +22,19 @@
 import io
 import os
 import binascii
-from .hashes import sha256_hw
+from krux.hashes import sha256_hw
 import time
 import flash
 import board
 from embit import ec
-from .input import Input, BUTTON_PAGE, BUTTON_PAGE_PREV
-from .metadata import SIGNER_PUBKEY
-from .display import display
-from .krux_settings import t
-from .wdt import wdt
-from .themes import theme
-from .metadata import VERSION
-from .settings import SD_PATH
+from krux.input import Input, BUTTON_PAGE, BUTTON_PAGE_PREV
+from krux.metadata import SIGNER_PUBKEY
+from krux.display import display
+from krux.krux_settings import t
+from krux.wdt import wdt
+from krux.themes import theme
+from krux.metadata import VERSION
+from krux.settings import SD_PATH
 
 FLASH_SIZE = 2**24
 MAX_FIRMWARE_SIZE = 0x300000

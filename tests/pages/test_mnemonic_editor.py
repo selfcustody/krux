@@ -1,4 +1,4 @@
-from . import create_ctx
+from tests.pages import create_ctx
 
 TEST_12_WORD_MNEMONIC = (
     "olympic term tissue route sense program under choose bean emerge velvet absurd"

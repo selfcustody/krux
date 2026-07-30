@@ -23,24 +23,26 @@
 """
 Single point of entry for SHA-256 hashing.
 
-Krux hashes with SHA-256 for two different reasons, and the two must not be
-confused, so this module keeps them as separate, explicitly named functions
-instead of a single backend that changes under the hood:
+Krux has software and K210 hardware implementations of SHA-256, so this module
+keeps them as separate, explicitly named functions instead of selecting a
+backend implicitly:
 
-- The plain `sha256()` / `sha256d()` / `pbkdf2_hmac_sha256()` functions are
-  the *software* implementation (`hashlib`). They produce a value the user can
-  reproduce outside Krux with `sha256sum` or any other tool, and they never
-  depend on the K210 accelerator. Use them for anything shown on screen for
-  verification, and for security-sensitive material -- entropy checksums, key
-  derivation, message signing.
+- The plain `sha256()` / `sha256d()` / `pbkdf2_hmac_sha256()` functions use
+  the software implementation (`hashlib`). They preserve the backend used by
+  entropy checksums, key derivation, message signing, and legacy decryption.
 
-- The `*_hw` functions are the K210 hardware-accelerated implementation
-  (`uhashlib_hw`), used only where throughput matters: scanning flash memory
-  or the firmware file, and PBKDF2 key stretching for KEF / tamper-check code.
+- The `*_hw` functions use the K210 hardware accelerator (`uhashlib_hw`). They
+  preserve the backend used for firmware and flash hashing, KEF operations,
+  and tamper-check-code hashing and key stretching.
 
-Import from here rather than reaching for `hashlib` or `uhashlib_hw` directly,
-and pick the software or `*_hw` variant deliberately -- the choice of backend
-is part of the behavior, not an implementation detail.
+Both backends produce the same SHA-256 and PBKDF2 results. Backend selection is
+kept explicit to preserve runtime behavior and performance characteristics.
+
+Application code should import from here rather than reaching for `hashlib` or
+`uhashlib_hw` directly, and pick the software or `*_hw` variant deliberately --
+the choice of backend is part of the behavior, not an implementation detail.
+Hardware and compatibility diagnostics may import a backend directly when the
+backend itself is what they test.
 
 `sha256d()` is a double SHA-256, `SHA256(SHA256(x))`, a Bitcoin protocol
 internal (BIP-137 message preimages, base58check, txids). It is NOT what a
@@ -82,10 +84,8 @@ def sha256_hw(data=b""):
     """
     Hardware-accelerated single SHA-256 hasher (K210 `uhashlib_hw`).
 
-    Same result as `sha256()`, offloaded to the accelerator for throughput.
-    Use it only for bulk hashing where speed matters -- scanning flash memory
-    or the firmware file -- never for a hash shown to the user or for
-    entropy/keys.
+    Same result as `sha256()`, offloaded to the accelerator. Used by firmware,
+    flash, KEF, and tamper-check-code operations.
     """
     import uhashlib_hw
 

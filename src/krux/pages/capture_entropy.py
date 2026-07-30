@@ -21,11 +21,11 @@
 # THE SOFTWARE.
 
 import math
-from . import Page
-from ..display import FONT_HEIGHT, BOTTOM_LINE, BOTTOM_PROMPT_LINE
-from ..krux_settings import t
-from ..themes import theme
-from ..kboard import kboard
+from krux.pages import Page
+from krux.display import FONT_HEIGHT, BOTTOM_LINE, BOTTOM_PROMPT_LINE
+from krux.krux_settings import t
+from krux.themes import theme
+from krux.kboard import kboard
 
 POOR_VARIANCE_TH = 10  # RMS value of L, A, B channels considered poor
 INSUFFICIENT_VARIANCE_TH = 5  # RMS value of L, A, B channels considered insufficient
@@ -149,13 +149,13 @@ class CameraEntropy(Page):
 
     def capture(self, show_entropy_details=True):
         """Captures camera's entropy as the hash of image buffer"""
-        from ..hashes import sha256
+        from krux.hashes import sha256
         import gc
         import sensor
         import shannon
-        from ..wdt import wdt
-        from ..camera import ENTROPY_MODE
-        from ..format import replace_decimal_separator, generate_thousands_separator
+        from krux.wdt import wdt
+        from krux.camera import ENTROPY_MODE
+        from krux.format import replace_decimal_separator, generate_thousands_separator
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("TOUCH or ENTER to capture"))

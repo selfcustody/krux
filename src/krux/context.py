@@ -20,11 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import gc
-from .display import display, Display
-from .input import Input
-from .camera import Camera
-from .light import Light
-from .kboard import kboard
+from krux.display import display, Display
+from krux.input import Input
+from krux.camera import Camera
+from krux.light import Light
+from krux.kboard import kboard
 
 
 class Context:

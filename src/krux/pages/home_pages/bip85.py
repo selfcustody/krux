@@ -20,13 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 from embit import bip85
-from ...qr import FORMAT_NONE
-from ...sd_card import B64_FILE_EXTENSION
-from ...baseconv import base_encode
-from ...display import BOTTOM_PROMPT_LINE, FONT_HEIGHT, DEFAULT_PADDING
-from ...krux_settings import t
-from ...krux_settings import Settings
-from .. import (
+from krux.qr import FORMAT_NONE
+from krux.sd_card import B64_FILE_EXTENSION
+from krux.baseconv import base_encode
+from krux.display import BOTTOM_PROMPT_LINE, FONT_HEIGHT, DEFAULT_PADDING
+from krux.krux_settings import t
+from krux.krux_settings import Settings
+from krux.pages import (
     Menu,
     Page,
     MENU_CONTINUE,
@@ -47,7 +47,7 @@ class Bip85(Page):
         if not num_words:
             return MENU_CONTINUE
 
-        from ..utils import Utils
+        from krux.pages.utils import Utils
 
         utils = Utils(self.ctx)
         child_index = ""
@@ -63,8 +63,8 @@ class Bip85(Page):
         )
         self.ctx.display.clear()
 
-        from ...key import Key
-        from ...themes import theme
+        from krux.key import Key
+        from krux.themes import theme
 
         key = Key(
             bip85_words,
@@ -83,7 +83,7 @@ class Bip85(Page):
                 key.fingerprint_hex_str(True), color=theme.highlight_color
             )
         if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
-            from ...wallet import Wallet
+            from krux.wallet import Wallet
 
             self.ctx.wallet = Wallet(key)
             self.flash_success(
@@ -97,7 +97,7 @@ class Bip85(Page):
         self.display_qr_codes(code, FORMAT_NONE, title=title)
 
     def _save_b64_pwd_to_sd(self, info):
-        from ..file_operations import SaveFile
+        from krux.pages.file_operations import SaveFile
 
         save_page = SaveFile(self.ctx)
         title = "BIP85 Password"
@@ -113,7 +113,7 @@ class Bip85(Page):
 
     def _derive_base64_password(self):
         """Derive a BIP85 base64 password"""
-        from ..utils import Utils
+        from krux.pages.utils import Utils
 
         utils = Utils(self.ctx)
         child_index = ""
