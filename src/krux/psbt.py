@@ -200,6 +200,19 @@ class PSBTSigner:
             if self.wallet.policy != self.policy:
                 raise ValueError("policy mismatch")
 
+    def unverified_input_amounts(self):
+        """True if an input amount could be understated without breaking its signature.
+
+        BIP143 commits only to the amount of the input being signed, so with more
+        than one input a coordinator can declare a different amount truthfully in
+        each of two signing sessions and combine one valid signature per input.
+        BIP341 hashes every input amount, so taproot is immune, and with a single
+        input the lie goes into its own sighash and invalidates it.
+        """
+        if len(self.psbt.inputs) < 2 or self.policy["type"] == P2TR:
+            return False
+        return any(not inp.is_verified for inp in self.psbt.inputs)
+
     def get_policy_from_psbt_input(self, tx_input, xpubs, origin_less_xpub=None):
         """Extracts the scriptPubKey from an input's UTXO and determines the policy."""
         # Same UTXO object the signer commits to, so policy, displayed amount

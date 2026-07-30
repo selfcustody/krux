@@ -229,6 +229,89 @@ def _compressed_psbt_with_contradicting_amounts(root, real_value, declared_value
     return raw, tx, pubkey, script_pubkey
 
 
+def _two_input_psbt(root, taproot=False, with_prev_txs=False):
+    """Two input PSBT, optionally taproot, optionally carrying previous txs"""
+    from embit import script
+    from embit.psbt import PSBT
+    from embit.transaction import Transaction, TransactionInput, TransactionOutput
+
+    base = "m/86h/1h/0h" if taproot else "m/84h/1h/0h"
+    make = script.p2tr if taproot else script.p2wpkh
+
+    keys, prevs = [], []
+    for i in (0, 1):
+        pubkey, derivation = _key_at(root, "%s/0/%d" % (base, i))
+        keys.append((pubkey, derivation))
+        prevs.append(
+            Transaction(
+                vin=[TransactionInput(bytes([0xA0 + i]) * 32, 0)],
+                vout=[TransactionOutput(100000000, make(pubkey))],
+            )
+        )
+
+    tx = Transaction(
+        vin=[TransactionInput(prev.txid(), 0) for prev in prevs],
+        vout=[TransactionOutput(199990000, make(_key_at(root, "%s/0/7" % base)[0]))],
+    )
+    psbt = PSBT(tx)
+    for i, (pubkey, derivation) in enumerate(keys):
+        psbt.inputs[i].witness_utxo = prevs[i].vout[0]
+        if with_prev_txs:
+            psbt.inputs[i].non_witness_utxo = prevs[i]
+        if taproot:
+            psbt.inputs[i].taproot_bip32_derivations[pubkey] = ([], derivation)
+            psbt.inputs[i].taproot_internal_key = pubkey
+        else:
+            psbt.inputs[i].bip32_derivations[pubkey] = derivation
+    return psbt.serialize()
+
+
+def _taproot_wallet():
+    from embit.networks import NETWORKS
+    from krux.key import Key, TYPE_SINGLESIG, P2TR
+    from krux.wallet import Wallet
+
+    return Wallet(Key(TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"], "", 0, P2TR))
+
+
+def test_warns_when_amounts_are_unverifiable(m5stickv):
+    """Two segwit v0 inputs with no previous transactions is the Path C setup"""
+    from krux.psbt import PSBTSigner
+    from krux.qr import FORMAT_NONE
+
+    signer = PSBTSigner(_wallet(), _two_input_psbt(_root()), FORMAT_NONE)
+    assert signer.unverified_input_amounts() is True
+
+
+def test_no_warning_with_previous_transactions(m5stickv):
+    """Verified amounts cannot be understated, so there is nothing to warn about"""
+    from krux.psbt import PSBTSigner
+    from krux.qr import FORMAT_NONE
+
+    raw = _two_input_psbt(_root(), with_prev_txs=True)
+    signer = PSBTSigner(_wallet(), raw, FORMAT_NONE)
+    assert signer.unverified_input_amounts() is False
+
+
+def test_no_warning_for_taproot(m5stickv):
+    """BIP341 hashes every input amount, so the two session trick cannot work"""
+    from krux.psbt import PSBTSigner
+    from krux.qr import FORMAT_NONE
+
+    raw = _two_input_psbt(_root(), taproot=True)
+    signer = PSBTSigner(_taproot_wallet(), raw, FORMAT_NONE)
+    assert signer.unverified_input_amounts() is False
+
+
+def test_no_warning_for_single_input(m5stickv):
+    """A lie about the only input goes into its own sighash and breaks it"""
+    from krux.psbt import PSBTSigner
+    from krux.qr import FORMAT_NONE
+
+    signer = PSBTSigner(_wallet(), _segwit_psbt(_root(), 100000, 90000), FORMAT_NONE)
+    assert signer.unverified_input_amounts() is False
+
+
 def test_displayed_amount_is_the_signed_amount(mocker, m5stickv):
     """Display and sighash must read the same UTXO, even in compressed mode"""
     from embit import ec, script
@@ -312,8 +395,10 @@ def test_compressed_parse_keeps_legacy_psbt_usable(mocker, m5stickv):
     reason="Segwit inputs are not required to carry a previous transaction, so "
     "their amounts stay unverified. Signing the same transaction twice, each "
     "session declaring a different input truthfully, yields one valid signature "
-    "per input. Closing this means requiring previous transactions on segwit "
-    "inputs too, which rejects PSBTs from coordinators that omit them.",
+    "per input. Krux warns about this through unverified_input_amounts() but "
+    "still signs if the user proceeds. Rejecting instead would need previous "
+    "transactions on segwit inputs, which Sparrow deliberately omits for Krux "
+    "and the other airgapped signers in WalletModel.alwaysIncludeNonWitnessUtxo.",
 )
 def test_segwit_input_amounts_are_verified(m5stickv):
     """Documents the residual exposure on multi input segwit transactions"""

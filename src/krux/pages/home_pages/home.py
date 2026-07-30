@@ -411,6 +411,23 @@ class Home(Page):
 
         return True
 
+    def _unverified_amounts_psbt_warn(self, signer):
+        """Warn when input amounts are not backed by their previous transactions"""
+        if signer.unverified_input_amounts():
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Warning:")
+                + " "
+                + t("Unverified input amounts!")
+                + "\n"
+                + t("The fee shown may be lower than the real fee."),
+                highlight_prefix=":",
+            )
+
+            return self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE)
+
+        return True
+
     def _fees_psbt_warn(self, fee_percent):
         """Warn if fees greater than 10% of what is spent"""
         if fee_percent >= 10.0:
@@ -509,6 +526,9 @@ class Home(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing…"))
         outputs, fee_percent = signer.outputs()
+
+        if not self._unverified_amounts_psbt_warn(signer):
+            return MENU_CONTINUE
 
         if not self._fees_psbt_warn(fee_percent):
             return MENU_CONTINUE
