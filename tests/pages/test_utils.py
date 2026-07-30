@@ -1,5 +1,5 @@
-from . import create_ctx
-from .test_tools import mock_file_operations, SEEDS_JSON
+from tests.pages import create_ctx
+from tests.pages.test_tools import mock_file_operations, SEEDS_JSON
 
 
 def test_load_file(m5stickv, mocker, mock_file_operations):

@@ -22,9 +22,9 @@
 
 from embit.networks import NETWORKS
 from embit.bip32 import HARDENED_INDEX
-from ..display import FONT_HEIGHT, DEFAULT_PADDING, BOTTOM_PROMPT_LINE
-from ..krux_settings import t
-from . import (
+from krux.display import FONT_HEIGHT, DEFAULT_PADDING, BOTTOM_PROMPT_LINE
+from krux.krux_settings import t
+from krux.pages import (
     Page,
     Menu,
     MENU_CONTINUE,
@@ -35,7 +35,7 @@ from . import (
     NUM_SPECIAL_1,
     NUM_SPECIAL_2,
 )
-from ..key import (
+from krux.key import (
     Key,
     SINGLESIG_SCRIPT_PURPOSE,
     MULTISIG_SCRIPT_PURPOSE,
@@ -47,12 +47,12 @@ from ..key import (
     NAME_MINISCRIPT,
 )
 
-from ..settings import (
+from krux.settings import (
     MAIN_TXT,
     TEST_TXT,
 )
 
-from ..key import P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
+from krux.key import P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 
 PASSPHRASE_MAX_LEN = 200
 DERIVATION_KEYPAD = "1234567890/h"
@@ -104,7 +104,7 @@ class PassphraseEditor(Page):
                 ):
                     continue
 
-            from ..themes import theme
+            from krux.themes import theme
 
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(
@@ -135,8 +135,8 @@ class PassphraseEditor(Page):
         return data
 
     def _load_qr_passphrase(self):
-        from .qr_capture import QRCodeCapture
-        from .encryption_ui import decrypt_kef
+        from krux.pages.qr_capture import QRCodeCapture
+        from krux.pages.encryption_ui import decrypt_kef
 
         qr_capture = QRCodeCapture(self.ctx)
         data, _ = qr_capture.qr_capture_loop()
@@ -182,8 +182,8 @@ class WalletSettings(Page):
 
     def customize_wallet(self, key):
         """Customize wallet derivation properties"""
-        from ..themes import theme
-        from .utils import Utils
+        from krux.themes import theme
+        from krux.pages.utils import Utils
 
         utils = Utils(self.ctx)
         network = key.network

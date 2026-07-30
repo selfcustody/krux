@@ -1,6 +1,5 @@
 import pytest
-from unittest.mock import patch
-from . import create_ctx
+from tests.pages import create_ctx
 
 
 @pytest.fixture

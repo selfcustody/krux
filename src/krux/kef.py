@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 import ucryptolib
-from .hashes import sha256_hw, pbkdf2_hmac_sha256_hw
+from krux.hashes import sha256_hw, pbkdf2_hmac_sha256_hw
 
 # KEF: AES, MODEs VERSIONS, MODE_NUMBERS, and MODE_IVS are defined here
 #  to disable a MODE: set its value to None

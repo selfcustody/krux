@@ -1,10 +1,10 @@
 import pytest
-from .test_home import tdata
-from .. import create_ctx
+from tests.pages.home_pages.test_home import tdata
+from tests.pages import create_ctx
 
 
 def test_xor_bytes(mocker, m5stickv):
-    from src.krux.pages.home_pages.mnemonic_xor import MnemonicXOR
+    from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
 
     # bytes_0 XOR bytest_1 = result_bytes
     cases = [
@@ -43,7 +43,7 @@ def test_xor_bytes(mocker, m5stickv):
 
 
 def test_fail_xor_bytes_different_lengths(mocker, m5stickv):
-    from src.krux.pages.home_pages.mnemonic_xor import MnemonicXOR
+    from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
 
     a = b"\x05\xdc\x07\xde\x04\x20\x00\x7d\x06\x35\x00\xe1\x01\xbf\x07\x23\x05\x8e\x01\x94\x07\x4e\x00\x01"
     b = b"\x04\x11\x04\x6d\x01\xff\x03\x7d\x03\xeb\x02\xcd\x01\x06\x00\x1f\x03\x88\x03\xe0\x05\x78\x07\x63\x02\x27\x02\xe8\x06\x3e\x01\x05\x06\x20\x04\xb0\x07\x33\x01\xa2\x03\xbd\x06\x1a\x01\xd9\x04\x22"

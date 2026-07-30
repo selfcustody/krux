@@ -23,9 +23,9 @@ from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key
 from embit.descriptor.errors import DescriptorError
 from embit.networks import NETWORKS
-from .krux_settings import t
-from .qr import FORMAT_BBQR, FORMAT_NONE
-from .key import (
+from krux.krux_settings import t
+from krux.qr import FORMAT_BBQR, FORMAT_NONE
+from krux.key import (
     P2PKH,
     P2SH,
     P2SH_P2WPKH,
@@ -301,7 +301,7 @@ class Wallet:
     def wallet_qr(self):
         """Returns the original wallet data and qr format for display back as a QR code"""
         if self.wallet_qr_format == FORMAT_BBQR:
-            from .bbqr import encode_bbqr
+            from krux.bbqr import encode_bbqr
 
             wallet_data = (
                 self.wallet_data.encode("utf-8")
@@ -546,7 +546,7 @@ def is_double_mnemonic(mnemonic: str):
 
     words = mnemonic.split(" ")
     if len(words) > 12:
-        from .bip39 import k_mnemonic_is_valid
+        from krux.bip39 import k_mnemonic_is_valid
 
         if (
             k_mnemonic_is_valid(" ".join(words[:12]))

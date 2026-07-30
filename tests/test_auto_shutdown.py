@@ -1,4 +1,4 @@
-from .shared_mocks import mock_context
+from tests.shared_mocks import mock_context
 import pytest
 
 

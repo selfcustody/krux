@@ -26,8 +26,8 @@
 import time
 from Maix import GPIO
 from fpioa_manager import fm
-from . import Touchscreen
-from ..i2c import i2c_bus
+from krux.touchscreens import Touchscreen
+from krux.i2c import i2c_bus
 
 # GT911 Register addresses
 GT911_PRODUCT_ID = 0x8140

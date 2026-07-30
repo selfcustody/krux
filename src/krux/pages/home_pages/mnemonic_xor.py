@@ -20,13 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .. import Menu, LETTERS, MENU_CONTINUE, MENU_EXIT
-from ..login import MnemonicLoader
-from ...krux_settings import Settings, t
-from ...display import BOTTOM_PROMPT_LINE, FONT_HEIGHT
-from ...themes import theme
-from ...key import Key
-from ...wallet import Wallet
+from krux.pages import Menu, LETTERS, MENU_CONTINUE, MENU_EXIT
+from krux.pages.login import MnemonicLoader
+from krux.krux_settings import Settings, t
+from krux.display import BOTTOM_PROMPT_LINE, FONT_HEIGHT
+from krux.themes import theme
+from krux.key import Key
+from krux.wallet import Wallet
 
 
 class MnemonicXOR(MnemonicLoader):

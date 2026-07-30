@@ -23,15 +23,15 @@
 import flash
 import sensor
 import time
-from . import Page, MENU_CONTINUE
-from .capture_entropy import CameraEntropy, POOR_VARIANCE_TH, LABEL_LINES
-from ..themes import theme
-from ..krux_settings import t
-from ..display import BOTTOM_LINE, MINIMAL_PADDING, FONT_HEIGHT
-from ..wdt import wdt
-from ..firmware import FLASH_SIZE
-from ..camera import ENTROPY_MODE
-from ..kboard import kboard
+from krux.pages import Page, MENU_CONTINUE
+from krux.pages.capture_entropy import CameraEntropy, POOR_VARIANCE_TH, LABEL_LINES
+from krux.themes import theme
+from krux.krux_settings import t
+from krux.display import BOTTOM_LINE, MINIMAL_PADDING, FONT_HEIGHT
+from krux.wdt import wdt
+from krux.firmware import FLASH_SIZE
+from krux.camera import ENTROPY_MODE
+from krux.kboard import kboard
 
 FLASH_ROWS = 64
 BLOCK_SIZE = 0x1000

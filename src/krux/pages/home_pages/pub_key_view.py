@@ -20,16 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ...display import FONT_HEIGHT
-from ...krux_settings import t
-from .. import (
+from krux.display import FONT_HEIGHT
+from krux.krux_settings import t
+from krux.pages import (
     Page,
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
 )
-from ...sd_card import PUBKEY_FILE_EXTENSION
-from ...key import P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH
+from krux.sd_card import PUBKEY_FILE_EXTENSION
+from krux.key import P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH
 
 # to start xpub value without the xpub/zpub/ypub prefix
 WALLET_XPUB_START = 4
@@ -42,7 +42,7 @@ class PubkeyView(Page):
         """Handler for the 'xpub' menu item"""
 
         def _save_xpub_to_sd(version):
-            from ..file_operations import SaveFile
+            from krux.pages.file_operations import SaveFile
 
             save_page = SaveFile(self.ctx)
             xpub = self.ctx.wallet.key.key_expression(version)
@@ -59,7 +59,7 @@ class PubkeyView(Page):
             )
 
         def _pub_key_text(version):
-            from ...themes import theme
+            from krux.themes import theme
 
             pub_text_menu_items = [
                 (
@@ -99,7 +99,7 @@ class PubkeyView(Page):
                 :WALLET_XPUB_START
             ].upper()
             xpub = self.ctx.wallet.key.key_expression(version)
-            from ..qr_view import SeedQRView
+            from krux.pages.qr_view import SeedQRView
 
             seed_qr_view = SeedQRView(self.ctx, data=xpub, title=title)
             seed_qr_view.display_qr(allow_export=True, transcript_tools=False)

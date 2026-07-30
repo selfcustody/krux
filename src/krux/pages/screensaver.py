@@ -21,8 +21,8 @@
 # THE SOFTWARE.
 
 # from . import Page
-from ..display import SPLASH, FONT_HEIGHT, TOTAL_LINES
-from ..themes import theme
+from krux.display import SPLASH, FONT_HEIGHT, TOTAL_LINES
+from krux.themes import theme
 
 
 class ScreenSaver:

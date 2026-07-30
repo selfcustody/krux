@@ -20,11 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from . import Page, Menu, MENU_CONTINUE
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
-from ..krux_settings import t
-from ..wdt import wdt
-from ..kboard import kboard
+from krux.pages import Page, Menu, MENU_CONTINUE
+from krux.display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
+from krux.krux_settings import t
+from krux.wdt import wdt
+from krux.kboard import kboard
 
 
 class DeviceTests(Page):
@@ -50,10 +50,10 @@ class DeviceTests(Page):
     def sd_check(self):
         """Handler for the 'SD Check' menu item"""
         import uos
-        from ..format import generate_thousands_separator
-        from ..sd_card import SDHandler
-        from .file_manager import SD_ROOT_PATH
-        from ..display import BOTTOM_PROMPT_LINE
+        from krux.format import generate_thousands_separator
+        from krux.sd_card import SDHandler
+        from krux.pages.file_manager import SD_ROOT_PATH
+        from krux.display import BOTTOM_PROMPT_LINE
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Checking for SD card…"))
@@ -85,7 +85,7 @@ class DeviceTests(Page):
                     highlight_prefix=":",
                 )
                 if self.prompt(t("Explore files?"), BOTTOM_PROMPT_LINE):
-                    from .file_manager import FileManager
+                    from krux.pages.file_manager import FileManager
 
                     file_manager = FileManager(self.ctx)
                     file_manager.select_file(
@@ -101,7 +101,7 @@ class DeviceTests(Page):
         title = t("Krux Printer Test QR")
         self.display_qr_codes(title, title=title)
 
-        from .utils import Utils
+        from krux.pages.utils import Utils
 
         utils = Utils(self.ctx)
         utils.print_standard_qr(title, title=title, check_printer=False)
@@ -209,8 +209,8 @@ class DeviceTests(Page):
 
     def test_touch(self):
         """Check touch detection across the entire screen"""
-        from ..buttons import PRESSED
-        from ..themes import theme
+        from krux.buttons import PRESSED
+        from krux.themes import theme
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Touchscreen"))
@@ -413,7 +413,7 @@ class DeviceTests(Page):
 
     def deflate_compression(self, interactive=False):
         """test deflate compression between MaixPy and python3:zlib"""
-        from ..bbqr import deflate_compress, deflate_decompress
+        from krux.bbqr import deflate_compress, deflate_decompress
         from binascii import hexlify, b2a_base64
         from hashlib import sha256
 

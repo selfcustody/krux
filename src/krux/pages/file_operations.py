@@ -20,15 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from . import (
+from krux.pages import (
     Page,
     ESC_KEY,
     LETTERS,
     UPPERCASE_LETTERS,
 )
-from ..krux_settings import t
-from ..sd_card import SDHandler
-from ..display import BOTTOM_PROMPT_LINE
+from krux.krux_settings import t
+from krux.sd_card import SDHandler
+from krux.display import BOTTOM_PROMPT_LINE
 
 FILE_SPECIAL = "1234567890[]-._()~"
 
