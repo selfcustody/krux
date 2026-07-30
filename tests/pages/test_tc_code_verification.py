@@ -1,4 +1,4 @@
-from . import create_ctx
+from tests.pages import create_ctx
 
 
 def test_tc_code_verification(amigo, mocker):

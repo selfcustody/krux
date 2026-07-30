@@ -1,5 +1,5 @@
 import pytest
-from .shared_mocks import get_mock_open
+from tests.shared_mocks import get_mock_open
 import sys
 import json
 

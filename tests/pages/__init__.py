@@ -1,4 +1,4 @@
-from ..shared_mocks import mock_context, MockPrinter
+from tests.shared_mocks import mock_context, MockPrinter
 
 
 def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):

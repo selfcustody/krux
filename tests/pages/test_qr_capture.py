@@ -1,7 +1,7 @@
-from . import create_ctx
-from ..test_qr import tdata
+from tests.pages import create_ctx
+from tests.test_qr import tdata
 
-from ..shared_mocks import (
+from tests.shared_mocks import (
     snapshot_generator,
     SNAP_ANIMATED_QR,
     DONT_FIND_ANYTHING,

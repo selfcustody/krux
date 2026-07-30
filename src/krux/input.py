@@ -21,11 +21,11 @@
 # THE SOFTWARE.
 import time
 import board
-from .wdt import wdt
-from .auto_shutdown import auto_shutdown
-from .buttons import PRESSED, RELEASED
-from .krux_settings import Settings
-from .kboard import kboard
+from krux.wdt import wdt
+from krux.auto_shutdown import auto_shutdown
+from krux.buttons import PRESSED, RELEASED
+from krux.krux_settings import Settings
+from krux.kboard import kboard
 
 BUTTON_ENTER = 0
 BUTTON_PAGE = 1
@@ -63,25 +63,25 @@ class Input:
 
         self.enter = None
         if "BUTTON_A" in board.config["krux"]["pins"]:
-            from .buttons import ButtonEnter
+            from krux.buttons import ButtonEnter
 
             self.enter = ButtonEnter(board.config["krux"]["pins"]["BUTTON_A"])
 
         self.page = None
         self.page_prev = None
         if kboard.has_encoder:
-            from .rotary import EncoderPage, EncoderPagePrev
+            from krux.rotary import EncoderPage, EncoderPagePrev
 
             self.page = EncoderPage()
             self.page_prev = EncoderPagePrev()
         else:
             if "BUTTON_B" in board.config["krux"]["pins"]:
-                from .buttons import ButtonPage
+                from krux.buttons import ButtonPage
 
                 self.page = ButtonPage(board.config["krux"]["pins"]["BUTTON_B"])
 
             if "BUTTON_C" in board.config["krux"]["pins"]:
-                from .buttons import ButtonPagePrev
+                from krux.buttons import ButtonPagePrev
 
                 self.page_prev = ButtonPagePrev(
                     board.config["krux"]["pins"]["BUTTON_C"]
@@ -98,7 +98,7 @@ class Input:
         self.buttons_active = True
         self.touch = None
         if kboard.has_touchscreen:
-            from .touch import Touch
+            from krux.touch import Touch
 
             self.touch = Touch(
                 board.config["lcd"]["width"],

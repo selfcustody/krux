@@ -23,10 +23,10 @@
 import math
 import time
 
-from ..krux_settings import Settings, CNC_HEAD_LASER, CNC_HEAD_ROUTER
-from ..sd_card import SDHandler
-from ..wdt import wdt
-from . import Printer
+from krux.krux_settings import Settings, CNC_HEAD_LASER, CNC_HEAD_ROUTER
+from krux.sd_card import SDHandler
+from krux.wdt import wdt
+from krux.printers import Printer
 
 G0_XY = "G0 X%.4f Y%.4f"
 G0_Z = "G0 Z%.4f"
@@ -100,7 +100,7 @@ class GCodeGenerator(Printer):
 
     def print_qr_code(self, qr_code):
         """Prints a QR code, scaling it up as large as possible"""
-        from ..qr import get_size
+        from krux.qr import get_size
 
         size = 0
 
