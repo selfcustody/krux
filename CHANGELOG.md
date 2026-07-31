@@ -1,4 +1,4 @@
-# Changelog 26.05.0 - May 2025
+# Changelog 26.08.0 - May 2025
 
 ### Security Fixes
 - Camera entropy: fix a heap buffer overflow in the Shannon entropy module. Only the Maix Bit could trigger it, a device discontinued in 25.09.0 with no known users; every other device feeds the module a frame that fits. The module copied the whole frame into a fixed 320x240 RGB565 (153,600 byte) scratch buffer, so the Maix Bit's larger CIF frames (352x288 RGB565, 202,752 bytes) wrote 49,152 bytes past the end. The scratch copy has been removed entirely, the read length is now capped and rounded to whole pixels, and the CIF path is gone along with the Maix Bit
