@@ -1,5 +1,11 @@
 # Changelog 26.05.0 - May 2025
 
+### Security Fixes
+- Camera entropy: fix a heap buffer overflow in the Shannon entropy module. Only the Maix Bit could trigger it, a device discontinued in 25.09.0 with no known users; every other device feeds the module a frame that fits. The module copied the whole frame into a fixed 320x240 RGB565 (153,600 byte) scratch buffer, so the Maix Bit's larger CIF frames (352x288 RGB565, 202,752 bytes) wrote 49,152 bytes past the end. The scratch copy has been removed entirely, the read length is now capped and rounded to whole pixels, and the CIF path is gone along with the Maix Bit
+
+### Removed Maix Bit Code
+All Maix Bit support has been removed from the source tree, including its firmware build project. Support for the device was discontinued in 25.09.0, which at the time kept the build parameters available; those are now gone too. The OV5642 sensor handling, used only by that device, was removed along with it.
+
 ### Stackbit 1248 Vertical Layout
 Added vertical layout option for Stackbit 1248 backup display, allowing users to choose between Standard (horizontal) and Vertical (transposed) grid orientations.
 
@@ -7,6 +13,7 @@ Added vertical layout option for Stackbit 1248 backup display, allowing users to
 Switch from the pure-Python urtypes and foundation-ur-py packages to the new uUR C module, allowing faster UR QR codes decoding with a smaller RAM footprint. Tests and the simulator now build the same module for CPython instead of shimming the pure-Python packages, so host and device run identical UR code.
 
 ### Other Bug Fixes and Improvements
+- Remove the unused `os.urandom()` from the MaixPy firmware. It was never called by Krux and played no part in generating keys or mnemonics, which draw entropy from the camera or dice. It was backed by a deterministic PRNG, so it has been removed to keep it from being mistaken for a secure source later
 - Improve scan TinySeed and other binary visibility by drawing punches only
 - Added `flash_success` method to standardize green success flashes across confirmation screens
 - Update Embit to latest - 3ae0ef2
