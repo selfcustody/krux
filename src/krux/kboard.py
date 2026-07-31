@@ -28,7 +28,6 @@ class KBoard:
 
     def __init__(self):
         self.is_amigo = board.config["type"] == "amigo"
-        self.is_bit = board.config["type"] == "bit"
         self.is_cube = board.config["type"] == "cube"
         self.is_embed_fire = board.config["type"] == "embed_fire"
         self.is_yahboom = board.config["type"] == "yahboom"

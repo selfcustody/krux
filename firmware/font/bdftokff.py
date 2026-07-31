@@ -50,7 +50,6 @@ REF_DEVICES = [SMALL_FONT_REF, MID_FONT_REF, BIG_FONT_REF]
 
 SMALL_FONT_DEVICES_TO_COPY = ["cube"]
 MID_FONT_DEVICES_TO_COPY = [
-    "bit",
     "yahboom",
     "wonder_mv",
     "tzt",

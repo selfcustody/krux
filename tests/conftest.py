@@ -8,7 +8,6 @@ from .shared_mocks import (
     board_m5stickv,
     board_wonder_mv,
     board_yahboom,
-    board_bit,
     board_wonder_k,
     board_embed_fire,
     encode_to_string,
@@ -173,15 +172,6 @@ def wonder_mv(monkeypatch, mp_modules):
 
 
 @pytest.fixture
-def bit(monkeypatch, mp_modules):
-    import sys
-
-    monkeypatch.setitem(sys.modules, "board", board_bit())
-    monkeypatch.setitem(sys.modules, "pmu", None)
-    reset_krux_modules()
-
-
-@pytest.fixture
 def wonder_k(monkeypatch, mp_modules):
     import sys
 
@@ -207,7 +197,6 @@ def embed_fire(monkeypatch, mp_modules):
         "cube",
         "yahboom",
         "wonder_mv",
-        "bit",
         "wonder_k",
     ]
 )
