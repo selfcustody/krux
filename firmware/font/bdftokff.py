@@ -55,6 +55,7 @@ MID_FONT_DEVICES_TO_COPY = [
     "tzt",
     "wonder_k",
     "yahboom_devkit",
+    "embed_fire",
 ]
 BIG_FONT_DEVICES_TO_COPY = []
 
