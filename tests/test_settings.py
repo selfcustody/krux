@@ -159,6 +159,26 @@ def test_malformed_settings_file_is_rejected(mocker, m5stickv):
     assert store.settings == {}
 
 
+def test_security_startup_apps_loads_flash_file(mocker, m5stickv):
+    """SecuritySettings._load_startup_apps returns saved apps plus none."""
+    import json
+
+    mocker.patch("builtins.open", mocker.mock_open(read_data=json.dumps(["app"])))
+
+    from krux.krux_settings import SecuritySettings
+
+    assert SecuritySettings._load_startup_apps() == ["app", "none"]
+
+
+def test_security_startup_apps_returns_none_on_load_error(mocker, m5stickv):
+    """SecuritySettings._load_startup_apps falls back to none on read errors."""
+    mocker.patch("builtins.open", side_effect=OSError)
+
+    from krux.krux_settings import SecuritySettings
+
+    assert SecuritySettings._load_startup_apps() == ["none"]
+
+
 def test_stored_cnc_settings(mocker, m5stickv):
     print("")
 

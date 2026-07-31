@@ -184,6 +184,43 @@ def sha256(firmware_filename, firmware_size=None):
     return hasher.digest()
 
 
+def check_signature(pubkey, sig, file_hash):
+    """Return if signature of the file_hash is valid for the pubkey"""
+
+    try:
+        # embit (via libsecp256k1) already enforces signature is compact
+        sig = ec.Signature.parse(sig)
+        if not pubkey.verify(sig, file_hash):
+            return False
+    except:
+        return False
+
+    return True
+
+
+def get_pubkey():
+    """Construct the pubkey based on Krux metadata pubkey string"""
+
+    try:
+        return ec.PublicKey.from_string(SIGNER_PUBKEY)
+    except:
+        return None
+
+
+def get_kapp_pubkeys():
+    """Construct the trusted kapp signer pubkeys from Krux metadata"""
+
+    from .metadata import KAPP_SIGNER_PUBKEYS
+
+    pubkeys = []
+    for pubkey_str in KAPP_SIGNER_PUBKEYS:
+        try:
+            pubkeys.append(ec.PublicKey.from_string(pubkey_str))
+        except:
+            pass
+    return pubkeys
+
+
 def find_all_occurrences(data, pattern):
     """Find all occurrences of the pattern in the data"""
     positions = []
@@ -311,10 +348,8 @@ def upgrade():
             return False
 
     # Validate curr pubkey
-    pubkey = None
-    try:
-        pubkey = ec.PublicKey.from_string(SIGNER_PUBKEY)
-    except:
+    pubkey = get_pubkey()
+    if pubkey is None:
         display.flash_text("Invalid public key", theme.error_color)
         return False
 
@@ -337,13 +372,7 @@ def upgrade():
 
     # Validate signature
     firmware_hash = sha256(firmware_path)
-    try:
-        # Parse, serialize, and reparse to ensure signature is compact prior to verification
-        sig = ec.Signature.parse(ec.Signature.parse(sig).serialize())
-        if not pubkey.verify(sig, firmware_hash):
-            display.flash_text(t("Bad signature"), theme.error_color)
-            return False
-    except:
+    if not check_signature(pubkey, sig, firmware_hash):
         display.flash_text(t("Bad signature"), theme.error_color)
         return False
 

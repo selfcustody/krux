@@ -3,6 +3,26 @@ Here are some useful tools that are available as soon as Krux starts! These are 
 <img src="../../../img/maixpy_amigo/tools-options-300.png" class="amigo">
 <img src="../../../img/maixpy_m5stickv/tools-options-250.png" class="m5stickv">
 
+### Load Krux app
+<img src="../../../img/maixpy_m5stickv/krux-apps-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/krux-apps-300.png" align="right" class="amigo">
+
+Run developer-signed Krux applications (Kapps) that are not suited to be part of the main firmware. Copy its `.mpy` file and corresponding signature to an SD card to load it onto the device. When executed, the Kapp is stored in the user's flash memory (just like custom settings) and this process modifies the last two words of the [Tamper Detection](tamper-detection.md#tamper-check-flash-hash-tc-flash-hash-a-tamper-detection-tool) (User's Region).
+
+Each Kapp lives in its own repository; signed releases are collected in [selfcustody/kapps](https://github.com/selfcustody/kapps).
+
+#### Writing a Kapp
+
+A Kapp is a single `.mpy` module (compiled with the firmware's `mpy-cross`) plus a detached `.mpy.sig` signature. Its contract:
+
+- **`run(ctx)`** — required entry point. It receives the Krux `ctx` and returns when the app is done.
+- **`ALLOW_STARTUP`** — optional. Set truthy to allow the app to be configured as a boot 'startup Kapp'.
+- **`NAME` / `VERSION`** — optional human-readable metadata.
+
+Kapps are verified against dedicated trusted signer keys (`KAPP_SIGNER_PUBKEYS`), which are separate from the firmware signer key, so signing a Kapp never implies the ability to sign firmware. The signature is re-checked against the flash copy on every execution, the module is imported inside a sandbox and dropped from memory afterwards, and the device reboots when the app exits so nothing it loaded persists into your session.
+
+<div style="clear: both"></div>
+
 ### Datum Tool
 <img src="../../../img/maixpy_m5stickv/tools-datum-tool-load-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/tools-datum-tool-load-300.png" align="right" class="amigo">

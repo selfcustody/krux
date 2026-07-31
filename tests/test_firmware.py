@@ -13120,6 +13120,73 @@ def test_upgrade_succeed(mocker, m5stickv, mock_success_input_cls, tdata):
     display_mocker.flash_text.assert_called_with("Shutting down…")
 
 
+def test_get_kapp_pubkeys_skips_invalid_keys(mocker, m5stickv, tdata):
+    from embit import ec
+    from krux import firmware
+
+    mocker.patch(
+        "krux.metadata.KAPP_SIGNER_PUBKEYS",
+        (tdata.TEST_SIGNER_PUBKEY, "not-a-pubkey"),
+    )
+
+    pubkeys = firmware.get_kapp_pubkeys()
+
+    assert len(pubkeys) == 1
+    assert pubkeys[0].sec() == ec.PublicKey.from_string(tdata.TEST_SIGNER_PUBKEY).sec()
+
+
+def test_check_signature_returns_false_when_pubkey_verify_rejects(
+    mocker, m5stickv, tdata
+):
+    from krux import firmware
+
+    pubkey = mocker.MagicMock()
+    pubkey.verify.return_value = False
+
+    assert (
+        firmware.check_signature(
+            pubkey,
+            tdata.TEST_FIRMWARE_SIG,
+            bytes.fromhex(tdata.TEST_FIRMWARE_SHA256),
+        )
+        is False
+    )
+    pubkey.verify.assert_called_once()
+
+
+def test_upgrade_flashes_bad_signature_when_pubkey_verify_rejects(
+    mocker, m5stickv, mock_success_input_cls, tdata
+):
+    mocker.patch(
+        "builtins.open",
+        new=get_mock_open(
+            {
+                SD_FIRMWARE_PATH: tdata.TEST_FIRMWARE,
+                SD_FIRMWARE_SIG_PATH: tdata.TEST_FIRMWARE_SIG,
+            }
+        ),
+    )
+    mocker.patch("os.stat", new=mocker.MagicMock(return_value=True))
+    display_mocker = mocker.patch("krux.firmware.display", new=mocker.MagicMock())
+    mocker.patch("krux.firmware.Input", new=mock_success_input_cls)
+    mocker.patch("krux.firmware.SIGNER_PUBKEY", tdata.TEST_SIGNER_PUBKEY)
+    from krux import firmware
+
+    pubkey = mocker.MagicMock()
+    pubkey.verify.return_value = False
+    mocker.patch("krux.firmware.ec.PublicKey.from_string", return_value=pubkey)
+    mocker.patch.object(
+        firmware, "find_active_firmware", side_effect=tdata.TEST_SECTOR_CASES[0]
+    )
+    firmware.is_version_greater = lambda filename: "00.00.0"
+
+    assert not firmware.upgrade()
+    pubkey.verify.assert_called_once()
+    display_mocker.flash_text.assert_called_with(
+        "Bad signature", firmware.theme.error_color
+    )
+
+
 def test_upgrade_fails_write_data(mocker, m5stickv, mock_success_input_cls, tdata):
     from krux import firmware
 

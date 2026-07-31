@@ -27,17 +27,18 @@ import gc
 import os
 
 from krux.power import power_manager
+from krux.display import display
+from krux.context import ctx
 
 MIN_SPLASH_WAIT_TIME = 1000
 
 
-def draw_splash():
+def draw_splash(display_splash):
     """Display splash while loading modules"""
-    from krux.display import display, SPLASH
+    from krux.display import SPLASH
 
-    display.initialize_lcd()
-    display.clear()
-    display.draw_centered_text(SPLASH)
+    display_splash.clear()
+    display_splash.draw_centered_text(SPLASH)
 
 
 def check_for_updates():
@@ -134,17 +135,35 @@ def home(ctx_home):
                 break
 
 
+def startup_kapp(ctx_app):
+    """Runs the configured startup kapp, if any. Must only be called after
+    the TC code / flash-hash integrity checks: the kapp lives in the same
+    flash region those checks are meant to attest. The kapp signature is
+    (re)verified inside execute_flash_kapp, and the device restarts after
+    the kapp exits."""
+    from krux.krux_settings import Settings
+
+    app_name = Settings().security.startup_kapp
+    if app_name == "none":
+        return
+
+    from krux.pages.kapps import Kapps
+
+    kapps = Kapps(ctx_app)
+    kapps.execute_flash_kapp(app_name, prompt=False)
+
+
+# ------
+# Boot initialization
+# ------
+
+display.initialize_lcd()
+
 preimport_ticks = time.ticks_ms()
-draw_splash()
+draw_splash(display)
+# Never skipped: SD firmware updates must not require disabling a startup kapp
 check_for_updates()
 gc.collect()
-
-from krux.context import ctx
-from krux.auto_shutdown import auto_shutdown
-
-ctx.power_manager = power_manager
-auto_shutdown.add_ctx(ctx)
-
 
 # If importing happened too fast, sleep the difference so the logo
 # will be shown
@@ -152,8 +171,18 @@ postimport_ticks = time.ticks_ms()
 if preimport_ticks + MIN_SPLASH_WAIT_TIME > postimport_ticks:
     time.sleep_ms(preimport_ticks + MIN_SPLASH_WAIT_TIME - postimport_ticks)
 
+
+from krux.auto_shutdown import auto_shutdown
+
+ctx.power_manager = power_manager
+auto_shutdown.add_ctx(ctx)
+
 if not tc_code_verification(ctx):
     power_manager.shutdown()
+# Startup kapp runs only after the flash-integrity checks above; if one runs,
+# the device restarts when it exits (no fall-through into login with kapp
+# residue). If none is configured this is a no-op.
+startup_kapp(ctx)
 login(ctx)
 gc.collect()
 home(ctx)
