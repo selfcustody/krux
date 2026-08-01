@@ -279,6 +279,67 @@ def test_parse_pmofn_rejects_invalid_index(m5stickv):
         parse_pmofn_qr_part("p4of3 data")
 
 
+def test_parser_rejects_bbqr_header_mismatch(m5stickv):
+    """Parts must agree with the encoding and file type of the first part,
+    which is the one detect_format used to set up decoding"""
+    from krux.qr import QRPartParser
+
+    parser = QRPartParser()
+    parser.parse("B$HP0200414243")
+
+    with pytest.raises(ValueError, match="BBQr header mismatch"):
+        parser.parse("B$ZU0201444546")
+
+    assert parser.parts == {0: "414243"}
+
+
+def test_parser_rejects_bbqr_total_mismatch(m5stickv):
+    """A part announcing a different total belongs to another stream"""
+    from krux.qr import QRPartParser
+
+    parser = QRPartParser()
+    parser.parse("B$2P0300AAAAAAAA")
+
+    with pytest.raises(ValueError, match="BBQr part total mismatch"):
+        parser.parse("B$2P0100MZXW6YTB")
+
+    assert parser.total == 3
+    assert not parser.is_complete()
+
+
+def test_parser_rejects_conflicting_bbqr_part(m5stickv):
+    """The same index can be re-scanned, but not with different content"""
+    from krux.qr import QRPartParser
+
+    parser = QRPartParser()
+    parser.parse("B$2P0200AAAAAAAA")
+    parser.parse("B$2P0200AAAAAAAA")  # redundant scan of the same part is fine
+
+    with pytest.raises(ValueError, match="Conflicting BBQr part"):
+        parser.parse("B$2P0200MZXW6YTB")
+
+    assert parser.parts == {0: "AAAAAAAA"}
+
+
+def test_parser_rejects_oversized_bbqr_payload(m5stickv):
+    """Accumulated payload is bounded, a stream above it could not be decoded"""
+    from krux.qr import QRPartParser
+    from krux.bbqr import BBQR_MAX_PAYLOAD_LEN, int2base36
+
+    parser = QRPartParser()
+    part_size = 8192
+    parts = BBQR_MAX_PAYLOAD_LEN // part_size + 1
+    for index in range(parts - 1):
+        parser.parse(
+            "B$2P%s%s%s" % (int2base36(parts), int2base36(index), "A" * part_size)
+        )
+
+    with pytest.raises(ValueError, match="BBQr payload too big"):
+        parser.parse(
+            "B$2P%s%s%s" % (int2base36(parts), int2base36(parts - 1), "A" * part_size)
+        )
+
+
 def test_detect_format_propagates_base_exceptions(mocker, m5stickv):
     """detect_format catches genuine parsing errors (returns FORMAT_NONE) but
     must NOT swallow BaseException-level signals like KeyboardInterrupt.

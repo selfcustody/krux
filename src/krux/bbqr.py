@@ -35,6 +35,15 @@ KNOWN_FILETYPES = {"P", "T", "J", "U"}
 
 BBQR_ALWAYS_COMPRESS_THRESHOLD = 5000  # bytes
 
+# Upper bound for the accumulated payload of an animated BBQr, in chars.
+# The header encodes the part total as 2 base36 chars, so a crafted stream may
+# announce up to 1295 parts and keep the parser accumulating them. A part count
+# limit can't be used here: small screens generate many small parts, so a few KB
+# PSBT already takes more than a hundred of them. Bound the total instead, at the
+# base32 expansion (8/5) of the 100 KB decompression limit. Anything above it
+# could not be decoded anyway.
+BBQR_MAX_PAYLOAD_LEN = 160 * 1024
+
 
 class BBQrCode:
     """A BBQr code, containing the data, encoding, and file type"""
