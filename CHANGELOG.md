@@ -20,12 +20,20 @@ Switch from the pure-Python urtypes and foundation-ur-py packages to the new uUR
 - Fix display of negative amounts
 - Improve scan TinySeed and other binary visibility by drawing punches only
 - Added `flash_success` method to standardize green success flashes across confirmation screens
-- Update Embit to latest - 3ae0ef2
+- Update Embit to latest - fff7ffa
 - Replace custom quirc (library to decode QR codes from images) with k_quirc
 - Fix default theme contrast failures for Light, CypherPink, network
   indicators, and Amigo info panels
 - Simplify generated-mnemonic confirmation with `Continue` and grouped
   `Wallet Options`
+- Stored mnemonics: a corrupt `seeds.json` is now reported and kept intact
+  instead of being overwritten when storing a new mnemonic
+- Reject Base58 addresses whose version byte matches no network, previously
+  accepted as valid when verifying an address
+- Settings: malformed `settings.json` content is handled without errors, and
+  reading a setting no longer writes back to storage
+- Hide the QR code title in line and region view modes, where it overlapped
+  the part index
 
 # Changelog 26.04.0 - April 2025
 
