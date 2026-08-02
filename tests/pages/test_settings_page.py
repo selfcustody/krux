@@ -493,6 +493,133 @@ def test_encryption_pbkdf2_setting(m5stickv, mocker):
     assert Settings().encryption.pbkdf2_iterations == 110000
 
 
+@pytest.mark.parametrize(
+    "namespace_name,setting_name,expected_suffix,expected_short_suffix",
+    [
+        ("appearance", "screensaver_time", "min [0-30]", "min"),
+        ("security", "auto_shutdown", "min [0-60]", "min"),
+        ("hardware.buttons", "debounce", "ms [20-500]", "ms"),
+        ("encryption", "pbkdf2_iterations", "", ""),
+    ],
+)
+def test_number_setting_passes_unit_and_range_context_to_keypad(
+    m5stickv,
+    mocker,
+    namespace_name,
+    setting_name,
+    expected_suffix,
+    expected_short_suffix,
+):
+    from krux.pages import ESC_KEY
+    from krux.pages.settings_page import SettingsPage
+    from krux.krux_settings import Settings
+
+    settings = Settings()
+    namespace = settings
+    for name in namespace_name.split("."):
+        namespace = getattr(namespace, name)
+    setting = getattr(namespace.__class__, setting_name)
+    settings_page = SettingsPage(mock_context(mocker))
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value=ESC_KEY)
+
+    settings_page.number_setting(namespace, setting)
+
+    settings_page.capture_from_keypad.assert_called_once_with(
+        mocker.ANY,
+        mocker.ANY,
+        starting_buffer=mocker.ANY,
+        esc_prompt=mocker.ANY,
+        buffer_suffix=expected_suffix,
+        buffer_short_suffix=expected_short_suffix,
+    )
+
+
+def test_touch_threshold_passes_range_only_context_to_keypad(amigo, mocker):
+    from krux.pages import ESC_KEY
+    from krux.pages.settings_page import SettingsPage
+    from krux.krux_settings import TouchSettings
+
+    settings_page = SettingsPage(mock_context(mocker))
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value=ESC_KEY)
+
+    settings_page.number_setting(TouchSettings(), TouchSettings.threshold)
+
+    settings_page.capture_from_keypad.assert_called_once_with(
+        mocker.ANY,
+        mocker.ANY,
+        starting_buffer=mocker.ANY,
+        esc_prompt=mocker.ANY,
+        buffer_suffix="[2-200]",
+        buffer_short_suffix="",
+    )
+
+
+@pytest.mark.parametrize("value", [20, 500])
+def test_number_setting_accepts_range_boundaries(m5stickv, mocker, value):
+    from krux.pages.settings_page import SettingsPage
+    from krux.krux_settings import ButtonsSettings, Settings
+
+    settings_page = SettingsPage(mock_context(mocker))
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value=str(value))
+
+    settings_page.number_setting(ButtonsSettings(), ButtonsSettings.debounce)
+
+    assert Settings().hardware.buttons.debounce == value
+
+
+def test_number_setting_accepts_zero(m5stickv, mocker):
+    from krux.pages.settings_page import SettingsPage
+    from krux.krux_settings import Settings, ThemeSettings
+
+    settings_page = SettingsPage(mock_context(mocker))
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value="0")
+
+    settings_page.number_setting(ThemeSettings(), ThemeSettings.screensaver_time)
+
+    assert Settings().appearance.screensaver_time == 0
+
+
+@pytest.mark.parametrize(
+    "value,error",
+    [
+        ("-1", "Value -1 out of range: [0, 30]"),
+        ("31", "Value 31 out of range: [0, 30]"),
+    ],
+)
+def test_number_setting_rejects_values_outside_range(m5stickv, mocker, value, error):
+    from krux.pages.settings_page import SettingsPage
+    from krux.krux_settings import Settings, ThemeSettings
+
+    settings_page = SettingsPage(mock_context(mocker))
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value=value)
+    settings_page.flash_error = mocker.MagicMock()
+
+    settings_page.number_setting(ThemeSettings(), ThemeSettings.screensaver_time)
+
+    settings_page.flash_error.assert_called_once_with(error)
+    assert Settings().appearance.screensaver_time == 5
+
+
+@pytest.mark.parametrize("input_kind", ["cancel", "empty"])
+def test_number_setting_cancel_or_empty_input_does_not_change_storage(
+    m5stickv, mocker, input_kind
+):
+    from krux.pages import ESC_KEY
+    from krux.pages.settings_page import SettingsPage
+    from krux.krux_settings import Settings, ThemeSettings
+    from krux.settings import store
+
+    settings_page = SettingsPage(mock_context(mocker))
+    value = ESC_KEY if input_kind == "cancel" else ""
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value=value)
+    starting_storage = store.settings.copy()
+
+    settings_page.number_setting(ThemeSettings(), ThemeSettings.screensaver_time)
+
+    assert Settings().appearance.screensaver_time == 5
+    assert store.settings == starting_storage
+
+
 def test_restore_settings(amigo, mocker, mocker_sd_card_ok):
     from krux.pages.settings_page import SettingsPage
     from krux.settings import FLASH_PATH, SETTINGS_FILENAME
