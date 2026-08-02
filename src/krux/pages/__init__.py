@@ -157,6 +157,8 @@ class Page:
         starting_buffer="",
         esc_prompt=True,
         buffer_title="",
+        buffer_suffix="",
+        buffer_short_suffix="",
     ):
         """Displays a key pad and captures a series of keys until the user returns.
         Returns a string.
@@ -167,7 +169,14 @@ class Page:
         show_swipe_hint = False
         while True:
             self.ctx.display.clear()
-            self._print_keypad_header(title, show_swipe_hint, buffer, buffer_title)
+            self._print_keypad_header(
+                title,
+                show_swipe_hint,
+                buffer,
+                buffer_title,
+                buffer_suffix,
+                buffer_short_suffix,
+            )
             if progress_bar_fn:
                 progress_bar_fn()
             pad.compute_possible_keys(buffer)
@@ -224,20 +233,51 @@ class Page:
             self.ctx.input.touch.clear_regions()
         return buffer
 
-    def _print_keypad_header(self, title, show_swipe_hint, buffer, buffer_title):
+    def _print_keypad_header(
+        self,
+        title,
+        show_swipe_hint,
+        buffer,
+        buffer_title,
+        buffer_suffix="",
+        buffer_short_suffix="",
+    ):
         big_title = len(self.ctx.display.to_lines(title)) > 1
         swipe_hint = SWIPE_L_CHAR + " " + t("swipe") + " " + SWIPE_R_CHAR
         offset_y = MINIMAL_PADDING if big_title else DEFAULT_PADDING
+        display_buffer = buffer
+        display_width = self.ctx.display.width()
+        buffer_fits = lcd.string_width_px(buffer) < display_width
+        if not buffer_title:
+            separator = " " if buffer else ""
+            buffer_candidates = (
+                buffer + separator + buffer_suffix if buffer_suffix else buffer,
+                (
+                    buffer + separator + buffer_short_suffix
+                    if buffer_short_suffix
+                    else buffer
+                ),
+                buffer,
+            )
+            for candidate in buffer_candidates:
+                candidate_fits = (
+                    buffer_fits
+                    if candidate == buffer
+                    else lcd.string_width_px(candidate) < display_width
+                )
+                if candidate_fits:
+                    display_buffer = candidate
+                    break
         if buffer_title:
             self.ctx.display.draw_hcentered_text(buffer_title, offset_y)
-        if lcd.string_width_px(buffer) < self.ctx.display.width():
+        if buffer_fits:
             text_to_show = title if not show_swipe_hint else swipe_hint
             self.ctx.display.draw_hcentered_text(
                 text_to_show, offset_y, color=theme.highlight_color, max_lines=1
             )
             offset_y += 2 * FONT_HEIGHT if big_title else (FONT_HEIGHT * 3 // 2)
         if not buffer_title:
-            self.ctx.display.draw_hcentered_text(buffer, offset_y)
+            self.ctx.display.draw_hcentered_text(display_buffer, offset_y)
 
     def display_qr_codes(
         self,

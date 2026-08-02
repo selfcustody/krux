@@ -138,10 +138,14 @@ class LinkedCategorySetting(CategorySetting):
 class NumberSetting(Setting):
     """Setting that can be a number within a defined range"""
 
-    def __init__(self, numtype, attr, default_value, value_range):
+    def __init__(
+        self, numtype, attr, default_value, value_range, unit=None, show_range=False
+    ):
         super().__init__(attr, default_value)
         self.numtype = numtype
         self.value_range = value_range
+        self.unit = unit
+        self.show_range = show_range or unit is not None
 
     def __get__(self, obj, _objtype=None):
         if obj is None:
