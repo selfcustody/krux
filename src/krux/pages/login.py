@@ -113,53 +113,65 @@ class Login(MnemonicLoader):
             hashlib.sha256(entropy_1).digest() + hashlib.sha256(entropy_2).digest()
         ).digest()
 
-    def _maybe_add_second_entropy(self, entropy_bytes, len_mnemonic, first_source):
-        """Optionally collect and mix a second entropy source"""
+    def _show_entropy_hash(self, title, entropy_bytes):
+        """Display a hex-encoded hash and wait for user acknowledgement"""
         import binascii
 
+        entropy_hash = binascii.hexlify(entropy_bytes).decode()
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(
+            title + "\n\n%s" % entropy_hash,
+            highlight_prefix=":",
+        )
+        self.ctx.input.wait_for_button()
+
+    def _confirm_single_source_fallback(self, reason_text):
+        """Ask user if flow should continue with only the first entropy source"""
+        warning_msg = reason_text
+        warning_msg += "\n\n"
+        warning_msg += t("Proceed with a single source?")
+        return self.prompt(warning_msg, BOTTOM_PROMPT_LINE)
+
+    def _confirm_same_source_proceed(self):
+        """Warn user when selecting the same entropy source twice"""
+        warning_msg = t("Same source selected.")
+        warning_msg += "\n"
+        warning_msg += t("Entropy gain may be limited.")
+        warning_msg += "\n\n"
+        warning_msg += t("Proceed anyway?")
+        proceed_same_source = self.prompt(warning_msg, BOTTOM_PROMPT_LINE)
+        self.ctx.display.clear()
+        return proceed_same_source
+
+    def _maybe_add_second_entropy(self, entropy_bytes, len_mnemonic, first_source):
+        """Optionally collect and mix a second entropy source"""
         if not self.prompt(t("Add a 2nd entropy source?"), BOTTOM_PROMPT_LINE):
             return entropy_bytes
 
         while True:
             second_source = self._entropy_source_menu(t("2nd entropy source"))
             if second_source is None:
-                warning_msg = t("2nd entropy source was not added.")
-                warning_msg += "\n\n"
-                warning_msg += t("Proceed with a single source?")
-                if self.prompt(warning_msg, BOTTOM_PROMPT_LINE):
+                if self._confirm_single_source_fallback(
+                    t("2nd entropy source was not added.")
+                ):
                     return entropy_bytes
                 return None
 
             if second_source == first_source:
-                warning_msg = t("Same source selected.")
-                warning_msg += "\n"
-                warning_msg += t("Entropy gain may be limited.")
-                warning_msg += "\n\n"
-                warning_msg += t("Proceed anyway?")
-                proceed_same_source = self.prompt(warning_msg, BOTTOM_PROMPT_LINE)
-                self.ctx.display.clear()
-                if not proceed_same_source:
+                if not self._confirm_same_source_proceed():
                     continue
             break
 
         second_entropy = self._capture_entropy_from_source(second_source, len_mnemonic)
         if second_entropy is None:
-            warning_msg = t("2nd entropy capture was cancelled.")
-            warning_msg += "\n\n"
-            warning_msg += t("Proceed with a single source?")
-            if self.prompt(warning_msg, BOTTOM_PROMPT_LINE):
+            if self._confirm_single_source_fallback(
+                t("2nd entropy capture was cancelled.")
+            ):
                 return entropy_bytes
             return None
 
         mixed_entropy = self._mix_entropy(entropy_bytes, second_entropy)
-
-        mixed_entropy_hash = binascii.hexlify(mixed_entropy).decode()
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(
-            t("SHA256 of combined entropy:") + "\n\n%s" % mixed_entropy_hash,
-            highlight_prefix=":",
-        )
-        self.ctx.input.wait_for_button()
+        self._show_entropy_hash(t("SHA256 of combined entropy:"), mixed_entropy)
         return mixed_entropy
 
     def _entropy_source_menu(self, prompt, excluded=None):
@@ -198,20 +210,12 @@ class Login(MnemonicLoader):
             return None
 
         from .capture_entropy import CameraEntropy
-        import binascii
-
         camera_entropy = CameraEntropy(self.ctx)
         entropy_bytes = camera_entropy.capture()
         if entropy_bytes is None:
             return None
 
-        entropy_hash = binascii.hexlify(entropy_bytes).decode()
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(
-            t("SHA256 of snapshot:") + "\n\n%s" % entropy_hash,
-            highlight_prefix=":",
-        )
-        self.ctx.input.wait_for_button()
+        self._show_entropy_hash(t("SHA256 of snapshot:"), entropy_bytes)
         return entropy_bytes
 
     def _capture_entropy_from_source(self, entropy_source, len_mnemonic):
@@ -261,8 +265,6 @@ class Login(MnemonicLoader):
 
     def new_key_from_two_entropy_sources(self):
         """Create a new mnemonic by combining two entropy sources"""
-        import hashlib
-        import binascii
         from embit.bip39 import mnemonic_from_bytes
 
         len_mnemonic = self.choose_len_mnemonic(t("Double mnemonic"))
@@ -285,17 +287,8 @@ class Login(MnemonicLoader):
         if entropy_2 is None:
             return MENU_CONTINUE
 
-        mixed_entropy = hashlib.sha256(
-            hashlib.sha256(entropy_1).digest() + hashlib.sha256(entropy_2).digest()
-        ).digest()
-
-        mixed_entropy_hash = binascii.hexlify(mixed_entropy).decode()
-        self.ctx.display.clear()
-        self.ctx.display.draw_centered_text(
-            t("SHA256 of combined entropy:") + "\n\n%s" % mixed_entropy_hash,
-            highlight_prefix=":",
-        )
-        self.ctx.input.wait_for_button()
+        mixed_entropy = self._mix_entropy(entropy_1, entropy_2)
+        self._show_entropy_hash(t("SHA256 of combined entropy:"), mixed_entropy)
 
         if len_mnemonic == EXTRA_MNEMONIC_LENGTH_FLAG:
             mixed_entropy = self._adjust_double_mnemonic_entropy(mixed_entropy)
@@ -315,7 +308,9 @@ class Login(MnemonicLoader):
 
             if ask_for_second_entropy:
                 len_mnemonic = 12 if len(captured_entropy) == 16 else 24
-                first_source = self.ENTROPY_SOURCE_D20 if d_20 else self.ENTROPY_SOURCE_D6
+                first_source = (
+                    self.ENTROPY_SOURCE_D20 if d_20 else self.ENTROPY_SOURCE_D6
+                )
                 captured_entropy = self._maybe_add_second_entropy(
                     captured_entropy,
                     len_mnemonic,
