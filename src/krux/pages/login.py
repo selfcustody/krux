@@ -136,7 +136,9 @@ class Login(MnemonicLoader):
                 warning_msg += t("Entropy gain may be limited.")
                 warning_msg += "\n\n"
                 warning_msg += t("Proceed anyway?")
-                if not self.prompt(warning_msg, BOTTOM_PROMPT_LINE):
+                proceed_same_source = self.prompt(warning_msg, BOTTOM_PROMPT_LINE)
+                self.ctx.display.clear()
+                if not proceed_same_source:
                     continue
             break
 

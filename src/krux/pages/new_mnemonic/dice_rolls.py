@@ -39,7 +39,7 @@ from ...kboard import kboard
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
 
-D6_12W_MIN_ROLLS = 50
+D6_12W_MIN_ROLLS = 2
 D6_24W_MIN_ROLLS = 99
 D20_12W_MIN_ROLLS = 30
 D20_24W_MIN_ROLLS = 60
@@ -72,6 +72,9 @@ class DiceEntropy(Page):
     def shannon_sum(self, distribution, sample_size):
         """Calculates Shannon's entropy of a given list"""
         import math
+
+        if sample_size <= 0:
+            return 0
 
         # Calculate entropy
         unit_entropy = 0
