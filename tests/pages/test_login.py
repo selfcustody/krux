@@ -215,6 +215,271 @@ def test_new_12w_from_snapshot(m5stickv, mocker):
     assert ctx.wallet.key.mnemonic == MNEMONIC
 
 
+def test_new_12w_from_two_entropy_sources(m5stickv, mocker):
+    import hashlib
+    from embit.bip39 import mnemonic_from_bytes
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER
+
+    BTN_SEQUENCE = [BUTTON_ENTER]
+    source_entropy_1 = b"\x01" * 32
+    source_entropy_2 = b"\x02" * 16
+
+    mixed_entropy = hashlib.sha256(
+        hashlib.sha256(source_entropy_1).digest()
+        + hashlib.sha256(source_entropy_2).digest()
+    ).digest()
+    expected_mnemonic = mnemonic_from_bytes(mixed_entropy[:16])
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    login = Login(ctx)
+
+    mocker.patch.object(login, "choose_len_mnemonic", return_value=12)
+    mocker.patch.object(
+        login,
+        "_entropy_source_menu",
+        side_effect=[login.ENTROPY_SOURCE_CAMERA, login.ENTROPY_SOURCE_D6],
+    )
+    mocker.patch.object(
+        login,
+        "_capture_entropy_from_source",
+        side_effect=[source_entropy_1, source_entropy_2],
+    )
+    load_key_spy = mocker.patch.object(login, "_load_key_from_words")
+
+    login.new_key_from_two_entropy_sources()
+
+    load_key_spy.assert_called_once_with(expected_mnemonic.split(), new=True)
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_new_12w_from_snapshot_with_optional_second_entropy(m5stickv, mocker):
+    import hashlib
+    from embit.bip39 import mnemonic_from_bytes
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER
+
+    source_entropy_1 = b"\x01" * 32
+    source_entropy_2 = b"\x02" * 16
+    mixed_entropy = hashlib.sha256(
+        hashlib.sha256(source_entropy_1).digest()
+        + hashlib.sha256(source_entropy_2).digest()
+    ).digest()
+    expected_mnemonic = mnemonic_from_bytes(mixed_entropy[:16])
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    login = Login(ctx)
+
+    mocker.patch.object(login, "choose_len_mnemonic", return_value=12)
+    mocker.patch.object(login, "_capture_camera_entropy", return_value=source_entropy_1)
+    mocker.patch.object(login, "prompt", return_value=True)
+    mocker.patch.object(
+        login, "_entropy_source_menu", return_value=login.ENTROPY_SOURCE_CAMERA
+    )
+    mocker.patch.object(
+        login,
+        "_capture_entropy_from_source",
+        return_value=source_entropy_2,
+    )
+    load_key_spy = mocker.patch.object(login, "_load_key_from_words")
+
+    login.new_key_from_snapshot(True)
+
+    load_key_spy.assert_called_once_with(expected_mnemonic.split(), new=True)
+
+
+def test_new_12w_from_snapshot_cancel_second_source_and_abort(m5stickv, mocker):
+    from krux.pages.login import Login, MENU_CONTINUE
+
+    source_entropy_1 = b"\x01" * 32
+
+    ctx = create_ctx(mocker, [])
+    login = Login(ctx)
+
+    mocker.patch.object(login, "choose_len_mnemonic", return_value=12)
+    mocker.patch.object(login, "_capture_camera_entropy", return_value=source_entropy_1)
+    # 1) add second entropy? -> Yes
+    # 2) proceed with single source after cancel? -> No (abort)
+    mocker.patch.object(login, "prompt", side_effect=[True, False])
+    mocker.patch.object(login, "_entropy_source_menu", return_value=None)
+    load_key_spy = mocker.patch.object(login, "_load_key_from_words")
+
+    status = login.new_key_from_snapshot(True)
+
+    assert status == MENU_CONTINUE
+    load_key_spy.assert_not_called()
+
+
+def test_new_12w_from_snapshot_same_source_reprompt_then_mix(m5stickv, mocker):
+    import hashlib
+    from embit.bip39 import mnemonic_from_bytes
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER
+
+    source_entropy_1 = b"\x01" * 32
+    source_entropy_2 = b"\x02" * 16
+    mixed_entropy = hashlib.sha256(
+        hashlib.sha256(source_entropy_1).digest()
+        + hashlib.sha256(source_entropy_2).digest()
+    ).digest()
+    expected_mnemonic = mnemonic_from_bytes(mixed_entropy[:16])
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    login = Login(ctx)
+
+    mocker.patch.object(login, "choose_len_mnemonic", return_value=12)
+    mocker.patch.object(login, "_capture_camera_entropy", return_value=source_entropy_1)
+    # 1) add second entropy? -> Yes
+    # 2) same source warning proceed anyway? -> No (reprompt)
+    # 3) same source warning proceed anyway? -> Yes
+    mocker.patch.object(login, "prompt", side_effect=[True, False, True])
+    mocker.patch.object(
+        login,
+        "_entropy_source_menu",
+        side_effect=[login.ENTROPY_SOURCE_CAMERA, login.ENTROPY_SOURCE_CAMERA],
+    )
+    mocker.patch.object(
+        login,
+        "_capture_entropy_from_source",
+        return_value=source_entropy_2,
+    )
+    load_key_spy = mocker.patch.object(login, "_load_key_from_words")
+
+    login.new_key_from_snapshot(True)
+
+    load_key_spy.assert_called_once_with(expected_mnemonic.split(), new=True)
+
+
+def test_new_12w_from_dice_cancel_second_source_and_abort(m5stickv, mocker):
+    from krux.pages.login import Login, MENU_CONTINUE
+
+    first_entropy = b"\x03" * 16
+
+    ctx = create_ctx(mocker, [])
+    login = Login(ctx)
+
+    mocker.patch("krux.pages.new_mnemonic.dice_rolls.DiceEntropy.new_key", return_value=first_entropy)
+    mocker.patch.object(login, "_maybe_add_second_entropy", return_value=None)
+    load_key_spy = mocker.patch.object(login, "_load_key_from_words")
+
+    status = login.new_key_from_dice(False, True)
+
+    assert status == MENU_CONTINUE
+    load_key_spy.assert_not_called()
+
+
+def test_new_12w_from_dice_same_source_reprompt_then_mix(m5stickv, mocker):
+    import hashlib
+    from embit.bip39 import mnemonic_from_bytes
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER
+
+    first_entropy = b"\x03" * 16
+    second_entropy = b"\x04" * 32
+    mixed_entropy = hashlib.sha256(
+        hashlib.sha256(first_entropy).digest() + hashlib.sha256(second_entropy).digest()
+    ).digest()
+    expected_mnemonic = mnemonic_from_bytes(mixed_entropy)
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    login = Login(ctx)
+
+    mocker.patch("krux.pages.new_mnemonic.dice_rolls.DiceEntropy.new_key", return_value=first_entropy)
+    mocker.patch.object(login, "prompt", side_effect=[True, False, True])
+    mocker.patch.object(
+        login,
+        "_entropy_source_menu",
+        side_effect=[login.ENTROPY_SOURCE_D6, login.ENTROPY_SOURCE_D6],
+    )
+    mocker.patch.object(login, "_capture_entropy_from_source", return_value=second_entropy)
+    load_key_spy = mocker.patch.object(login, "_load_key_from_words")
+
+    login.new_key_from_dice(False, True)
+
+    load_key_spy.assert_called_once_with(expected_mnemonic.split(), new=True)
+
+
+def test_new_12w_from_snapshot_second_capture_cancel_then_single_source(m5stickv, mocker):
+    from embit.bip39 import mnemonic_from_bytes
+    from krux.pages.login import Login
+
+    source_entropy_1 = b"\x01" * 32
+    expected_mnemonic = mnemonic_from_bytes(source_entropy_1[:16])
+
+    ctx = create_ctx(mocker, [])
+    login = Login(ctx)
+
+    mocker.patch.object(login, "choose_len_mnemonic", return_value=12)
+    mocker.patch.object(login, "_capture_camera_entropy", return_value=source_entropy_1)
+    # 1) add second entropy? -> Yes
+    # 2) proceed with single source after capture cancel? -> Yes
+    mocker.patch.object(login, "prompt", side_effect=[True, True])
+    mocker.patch.object(login, "_entropy_source_menu", return_value=login.ENTROPY_SOURCE_D6)
+    mocker.patch.object(login, "_capture_entropy_from_source", return_value=None)
+    load_key_spy = mocker.patch.object(login, "_load_key_from_words")
+
+    login.new_key_from_snapshot(True)
+
+    load_key_spy.assert_called_once_with(expected_mnemonic.split(), new=True)
+
+
+def test_new_12w_from_snapshot_second_capture_cancel_and_abort(m5stickv, mocker):
+    from krux.pages.login import Login, MENU_CONTINUE
+
+    source_entropy_1 = b"\x01" * 32
+
+    ctx = create_ctx(mocker, [])
+    login = Login(ctx)
+
+    mocker.patch.object(login, "choose_len_mnemonic", return_value=12)
+    mocker.patch.object(login, "_capture_camera_entropy", return_value=source_entropy_1)
+    # 1) add second entropy? -> Yes
+    # 2) proceed with single source after capture cancel? -> No
+    mocker.patch.object(login, "prompt", side_effect=[True, False])
+    mocker.patch.object(login, "_entropy_source_menu", return_value=login.ENTROPY_SOURCE_D6)
+    mocker.patch.object(login, "_capture_entropy_from_source", return_value=None)
+    load_key_spy = mocker.patch.object(login, "_load_key_from_words")
+
+    status = login.new_key_from_snapshot(True)
+
+    assert status == MENU_CONTINUE
+    load_key_spy.assert_not_called()
+
+
+def test_new_double_mnemonic_from_snapshot_with_optional_second_entropy(m5stickv, mocker):
+    import hashlib
+    from embit.bip39 import mnemonic_from_bytes
+    from krux.pages import EXTRA_MNEMONIC_LENGTH_FLAG
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER
+
+    source_entropy_1 = b"\x05" * 32
+    source_entropy_2 = b"\x06" * 32
+    adjusted_entropy = b"\x07" * 32
+    mixed_entropy = hashlib.sha256(
+        hashlib.sha256(source_entropy_1).digest() + hashlib.sha256(source_entropy_2).digest()
+    ).digest()
+    expected_mnemonic = mnemonic_from_bytes(adjusted_entropy)
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    login = Login(ctx)
+
+    mocker.patch.object(login, "choose_len_mnemonic", return_value=EXTRA_MNEMONIC_LENGTH_FLAG)
+    mocker.patch.object(login, "_capture_camera_entropy", return_value=source_entropy_1)
+    mocker.patch.object(login, "prompt", return_value=True)
+    mocker.patch.object(login, "_entropy_source_menu", return_value=login.ENTROPY_SOURCE_D20)
+    mocker.patch.object(login, "_capture_entropy_from_source", return_value=source_entropy_2)
+    adjust_spy = mocker.patch.object(
+        login, "_adjust_double_mnemonic_entropy", return_value=adjusted_entropy
+    )
+    load_key_spy = mocker.patch.object(login, "_load_key_from_words")
+
+    login.new_key_from_snapshot(True)
+
+    adjust_spy.assert_called_once_with(mixed_entropy)
+    load_key_spy.assert_called_once_with(expected_mnemonic.split(), new=True)
+
+
 def test_new_24w_from_snapshot(m5stickv, mocker):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE

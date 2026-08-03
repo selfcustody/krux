@@ -60,6 +60,9 @@ class Login(MnemonicLoader):
 
     # Used on boot.py when changing the locale on Settings
     SETTINGS_MENU_INDEX = 2
+    ENTROPY_SOURCE_CAMERA = 0
+    ENTROPY_SOURCE_D6 = 1
+    ENTROPY_SOURCE_D20 = 2
 
     def __init__(self, ctx):
         login_menu_items = [
@@ -91,10 +94,10 @@ class Login(MnemonicLoader):
         submenu = Menu(
             self.ctx,
             [
-                (t("Via Camera"), self.new_key_from_snapshot),
+                (t("Via Camera"), lambda: self.new_key_from_snapshot(True)),
                 (t("Via Words"), lambda: self.load_key_from_text(new=True)),
-                (t("Via D6"), self.new_key_from_dice),
-                (t("Via D20"), lambda: self.new_key_from_dice(True)),
+                (t("Via D6"), lambda: self.new_key_from_dice(False, True)),
+                (t("Via D20"), lambda: self.new_key_from_dice(True, True)),
             ],
         )
         index, status = submenu.run_loop()
@@ -102,7 +105,204 @@ class Login(MnemonicLoader):
             return MENU_CONTINUE
         return status
 
-    def new_key_from_dice(self, d_20=False):
+    def _mix_entropy(self, entropy_1, entropy_2):
+        """Combine two entropy sources deterministically"""
+        import hashlib
+
+        return hashlib.sha256(
+            hashlib.sha256(entropy_1).digest() + hashlib.sha256(entropy_2).digest()
+        ).digest()
+
+    def _maybe_add_second_entropy(self, entropy_bytes, len_mnemonic, first_source):
+        """Optionally collect and mix a second entropy source"""
+        import binascii
+
+        if not self.prompt(t("Add a 2nd entropy source?"), BOTTOM_PROMPT_LINE):
+            return entropy_bytes
+
+        while True:
+            second_source = self._entropy_source_menu(t("2nd entropy source"))
+            if second_source is None:
+                warning_msg = t("2nd entropy source was not added.")
+                warning_msg += "\n\n"
+                warning_msg += t("Proceed with a single source?")
+                if self.prompt(warning_msg, BOTTOM_PROMPT_LINE):
+                    return entropy_bytes
+                return None
+
+            if second_source == first_source:
+                warning_msg = t("Same source selected.")
+                warning_msg += "\n"
+                warning_msg += t("Entropy gain may be limited.")
+                warning_msg += "\n\n"
+                warning_msg += t("Proceed anyway?")
+                if not self.prompt(warning_msg, BOTTOM_PROMPT_LINE):
+                    continue
+            break
+
+        second_entropy = self._capture_entropy_from_source(second_source, len_mnemonic)
+        if second_entropy is None:
+            warning_msg = t("2nd entropy capture was cancelled.")
+            warning_msg += "\n\n"
+            warning_msg += t("Proceed with a single source?")
+            if self.prompt(warning_msg, BOTTOM_PROMPT_LINE):
+                return entropy_bytes
+            return None
+
+        mixed_entropy = self._mix_entropy(entropy_bytes, second_entropy)
+
+        mixed_entropy_hash = binascii.hexlify(mixed_entropy).decode()
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(
+            t("SHA256 of combined entropy:") + "\n\n%s" % mixed_entropy_hash,
+            highlight_prefix=":",
+        )
+        self.ctx.input.wait_for_button()
+        return mixed_entropy
+
+    def _entropy_source_menu(self, prompt, excluded=None):
+        """Ask user to pick an entropy source, optionally excluding one"""
+        options = [
+            (self.ENTROPY_SOURCE_CAMERA, t("Via Camera")),
+            (self.ENTROPY_SOURCE_D6, t("Via D6")),
+            (self.ENTROPY_SOURCE_D20, t("Via D20")),
+        ]
+        items = [
+            (label, (lambda entropy_source=entropy_source: entropy_source))
+            for entropy_source, label in options
+            if entropy_source != excluded
+        ]
+        submenu = Menu(self.ctx, items, back_status=lambda: None)
+        self.ctx.display.draw_hcentered_text(prompt)
+        _, entropy_source = submenu.run_loop()
+        self.ctx.display.clear()
+        return entropy_source
+
+    def _new_key_from_dice_with_len(self, len_mnemonic, d_20=False):
+        """Capture entropy from dice using a pre-selected mnemonic length"""
+        from .new_mnemonic.dice_rolls import DiceEntropy
+
+        dice_entropy = DiceEntropy(self.ctx, d_20)
+        return dice_entropy.new_key(len_mnemonic)
+
+    def _capture_camera_entropy(self):
+        """Use camera entropy source and return its 32-byte digest"""
+        self.ctx.display.draw_hcentered_text(
+            t("Use camera's entropy to create a new mnemonic")
+            + ". "
+            + t("(Experimental)")
+        )
+        if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+            return None
+
+        from .capture_entropy import CameraEntropy
+        import binascii
+
+        camera_entropy = CameraEntropy(self.ctx)
+        entropy_bytes = camera_entropy.capture()
+        if entropy_bytes is None:
+            return None
+
+        entropy_hash = binascii.hexlify(entropy_bytes).decode()
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(
+            t("SHA256 of snapshot:") + "\n\n%s" % entropy_hash,
+            highlight_prefix=":",
+        )
+        self.ctx.input.wait_for_button()
+        return entropy_bytes
+
+    def _capture_entropy_from_source(self, entropy_source, len_mnemonic):
+        """Capture entropy from the selected source"""
+        if entropy_source == self.ENTROPY_SOURCE_CAMERA:
+            return self._capture_camera_entropy()
+
+        dice_mnemonic_len = (
+            24 if len_mnemonic == EXTRA_MNEMONIC_LENGTH_FLAG else len_mnemonic
+        )
+        return self._new_key_from_dice_with_len(
+            dice_mnemonic_len, d_20=(entropy_source == self.ENTROPY_SOURCE_D20)
+        )
+
+    def _adjust_double_mnemonic_entropy(self, entropy_bytes):
+        """Adjust entropy so both 12w halves and 24w mnemonic checksums are valid"""
+        from ..bip39 import entropy_checksum
+
+        first_12_entropy = entropy_bytes[:16]
+        second_12_entropy = entropy_bytes[16:32]
+
+        checksum1 = entropy_checksum(first_12_entropy, 4)
+
+        snd_12_array = bytearray(second_12_entropy)
+        snd_12_array[0] = (snd_12_array[0] & 0x0F) | ((checksum1 & 0x0F) << 4)
+        second_12_entropy = bytes(snd_12_array)
+
+        entropy_bytes = first_12_entropy + second_12_entropy
+        tries = 0
+        entropy_int = int.from_bytes(entropy_bytes, "big")
+        while True:
+            ck_sum_24 = entropy_checksum(entropy_bytes, 8)
+
+            snd_12_int = entropy_int & MASK128
+            shifted_entr = ((snd_12_int << 4) & MASK128) | (ck_sum_24 >> 4)
+            shifted_entropy_bytes = shifted_entr.to_bytes(16, "big")
+            checksum_l_12 = entropy_checksum(shifted_entropy_bytes, 4)
+
+            if checksum_l_12 == (ck_sum_24 & 0x0F):
+                return entropy_bytes
+
+            entropy_int = (entropy_int + 1) & MASK256
+            entropy_bytes = entropy_int.to_bytes(32, "big")
+            tries += 1
+            if tries > DOUBLE_MNEMONICS_MAX_TRIES:
+                raise ValueError("Failed to find a valid double mnemonic")
+
+    def new_key_from_two_entropy_sources(self):
+        """Create a new mnemonic by combining two entropy sources"""
+        import hashlib
+        import binascii
+        from embit.bip39 import mnemonic_from_bytes
+
+        len_mnemonic = self.choose_len_mnemonic(t("Double mnemonic"))
+        if not len_mnemonic:
+            return MENU_CONTINUE
+
+        source_1 = self._entropy_source_menu(t("1st entropy source"))
+        if source_1 is None:
+            return MENU_CONTINUE
+
+        source_2 = self._entropy_source_menu(t("2nd entropy source"))
+        if source_2 is None:
+            return MENU_CONTINUE
+
+        entropy_1 = self._capture_entropy_from_source(source_1, len_mnemonic)
+        if entropy_1 is None:
+            return MENU_CONTINUE
+
+        entropy_2 = self._capture_entropy_from_source(source_2, len_mnemonic)
+        if entropy_2 is None:
+            return MENU_CONTINUE
+
+        mixed_entropy = hashlib.sha256(
+            hashlib.sha256(entropy_1).digest() + hashlib.sha256(entropy_2).digest()
+        ).digest()
+
+        mixed_entropy_hash = binascii.hexlify(mixed_entropy).decode()
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(
+            t("SHA256 of combined entropy:") + "\n\n%s" % mixed_entropy_hash,
+            highlight_prefix=":",
+        )
+        self.ctx.input.wait_for_button()
+
+        if len_mnemonic == EXTRA_MNEMONIC_LENGTH_FLAG:
+            mixed_entropy = self._adjust_double_mnemonic_entropy(mixed_entropy)
+
+        num_bytes = 16 if len_mnemonic == 12 else 32
+        entropy_mnemonic = mnemonic_from_bytes(mixed_entropy[:num_bytes])
+        return self._load_key_from_words(entropy_mnemonic.split(), new=True)
+
+    def new_key_from_dice(self, d_20=False, ask_for_second_entropy=False):
         """Handler for both 'new mnemonic'>'via D6/D20' menu items. Default is D6"""
         from .new_mnemonic.dice_rolls import DiceEntropy
 
@@ -111,92 +311,47 @@ class Login(MnemonicLoader):
         if captured_entropy is not None:
             from embit.bip39 import mnemonic_from_bytes
 
+            if ask_for_second_entropy:
+                len_mnemonic = 12 if len(captured_entropy) == 16 else 24
+                first_source = self.ENTROPY_SOURCE_D20 if d_20 else self.ENTROPY_SOURCE_D6
+                captured_entropy = self._maybe_add_second_entropy(
+                    captured_entropy,
+                    len_mnemonic,
+                    first_source,
+                )
+                if captured_entropy is None:
+                    return MENU_CONTINUE
+
             words = mnemonic_from_bytes(captured_entropy).split()
             return self._load_key_from_words(words, new=True)
         return MENU_CONTINUE
 
-    def new_key_from_snapshot(self):
+    def new_key_from_snapshot(self, ask_for_second_entropy=False):
         """Use camera's entropy to create a new mnemonic"""
         extra_option = t("Double mnemonic")
         len_mnemonic = self.choose_len_mnemonic(extra_option)
         if not len_mnemonic:
             return MENU_CONTINUE
 
-        self.ctx.display.draw_hcentered_text(
-            t("Use camera's entropy to create a new mnemonic")
-            + ". "
-            + t("(Experimental)")
-        )
-        if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-            from .capture_entropy import CameraEntropy
+        entropy_bytes = self._capture_camera_entropy()
+        if entropy_bytes is not None:
+            from embit.bip39 import mnemonic_from_bytes
 
-            camera_entropy = CameraEntropy(self.ctx)
-            entropy_bytes = camera_entropy.capture()
-            if entropy_bytes is not None:
-                import binascii
-                from embit.bip39 import mnemonic_from_bytes
-                from ..bip39 import entropy_checksum
-
-                entropy_hash = binascii.hexlify(entropy_bytes).decode()
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(
-                    t("SHA256 of snapshot:") + "\n\n%s" % entropy_hash,
-                    highlight_prefix=":",
+            if ask_for_second_entropy:
+                entropy_bytes = self._maybe_add_second_entropy(
+                    entropy_bytes,
+                    len_mnemonic,
+                    self.ENTROPY_SOURCE_CAMERA,
                 )
-                self.ctx.input.wait_for_button()
+                if entropy_bytes is None:
+                    return MENU_CONTINUE
 
-                # Checks if user wants to create a double mnemonic
-                if len_mnemonic == EXTRA_MNEMONIC_LENGTH_FLAG:
-                    # import time  # Debug
-                    # pre_t = time.ticks_ms()  # Debug
+            if len_mnemonic == EXTRA_MNEMONIC_LENGTH_FLAG:
+                entropy_bytes = self._adjust_double_mnemonic_entropy(entropy_bytes)
 
-                    # split the mnemonic into two parts
-                    first_12_entropy = entropy_bytes[:16]
-                    second_12_entropy = entropy_bytes[16:32]
-
-                    # calculate the checksum for the first 12 words
-                    checksum1 = entropy_checksum(first_12_entropy, 4)
-                    # print first 12 words
-
-                    # replace checksum1 as first 4 bits of second 12 words
-                    snd_12_array = bytearray(second_12_entropy)
-                    snd_12_array[0] = (snd_12_array[0] & 0x0F) | (
-                        (checksum1 & 0x0F) << 4
-                    )
-                    second_12_entropy = bytes(snd_12_array)
-                    # reassemble the 256 bits entropy that has first 12 words with valid checksum
-                    entropy_bytes = first_12_entropy + second_12_entropy
-
-                    # Increment 1 to full 24 words entropy until
-                    # both last 12 words and all 24 have valid checksum
-                    tries = 0
-                    entropy_int = int.from_bytes(entropy_bytes, "big")
-                    while True:
-                        # calculate the checksum for the new 24 words
-                        ck_sum_24 = entropy_checksum(entropy_bytes, 8)
-
-                        # Extract the lower 128 bits from the integer.
-                        snd_12_int = entropy_int & MASK128
-                        # Shift and combine with first 4 bits of the 24 wwords checksum
-                        shifted_entr = ((snd_12_int << 4) & MASK128) | (ck_sum_24 >> 4)
-                        shifted_entropy_bytes = shifted_entr.to_bytes(16, "big")
-                        checksum_l_12 = entropy_checksum(shifted_entropy_bytes, 4)
-                        # check if checksum_l_12 is equal to the last 4 bits of the
-                        # checksum of the full 24 words
-                        if checksum_l_12 == (ck_sum_24 & 0x0F):
-                            break
-
-                        # Increment the integer value and mask to 256 bits.
-                        entropy_int = (entropy_int + 1) & MASK256
-                        entropy_bytes = entropy_int.to_bytes(32, "big")
-                        tries += 1
-                        if tries > DOUBLE_MNEMONICS_MAX_TRIES:
-                            raise ValueError("Failed to find a valid double mnemonic")
-                    # print("Tries: {} / {} ms".format(tries, time.ticks_ms() - pre_t))  # Debug
-
-                num_bytes = 16 if len_mnemonic == 12 else 32
-                entropy_mnemonic = mnemonic_from_bytes(entropy_bytes[:num_bytes])
-                return self._load_key_from_words(entropy_mnemonic.split(), new=True)
+            num_bytes = 16 if len_mnemonic == 12 else 32
+            entropy_mnemonic = mnemonic_from_bytes(entropy_bytes[:num_bytes])
+            return self._load_key_from_words(entropy_mnemonic.split(), new=True)
         return MENU_CONTINUE
 
     def _load_key_from_words(self, words, charset=LETTERS, new=False):
