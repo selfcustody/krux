@@ -174,8 +174,8 @@ class Login(MnemonicLoader):
         self._show_entropy_hash(t("SHA256 of combined entropy:"), mixed_entropy)
         return mixed_entropy
 
-    def _entropy_source_menu(self, prompt, excluded=None):
-        """Ask user to pick an entropy source, optionally excluding one"""
+    def _entropy_source_menu(self, prompt):
+        """Ask user to pick an entropy source"""
         options = [
             (self.ENTROPY_SOURCE_CAMERA, t("Via Camera")),
             (self.ENTROPY_SOURCE_D6, t("Via D6")),
@@ -184,13 +184,22 @@ class Login(MnemonicLoader):
         items = [
             (label, (lambda entropy_source=entropy_source: entropy_source))
             for entropy_source, label in options
-            if entropy_source != excluded
         ]
         submenu = Menu(self.ctx, items, back_status=lambda: None)
         self.ctx.display.draw_hcentered_text(prompt)
         _, entropy_source = submenu.run_loop()
         self.ctx.display.clear()
         return entropy_source
+
+    def _target_entropy_num_bytes(self, len_mnemonic):
+        """Return entropy size in bytes for chosen mnemonic length"""
+        if len_mnemonic == EXTRA_MNEMONIC_LENGTH_FLAG:
+            return 32
+        return 16 if len_mnemonic == 12 else 32
+
+    def _normalize_entropy_size(self, entropy_bytes, len_mnemonic):
+        """Normalize entropy size to selected mnemonic length"""
+        return entropy_bytes[: self._target_entropy_num_bytes(len_mnemonic)]
 
     def _new_key_from_dice_with_len(self, len_mnemonic, d_20=False):
         """Capture entropy from dice using a pre-selected mnemonic length"""
@@ -263,40 +272,6 @@ class Login(MnemonicLoader):
             if tries > DOUBLE_MNEMONICS_MAX_TRIES:
                 raise ValueError("Failed to find a valid double mnemonic")
 
-    def new_key_from_two_entropy_sources(self):
-        """Create a new mnemonic by combining two entropy sources"""
-        from embit.bip39 import mnemonic_from_bytes
-
-        len_mnemonic = self.choose_len_mnemonic(t("Double mnemonic"))
-        if not len_mnemonic:
-            return MENU_CONTINUE
-
-        source_1 = self._entropy_source_menu(t("1st entropy source"))
-        if source_1 is None:
-            return MENU_CONTINUE
-
-        source_2 = self._entropy_source_menu(t("2nd entropy source"))
-        if source_2 is None:
-            return MENU_CONTINUE
-
-        entropy_1 = self._capture_entropy_from_source(source_1, len_mnemonic)
-        if entropy_1 is None:
-            return MENU_CONTINUE
-
-        entropy_2 = self._capture_entropy_from_source(source_2, len_mnemonic)
-        if entropy_2 is None:
-            return MENU_CONTINUE
-
-        mixed_entropy = self._mix_entropy(entropy_1, entropy_2)
-        self._show_entropy_hash(t("SHA256 of combined entropy:"), mixed_entropy)
-
-        if len_mnemonic == EXTRA_MNEMONIC_LENGTH_FLAG:
-            mixed_entropy = self._adjust_double_mnemonic_entropy(mixed_entropy)
-
-        num_bytes = 16 if len_mnemonic == 12 else 32
-        entropy_mnemonic = mnemonic_from_bytes(mixed_entropy[:num_bytes])
-        return self._load_key_from_words(entropy_mnemonic.split(), new=True)
-
     def new_key_from_dice(self, d_20=False, ask_for_second_entropy=False):
         """Handler for both 'new mnemonic'>'via D6/D20' menu items. Default is D6"""
         from .new_mnemonic.dice_rolls import DiceEntropy
@@ -318,6 +293,11 @@ class Login(MnemonicLoader):
                 )
                 if captured_entropy is None:
                     return MENU_CONTINUE
+
+            captured_entropy = self._normalize_entropy_size(
+                captured_entropy,
+                len_mnemonic,
+            )
 
             words = mnemonic_from_bytes(captured_entropy).split()
             return self._load_key_from_words(words, new=True)
@@ -343,11 +323,14 @@ class Login(MnemonicLoader):
                 if entropy_bytes is None:
                     return MENU_CONTINUE
 
+            entropy_bytes = self._normalize_entropy_size(entropy_bytes, len_mnemonic)
+
             if len_mnemonic == EXTRA_MNEMONIC_LENGTH_FLAG:
                 entropy_bytes = self._adjust_double_mnemonic_entropy(entropy_bytes)
 
-            num_bytes = 16 if len_mnemonic == 12 else 32
-            entropy_mnemonic = mnemonic_from_bytes(entropy_bytes[:num_bytes])
+            entropy_mnemonic = mnemonic_from_bytes(
+                entropy_bytes[: self._target_entropy_num_bytes(len_mnemonic)]
+            )
             return self._load_key_from_words(entropy_mnemonic.split(), new=True)
         return MENU_CONTINUE
 

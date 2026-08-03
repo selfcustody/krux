@@ -215,44 +215,6 @@ def test_new_12w_from_snapshot(m5stickv, mocker):
     assert ctx.wallet.key.mnemonic == MNEMONIC
 
 
-def test_new_12w_from_two_entropy_sources(m5stickv, mocker):
-    import hashlib
-    from embit.bip39 import mnemonic_from_bytes
-    from krux.pages.login import Login
-    from krux.input import BUTTON_ENTER
-
-    BTN_SEQUENCE = [BUTTON_ENTER]
-    source_entropy_1 = b"\x01" * 32
-    source_entropy_2 = b"\x02" * 16
-
-    mixed_entropy = hashlib.sha256(
-        hashlib.sha256(source_entropy_1).digest()
-        + hashlib.sha256(source_entropy_2).digest()
-    ).digest()
-    expected_mnemonic = mnemonic_from_bytes(mixed_entropy[:16])
-
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
-    login = Login(ctx)
-
-    mocker.patch.object(login, "choose_len_mnemonic", return_value=12)
-    mocker.patch.object(
-        login,
-        "_entropy_source_menu",
-        side_effect=[login.ENTROPY_SOURCE_CAMERA, login.ENTROPY_SOURCE_D6],
-    )
-    mocker.patch.object(
-        login,
-        "_capture_entropy_from_source",
-        side_effect=[source_entropy_1, source_entropy_2],
-    )
-    load_key_spy = mocker.patch.object(login, "_load_key_from_words")
-
-    login.new_key_from_two_entropy_sources()
-
-    load_key_spy.assert_called_once_with(expected_mnemonic.split(), new=True)
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-
-
 def test_new_12w_from_snapshot_with_optional_second_entropy(m5stickv, mocker):
     import hashlib
     from embit.bip39 import mnemonic_from_bytes
@@ -379,7 +341,7 @@ def test_new_12w_from_dice_same_source_reprompt_then_mix(m5stickv, mocker):
     mixed_entropy = hashlib.sha256(
         hashlib.sha256(first_entropy).digest() + hashlib.sha256(second_entropy).digest()
     ).digest()
-    expected_mnemonic = mnemonic_from_bytes(mixed_entropy)
+    expected_mnemonic = mnemonic_from_bytes(mixed_entropy[:16])
 
     ctx = create_ctx(mocker, [BUTTON_ENTER])
     login = Login(ctx)
