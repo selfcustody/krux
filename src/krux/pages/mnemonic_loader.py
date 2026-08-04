@@ -79,6 +79,7 @@ class MnemonicLoader(Page):
                     t("Binary Grid"),
                     lambda: self.load_key_from_tiny_seed_image("Binary Grid"),
                 ),
+                ("Stackbit 1248", self.load_key_from_1248_scan),
             ],
         )
         index, status = submenu.run_loop()
@@ -265,6 +266,29 @@ class MnemonicLoader(Page):
         if words is not None:
             return self._load_key_from_words(words)
         return MENU_CONTINUE
+
+    def load_key_from_1248_scan(self):
+        """Menu handler to scan key from Stackbit 1248 plate with camera"""
+        from .stack_1248_scanner import StackbitScanner
+
+        len_mnemonic = self.choose_len_mnemonic()
+        if not len_mnemonic:
+            return MENU_CONTINUE
+
+        intro = t("Paint punched dots black so they can be detected.") + " "
+        intro += t("Use a black background surface.") + " "
+        intro += t("Align camera and backup plate properly.")
+        self.ctx.display.draw_hcentered_text(intro)
+        if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+            return MENU_CONTINUE
+
+        stackbit_scanner = StackbitScanner(self.ctx)
+        words = stackbit_scanner.scanner(len_mnemonic == 24)
+        del stackbit_scanner
+        if words is None:
+            self.flash_error(t("Failed to load"))
+            return MENU_CONTINUE
+        return self._load_key_from_words(words)
 
     def load_key_from_tiny_seed(self):
         """Menu handler to manually load key from Tinyseed sheet metal storage method"""
