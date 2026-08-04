@@ -1945,3 +1945,31 @@ def test_load_key_from_tiny_seed_image_back_is_silent(m5stickv, mocker):
 
     # "Back" is not a failure - it must not flash an error
     assert_not_flashed(ctx, "Failed to load")
+
+
+def test_load_wallet_silent_payment_policy(amigo, mocker):
+    from krux.pages.login import Login
+    from krux.krux_settings import Settings
+    from krux.key import NAME_SILENT_PAYMENT, TYPE_SILENT_PAYMENT, P2TR
+    from krux.input import BUTTON_ENTER
+
+    original_policy = Settings().wallet.policy_type
+    Settings().wallet.policy_type = NAME_SILENT_PAYMENT
+    try:
+        BTN_SEQUENCE = [
+            BUTTON_ENTER,  # Confirm words
+            BUTTON_ENTER,  # Load Wallet
+        ]
+        MNEMONIC = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo daring"
+
+        ctx = create_ctx(mocker, BTN_SEQUENCE)
+        login = Login(ctx)
+        login._load_key_from_words(MNEMONIC.split())
+
+        assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+        # Silent Payment policy forces the P2TR script type
+        assert ctx.wallet.is_silent_payment()
+        assert ctx.wallet.key.policy_type == TYPE_SILENT_PAYMENT
+        assert ctx.wallet.key.script_type == P2TR
+    finally:
+        Settings().wallet.policy_type = original_policy
