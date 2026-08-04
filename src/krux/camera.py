@@ -81,6 +81,15 @@ class Camera:
             sensor.run(0)
         except Exception as e:
             print("Camera not found:", e)
+        if kboard.is_wonder_mv:
+            # Camera power-on inrush may brownout-reset the LCD controller,
+            # leaving a black screen while firmware keeps running.
+            # Re-initialize the LCD and redraw the splash to recover.
+            from .display import display, SPLASH
+
+            display.initialize_lcd()
+            display.clear()
+            display.draw_centered_text(SPLASH)
 
     def _rotate_yaboom_or_wondermv(self):
         return (
@@ -92,7 +101,14 @@ class Camera:
 
     def initialize_sensor(self, mode=QR_SCAN_MODE):
         """Initializes the camera"""
-        sensor.reset(freq=18200000)
+        if kboard.is_wonder_mv:
+            # GC2145 sensor: probe only GC types (choice=2), skipping OV probe
+            # rounds and their camera power cycles (inrush).
+            # TODO: yahboom and wonder_k also ship GC2145 and could benefit,
+            # but only wonder_mv was tested so far.
+            sensor.reset(freq=18200000, choice=2)
+        else:
+            sensor.reset(freq=18200000)
         self.cam_id = sensor.get_id()
         if (
             kboard.is_cube
