@@ -171,7 +171,7 @@ class MnemonicXOR(MnemonicLoader):
                 self.ctx.wallet.key.script_type,
             )
             self.ctx.wallet = Wallet(xored_key)
-            self.flash_text(
+            self.flash_success(
                 t("%s: loaded!") % xored_fingerprint,
                 highlight_prefix=":",
             )

@@ -941,6 +941,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Load from QR code
                 BUTTON_ENTER,  # Path mismatch ACK
                 BUTTON_ENTER,  # PSBT Policy ACK
+                BUTTON_ENTER,  # Unverified input amounts ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -966,6 +967,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Load from QR code
                 BUTTON_ENTER,  # Path mismatch ACK
                 BUTTON_ENTER,  # PSBT Policy ACK
+                BUTTON_ENTER,  # Unverified input amounts ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -992,6 +994,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Load from QR code
                 BUTTON_ENTER,  # Path mismatch ACK
                 BUTTON_ENTER,  # PSBT Policy ACK
+                BUTTON_ENTER,  # Unverified input amounts ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -1042,6 +1045,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Load from SD card
                 BUTTON_ENTER,  # Path mismatch ACK
                 BUTTON_ENTER,  # PSBT Policy ACK
+                BUTTON_ENTER,  # Unverified input amounts ACK
                 BUTTON_ENTER,  # PSBT resume
                 BUTTON_ENTER,  # output 1
                 BUTTON_ENTER,  # output 2
@@ -1230,6 +1234,7 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
         BUTTON_ENTER,  # Load from SD card
         BUTTON_ENTER,  # Path mismatch ACK
         BUTTON_ENTER,  # PSBT Policy ACK
+        BUTTON_ENTER,  # Unverified input amounts ACK
         BUTTON_ENTER,  # PSBT resume
         BUTTON_ENTER,  # output 1
         BUTTON_ENTER,  # output 2
@@ -1912,3 +1917,37 @@ def test_sign_spent_and_self(mocker, m5stickv, tdata):
             ),
         ]
     )
+
+
+def test_unverified_amounts_warning(mocker, m5stickv):
+    """The warning must be shown and must abort signing when declined"""
+    from krux.pages.home_pages.home import Home
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    class FakeSigner:
+        def __init__(self, unverified):
+            self.unverified = unverified
+
+        def unverified_input_amounts(self):
+            return self.unverified
+
+    # Declined
+    ctx = create_ctx(mocker, [BUTTON_PAGE])
+    home = Home(ctx)
+    mocker.spy(ctx.display, "draw_centered_text")
+    assert home._unverified_amounts_psbt_warn(FakeSigner(True)) is False
+    shown = ctx.display.draw_centered_text.call_args[0][0]
+    assert "Unverified input amounts!" in shown
+    assert "The fee shown may be lower than the real fee." in shown
+
+    # Accepted
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    home = Home(ctx)
+    assert home._unverified_amounts_psbt_warn(FakeSigner(True)) is True
+
+    # Nothing to warn about, no prompt consumed
+    ctx = create_ctx(mocker, [])
+    home = Home(ctx)
+    mocker.spy(ctx.display, "draw_centered_text")
+    assert home._unverified_amounts_psbt_warn(FakeSigner(False)) is True
+    assert ctx.display.draw_centered_text.call_count == 0

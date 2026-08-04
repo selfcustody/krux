@@ -202,7 +202,7 @@ class Key:
                 Key.extract_root(mnemonic, passphrase, network).child(0).fingerprint,
                 pretty,
             )
-        except:
+        except Exception:
             pass
         return ""
 

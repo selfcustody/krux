@@ -29,17 +29,19 @@ BLACK = 0x0000
 LIGHTBLACK = 0x0842
 DARKGREY = 0xEF7B
 GREY = 0x14A5
-LIGHTGREY = 0x38C6
 DARKWHITE = 0x1CE7
 WHITE = 0xFFFF
 GREEN = 0xE007
 DARKGREEN = 0x8005
+DARKERGREEN = 0x4004
 RED = 0x00F8
+DARKERRED = 0x00C0
 LIGHT_PINK = 0xDFFC
 PINK = 0x1FF8
-PURPLE = 0x0F78
+DARKPINK = 0x1AD0
 ORANGE = 0x20FD
 DARKORANGE = 0xA0CA
+DARKERORANGE = 0xE0B2
 YELLOW = 0x85F6
 BLUE = 0xF800
 LIGHTBLUE = 0xBD0E
@@ -67,13 +69,13 @@ THEMES = {
         "background": WHITE,
         "info_background": DARKWHITE,
         "foreground": BLACK,
-        "frame": LIGHTGREY,
+        "frame": DARKGREY,
         "disabled": DARKWHITE,
-        "go": DARKGREEN,
+        "go": DARKERGREEN,
         "esc_no": RED,
         "del": DARKORANGE,
         "toggle": BLUE,
-        "error": RED,
+        "error": DARKERRED,
         "highlight": BLUE,
     },
     ThemeSettings.ORANGE_THEME_NAME: {
@@ -93,7 +95,7 @@ THEMES = {
         "background": BLACK,
         "info_background": LIGHTBLACK,
         "foreground": LIGHT_PINK,
-        "frame": PURPLE,
+        "frame": DARKPINK,
         "disabled": DARKGREY,
         "go": PINK,
         "esc_no": RED,

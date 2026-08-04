@@ -1,4 +1,41 @@
-# Changelog 26.04.0 - April 2025
+# Changelog 26.08.0 - August 2026
+
+### Security Fixes
+- Camera entropy: fix a heap buffer overflow in the Shannon entropy module. Only the Maix Bit could trigger it, a device discontinued in 25.09.0 with no known users; every other device feeds the module a frame that fits. The module copied the whole frame into a fixed 320x240 RGB565 (153,600 byte) scratch buffer, so the Maix Bit's larger CIF frames (352x288 RGB565, 202,752 bytes) wrote 49,152 bytes past the end. The scratch copy has been removed entirely, the read length is now capped and rounded to whole pixels, and the CIF path is gone along with the Maix Bit
+- PSBT: stricter checks on the calculation of fee shown on screen
+- PSBT: warn before signing when the wallet coordinator did not send enough data to confirm those amounts
+
+### Removed Maix Bit Code
+All Maix Bit support has been removed from the source tree, including its firmware build project. Support for the device was discontinued in 25.09.0, which at the time kept the build parameters available; those are now gone too. The OV5642 sensor handling, used only by that device, was removed along with it.
+
+### Stackbit 1248 Vertical Layout
+Added vertical layout option for Stackbit 1248 backup display, allowing users to choose between Standard (horizontal) and Vertical (transposed) grid orientations.
+
+### Migrate UR encoding to uUR C module
+Switch from the pure-Python urtypes and foundation-ur-py packages to the new uUR C module, allowing faster UR QR codes decoding with a smaller RAM footprint. Tests and the simulator now build the same module for CPython instead of shimming the pure-Python packages, so host and device run identical UR code.
+
+
+### Other Bug Fixes and Improvements
+- Remove the unused `os.urandom()` from the MaixPy firmware. It was never called by Krux and played no part in generating keys or mnemonics, which draw entropy from the camera or dice. It was backed by a deterministic PRNG, so it has been removed to keep it from being mistaken for a secure source later
+- Fix display of negative amounts
+- Improve scan TinySeed and other binary visibility by drawing punches only
+- Added `flash_success` method to standardize green success flashes across confirmation screens
+- Update Embit to latest - fff7ffa
+- Replace custom quirc (library to decode QR codes from images) with k_quirc
+- Fix default theme contrast failures for Light, CypherPink, network
+  indicators, and Amigo info panels
+- Simplify generated-mnemonic confirmation with `Continue` and grouped
+  `Wallet Options`
+- Stored mnemonics: a corrupt `seeds.json` is now reported and kept intact
+  instead of being overwritten when storing a new mnemonic
+- Reject Base58 addresses whose version byte matches no network, previously
+  accepted as valid when verifying an address
+- Settings: malformed `settings.json` content is handled without errors, and
+  reading a setting no longer writes back to storage
+- Hide the QR code title in line and region view modes, where it overlapped
+  the part index
+
+# Changelog 26.04.0 - April 2026
 
 ### Security Fixes
 - Reject PSBT inputs with non-standard sighash types before signing
@@ -13,7 +50,7 @@
 - File manager: filter "."/".." and entries containing path separators from SD listings, blocking directory traversal via crafted FAT entries
 - KEF decryption: in-session exponential backoff (1s, 2s, 4s … capped at 30s) on failed attempts, slowing interactive brute forcing without persisting lockout state to flash
 
-# Changelog 26.03.0 - March 2025
+# Changelog 26.03.0 - March 2026
 
 ### New Device Support: Embed Fire
 This device shares similarities with the WonderMV but stands out with its larger 2.4" touchscreen.

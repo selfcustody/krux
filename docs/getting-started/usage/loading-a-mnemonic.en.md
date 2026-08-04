@@ -31,7 +31,7 @@ You can also use [an offline QR code generator for this](https://iancoleman.io/b
 #### Tinyseed, OneKey KeyTag or Binary Grid
 [Tinyseed](https://tinyseed.io/), [Onekey KeyTag](https://onekey.so/products/onekey-keytag/) and others directly encode a seed as binary, allowing for a very compact mnemonic storage. Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them (this feature is not available in [Krux Mobile Android app](../../faq.md#what-is-krux-mobile-android-app)).
 
-To ensure a proper scan, place the backup plate over a black background and fill in the punched areas with black to enhance contrast. Alternatively, you can scan a [thermally printed version](../features/printing/printing.md) or a completed template. You can view some [examples of encoded mnemonics here](../features/tinyseed.md), and explore our [available transcription templates here](../templates/templates.md).
+To ensure a proper scan, place the backup plate over a black background and fill in the punched areas with black to enhance contrast. Alternatively, you can scan a [thermally printed version](../features/printing/printing.md) or a completed template. You can view some [examples of encoded mnemonics here](../features/tinyseed.md), and explore our [available transcription templates here](../templates/index.md).
 
 ### Via Manual Input
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-manual-options-250.png" align="right" class="m5stickv">
@@ -117,7 +117,10 @@ If you make a mistake while loading a mnemonic, you can easily edit it. Simply t
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-overview-300.png" align="right" class="amigo">
 
-After confirming your mnemonic, a screen with an **information box at the top** with the wallet's attributes is shown. If they are as expected, just press `Load Wallet`. If you need to change something you may customize the wallet by setting a `Passphrase` or using the `Customize` button.
+After confirming an existing mnemonic, a screen with an **information box at the
+top** shows the wallet's attributes. If they are as expected, just press
+`Load Wallet`. If you need to change something, you may customize the wallet by
+setting a `Passphrase` or using the `Customize` button.
 
 <div style="clear: both"></div>
 

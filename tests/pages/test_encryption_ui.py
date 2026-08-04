@@ -41,7 +41,7 @@ def mock_file_operations(mocker):
         "os.listdir",
         new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
     )
-    mocker.patch("builtins.open", mocker.mock_open(read_data="SEEDS_JSON"))
+    mocker.patch("builtins.open", mocker.mock_open(read_data=SEEDS_JSON))
 
 
 def test_load_key_from_keypad(m5stickv, mocker):
@@ -285,6 +285,49 @@ def test_encrypt_save_error(m5stickv, mocker, mock_file_operations):
 
     ctx.display.draw_centered_text.assert_has_calls(
         [mocker.call("Failed to store mnemonic", theme.error_color)], any_order=True
+    )
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_encrypt_save_corrupted_file_preserved(m5stickv, mocker, mock_file_operations):
+    from krux.wallet import Wallet
+    from krux.krux_settings import Settings
+    from krux.input import BUTTON_ENTER
+    from krux.pages.encryption_ui import EncryptMnemonic
+    from krux.encryption import StorageCorruptedError
+    from krux.key import Key
+    from embit.networks import NETWORKS
+    from krux.themes import theme
+
+    BTN_SEQUENCE = (
+        [BUTTON_ENTER]  # Confirm flash store
+        + [BUTTON_ENTER]  # Yes, use fingerprint as ID
+        + [BUTTON_ENTER]  # Confirm encryption ID
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx.wallet = Wallet(Key(ECB_WORDS, False, NETWORKS["main"]))
+    Settings().encryption.version = "AES-ECB"
+    storage_ui = EncryptMnemonic(ctx)
+    mocker.patch(
+        "krux.pages.encryption_ui.EncryptionKey.encryption_key",
+        mocker.MagicMock(return_value=TEST_KEY),
+    )
+    # a corrupt seeds file must not be overwritten: store raises, UI warns
+    mocker.patch(
+        "krux.encryption.MnemonicStorage.store_encrypted_kef",
+        mocker.MagicMock(side_effect=StorageCorruptedError("seeds.json")),
+    )
+    storage_ui.encrypt_menu()
+
+    ctx.display.draw_centered_text.assert_has_calls(
+        [
+            mocker.call(
+                "Stored seeds file is corrupted and was preserved.\n"
+                "Encrypted mnemonic was not stored.",
+                theme.error_color,
+            )
+        ],
+        any_order=True,
     )
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 

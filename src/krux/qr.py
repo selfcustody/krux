@@ -131,6 +131,7 @@ class QRPartParser:
 
     def __init__(self):
         self.parts = {}
+        self.payload_len = 0
         self.total = -1
         self.format = None
         self.decoder = None
@@ -139,28 +140,28 @@ class QRPartParser:
     def parsed_count(self):
         """Returns the number of parsed parts so far"""
         if self.format == FORMAT_UR:
-            # Single-part URs have no expected part indexes
-            if self.decoder.fountain_decoder.expected_part_indexes is None:
+            # Single-part URs report expected_part_count == 0
+            if self.decoder.expected_part_count == 0:
                 return 1 if self.decoder.result is not None else 0
             completion_pct = self.decoder.estimated_percent_complete()
-            return math.ceil(completion_pct * self.total_count() / 2) + len(
-                self.decoder.fountain_decoder.received_part_indexes
+            return math.ceil(completion_pct * self.total_count() / 2) + min(
+                self.decoder.processed_parts_count, self.decoder.expected_part_count
             )
         return len(self.parts)
 
     def processed_parts_count(self):
         """Returns quantity of processed QR code parts"""
         if self.format == FORMAT_UR:
-            return self.decoder.fountain_decoder.processed_parts_count
+            return self.decoder.processed_parts_count
         return len(self.parts)
 
     def total_count(self):
         """Returns the total number of parts there should be"""
         if self.format == FORMAT_UR:
-            # Single-part URs have no expected part indexes
-            if self.decoder.fountain_decoder.expected_part_indexes is None:
+            # Single-part URs report expected_part_count == 0
+            if self.decoder.expected_part_count == 0:
                 return 1
-            return self.decoder.expected_part_count() * 2
+            return self.decoder.expected_part_count * 2
         return self.total
 
     def parse(self, data):
@@ -177,16 +178,34 @@ class QRPartParser:
             self.total = total
             return index - 1
         elif self.format == FORMAT_UR:
-            if not self.decoder:
-                from ur.ur_decoder import URDecoder
+            from uUR import URDecoder, DECODER_NO_RESULT, DECODER_ERR_INVALID_CHECKSUM
 
+            if not self.decoder:
                 self.decoder = URDecoder()
             data = data.decode() if isinstance(data, bytes) else data
-            self.decoder.receive_part(data)
+            if self.decoder.receive_part(data) in (
+                DECODER_NO_RESULT,
+                DECODER_ERR_INVALID_CHECKSUM,
+            ):
+                raise ValueError("Failed to decode UR")
         elif self.format == FORMAT_BBQR:
-            from .bbqr import parse_bbqr
+            from .bbqr import parse_bbqr, BBQR_MAX_PAYLOAD_LEN
 
             part, index, total = parse_bbqr(data)
+            # Only the first part is passed to detect_format, and its encoding and
+            # file type are used to decode all of them. Parts of a BBQr aren't bound
+            # to each other by any checksum, so reject the ones that disagree with
+            # the first instead of splicing different streams into a corrupt result.
+            if data[2] != self.bbqr.encoding or data[3] != self.bbqr.file_type:
+                raise ValueError("BBQr header mismatch")
+            if self.total not in (-1, total):
+                raise ValueError("BBQr part total mismatch")
+            if self.parts.get(index, part) != part:
+                raise ValueError("Conflicting BBQr part")
+            if index not in self.parts:
+                self.payload_len += len(part)
+                if self.payload_len > BBQR_MAX_PAYLOAD_LEN:
+                    raise ValueError("BBQr payload too big")
             self.parts[index] = part
             self.total = total
             return index
@@ -195,7 +214,9 @@ class QRPartParser:
     def is_complete(self):
         """Returns a boolean indicating whether or not enough parts have been parsed"""
         if self.format == FORMAT_UR:
-            return self.decoder.is_complete()
+            from uUR import DECODER_OK
+
+            return self.decoder.state == DECODER_OK
         keys_check = (
             sum(range(1, self.total + 1))
             if self.format in (FORMAT_PMOFN, FORMAT_NONE)
@@ -256,11 +277,11 @@ def to_qr_codes(data, max_width, qr_format):
                 code = qrcode.encode(part)
                 yield (code, num_parts)
         elif qr_format == FORMAT_UR:
-            from ur.ur_encoder import UREncoder
+            from uUR import UREncoder
 
             encoder = UREncoder(data, part_size, 0)
             while True:
-                part = encoder.next_part().upper()
+                part = encoder.next_part()
                 code = qrcode.encode(part)
                 yield (code, encoder.fountain_encoder.seq_len())
         elif qr_format == FORMAT_BBQR:
@@ -308,7 +329,7 @@ def max_qr_bytes(max_width, encoding="byte"):
 
     try:
         return capacity_list[qr_version - 1]
-    except:
+    except IndexError:
         # Limited to version 20
         return capacity_list[-1]
 
@@ -317,7 +338,7 @@ def find_min_num_parts(data, max_width, qr_format):
     """Finds the minimum number of QR parts necessary to encode the data in
     the specified format within the max_width constraint
     """
-    encoding = "alphanumeric" if qr_format == FORMAT_BBQR else "byte"
+    encoding = "alphanumeric" if qr_format in (FORMAT_BBQR, FORMAT_UR) else "byte"
     qr_capacity = max_qr_bytes(max_width, encoding)
     if qr_format == FORMAT_PMOFN:
         data_length = len(data)
@@ -406,6 +427,6 @@ def detect_format(data):
                     bbqr_encoding = data[2]
                     return FORMAT_BBQR, BBQrCode(None, bbqr_encoding, bbqr_file_type)
 
-    except:
+    except Exception:
         pass
     return qr_format, None

@@ -8,8 +8,7 @@ to static SVGs committed in the repo, and inline math is written as plain HTML.
 This is a dev only build tool. It is never shipped to the site and adds no
 runtime dependency for visitors. It only needs matplotlib:
 
-    poetry run pip install matplotlib   # or add to the docs/dev extras
-    poetry run python render_docs_math.py
+    uv run --with matplotlib python render_docs_math.py
 
 Source of truth is the markdown itself: every display equation is an image whose
 alt text is the original LaTeX, e.g.

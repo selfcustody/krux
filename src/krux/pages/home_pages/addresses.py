@@ -254,7 +254,7 @@ class Addresses(Page):
                             )
                             wdt.feed()
 
-                self.flash_text(
+                self.flash_success(
                     t("Saved to SD card:") + "\n\n%s" % filename,
                     highlight_prefix=":",
                 )

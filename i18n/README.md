@@ -16,7 +16,7 @@ Add a file in format `xy-WZ.json` in [translations](./translations), where `xy` 
 Execute:
 
 ```bash
-poetry install --extras docs
+uv sync --extra docs
 ```
 
 ### Configure translation

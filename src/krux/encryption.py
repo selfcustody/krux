@@ -33,21 +33,32 @@ FLASH_PATH_STR = "/" + FLASH_PATH + "/%s"
 QR_CODE_ITER_MULTIPLE = 10000
 
 
+class StorageCorruptedError(Exception):
+    """Stored mnemonics file exists but is not a valid object; it is left
+    untouched instead of being overwritten, so its data can be recovered."""
+
+
 class MnemonicStorage:
     """Handler of stored encrypted seeds"""
+
+    @staticmethod
+    def _load_mnemonics(contents):
+        return json.loads(contents)
 
     def __init__(self) -> None:
         self.stored = {}
         self.stored_sd = {}
         try:
             with SDHandler() as sd:
-                self.stored_sd = json.loads(sd.read(MNEMONICS_FILE))
-        except:
+                self.stored_sd = self._load_mnemonics(sd.read(MNEMONICS_FILE))
+        except (OSError, ValueError):
+            # missing/unreadable SD card or malformed JSON -> start empty
             pass
         try:
             with open(FLASH_PATH_STR % MNEMONICS_FILE, "r") as f:
-                self.stored = json.loads(f.read())
-        except:
+                self.stored = self._load_mnemonics(f.read())
+        except (OSError, ValueError):
+            # missing/unreadable flash file or malformed JSON -> start empty
             pass
 
     def _deprecated_decrypt(self, key, salt, iterations, mode, payload):
@@ -73,24 +84,24 @@ class MnemonicStorage:
             plaintext = kef._unpad(decryptor.decrypt(payload), pkcs_pad=False)
             return plaintext.decode()
         except:
+            # broad on purpose: any failure here means a wrong key or
+            # incompatible legacy ciphertext -> return None
             return None
 
     def list_mnemonics(self, sd_card=False):
         """List all seeds stored on a file"""
-        mnemonic_ids = []
         source = self.stored_sd if sd_card else self.stored
-        for mnemonic_id in source:
-            mnemonic_ids.append(mnemonic_id)
-        return mnemonic_ids
+        if not isinstance(source, dict):
+            # corrupt/non-dict storage -> nothing to list
+            return []
+        return list(source)
 
     def decrypt(self, key, mnemonic_id, sd_card=False):
         """Decrypt a selected encrypted mnemonic from a file"""
-        try:
-            if sd_card:
-                stored_value = self.stored_sd.get(mnemonic_id)
-            else:
-                stored_value = self.stored.get(mnemonic_id)
-        except:
+        source = self.stored_sd if sd_card else self.stored
+        stored_value = source.get(mnemonic_id) if isinstance(source, dict) else None
+        if not isinstance(stored_value, dict):
+            # unknown id, or a corrupt/non-dict storage entry -> nothing to decrypt
             return None
 
         if stored_value.get("b64_kef"):
@@ -114,13 +125,21 @@ class MnemonicStorage:
         mnemonics = {}
         if sd_card:
             # load current MNEMONICS_FILE
+            orig_len = 0
             try:
                 with SDHandler() as sd:
                     contents = sd.read(MNEMONICS_FILE)
                     orig_len = len(contents)
-                    mnemonics = json.loads(contents)
-            except:
-                orig_len = 0
+                    mnemonics = self._load_mnemonics(contents)
+            except OSError:
+                # missing file -> write a fresh store
+                pass
+            except ValueError as exc:
+                # corrupt JSON -> preserve for recovery
+                raise StorageCorruptedError(MNEMONICS_FILE) from exc
+            if not isinstance(mnemonics, dict):
+                # wrong shape -> preserve for recovery
+                raise StorageCorruptedError(MNEMONICS_FILE)
 
             # save the new MNEMONICS_FILE
             try:
@@ -132,20 +151,29 @@ class MnemonicStorage:
                         contents += " " * (orig_len - len(contents))
                     sd.write(MNEMONICS_FILE, contents)
             except:
+                # broad on purpose: any failure to save means the store failed
                 return False
         else:
             try:
                 # load current MNEMONICS_FILE
                 with open(FLASH_PATH_STR % MNEMONICS_FILE, "r") as f:
-                    mnemonics = json.loads(f.read())
-            except:
+                    mnemonics = self._load_mnemonics(f.read())
+            except OSError:
+                # missing file -> write a fresh store
                 pass
+            except ValueError as exc:
+                # corrupt JSON -> preserve for recovery
+                raise StorageCorruptedError(MNEMONICS_FILE) from exc
+            if not isinstance(mnemonics, dict):
+                # wrong shape -> preserve for recovery
+                raise StorageCorruptedError(MNEMONICS_FILE)
             try:
                 # save the new MNEMONICS_FILE
                 with open(FLASH_PATH_STR % MNEMONICS_FILE, "w") as f:
                     mnemonics[mnemonic_id] = {"b64_kef": b64_kef}
                     f.write(json.dumps(mnemonics))
             except:
+                # broad on purpose: any failure to save means the store failed
                 return False
         return True
 

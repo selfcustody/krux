@@ -8,7 +8,6 @@ from .shared_mocks import (
     board_m5stickv,
     board_wonder_mv,
     board_yahboom,
-    board_bit,
     board_wonder_k,
     board_embed_fire,
     encode_to_string,
@@ -30,6 +29,18 @@ def reset_krux_modules():
             del sys.modules[name]
 
 
+@pytest.fixture(autouse=True)
+def no_gc_collect(monkeypatch):
+    """Krux calls gc.collect() often to manage the device's small heap.
+    On CPython each call walks the much bigger test heap (mostly mock objects)
+    and does nothing useful, costing about a third of the suite runtime.
+    Tests that assert on gc.collect patch it themselves, over this one.
+    """
+    import gc
+
+    monkeypatch.setattr(gc, "collect", lambda *args: 0)
+
+
 @pytest.fixture
 def mp_modules(mocker, monkeypatch):
     from embit.util import secp256k1
@@ -38,6 +49,8 @@ def mp_modules(mocker, monkeypatch):
     import sys
     import hashlib
 
+    # uUR is the native BC-UR extension, installed as a real dependency, so it
+    # needs no mock: tests exercise the same module the firmware does.
     monkeypatch.setitem(
         sys.modules,
         "qrcode",
@@ -159,15 +172,6 @@ def wonder_mv(monkeypatch, mp_modules):
 
 
 @pytest.fixture
-def bit(monkeypatch, mp_modules):
-    import sys
-
-    monkeypatch.setitem(sys.modules, "board", board_bit())
-    monkeypatch.setitem(sys.modules, "pmu", None)
-    reset_krux_modules()
-
-
-@pytest.fixture
 def wonder_k(monkeypatch, mp_modules):
     import sys
 
@@ -193,7 +197,6 @@ def embed_fire(monkeypatch, mp_modules):
         "cube",
         "yahboom",
         "wonder_mv",
-        "bit",
         "wonder_k",
     ]
 )

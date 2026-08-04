@@ -311,7 +311,7 @@ class Home(Page):
                         with open(SDHandler.PATH_STR % psbt_filename, "wb") as f:
                             # Write PSBT data directly to the file
                             signer.psbt.write_to(f)
-                    self.flash_text(
+                    self.flash_success(
                         t("Saved to SD card:") + "\n\n%s" % psbt_filename,
                         highlight_prefix=":",
                     )
@@ -408,6 +408,23 @@ class Home(Page):
             self.ctx.display.draw_centered_text(t("Fingerprint unset in PSBT"))
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return False
+
+        return True
+
+    def _unverified_amounts_psbt_warn(self, signer):
+        """Warn when input amounts are not backed by their previous transactions"""
+        if signer.unverified_input_amounts():
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Warning:")
+                + " "
+                + t("Unverified input amounts!")
+                + "\n"
+                + t("The fee shown may be lower than the real fee."),
+                highlight_prefix=":",
+            )
+
+            return self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE)
 
         return True
 
@@ -509,6 +526,9 @@ class Home(Page):
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing…"))
         outputs, fee_percent = signer.outputs()
+
+        if not self._unverified_amounts_psbt_warn(signer):
+            return MENU_CONTINUE
 
         if not self._fees_psbt_warn(fee_percent):
             return MENU_CONTINUE

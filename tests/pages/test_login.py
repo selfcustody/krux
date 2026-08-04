@@ -10,6 +10,7 @@ def mocker_printer(mocker):
 @pytest.fixture
 def mock_retro_compatibility(mocker, amigo):
     from krux.settings import CategorySetting
+    from krux.krux_settings import Settings
 
     class MockDefaultWallet:
         namespace = "settings.wallet"
@@ -24,6 +25,10 @@ def mock_retro_compatibility(mocker, amigo):
         "krux.krux_settings.DefaultWallet",
         mocker.MagicMock(return_value=MockDefaultWallet()),
     )
+    # Settings caches its namespace tree, which may already have been built
+    # (e.g. via krux.themes at import). Drop the cache so the next Settings()
+    # rebuilds with the patched DefaultWallet.
+    mocker.patch.object(Settings, "_instance", None)
 
 
 ################### Test menus
@@ -508,7 +513,7 @@ def test_load_12w_camera_qrcode_format_ur(m5stickv, mocker, mocker_printer):
     from krux.qr import FORMAT_UR
     from krux.pages.qr_capture import QRCodeCapture
     import binascii
-    from ur.ur import UR
+    from uUR import UR
 
     BTN_SEQUENCE = (
         # 1 press to proceed with the 12 words
@@ -1452,6 +1457,100 @@ def test_customization_while_loading_wallet(amigo, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     # Assert that the wallet settings module was loaded
     assert "krux.pages.wallet_settings" in sys.modules
+
+
+def test_generated_mnemonic_wallet_options_return_to_summary(amigo, mocker):
+    from krux.pages import MENU_CONTINUE, MENU_EXIT
+    from krux.pages.login import Login
+    from krux.pages.wallet_settings import PassphraseEditor, WalletSettings
+    from krux.krux_settings import Settings
+
+    mnemonic = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo daring"
+    Settings().security.hide_mnemonic = True
+
+    ctx = create_ctx(mocker, [])
+    login = Login(ctx)
+    discard_prompt = mocker.patch.object(login, "prompt", return_value=False)
+
+    passphrase_editor = mocker.patch.object(
+        PassphraseEditor,
+        "load_passphrase_menu",
+        return_value="secret",
+    )
+    wallet_settings = mocker.patch.object(
+        WalletSettings,
+        "customize_wallet",
+        side_effect=lambda key: (
+            key.network,
+            key.policy_type,
+            key.script_type,
+            key.account_index,
+            key.derivation,
+        ),
+    )
+
+    menu_selections = iter([1, 2, 2, 1, 0, 1, 1, 0])
+    menu_labels = []
+
+    class MenuStub:
+        def __init__(self, _ctx, menu, **_kwargs):
+            self.menu = menu + [("< Back", lambda: MENU_EXIT)]
+            menu_labels.append([label for label, _ in self.menu])
+
+        @property
+        def back_index(self):
+            return len(self.menu) - 1
+
+        def run_loop(self):
+            return next(menu_selections), MENU_CONTINUE
+
+    mocker.patch("krux.pages.login.Menu", MenuStub)
+
+    assert login._load_key_from_words(mnemonic.split(), new=True) == MENU_EXIT
+    assert menu_labels == [
+        ["Continue", "Wallet Options", "< Back"],
+        ["Passphrase", "Customize", "< Back"],
+        ["Continue", "Wallet Options", "< Back"],
+        ["Continue", "Wallet Options", "< Back"],
+        ["Passphrase", "Customize", "< Back"],
+        ["Continue", "Wallet Options", "< Back"],
+        ["Passphrase", "Customize", "< Back"],
+        ["Continue", "Wallet Options", "< Back"],
+    ]
+    discard_prompt.assert_called_once()
+    passphrase_editor.assert_called_once_with(mnemonic)
+    wallet_settings.assert_called_once()
+    assert ctx.wallet.key.passphrase == "secret"
+
+
+def test_loaded_mnemonic_keeps_direct_wallet_actions(amigo, mocker):
+    from krux.pages import MENU_CONTINUE, MENU_EXIT
+    from krux.pages.login import Login
+    from krux.krux_settings import Settings
+
+    mnemonic = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo daring"
+    Settings().security.hide_mnemonic = True
+
+    ctx = create_ctx(mocker, [])
+    login = Login(ctx)
+    menu_labels = []
+
+    class MenuStub:
+        def __init__(self, _ctx, menu, **_kwargs):
+            self.menu = menu + [("< Back", lambda: MENU_EXIT)]
+            menu_labels.append([label for label, _ in self.menu])
+
+        @property
+        def back_index(self):
+            return len(self.menu) - 1
+
+        def run_loop(self):
+            return 0, MENU_CONTINUE
+
+    mocker.patch("krux.pages.login.Menu", MenuStub)
+
+    assert login._load_key_from_words(mnemonic.split()) == MENU_EXIT
+    assert menu_labels == [["Load Wallet", "Passphrase", "Customize", "< Back"]]
 
 
 def test_about(mocker, multiple_devices):

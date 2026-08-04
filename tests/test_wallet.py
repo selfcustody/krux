@@ -1,12 +1,20 @@
 import pytest
-from ur.ur_decoder import URDecoder
+import uUR
+
+
+def decode_single_part_ur(part):
+    """uUR's decoder is a state machine with no single-shot decode() helper,
+    so feed the lone part and hand back the assembled UR."""
+    decoder = uUR.URDecoder()
+    assert decoder.receive_part(part) == uUR.DECODER_OK
+    return decoder.result
 
 
 @pytest.fixture
 def tdata(mocker):
     import binascii
     from collections import namedtuple
-    from ur.ur import UR
+    from uUR import UR
     from krux.bbqr import encode_bbqr
     from embit.networks import NETWORKS
     from krux.key import (
@@ -1096,7 +1104,7 @@ def test_load_multisig(mocker, m5stickv, tdata):
             },
         ),
     ]
-    from ur.ur import UR
+    from uUR import UR
 
     n = 0
     for case in cases:
@@ -1669,7 +1677,7 @@ def test_provably_unspendable_non_deterministic_chain_code(mocker, m5stickv, tda
 
 def test_parse_wallet_raises_errors(mocker, m5stickv, tdata):
     from krux.wallet import parse_wallet
-    from ur.ur import UR
+    from uUR import UR
 
     cases = [
         tdata.BLUEWALLET_MULTISIG_WALLET_DATA_MISSING_KEYS,
@@ -1772,6 +1780,70 @@ def test_parse_address_raises_errors(mocker, m5stickv, tdata):
             parse_address(case)
 
 
+def test_parse_address_rejects_unknown_base58_version(m5stickv):
+    """A base58 address with a valid checksum but an unknown version byte must be
+    rejected. address_to_scriptpubkey returns None (no exception) for such an
+    address, so parse_address must check the returned Script, not only catch
+    errors.
+    """
+    from embit import base58
+    from krux.wallet import parse_address
+
+    # Valid base58check payload; version byte 0xFF matches no network p2pkh/p2sh
+    unknown_version_address = base58.encode_check(b"\xff" + b"\x00" * 20)
+    with pytest.raises(ValueError):
+        parse_address(unknown_version_address)
+
+
+def test_parse_address_propagates_keyboardinterrupt(mocker, m5stickv):
+    """KeyboardInterrupt must propagate: never swallowed by the bech32-uppercase
+    fallback, nor relabeled 'invalid address' by the final attempt.
+
+    parse_address imports address_to_scriptpubkey *inside* the function, so the
+    patch target is embit.script.address_to_scriptpubkey — there is no
+    krux.wallet.address_to_scriptpubkey to patch.
+    """
+    from krux.wallet import parse_address
+
+    mocker.patch("embit.script.address_to_scriptpubkey", side_effect=KeyboardInterrupt)
+
+    # Uppercase input exercises the bech32-uppercase fallback branch
+    with pytest.raises(KeyboardInterrupt):
+        parse_address("BC1QX2ZUDAY8D6J4UFH4DF6E9TTD06LNFMN2CUZ0VN")
+
+    # Mixed-case input skips that branch and exercises the final attempt
+    with pytest.raises(KeyboardInterrupt):
+        parse_address("bc1qx2zuday8d6j4ufh4df6e9ttd06lnfmn2cuz0vn")
+
+
+def test_parse_wallet_propagates_keyboardinterrupt(mocker, m5stickv):
+    """KeyboardInterrupt must propagate from each parse_wallet fallback: never
+    swallowed by the JSON or raw-descriptor fallbacks, nor relabeled 'invalid
+    wallet format' by the key-value fallback."""
+    import krux.wallet
+    from krux.wallet import parse_wallet
+
+    # JSON branch: valid JSON with a 'descriptor' key; the Descriptor.from_string
+    # call is interrupted.
+    mocker.patch.object(
+        krux.wallet.Descriptor, "from_string", side_effect=KeyboardInterrupt
+    )
+    with pytest.raises(KeyboardInterrupt):
+        parse_wallet('{"descriptor": "x"}')
+
+    # Key-value branch: parse_key_value_file is interrupted. (json.loads of a
+    # non-JSON string fails first and is correctly caught by the JSON branch.)
+    mocker.patch("krux.wallet.parse_key_value_file", side_effect=KeyboardInterrupt)
+    with pytest.raises(KeyboardInterrupt):
+        parse_wallet("invalid wallet format")
+
+    # Raw-descriptor branch: key-value returns nothing (so we fall through), and
+    # the Descriptor.from_string call is interrupted (still patched from above).
+    mocker.patch("krux.wallet.parse_key_value_file", return_value=(None, None))
+    with pytest.raises(KeyboardInterrupt):
+        parse_wallet("wpkh(tpubraw/0/*)")
+
+
 def test_to_unambiguous_descriptor(mocker, m5stickv, tdata):
     from embit.descriptor import Descriptor
     from krux.wallet import to_unambiguous_descriptor
@@ -1843,7 +1915,7 @@ def test_parse_wallet_via_ur_output(mocker, m5stickv):
     ]
 
     for i, QRDATUM in enumerate(QRDATA):
-        wallet_data = URDecoder().decode(QRDATUM)
+        wallet_data = decode_single_part_ur(QRDATUM)
         descriptor, label = parse_wallet(wallet_data)
         assert str(descriptor) == DESCRIPTORS[i]
         print(DESCRIPTORS[i])
@@ -1871,7 +1943,7 @@ def test_parse_wallet_via_ur_account(mocker, m5stickv):
     ]
 
     for i, QRDATUM in enumerate(QRDATA):
-        wallet_data = URDecoder().decode(QRDATUM)
+        wallet_data = decode_single_part_ur(QRDATUM)
         descriptor, label = parse_wallet(wallet_data)
         assert str(descriptor) == DESCRIPTORS[i]
         print(DESCRIPTORS[i])

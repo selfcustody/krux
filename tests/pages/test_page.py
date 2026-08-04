@@ -38,7 +38,7 @@ def test_init(mocker, m5stickv, mock_page_cls):
 
 def test_flash_text(mocker, m5stickv, mock_page_cls):
     from krux.display import FLASH_MSG_TIME
-    from krux.themes import WHITE, RED
+    from krux.themes import WHITE, RED, GREEN
 
     ctx = mock_context(mocker)
     mocker.patch("time.ticks_ms", new=lambda: 0)
@@ -55,6 +55,13 @@ def test_flash_text(mocker, m5stickv, mock_page_cls):
     assert ctx.display.flash_text.call_count == 2
     ctx.display.flash_text.assert_called_with(
         "Error", RED, FLASH_MSG_TIME, highlight_prefix=""
+    )
+
+    page.flash_success("Done")
+
+    assert ctx.display.flash_text.call_count == 3
+    ctx.display.flash_text.assert_called_with(
+        "Done", GREEN, FLASH_MSG_TIME, highlight_prefix=""
     )
 
 
@@ -128,6 +135,31 @@ def test_display_qr_code(mocker, m5stickv, mock_page_cls):
     )
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_display_qr_code_propagates_real_errors(mocker, m5stickv, mock_page_cls):
+    """A non-StopIteration error from the QR generator must propagate and must
+    NOT trigger a silent generator restart.
+
+    Regression for narrowing the bare ``except`` to ``except StopIteration``.
+    With the old bare except, a real error was swallowed and ``to_qr_codes``
+    was called a second time; now it surfaces immediately.
+    """
+    from krux.qr import FORMAT_NONE
+
+    def boom(*args, **kwargs):
+        raise ValueError("bad qr data")
+        yield  # pragma: no cover - makes boom a generator function
+
+    mocked = mocker.patch("krux.pages.to_qr_codes", side_effect=boom)
+    ctx = create_ctx(mocker, [])
+    page = mock_page_cls(ctx)
+
+    with pytest.raises(ValueError):
+        page.display_qr_codes(TEST_QR_DATA, FORMAT_NONE)
+
+    # The error surfaced on the first generator; no silent restart attempt.
+    assert mocked.call_count == 1
 
 
 def test_display_qr_code_light_theme(mocker, m5stickv, mock_page_cls):
@@ -335,7 +367,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
     AMIGO = "amigo"
     M5 = "m5stickv"
     DOCK = "dock"
-    BIT = "bit"
     CUBE = "cube"
     YAHBOOM = "yahboom"
     WONDER_MV = "wonder_mv"
@@ -347,7 +378,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789ab…opqrstuvwxyz",
             M5: "0123456…tuvwxyz",
             DOCK: "0123456789abc…nopqrstuvwxyz",
-            BIT: "0123456789abc…nopqrstuvwxyz",
             CUBE: "0123456789abc…nopqrstuvwxyz",
             YAHBOOM: "0123456789abc…nopqrstuvwxyz",
             WONDER_MV: "0123456789abc…nopqrstuvwxyz",
@@ -358,7 +388,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789ab…nopqrstuvwxy",
             M5: "0123456…stuvwxy",
             DOCK: "0123456789abc…mnopqrstuvwxy",
-            BIT: "0123456789abc…mnopqrstuvwxy",
             CUBE: "0123456789abc…mnopqrstuvwxy",
             YAHBOOM: "0123456789abc…mnopqrstuvwxy",
             WONDER_MV: "0123456789abc…mnopqrstuvwxy",
@@ -369,7 +398,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789ab…mnopqrstuvwx",
             M5: "0123456…rstuvwx",
             DOCK: "0123456789abc…lmnopqrstuvwx",
-            BIT: "0123456789abc…lmnopqrstuvwx",
             CUBE: "0123456789abc…lmnopqrstuvwx",
             YAHBOOM: "0123456789abc…lmnopqrstuvwx",
             WONDER_MV: "0123456789abc…lmnopqrstuvwx",
@@ -380,7 +408,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789ab…lmnopqrstuvw",
             M5: "0123456…qrstuvw",
             DOCK: "0123456789abc…klmnopqrstuvw",
-            BIT: "0123456789abc…klmnopqrstuvw",
             CUBE: "0123456789abc…klmnopqrstuvw",
             YAHBOOM: "0123456789abc…klmnopqrstuvw",
             WONDER_MV: "0123456789abc…klmnopqrstuvw",
@@ -391,7 +418,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789ab…ghijklmnopqr",
             M5: "0123456…lmnopqr",
             DOCK: "0123456789abc…fghijklmnopqr",
-            BIT: "0123456789abc…fghijklmnopqr",
             CUBE: "0123456789abc…fghijklmnopqr",
             YAHBOOM: "0123456789abc…fghijklmnopqr",
             WONDER_MV: "0123456789abc…fghijklmnopqr",
@@ -402,7 +428,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789ab…fghijklmnopq",
             M5: "0123456…klmnopq",
             DOCK: "0123456789abcdefghijklmnopq",
-            BIT: "0123456789abcdefghijklmnopq",
             CUBE: "0123456789abcdefghijklmnopq",
             YAHBOOM: "0123456789abcdefghijklmnopq",
             WONDER_MV: "0123456789abcdefghijklmnopq",
@@ -413,7 +438,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789ab…efghijklmnop",
             M5: "0123456…jklmnop",
             DOCK: "0123456789abcdefghijklmnop",
-            BIT: "0123456789abcdefghijklmnop",
             CUBE: "0123456789abcdefghijklmnop",
             YAHBOOM: "0123456789abcdefghijklmnop",
             WONDER_MV: "0123456789abcdefghijklmnop",
@@ -424,7 +448,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789abcdefghijklmno",
             M5: "0123456…ijklmno",
             DOCK: "0123456789abcdefghijklmno",
-            BIT: "0123456789abcdefghijklmno",
             CUBE: "0123456789abcdefghijklmno",
             YAHBOOM: "0123456789abcdefghijklmno",
             WONDER_MV: "0123456789abcdefghijklmno",
@@ -435,7 +458,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789abcdefghijklmn",
             M5: "0123456…hijklmn",
             DOCK: "0123456789abcdefghijklmn",
-            BIT: "0123456789abcdefghijklmn",
             CUBE: "0123456789abcdefghijklmn",
             YAHBOOM: "0123456789abcdefghijklmn",
             WONDER_MV: "0123456789abcdefghijklmn",
@@ -446,7 +468,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789abcdefghijklm",
             M5: "0123456…ghijklm",
             DOCK: "0123456789abcdefghijklm",
-            BIT: "0123456789abcdefghijklm",
             CUBE: "0123456789abcdefghijklm",
             YAHBOOM: "0123456789abcdefghijklm",
             WONDER_MV: "0123456789abcdefghijklm",
@@ -457,7 +478,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789abcdefghij",
             M5: "0123456…defghij",
             DOCK: "0123456789abcdefghij",
-            BIT: "0123456789abcdefghij",
             CUBE: "0123456789abcdefghij",
             YAHBOOM: "0123456789abcdefghij",
             WONDER_MV: "0123456789abcdefghij",
@@ -468,7 +488,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789abcdefg",
             M5: "0123456…abcdefg",
             DOCK: "0123456789abcdefg",
-            BIT: "0123456789abcdefg",
             CUBE: "0123456789abcdefg",
             YAHBOOM: "0123456789abcdefg",
             WONDER_MV: "0123456789abcdefg",
@@ -479,7 +498,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789abcdef",
             M5: "0123456789abcdef",
             DOCK: "0123456789abcdef",
-            BIT: "0123456789abcdef",
             CUBE: "0123456789abcdef",
             YAHBOOM: "0123456789abcdef",
             WONDER_MV: "0123456789abcdef",
@@ -490,7 +508,6 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             AMIGO: "0123456789abcde",
             M5: "0123456789abcde",
             DOCK: "0123456789abcde",
-            BIT: "0123456789abcde",
             CUBE: "0123456789abcde",
             YAHBOOM: "0123456789abcde",
             WONDER_MV: "0123456789abcde",
@@ -639,3 +656,24 @@ def test_fit_to_line_not_crop_middle(mocker, multiple_devices, mock_page_cls):
         formatted_text = page.fit_to_line(case[TXT], case[PREFIX], crop_middle=False)
         assert len(formatted_text) <= max_chars_in_line
         assert formatted_text == case[device_type]
+
+
+def test_has_sd_card_handles_errors_and_propagates_signals(
+    mocker, m5stickv, mock_page_cls
+):
+    """has_sd_card returns False on genuine SD errors, but must NOT swallow
+    BaseException-level signals like KeyboardInterrupt.
+
+    Regression for narrowing the bare except to `except Exception`.
+    """
+    ctx = create_ctx(mocker, [])
+    page = mock_page_cls(ctx)
+
+    # Genuine SD failure (OSError) -> reported as "no SD card".
+    mocker.patch("krux.pages.SDHandler", side_effect=OSError("no card"))
+    assert page.has_sd_card() is False
+
+    # Shutdown signal during the check -> propagates, not swallowed into False.
+    mocker.patch("krux.pages.SDHandler", side_effect=KeyboardInterrupt)
+    with pytest.raises(KeyboardInterrupt):
+        page.has_sd_card()

@@ -633,10 +633,10 @@ def test_save_settings_on_sd(amigo, mocker, mocker_sd_card_ok):
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     settings_page = SettingsPage(ctx)
-    settings_page.flash_text = mocker.MagicMock()
+    settings_page.flash_success = mocker.MagicMock()
     Settings().persist.location = SD_PATH
     settings_page.settings()
-    settings_page.flash_text.assert_has_calls(
+    settings_page.flash_success.assert_has_calls(
         [
             mocker.call("Settings stored on SD card.", duration=2500),
         ]
@@ -691,13 +691,13 @@ def test_leave_settings_without_changes(amigo, mocker):
     for btn_sequence in BTN_SEQUENCES:
         ctx = create_ctx(mocker, btn_sequence)
         settings_page = SettingsPage(ctx)
-        settings_page.flash_text = mocker.MagicMock()
+        settings_page.flash_success = mocker.MagicMock()
         settings_page.settings()
         persisted_to_flash_call = mocker.call(
             "Settings stored internally on flash.", duration=2500
         )
         assert ctx.input.wait_for_button.call_count == len(btn_sequence)
-        assert persisted_to_flash_call not in settings_page.flash_text.call_args_list
+        assert persisted_to_flash_call not in settings_page.flash_success.call_args_list
 
 
 def test_leave_settings_with_changes(amigo, mocker, mocker_sd_card_ok):
@@ -718,12 +718,12 @@ def test_leave_settings_with_changes(amigo, mocker, mocker_sd_card_ok):
     ]
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     settings_page = SettingsPage(ctx)
-    settings_page.flash_text = mocker.MagicMock()
+    settings_page.flash_success = mocker.MagicMock()
 
     # Leave settings without changes
     settings_page.settings()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-    settings_page.flash_text.assert_has_calls(
+    settings_page.flash_success.assert_has_calls(
         [
             mocker.call("Settings stored internally on flash.", duration=2500),
         ]

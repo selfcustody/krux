@@ -167,9 +167,10 @@ class Display:
                 offset_h0=80,
             )
         elif kboard.is_amigo:
-            lcd_type = Settings().hardware.display.lcd_type
-            invert = Settings().hardware.display.inverted_colors
-            bgr_to_rgb = Settings().hardware.display.bgr_colors
+            display_settings = Settings().hardware.display
+            lcd_type = display_settings.lcd_type
+            invert = display_settings.inverted_colors
+            bgr_to_rgb = display_settings.bgr_colors
             lcd.init(invert=invert, lcd_type=lcd_type)
             lcd.mirror(True)
             lcd.bgr_to_rgb(bgr_to_rgb)
@@ -243,23 +244,15 @@ class Display:
     def to_landscape(self):
         """Changes the rotation of the display to landscape"""
         if self.portrait:
-            lcd.rotation(
-                (LANDSCAPE + 2) % 4
-                if hasattr(Settings().hardware, "display")
-                and getattr(Settings().hardware.display, "flipped_orientation", False)
-                else LANDSCAPE
-            )
+            flipped = Settings().is_flipped_orientation()
+            lcd.rotation((LANDSCAPE + 2) % 4 if flipped else LANDSCAPE)
             self.portrait = False
 
     def to_portrait(self):
         """Changes the rotation of the display to portrait"""
         if not self.portrait:
-            lcd.rotation(
-                (PORTRAIT + 2) % 4
-                if hasattr(Settings().hardware, "display")
-                and getattr(Settings().hardware.display, "flipped_orientation", False)
-                else PORTRAIT
-            )
+            flipped = Settings().is_flipped_orientation()
+            lcd.rotation((PORTRAIT + 2) % 4 if flipped else PORTRAIT)
             self.portrait = True
 
     def _usable_pixels_in_line(self):

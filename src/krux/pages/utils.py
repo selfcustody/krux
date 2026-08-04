@@ -189,6 +189,14 @@ class Utils(Page):
     @staticmethod
     def get_network_color(network_name: str):
         """Returns the correct theme color to write network"""
-        from ..themes import TEST_TXT_COLOR, MAIN_TXT_COLOR
+        from ..krux_settings import Settings, ThemeSettings
+        from ..themes import (
+            DARKERGREEN,
+            DARKERORANGE,
+            MAIN_TXT_COLOR,
+            TEST_TXT_COLOR,
+        )
 
+        if Settings().appearance.theme == ThemeSettings.LIGHT_THEME_NAME:
+            return DARKERORANGE if network_name == "Mainnet" else DARKERGREEN
         return MAIN_TXT_COLOR if network_name == "Mainnet" else TEST_TXT_COLOR

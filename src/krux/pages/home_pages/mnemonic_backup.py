@@ -178,7 +178,19 @@ class MnemonicsView(Page):
         return seed_qr_view.display_qr()
 
     def stackbit(self):
-        """Displays which numbers 1248 user should punch on 1248 steel card"""
+        """Displays layout selection submenu for Stackbit 1248 backup"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Standard"), self._stackbit_standard),
+                (t("Vertical"), self._stackbit_vertical),
+            ],
+        )
+        submenu.run_loop()
+        return MENU_CONTINUE
+
+    def _stackbit_standard(self):
+        """Displays Stackbit 1248 in standard (horizontal) format — 6 words per page"""
         from ..stack_1248 import Stackbit
 
         stackbit = Stackbit(self.ctx)
@@ -194,6 +206,67 @@ class MnemonicsView(Page):
                 else:
                     y_offset += 5 + 2 * FONT_HEIGHT
                 word_index += 1
+            self.ctx.input.wait_for_button()
+            self.ctx.display.clear()
+        return MENU_CONTINUE
+
+    def _stackbit_vertical(self):
+        """Dispatches to the grouped or minimal layout based on the current device"""
+        if kboard.has_minimal_display:
+            return self._stackbit_vertical_compact()
+        return self._stackbit_vertical_default()
+
+    def _stackbit_vertical_default(self):
+        """Draws vertical Stackbit 1248 layout with 2 words per group, 4 words per page"""
+        from ..stack_1248 import Stackbit
+
+        stackbit = Stackbit(self.ctx)
+        words = self.ctx.wallet.key.mnemonic.split(" ")
+        total_words = len(words)
+
+        words_per_group = 2
+
+        groups_per_page = 2
+        block_h = 7 * FONT_HEIGHT + 2
+        group_gap = max(2, FONT_HEIGHT // 4)
+
+        word_index = 1
+        while word_index <= total_words:
+            self.ctx.display.draw_hcentered_text("Stackbit 1248")
+            y_offset = 2 * FONT_HEIGHT
+            for _ in range(groups_per_page):
+                if word_index > total_words:
+                    break
+                group = []
+                for _ in range(words_per_group):
+                    if word_index > total_words:
+                        break
+                    group.append((word_index, words[word_index - 1]))
+                    word_index += 1
+                stackbit.export_1248_vertical_grouped(y_offset, group)
+                y_offset += block_h + group_gap
+            self.ctx.input.wait_for_button()
+            self.ctx.display.clear()
+        return MENU_CONTINUE
+
+    def _stackbit_vertical_compact(self):
+        """Draws compact Stackbit 1248 layout for M5StickV, 6 words per page"""
+        from ..stack_1248 import Stackbit
+
+        stackbit = Stackbit(self.ctx)
+        words = self.ctx.wallet.key.mnemonic.split(" ")
+        total_words = len(words)
+        words_per_page = 6
+        word_index = 0
+
+        while word_index < total_words:
+            self.ctx.display.draw_hcentered_text("Stackbit 1248")
+            page_words = []
+            for _ in range(words_per_page):
+                if word_index < total_words:
+                    page_words.append((word_index + 1, words[word_index]))
+                    word_index += 1
+            stackbit.export_1248_vertical_compact(page_words, 2 * FONT_HEIGHT)
             self.ctx.input.wait_for_button()
             self.ctx.display.clear()
         return MENU_CONTINUE

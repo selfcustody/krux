@@ -138,6 +138,12 @@ class Page:
         """Flashes text centered on the display for duration ms"""
         self.flash_text(text, theme.error_color)
 
+    def flash_success(self, text, duration=FLASH_MSG_TIME, highlight_prefix=""):
+        """Flashes success text centered on the display for duration ms"""
+        self.flash_text(
+            text, theme.go_color, duration, highlight_prefix=highlight_prefix
+        )
+
     # pylint: disable=too-many-arguments
     def capture_from_keypad(
         self,
@@ -288,7 +294,7 @@ class Page:
         while not done:
             try:
                 code, num_parts = next(code_generator)
-            except:
+            except StopIteration:
                 code_generator = to_qr_codes(data, qr_data_width, qr_format)
                 code, num_parts = next(code_generator)
 
@@ -517,7 +523,7 @@ class Page:
             # Check for SD hot-plug
             with SDHandler():
                 return True
-        except:
+        except Exception:
             return False
 
     def shutdown(self):

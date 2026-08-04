@@ -9,13 +9,19 @@ on:
 
 jobs:
   lint-black:
+    strategy:
+      matrix:
+        # minimum tested python version
+        # maximum python version
+        py-version: [ "3.11.5", "3.12.13"]
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.py-version }}
       - uses: psf/black@stable
         with:
           options: "--check --verbose"
@@ -38,53 +44,74 @@ jobs:
           src: "./tests"
           
   lint-pylint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install pylint
-      - name: Lint
-        run: |
-          pylint firmware/font/*.py
-          pylint firmware/scripts/*.py
-          pylint i18n/*.py
-          pylint src
-
-  check-translations:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Validate translations
-        run: cd i18n && python3 i18n.py validate
-
-  run-tests:
+    strategy:
+      matrix:
+        # minimum tested python version
+        # maximum python version
+        py-version: [ "3.11.5", "3.12.13"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
         with:
-          python-version: '3.11'
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install poetry
-      - name: Install project and its dependencies
-        run: poetry install
+          enable-cache: true
+      - name: Set up Python
+        run: uv python install ${{ matrix.py-version }}
+      - name: Sync dependencies
+        run: uv sync --frozen --python ${{ matrix.py-version }}
+      - name: Lint
+        run: uv run --python ${{ matrix.py-version }} poe lint
+
+  check-translations:
+    strategy:
+      matrix:
+        # minimum tested python version
+        # maximum python version
+        py-version: [ "3.11.5", "3.12.13"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - name: Set up Python
+        run: uv python install ${{ matrix.py-version }}
+      - name: Sync dependencies
+        run: uv sync --frozen --python ${{ matrix.py-version }}
+      - name: Validate translations
+        run: uv run --python ${{ matrix.py-version }} poe i18n validate
+
+  run-tests:
+    strategy:
+      matrix:
+        # minimum tested python version
+        # maximum python version
+        py-version: [ "3.11.5", "3.12.13"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - name: Set up Python
+        run: uv python install ${{ matrix.py-version }}
+      - name: Sync dependencies
+        run: uv sync --frozen --python ${{ matrix.py-version }}
+      - name: Build libsecp256k1
+        run: uv run --python ${{ matrix.py-version }} poe secp256k1-build
+      - name: Check embit uses the C secp256k1
+        run: uv run --python ${{ matrix.py-version }} poe secp256k1-check
       - name: Run tests
-        run: poetry run pytest --cache-clear tests
+        run: uv run --python ${{ matrix.py-version }} poe test-simple
 
   coverage:
     runs-on: ubuntu-latest
@@ -92,18 +119,21 @@ jobs:
       - uses: actions/checkout@main
         with:
           submodules: recursive
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
         with:
-          python-version: '3.11'
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install poetry
-      - name: Install project and its dependencies
-        run: poetry install
+          enable-cache: true
+      - name: Set up Python
+        # no need to use many coverages
+        run: uv python install 3.12.13
+      - name: Sync dependencies
+        run: uv sync --frozen --python 3.12.13
+      - name: Build libsecp256k1
+        run: uv run --python 3.12.13 poe secp256k1-build
+      - name: Check embit uses the C secp256k1
+        run: uv run --python 3.12.13 poe secp256k1-check
       - name: Build coverage file
-        run: poetry run pytest --cache-clear --cov src/krux --cov-report xml tests
+        run: uv run --python 3.12.13 pytest --cache-clear --cov src/krux --cov-report xml tests
       - name: Upload coverage reports to Codecov with GitHub Action
         uses: codecov/codecov-action@v5
         with:

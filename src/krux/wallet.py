@@ -423,28 +423,18 @@ def parse_wallet(wallet_data):
 
     # Check if wallet_data is a UR object without loading the UR module
     if wallet_data.__class__.__name__ == "UR":
-        # Try to parse as a Crypto-Output type
-        try:
-            from urtypes.crypto.output import Output
+        from uUR import Types
 
-            output = Output.from_cbor(wallet_data.cbor)
-            return Descriptor.from_string(output.descriptor()), None
-        except:
-            pass
+        if wallet_data.type == "crypto-output":
+            output = Types.output_from_cbor(wallet_data.cbor)
+            return Descriptor.from_string(output), None
 
-        # Try to parse as a Crypto-Account type
-        try:
-            from urtypes.crypto.account import Account
-
-            account = Account.from_cbor(wallet_data.cbor).output_descriptors[0]
-            return Descriptor.from_string(account.descriptor()), None
-        except:
-            pass
+        if wallet_data.type == "crypto-account":
+            output = Types.output_from_cbor_account(wallet_data.cbor)
+            return Descriptor.from_string(output), None
 
         # Treat the UR as a generic UR bytes object and extract the data for further processing
-        from urtypes.bytes import Bytes
-
-        wallet_data = Bytes.from_cbor(wallet_data.cbor).data
+        wallet_data = Types.bytes_from_cbor(wallet_data.cbor)
 
     # Process as a string
     wallet_data = (
@@ -463,7 +453,9 @@ def parse_wallet(wallet_data):
         raise KeyError('"descriptor" key not found in JSON')
     except KeyError:
         raise ValueError("invalid wallet format")
-    except:
+    except Exception:
+        # Untrusted input: any non-KeyError parse failure (bad JSON, bad
+        # descriptor) falls through to the next format.
         pass
 
     # Try to parse as a key-value file
@@ -473,14 +465,17 @@ def parse_wallet(wallet_data):
             return descriptor, label
     except ValueError:
         raise
-    except:
+    except Exception:
+        # Untrusted input: an unexpected parse failure means "invalid wallet".
         raise ValueError("invalid wallet format")
 
     # Try to parse directly as a descriptor
     try:
         descriptor = Descriptor.from_string(wallet_data.strip())
         return descriptor, None
-    except:
+    except Exception:
+        # Untrusted input: not a bare descriptor either; fall through to the
+        # final raise.
         pass
 
     raise ValueError("invalid wallet format")
@@ -492,7 +487,7 @@ def parse_address(address_data):
 
     If the address cannot be derived, an exception is raised.
     """
-    from embit.script import Script, address_to_scriptpubkey
+    from embit.script import Script, address_to_scriptpubkey, EmbitError
 
     addr = address_data
     sc = None
@@ -508,13 +503,17 @@ def parse_address(address_data):
             sc = address_to_scriptpubkey(addr.lower())
             if isinstance(sc, Script):
                 return addr.lower()
-        except:
+        except EmbitError:
             pass
 
     if not isinstance(sc, Script):
         try:
-            address_to_scriptpubkey(addr)
-        except:
+            sc = address_to_scriptpubkey(addr)
+        except EmbitError:
+            raise ValueError("invalid address")
+        # A base58 address with a valid checksum but an unknown version byte
+        # returns None here instead of raising, so verify a Script came back.
+        if not isinstance(sc, Script):
             raise ValueError("invalid address")
 
     return addr

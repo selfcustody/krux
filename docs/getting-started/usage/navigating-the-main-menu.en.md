@@ -96,10 +96,14 @@ Display the BIP39 mnemonic word numbers (1-2048) in decimal, hex, or octal forma
 
 <img src="../../../img/maixpy_m5stickv/backup-stackbit-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/backup-stackbit-300.png" align="right" class="amigo">
-
 This metal backup format represents the BIP39 mnemonic word's numbers (1-2048). Each of the four digits is converted to a sum of 1, 2, 4 or 8. This option does not print even if a printer driver is set.
+<div style="clear: both"></div>
+<img src="../../../img/maixpy_m5stickv/backup-stackbit-vertical-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/backup-stackbit-vertical-300.png" align="right" class="amigo">
+Vertical layout transposes the grid, with rows = weights (1,2,4,8) and columns = digits.
 
 <div style="clear: both"></div>
+
 
 - **Tinyseed**
 

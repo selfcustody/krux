@@ -187,7 +187,7 @@ class SettingsPage(Page):
         with open(TC_CODE_PATH, "wb") as f:
             f.write(secret)
         self.ctx.tc_code_enabled = True
-        self.flash_text(t("Tamper check code set successfully"))
+        self.flash_success(t("Tamper check code set successfully"))
 
         from .fill_flash import FillFlash
 
@@ -226,7 +226,7 @@ class SettingsPage(Page):
                 # Check for SD hot-plug
                 with SDHandler():
                     if store.save_settings():
-                        self.flash_text(
+                        self.flash_success(
                             t("Settings stored on SD card."),
                             duration=PERSIST_MSG_TIME,
                         )
@@ -240,7 +240,7 @@ class SettingsPage(Page):
         else:
             self.ctx.display.clear()
             if store.save_settings():
-                self.flash_text(
+                self.flash_success(
                     t("Settings stored internally on flash."),
                     duration=PERSIST_MSG_TIME,
                 )

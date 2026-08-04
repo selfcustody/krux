@@ -490,8 +490,19 @@ class Settings(SettingsNamespace):
     """The top-level settings namespace under which other namespaces reside"""
 
     namespace = "settings"
+    _instance = None
+
+    def __new__(cls):
+        # Cache the namespace tree: values are read live from the `store`
+        # singleton, so reusing the instance avoids rebuilding ~16 objects
+        # on every Settings() call without staling any setting.
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
 
     def __init__(self):
+        if getattr(self, "_built", False):
+            return
         self.wallet = DefaultWallet()
         self.security = SecuritySettings()
         self.hardware = HardwareSettings()
@@ -499,11 +510,12 @@ class Settings(SettingsNamespace):
         self.encryption = EncryptionSettings()
         self.persist = PersistSettings()
         self.appearance = ThemeSettings()
+        self._built = True
 
     def is_flipped_orientation(self):
         """Returns flipped orientation setting"""
-        return hasattr(Settings().hardware, "display") and getattr(
-            Settings().hardware.display, "flipped_orientation", False
+        return hasattr(self.hardware, "display") and getattr(
+            self.hardware.display, "flipped_orientation", False
         )
 
     def label(self, attr):
