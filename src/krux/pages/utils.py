@@ -126,6 +126,7 @@ class Utils(Page):
                     y_offset + (line_index * (FONT_HEIGHT)),
                     part,
                     theme.highlight_color,
+                    theme.bg_color,
                 )
             x_addr_offset += lcd.string_width_px(part + " ")
             highlight = not highlight

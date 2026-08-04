@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 import gc
-from ...display import BOTTOM_PROMPT_LINE
+from ...display import BOTTOM_PROMPT_LINE, FONT_HEIGHT
 from ...krux_settings import t
 from ...settings import THIN_SPACE
 from ...qr import FORMAT_NONE
@@ -49,6 +49,9 @@ class Addresses(Page):
         ):
             self.flash_error(t("Please load a wallet output descriptor"))
             return MENU_CONTINUE
+
+        if self.ctx.wallet.is_silent_payment():
+            return self._silent_payment_address_view()
 
         submenu = Menu(
             self.ctx,
@@ -145,7 +148,7 @@ class Addresses(Page):
                     address_index -= 2 * max_addresses
 
     def _qr_highlight_addr(self, formatted_text, y_offset):
-        """Case highlight address for QR"""
+        """Overdraw address blocks with alternating highlight color"""
 
         from ..utils import Utils
 
@@ -164,6 +167,56 @@ class Addresses(Page):
             highlight_state = utils.display_addr_highlighted(
                 y_offset, x_offset, line, i, highlight_state, addr_prefix
             )
+
+    def _silent_payment_address_view(self):
+        """Show the BIP-352 reusable SP address as separate text or QR entries,
+        since it is too long to fit alongside its QR code on most screens"""
+        from ...sd_card import ADDRESSES_FILE_EXTENSION
+
+        addr = self.ctx.wallet.obtain_sp_address()
+
+        def _show_text():
+            from ..file_operations import SaveFile
+
+            items = [
+                (
+                    t("Save to SD card"),
+                    (
+                        None
+                        if not self.has_sd_card()
+                        else lambda: SaveFile(self.ctx).save_file(
+                            addr,
+                            "address",
+                            "address",
+                            t("Address") + ": ",
+                            ADDRESSES_FILE_EXTENSION,
+                            save_as_binary=False,
+                        )
+                    ),
+                ),
+            ]
+            # 4 char blocks, with alternating highlight
+            blocks_text = format_address(addr)
+            offset = (len(self.ctx.display.to_lines(blocks_text)) + 1) * FONT_HEIGHT
+            menu = Menu(self.ctx, items, offset=offset)
+            self.ctx.display.clear()
+            self.ctx.display.draw_hcentered_text(blocks_text, offset_y=FONT_HEIGHT)
+            self._qr_highlight_addr(blocks_text, FONT_HEIGHT)
+            menu.run_loop()
+
+        def _show_qr():
+            self.show_address(addr, title="", quick_exit=True)
+
+        items = [
+            (t("Address") + " - " + t("Text"), _show_text),
+            (t("Address") + " - " + t("QR Code"), _show_qr),
+        ]
+        menu = Menu(self.ctx, items)
+        while True:
+            _, status = menu.run_loop()
+            if status == MENU_EXIT:
+                break
+        return MENU_CONTINUE
 
     def show_address(self, addr, title="", quick_exit=False):
         """Show addr provided as a QRCode"""
