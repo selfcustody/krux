@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../../img/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -2229,9 +2229,34 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../templates/templates/" class="md-nav__link">
+    
+    
+      
         
+          
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_2_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../templates/" class="md-nav__link ">
+              
   
   
   <span class="md-ellipsis">
@@ -2245,7 +2270,26 @@
   
   
 
-      </a>
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -2446,7 +2490,7 @@
 You can also use <a href="https://iancoleman.io/bip39/">an offline QR code generator for this</a> (ideally on an airgapped device).</p>
 <h4 id="tinyseed-onekey-keytag-or-binary-grid">Tinyseed, OneKey KeyTag or Binary Grid<a class="headerlink" href="#tinyseed-onekey-keytag-or-binary-grid" title="Permanent link">&para;</a></h4>
 <p><a href="https://tinyseed.io/">Tinyseed</a>, <a href="https://onekey.so/products/onekey-keytag/">Onekey KeyTag</a> and others directly encode a seed as binary, allowing for a very compact mnemonic storage. Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them (this feature is not available in <a href="../../../faq/#what-is-krux-mobile-android-app">Krux Mobile Android app</a>).</p>
-<p>To ensure a proper scan, place the backup plate over a black background and fill in the punched areas with black to enhance contrast. Alternatively, you can scan a <a href="../../features/printing/printing/">thermally printed version</a> or a completed template. You can view some <a href="../../features/tinyseed/">examples of encoded mnemonics here</a>, and explore our <a href="../../templates/templates/">available transcription templates here</a>.</p>
+<p>To ensure a proper scan, place the backup plate over a black background and fill in the punched areas with black to enhance contrast. Alternatively, you can scan a <a href="../../features/printing/printing/">thermally printed version</a> or a completed template. You can view some <a href="../../features/tinyseed/">examples of encoded mnemonics here</a>, and explore our <a href="../../templates/">available transcription templates here</a>.</p>
 <h3 id="via-manual-input">Via Manual Input<a class="headerlink" href="#via-manual-input" title="Permanent link">&para;</a></h3>
 <p><img src="../../../img/maixpy_m5stickv/load-mnemonic-manual-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-manual-options-300.png" align="right" class="amigo"></p>
@@ -2512,7 +2556,10 @@ If you see an asterisk (<code>*</code>) in the header, it means this is a <a hre
 <h3 id="confirm-wallet-attributes">Confirm Wallet Attributes<a class="headerlink" href="#confirm-wallet-attributes" title="Permanent link">&para;</a></h3>
 <p><img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-overview-300.png" align="right" class="amigo"></p>
-<p>After confirming your mnemonic, a screen with an <strong>information box at the top</strong> with the wallet's attributes is shown. If they are as expected, just press <code>Load Wallet</code>. If you need to change something you may customize the wallet by setting a <code>Passphrase</code> or using the <code>Customize</code> button.</p>
+<p>After confirming an existing mnemonic, a screen with an <strong>information box at the
+top</strong> shows the wallet's attributes. If they are as expected, just press
+<code>Load Wallet</code>. If you need to change something, you may customize the wallet by
+setting a <code>Passphrase</code> or using the <code>Customize</code> button.</p>
 <div style="clear: both"></div>
 
 <h4 id="the-attributes">The Attributes:<a class="headerlink" href="#the-attributes" title="Permanent link">&para;</a></h4>

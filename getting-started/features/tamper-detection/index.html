@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../../img/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -2114,9 +2114,34 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../templates/templates/" class="md-nav__link">
+    
+    
+      
         
+          
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_2_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../templates/" class="md-nav__link ">
+              
   
   
   <span class="md-ellipsis">
@@ -2130,7 +2155,26 @@
   
   
 
-      </a>
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -2340,7 +2384,7 @@
 <h2 id="tamper-check-code-tc-code">Tamper Check Code (TC Code)<a class="headerlink" href="#tamper-check-code-tc-code" title="Permanent link">&para;</a></h2>
 <p>Before being stored in the device’s flash, the <em>TC Code</em> is hashed together with the K210 chip’s unique ID and stretched using PBKDF2. This ensures the <em>TC Code</em> is not retrievable via a flash dump and can only be brute-forced outside the device if the attacker also has access to the device’s unique ID (UID). By allowing letters, special characters, and running 100k iterations of PBKDF2, brute-forcing the <em>TC Code</em> from dumped data becomes more time-consuming and resource-intensive.</p>
 <h3 id="enhancing-tamper-detection">Enhancing Tamper Detection<a class="headerlink" href="#enhancing-tamper-detection" title="Permanent link">&para;</a></h3>
-<p>After setting the <em>TC Code</em>, you are prompted to fill empty flash memory blocks with random entropy from the camera. This process ensures that attackers cannot exploit unused memory space.</p>
+<p>Once the <em>TC Code</em> is stored, Krux briefly flashes a green <em>"Tamper check code set successfully"</em> confirmation. You are then prompted to fill empty flash memory blocks with random entropy from the camera. This process ensures that attackers cannot exploit unused memory space.</p>
 <h2 id="tamper-check-flash-hash-tc-flash-hash-a-tamper-detection-tool">Tamper Check Flash Hash (TC Flash Hash) - A Tamper Detection Tool<a class="headerlink" href="#tamper-check-flash-hash-tc-flash-hash-a-tamper-detection-tool" title="Permanent link">&para;</a></h2>
 <p>The <em>TC Flash Hash</em> tool enables you to verify if the device's internal flash memory content has been altered. This tool generates a unique image and two sets of two tamper detection words based on a hash of your <em>TC Code</em>, the device's UID, and its internal flash content. The flash memory is divided into two regions:</p>
 <ul>
