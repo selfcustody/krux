@@ -322,6 +322,24 @@ class Key:
             self.sp_keys.scan_privkey, self.sp_keys.spend_pubkey, network=network_name
         )
 
+    def sp_detection_keys(self):
+        """Returns the wallet's BIP-352 keys for own SP-output detection.
+
+        The scan/spend keys are deterministic from the seed, so they are
+        derived even when the wallet was not loaded in Silent Payments policy
+        type. This lets the review screen recognize SP change/self-transfer
+        outputs regardless of the loaded policy type. Derivation assumes the
+        default SP account matching this wallet's account index; a different
+        SP account fails the ownership check safely (output stays a spend).
+        """
+        if self.sp_keys is not None:
+            return self.sp_keys
+        return self._derive_sp_keys(
+            Key.get_default_derivation(
+                TYPE_SILENT_PAYMENT, self.network, self.account_index
+            )
+        )
+
     @staticmethod
     def pick_final_word(entropy, words):
         """Returns a random final word with a valid checksum for the given list of

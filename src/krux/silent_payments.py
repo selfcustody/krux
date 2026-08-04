@@ -22,7 +22,29 @@
 from .key import P2PKH, P2SH_P2WPKH, P2TR, P2WPKH
 
 
-def output_address(psbt, index, out, network):
+def own_sp_output_type(out, sp_keys):
+    """Returns "change", "self", or None for an SP output vs the wallet's keys."""
+    if sp_keys is None:
+        return None
+
+    sp_data = out.sp_data
+    if sp_data.scan_key != sp_keys.scan_privkey.get_public_key():
+        return None
+
+    label = out.sp_label
+    if label is None:
+        expected_spend = sp_keys.spend_pubkey
+    else:
+        from embit.silent_payments.sp import apply_label
+
+        expected_spend = apply_label(sp_keys.spend_pubkey, sp_keys.scan_privkey, label)
+
+    if sp_data.spend_key != expected_spend:
+        return None
+    return "change" if label == 0 else "self"
+
+
+def output_address(out, script_pubkey, network):
     """Returns the human-readable destination address for a PSBT output."""
     if out.sp_data is not None:
         from embit.silent_payments.sp import encode_silent_payment_address
@@ -32,7 +54,7 @@ def output_address(psbt, index, out, network):
         return encode_silent_payment_address(
             out.sp_data.scan_key, out.sp_data.spend_key, network=net_name
         )
-    return psbt.tx.vout[index].script_pubkey.address(network=network)
+    return script_pubkey.address(network=network)
 
 
 def validate(psbt):

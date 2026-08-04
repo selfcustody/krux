@@ -70,7 +70,9 @@ class PSBTSigner:
         self.qr_format = qr_format
         self.policy = None
         self.is_b64_file = False
+        self.zero_fingerprints_filled = None
         self._has_sp = False
+        self._sp_keys = None
 
         # Parse the PSBT
         if psbt_filename:
@@ -220,10 +222,17 @@ class PSBTSigner:
             from .silent_payments import check_inputs_owned, validate_eligibility
 
             validate_eligibility(self.policy)
+            # embit matches derivations by fingerprint, so a PSBT exported by an
+            # xpub-only wallet looks foreign until the zeroes are repaired. The
+            # review screen still reports the repair (the call is memoized).
+            self.fill_zero_fingerprint()
             # Ownership is checked here (BIP32 only) so an unsignable PSBT is
             # rejected before the user reviews it. The SP output derivation --
             # ECDH shares plus DLEQ proofs -- runs once, inside sign_with().
             check_inputs_owned(self.psbt, self.wallet.key.root)
+            # Cached because _classify_output needs it per SP output, and each
+            # call is two 5-level hardened BIP32 derivations.
+            self._sp_keys = self.wallet.key.sp_detection_keys()
 
     def has_sp_outputs(self):
         """Returns True if any output carries BIP-375 Silent Payment data"""
@@ -301,8 +310,16 @@ class PSBTSigner:
         """Classify the output based on its properties and policy"""
 
         if out.sp_data is not None:
-            # The on-chain script is a derived P2TR that only the recipient
-            # can link back to their SP address, so it is always a spend.
+            from .silent_payments import own_sp_output_type
+
+            # SP keys are derived from the seed even for non-SP wallets, so own
+            # change/self-transfer is recognized regardless of the loaded
+            # policy type (e.g. when the wallet was loaded as plain single-sig).
+            own = own_sp_output_type(out, self._sp_keys)
+            if own == "change":
+                return CHANGE
+            if own == "self":
+                return SELF_TRANSFER
             return SPEND
 
         address_from_my_wallet = False
@@ -417,6 +434,10 @@ class PSBTSigner:
             pass
         from .silent_payments import output_address
 
+        # psbt.tx is a property that rebuilds the whole transaction on every
+        # access, so read it once instead of three times per output.
+        vout = self.psbt.tx.vout
+
         for i, out in enumerate(self.psbt.outputs):
             if out.sp_data is not None:
                 # script_pubkey is empty until the sender derives it; skip the
@@ -427,13 +448,15 @@ class PSBTSigner:
                 output_type = self._classify_output(None, out)
             else:
                 out_policy = get_policy(
-                    out, self.psbt.tx.vout[i].script_pubkey, xpubs, origin_less_xpub
+                    out, vout[i].script_pubkey, xpubs, origin_less_xpub
                 )
                 output_policy_count[out_policy["type"]] += 1
                 output_type = self._classify_output(out_policy, out)
 
-            address = output_address(self.psbt, i, out, self.wallet.key.network)
-            value = self.psbt.tx.vout[i].value
+            address = output_address(
+                out, vout[i].script_pubkey, self.wallet.key.network
+            )
+            value = vout[i].value
 
             if output_type == CHANGE:
                 change_list.append((address, value))
@@ -539,6 +562,7 @@ class PSBTSigner:
 
     def add_signatures(self, **kwargs):
         """Add signatures to PSBT"""
+        self.check_sighash()
         sigs_added = self.psbt.sign_with(self.wallet.key.root, **kwargs)
         if sigs_added == 0:
             raise ValueError("cannot sign")
@@ -546,7 +570,14 @@ class PSBTSigner:
     def fill_zero_fingerprint(self):
         """Fix for zeroes in fingerprint that happen when user imports the wallet
         with XPUB only (without derivation path)
+
+        Memoized: Silent Payment PSBTs have to repair the fingerprints during
+        validate(), before the ownership check reads them, and the review
+        screen asks for the count afterwards.
         """
+        if self.zero_fingerprints_filled is not None:
+            return self.zero_fingerprints_filled
+
         filled = 0
 
         for inp in self.psbt.inputs:
@@ -555,6 +586,7 @@ class PSBTSigner:
         for out in self.psbt.outputs:
             filled += self._fill_zero_fingerprint_scope(out)
 
+        self.zero_fingerprints_filled = filled
         return filled
 
     def _fill_zero_fingerprint_scope(self, scope):
@@ -579,18 +611,17 @@ class PSBTSigner:
     def sign(self, trim=True):
         """Signs the PSBT and preserves necessary fields for the final transaction"""
         has_sp = self._has_sp
-        self.check_sighash()
 
         # embit signs BIP-376 SP-spend inputs (sp_tweak) on every PSBT, not
         # just ones with new SP outputs, so this can raise regardless of has_sp.
-        from embit.silent_payments.psbt import SPValidationError
+        from embit.silent_payments.psbt import SPValidationError, SPFieldError
 
         try:
             if has_sp:
                 self.add_signatures(aux_rand=self._sp_aux_rand())
             else:
                 self.add_signatures()
-        except SPValidationError as e:
+        except (SPValidationError, SPFieldError) as e:
             raise ValueError(str(e))
 
         if has_sp:

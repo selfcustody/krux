@@ -823,6 +823,90 @@ def test_sp_taproot_signature_commits_to_derived_output(mocker, m5stickv):
     assert not q.schnorr_verify(ec.SchnorrSig.parse(sig), tampered_sighash)
 
 
+def test_self_transfer_sp_to_sp(mocker, m5stickv):
+    """Self-transfer: spend a received SP UTXO into a new SP output.
+
+    The P2TR spend-from input's even-Y tweaked spend key must be summed into the
+    shared secret of the new SP output. The tweak is chosen so the tweaked key
+    has odd Y, exercising the even-Y normalization (a missing negation would make
+    the per-input DLEQ proof fail validation or derive the wrong output).
+    """
+    from embit import ec, script
+    from embit.psbt import DerivationPath
+    from embit.bip32 import parse_path
+    from embit.transaction import TransactionOutput, SIGHASH
+    from embit.script import Script
+    from embit.networks import NETWORKS
+    from embit.silent_payments import SilentPaymentsPSBT
+    from embit.silent_payments.psbt import SPInputScope, SPOutputScope
+    from embit.silent_payments.psbt import SilentPaymentData
+    from krux.psbt import PSBTSigner
+    from krux.key import P2TR, Key, TYPE_SILENT_PAYMENT
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(TEST_MNEMONIC, TYPE_SILENT_PAYMENT, NETWORKS["test"]))
+    key = wallet.key
+    root = key.root
+    spend_priv = key.sp_keys.spend_privkey
+    spend_pub = key.sp_keys.spend_pubkey
+
+    # Pick a tweak whose tweaked spend key has odd Y, to exercise the negation.
+    sp_tweak = None
+    for b in range(1, 256):
+        cand = bytes([b] * 32)
+        if spend_priv.sp_spend_tweak(cand).sec()[0] == 0x03:
+            sp_tweak = cand
+            break
+    assert sp_tweak is not None, "no odd-Y tweak found"
+
+    output_xonly = spend_priv.sp_spend_tweak(sp_tweak).xonly()
+
+    # Destination SP recipient (external scan/spend keys).
+    scan_pub = ec.PublicKey.parse(bytes.fromhex(SCAN_HEX))
+    dest_spend_pub = ec.PublicKey.parse(bytes.fromhex(SPEND_HEX))
+
+    txid = bytes([0xCD] * 32)
+    psbt = SilentPaymentsPSBT.create_v2()
+    inp = SPInputScope()
+    inp.txid = txid
+    inp.vout = 0
+    inp.sequence = 0xFFFFFFFE
+    inp.witness_utxo = TransactionOutput(
+        value=100_000, script_pubkey=Script(b"\x51\x20" + output_xonly)
+    )
+    inp.sp_tweak = sp_tweak
+    inp.sp_spend_bip32_derivations[spend_pub.sec()] = DerivationPath(
+        root.my_fingerprint, parse_path(key.derivation + "/0h/0")
+    )
+    # Coordinators set SIGHASH_DEFAULT (0x00) on taproot inputs; the SP
+    # validator must accept it as SIGHASH_ALL-equivalent.
+    inp.sighash_type = SIGHASH.DEFAULT
+    psbt.add_input(inp)
+
+    out = SPOutputScope()
+    out.value = 95_000
+    out.script_pubkey = None
+    out.sp_data = SilentPaymentData(scan_pub, dest_spend_pub)
+    psbt.add_output(out)
+    psbt.tx_modifiable_flags = 0
+
+    signer = PSBTSigner(wallet, psbt.to_string(), FORMAT_NONE)
+    assert signer.has_sp_outputs()
+    assert signer.policy["type"] == P2TR
+    signer.sign(trim=False)
+
+    # Independent derivation: input key is the even-Y of (b_spend + t).
+    in_priv = spend_priv.sp_spend_tweak(sp_tweak).even_y()
+    expected = _expected_sp_script(
+        [(in_priv.secret, True)], txid, scan_pub, dest_spend_pub
+    )
+    derived = signer.psbt.outputs[0].script_pubkey
+    assert derived is not None and derived.data.hex() == expected
+    # The SP UTXO is signed via the BIP-376 spend path.
+    assert signer.psbt.inputs[0].taproot_key_sig is not None
+
+
 def _build_sp_psbt_spend_list(spend_pubs):
     """One P2WPKH input and one SP output per entry of spend_pubs (in order),
     all sharing SCAN_HEX's scan key. Repeated entries are allowed."""
@@ -910,6 +994,225 @@ def test_sign_interleaved_sp_outputs_same_scan_key(mocker, m5stickv):
     # k differs per output, so all three scripts must be distinct — even the
     # two paying the same address.
     assert len(set(on_chain)) == 3
+
+
+def _labeled_spend_pub(sp_keys, label):
+    """Independently derive the wallet's BIP-352 labeled spend pubkey via
+    private-key arithmetic: (b_spend + hash(b_scan || m)) · G."""
+    tweak = tagged_hash(
+        "BIP0352/Label", sp_keys.scan_privkey.secret + label.to_bytes(4, "big")
+    )
+    scalar = (
+        int.from_bytes(sp_keys.spend_privkey.secret, "big")
+        + int.from_bytes(tweak, "big")
+    ) % SECP256K1_ORDER
+    return ec.PrivateKey(scalar.to_bytes(32, "big")).get_public_key()
+
+
+def test_own_sp_output_type_classification(mocker, m5stickv):
+    """own_sp_output_type: change/self only when scan AND spend keys match."""
+    from krux.silent_payments import own_sp_output_type
+    from krux.key import Key, TYPE_SILENT_PAYMENT
+
+    key = Key(TEST_MNEMONIC, TYPE_SILENT_PAYMENT, NETWORKS["test"])
+    sp_keys = key.sp_keys
+    scan_pub = sp_keys.scan_privkey.get_public_key()
+
+    def out_with(scan, spend, label=None):
+        out = SPOutputScope()
+        out.sp_data = SilentPaymentData(scan, spend)
+        out.sp_label = label
+        return out
+
+    # Unlabeled output to our own address → self-transfer.
+    assert (
+        own_sp_output_type(out_with(scan_pub, sp_keys.spend_pubkey), sp_keys) == "self"
+    )
+    # Label 0 is the BIP-352 change label.
+    assert (
+        own_sp_output_type(
+            out_with(scan_pub, _labeled_spend_pub(sp_keys, 0), label=0), sp_keys
+        )
+        == "change"
+    )
+    # Other labels are our own labeled receive addresses.
+    assert (
+        own_sp_output_type(
+            out_with(scan_pub, _labeled_spend_pub(sp_keys, 1), label=1), sp_keys
+        )
+        == "self"
+    )
+
+    foreign_scan = ec.PublicKey.parse(bytes.fromhex(SCAN_HEX))
+    foreign_spend = ec.PublicKey.parse(bytes.fromhex(SPEND_HEX))
+    # Foreign recipient → not ours.
+    assert own_sp_output_type(out_with(foreign_scan, foreign_spend), sp_keys) is None
+    # Our scan key paired with a foreign spend key must NOT classify as ours,
+    # otherwise a coordinator could disguise a spend as change.
+    assert (
+        own_sp_output_type(out_with(scan_pub, foreign_spend, label=0), sp_keys) is None
+    )
+    assert own_sp_output_type(out_with(scan_pub, foreign_spend), sp_keys) is None
+    # A label claim that does not match the tweaked spend key is not ours.
+    assert (
+        own_sp_output_type(
+            out_with(scan_pub, _labeled_spend_pub(sp_keys, 2), label=1), sp_keys
+        )
+        is None
+    )
+    # Non-SP wallets carry no sp_keys.
+    assert own_sp_output_type(out_with(scan_pub, sp_keys.spend_pubkey), None) is None
+
+
+def test_sp_change_classified_as_change(mocker, m5stickv):
+    """SP wallet send: the label-0 SP change output shows as change, not spend.
+
+    Spend a received SP UTXO (BIP-376) into a foreign SP recipient plus a
+    label-0 change output back to the wallet's own silent payment address —
+    the shape Sparrow builds for an SP wallet send. The review resume must
+    count only the foreign output as spend, so the user sees the real payment
+    amount rather than payment + change.
+    """
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SILENT_PAYMENT
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(TEST_MNEMONIC, TYPE_SILENT_PAYMENT, NETWORKS["test"]))
+    key = wallet.key
+    root = key.root
+    spend_priv = key.sp_keys.spend_privkey
+    spend_pub = key.sp_keys.spend_pubkey
+    own_scan_pub = key.sp_keys.scan_privkey.get_public_key()
+
+    sp_tweak = bytes([1] * 32)
+    output_xonly = spend_priv.sp_spend_tweak(sp_tweak).xonly()
+
+    txid = bytes([0xEF] * 32)
+    psbt = SilentPaymentsPSBT.create_v2()
+    inp = SPInputScope()
+    inp.txid = txid
+    inp.vout = 0
+    inp.sequence = 0xFFFFFFFE
+    inp.witness_utxo = TransactionOutput(
+        value=100_000, script_pubkey=Script(b"\x51\x20" + output_xonly)
+    )
+    inp.sp_tweak = sp_tweak
+    inp.sp_spend_bip32_derivations[spend_pub.sec()] = DerivationPath(
+        root.my_fingerprint, parse_path(key.derivation + "/0h/0")
+    )
+    psbt.add_input(inp)
+
+    # Output 0: foreign SP recipient (the actual payment).
+    out = SPOutputScope()
+    out.value = 60_000
+    out.script_pubkey = None
+    out.sp_data = SilentPaymentData(
+        ec.PublicKey.parse(bytes.fromhex(SCAN_HEX)),
+        ec.PublicKey.parse(bytes.fromhex(SPEND_HEX)),
+    )
+    psbt.add_output(out)
+
+    # Output 1: label-0 change back to our own SP address.
+    change = SPOutputScope()
+    change.value = 35_000
+    change.script_pubkey = None
+    change.sp_data = SilentPaymentData(own_scan_pub, _labeled_spend_pub(key.sp_keys, 0))
+    change.sp_label = 0
+    psbt.add_output(change)
+
+    psbt.tx_modifiable_flags = 0
+
+    signer = PSBTSigner(wallet, psbt.to_string(), FORMAT_NONE)
+    messages, _ = signer.outputs()
+
+    # Only the foreign output counts as spend; the change output is grouped
+    # under self-transfer/change instead of inflating the spend total.
+    assert "Spend (1):" in messages[0]
+    assert "Self-transfer or Change (1):" in messages[0]
+
+    # The change output still derives and signs like any SP output.
+    signer.sign(trim=False)
+    assert all(out.script_pubkey is not None for out in signer.psbt.outputs)
+    assert signer.psbt.inputs[0].taproot_key_sig is not None
+
+
+def test_sp_detection_keys_match_sp_wallet(mocker, m5stickv):
+    """A non-SP wallet derives the same BIP-352 keys an SP wallet would.
+
+    SP scan/spend keys are deterministic from the seed, so detection works
+    regardless of the loaded policy type.
+    """
+    from krux.key import Key, TYPE_SINGLESIG, TYPE_SILENT_PAYMENT
+
+    sp_key = Key(TEST_MNEMONIC, TYPE_SILENT_PAYMENT, NETWORKS["test"])
+    ss_key = Key(TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"])
+
+    assert ss_key.sp_keys is None
+    detected = ss_key.sp_detection_keys()
+    assert detected.scan_privkey.secret == sp_key.sp_keys.scan_privkey.secret
+    assert detected.spend_pubkey.sec() == sp_key.sp_keys.spend_pubkey.sec()
+    # The SP wallet returns its own keys unchanged.
+    assert sp_key.sp_detection_keys() is sp_key.sp_keys
+
+
+def test_sp_change_detected_when_loaded_as_singlesig(mocker, m5stickv):
+    """Own SP change is recognized even when the wallet is loaded as plain
+    single-sig instead of Silent Payments: the SP keys are derived from the
+    seed, so the label-0 change output is grouped under self-transfer/change
+    rather than inflating the spend total.
+    """
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG, TYPE_SILENT_PAYMENT
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    # SP keys for building the own-change output: same seed, so the single-sig
+    # wallet derives these same keys on the fly for detection.
+    sp_keys = Key(TEST_MNEMONIC, TYPE_SILENT_PAYMENT, NETWORKS["test"]).sp_keys
+    own_scan_pub = sp_keys.scan_privkey.get_public_key()
+
+    root = bip32.HDKey.from_seed(bip39.mnemonic_to_seed(TEST_MNEMONIC))
+    pub = root.derive(INPUT_PATH).get_public_key()
+
+    psbt = SilentPaymentsPSBT.create_v2()
+    inp = SPInputScope()
+    inp.txid = bytes([0xAB] * 32)
+    inp.vout = 0
+    inp.sequence = 0xFFFFFFFE
+    inp.witness_utxo = TransactionOutput(
+        value=100_000, script_pubkey=script.p2wpkh(pub)
+    )
+    inp.bip32_derivations[pub] = DerivationPath(root.my_fingerprint, INPUT_PATH)
+    psbt.add_input(inp)
+
+    # Output 0: foreign SP recipient (the actual payment).
+    out = SPOutputScope()
+    out.value = 60_000
+    out.script_pubkey = None
+    out.sp_data = SilentPaymentData(
+        ec.PublicKey.parse(bytes.fromhex(SCAN_HEX)),
+        ec.PublicKey.parse(bytes.fromhex(SPEND_HEX)),
+    )
+    psbt.add_output(out)
+
+    # Output 1: label-0 change back to our own SP address.
+    change = SPOutputScope()
+    change.value = 35_000
+    change.script_pubkey = None
+    change.sp_data = SilentPaymentData(own_scan_pub, _labeled_spend_pub(sp_keys, 0))
+    change.sp_label = 0
+    psbt.add_output(change)
+
+    psbt.tx_modifiable_flags = 0
+
+    # Wallet loaded as plain single-sig, NOT silent payments.
+    wallet = Wallet(Key(TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, psbt.to_string(), FORMAT_NONE)
+    messages, _ = signer.outputs()
+
+    assert "Spend (1):" in messages[0]
+    assert "Self-transfer or Change (1):" in messages[0]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1033,6 +1336,36 @@ def test_sp_send_derives_outputs_only_once(mocker, m5stickv):
 
     signer.sign(trim=False)
     assert spy.call_count == 1
+
+
+def test_sp_detection_keys_derived_once_for_many_outputs(mocker, m5stickv):
+    """Own-output detection keys are cached, not re-derived per SP output.
+
+    Each derivation is two 5-level hardened BIP32 paths; doing it per output
+    scaled that cost linearly with the number of SP outputs.
+    """
+    from embit.networks import NETWORKS
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.psbt import PSBTSigner
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    spend_pubs = [
+        bip32.HDKey.from_seed(bip39.mnemonic_to_seed(TEST_MNEMONIC))
+        .derive([7 + 2**31, i + 2**31, 0])
+        .get_public_key()
+        for i in range(3)
+    ]
+    psbt_b64 = _build_sp_psbt_spend_list(spend_pubs)
+
+    spy = mocker.spy(Key, "sp_detection_keys")
+    wallet = Wallet(Key(TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, psbt_b64, FORMAT_NONE)
+    out_strs, _ = signer.outputs()
+
+    assert len(signer.psbt.outputs) == 3
+    assert spy.call_count == 1
+    assert any("Spend (3):" in s for s in out_strs)
 
 
 def test_sp_send_hands_back_fully_unfinalized_psbt(mocker, m5stickv):
