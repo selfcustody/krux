@@ -104,6 +104,7 @@ class Camera:
         if kboard.is_wonder_mv:
             # GC2145 sensor: probe only GC types (choice=2), skipping OV probe
             # rounds and their camera power cycles (inrush).
+            # See: sensor_reset() in MaixPy/components/micropython/port/src/omv/sensor.c
             # TODO: yahboom and wonder_k also ship GC2145 and could benefit,
             # but only wonder_mv was tested so far.
             sensor.reset(freq=18200000, choice=2)
