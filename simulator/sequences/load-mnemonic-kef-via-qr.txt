@@ -1,10 +1,9 @@
 include _wait-for-logo.txt
 
-# Navigate to via QR
-x3 press BUTTON_A
+# Navigate to QR Code
+x2 press BUTTON_A
 
 qrcode 12-word-mnemonic-KEF_abc.png
 wait 0.5
 
 screenshot load-mnemonic-kef-via-qr.png
-
