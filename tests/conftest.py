@@ -63,6 +63,8 @@ def mp_modules(mocker, monkeypatch):
     monkeypatch.setitem(sys.modules, "sensor", mocker.MagicMock())
     lcd_mock = mocker.MagicMock()
     lcd_mock.string_width_px.side_effect = lambda s: len(s) * 8  # Assume 8px per char
+    lcd_mock.width.return_value = 240
+    lcd_mock.height.return_value = 320
     monkeypatch.setitem(sys.modules, "lcd", lcd_mock)
     monkeypatch.setitem(sys.modules, "Maix", mocker.MagicMock())
     monkeypatch.setitem(sys.modules, "fpioa_manager", mocker.MagicMock())
