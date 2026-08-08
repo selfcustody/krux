@@ -54,9 +54,10 @@ class MnemonicLoader(Page):
         submenu = Menu(
             self.ctx,
             [
-                (t("Via Camera"), self.load_key_from_camera),
-                (t("Via Manual Input"), self.load_key_from_manual_input),
+                (t("QR Code"), self.load_key_from_qr_code),
+                (t("Words"), self.load_key_from_text),
                 (t("From Storage"), self.load_mnemonic_from_storage),
+                ("Other Formats", self.load_other_formats),
             ],
         )
         index, status = submenu.run_loop()
@@ -64,13 +65,13 @@ class MnemonicLoader(Page):
             return MENU_CONTINUE
         return status
 
-    def load_key_from_camera(self):
-        """Handler for the 'load mnemonic'>'via camera' menu item"""
+    def load_other_formats(self):
+        """Handler for specialist mnemonic backup formats"""
         submenu = Menu(
             self.ctx,
             [
-                (t("QR Code"), self.load_key_from_qr_code),
                 ("Tinyseed", lambda: self.load_key_from_tiny_seed_image("Tinyseed")),
+                ("Tinyseed (Bits)", self.load_key_from_tiny_seed),
                 (
                     "OneKey KeyTag",
                     lambda: self.load_key_from_tiny_seed_image("OneKey KeyTag"),
@@ -79,21 +80,7 @@ class MnemonicLoader(Page):
                     t("Binary Grid"),
                     lambda: self.load_key_from_tiny_seed_image("Binary Grid"),
                 ),
-            ],
-        )
-        index, status = submenu.run_loop()
-        if index == submenu.back_index:
-            return MENU_CONTINUE
-        return status
-
-    def load_key_from_manual_input(self):
-        """Handler for the 'load mnemonic'>'via manual input' menu item"""
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("Words"), self.load_key_from_text),
                 (t("Word Numbers"), self.pre_load_key_from_digits),
-                ("Tinyseed (Bits)", self.load_key_from_tiny_seed),
                 ("Stackbit 1248", self.load_key_from_1248),
             ],
         )

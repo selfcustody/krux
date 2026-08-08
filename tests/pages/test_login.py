@@ -34,17 +34,11 @@ def mock_retro_compatibility(mocker, amigo):
 ################### Test menus
 
 
-def test_menu_load_from_camera(m5stickv, mocker):
+def test_menu_load_from_qr_code(m5stickv, mocker):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER
 
-    BTN_SEQUENCE = (
-        # Load Key from Camera
-        [BUTTON_ENTER]
-        +
-        # QR code
-        [BUTTON_ENTER]
-    )
+    BTN_SEQUENCE = [BUTTON_ENTER]
 
     TEST_VALUE = "Test value"
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -58,16 +52,18 @@ def test_menu_load_from_camera(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_menu_load_from_manual(m5stickv, mocker):
+def test_menu_load_from_word_numbers(m5stickv, mocker):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     BTN_SEQUENCE = (
-        # Load Key from Manual
-        [BUTTON_PAGE, BUTTON_ENTER]
+        # Other Formats
+        [BUTTON_PAGE] * 3
+        + [BUTTON_ENTER]
         +
-        # Load from Numbers
-        [BUTTON_PAGE, BUTTON_ENTER]
+        # Word Numbers
+        [BUTTON_PAGE] * 4
+        + [BUTTON_ENTER]
         +
         # Decimal
         [BUTTON_ENTER]
