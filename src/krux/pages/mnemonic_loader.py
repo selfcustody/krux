@@ -57,7 +57,7 @@ class MnemonicLoader(Page):
                 (t("QR Code"), self.load_key_from_qr_code),
                 (t("Words"), self.load_key_from_text),
                 (t("From Storage"), self.load_mnemonic_from_storage),
-                ("Other Formats", self.load_other_formats),
+                (t("Other Formats"), self.load_other_formats),
             ],
         )
         index, status = submenu.run_loop()
