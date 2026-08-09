@@ -30,6 +30,24 @@ def test_load_key_menu_is_format_first(m5stickv, mocker):
     ]
 
 
+def test_load_key_translates_other_formats(m5stickv, mocker):
+    from krux.krux_settings import locale_control
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.login import Login
+
+    locale_control.load_locale("pt-BR")
+    ctx = create_ctx(mocker, [])
+    login = Login(ctx)
+    menu = mocker.patch("krux.pages.mnemonic_loader.Menu")
+    menu.return_value.back_index = 4
+    menu.return_value.run_loop.return_value = (4, MENU_CONTINUE)
+
+    login.load_key()
+
+    items = menu.call_args.args[1]
+    assert items[3][0] == "Outros Formatos"
+
+
 def test_other_formats_menu_routes_existing_handlers(m5stickv, mocker):
     from krux.pages import MENU_CONTINUE
     from krux.pages.login import Login
