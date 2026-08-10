@@ -548,7 +548,9 @@ class Display:
                 one_line_fit_value -= 1
         return one_line_fit_value
 
-    def render_image(self, img, title_lines=0, double_subtitle=False):
+    def render_image(
+        self, img, title_lines=0, double_subtitle=False, extra_bottom_lines=0
+    ):
         """Renders the image based on the board type."""
 
         # Initialize offset and region components
@@ -577,6 +579,11 @@ class Display:
                 # Extra cut on Cube to fit progress bar
                 # and entropy measurement on flash filling
                 region_w -= FONT_HEIGHT
+
+        # Reserve room for text lines drawn below the image.
+        # Amigo and m5stickv already have enough free space.
+        if extra_bottom_lines and not kboard.is_amigo and not kboard.is_m5stickv:
+            region_w -= extra_bottom_lines * FONT_HEIGHT
 
         # Pass precomputed values as tuples
         lcd.display(
