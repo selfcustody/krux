@@ -43,11 +43,7 @@ Words are converted to their BIP39 numeric indexes, those numbers are then conca
 
 - **Encrypted QR Code**
 
-This option converts the encrypted mnemonic into a QR code. Enter an encryption
-key and, optionally, a custom ID. When you scan this QR code through
-**Load Mnemonic -> QR Code**, you will be prompted to enter the decryption key
-to load the mnemonic stored in it. Like any QR code, it can be printed after
-setting up the printer driver.
+This option converts the encrypted mnemonic into a QR code. Enter an encryption key and, optionally, a custom ID. When you scan this QR code through **Load Mnemonic -> QR Code**, you will be prompted to enter the decryption key to load the mnemonic stored in it. Like any QR code, it can be printed after setting up the printer driver.
 
 **Transcribing QR Codes**
 
