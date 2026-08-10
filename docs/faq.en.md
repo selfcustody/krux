@@ -10,7 +10,7 @@ Krux does not include hardware secure elements. The security of stored data reli
 ## What is the test (beta) version?
 The test (beta) version includes the latest and most experimental features, which we occasionally share on our social media. The firmware can be found exclusively in the [test (beta) repository](https://github.com/odudex/krux_binaries). Use and flash the beta firmware if you are curious about new features or want to participate in the development process by hunting bugs, providing feedback, and sharing ideas in our Telegram groups or other social media platforms.
 
-Just remember that for regular use, use the official versions, which are signed, thoroughly tested, and well documented.
+Just remember that for regular use, use the official versions, which are the signed and documented ones.
 
 ## What is Krux Mobile Android app?
 

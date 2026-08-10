@@ -17,11 +17,13 @@
 <img src="docs/img/maixpy_cube/logo-400.en.png" alt="maixpy cube" style="width: 10%;">
 </p>
 
-Krux is an open-source firmware facilitating the creation of Bitcoin signing devices from readily available components, such as Kendryte K210 devices. It transforms these devices into airgapped tools capable of handling transactions for both single and multisignature wallets, supporting offline signing via QR code or SD card, thus empowering users to securely self-custody their Bitcoin.
+Krux is an open-source firmware facilitating the creation of Bitcoin signing devices from readily available components, such as Kendryte K210 devices. It transforms these devices into airgapped tools capable of handling transactions for both single and multisignature wallets, supporting offline signing via QR code or SD card.
 
 ---
 ## Disclaimer
 **WARNING**: *This software has not yet been formally audited by a third party. Use at your own risk!*
+
+Krux is a research and development project, made by nerds building tools for their own interests, open to the world. Innovative features may have undiscovered flaws that endanger funds.
 
 ---
 
