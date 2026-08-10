@@ -91,7 +91,7 @@ def test_insufficient_variance(amigo, mocker):
     # Assert that the result is None
     assert result is None
 
-    # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
+    # Assert ctx.display.draw_centered_text was called with "Insufficient!"
     assert _called_with_insufficient_entropy_message(ctx)
 
 
@@ -134,7 +134,7 @@ def test_insufficient_shannons_entropy(amigo, mocker):
     # Assert that the result is None
     assert result is None
 
-    # Assert ctx.display.draw_centered_text was called with "Insufficient entropy!"
+    # Assert ctx.display.draw_centered_text was called with "Insufficient!"
     assert _called_with_insufficient_entropy_message(ctx)
 
 
@@ -183,7 +183,7 @@ def test_poor_variance(amigo, mocker):
 
     assert result == hasher.digest()
 
-    # Assert ctx.display.draw_centered_text was NOT called with "Insufficient entropy!"
+    # Assert ctx.display.draw_centered_text was NOT called with "Insufficient!"
     assert not _called_with_insufficient_entropy_message(ctx)
 
 
@@ -232,7 +232,7 @@ def test_good_variance_good_shannons_entropy(amigo, mocker):
 
     assert result == hasher.digest()
 
-    # Assert ctx.display.draw_centered_text was NOT called with "Insufficient entropy!"
+    # Assert ctx.display.draw_centered_text was NOT called with "Insufficient!"
     assert not _called_with_insufficient_entropy_message(ctx)
 
 

@@ -24,10 +24,10 @@ import flash
 import sensor
 import time
 from . import Page, MENU_CONTINUE
-from .capture_entropy import CameraEntropy, POOR_VARIANCE_TH
+from .capture_entropy import CameraEntropy, POOR_VARIANCE_TH, LABEL_LINES
 from ..themes import theme
 from ..krux_settings import t
-from ..display import BOTTOM_LINE, MINIMAL_PADDING
+from ..display import BOTTOM_LINE, MINIMAL_PADDING, FONT_HEIGHT
 from ..wdt import wdt
 from ..firmware import FLASH_SIZE
 from ..camera import ENTROPY_MODE
@@ -56,11 +56,16 @@ class FillFlash(Page):
             wdt.feed()
             img = sensor.snapshot()
             entropy_measurement.entropy_measurement_update(img, all_at_once=True)
-            self.ctx.display.render_image(img, title_lines=1, double_subtitle=True)
+            self.ctx.display.render_image(
+                img,
+                title_lines=1,
+                double_subtitle=True,
+                extra_bottom_lines=LABEL_LINES - 1,
+            )
             if entropy_measurement.stdev_index > POOR_VARIANCE_TH:
                 self.ctx.display.to_portrait()
                 return img.to_bytes()
-        raise ValueError(t("Insufficient entropy!"))
+        raise ValueError(t("Estimated entropy:") + " " + t("Insufficient!"))
 
     def fill_flash_with_camera_entropy(self):
         """Fill the flash memory with entropy data from the camera."""
@@ -80,7 +85,12 @@ class FillFlash(Page):
         block_count = 0
         offset_x = (display_width - (TOTAL_BLOCKS // blocks_per_line)) // 2
 
-        offset_y = BOTTOM_LINE if kboard.is_amigo else BOTTOM_LINE - 12
+        # Keep the progress bar above the entropy estimation label
+        offset_y = (
+            BOTTOM_LINE
+            if kboard.is_amigo
+            else BOTTOM_LINE - 12 - (LABEL_LINES - 1) * FONT_HEIGHT
+        )
 
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(t("Filling Flash"), MINIMAL_PADDING)

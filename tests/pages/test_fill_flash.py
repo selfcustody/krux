@@ -108,7 +108,7 @@ def test_fill_flash_entropy_timeout_scenario(amigo, mocker):
     # Mock entropy capture method to simulate timeout
     mocker.patch(
         "krux.pages.fill_flash.FillFlash.capture_image_with_sufficient_entropy",
-        side_effect=ValueError("Insufficient entropy!"),
+        side_effect=ValueError("Estimated entropy: Insufficient!"),
     )
 
     ctx = create_ctx(mocker, btn_sequence)
@@ -162,7 +162,7 @@ def test_fill_flash_insufficient_entropy_scenario(amigo, mocker):
     )
 
     # Execute test and verify insufficient entropy is handled
-    with pytest.raises(ValueError, match="Insufficient entropy!"):
+    with pytest.raises(ValueError, match="Estimated entropy: Insufficient!"):
         fill_flash.fill_flash_with_camera_entropy()
 
     # Verify user interaction occurred as expected
