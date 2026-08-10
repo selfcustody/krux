@@ -49,6 +49,9 @@ BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
 TC_CODE_PATH = "/flash/tcc"
 TC_CODE_PBKDF2_ITERATIONS = 100000
 
+# Stores the firmware version the disclaimer was acknowledged for
+DISCLAIMER_PATH = "/flash/disclaimer"
+
 DEFAULT_LOCALE = "en-US"
 
 DEFAULT_TX_PIN = (
