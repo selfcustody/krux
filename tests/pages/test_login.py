@@ -1562,6 +1562,7 @@ def test_about(mocker, multiple_devices):
     from krux.qr import FORMAT_NONE
 
     BTN_SEQUENCE = [
+        BUTTON_ENTER,  # past disclaimer
         BUTTON_ENTER,  # past qr_code
     ]
 
@@ -1606,6 +1607,17 @@ def test_about(mocker, multiple_devices):
         ]
     login.display_qr_codes.assert_has_calls(display_qr_codes_call)
 
+    disclaimer = (
+        "Krux is a research and development project, made by nerds building"
+        " tools for their own interests, open to the world."
+        + "\n\n"
+        + "Innovative features may have undiscovered flaws that endanger funds."
+    )
+    drawn_texts = [
+        call.args[0] for call in ctx.display.draw_hcentered_text.call_args_list
+    ]
+    assert disclaimer in drawn_texts
+    assert "Use it at your own risk." in drawn_texts
     ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(msg, 250, highlight_prefix=":"),

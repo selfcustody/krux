@@ -101,6 +101,24 @@ def tc_code_verification(ctx_pin):
     return True
 
 
+def disclaimer(ctx_disclaimer):
+    """Loads and run the Disclaimer page, unless already acknowledged for this version.
+    Returns False if the user did not acknowledge it
+    """
+    from krux.pages.disclaimer import Disclaimer, acknowledged
+
+    acknowledgment = True
+    if not acknowledged():
+        acknowledgment = Disclaimer(ctx_disclaimer).show(acknowledge=True)
+
+    # Unimport Disclaimer to free memory
+    sys.modules.pop("krux.pages.disclaimer")
+    del sys.modules["krux"].pages.disclaimer
+    del Disclaimer
+
+    return acknowledgment
+
+
 def login(ctx_login):
     """Loads and run the Login page"""
     from krux.pages.login import Login
@@ -153,6 +171,8 @@ if preimport_ticks + MIN_SPLASH_WAIT_TIME > postimport_ticks:
     time.sleep_ms(preimport_ticks + MIN_SPLASH_WAIT_TIME - postimport_ticks)
 
 if not tc_code_verification(ctx):
+    power_manager.shutdown()
+if not disclaimer(ctx):
     power_manager.shutdown()
 login(ctx)
 gc.collect()

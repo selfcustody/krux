@@ -404,6 +404,13 @@ class Login(MnemonicLoader):
         import board
         from ..metadata import VERSION
         from ..qr import FORMAT_NONE
+        from .disclaimer import Disclaimer
+
+        Disclaimer(self.ctx).show()
+
+        # Unimport Disclaimer
+        sys.modules.pop("krux.pages.disclaimer")
+        del sys.modules["krux.pages"].disclaimer
 
         title = "selfcustody.github.io/krux"
         msg = (
