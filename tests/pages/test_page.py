@@ -307,7 +307,8 @@ def test_keypad_scan_replaces_buffer_and_returns_for_editing(mocker, amigo):
     scan_fn.assert_called_once_with()
 
 
-def test_keypad_scan_returns_binary_without_editing(mocker, amigo):
+@pytest.mark.parametrize("scanned", [b"decodable text", b"\xde\xad\xbe\xef"])
+def test_keypad_scan_rejects_binary_and_preserves_buffer(mocker, amigo, scanned):
     from krux.input import BUTTON_TOUCH, SWIPE_RIGHT
     from krux.pages import Page
     from krux.pages.keypads import Keypad
@@ -318,17 +319,19 @@ def test_keypad_scan_returns_binary_without_editing(mocker, amigo):
     pad.next_keyset()
     ctx = create_ctx(
         mocker,
-        [SWIPE_RIGHT, BUTTON_TOUCH],
-        touch_seq=[pad.scan_index],
+        [SWIPE_RIGHT, BUTTON_TOUCH, BUTTON_TOUCH],
+        touch_seq=[pad.scan_index, pad.go_index],
     )
     page = Page(ctx)
+    page.prompt = mocker.MagicMock(return_value=True)
+    page.flash_error = mocker.MagicMock()
 
     result = page.capture_from_keypad(
-        "test", keysets, scan_fn=lambda: b"\xde\xad\xbe\xef"
+        "test", keysets, starting_buffer="typed", scan_fn=lambda: scanned
     )
 
-    assert result == b"\xde\xad\xbe\xef"
-    ctx.input.touch.clear_regions.assert_called_once_with()
+    assert result == "typed"
+    page.flash_error.assert_called_once_with("Failed to load")
 
 
 def test_keypad_scan_preserves_buffer_when_overwrite_declined(mocker, amigo):
@@ -346,7 +349,14 @@ def test_keypad_scan_preserves_buffer_when_overwrite_declined(mocker, amigo):
         touch_seq=[pad.scan_index, pad.go_index],
     )
     page = Page(ctx)
-    page.prompt = mocker.MagicMock(return_value=False)
+    clears_before_capture = ctx.display.clear.call_count
+
+    def decline_overwrite(*_args):
+        # Initial and post-swipe frames, followed by a clean frame for the prompt.
+        assert ctx.display.clear.call_count == clears_before_capture + 3
+        return False
+
+    page.prompt = mocker.MagicMock(side_effect=decline_overwrite)
     scan_fn = mocker.MagicMock()
 
     result = page.capture_from_keypad(

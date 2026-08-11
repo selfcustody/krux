@@ -143,13 +143,6 @@ class PassphraseEditor(Page):
 
         try:
             data = decrypt_kef(self.ctx, data)
-
-            # Cpython raises UnicodeDecodeError, MaixPy raises TypeError
-            try:
-                data = data.decode()
-            except:
-                self.flash_error(t("Failed to load"))
-                return None
         except KeyError:
             self.flash_error(t("Failed to decrypt"))
             return None
@@ -157,6 +150,16 @@ class PassphraseEditor(Page):
             # ValueError=not KEF or declined to decrypt
             pass
 
+        if isinstance(data, bytes):
+            # Cpython raises UnicodeDecodeError, MaixPy raises TypeError
+            try:
+                data = data.decode()
+            except:
+                self.flash_error(t("Failed to load"))
+                return None
+        if not isinstance(data, str):
+            self.flash_error(t("Failed to load"))
+            return None
         if len(data) > PASSPHRASE_MAX_LEN:
             self.flash_error(t("Failed to load"))
             return None

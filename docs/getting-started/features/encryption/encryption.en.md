@@ -12,10 +12,10 @@ When Krux detects data resembling a KEF-encrypted envelope, it prompts the user
 to *"Decrypt?"*, showing the KEF version, envelope ID (or label), and the PBKDF2
 iteration count used during creation. To decrypt, provide the same key by typing
 it or selecting the QR glyph on the last symbols keypad. Scanned text returns to
-the keypad for review and editing; binary keys remain binary and proceed to
-confirmation. Once unlocked, Krux uses the plaintext within context. If
-decryption is declined, the raw envelope is used instead—usually resulting in an
-error, since KEF data is meaningless without decryption.
+the keypad for review and editing; QR keys that cannot be decoded as text are
+rejected. Once unlocked, Krux uses the plaintext within context. If decryption
+is declined, the raw envelope is used instead—usually resulting in an error,
+since KEF data is meaningless without decryption.
 
 <div style="clear: both"></div>
 

@@ -51,6 +51,48 @@ def test_qr_passphrase(m5stickv, mocker):
     qr_capturer.assert_called_once()
 
 
+def test_qr_passphrase_decodes_byte_mode_text(m5stickv, mocker):
+    from krux.pages.wallet_settings import PassphraseEditor
+    from krux.pages.qr_capture import QRCodeCapture
+
+    ctx = create_ctx(mocker, None)
+    passphrase_editor = PassphraseEditor(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (b"https://it-tools.tech", None),
+    )
+    mocker.patch(
+        "krux.pages.encryption_ui.decrypt_kef",
+        side_effect=ValueError,
+    )
+
+    assert passphrase_editor._load_qr_passphrase() == "https://it-tools.tech"
+    ctx.display.flash_text.assert_not_called()
+
+
+def test_qr_passphrase_rejects_non_text_bytes(m5stickv, mocker):
+    from krux.pages.wallet_settings import PassphraseEditor
+    from krux.pages.qr_capture import QRCodeCapture
+
+    ctx = create_ctx(mocker, None)
+    passphrase_editor = PassphraseEditor(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (b"\x8f", None),
+    )
+    mocker.patch(
+        "krux.pages.encryption_ui.decrypt_kef",
+        side_effect=ValueError,
+    )
+
+    assert passphrase_editor._load_qr_passphrase() is None
+    ctx.display.flash_text.assert_called_once_with(
+        "Failed to load", 248, 2000, highlight_prefix=""
+    )
+
+
 def test_qr_passphrase_too_long(m5stickv, mocker):
     from krux.pages.wallet_settings import PassphraseEditor, PASSPHRASE_MAX_LEN
     from krux.pages.qr_capture import QRCodeCapture

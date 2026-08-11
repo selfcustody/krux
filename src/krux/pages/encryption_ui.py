@@ -546,13 +546,19 @@ class EncryptionKey(Page):
 
         try:
             decrypted = self._decode_key(decrypt_kef(self.ctx, key))
-            return decrypted if decrypted else key
+            if isinstance(decrypted, str):
+                return decrypted
+            self.flash_error(t("Failed to load"))
+            return None
         except KeyError:
             self.flash_error(t("Failed to decrypt"))
             return None
         except ValueError:
             # ValueError=not KEF or declined to decrypt
-            return key
+            if isinstance(key, str):
+                return key
+            self.flash_error(t("Failed to load"))
+            return None
 
     def load_qr_encryption_key(self):
         """Loads and returns a key from a QR code"""
@@ -569,7 +575,7 @@ class EncryptionKey(Page):
 
     @staticmethod
     def _decode_key(key):
-        """Decodes a UTF-8 byte key while preserving binary keys."""
+        """Decodes a UTF-8 byte key while preserving non-text data."""
         if not isinstance(key, bytes):
             return key
         try:

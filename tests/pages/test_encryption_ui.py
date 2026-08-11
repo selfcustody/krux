@@ -134,13 +134,13 @@ def test_load_key_from_qr_code(m5stickv, mocker):
     mocker.patch.object(
         QRCodeCapture,
         "qr_capture_loop",
-        new=lambda self: (b"decodable bytes qr key", None),
+        new=lambda self: (b"https://it-tools.tech", None),
     )
     key = key_generator.encryption_key()
-    assert key == "decodable bytes qr key"
+    assert key == "https://it-tools.tech"
 
     print("case 3: load_key_from_qr_code")
-    BTN_SEQUENCE = [BUTTON_ENTER]  # Confirm
+    BTN_SEQUENCE = []
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     key_generator = EncryptionKey(ctx)
     mocker.patch.object(
@@ -152,9 +152,7 @@ def test_load_key_from_qr_code(m5stickv, mocker):
         QRCodeCapture, "qr_capture_loop", new=lambda self: (b"\xde\xad\xbe\xef", None)
     )
     key = key_generator.encryption_key()
-    assert key == b"\xde\xad\xbe\xef"
-    call_message = mocker.call("Key (4): 0xdeadbeef", 10, highlight_prefix=":")
-    ctx.display.draw_hcentered_text.assert_has_calls([call_message])
+    assert key is None
 
     print("case 4: load_key_from_qr_code")
     # Repeat with too much characters >ENCRYPTION_KEY_MAX_LEN
@@ -194,6 +192,26 @@ def test_load_qr_key_for_keypad_cancelled(m5stickv, mocker):
 
     assert key_generator._load_qr_key_for_keypad() is None
     key_generator.load_qr_encryption_key.assert_called_once_with()
+
+
+def test_load_qr_key_for_keypad_accepts_decrypted_text_only(m5stickv, mocker):
+    from krux.pages.encryption_ui import EncryptionKey
+
+    key_generator = EncryptionKey(create_ctx(mocker, []))
+    mocker.patch.object(
+        key_generator, "load_qr_encryption_key", return_value=b"encrypted"
+    )
+    decrypt = mocker.patch(
+        "krux.pages.encryption_ui.decrypt_kef", return_value=b"decrypted text"
+    )
+
+    assert key_generator._load_qr_key_for_keypad() == "decrypted text"
+
+    decrypt.return_value = b"\x8f"
+    assert key_generator._load_qr_key_for_keypad() is None
+    key_generator.ctx.display.flash_text.assert_called_once_with(
+        "Failed to load", 248, 2000, highlight_prefix=""
+    )
 
 
 def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
@@ -1298,36 +1316,18 @@ def test_kefenvelope_input_key_ui(m5stickv, mocker):
     assert page.input_key_ui() == True
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
-    print("returns True if a binary key (ie: 0x8f) was scanned")
-    BTN_SEQUENCE = scan_key_sequence + [BUTTON_ENTER]  # confirm binary key
+    print("returns False if a binary key (ie: 0x8f) was scanned")
+    BTN_SEQUENCE = scan_key_sequence + [
+        *([BUTTON_PAGE] * 3),  # move from QR to Esc
+        BUTTON_ENTER,  # Esc
+        BUTTON_ENTER,  # confirm Esc
+    ]
     mocker.patch.object(
         QRCodeCapture, "qr_capture_loop", new=lambda self: (b"\x8f", None)
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = KEFEnvelope(ctx)
-    assert page.input_key_ui() == True
-    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
-
-    print("returns True if an encrypted binary key (ie: 0x8f) was scanned/decrypted")
-    BTN_SEQUENCE = scan_key_sequence + [
-        BUTTON_ENTER,  # confirm decrypt
-        BUTTON_ENTER,  # key is "a"
-        BUTTON_PAGE_PREV,  # move to Go
-        BUTTON_ENTER,  # select Go
-        BUTTON_ENTER,  # confirm key "a"
-        BUTTON_ENTER,  # confirm weak key
-    ]
-    mocker.patch.object(
-        QRCodeCapture,
-        "qr_capture_loop",
-        new=lambda self: (
-            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x84\x2b\x2c",
-            None,
-        ),
-    )
-    ctx = create_ctx(mocker, BTN_SEQUENCE)
-    page = KEFEnvelope(ctx)
-    assert page.input_key_ui() == True
+    assert page.input_key_ui() == False
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
     print("returns None if wrong key")
@@ -1343,6 +1343,14 @@ def test_kefenvelope_input_key_ui(m5stickv, mocker):
         BUTTON_ENTER,  # Esc
         BUTTON_ENTER,  # confirm Esc
     ]
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x84\x2b\x2c",
+            None,
+        ),
+    )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     page = KEFEnvelope(ctx)
     assert page.input_key_ui() == bool(None)

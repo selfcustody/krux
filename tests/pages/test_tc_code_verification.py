@@ -126,6 +126,7 @@ def test_tc_code_qr_sanitization(amigo, mocker):
     tc_verifier = TCCodeVerification(create_ctx(mocker, []))
     cases = [
         ("aBcDeF%@14", "aBcDeF%@14"),
+        (b"https://it-tools.tech", "https://it-tools.tech"),
         (b"  aBcDeF%@14  ", "  aBcDeF%@14  "),
         (b"  aBcDeF%@14\r\n", None),
         (None, None),
