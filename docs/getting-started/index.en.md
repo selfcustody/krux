@@ -22,3 +22,9 @@ These wallet coordinators are currently **compatible with Krux**:
 - [Electrum Bitcoin Wallet](https://electrum.org/) (desktop / mobile - error 'cannot sign') 
 
 <div style="clear: both"></div>
+
+## Disclaimer
+
+Krux is a research and development project, made by nerds building tools for their own interests, open to the world. Innovative features may have undiscovered flaws that endanger funds.
+
+**Use it at your own risk.**
