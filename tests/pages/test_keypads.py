@@ -55,9 +55,7 @@ def test_scan_key_is_reachable_with_buttons(mocker, m5stickv):
 
 
 def test_draw_scan_key_glyph(mocker, m5stickv):
-    import sys
-    import lcd
-    from krux.pages.keypads import Keypad
+    from krux.pages.keypads import Keypad, QR_SCAN_CHAR
 
     ctx = create_ctx(mocker, [])
     keypad = Keypad(ctx, ["a" * 26, "b" * 23], has_scan_key=True)
@@ -66,7 +64,10 @@ def test_draw_scan_key_glyph(mocker, m5stickv):
     keypad.draw_keys()
     keypad.draw_keys()
 
-    sys.modules["image"].Image.assert_called_once()
-    assert sys.modules["image"].Image.return_value.draw_rectangle.call_count > 1
-    assert lcd.display.call_count == 2
+    scan_calls = [
+        call
+        for call in ctx.display.draw_string.call_args_list
+        if call.args[2] == QR_SCAN_CHAR
+    ]
+    assert len(scan_calls) == 2
     ctx.display.fill_rectangle.assert_not_called()
