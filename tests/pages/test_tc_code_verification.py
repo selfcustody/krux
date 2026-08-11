@@ -1,7 +1,14 @@
+import pytest
+
 from . import create_ctx
 
 
-def test_tc_code_verification(amigo, mocker):
+@pytest.fixture
+def device_secret(mocker):
+    mocker.patch("machine.unique_id", return_value=b"\x01" * 32)
+
+
+def test_tc_code_verification(amigo, mocker, device_secret):
     from krux.pages import (
         LETTERS,
         UPPERCASE_LETTERS,
@@ -61,7 +68,6 @@ def test_tc_code_verification(amigo, mocker):
         ),
     ]
     for case in cases:
-        mocker.patch("machine.unique_id", return_value=b"\x01" * 32)
         ctx = create_ctx(mocker, [])
         tc_verifier = TCCodeVerification(ctx)
         tc_verifier.capture_from_keypad = mocker.MagicMock(return_value=case[0])
