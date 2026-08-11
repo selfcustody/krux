@@ -26,8 +26,7 @@ import sensor
 from .krux_settings import Settings
 from .kboard import kboard
 
-OV2640_ID = 0x2642  # Lenses, vertical flip - Bit
-OV5642_ID = 0x5642  # Lenses, horizontal flip - Bit
+OV2640_ID = 0x2642  # Lenses, vertical flip - Embed Fire
 OV7740_ID = 0x7742  # No lenses, no Flip - M5sitckV, Amigo
 GC0328_ID = 0x9D  # Dock
 GC2145_ID = 0x45  # Yahboom, WonderK
@@ -53,11 +52,6 @@ LUM_TH = {
     (OV2640_ID, ENTROPY_MODE): (0x68, 0x78),
     (OV2640_ID, BINARY_GRID_MODE): (0x44, 0x48),
     (OV2640_ID, ZOOMED_MODE): (0x35, 0x50),
-    (OV5642_ID, QR_SCAN_MODE): (0x60, 0x70),
-    (OV5642_ID, ANTI_GLARE_MODE): (0x20, 0x28),
-    (OV5642_ID, ENTROPY_MODE): (0x68, 0x78),
-    (OV5642_ID, BINARY_GRID_MODE): (0x44, 0x48),
-    (OV5642_ID, ZOOMED_MODE): (0x35, 0x50),
     (OV7740_ID, QR_SCAN_MODE): (0x60, 0x70),
     (OV7740_ID, ANTI_GLARE_MODE): (0x20, 0x28),
     (OV7740_ID, ENTROPY_MODE): (0x68, 0x78),
@@ -114,18 +108,12 @@ class Camera:
             sensor.set_pixformat(sensor.GRAYSCALE)
         else:
             sensor.set_pixformat(sensor.RGB565)
-        if self.cam_id == OV5642_ID:
-            sensor.set_hmirror(1)
         if self.cam_id == OV2640_ID:
             if kboard.is_embed_fire:
                 sensor.set_hmirror(0)
             else:
                 sensor.set_vflip(1)
-        if kboard.is_bit:
-            # CIF mode will use central pixels and discard darker periphery
-            sensor.set_framesize(sensor.CIF)
-        else:
-            sensor.set_framesize(sensor.QVGA)
+        sensor.set_framesize(sensor.QVGA)
         if mode != ENTROPY_MODE:
             if self.cam_id == OV7740_ID:
                 self.config_ov_7740()
@@ -186,7 +174,6 @@ class Camera:
             GC0328_ID: self._config_gc0328_lum,
             OV2640_ID: self._config_ovxx40_lum,
             OV7740_ID: self._config_ovxx40_lum,  # Same as OV2640
-            OV5642_ID: self._config_ovxx40_lum,  # Same as OV2640
             GC2145_ID: self._config_gc2145_lum,
         }
 
@@ -359,11 +346,7 @@ class Camera:
 
     def snapshot(self):
         """Helper to take a customized snapshot from sensor"""
-        img = sensor.snapshot()
-        if kboard.is_bit:
-            img.lens_corr(strength=1.1)
-            img.rotation_corr(z_rotation=180)
-        return img
+        return sensor.snapshot()
 
     def initialize_run(self, mode=QR_SCAN_MODE):
         """Initializes and runs sensor"""

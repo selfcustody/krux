@@ -17,7 +17,6 @@ def test_initialize_sensors(mocker, multiple_devices):
     from krux.camera import (
         Camera,
         OV7740_ID,
-        OV5642_ID,
         OV2640_ID,
         GC0328_ID,
         GC2145_ID,
@@ -26,7 +25,6 @@ def test_initialize_sensors(mocker, multiple_devices):
     SENSORS_LIST = [
         (OV7740_ID, "config_ov_7740"),
         (OV2640_ID, "config_ov_2640"),
-        (OV5642_ID, None),
         (GC0328_ID, None),
         (GC2145_ID, "config_gc_2145"),
     ]
@@ -50,7 +48,7 @@ def test_initialize_sensors(mocker, multiple_devices):
 
         krux.camera.sensor.set_vflip.reset_mock()
 
-        if board.config["type"] in ("cube", "wonder_k") or c.cam_id == OV5642_ID:
+        if board.config["type"] in ("cube", "wonder_k"):
             krux.camera.sensor.set_hmirror.assert_called_with(1)
         else:
             krux.camera.sensor.set_hmirror.assert_not_called()
@@ -68,16 +66,10 @@ def test_initialize_sensors(mocker, multiple_devices):
         krux.camera.sensor.set_pixformat.reset_mock()
 
         krux.camera.sensor.set_framesize.assert_called()
-        if board.config["type"] != "bit":
-            assert (
-                krux.camera.sensor.set_framesize.call_args.args[0]._extract_mock_name()
-                == "mock.QVGA"
-            )
-        else:
-            assert (
-                krux.camera.sensor.set_framesize.call_args.args[0]._extract_mock_name()
-                == "mock.CIF"
-            )
+        assert (
+            krux.camera.sensor.set_framesize.call_args.args[0]._extract_mock_name()
+            == "mock.QVGA"
+        )
         krux.camera.sensor.set_framesize.reset_mock()
 
 
@@ -139,7 +131,6 @@ def test_toggle_mode(mocker, m5stickv):
     from krux.camera import (
         Camera,
         OV7740_ID,
-        OV5642_ID,
         OV2640_ID,
         GC0328_ID,
         GC2145_ID,
@@ -148,7 +139,7 @@ def test_toggle_mode(mocker, m5stickv):
         ZOOMED_MODE,
     )
 
-    SENSORS_LIST = [OV7740_ID, OV5642_ID, OV2640_ID, GC0328_ID, GC2145_ID]
+    SENSORS_LIST = [OV7740_ID, OV2640_ID, GC0328_ID, GC2145_ID]
 
     for sensor_id in SENSORS_LIST:
         mocker.patch("krux.camera.sensor.get_id", lambda: sensor_id)
@@ -167,28 +158,15 @@ def test_toggle_mode(mocker, m5stickv):
 
 def test_snapshot(mocker, multiple_devices):
     import krux
-    import board
     from krux.camera import Camera
 
-    if board.config["type"] == "bit":
-        image = mocker.MagicMock(
-            lens_corr=mocker.MagicMock(), rotation_corr=mocker.MagicMock()
-        )
-        mock_snapshot = mocker.MagicMock(return_value=image)
-    else:
-        mock_snapshot = mocker.MagicMock()
-
-    mocker.patch("krux.camera.sensor.snapshot", side_effect=mock_snapshot)
+    mocker.patch("krux.camera.sensor.snapshot", side_effect=mocker.MagicMock())
 
     c = Camera()
     c.initialize_sensor()
     c.snapshot()
 
     krux.camera.sensor.snapshot.assert_called()
-
-    if board.config["type"] == "bit":
-        image.lens_corr.assert_called_with(strength=1.1)
-        image.rotation_corr.assert_called_with(z_rotation=180)
 
 
 def test_stop_sensor(mocker, multiple_devices):

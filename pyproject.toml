@@ -22,7 +22,7 @@
 
 [project]
 name = "krux"
-version = "26.04.0"
+version = "26.08.0"
 description = "Open-source signing device firmware for Bitcoin"
 authors = [{ name = "Jeff S", email = "jeffreesun@protonmail.com" }]
 readme = "README.md"
@@ -30,8 +30,7 @@ license = { text = "MIT" }
 requires-python = ">=3.11.5, <3.13"
 dependencies = [
     "embit",
-    "ur",
-    "urtypes",
+    "uUR",
 ]
 
 [project.optional-dependencies]
@@ -76,8 +75,10 @@ package = false
 
 [tool.uv.sources]
 embit = { path = "vendor/embit", editable = true }
-ur = { path = "vendor/foundation-ur-py", editable = true }
-urtypes = { path = "vendor/urtypes", editable = true }
+# Native BC-UR module, the same cUR sources the devices run. Not editable: it is
+# a C extension, so it has to be rebuilt (uv sync --reinstall-package uUR) after
+# changing the submodule anyway.
+uUR = { path = "firmware/MaixPy/components/micropython/port/src/bc-ur" }
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
@@ -107,6 +108,25 @@ vulture-src = "vulture src"
 vulture.ref = "vulture-src vulture_whitelist.py"
 vulture-make = { shell = "vulture src --make-whitelist > vulture_whitelist.py" }
 vulture-whitelist.ref = "vulture-make"
+
+# secp256k1 tasks
+# Builds the libsecp256k1-zkp pinned by the embit submodule and drops it where
+# embit's ctypes backend looks for it. Without it embit falls back to its pure
+# Python EC implementation, which is slower and does not always behave like the
+# C library the firmware runs.
+secp256k1-build = { shell = """
+make -C vendor/embit/secp256k1
+mkdir -p vendor/embit/src/embit/util/prebuilt
+cp vendor/embit/secp256k1/build/libsecp256k1_* vendor/embit/src/embit/util/prebuilt/
+""" }
+secp256k1-check = { shell = '''python -c "
+import sys
+from embit.util import secp256k1
+
+using_c = hasattr(secp256k1, '_secp')
+print('embit secp256k1 backend:', 'C library' if using_c else 'pure Python')
+sys.exit(0 if using_c else 1)
+"''' }
 
 # test tasks
 test-clean = """python -c 'import shutil, os; os.path.exists("htmlcov") and shutil.rmtree("htmlcov")'"""

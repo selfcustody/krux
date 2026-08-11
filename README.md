@@ -66,10 +66,12 @@ To build and flash the firmware:
 The first time, the build can take around an hour or so to complete. Subsequent builds should take only a few minutes. If all goes well, you should see a new `build` folder containing `firmware.bin` and `kboot.kfpkg` files when the build completes.
 
 ## Install Krux and dev tools
-Krux uses [uv](https://docs.astral.sh/uv/) for Python packaging and environment management. Install uv by following its [installation guide](https://docs.astral.sh/uv/getting-started/installation/), then sync the project to install runtime deps ([embit](https://github.com/diybitcoinhardware/embit), [ur](https://github.com/selfcustody/foundation-ur-py), [urtypes](https://github.com/selfcustody/urtypes)) along with the `dev` group ([pytest](https://docs.pytest.org), [pylint](https://pypi.org/project/pylint/), [black](https://github.com/psf/black) and i18n helpers):
+Krux uses [uv](https://docs.astral.sh/uv/) for Python packaging and environment management. Install uv by following its [installation guide](https://docs.astral.sh/uv/getting-started/installation/), then sync the project to install runtime deps ([embit](https://github.com/diybitcoinhardware/embit) and [uUR](https://github.com/selfcustody/cUR), the native UR module compiled from the same sources the devices run) along with the `dev` group ([pytest](https://docs.pytest.org), [pylint](https://pypi.org/project/pylint/), [black](https://github.com/psf/black) and i18n helpers):
 ```bash
 uv sync
 ```
+
+> **`uUR` is a C extension** It is built from the `bc-ur` submodule nested under `firmware/MaixPy`, so clone with `--recursive` (or run `git submodule update --init --recursive`) and make sure a C compiler and the Python development headers are installed (`python3-dev` on Debian/Ubuntu). After changing the submodule, rebuild it with `uv sync --reinstall-package uUR`.
 
 `uv sync` creates a `.venv` in the project root, resolves `uv.lock` if needed, and installs everything — this is the day-to-day command. When dependencies in `pyproject.toml` change but you only want to refresh `uv.lock` without touching the venv, run `uv lock` instead; `uv sync` will then pick the new pins on its next run.
 
@@ -95,6 +97,16 @@ uv run poe lint
 ## Run tests with coverage
 ```bash
 uv run poe test
+```
+
+Before the first run, build the `libsecp256k1` that the `embit` submodule pins (needs `gcc` and `make`):
+```bash
+uv run poe secp256k1-build
+```
+
+Without it `embit` falls back to its pure Python EC implementation, which is slower and does not always match the C library the firmware runs, so some signature paths get exercised differently than on device. CI builds it and fails if the fallback is in use. To check your own setup:
+```bash
+uv run poe secp256k1-check
 ```
 
 Note: The coverage report will be created at the `htmlcov` folder `file:///path/to/krux/htmlcov/index.html`. 

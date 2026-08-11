@@ -453,7 +453,9 @@ def parse_wallet(wallet_data):
         raise KeyError('"descriptor" key not found in JSON')
     except KeyError:
         raise ValueError("invalid wallet format")
-    except:
+    except Exception:
+        # Untrusted input: any non-KeyError parse failure (bad JSON, bad
+        # descriptor) falls through to the next format.
         pass
 
     # Try to parse as a key-value file
@@ -463,14 +465,17 @@ def parse_wallet(wallet_data):
             return descriptor, label
     except ValueError:
         raise
-    except:
+    except Exception:
+        # Untrusted input: an unexpected parse failure means "invalid wallet".
         raise ValueError("invalid wallet format")
 
     # Try to parse directly as a descriptor
     try:
         descriptor = Descriptor.from_string(wallet_data.strip())
         return descriptor, None
-    except:
+    except Exception:
+        # Untrusted input: not a bare descriptor either; fall through to the
+        # final raise.
         pass
 
     raise ValueError("invalid wallet format")
@@ -482,7 +487,7 @@ def parse_address(address_data):
 
     If the address cannot be derived, an exception is raised.
     """
-    from embit.script import Script, address_to_scriptpubkey
+    from embit.script import Script, address_to_scriptpubkey, EmbitError
 
     addr = address_data
     sc = None
@@ -498,13 +503,17 @@ def parse_address(address_data):
             sc = address_to_scriptpubkey(addr.lower())
             if isinstance(sc, Script):
                 return addr.lower()
-        except:
+        except EmbitError:
             pass
 
     if not isinstance(sc, Script):
         try:
-            address_to_scriptpubkey(addr)
-        except:
+            sc = address_to_scriptpubkey(addr)
+        except EmbitError:
+            raise ValueError("invalid address")
+        # A base58 address with a valid checksum but an unknown version byte
+        # returns None here instead of raising, so verify a Script came back.
+        if not isinstance(sc, Script):
             raise ValueError("invalid address")
 
     return addr

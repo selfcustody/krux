@@ -131,6 +131,7 @@ class QRPartParser:
 
     def __init__(self):
         self.parts = {}
+        self.payload_len = 0
         self.total = -1
         self.format = None
         self.decoder = None
@@ -177,16 +178,34 @@ class QRPartParser:
             self.total = total
             return index - 1
         elif self.format == FORMAT_UR:
-            if not self.decoder:
-                from uUR import URDecoder
+            from uUR import URDecoder, DECODER_NO_RESULT, DECODER_ERR_INVALID_CHECKSUM
 
+            if not self.decoder:
                 self.decoder = URDecoder()
             data = data.decode() if isinstance(data, bytes) else data
-            self.decoder.receive_part(data)
+            if self.decoder.receive_part(data) in (
+                DECODER_NO_RESULT,
+                DECODER_ERR_INVALID_CHECKSUM,
+            ):
+                raise ValueError("Failed to decode UR")
         elif self.format == FORMAT_BBQR:
-            from .bbqr import parse_bbqr
+            from .bbqr import parse_bbqr, BBQR_MAX_PAYLOAD_LEN
 
             part, index, total = parse_bbqr(data)
+            # Only the first part is passed to detect_format, and its encoding and
+            # file type are used to decode all of them. Parts of a BBQr aren't bound
+            # to each other by any checksum, so reject the ones that disagree with
+            # the first instead of splicing different streams into a corrupt result.
+            if data[2] != self.bbqr.encoding or data[3] != self.bbqr.file_type:
+                raise ValueError("BBQr header mismatch")
+            if self.total not in (-1, total):
+                raise ValueError("BBQr part total mismatch")
+            if self.parts.get(index, part) != part:
+                raise ValueError("Conflicting BBQr part")
+            if index not in self.parts:
+                self.payload_len += len(part)
+                if self.payload_len > BBQR_MAX_PAYLOAD_LEN:
+                    raise ValueError("BBQr payload too big")
             self.parts[index] = part
             self.total = total
             return index
@@ -195,7 +214,9 @@ class QRPartParser:
     def is_complete(self):
         """Returns a boolean indicating whether or not enough parts have been parsed"""
         if self.format == FORMAT_UR:
-            return self.decoder.is_complete()
+            from uUR import DECODER_OK
+
+            return self.decoder.state == DECODER_OK
         keys_check = (
             sum(range(1, self.total + 1))
             if self.format in (FORMAT_PMOFN, FORMAT_NONE)

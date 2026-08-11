@@ -1,0 +1,28 @@
+include _wait-for-logo.txt
+
+# Navigate to New Mnemonic
+press BUTTON_B
+press BUTTON_A
+
+# Generate a 12-word mnemonic via camera entropy
+press BUTTON_A
+press BUTTON_A
+press BUTTON_A
+qrcode arara.png
+qrcode arara.png
+qrcode arara.png
+wait 0.3
+press BUTTON_A
+
+# Continue through entropy details, SHA256, and the mnemonic screen
+press BUTTON_A
+press BUTTON_A
+press BUTTON_A
+
+screenshot new-mnemonic-wallet-summary.png
+
+# Open Wallet Options
+press BUTTON_B
+press BUTTON_A
+
+screenshot new-mnemonic-wallet-options.png

@@ -117,7 +117,10 @@ If you make a mistake while loading a mnemonic, you can easily edit it. Simply t
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-seq-overview-300.png" align="right" class="amigo">
 
-After confirming your mnemonic, a screen with an **information box at the top** with the wallet's attributes is shown. If they are as expected, just press `Load Wallet`. If you need to change something you may customize the wallet by setting a `Passphrase` or using the `Customize` button.
+After confirming an existing mnemonic, a screen with an **information box at the
+top** shows the wallet's attributes. If they are as expected, just press
+`Load Wallet`. If you need to change something, you may customize the wallet by
+setting a `Passphrase` or using the `Customize` button.
 
 <div style="clear: both"></div>
 

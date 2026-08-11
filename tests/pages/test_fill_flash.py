@@ -123,8 +123,6 @@ def test_fill_flash_entropy_timeout_scenario(amigo, mocker):
 
 
 def test_fill_flash_insufficient_entropy_scenario(amigo, mocker):
-    # Test insufficient entropy scenario using mocker.patch instead of PropertyMock
-    # Following @qlrd recommendation to avoid false positive assertions
     from krux.pages.fill_flash import FillFlash
     from krux.pages.capture_entropy import CameraEntropy, INSUFFICIENT_VARIANCE_TH
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
@@ -137,10 +135,21 @@ def test_fill_flash_insufficient_entropy_scenario(amigo, mocker):
 
     ctx = create_ctx(mocker, btn_sequence)
     fill_flash = FillFlash(ctx)
+
+    # Fake clock so the capture timeout elapses after a few frames, instead of
+    # spinning on the mocked camera for 25 real seconds and piling up mock calls
+    clock = [0]
+
+    def _fake_time():
+        clock[0] += 5
+        return clock[0]
+
+    mocker.patch("krux.pages.fill_flash.time.time", side_effect=_fake_time)
+
     entropy_measurement = CameraEntropy(ctx)
 
-    # Use mocker.patch.object instead of PropertyMock as per @qlrd recommendation
-    # This avoids false positive assertions that can occur with PropertyMock
+    # Test insufficient entropy scenario using mocker.patch
+    # to avoid false positive assertions
     mocker.patch.object(
         entropy_measurement,
         "rms_value",

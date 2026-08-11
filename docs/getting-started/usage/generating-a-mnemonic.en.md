@@ -80,7 +80,14 @@ A low Shannon's entropy value could suggest that your dice are biased or that th
 
 After sufficient entropy is given, you can manually add custom entropy by editing some of the words. Simply touch or navigate to the word you want to change and replace it. Edited words will be highlighted, and the final word will automatically update to ensure a valid checksum. However, proceed with caution, modifying words can negatively impact the natural entropy previously captured.
 
-On the next screen, you will be loading a wallet. You can read more about this in [Loading a Mnemonic -> Confirm Wallet Attributes](./loading-a-mnemonic.md/#confirm-wallet-attributes).
+On the next screen, review the wallet attributes. Select `Continue` to load
+the wallet with the displayed settings, or select `Wallet Options` to set a
+`Passphrase` or `Customize` the wallet.
+
+<img src="../../../img/maixpy_amigo/new-mnemonic-wallet-summary-300.png" class="amigo">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-wallet-summary-250.png" class="m5stickv">
+<img src="../../../img/maixpy_amigo/new-mnemonic-wallet-options-300.png" class="amigo">
+<img src="../../../img/maixpy_m5stickv/new-mnemonic-wallet-options-250.png" class="m5stickv">
 
 <div style="clear: both"></div>
 

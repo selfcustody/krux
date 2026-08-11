@@ -106,6 +106,10 @@ jobs:
         run: uv python install ${{ matrix.py-version }}
       - name: Sync dependencies
         run: uv sync --frozen --python ${{ matrix.py-version }}
+      - name: Build libsecp256k1
+        run: uv run --python ${{ matrix.py-version }} poe secp256k1-build
+      - name: Check embit uses the C secp256k1
+        run: uv run --python ${{ matrix.py-version }} poe secp256k1-check
       - name: Run tests
         run: uv run --python ${{ matrix.py-version }} poe test-simple
 
@@ -124,6 +128,10 @@ jobs:
         run: uv python install 3.12.13
       - name: Sync dependencies
         run: uv sync --frozen --python 3.12.13
+      - name: Build libsecp256k1
+        run: uv run --python 3.12.13 poe secp256k1-build
+      - name: Check embit uses the C secp256k1
+        run: uv run --python 3.12.13 poe secp256k1-check
       - name: Build coverage file
         run: uv run --python 3.12.13 pytest --cache-clear --cov src/krux --cov-report xml tests
       - name: Upload coverage reports to Codecov with GitHub Action
