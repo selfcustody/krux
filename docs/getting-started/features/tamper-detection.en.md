@@ -33,6 +33,8 @@ When you enable the *TC Flash Hash at Boot* feature, the device will require you
 
 *TC Flash Hash* produces a unique visual and verbal signature (an image and two sets of words) that helps you instantly recognize unauthorized changes. See below for details on how it works and what to expect from its output.
 
+**Privacy warning**: Right after the *TC Code* is set, Krux offers to fill the empty blocks of the flash memory with entropy captured from the camera. Camera frames are stored as they are captured, without scrambling, so that what gets written to the flash stays verifiable. As a consequence, anyone who later dumps the device's flash memory can reconstruct the captured images. Frame something well-lit, visually rich but harmless, such as fabric, a textured surface, gravel or foliage, and keep faces, documents, screens, seed backups, addresses and any recognizable feature of your home or surroundings out of the shot.
+
 ### How Krux Tamper Detection Works
 
 ## Tamper Check Code (TC Code)
@@ -67,6 +69,8 @@ Any change in the flash content results in a different image and words:
 ### Filling Empty Flash Memory Blocks
 
 Use this to enhance tamper detection. Krux performs a memory sweep while capturing a live feed from the camera. Whenever an empty block is found in the flash memory, it uses the data from the image to fill these empty spaces when the entropy is good enough. It estimates the image's entropy by evaluating its color variance waiting until a minimum threshold is met.
+
+Because the captured frames are written to the flash unmodified, so that the stored content remains verifiable, avoid framing anything that could compromise your privacy. See the privacy warning in [Setting Up Tamper Detection](#setting-up-tamper-detection).
 
 A progress bar is shown below, when the highlighted color appears, it means that this flash memory space is not empty and Krux will move on to the next one to fill any empty spaces. When you run it a second time, nothing will change because all the memory will be filled. You will see the progress bar move quickly, showing only the highlighted color, and a still image will be displayed on the camera during the process.
 
