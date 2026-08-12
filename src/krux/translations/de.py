@@ -251,6 +251,7 @@ translation_array = [
     "QR-Etikett",
     "Menge",
     "RX Pin",
+    "Lesen Sie die Dokumentation, bevor Sie fortfahren",
     "Neustart",
     "Empfangen",
     "Region:",

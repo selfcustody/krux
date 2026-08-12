@@ -251,6 +251,7 @@ translation_array = [
     "Etiqueta QR",
     "Quantidade",
     "Pino RX",
+    "Leia a documentação antes de prosseguir",
     "Reiniciar",
     "Recebimento",
     "Região:",

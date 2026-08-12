@@ -251,6 +251,7 @@ translation_array = [
     "Nhãn QR",
     "Số lượng",
     "RX Pin",
+    "Đọc tài liệu trước khi tiếp tục",
     "Khởi động lại",
     "Nhận được",
     "Vùng:",

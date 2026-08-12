@@ -251,6 +251,7 @@ translation_array = [
     "Texte d'étiquette QR",
     "Quantité",
     "RX Fiche",
+    "Lisez la documentation avant de continuer",
     "Redémarrer",
     "Recevoir",
     "Région\u2009:",
