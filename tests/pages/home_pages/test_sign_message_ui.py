@@ -2,6 +2,31 @@ from ...shared_mocks import MockPrinter, get_mock_open
 from .. import create_ctx
 from .test_home import tdata
 
+# Pre-built BIP-322 Simple PSBTs for tdata.SINGLESIG_SIGNING_KEY,
+BIP322_P2PKH_PSBT = "cHNidP8BAD0CAAAAAQCT8JL2BtAApmsl1B/zBHFH8tXf9qPfLSK7A6gLAhQsAAAAAAD/////AQAAAAAAAAAAAWoAAAAAAQkMaGVsbG8gYmlwMzIyAAEBIgAAAAAAAAAAGXapFNmG7QG3oiIlpw7b8rp8+2OhXLOqiKwiBgOq61LddJTDYQSd5nzGgOg+vLu9vrE2N9ks2EX3AwivXhhzxdoKLAAAgAAAAIAAAACAAAAAAAAAAAAAAA=="
+
+BIP322_P2SH_P2WPKH_PSBT = "cHNidP8BAD0CAAAAAdnOujvnNBB4CCjtIYSFBflzrpwyNFOW3QgYqsYSwwlVAAAAAAD/////AQAAAAAAAAAAAWoAAAAAAQkMaGVsbG8gYmlwMzIyAAEBIAAAAAAAAAAAF6kUP7bpWBLle7RpH5pKYohiphpPdpuHIgYDmztpS4/FteB/sGnHg8rHVPXTjD4IvtGWDjH9sd2jXCQYc8XaCjEAAIAAAACAAAAAgAAAAAAAAAAAAAA="
+
+BIP322_P2WPKH_PSBT = "cHNidP8BAD0CAAAAAZEdpOdV7S+h47f+ubX6I4iaALKOjpPS6Xud3m2i7JLaAAAAAAD/////AQAAAAAAAAAAAWoAAAAAAQkMaGVsbG8gYmlwMzIyAAEBHwAAAAAAAAAAFgAUwM681sPTyox13F7GLr5VMw75EOIiBgMw1U/Q3UIKbl+NNiT180gsrjUPedXwdTv1vu+cLZGvPBhzxdoKVAAAgAAAAIAAAACAAAAAAAAAAAAAAA=="
+
+BIP322_P2TR_PSBT = "cHNidP8BAD0CAAAAAQ8eLSqZ9cH1Pi5bqoN9Rrwe7JbtPh8nZ+GhDGQTSR9pAAAAAAD/////AQAAAAAAAAAAAWoAAAAAAQkMaGVsbG8gYmlwMzIyAAEBKwAAAAAAAAAAIlEgpghp8NvPHcZZyc7Lr4BQE16p6M3EhwU/HcaICUncaEwhFsyKS8ZNiXvdxfvC9nD3qLoLOGd5EGzxIjxvxdfNb8EVGQBzxdoKVgAAgAAAAIAAAACAAAAAAAAAAAAAAA=="
+
+INVALID_BIP322_PSBT = "cHNidP8BAFICAAAAARERERERERERERERERERERERERERERERERERERERERERAAAAAAD/////AaCGAQAAAAAAFgAUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+INVALID_BIP322_TWO_VINS_PSBT = "cHNidP8BAGYCAAAAApEdpOdV7S+h47f+ubX6I4iaALKOjpPS6Xud3m2i7JLaAAAAAAD/////kR2k51XtL6Hjt/65tfojiJoAso6Ok9Lpe53ebaLsktoAAAAAAP////8BAAAAAAAAAAABagAAAAABCQxoZWxsbyBiaXAzMjIAAQEfAAAAAAAAAAAWABTAzrzWw9PKjHXcXsYuvlUzDvkQ4gABAR8AAAAAAAAAABYAFMDOvNbD08qMddxexi6+VTMO+RDiAAA="
+INVALID_BIP322_WRONG_PREVN_PSBT = "cHNidP8BAD0CAAAAAZEdpOdV7S+h47f+ubX6I4iaALKOjpPS6Xud3m2i7JLaAQAAAAD/////AQAAAAAAAAAAAWoAAAAAAQkMaGVsbG8gYmlwMzIyAAEBHwAAAAAAAAAAFgAUwM681sPTyox13F7GLr5VMw75EOIAAA=="
+INVALID_BIP322_FUNDED_PSBT = "cHNidP8BAD0CAAAAAZEdpOdV7S+h47f+ubX6I4iaALKOjpPS6Xud3m2i7JLaAAAAAAD/////AQEAAAAAAAAAAWoAAAAAAQkMaGVsbG8gYmlwMzIyAAEBHwAAAAAAAAAAFgAUwM681sPTyox13F7GLr5VMw75EOIAAA=="
+INVALID_BIP322_NON_OP_RETURN_PSBT = "cHNidP8BAFICAAAAAZEdpOdV7S+h47f+ubX6I4iaALKOjpPS6Xud3m2i7JLaAAAAAAD/////AQAAAAAAAAAAFgAUwM681sPTyox13F7GLr5VMw75EOIAAAAAAQkMaGVsbG8gYmlwMzIyAAEBHwAAAAAAAAAAFgAUwM681sPTyox13F7GLr5VMw75EOIAAA=="
+INVALID_BIP322_NO_UTXO_PSBT = "cHNidP8BAD0CAAAAAZEdpOdV7S+h47f+ubX6I4iaALKOjpPS6Xud3m2i7JLaAAAAAAD/////AQAAAAAAAAAAAWoAAAAAAQkMaGVsbG8gYmlwMzIyAAAA"
+
+# P2PKH with non_witness_utxo (parent tx vout[0] = address spk) instead of witness_utxo.
+BIP322_P2PKH_NON_WITNESS_UTXO_PSBT = "cHNidP8BAD0CAAAAAQCT8JL2BtAApmsl1B/zBHFH8tXf9qPfLSK7A6gLAhQsAAAAAAD/////AQAAAAAAAAAAAWoAAAAAAQkMaGVsbG8gYmlwMzIyAAEAVQAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/////AAAAAAABAAAAAAAAAAAZdqkU2YbtAbeiIiWnDtvyunz7Y6Fcs6qIrAAAAAAiBgOq61LddJTDYQSd5nzGgOg+vLu9vrE2N9ks2EX3AwivXhhzxdoKLAAAgAAAAIAAAACAAAAAAAAAAAAAAA=="
+
+# Prepared for fingerprint b8688df1 — tdata's fp 73c5da0a doesn't match.
+BIP322_OTHER_WALLET_PSBT = "cHNidP8BAD0CAAAAAcGgKxwXL1jXcIP4vdKJAPjw6N8+KaBi+XHCxdO9slW6AAAAAAD/////AQAAAAAAAAAAAWoAAAAAAQkMaGVsbG8gYmlwMzIyAAEBHwAAAAAAAAAAFgAURaXKkYxfBPgdgJnj4ES6lkXFXPkiBgLh6Dn3camvYFVOBD3posWvbavFvR0y8zGXCX3KVI6JVxi4aI3xVAAAgAAAAIAAAACAAAAAAAAAAAAAAA=="
+
+# Valid BIP-322 p2wpkh shape but bip32_derivations stripped.
+BIP322_P2WPKH_NO_DERIV_PSBT = "cHNidP8BAD0CAAAAAZEdpOdV7S+h47f+ubX6I4iaALKOjpPS6Xud3m2i7JLaAAAAAAD/////AQAAAAAAAAAAAWoAAAAAAQkMaGVsbG8gYmlwMzIyAAEBHwAAAAAAAAAAFgAUwM681sPTyox13F7GLr5VMw75EOIAAA=="
+
 
 def test_sign_message(mocker, m5stickv, tdata):
     import binascii
@@ -68,7 +93,7 @@ def test_sign_message(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Hex Public Key Text
                 BUTTON_ENTER,  # PK QR code
             ],
-            "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==",
+            "KNDYjnAavccLPKVJ7u6RjWs9n2NzN+kHc8MHrrUiQRq9TEoXa3UAbwsjESNCi7wcAZ9Vw1N7K+ujZzasgEgsvL0=",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
@@ -86,7 +111,7 @@ def test_sign_message(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Hex Public Key Text
                 BUTTON_ENTER,  # PK QR code
             ],
-            "MEQCIEHpCMfQ+5mBAOH//OCxF6iojpVtIS6G7X+3r3qB/0CaAiAkbjW2SGrPLvju+O05yH2x/4EKL2qlkdWnquiVkUY3jQ==",
+            "KIyFNagItWNotujcQQ7AoXLO90ndVEmsQvXeJbaTnFKufb2eq+G1RKvxRw+eR887Rn0UgqAKyrji4GQQYGfxvkw=",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
@@ -167,11 +192,11 @@ def test_sign_message(mocker, m5stickv, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Press "Go" (saved pubkey to SD)
             ],
-            "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==",  # 4 base64 for display_qr_codes / print_qr_prompt
+            "KNDYjnAavccLPKVJ7u6RjWs9n2NzN+kHc8MHrrUiQRq9TEoXa3UAbwsjESNCi7wcAZ9Vw1N7K+ujZzasgEgsvL0=",  # 4 base64 for display_qr_codes / print_qr_prompt
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",  # 5 pubkey for display_qr_codes / print_qr_prompt
             # 6 SD file
             binascii.b2a_base64(
-                "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==".encode(
+                "KNDYjnAavccLPKVJ7u6RjWs9n2NzN+kHc8MHrrUiQRq9TEoXa3UAbwsjESNCi7wcAZ9Vw1N7K+ujZzasgEgsvL0=".encode(
                     "utf-8"
                 ),
                 newline=False,
@@ -206,7 +231,6 @@ def test_sign_message(mocker, m5stickv, tdata):
             with patch(
                 "builtins.open", new=get_mock_open({"/sd/signed-message.sig": case[6]})
             ) as mock_file:
-
                 # function being tested
                 home.sign_message()
 
@@ -263,7 +287,7 @@ def test_sign_message_invalid_derivations(mocker, m5stickv, tdata):
             ],
             "signmessage m84h ascii:hello",
             "m84h",
-            "MEQCIA7DCCFox6tQqC3GE9a5IMvm8cVu1Zh6OWcUE1gls77gAiAzLncevU9FFJRvG83ahSJ8hISimgtSSdRHye2rmijwlg==",
+            "J7jAswueRmlhh64HDmfIuVvo5pcMMgBYdSCXAnMh2NQsQUwYkyI1O8G0F/8ChIiOz2pfCiQwE0FfOXWTAtMsMDE=",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
         ),
         (
@@ -278,7 +302,7 @@ def test_sign_message_invalid_derivations(mocker, m5stickv, tdata):
             ],
             "signmessage m/8xh/0/0 ascii:hello",
             "m/8xh/0/0",
-            "MEQCIDL/XdIRF+v0wnN/JDOu2XYMTYqJaAyjuIDdSG4E/909AiASARSc1zfJsvUKC6MDQlM3E2lrkTx3iYfpJUWRZy/Vpg==",
+            "JwdAF2MY6uglo4E3Wxbbi9G6NyrEna4LyYBsUueJg8yoLQm39BHDJ+ulgRhXl2RI/BManG05oTmRyXOqjDfDrs0=",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
         ),
         (  # 2 - QR invalid (empty segment)
@@ -293,15 +317,13 @@ def test_sign_message_invalid_derivations(mocker, m5stickv, tdata):
             ],
             "signmessage m//0 ascii:hello",
             "m//0",
-            "MEQCIDx4K8atJhGiaFdCCsgaUqFv22ncJ3AFHczFsNLZmbcGAiBuQdB5/pztOHjyQt0DKmuMKo799raQuRrXMVKK69ELjQ==",
+            "J0yYgnVLwEditYd+QwmJrXqFRplrBqfUfUHOpAF4m+EEW9MYf4BVp/SWPujLDYfQKWxbpRPVZdaYuyGm77bNSsE=",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
         ),
     ]
 
-    n = 0
-    for case in cases:
+    for n, case in enumerate(cases):
         print("Case: ", n)
-        n = 0
 
         # A mainnet wallet
         wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
@@ -372,7 +394,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             False,
             "a test message with a colon ':' character.",
             "3. bc1qgl5…3cn3",  # bc1qgl5vlg0zdl7yvprgxj9fevsc6q6x5dmcyk3cn3
-            "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
+            "KN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
         (  # 1 - Sign P2WPKH Testnet
             [
@@ -387,7 +409,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             False,
             "A test message.",
             "3. tb1qynp…m5km",
-            "ILc30ti8OPSpCtzfj7sNnftANBCuVpyRX7pnM3iAgOk9F9IUtnXNPus0+MF12y5HKYHAB6IVYr66sLmL3Vi3oEE=",
+            "KLc30ti8OPSpCtzfj7sNnftANBCuVpyRX7pnM3iAgOk9F9IUtnXNPus0+MF12y5HKYHAB6IVYr66sLmL3Vi3oEE=",
         ),
         (  # 2 - Sign P2TR Mainnet
             [
@@ -432,7 +454,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             False,
             "a test message with a colon ':' character.",
             "3. 38CahkV…sEAN",
-            "HyH8898c2S6eF8hTPGhRqLC6UQrJrhw/fdguBeFG0cCrOFkbG8TCVURXOgxXaEV93vrFlHyxNGEvL10IcsLtvvI=",
+            "IyH8898c2S6eF8hTPGhRqLC6UQrJrhw/fdguBeFG0cCrOFkbG8TCVURXOgxXaEV93vrFlHyxNGEvL10IcsLtvvI=",
         ),
         (  # 5 - Sign P2WPKH Mainnet - Save to SD card
             [
@@ -449,7 +471,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             True,  # Sign to SD
             "A test message.",
             "3. bc1qgl5…3cn3",
-            "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
+            "KN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
         (  # 6 - Sign P2WPKH Mainnet - Load from and save to SD card
             [
@@ -468,7 +490,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             True,  # Sign to SD
             "A test message.",
             "3. bc1qgl5…3cn3",
-            "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
+            "KN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
         (  # 7 - Sign empty - Load from and save to SD card
             [
@@ -488,7 +510,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             True,  # Sign to SD
             "A test message.",
             "3. bc1qgl…cn3",
-            "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
+            "KN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
     ]
     case_count = 0
@@ -532,7 +554,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
 
         if case[2] != b"":
             ctx.display.draw_hcentered_text.assert_has_calls(
-                [mocker.call("Message:", 10, theme.highlight_color)]
+                [mocker.call("Message:", mocker.ANY, theme.highlight_color)]
             )
             ctx.display.draw_hcentered_text.assert_has_calls(
                 [mocker.call(case[4], mocker.ANY, max_lines=10)]
@@ -577,21 +599,321 @@ def test_load_from_sd_card(mocker, m5stickv, tdata):
 
     ctx = create_ctx(mocker, btn_seq, wallet)
     sign_msg = SignMessage(ctx)
-
-    # test sign at address with binary content (it can't be decoded to UTF8 and it is not sign to address)
-    sign_msg._sign_at_address_from_sd(file_content) == None
-
-    # mock load of file
+    assert sign_msg._sign_at_address_from_sd(file_content) is None
     sign_msg._load_message = lambda: (file_content, FORMAT_NONE, filename)
 
     mocker.spy(sign_msg, "_export_signature")
     mocker.spy(sign_msg, "_export_to_qr")
-
-    # Successful sign a binary (that can't be decoded) from sd card
     sign_msg.sign_message()
-
-    # Assert signature sucessfully exported to QR
     sign_msg._export_signature.assert_called()
     sign_msg._export_to_qr.assert_called()
 
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_sign_bip322_psbt_menu(mocker, m5stickv, tdata):
+    from krux import bip137, bip322
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # Confirm Sign?
+        BUTTON_ENTER,  # Select "Sign to QR code"
+        BUTTON_ENTER,  # Dismiss QR display
+    ]
+
+    # (script_type, opaque pre-built PSBT, signing module)
+    cases = [
+        ("p2pkh", BIP322_P2PKH_PSBT, bip137),
+        ("p2sh-p2wpkh", BIP322_P2SH_P2WPKH_PSBT, bip137),
+        ("p2wpkh", BIP322_P2WPKH_PSBT, bip322),
+        ("p2tr", BIP322_P2TR_PSBT, bip322),
+    ]
+
+    # `mocker.spy` wraps the live module attribute; re-running it on a
+    # later iteration would try to spy the previous spy and fail with
+    # InvalidSpecError.
+    original_bip137_sign = bip137.sign
+    original_bip322_sign = bip322.sign
+    for i, case in enumerate(cases):
+        print("case %d (%s)" % (i, case[0]))
+        bip137.sign = original_bip137_sign
+        bip322.sign = original_bip322_sign
+
+        wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+        ctx = create_ctx(mocker, btn_seq, wallet)
+
+        home = SignMessage(ctx)
+        mocker.patch.object(
+            QRCodeCapture,
+            "qr_capture_loop",
+            new=lambda self: (case[1], FORMAT_NONE),
+        )
+        mocker.patch.object(home, "has_sd_card", new=lambda: False)
+        mocker.patch.object(
+            home,
+            "display_qr_codes",
+            new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+        )
+        mocker.patch.object(home, "print_standard_qr", new=lambda *a, **kw: None)
+        sign_spy = mocker.spy(case[2], "sign")
+        home.sign_message()
+        sign_spy.assert_called_once()
+
+
+def test_sign_bip322_psbt_to_sd(mocker, m5stickv, tdata):
+    from krux import bip322
+    from krux.pages import file_operations
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.sd_card import PSBT_FILE_EXTENSION, SIGNED_FILE_SUFFIX
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # Confirm Sign?
+        BUTTON_PAGE,  # Move to "Sign to SD card"
+        BUTTON_ENTER,  # Press "Sign to SD card"
+    ]
+
+    cases = [
+        ("p2wpkh", BIP322_P2WPKH_PSBT),
+        ("p2tr", BIP322_P2TR_PSBT),
+    ]
+
+    original_serialize = bip322.serialize_bip322
+    for i, case in enumerate(cases):
+        print("case %d (%s)" % (i, case[0]))
+        bip322.serialize_bip322 = original_serialize
+
+        wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+        ctx = create_ctx(mocker, btn_seq, wallet)
+        home = SignMessage(ctx)
+        mocker.patch.object(
+            QRCodeCapture,
+            "qr_capture_loop",
+            new=lambda self, b=case[1]: (b, FORMAT_NONE),
+        )
+        mocker.patch.object(home, "has_sd_card", new=lambda: True)
+        savefile_mock = mocker.MagicMock()
+        mocker.patch.object(file_operations, "SaveFile", return_value=savefile_mock)
+        serialize_spy = mocker.spy(bip322, "serialize_bip322")
+
+        home.sign_message()
+
+        serialize_spy.assert_called_once()
+        savefile_mock.save_file.assert_called_once_with(
+            serialize_spy.spy_return,
+            "message",
+            "",
+            "Signature:",
+            PSBT_FILE_EXTENSION,
+            SIGNED_FILE_SUFFIX,
+            prompt=False,
+            save_as_binary=True,
+        )
+
+
+def test_sign_non_bip322_psbt_fail(mocker, m5stickv, tdata):
+    from krux import bip322
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
+
+    cases = [
+        INVALID_BIP322_PSBT,
+        INVALID_BIP322_TWO_VINS_PSBT,
+        INVALID_BIP322_WRONG_PREVN_PSBT,
+        INVALID_BIP322_FUNDED_PSBT,
+        INVALID_BIP322_NON_OP_RETURN_PSBT,
+        INVALID_BIP322_NO_UTXO_PSBT,
+    ]
+
+    original_check = bip322.check_bip322_psbt
+    for i, psbt_b64 in enumerate(cases):
+        print("Case %d" % i)
+        bip322.check_bip322_psbt = original_check
+
+        wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+        ctx = create_ctx(mocker, [BUTTON_ENTER], wallet)
+        home = SignMessage(ctx)
+        mocker.patch.object(
+            QRCodeCapture,
+            "qr_capture_loop",
+            new=lambda self, b=psbt_b64: (b, FORMAT_NONE),
+        )
+        check_spy = mocker.spy(bip322, "check_bip322_psbt")
+        flash_spy = mocker.spy(home, "flash_error")
+        home.sign_message()
+        check_spy.assert_called_once()
+        assert not check_spy.spy_return
+        flash_spy.assert_called_once()
+
+
+def test_sign_bip322_psbt_accepts_non_witness_utxo(mocker, m5stickv, tdata):
+    from krux import bip137, bip322
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # Confirm Sign?
+        BUTTON_ENTER,  # Select "Sign to QR code"
+        BUTTON_ENTER,  # Dismiss QR display
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    home = SignMessage(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (BIP322_P2PKH_NON_WITNESS_UTXO_PSBT, FORMAT_NONE),
+    )
+    mocker.patch.object(home, "has_sd_card", new=lambda: False)
+    mocker.patch.object(
+        home,
+        "display_qr_codes",
+        new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+    )
+    mocker.patch.object(home, "print_standard_qr", new=lambda *a, **kw: None)
+    check_spy = mocker.spy(bip322, "check_bip322_psbt")
+    sign_spy = mocker.spy(bip137, "sign")
+    home.sign_message()
+    check_spy.assert_called_once()
+    assert check_spy.spy_return
+    sign_spy.assert_called_once()
+
+
+def test_sign_bip322_psbt_from_qrcodes(mocker, m5stickv, tdata):
+    import base64
+    from krux import bip322
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_UR, FORMAT_BBQR
+    from krux.pages.qr_capture import QRCodeCapture
+    from ur.ur import UR
+    from urtypes.crypto import PSBT as URPSBT
+
+    cases = [
+        (
+            tdata.SINGLESIG_SIGNING_KEY,
+            [BUTTON_ENTER] * 6,
+            BIP322_P2WPKH_PSBT,
+            FORMAT_UR,
+        ),
+        (
+            tdata.SINGLESIG_SIGNING_KEY,
+            [BUTTON_ENTER] * 6,
+            BIP322_P2TR_PSBT,
+            FORMAT_UR,
+        ),
+        (
+            tdata.SINGLESIG_SIGNING_KEY,
+            [BUTTON_ENTER] * 6,
+            BIP322_P2WPKH_PSBT,
+            FORMAT_BBQR,
+        ),
+        (
+            tdata.SINGLESIG_SIGNING_KEY,
+            [BUTTON_ENTER] * 6,
+            BIP322_P2TR_PSBT,
+            FORMAT_BBQR,
+        ),
+    ]
+
+    original_bip322_sign = bip322.sign
+    for i, case in enumerate(cases):
+        print("Case %d: %s" % (i, case))
+        bip322.sign = original_bip322_sign
+
+        raw = base64.b64decode(case[2])
+        if case[3] == FORMAT_UR:
+            raw = UR("crypto-psbt", URPSBT(raw).to_cbor())
+
+        wallet = Wallet(case[0])
+        ctx = create_ctx(mocker, case[1], wallet)
+        home = SignMessage(ctx)
+        mocker.patch.object(
+            QRCodeCapture,
+            "qr_capture_loop",
+            new=lambda self, r=raw, f=case[3]: (r, f),
+        )
+        mocker.patch.object(home, "has_sd_card", new=lambda: False)
+        mocker.patch.object(
+            home,
+            "display_qr_codes",
+            new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
+        )
+        mocker.patch.object(home, "print_standard_qr", new=lambda *a, **kw: None)
+        sign_spy = mocker.spy(bip322, "sign")
+        home.sign_message()
+        sign_spy.assert_called_once()
+
+
+def test_sign_bip322_psbt_fail(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+
+    cases = [
+        # Just decline sign
+        (
+            tdata.SINGLESIG_SIGNING_KEY,
+            [BUTTON_ENTER, BUTTON_PAGE],
+            BIP322_P2WPKH_PSBT,
+            None,
+        ),
+        # Key on psbt do not have derivation
+        (
+            tdata.SINGLESIG_SIGNING_KEY,
+            [BUTTON_ENTER, BUTTON_ENTER],
+            BIP322_P2WPKH_NO_DERIV_PSBT,
+            "Key not match PSBT",
+        ),
+        # Keys derivations differ
+        (
+            tdata.SINGLESIG_SIGNING_KEY,
+            [BUTTON_ENTER, BUTTON_ENTER],
+            BIP322_OTHER_WALLET_PSBT,
+            "Key not match PSBT",
+        ),
+        # Same, but swapped
+        (
+            tdata.SINGLESIG_ACTION_KEY,
+            [BUTTON_ENTER, BUTTON_ENTER],
+            BIP322_P2PKH_PSBT,
+            "Failed to load",
+        ),
+    ]
+
+    for i, case in enumerate(cases):
+        print("Case %d: %s" % (i, case))
+        wallet = Wallet(case[0])
+        ctx = create_ctx(mocker, case[1], wallet)
+        home = SignMessage(ctx)
+        mocker.patch.object(
+            QRCodeCapture,
+            "qr_capture_loop",
+            new=lambda self, b=case[2]: (b, FORMAT_NONE),
+        )
+        flash_spy = mocker.spy(home, "flash_error")
+        home.sign_message()
+        if case[3] is None:
+            flash_spy.assert_not_called()
+        else:
+            flash_spy.assert_called_once_with(case[3])

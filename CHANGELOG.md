@@ -34,6 +34,9 @@ Switch from the pure-Python urtypes and foundation-ur-py packages to the new uUR
   reading a setting no longer writes back to storage
 - Hide the QR code title in line and region view modes, where it overlapped
   the part index
+- Check for recids in BIP-137 message signing
+- Add BIP-322 simple message signing for P2WPKH and P2TR single-sig
+  wallets, with BIP-137 fallback for P2PKH and P2SH-P2WPKH
 
 # Changelog 26.04.0 - April 2026
 
