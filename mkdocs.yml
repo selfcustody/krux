@@ -177,7 +177,7 @@ plugins:
           Printing: Impresión
           Settings: Ajustes
           From GUI application: Desde la Aplicación Gráfica
-          Exploring Features: Explorar Funciones
+          Exploring Features: Explorando Características
           Video Tutorials: Tutoriales en Video
           Troubleshooting: Solución de Problemas
           Usage: Uso
@@ -189,4 +189,7 @@ plugins:
           Fedora-like: Distros Fedora y similares
           Other linux distro: Otras distribuciones de Linux
           Setting a Coordinator and Signing: Configurar una Cartera Coordinadora y Firmar
-          
+          Features: Características
+          Encryption: Cifrado
+          Encryption Introduction: Introducción al Cifrado
+          KEF Specifications: Especificaciones de KEF
