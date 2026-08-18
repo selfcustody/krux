@@ -140,13 +140,15 @@ class WalletDescriptor(Page):
                 from ..utils import Utils
 
                 utils = Utils(self.ctx)
-                _, wallet_data = utils.load_file(
+                filename, wallet_data = utils.load_file(
                     (
                         DESCRIPTOR_FILE_EXTENSION,
                         JSON_FILE_EXTENSION,
                     ),
                     prompt=False,
                 )
+                if not filename:
+                    return None, None, False  # user backed out of the SD file browser
                 persisted = True
             except OSError:
                 pass

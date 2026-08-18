@@ -222,7 +222,7 @@ class Home(Page):
         load_method = self.load_method()
 
         if load_method > LOAD_FROM_SD:
-            return (None, None, "")
+            return None  # user chose Back
 
         if load_method == LOAD_FROM_CAMERA:
             from ..qr_capture import QRCodeCapture
@@ -241,6 +241,8 @@ class Home(Page):
             prompt=False,
             only_get_filename=True,
         )
+        if not psbt_filename:
+            return None  # user backed out of the SD file browser
         return (None, FORMAT_NONE, psbt_filename)
 
     def _sign_menu(self, signer, psbt_filename, outputs):
@@ -470,7 +472,10 @@ class Home(Page):
             return MENU_CONTINUE
 
         # Load a PSBT
-        data, qr_format, psbt_filename = self.load_psbt()
+        loaded = self.load_psbt()
+        if loaded is None:  # user chose Back on the load menu
+            return MENU_CONTINUE
+        data, qr_format, psbt_filename = loaded
 
         if data is None and psbt_filename == "":
             # Both the camera and the file on SD card failed!

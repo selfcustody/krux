@@ -65,8 +65,10 @@ class SignMessage(Utils):
             return (data, qr_format, "")
         if load_method == LOAD_FROM_SD:
             message_filename, data = self.load_file(prompt=False)
+            if not message_filename:
+                return None  # user backed out of the SD file browser
             return (data, FORMAT_NONE, message_filename)
-        return (None, None, "")
+        return None  # user chose Back
 
     def _is_valid_derivation_path(self, derivation_path):
         """Strictly checks if the derivation path is valid according to BIP32"""
@@ -368,7 +370,10 @@ class SignMessage(Utils):
 
     def sign_message(self):
         """Sign message user interface"""
-        data, qr_format, message_filename = self._load_message()
+        loaded = self._load_message()
+        if loaded is None:  # user chose Back on the load menu
+            return MENU_CONTINUE
+        data, qr_format, message_filename = loaded
 
         if data is None:
             self.flash_error(t("Failed to load"))
