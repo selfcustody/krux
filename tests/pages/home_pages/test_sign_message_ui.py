@@ -595,3 +595,55 @@ def test_load_from_sd_card(mocker, m5stickv, tdata):
     sign_msg._export_to_qr.assert_called()
 
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_sign_message_back_is_silent(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.pages import MENU_CONTINUE
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    btn_seq = [
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+
+    assert SignMessage(ctx).sign_message() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+    # "Back" is not a failure - it must not flash an error
+    assert not any(
+        call.args and call.args[0] == "Failed to load"
+        for call in ctx.display.flash_text.call_args_list
+    )
+
+
+def test_sign_message_sd_back_is_silent(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.pages import MENU_CONTINUE
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    btn_seq = [
+        BUTTON_PAGE,  # Go to "Load from SD card"
+        BUTTON_ENTER,  # Select "Load from SD card"
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    sign_msg = SignMessage(ctx)
+    mocker.patch.object(sign_msg, "has_sd_card", new=lambda: True)
+    # user backed out of the SD file browser
+    mocker.patch.object(sign_msg, "load_file", return_value=("", None))
+
+    assert sign_msg.sign_message() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+    # "Back" is not a failure - it must not flash an error
+    assert not any(
+        call.args and call.args[0] == "Failed to load"
+        for call in ctx.display.flash_text.call_args_list
+    )

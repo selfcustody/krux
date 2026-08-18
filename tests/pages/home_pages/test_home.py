@@ -682,6 +682,12 @@ def test_load_sign_psbt_menu(mocker, amigo, tdata):
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
+    # "Back" is not a failure - it must not flash an error
+    assert not any(
+        call.args and call.args[0] == "Failed to load"
+        for call in ctx.display.flash_text.call_args_list
+    )
+
     # assert that some methods where called, but not all
     for _method in [
         ("_pre_load_psbt_warn", "assert_called_once"),
@@ -693,6 +699,36 @@ def test_load_sign_psbt_menu(mocker, amigo, tdata):
     ]:
         home_method = getattr(home, _method[0])
         getattr(home_method, _method[1])()
+
+
+def test_load_sign_psbt_sd_back_is_silent(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.pages import MENU_CONTINUE
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # Go to "Load from SD card"
+        BUTTON_ENTER,  # Select "Load from SD card"
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
+    home = Home(ctx)
+    mocker.patch.object(home, "has_sd_card", new=lambda: True)
+    mock_utils = mocker.patch("krux.pages.utils.Utils")
+    # user backed out of the SD file browser
+    mock_utils.return_value.load_file.return_value = ("", None)
+
+    assert home.sign_psbt() == MENU_CONTINUE
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # "Back" is not a failure - it must not flash an error
+    assert not any(
+        call.args and call.args[0] == "Failed to load"
+        for call in ctx.display.flash_text.call_args_list
+    )
 
 
 def DISABLEDtest_sign_psbt_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
