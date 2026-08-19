@@ -34,7 +34,7 @@ x2 press BUTTON_A
 press BUTTON_C
 press BUTTON_A
 
-# Navigate to Tinyseed (Bits)
+# Navigate to Binary Grid (manual)
 x3 press BUTTON_C
 x2 press BUTTON_A
 

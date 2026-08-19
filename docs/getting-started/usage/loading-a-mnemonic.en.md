@@ -43,17 +43,17 @@ Retrieve an [encrypted mnemonic previously stored](./navigating-the-main-menu.md
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-other-formats-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-other-formats-300.png" align="right" class="amigo">
 
-Specialist backup formats are grouped in one menu: `Tinyseed`, `Tinyseed (Bits)`, `OneKey KeyTag`, `Binary Grid`, `Word Numbers`, and `Stackbit 1248`.
+Specialist backup formats are grouped in one menu: `Tinyseed (scan)`, `Binary Grid (manual)`, `OneKey KeyTag (scan)`, `Binary Grid (scan)`, `Word Numbers`, and `Stackbit 1248`.
 
 <div style="clear: both"></div>
 
-#### Tinyseed
+#### Tinyseed (scan)
 
 [Tinyseed](https://tinyseed.io/) directly encodes a seed as binary on a compact backup plate. Krux can scan a completed Tinyseed with its camera. This feature is not available in the [Krux Mobile Android app](../../faq.md#what-is-krux-mobile-android-app).
 
 Place the backup over a black background and fill punched areas with black to improve contrast. You can also scan a [thermally printed version](../features/printing/printing.md) or a completed template. See the [encoded examples](../features/tinyseed.md) and [transcription templates](../templates/index.md).
 
-#### Tinyseed (Bits)
+#### Binary Grid (manual)
 
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-via-tinyseed-filled-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-tinyseed-filled-300.png" align="right" class="amigo">
@@ -67,11 +67,11 @@ Enter each BIP39 word number (1-2048) in binary by toggling its bits. Krux calcu
 
 <div style="clear: both"></div>
 
-#### OneKey KeyTag
+#### OneKey KeyTag (scan)
 
 [OneKey KeyTag](https://onekey.so/products/onekey-keytag/) also stores a seed as a compact binary pattern. Use the camera to scan the completed plate.
 
-#### Binary Grid
+#### Binary Grid (scan)
 
 Use the camera to scan another supported binary-grid backup or a completed
 transcription template.
