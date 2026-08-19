@@ -397,6 +397,8 @@ translation_array = [
     "van hex",
     "van utf8",
     "is geen geldig adres",
+    "handmatig",
+    "scannen",
     "schuifgeval",
     "Slaagkans:",
     "veeg",
