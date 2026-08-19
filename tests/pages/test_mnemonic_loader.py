@@ -70,10 +70,10 @@ def test_other_formats_menu_routes_existing_handlers(m5stickv, mocker):
 
     items = menu.call_args.args[1]
     assert [label for label, _ in items] == [
-        "Tinyseed",
-        "Tinyseed (Bits)",
-        "OneKey KeyTag",
-        "Binary Grid",
+        "Tinyseed (scan)",
+        "Binary Grid (manual)",
+        "OneKey KeyTag (scan)",
+        "Binary Grid (scan)",
         "Word Numbers",
         "Stackbit 1248",
     ]
@@ -84,6 +84,29 @@ def test_other_formats_menu_routes_existing_handlers(m5stickv, mocker):
         "scan Binary Grid",
         "numbers",
         "stackbit",
+    ]
+
+
+def test_other_formats_translates_input_methods(m5stickv, mocker):
+    from krux.krux_settings import locale_control
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.login import Login
+
+    locale_control.load_locale("pt-BR")
+    ctx = create_ctx(mocker, [])
+    login = Login(ctx)
+    menu = mocker.patch("krux.pages.mnemonic_loader.Menu")
+    menu.return_value.back_index = 6
+    menu.return_value.run_loop.return_value = (6, MENU_CONTINUE)
+
+    login.load_other_formats()
+
+    items = menu.call_args.args[1]
+    assert [label for label, _ in items[:4]] == [
+        "Tinyseed (escanear)",
+        "Grade binária (manual)",
+        "OneKey KeyTag (escanear)",
+        "Grade binária (escanear)",
     ]
 
 
