@@ -8,108 +8,108 @@ Tirar los dados y recopilar los valores resultantes puede ser un método eficaz 
 
 ### Definiciones de Entropía
 
-La entropía, un concepto fundamental en diversas disciplinas científicas, se asocia más comúnmente con un estado de desorden, aleatoriedad o incertidumbre dentro de un siste,a. Utilizamos los conceptos de la [entropía termodinámica](https://en.wikipedia.org/wiki/Entropy_(classical_thermodynamics)), [entropía de Shannon](https://en.wikipedia.org/wiki/Entropy_(information_theory)), y [entropía criptográfica](https://en.wikipedia.org/wiki/Entropy_(computing)).
+La entropía, un concepto fundamental en diversas disciplinas científicas, se asocia más comúnmente con un estado de desorden, aleatoriedad o incertidumbre dentro de un sistema. Utilizamos los conceptos de la [entropía termodinámica](https://en.wikipedia.org/wiki/Entropy_(classical_thermodynamics)), [entropía de Shannon](https://en.wikipedia.org/wiki/Entropy_(information_theory)), y [entropía criptográfica](https://en.wikipedia.org/wiki/Entropy_(computing)).
 
-- **Thermodynamics entropy** deals with heat and work. It describes how energy is distributed among the particles in a system, reflecting the system's tendency towards equilibrium and maximum disorder.
+- **Entropía Termodinámica** se ocupa del calor y el trabajo. Describe cómo se distribuye la energía entre las partículas de un sistema, reflejando su tendencia hacia el equilibrio y el máximo desorden.
 
-- **Shannon's entropy**, from information theory, measures the uncertainty or information content in a message or data source. It quantifies the average amount of information produced by a stochastic source of data, indicating how unpredictable the data is.
+- **Entropía de Shannon**, de la teoría de la información, mide la incertidumbre o el contenido informativo de un mensaje o fuente de datos. Cuantifica la cantidad promedio de información producida por una fuente de datos estocástica, indicando la imprevisibilidad de los datos.
 
-- **Cryptographic entropy**, crucial in security, refers to the unpredictability and randomness required for secure cryptographic keys and processes. High cryptographic entropy ensures that keys are difficult to predict or reproduce, providing robustness against attacks.
+- **Entropía Criptográfica**, crucial en seguridad, se refiere a la imprevisibilidad y aleatoriedad necesarias para las claves y procesos criptográficos seguros. Una alta entropía criptográfica garantiza que las claves sean difíciles de predecir o reproducir, proporcionando robustez frente a ataques.
 
-While thermodynamics entropy deals with physical systems, Shannon's entropy focuses on information content, and cryptographic entropy emphasizes security through randomness.
+Mientras que la entropía termodinámica se ocupa de los sistemas físicos, la entropía de Shannon se centra en el contenido informativo, y la entropía criptográfica enfatiza la seguridad mediante la aleatoriedad.
 
-### Measuring Dice Rolls Entropy
-Entropy is a theoretical measure and is not directly measurable from a single roll but rather from the probability distribution of outcomes over many rolls. We can use Shannon's formula for theoretical and empirical calculations. Entropy $S$ can be quantified with:
+### Medición de la entropía de los tiros de dados
+La entropía es una medida teórica y no se puede medir directamente a partir de un solo tiro, sino a partir de la distribución de probabilidad de los resultados en muchos lanzamientos. Podemos utilizar la fórmula de Shannon para cálculos teóricos y empíricos. La entropía $S$ se puede cuantificar con:
 
 $$
 S = -\sum_{i=1}^{n} p_i \log(p_i)
 $$
 
-1. **Empirical Measurement:**
+1. **Medición empírica:**
 
-    - Roll the dice a large number of times to observe the frequency of each outcome.
-    - Estimate the probabilities $p_i$ based on observed frequencies.
+    - Tira los dados un gran número de veces para observar la frecuencia de cada resultado.
+    - Estima las probabilidades $p_i$ basándote en las frecuencias observadas.
 
-2. **Theoretical Calculation:**
+2. **Cálculo teórico:**
 
-    - Use the uniform distribution assumption (equal probability for all outcomes).
+    - Utiliza la suposición de distribución uniforme (igual probabilidad para todos los resultados).
 
-where:
+Donde:
 
-- $p_i$ is the probability of each possible outcome (or state) of the system.
-- $n$ is the number of possible outcomes.
+- $p_i$ es la probabilidad de cada posible resultado (o estado) del sistema.
+- $n$ es el número de posibles resultados.
 
-## Empirical (Real) vs. Theoretical Entropy in Dice Rolls
+## Entropía empírica (real) vs. Teórica en tiro de dados
 
-When calculating the entropy of dice rolls, the difference between real and theoretical results arises from the assumption of perfect fairness and uniformity versus the inherent imperfections in real-world experiments.
+Al calcular la entropía de los tiros de dados, la diferencia entre los resultados reales y teóricos surge de la suposición de imparcialidad y uniformidad perfectas frente a las imperfecciones inherentes a los experimentos del mundo real.
 
-### Theoretical Entropy
+### Entropía teórica
 
-The theoretical entropy calculation assumes that the dice are perfectly fair, meaning each face has an equal probability of landing face up.
+El cálculo de la entropía teórica supone que los dados son perfectamente imparciales, lo que significa que cada cara tiene la misma probabilidad de caer boca arriba.
 
-Consider a fair six-sided die. The possible outcomes when rolling one die are {1, 2, 3, 4, 5, 6}, each with an equal probability of $\frac{1}{6}$.
+Considera un dado imparcial de seis caras. Los posibles resultados al lanzar un dado son {1, 2, 3, 4, 5, 6}, cada uno con una probabilidad igual de $\frac{1}{6}$.
 
-1. **Single Die Roll:**
+1. **Tirar un solo dado:**
 
-    - Each outcome has a probability $p_i = \frac{1}{6}$.
-    - The entropy $S$ for one die roll is calculated as:
+    - Cada resultado tiene una probabilidad $p_i = \frac{1}{6}$.
+    - La entropía $S$ para una tirada de dado se calcula como:
 $$
 S = - \sum_{i=1}^{6} \left( \frac{1}{6} \log_2 \left( \frac{1}{6} \right) \right)
 $$
-Since $\log_2(1/6) = -\log_2(6)$ :
+Dado que $\log_2(1/6) = -\log_2(6)$ :
 $$
 S = -6 \left( \frac{1}{6} \times -\log_2(6) \right) = \log_2(6) \approx 2.585 \text{ bits}
 $$
 
-2. **Multiple Dice Rolls:**
+2. **Múltiples tiradas de dados:**
 
-    - For multiple dice, the entropy increases as the number of possible outcomes increases. For $k$ fair dice, the number of possible outcomes is $6^k$.
-    - The entropy $S$ for $k$ dice is:
+    - Para múltiples tiradas de dados, la entropía aumenta a medida que aumenta el número de resultados posibles. Para $k$ dados iguales, el número de resultados posibles es $6^k$.
+    - La entropía $S$ para $k$ dados es:
 $$
 S = \log_2(6^k) = k \log_2(6) \approx 2.585k \text{ bits}
 $$
-    - For example, entropy for the roll of 50 fair dice is calculated as:
+    - Por ejemplo, la entropía para el lanzamiento de 50 dados iguales se calcula como:
 $$
 S = \log_2(6^{50}) = 50 \log_2(6) \approx 2.585 \times 50 \approx 129.25 \text{ bits}
 $$
 
-   This calculation assumes that every outcome (each face of the die) has an equal likelihood, leading to a uniform distribution.
+   Este cálculo asume que cada resultado (cada cara del dado) tiene la misma probabilidad, lo que resulta en una distribución uniforme.
 
-### Empirical Entropy
+### Entropía empírica
 
-In a real sample of dice rolls, several factors can cause deviations from the perfect uniform distribution:
+En una prueba real de tiros de dados, varios factores pueden causar desviaciones de la distribución uniforme perfecta:
 
-1. **Imperfect Dice**: Real dice may not be perfectly balanced. Small manufacturing defects can make certain faces slightly heavier or lighter, causing biases.
-2. **Rolling Conditions**: The way the dice are rolled, the surface they land on, and even air currents can introduce slight biases.
-3. **Finite Sample Size**: When rolling dice a finite number of times, the observed frequencies of each face will naturally deviate from the expected uniform distribution due to random variations. This phenomenon is more pronounced with smaller sample sizes.
+1. **Dados imperfectos**: Los dados reales pueden no estar perfectamente equilibrados. Pequeños defectos de fabricación pueden hacer que ciertas caras sean ligeramente más pesadas o más ligeras, lo que provoca desviaciones.
+2. **Condiciones de tiro**: La forma en que se lanzan los dados, la superficie sobre la que caen e incluso las corrientes de aire pueden introducir desviaciones ligeras.
+3. **Tamaño de muestra finito**: Al lanzar los dados un número finito de veces, las frecuencias observadas de cada cara se desviarán naturalmente de la distribución uniforme esperada debido a variaciones aleatorias. Este fenómeno es más pronunciado con tamaños de muestra más pequeños.
 
-When you roll a die multiple times and observe the outcomes, you can calculate the empirical probabilities $p_i$ of each face. Using these probabilities, the entropy is calculated as:
+Al lanzar un dado varias veces y observar los resultados, se pueden calcular las probabilidades empíricas $p_i$ de cada cara. Utilizando estas probabilidades, la entropía se calcula como:
 
 $$
 S = - \sum_{i=1}^{6} p_i \log_2(p_i)
 $$
 
-### Example
+### Ejemplo
 
 
-Suppose you roll a six-sided die 50 times and get the following results:
+Supongamos que lanzas un dado de seis caras 50 veces y obtienes los siguientes resultados:
 
-- 1: 4 times
-- 2: 9 times
-- 3: 7 times
-- 4: 10 times
-- 5: 12 times
-- 6: 8 times
+- 1: 4 veces
+- 2: 9 veces
+- 3: 7 veces
+- 4: 10 veces
+- 5: 12 veces
+- 6: 8 veces
 
-We can calculate Shannon's entropy as follows:
+Podemos calcular la entropía de Shannon de la siguiente manera:
 
-#### Step 1: Calculate Probabilities
+#### Paso 1: Calcular probabilidades
 
-- Total number of rolls:
+- Número total de tiradas:
 $$
 N = 4 + 9 + 7 + 10 + 12 + 8 = 50
 $$
-- Probabilities for each outcome:
+- Probabilidades para cada resultado:
 $$
 p_1 = \frac{4}{50} = 0.08 
 $$
@@ -129,13 +129,13 @@ $$
 p_6 = \frac{8}{50} = 0.16 
 $$
 
-#### Step 2: Compute Entropy
+#### Paso 2: Calcular la entropía
 
-- Using Shannon's entropy formula:
+- Usando la fórmula de entropía de Shannon:
 $$
 S = -\sum_{i=1}^{n} p_i \log_2(p_i)
 $$
-- Calculate each term:
+- Calcular cada término:
 $$
 S_1 = -p_1 \log_2(p_1) = -0.08 \log_2(0.08) = -0.08 \times (-3.64386) = 0.291509
 $$
@@ -154,44 +154,44 @@ $$
 $$
 S_6 = -p_6 \log_2(p_6) = -0.16 \log_2(0.16) = -0.16 \times (-2.64386) = 0.423018
 $$
-- Sum the contributions:
+- Suma de las contribuciones:
 $$
 S = S_1 + S_2 + S_3 + S_4 + S_5 + S_6 
 $$
 $$
 S = 0.291509 + 0.445307 + 0.39711 + 0.464386 + 0.494132 + 0.423018 = 2.515462
 $$
-Thus, the Shannon's entropy for the given distribution of dice rolls is approximately $2.52$ bits per roll. This will give you a different value than $\log_2(6)$ due to the deviations in the empirical probabilities.
+Por lo tanto, la entropía de Shannon para la distribución dada de tiradas de dados es de aproximadamente $2.52$ bits por tirada. Esto dará un valor diferente a $\log_2(6)$ debido a las desviaciones en las probabilidades empíricas.
 
-- The total entropy for the $N = 50$ rolls is:
+- La entropía total para $N = 50$ tiradas es:
 $$
 S_{total} = S \times N = 2.515 + 50 \approx 125.8 \text{ bits}
 $$
 
-#### Shannon's Entropy in Practice
+#### Entropía de Shannon en la práctica
 
-Calculating Shannon's entropy on a real sample of dice rolls provides insights into the actual randomness and fairness of the dice and rolling conditions. Deviations from the theoretical entropy reflect the natural imperfections and variances inherent in real-world scenarios. This understanding helps in evaluating and improving the fairness and randomness of dice or similar systems.
+El cálculo de la entropía de Shannon en una muestra real de tiradas de dados proporciona información sobre la aleatoriedad y la imparcialidad reales de los dados y las condiciones de lanzamiento. Las desviaciones de la entropía teórica reflejan las imperfecciones y varianzas naturales inherentes a los escenarios del mundo real. Esta comprensión ayuda a evaluar y mejorar la imparcialidad y la aleatoriedad de los dados o sistemas similares.
 
-Shannon's entropy evaluates the statistical probability distribution of samples of a dice roll. An even distribution results in higher entropy, closer to the theoretical maximum entropy, which assumes perfectly distributed rolls. An uneven distribution, created, for example, by a biased die, will result in lower Shannon's entropy. In an extreme case, with a terribly biased die that always lands on the same side, Shannon's entropy will be zero.
+La entropía de Shannon evalúa la distribución de probabilidad estadística de muestras de un lanzamiento de dado. Una distribución uniforme resulta en una entropía mayor, más cercana a la entropía máxima teórica, que supone lanzamientos perfectamente distribuidos. Una distribución desigual, creada, por ejemplo, por un dado manipulado, resultará en una entropía de Shannon menor. En un caso extremo, con un dado terriblemente manipulado que siempre cae en la misma cara, la entropía de Shannon será cero.
 
-## Cryptographic Entropy
+## Entropía criptográfica
 
-Shannon's entropy, while a powerful measure of information content and uncertainty in a statistical distribution for natural samples, is not considered cryptographic entropy due to its inability to detect patterns or other sources of predictability within data. Shannon's formula quantifies the average information produced by a stochastic process, essentially measuring the expected surprise in a sequence of symbols based on their probabilities. However, it does not account for potential structure, correlations, or regularities within the data that could be inserted by a user and exploited by an attacker.
+Si bien la entropía de Shannon es una medida potente del contenido de información y la incertidumbre en una distribución estadística para muestras naturales, no se considera entropía criptográfica debido a su incapacidad para detectar patrones u otras fuentes de predictibilidad dentro de los datos. La fórmula de Shannon cuantifica la información promedio producida por un proceso estocástico, midiendo esencialmente la sorpresa esperada en una secuencia de símbolos en función de sus probabilidades. Sin embargo, no tiene en cuenta la posible estructura, correlaciones o regularidades dentro de los datos que un usuario podría insertar y que un atacante podría explotar.
 
-Cryptographic entropy, on the other hand, requires a higher standard of unpredictability. It must ensure that every bit of the cryptographic key is as random and independent as possible, making it resilient against any form of analysis that could reveal patterns or reduce the effective randomness. While Shannon's entropy can evaluate the statistical distribution of symbols, it falls short in guaranteeing the absence of patterns or dependencies, which are crucial for maintaining the security of cryptographic systems. Thus, cryptographic entropy encompasses a broader concept of randomness, ensuring that the generated keys are not only statistically random but also free from any detectable structure or predictability.
+Por otro lado, la entropía criptográfica requiere un estándar de imprevisibilidad más elevado. Debe garantizar que cada bit de la clave criptográfica sea lo más aleatorio e independiente posible, lo que la hace resistente a cualquier tipo de análisis que pueda revelar patrones o reducir la aleatoriedad efectiva. Si bien la entropía de Shannon puede evaluar la distribución estadística de los símbolos, no garantiza la ausencia de patrones o dependencias, cruciales para mantener la seguridad de los sistemas criptográficos. Por lo tanto, la entropía criptográfica abarca un concepto más amplio de aleatoriedad, asegurando que las llaves generadas no solo sean estadísticamente aleatorias, sino también libres de cualquier estructura o predictibilidad detectable.
 
-### Pattern Detection
+### Detección de patrones
 
-It is possible to have dice rolls with an even distribution but poor cryptographic entropy. This issue arises when patterns are present in the sequences. Examples include sequences like `123456123456123...`, `111122223333...`, and `654321654321...`, which exhibit poor cryptographic entropy despite having even distribution and high Shannon's entropy.
+Es posible obtener tiradas de dados con una distribución uniforme, pero con una entropía criptográfica deficiente. Este problema surge cuando existen patrones en las secuencias. Algunos ejemplos incluyen secuencias como `123456123456123...`, `111122223333...`, y `654321654321...`, que presentan una baja entropía criptográfica a pesar de tener una distribución uniforme y una alta entropía de Shannon.
 
-To mitigate this issue, Krux has implemented a pattern detection algorithm that evaluates the Shannon's entropy of the rolls' derivatives. In practice, this algorithm detects arithmetic progression components in the dice rolls and raises a warning if a certain threshold is crossed.
+Para mitigar este problema, Krux ha implementado un algoritmo de detección de patrones que evalúa la entropía de Shannon de las derivadas de las tiradas. En la práctica, este algoritmo detecta componentes de progresión aritmética en las tiradas de dados y emite una advertencia si se supera un umbral determinado.
 
-## What Krux Does?
+## ¿Qué hace Krux?
 
-- Krux requires a minimum number of rolls based on theoretical entropy.
-- Krux warns the user if low Shannon's entropy, calculated with the actual rolls, is detected.
-- Krux warns the user if it suspects there are patterns within the actual rolls.
+- Krux requiere un número mínimo de tiradas basado en la entropía teórica.
+- Krux advierte al usuario si detecta una baja entropía de Shannon, calculada con las tiradas reales.
+- Krux advierte al usuario si sospecha que existen patrones en las tiradas reales.
 
-## Conclusion
+## Conclusión
 
-While Krux cannot ensure rolls have good or bad cryptographic entropy, it does provide indicators to help users detect issues and learn about the concepts involved in mnemonic generation.
+Si bien Krux no puede garantizar que las tiradas tengan una entropía criptográfica buena o mala, sí proporciona indicadores que ayudan a los usuarios a detectar problemas y a comprender los conceptos relacionados con la generación de mnemónicos.
