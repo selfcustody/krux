@@ -397,6 +397,8 @@ translation_array = [
     "depuis hexa.",
     "depuis utf8",
     "Adresse valide\u2009!",
+    "manuel",
+    "scanner",
     "casse des caractères",
     "Taux de réussite:",
     "glisser",
