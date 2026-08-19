@@ -1332,6 +1332,7 @@ def test_load_12w_from_tiny_seed(amigo, mocker, mocker_printer):
     login.load_key_from_tiny_seed()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    ctx.display.draw_hcentered_text.assert_any_call("Binary Grid")
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
