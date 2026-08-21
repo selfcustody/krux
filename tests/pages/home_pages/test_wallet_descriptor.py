@@ -1,6 +1,7 @@
 import pytest
 from ...shared_mocks import MockPrinter
-from .test_home import tdata, create_ctx
+from .. import create_ctx, assert_not_flashed
+from .test_home import tdata
 from ...test_wallet import tdata as wallet_tdata
 
 
@@ -115,7 +116,10 @@ def test_wallet(mocker, m5stickv, tdata):
         # Mock SD card descriptor loading
         if case[4][:3] == [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER]:
             mock_utils = mocker.patch("krux.pages.utils.Utils")
-            mock_utils.return_value.load_file.return_value = (None, case[2])
+            mock_utils.return_value.load_file.return_value = (
+                "descriptor.txt",
+                case[2],
+            )
 
         wallet_descriptor.wallet()
 
@@ -136,6 +140,33 @@ def test_wallet(mocker, m5stickv, tdata):
                     wallet_descriptor.display_loading_wallet.assert_called_once()
                     assert ctx.wallet.has_change_addr()
         assert ctx.input.wait_for_button.call_count == len(case[4])
+
+
+def test_wallet_load_sd_back_is_silent(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.pages import MENU_CONTINUE
+
+    btn_seq = [
+        BUTTON_ENTER,  # confirm load
+        BUTTON_PAGE,  # go to "Load from SD card"
+        BUTTON_ENTER,  # select "Load from SD card"
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.patch.object(wallet_descriptor, "has_sd_card", return_value=True)
+    mock_utils = mocker.patch("krux.pages.utils.Utils")
+    # user backed out of the SD file browser
+    mock_utils.return_value.load_file.return_value = ("", None)
+
+    assert wallet_descriptor.wallet() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+    # "Back" is not a failure - it must not flash an error
+    assert_not_flashed(ctx, "Failed to load")
 
 
 def test_wallet_load_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
@@ -920,3 +951,27 @@ def test_combined_policy_and_network_mismatch_accept(mocker, m5stickv, tdata):
     # Verify wallet was loaded
     assert ctx.wallet.is_loaded()
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_wallet_load_camera_back_is_silent(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+
+    btn_seq = [
+        BUTTON_ENTER,  # confirm load
+        BUTTON_ENTER,  # select "Load from camera"
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    # user left the QR scanner without scanning anything
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (None, None))
+
+    assert WalletDescriptor(ctx).wallet() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+    # "Back" is not a failure - it must not flash an error
+    assert_not_flashed(ctx, "Failed to load")

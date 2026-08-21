@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from . import create_ctx
+from . import create_ctx, assert_not_flashed
 
 TEST_KEY = "test key"
 CBC_WORDS = "dog guitar hotel random owner gadget salute riot patrol work advice panic erode leader pass cross section laundry elder asset soul scale immune scatter"
@@ -1898,3 +1898,23 @@ def test_kefenvelope_unseal_ui(m5stickv, mocker):
     with pytest.raises(KeyError, match="Failed to decrypt"):
         page.unseal_ui()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_encryption_key_camera_back_is_silent(m5stickv, mocker):
+    from krux.pages.encryption_ui import EncryptionKey
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.pages.qr_capture import QRCodeCapture
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # move to QR code key
+        BUTTON_ENTER,  # choose QR code key
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    # user left the QR scanner without scanning anything
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (None, None))
+
+    assert EncryptionKey(ctx).encryption_key() is None
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # "Back" is not a failure - it must not flash an error
+    assert_not_flashed(ctx, "Failed to load")

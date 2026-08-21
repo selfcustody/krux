@@ -30,3 +30,11 @@ def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
             current_index=mocker.MagicMock(side_effect=touch_seq)
         )
     return ctx
+
+
+def assert_not_flashed(ctx, text):
+    """Asserts `text` was never flashed on the mocked display"""
+    assert not any(
+        call.args and call.args[0] == text
+        for call in ctx.display.flash_text.call_args_list
+    ), ("unexpected flash: %s" % text)
