@@ -251,6 +251,7 @@ translation_array = [
     "QR Etiket",
     "Miktar",
     "RX Pini",
+    "Devam etmeden önce belgeleri okuyun",
     "Yeniden Başlat",
     "Al",
     "Bölge:",
