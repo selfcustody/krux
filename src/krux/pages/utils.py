@@ -56,7 +56,13 @@ class Utils(Page):
         """Load a file from SD card"""
         from ..sd_card import SDHandler
 
-        if self.has_sd_card():
+        # Callers read an empty filename as "user cancelled", so every failure
+        # has to report itself here or it would be swallowed silently.
+        if not self.has_sd_card():
+            self.flash_error(t("SD card not detected."))
+            return "", None
+
+        try:
             with SDHandler() as sd:
                 self.ctx.display.clear()
                 if not prompt or self.prompt(
@@ -75,6 +81,8 @@ class Utils(Page):
                         if only_get_filename:
                             return filename, None
                         return filename, sd.read_binary(filename)
+        except OSError:
+            self.flash_error(t("Failed to load"))
         return "", None
 
     @staticmethod

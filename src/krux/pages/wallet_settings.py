@@ -143,8 +143,7 @@ class PassphraseEditor(Page):
 
         qr_capture = QRCodeCapture(self.ctx)
         data, _ = qr_capture.qr_capture_loop()
-        if data is None:
-            self.flash_error(t("Failed to load"))
+        if data is None:  # user left the QR scanner
             return MENU_CONTINUE
 
         try:

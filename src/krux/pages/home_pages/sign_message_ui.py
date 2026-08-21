@@ -62,11 +62,15 @@ class SignMessage(Utils):
 
             qr_capture = QRCodeCapture(self.ctx)
             data, qr_format = qr_capture.qr_capture_loop()
+            if data is None:
+                return None  # user left the QR scanner
             return (data, qr_format, "")
         if load_method == LOAD_FROM_SD:
             message_filename, data = self.load_file(prompt=False)
+            if not message_filename:
+                return None  # user backed out of the SD file browser
             return (data, FORMAT_NONE, message_filename)
-        return (None, None, "")
+        return None  # user chose Back
 
     def _is_valid_derivation_path(self, derivation_path):
         """Strictly checks if the derivation path is valid according to BIP32"""
@@ -368,11 +372,10 @@ class SignMessage(Utils):
 
     def sign_message(self):
         """Sign message user interface"""
-        data, qr_format, message_filename = self._load_message()
-
-        if data is None:
-            self.flash_error(t("Failed to load"))
+        loaded = self._load_message()
+        if loaded is None:  # user chose Back on the load menu
             return MENU_CONTINUE
+        data, qr_format, message_filename = loaded
 
         if message_filename:
             signature_data = self._sign_at_address_from_sd(data)

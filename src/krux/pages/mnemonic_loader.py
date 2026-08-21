@@ -299,8 +299,7 @@ class MnemonicLoader(Page):
         tiny_scanner = TinyScanner(self.ctx, grid_type)
         words = tiny_scanner.scanner(len_mnemonic == 24)
         del tiny_scanner
-        if words is None:
-            self.flash_error(t("Failed to load"))
+        if words is None:  # user left the scanner
             return MENU_CONTINUE
         return self._load_key_from_words(words)
 
@@ -311,8 +310,7 @@ class MnemonicLoader(Page):
 
         qr_capture = QRCodeCapture(self.ctx)
         data, qr_format = qr_capture.qr_capture_loop()
-        if data is None:
-            self.flash_error(t("Failed to load"))
+        if data is None:  # user left the QR scanner
             return MENU_CONTINUE
 
         try:
