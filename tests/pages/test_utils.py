@@ -49,3 +49,29 @@ def test_load_file_with_no_sd(m5stickv, mocker):
 
     assert file_name == ""
     assert data is None
+    # an empty filename means "cancelled" to callers, so a missing card must
+    # report itself here instead of failing silently
+    ctx.display.flash_text.assert_called_once()
+    assert ctx.display.flash_text.call_args.args[0] == "SD card not detected."
+
+
+def test_load_file_with_sd_read_error(m5stickv, mocker):
+    from krux.pages.utils import Utils
+
+    mocker.patch(
+        "krux.sd_card.SDHandler.dir_exists",
+        mocker.MagicMock(return_value=True),
+    )
+    mocker.patch(
+        # first entry is has_sd_card()'s hot-plug probe, second is load_file's
+        "krux.sd_card.SDHandler.__enter__",
+        mocker.MagicMock(side_effect=[None, OSError]),
+    )
+    ctx = create_ctx(mocker, None)
+    utils = Utils(ctx)
+    file_name, data = utils.load_file(prompt=False)
+
+    assert file_name == ""
+    assert data is None
+    # same rule: a read that blew up must report itself, not look like a cancel
+    assert ctx.display.flash_text.call_args.args[0] == "Failed to load"

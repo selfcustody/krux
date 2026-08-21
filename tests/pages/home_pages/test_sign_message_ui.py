@@ -1,5 +1,5 @@
 from ...shared_mocks import MockPrinter, get_mock_open
-from .. import create_ctx
+from .. import create_ctx, assert_not_flashed
 from .test_home import tdata
 
 
@@ -595,3 +595,49 @@ def test_load_from_sd_card(mocker, m5stickv, tdata):
     sign_msg._export_to_qr.assert_called()
 
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_sign_message_sd_back_is_silent(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.pages import MENU_CONTINUE
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    btn_seq = [
+        BUTTON_PAGE,  # Go to "Load from SD card"
+        BUTTON_ENTER,  # Select "Load from SD card"
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    sign_msg = SignMessage(ctx)
+    mocker.patch.object(sign_msg, "has_sd_card", new=lambda: True)
+    # user backed out of the SD file browser
+    mocker.patch.object(sign_msg, "load_file", return_value=("", None))
+
+    assert sign_msg.sign_message() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+    # "Back" is not a failure - it must not flash an error
+    assert_not_flashed(ctx, "Failed to load")
+
+
+def test_sign_message_camera_back_is_silent(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+
+    btn_seq = [BUTTON_ENTER]  # Select "Load from camera"
+
+    wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    # user left the QR scanner without scanning anything
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (None, None))
+
+    assert SignMessage(ctx).sign_message() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+    # "Back" is not a failure - it must not flash an error
+    assert_not_flashed(ctx, "Failed to load")
