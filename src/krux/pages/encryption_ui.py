@@ -503,7 +503,7 @@ class EncryptionKey(Page):
 
         while True:
             if key in (None, "", b"", ESC_KEY, MENU_CONTINUE):
-                self.flash_error(t("Failed to load"))
+                # user cancelled the keypad or left the QR scanner
                 return None
 
             self.ctx.display.clear()
