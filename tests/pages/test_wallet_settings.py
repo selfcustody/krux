@@ -1,4 +1,4 @@
-from . import create_ctx
+from . import create_ctx, assert_not_flashed
 from .home_pages.test_home import tdata
 
 
@@ -111,7 +111,7 @@ def test_qr_passphrase_too_long(m5stickv, mocker):
     qr_capturer.assert_called_once()
 
 
-def test_qr_passphrase_fail(m5stickv, mocker):
+def test_qr_passphrase_camera_back_is_silent(m5stickv, mocker):
     from krux.pages.wallet_settings import PassphraseEditor
     from krux.pages.qr_capture import QRCodeCapture
 
@@ -125,6 +125,9 @@ def test_qr_passphrase_fail(m5stickv, mocker):
 
     assert test_passphrase is None
     qr_capturer.assert_called_once()
+
+    # "Back" is not a failure - it must not flash an error
+    assert_not_flashed(ctx, "Failed to load")
 
 
 def test_qr_passphrase_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):

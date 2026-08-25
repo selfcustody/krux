@@ -251,6 +251,7 @@ translation_array = [
     "QR-label",
     "Aantal",
     "RX pin",
+    "Lees de documentatie voordat u doorgaat",
     "Opnieuw opstarten",
     "Ontvangen",
     "Regio:",

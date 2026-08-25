@@ -222,13 +222,15 @@ class Home(Page):
         load_method = self.load_method()
 
         if load_method > LOAD_FROM_SD:
-            return (None, None, "")
+            return None  # user chose Back
 
         if load_method == LOAD_FROM_CAMERA:
             from ..qr_capture import QRCodeCapture
 
             qr_capture = QRCodeCapture(self.ctx)
             data, qr_format = qr_capture.qr_capture_loop()
+            if data is None:
+                return None  # user left the QR scanner
             return (data, qr_format, "")
 
         # If load_method == LOAD_FROM_SD
@@ -241,6 +243,8 @@ class Home(Page):
             prompt=False,
             only_get_filename=True,
         )
+        if not psbt_filename:
+            return None  # user backed out of the SD file browser
         return (None, FORMAT_NONE, psbt_filename)
 
     def _sign_menu(self, signer, psbt_filename, outputs):
@@ -487,12 +491,10 @@ class Home(Page):
             return MENU_CONTINUE
 
         # Load a PSBT
-        data, qr_format, psbt_filename = self.load_psbt()
-
-        if data is None and psbt_filename == "":
-            # Both the camera and the file on SD card failed!
-            self.flash_error(t("Failed to load"))
+        loaded = self.load_psbt()
+        if loaded is None:  # user chose Back on the load menu
             return MENU_CONTINUE
+        data, qr_format, psbt_filename = loaded
 
         # DISABLED to avoid false "Decrypt?" on normal PSBTs as KEF
         # try:

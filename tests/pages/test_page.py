@@ -262,6 +262,91 @@ def get_frame_titles_resulting_from_input(
     return frame_titles
 
 
+@pytest.mark.parametrize(
+    "buffer,buffer_suffix,buffer_short_suffix,expected",
+    [
+        ("5", "min [0-30]", "min", "5 min [0-30]"),
+        ("500", "ms [20-500]", "ms", "500 ms [20-500]"),
+        ("", "ms [20-500]", "ms", "ms [20-500]"),
+        ("50000", "ms [20-500]", "ms", "50000 ms"),
+        ("1234567890123456", "ms [20-500]", "ms", "1234567890123456"),
+        ("100000", "", "", "100000"),
+    ],
+)
+def test_keypad_header_shows_context_that_fits_display(
+    mocker,
+    m5stickv,
+    mock_page_cls,
+    buffer,
+    buffer_suffix,
+    buffer_short_suffix,
+    expected,
+):
+    page = mock_page_cls(mock_context(mocker))
+
+    page._print_keypad_header(
+        "Setting",
+        False,
+        buffer,
+        "",
+        buffer_suffix,
+        buffer_short_suffix,
+    )
+
+    page.ctx.display.draw_hcentered_text.assert_called_with(expected, mocker.ANY)
+
+
+def test_keypad_header_measures_raw_buffer_once_without_context(
+    mocker, m5stickv, mock_page_cls
+):
+    from krux.pages import lcd
+
+    page = mock_page_cls(mock_context(mocker))
+    lcd.string_width_px.reset_mock()
+
+    page._print_keypad_header("Setting", False, "100000", "")
+
+    lcd.string_width_px.assert_called_once_with("100000")
+
+
+def test_keypad_context_does_not_change_raw_return(mocker, m5stickv, mock_page_cls):
+    from krux.input import BUTTON_ENTER
+    from krux.pages import DIGITS
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    page = mock_page_cls(ctx)
+
+    result = page.capture_from_keypad(
+        "Setting",
+        [DIGITS],
+        go_on_change=True,
+        starting_buffer="5",
+        buffer_suffix="min [0-30]",
+        buffer_short_suffix="min",
+    )
+
+    assert result == "51"
+
+
+def test_keypad_non_empty_buffer_title_keeps_existing_display_behavior(
+    mocker, m5stickv, mock_page_cls
+):
+    page = mock_page_cls(mock_context(mocker))
+
+    page._print_keypad_header(
+        "Rolls: 3",
+        False,
+        "6",
+        "\n1-2-3",
+        "ms [20-500]",
+        "ms",
+    )
+
+    assert [
+        call.args[0] for call in page.ctx.display.draw_hcentered_text.call_args_list
+    ] == ["\n1-2-3", "Rolls: 3"]
+
+
 def test_keypad_esc_no_exit(mocker, amigo):
     from krux.pages import Page, LETTERS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV

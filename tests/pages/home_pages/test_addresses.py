@@ -1,4 +1,5 @@
 import pytest
+from .. import assert_not_flashed
 from .test_home import tdata, create_ctx
 
 # fortdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH
@@ -1178,3 +1179,40 @@ def test_list_change_addresses(mocker, m5stickv, tdata):
 
         # assert the number of calls to wait_for_button
         assert ctx.input.wait_for_button.call_count == len(sequence_buttons)
+
+
+def test_scan_address_camera_back_is_silent(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.addresses import Addresses
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.wallet import Wallet
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, [], wallet, None)
+    # user left the QR scanner without scanning anything
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (None, None))
+
+    assert Addresses(ctx).scan_address() == MENU_CONTINUE
+
+    # "Back" is not a failure - it must not flash an error
+    assert_not_flashed(ctx, "Failed to load")
+
+
+def test_scan_address_wrong_qr_format_still_fails(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.addresses import Addresses
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.qr import FORMAT_PMOFN
+    from krux.wallet import Wallet
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, [], wallet, None)
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: ("an address", FORMAT_PMOFN)
+    )
+
+    assert Addresses(ctx).scan_address() == MENU_CONTINUE
+
+    assert any(
+        c.args[0] == "Failed to load" for c in ctx.display.flash_text.call_args_list
+    )

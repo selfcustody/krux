@@ -591,6 +591,22 @@ def test_linked_settings(mocker, m5stickv):
     assert a.food == "apple"
 
 
+def test_number_setting_unit_metadata(mocker, m5stickv):
+    from krux.krux_settings import (
+        ButtonsSettings,
+        EncryptionSettings,
+        SecuritySettings,
+        ThemeSettings,
+    )
+    from krux.settings import NumberSetting
+
+    assert NumberSetting(int, "number", 1, [0, 2]).unit is None
+    assert ThemeSettings.screensaver_time.unit == "min"
+    assert SecuritySettings.auto_shutdown.unit == "min"
+    assert ButtonsSettings.debounce.unit == "ms"
+    assert EncryptionSettings.pbkdf2_iterations.unit is None
+
+
 def test_all_labels(mocker, m5stickv):
     from krux.krux_settings import (
         DefaultWallet,
