@@ -55,7 +55,7 @@ $file = Split-Path $exe -Leaf
 (Select-String $file '.\{{latest_installer_sha}}').Line.Split()[0].ToUpper()
 ```
 
-> 🛡️  TIP: If you followed the authenticity/integrity checks steps presented, you already
+> 🛡️  TIP: If you followed the authenticity **AND** integrity checks steps presented, you already
 have the assurance that the software is from a verified and genuine software publisher.
 This will also help establish a chain of trust when you perform the firmware verification
 step before flashing.
