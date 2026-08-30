@@ -63,24 +63,23 @@ class PubkeyView(Page):
             from ...themes import theme
             from ..file_operations import SaveFile
 
+            def _save_spscan_to_sd():
+                # SD exports the scan key with its origin (not the full
+                # sp(...) descriptor), matching the QR and what the
+                # Sparrow coordinator expects.
+                SaveFile(self.ctx).save_file(
+                    spscan,
+                    "SPSCAN",
+                    "SPSCAN",
+                    file_extension=".txt",
+                    save_as_binary=False,
+                    prompt=False,
+                )
+
             items = [
                 (
                     t("Save to SD card"),
-                    (
-                        None
-                        if not self.has_sd_card()
-                        # SD exports the scan key with its origin (not the full
-                        # sp(...) descriptor), matching the QR and what the
-                        # Sparrow coordinator expects.
-                        else lambda: SaveFile(self.ctx).save_file(
-                            spscan,
-                            "SPSCAN",
-                            "SPSCAN",
-                            "SPSCAN:",
-                            ".txt",
-                            save_as_binary=False,
-                        )
-                    ),
+                    None if not self.has_sd_card() else _save_spscan_to_sd,
                 ),
             ]
             spscan_key_only = (
