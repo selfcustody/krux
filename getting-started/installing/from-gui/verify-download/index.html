@@ -2166,20 +2166,20 @@
 
   <h1>Verify</h1>
 
-<p>Before start using the GUI, it's <strong>strongly recommended</strong> to verify the authenticity of the <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.21/krux-installer.SHA256.txt">krux-installer.SHA256.txt</a> file.
-It attest the integrity of all variants (<a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.21/krux_installer_0.0.21_amd64.deb">krux_installer_0.0.21_amd64.deb</a>, <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.21/krux_installer-0.0.21-1.x86_64.rpm">krux_installer-0.0.21-1.x86_64.rpm</a>, <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.21/krux_installer_0.0.21_arm64.dmg">krux_installer_0.0.21_arm64.dmg</a>, <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.21/krux_installer_v0.0.21_Setup.exe">krux_installer_v0.0.21_Setup.exe</a>).</p>
+<p>Before start using the GUI, it's <strong>strongly recommended</strong> to verify the authenticity of the <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.23/krux-installer_0.0.23.SHA256.txt">krux-installer_0.0.23.SHA256.txt</a> file.
+It attest the integrity of all variants (<a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.23/krux-installer_0.0.23_amd64.deb">krux-installer_0.0.23_amd64.deb</a>, <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.23/krux-installer-0.0.23-1.x86_64.rpm">krux-installer-0.0.23-1.x86_64.rpm</a>, <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.23/krux-installer_0.0.23_arm64.dmg">krux-installer_0.0.23_arm64.dmg</a>, <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.23/krux-installer_v0.0.23_Setup.exe">krux-installer_v0.0.23_Setup.exe</a>).</p>
 <p>To do this, download two files:</p>
 <ul>
-<li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.21/krux-installer.SHA256.txt"><code>krux-installer.SHA256.txt</code></a>;</li>
-<li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.21/krux-installer.SHA256.txt.sig"><code>krux-installer.SHA256.txt.sig</code></a>.</li>
+<li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.23/krux-installer_0.0.23.SHA256.txt"><code>krux-installer_0.0.23.SHA256.txt</code></a>;</li>
+<li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.23/krux-installer_0.0.23.SHA256.txt.asc"><code>krux-installer_0.0.23.SHA256.txt.asc</code></a>.</li>
 </ul>
 <h2 id="verify-the-authenticity">Verify the authenticity<a class="headerlink" href="#verify-the-authenticity" title="Permanent link">&para;</a></h2>
 <p><strong>Linux/MacOS</strong></p>
 <p>The next step is import the developer's key:</p>
-<div class="highlight"><pre><span></span><code>gpg<span class="w"> </span>--keyserver<span class="w"> </span>hkps://keys.openpgp.org<span class="w"> </span>--recv-keys<span class="w"> </span>B4281DDDFBBD207BFA4113138974C90299326322
+<div class="highlight"><pre><span></span><code>gpg<span class="w"> </span>--keyserver<span class="w"> </span>hkps://keys.openpgp.org<span class="w"> </span>--recv-keys<span class="w"> </span>C43B4A5325273ABA93A8EED5B38829728980AA8B
 </code></pre></div>
 <p>Then, to verify yourself, run this:</p>
-<div class="highlight"><pre><span></span><code>gpg<span class="w"> </span>--verify<span class="w"> </span>krux-installer.SHA256.txt.sig
+<div class="highlight"><pre><span></span><code>gpg<span class="w"> </span>--verify<span class="w"> </span>krux-installer_0.0.23.SHA256.txt.asc
 </code></pre></div>
 <p><strong>Windows</strong></p>
 <ul>
@@ -2192,21 +2192,21 @@ It attest the integrity of all variants (<a href="https://github.com/selfcustody
 Also, you can ignore a WARNING message if it says that the key isn't a trusted one (you need to do it manually).</p>
 </blockquote>
 <h2 id="verify-the-integrity">Verify the integrity<a class="headerlink" href="#verify-the-integrity" title="Permanent link">&para;</a></h2>
-<p>After verify that the <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.21/krux-installer.SHA256.txt"><code>krux-installer.SHA256.txt</code></a>
+<p>After verify that the <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.23/krux-installer_0.0.23.SHA256.txt"><code>krux-installer_0.0.23.SHA256.txt</code></a>
 is authentic, we can proceed with the integrity check in your <code>bash</code>/<code>zsh</code> terminal:</p>
 <p><strong>Linux / MacOS</strong></p>
-<div class="highlight"><pre><span></span><code>sha256sum<span class="w"> </span>--check<span class="w"> </span>krux-installer.SHA256.txt
+<div class="highlight"><pre><span></span><code>sha256sum<span class="w"> </span>--check<span class="w"> </span>krux-installer_0.0.23.SHA256.txt
 </code></pre></div>
 <p><strong>Windows</strong></p>
 <p>You can verify the integrity with this command in a <code>powershell</code> terminal:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$exe</span> <span class="p">=</span> <span class="s1">&#39;.\krux_installer_v0.0.21_Setup.exe&#39;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$exe</span> <span class="p">=</span> <span class="s1">&#39;.\krux-installer_v0.0.23_Setup.exe&#39;</span>
 <span class="nv">$file</span> <span class="p">=</span> <span class="nb">Split-Path</span> <span class="nv">$exe</span> <span class="n">-Leaf</span>
 
 <span class="p">(</span><span class="nb">Get-FileHash</span> <span class="nv">$exe</span> <span class="n">-Algorithm</span> <span class="n">SHA256</span><span class="p">).</span><span class="n">Hash</span> <span class="o">-eq</span>
-<span class="p">(</span><span class="nb">Select-String</span> <span class="nv">$file</span> <span class="s1">&#39;.\krux-installer.SHA256.txt&#39;</span><span class="p">).</span><span class="n">Line</span><span class="p">.</span><span class="n">Split</span><span class="p">()[</span><span class="n">0</span><span class="p">].</span><span class="n">ToUpper</span><span class="p">()</span>
+<span class="p">(</span><span class="nb">Select-String</span> <span class="nv">$file</span> <span class="s1">&#39;.\krux-installer_0.0.23.SHA256.txt&#39;</span><span class="p">).</span><span class="n">Line</span><span class="p">.</span><span class="n">Split</span><span class="p">()[</span><span class="n">0</span><span class="p">].</span><span class="n">ToUpper</span><span class="p">()</span>
 </code></pre></div>
 <blockquote>
-<p>🛡️  TIP: If you followed the authenticity/integrity checks steps presented, you already
+<p>🛡️  TIP: If you followed the authenticity <strong>AND</strong> integrity checks steps presented, you already
 have the assurance that the software is from a verified and genuine software publisher.
 This will also help establish a chain of trust when you perform the firmware verification
 step before flashing.</p>
