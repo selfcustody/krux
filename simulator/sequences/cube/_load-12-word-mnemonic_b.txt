@@ -1,7 +1,7 @@
 include _wait-for-logo.txt
 
-# Navigate to via QR
-x3 press BUTTON_A
+# Navigate to QR Code
+x2 press BUTTON_A
 
 qrcode 12-word-mnemonic_b.png
 wait 0.5
@@ -11,4 +11,3 @@ x2 press BUTTON_A
 
 # Confirm wallet
 press BUTTON_A
-
