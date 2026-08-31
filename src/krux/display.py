@@ -178,6 +178,9 @@ class Display:
             lcd.init(invert=False)
             lcd.mirror(False)
             lcd.bgr_to_rgb(False)
+        # lcd.init resets the driver's rotation state, so invalidate the
+        # cached orientation to make to_portrait() re-apply it on re-init
+        self.portrait = False
         self.to_portrait()
 
     def gpio_backlight_ctrl(self, brightness):
