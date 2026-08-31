@@ -1,0 +1,146 @@
+include _wait-for-logo.txt
+
+# Navigate to New Mnemonic > Via Entropy App 2XD8
+press BUTTON_B
+press BUTTON_A
+x4 press BUTTON_B
+press BUTTON_A
+
+# 12 words, then Proceed
+press BUTTON_A
+press BUTTON_A
+
+screenshot entropy-app-2xd8-card-wheel-start.png
+
+press BUTTON_A
+
+screenshot entropy-app-2xd8-white-locked-black-active.png
+
+x1 press BUTTON_B
+press BUTTON_A
+
+screenshot entropy-app-2xd8-card-revealed-next-screen.png
+
+x2 press BUTTON_B
+press BUTTON_A
+x3 press BUTTON_B
+press BUTTON_A
+
+screenshot entropy-app-2xd8-word-1-reveal.png
+
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+x5 press BUTTON_B
+press BUTTON_A
+x6 press BUTTON_B
+press BUTTON_A
+x7 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_A
+
+press BUTTON_A
+x1 press BUTTON_B
+press BUTTON_A
+x2 press BUTTON_B
+press BUTTON_A
+x3 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+x5 press BUTTON_B
+press BUTTON_A
+x6 press BUTTON_B
+press BUTTON_A
+x7 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_A
+
+press BUTTON_A
+x1 press BUTTON_B
+press BUTTON_A
+x2 press BUTTON_B
+press BUTTON_A
+x3 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+x5 press BUTTON_B
+press BUTTON_A
+x6 press BUTTON_B
+press BUTTON_A
+x7 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_A
+
+press BUTTON_A
+x1 press BUTTON_B
+press BUTTON_A
+x2 press BUTTON_B
+press BUTTON_A
+x3 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+x5 press BUTTON_B
+press BUTTON_A
+x6 press BUTTON_B
+press BUTTON_A
+x7 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_A
+
+press BUTTON_A
+x1 press BUTTON_B
+press BUTTON_A
+x2 press BUTTON_B
+press BUTTON_A
+x3 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_A
+
+x4 press BUTTON_B
+press BUTTON_A
+x5 press BUTTON_B
+press BUTTON_A
+x6 press BUTTON_B
+press BUTTON_A
+x7 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_A
+
+press BUTTON_A
+x1 press BUTTON_B
+press BUTTON_A
+x2 press BUTTON_B
+press BUTTON_A
+x3 press BUTTON_B
+press BUTTON_A
+
+press BUTTON_A
+
+screenshot entropy-app-2xd8-all-words-drawn.png
+
+# dismiss the Words Drawn list (new: it's now its own screen)
+press BUTTON_A
+
+
+press BUTTON_A
+
+screenshot entropy-app-2xd8-mnemonic-confirm.png
