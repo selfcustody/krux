@@ -269,6 +269,7 @@ def test_edit_existing_mnemonic_using_touch(mocker, amigo):
         1,
         1,
         1,  # Confirm cabbage
+        -1,  # Try a swipe return invalid index
         25,  # Try to "Go" with invalid checksum word
         23,  # index 23 = word 24
         22,  # Type w, i, t -> witness

@@ -14,16 +14,6 @@ def mock_settings(mocker):
     return mock_settings_obj
 
 
-@pytest.fixture
-def mock_touch_driver(mocker):
-    """Mock a generic touch driver"""
-    driver = mocker.MagicMock()
-    driver.current_point.return_value = None
-    driver.event.return_value = False
-    driver.irq_point = None
-    return driver
-
-
 def test_touch_init_ft6x36(mocker, amigo, mock_settings):
     """Test Touch initialization with FT6X36 driver (default case)"""
     from krux.touch import Touch
@@ -201,11 +191,47 @@ def test_valid_position(
     [
         ([60, 120], [], (100, 50), 0),  # y=50 < 60: index 0
         ([60, 120], [], (100, 80), 0),  # y=80 between 60 and 120: index 0
-        ([60, 120], [], (100, 130), 1),  # y=130 > 120: index 1
+        ([60, 120], [], (100, 130), 0),  # y=130 > 120: index 0 (max==len(regions)-2)
         ([40, 80, 120], [], (50, 30), 0),  # y=30 < 40: index 0
         ([40, 80, 120], [], (50, 50), 0),  # y=50 between 40-80: index 0
         ([40, 80, 120], [], (50, 90), 1),  # y=90 between 80-120: index 1
-        ([40, 80, 120], [], (50, 130), 2),  # y=130 > 120: index 2
+        (
+            [40, 80, 120],
+            [],
+            (50, 130),
+            1,
+        ),  # y=130 > 120: index 1 (max==len(regions)-2)
+        ([0, 100, 200], [], (100, 100), -1),  # boundary y region: index -1
+        ([0, 100, 200], [], (100, 200), 1),  # last boundary y region ignore: index 1
+        ([], [10, 100, 200], (0, 100), 0),  # x=0 < 10: index 0 first region
+        ([], [10, 100, 200], (50, 100), 0),  # x=50 < 100: index 0 still first region
+        ([], [10, 100, 200], (100, 100), -1),  # boundary x region: index -1
+        ([], [10, 100, 200], (150, 100), 1),  # x=150 > 100: index 1
+        (
+            [],
+            [0, 100, 200],
+            (201, 100),
+            1,
+        ),  # x=201 > 200: index 1 (max==len(regions)-2)
+        (
+            [0, 100, 200],
+            [0, 100, 200],
+            (100, 100),
+            -1,
+        ),  # boundary x and y region: index -1
+        ([], [], (50, 50), 0),  # no regions
+        ([60, 120], [], (10, 30), 0),  # before first y region
+        ([60, 120], [], (10, 80), 0),  # normal y region
+        ([60, 120], [], (10, 60), 0),  # edge of the first y region
+        ([60, 120], [], (10, 120), 0),  # edge of last y region
+        (
+            [60, 120],
+            [50, 100, 150],
+            (70, 130),
+            0,
+        ),  # y=130 > last region, x=70 > 50 first region
+        ([60, 120], [50, 100, 150], (100, 130), -1),  # boundary x region: index -1
+        ([60, 80, 90, 100, 110, 120], [], (0, 91), -1),  # boundary with more regions
     ],
 )
 def test_extract_index(
@@ -291,6 +317,7 @@ def test_current_state_released_to_idle(mocker, amigo, mock_settings):
         ((100, 100), (100, 160), 4),  # SWIPE_DOWN (vertical = 60 > lateral)
         ((100, 160), (100, 100), 3),  # SWIPE_UP (vertical = -60 > lateral)
         ((100, 100), (105, 105), None),  # No gesture (< threshold)
+        ((10, 10), (60, 60), 5),  # SWIPE_FAIL diagonal swipe
     ],
 )
 def test_gesture_detection(
@@ -308,10 +335,34 @@ def test_gesture_detection(
     touch.state = PRESSED
     touch.press_point = [press_point]
     touch.release_point = release_point
+    touch.pressed_time = time.ticks_ms()
 
     touch.current_state()
 
     assert touch.gesture == expected_gesture
+
+
+def test_gesture_long_duration_fail(
+    mocker,
+    amigo,
+    mock_settings,
+):
+    """Test swipe gesture fail detection"""
+    from krux.touch import Touch, PRESSED, SWIPE_NONE
+
+    mock_driver = mocker.MagicMock()
+    mock_driver.current_point.return_value = None
+    mocker.patch("krux.touchscreens.ft6x36.touch_control", mock_driver)
+    mocker.patch("time.ticks_ms", side_effect=[1000, 3000])
+
+    touch = Touch(width=240, height=135, irq_pin=20)
+    touch.state = PRESSED
+    touch.press_point = [(10, 10)]
+    touch.release_point = (10, 60)
+
+    touch.current_state()
+
+    assert touch.gesture == SWIPE_NONE
 
 
 def test_event_with_validation(mocker, amigo, mock_settings):

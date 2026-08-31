@@ -19,6 +19,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+# pylint: disable=unnecessary-lambda
+
 import time
 import board
 from .wdt import wdt
@@ -35,6 +37,7 @@ SWIPE_RIGHT = 4
 SWIPE_LEFT = 5
 SWIPE_UP = 6
 SWIPE_DOWN = 7
+SWIPE_FAIL = 99
 FAST_FORWARD = 8
 FAST_BACKWARD = 9
 
@@ -175,29 +178,30 @@ class Input:
             return self.touch.event(validate_position)
         return False
 
+    def _swipe_check_value(self, swipe_fnc):
+        if kboard.has_touchscreen:
+            return swipe_fnc()
+        return RELEASED
+
+    def swipe_none_value(self):
+        """Intermediary method to pull touch gesture, if touch available"""
+        return self._swipe_check_value(lambda: self.touch.swipe_none_value())
+
     def swipe_right_value(self):
         """Intermediary method to pull touch gesture, if touch available"""
-        if kboard.has_touchscreen:
-            return self.touch.swipe_right_value()
-        return RELEASED
+        return self._swipe_check_value(lambda: self.touch.swipe_right_value())
 
     def swipe_left_value(self):
         """Intermediary method to pull touch gesture, if touch available"""
-        if kboard.has_touchscreen:
-            return self.touch.swipe_left_value()
-        return RELEASED
+        return self._swipe_check_value(lambda: self.touch.swipe_left_value())
 
     def swipe_up_value(self):
         """Intermediary method to pull touch gesture, if touch available"""
-        if kboard.has_touchscreen:
-            return self.touch.swipe_up_value()
-        return RELEASED
+        return self._swipe_check_value(lambda: self.touch.swipe_up_value())
 
     def swipe_down_value(self):
         """Intermediary method to pull touch gesture, if touch available"""
-        if kboard.has_touchscreen:
-            return self.touch.swipe_down_value()
-        return RELEASED
+        return self._swipe_check_value(lambda: self.touch.swipe_down_value())
 
     def wdt_feed_inc_entropy(self):
         """Feeds the watchdog and increments the input's entropy"""
@@ -310,6 +314,10 @@ class Input:
             while self.touch_value() == PRESSED:
                 self.wdt_feed_inc_entropy()
             self.buttons_active = False
+
+            # Check if was a swipe
+            if self.swipe_none_value() == PRESSED:
+                return SWIPE_FAIL
             if self.swipe_right_value() == PRESSED:
                 return SWIPE_RIGHT
             if self.swipe_left_value() == PRESSED:
@@ -318,6 +326,8 @@ class Input:
                 return SWIPE_UP
             if self.swipe_down_value() == PRESSED:
                 return SWIPE_DOWN
+
+            # was a simple touch
             return BUTTON_TOUCH
 
         if btn in [BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV]:

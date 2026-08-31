@@ -43,6 +43,7 @@ from ..input import (
     BUTTON_TOUCH,
     FAST_FORWARD,
     FAST_BACKWARD,
+    SWIPE_FAIL,
 )
 from ..bip39 import entropy_checksum
 from ..kboard import kboard
@@ -93,7 +94,7 @@ class TinySeed(Page):
 
     def _draw_labels(self, page):
         """Draws labels for import and export Tinyseed UI"""
-        self.ctx.display.draw_hcentered_text(self.label)
+        self.ctx.display.draw_hcentered_text(self.label, color=theme.highlight_color)
         # For non‑minimal displays, show extra bit numbers (rotate to landscape temporarily)
         if not kboard.has_minimal_display:
             self.ctx.display.to_landscape()
@@ -248,7 +249,7 @@ class TinySeed(Page):
         """Outline index position"""
         height = self.y_pad - 2
         y_pos = (index // 12) * self.y_pad + self.y_offset + 1
-        if index < TS_LAST_BIT_NO_CS:
+        if index < TS_ESC_START_POSITION:
             x_pos = (index % 12) * self.x_pad + self.x_offset + 1
             width = self.x_pad - 2
             self.ctx.display.outline(x_pos, y_pos, width, height, theme.fg_color)
@@ -375,10 +376,22 @@ class TinySeed(Page):
             if self.ctx.input.buttons_active:
                 self._draw_index(index)
 
-            btn = self.ctx.input.wait_for_fastnav_button()
-            if btn == BUTTON_TOUCH:
-                btn = BUTTON_ENTER
-                index = self.ctx.input.touch.current_index()
+            # wait until valid input is captured
+            btn = BUTTON_TOUCH
+            while btn in (BUTTON_TOUCH, SWIPE_FAIL):
+                btn = self.ctx.input.wait_for_fastnav_button()
+                if btn == BUTTON_TOUCH:
+                    index = self.ctx.input.touch.current_index()
+                    # Ignore clicks on invalid indexes (avoids redraw screen)
+                    disabled_indexes = 4 if not w24 else (8 if page else 0)
+                    if (
+                        index < 0
+                        or TS_LAST_BIT_NO_CS - disabled_indexes
+                        < index
+                        < TS_ESC_START_POSITION
+                    ):
+                        continue
+                    btn = BUTTON_ENTER
             if btn == BUTTON_ENTER:
                 if index > TS_ESC_END_POSITION:  # "Go"
                     if not w24 or (w24 and (page or scanning_24)):
