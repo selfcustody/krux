@@ -396,7 +396,7 @@ class WalletSettings(Page):
             return P2SH_DEFAULT_DERIVATION
 
         if policy_type == TYPE_SILENT_PAYMENT:
-            from ..key import Key
+            from krux.key import Key
 
             # Key.get_default_derivation also copes with account=None, which a
             # P2SH multisig wallet carries when switching policy type.

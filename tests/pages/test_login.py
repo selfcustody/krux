@@ -1954,6 +1954,7 @@ def test_load_wallet_silent_payment_policy(amigo, mocker):
     from krux.input import BUTTON_ENTER
 
     original_policy = Settings().wallet.policy_type
+    original_script = Settings().wallet.script_type
     Settings().wallet.policy_type = NAME_SILENT_PAYMENT
     try:
         BTN_SEQUENCE = [
@@ -1973,3 +1974,6 @@ def test_load_wallet_silent_payment_policy(amigo, mocker):
         assert ctx.wallet.key.script_type == P2TR
     finally:
         Settings().wallet.policy_type = original_policy
+
+    assert Settings().wallet.policy_type == original_policy
+    assert Settings().wallet.script_type == original_script

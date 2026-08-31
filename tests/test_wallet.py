@@ -528,7 +528,7 @@ def test_init_silent_payment(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
 
     key = Key(
-        "olympic term tissue route sense program under choose bean emerge velvet absurd",
+        tdata.TEST_MNEMONIC1,
         TYPE_SILENT_PAYMENT,
         NETWORKS["test"],
     )
@@ -557,7 +557,7 @@ def test_silent_payment_load_rejected(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
 
     key = Key(
-        "olympic term tissue route sense program under choose bean emerge velvet absurd",
+        tdata.TEST_MNEMONIC1,
         TYPE_SILENT_PAYMENT,
         NETWORKS["test"],
     )
@@ -573,7 +573,7 @@ def test_determine_descriptor_policy_silent_payment(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
 
     key = Key(
-        "olympic term tissue route sense program under choose bean emerge velvet absurd",
+        tdata.TEST_MNEMONIC1,
         TYPE_SILENT_PAYMENT,
         NETWORKS["test"],
     )
@@ -2125,7 +2125,7 @@ def test_silent_payment_obtain_sp_address(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
 
     key = Key(
-        "olympic term tissue route sense program under choose bean emerge velvet absurd",
+        tdata.TEST_MNEMONIC1,
         TYPE_SILENT_PAYMENT,
         NETWORKS["test"],
     )
@@ -2143,7 +2143,7 @@ def test_silent_payment_validate_xpub_match_skipped(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
 
     key = Key(
-        "olympic term tissue route sense program under choose bean emerge velvet absurd",
+        tdata.TEST_MNEMONIC1,
         TYPE_SILENT_PAYMENT,
         NETWORKS["test"],
     )
