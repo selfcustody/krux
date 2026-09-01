@@ -507,16 +507,21 @@ class SettingsPage(Page):
             else:
                 buffer_suffix = range_suffix
 
-        new_value = self.capture_from_keypad(
-            self.fit_to_line(settings_namespace.label(setting.attr)),
-            [numerals],
-            starting_buffer=str(starting_value),
-            esc_prompt=False,
-            buffer_suffix=buffer_suffix,
-            buffer_short_suffix=buffer_short_suffix,
-        )
-        if new_value in (ESC_KEY, ""):
-            return MENU_CONTINUE
+        new_value = str(starting_value)
+        while True:
+            new_value = self.capture_from_keypad(
+                self.fit_to_line(settings_namespace.label(setting.attr)),
+                [numerals],
+                starting_buffer=new_value,
+                esc_prompt=False,
+                buffer_suffix=buffer_suffix,
+                buffer_short_suffix=buffer_short_suffix,
+            )
+            if new_value == ESC_KEY:
+                return MENU_CONTINUE
+            if new_value != "":
+                break
+            self.flash_error(t("Empty"))
 
         new_value = setting.numtype(new_value)
         if setting.value_range[0] <= new_value <= setting.value_range[1]:
