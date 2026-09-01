@@ -56,6 +56,16 @@ class WalletDescriptor(Page):
         """Handler for the 'wallet descriptor' menu item"""
         title = t("Wallet output descriptor")
         self.ctx.display.clear()
+        if self.ctx.wallet.is_silent_payment():
+            # SP wallets are self-describing: Wallet.load() rejects external
+            # descriptors, so offering the load flow here is a dead end.
+            self.ctx.display.draw_centered_text(
+                t("Silent Payment wallets do not use an output descriptor.")
+                + "\n\n"
+                + t("Use Extended Public Key to export the scan key.")
+            )
+            self.ctx.input.wait_for_button()
+            return MENU_CONTINUE
         if self.ctx.wallet.key is None:
             # No key loaded, so it's being called from tools -> descriptor addresses
             text = t("Load a trusted wallet descriptor to view addresses?")

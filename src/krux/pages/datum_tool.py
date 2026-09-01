@@ -171,7 +171,7 @@ def detect_encodings(str_data, verify=True):
     # pylint: disable=R0912,R0915
     from binascii import unhexlify
     from krux.baseconv import base_decode, base_encode
-    from embit.bech32 import bech32_decode, Encoding
+    from embit.bech32 import bech32_decode, Encoding, Bech32DecodeError
 
     encodings = []
 
@@ -218,23 +218,18 @@ def detect_encodings(str_data, verify=True):
             encodings.append(32)
 
     # might it be bech32
-    if str_len <= SLOW_ENCODING_MAX_SIZE and "0" <= min_chr:
+    if str_len <= SLOW_ENCODING_MAX_SIZE and "0" <= min_chr and max_chr <= "z":
         encoding = None
-        if max_chr <= "Z":
-            if verify:
+        if verify:
+            try:
                 encoding, _, _ = bech32_decode(str_data)
-                wdt.feed()
-            if encoding == Encoding.BECH32:
-                encodings.append("BECH32")
-            elif encoding == Encoding.BECH32M:
-                encodings.append("BECH32M")
-        elif max_chr <= "z":
-            if verify:
-                encoding, _, _ = bech32_decode(str_data)
-            if encoding == Encoding.BECH32:
-                encodings.append("bech32")
-            elif encoding == Encoding.BECH32M:
-                encodings.append("bech32m")
+            except Bech32DecodeError:
+                encoding = None
+            wdt.feed()
+        # bech32 is single-case; report the name in the case it was found in
+        if encoding in (Encoding.BECH32, Encoding.BECH32M):
+            name = "bech32" if encoding == Encoding.BECH32 else "bech32m"
+            encodings.append(name.upper() if max_chr <= "Z" else name)
 
     # might it be base43
     if str_len <= SLOW_ENCODING_MAX_SIZE and "$" <= min_chr and max_chr <= "Z":
