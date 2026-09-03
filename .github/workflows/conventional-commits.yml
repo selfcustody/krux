@@ -7,7 +7,7 @@ jobs:
   conventional-commits:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: webiny/action-conventional-commits@v1.3.0
+      - uses: actions/checkout@v7
+      - uses: webiny/action-conventional-commits@v1.4.2
         with:
           allowed-commit-types: "feat,fix,docs,style,refactor,perf,test,i18n,ci,chore,git"
