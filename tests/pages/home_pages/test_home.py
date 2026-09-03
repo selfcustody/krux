@@ -1,6 +1,6 @@
 import pytest
 from ...shared_mocks import MockPrinter
-from .. import create_ctx
+from .. import create_ctx, assert_not_flashed
 from ...test_psbt import tdata as psbt_tdata
 
 
@@ -654,6 +654,9 @@ def test_load_sign_message_menu(mocker, amigo):
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
+    # "Back" is not a failure - it must not flash an error
+    assert_not_flashed(ctx, "Failed to load")
+
 
 def test_load_sign_psbt_menu(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
@@ -682,6 +685,9 @@ def test_load_sign_psbt_menu(mocker, amigo, tdata):
 
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
+    # "Back" is not a failure - it must not flash an error
+    assert_not_flashed(ctx, "Failed to load")
+
     # assert that some methods where called, but not all
     for _method in [
         ("_pre_load_psbt_warn", "assert_called_once"),
@@ -693,6 +699,33 @@ def test_load_sign_psbt_menu(mocker, amigo, tdata):
     ]:
         home_method = getattr(home, _method[0])
         getattr(home_method, _method[1])()
+
+
+def test_load_sign_psbt_sd_back_is_silent(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.pages import MENU_CONTINUE
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # Go to "Load from SD card"
+        BUTTON_ENTER,  # Select "Load from SD card"
+    ]
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
+    home = Home(ctx)
+    mocker.patch.object(home, "has_sd_card", new=lambda: True)
+    mock_utils = mocker.patch("krux.pages.utils.Utils")
+    # user backed out of the SD file browser
+    mock_utils.return_value.load_file.return_value = ("", None)
+
+    assert home.sign_psbt() == MENU_CONTINUE
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # "Back" is not a failure - it must not flash an error
+    assert_not_flashed(ctx, "Failed to load")
 
 
 def DISABLEDtest_sign_psbt_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
@@ -1951,3 +1984,25 @@ def test_unverified_amounts_warning(mocker, m5stickv):
     mocker.spy(ctx.display, "draw_centered_text")
     assert home._unverified_amounts_psbt_warn(FakeSigner(False)) is True
     assert ctx.display.draw_centered_text.call_count == 0
+
+
+def test_load_sign_psbt_camera_back_is_silent(mocker, amigo, tdata):
+    from krux.pages.home_pages.home import Home
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+
+    BTN_SEQUENCE = [BUTTON_ENTER]  # Select "Load from camera"
+
+    wallet = Wallet(tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, BTN_SEQUENCE, wallet)
+    # user left the QR scanner without scanning anything
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (None, None))
+
+    assert Home(ctx).sign_psbt() == MENU_CONTINUE
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # "Back" is not a failure - it must not flash an error
+    assert_not_flashed(ctx, "Failed to load")

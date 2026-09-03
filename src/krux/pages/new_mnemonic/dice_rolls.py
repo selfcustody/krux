@@ -299,7 +299,7 @@ class DiceEntropy(Page):
                         if self.calculate_entropy() < (
                             self.min_entropy - ENTROPY_TOLERANCE
                         ):
-                            warning_txt += t("Poor entropy!")
+                            warning_txt += t("Estimated entropy:") + " " + t("Poor!")
                         if self.pattern_detection():
                             if warning_txt:
                                 warning_txt += "\n"

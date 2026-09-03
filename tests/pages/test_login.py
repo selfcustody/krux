@@ -1,5 +1,5 @@
 import pytest
-from . import create_ctx
+from . import create_ctx, assert_not_flashed
 
 
 @pytest.fixture
@@ -34,17 +34,11 @@ def mock_retro_compatibility(mocker, amigo):
 ################### Test menus
 
 
-def test_menu_load_from_camera(m5stickv, mocker):
+def test_menu_load_from_qr_code(m5stickv, mocker):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER
 
-    BTN_SEQUENCE = (
-        # Load Key from Camera
-        [BUTTON_ENTER]
-        +
-        # QR code
-        [BUTTON_ENTER]
-    )
+    BTN_SEQUENCE = [BUTTON_ENTER]
 
     TEST_VALUE = "Test value"
     ctx = create_ctx(mocker, BTN_SEQUENCE)
@@ -58,16 +52,18 @@ def test_menu_load_from_camera(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_menu_load_from_manual(m5stickv, mocker):
+def test_menu_load_from_word_numbers(m5stickv, mocker):
     from krux.pages.login import Login
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
 
     BTN_SEQUENCE = (
-        # Load Key from Manual
-        [BUTTON_PAGE, BUTTON_ENTER]
+        # Other Formats
+        [BUTTON_PAGE] * 3
+        + [BUTTON_ENTER]
         +
-        # Load from Numbers
-        [BUTTON_PAGE, BUTTON_ENTER]
+        # Word Numbers
+        [BUTTON_PAGE] * 4
+        + [BUTTON_ENTER]
         +
         # Decimal
         [BUTTON_ENTER]
@@ -1336,6 +1332,7 @@ def test_load_12w_from_tiny_seed(amigo, mocker, mocker_printer):
     login.load_key_from_tiny_seed()
 
     assert ctx.wallet.key.mnemonic == MNEMONIC
+    ctx.display.draw_hcentered_text.assert_any_call("Binary Grid")
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
@@ -1562,6 +1559,7 @@ def test_about(mocker, multiple_devices):
     from krux.qr import FORMAT_NONE
 
     BTN_SEQUENCE = [
+        BUTTON_ENTER,  # past disclaimer
         BUTTON_ENTER,  # past qr_code
     ]
 
@@ -1606,6 +1604,17 @@ def test_about(mocker, multiple_devices):
         ]
     login.display_qr_codes.assert_has_calls(display_qr_codes_call)
 
+    disclaimer = (
+        "Krux is a research and development project, made by nerds building"
+        " tools for their own interests, open to the world."
+        + "\n\n"
+        + "Innovative features may have undiscovered flaws that endanger funds."
+    )
+    drawn_texts = [
+        call.args[0] for call in ctx.display.draw_hcentered_text.call_args_list
+    ]
+    assert disclaimer in drawn_texts
+    assert "Use it at your own risk." in drawn_texts
     ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(msg, 250, highlight_prefix=":"),
@@ -1895,3 +1904,41 @@ def test_load_default_wallet(mocker, amigo):
         assert ctx.wallet.key.policy_type == case[3]
         assert ctx.wallet.key.script_type == case[4]
         assert ctx.wallet.key.derivation == case[5]
+
+
+def test_load_key_from_qr_code_camera_back_is_silent(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.qr_capture import QRCodeCapture
+
+    ctx = create_ctx(mocker, [])
+    # user left the QR scanner without scanning anything
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (None, None))
+
+    assert Login(ctx).load_key_from_qr_code() == MENU_CONTINUE
+
+    # "Back" is not a failure - it must not flash an error
+    assert_not_flashed(ctx, "Failed to load")
+
+
+def test_load_key_from_tiny_seed_image_back_is_silent(m5stickv, mocker):
+    from krux.pages.login import Login
+    from krux.pages import MENU_CONTINUE
+    from krux.input import BUTTON_ENTER
+
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # 12 words
+        BUTTON_ENTER,  # Proceed?
+    ]
+    # user left the scanner without capturing a seed
+    mocker.patch(
+        "krux.pages.tiny_seed.TinyScanner.scanner",
+        new=mocker.MagicMock(return_value=None),
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+
+    assert Login(ctx).load_key_from_tiny_seed_image() == MENU_CONTINUE
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # "Back" is not a failure - it must not flash an error
+    assert_not_flashed(ctx, "Failed to load")
