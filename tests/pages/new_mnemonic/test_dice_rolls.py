@@ -11,67 +11,82 @@ PATTERN_ROLLS_TOUCH_SEQUENCE = (
     + [5] * 9  # 9 number 6 presses
 )
 
-# rolls which will result in poor entropy
-POOR_ROLLS_TOUCH_SEQUENCE = (
-    [0] * 10  # 10 number 1 presses
-    + [1] * 10  # 10 number 2 presses
-    + [2] * 10  # 10 number 3 presses
-    + [3] * 10  # 16 number 4 presses
-    + [4] * 6  # 2 number 5 presses
-    + [5] * 4  # 2 number 6 presses
-)
+# rolls which will result in poor min-entropy AND a detectable pattern: cycling
+# through only faces 1,2,3 skews the distribution (p_max ~= 1/3) and produces a
+# constant derivative between consecutive rolls
+POOR_ROLLS_TOUCH_SEQUENCE = [0, 1, 2] * 23 + [0]
 
 GOOD_ROLLS_SEQUENCE = [
-    1,
-    4,
-    5,
-    2,
-    0,
-    3,
-    2,
-    4,
-    4,
-    5,
-    5,
     5,
     0,
-    5,
-    2,
-    3,
-    2,
-    5,
-    2,
-    5,
     0,
     5,
     2,
     1,
+    1,
+    1,
+    5,
+    0,
+    5,
+    5,
+    4,
+    0,
     4,
     3,
     0,
-    5,
-    3,
+    0,
+    0,
+    1,
+    1,
+    4,
+    4,
+    0,
     4,
     1,
-    0,
-    3,
-    0,
-    3,
     5,
+    5,
+    5,
+    4,
+    3,
+    1,
+    3,
+    4,
+    2,
+    0,
+    1,
+    5,
+    3,
+    2,
+    2,
+    1,
+    1,
+    2,
+    0,
+    0,
+    3,
+    0,
+    2,
+    2,
+    4,
+    2,
+    0,
+    5,
+    3,
+    4,
+    0,
+    3,
+    0,
+    4,
+    2,
     5,
     4,
     2,
-    1,
     4,
     1,
     5,
-    4,
+    0,
+    0,
     5,
-    2,
-    0,
-    3,
-    3,
-    0,
 ]
 
 
@@ -145,7 +160,9 @@ def test_new_12w_from_d6(m5stickv, mocker):
             BUTTON_ENTER,  # 1 press to confirm SHA
         ]
     )
-    MNEMONIC = "diet glad hat rural panther lawsuit act drop gallery urge where fit"
+    MNEMONIC = (
+        "reflect net crush light tobacco cat boil begin laptop fish kangaroo speed"
+    )
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     dice_entropy = DiceEntropy(ctx)
@@ -179,7 +196,7 @@ def test_new_24w_from_d6(m5stickv, mocker):
             BUTTON_ENTER,  # 1 press to confirm SHA
         ]
     )
-    MNEMONIC = "wheel erase puppy pistol chapter accuse carpet drop quote final attend near scrap satisfy limit style crunch person south inspire lunch meadow enact tattoo"
+    MNEMONIC = "artist glimpse decade mountain deliver latin forum permit clown wheat digital report parent hockey replace control awesome afford rough assume rain long village soup"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     dice_entropy = DiceEntropy(ctx)
@@ -213,7 +230,9 @@ def test_new_12w_from_d6_on_amigo_device(amigo, mocker):
             BUTTON_ENTER,  # 1 press to confirm SHA
         ]
     )
-    MNEMONIC = "diet glad hat rural panther lawsuit act drop gallery urge where fit"
+    MNEMONIC = (
+        "reflect net crush light tobacco cat boil begin laptop fish kangaroo speed"
+    )
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     dice_entropy = DiceEntropy(ctx)
@@ -247,7 +266,7 @@ def test_new_24w_from_d6_on_amigo_device(amigo, mocker):
             BUTTON_ENTER,  # 1 press to confirm SHA
         ]
     )
-    MNEMONIC = "wheel erase puppy pistol chapter accuse carpet drop quote final attend near scrap satisfy limit style crunch person south inspire lunch meadow enact tattoo"
+    MNEMONIC = "artist glimpse decade mountain deliver latin forum permit clown wheat digital report parent hockey replace control awesome afford rough assume rain long village soup"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     dice_entropy = DiceEntropy(
@@ -309,9 +328,7 @@ def test_new_12w_from_d20(m5stickv, mocker):
             BUTTON_ENTER,  # 1 press to confirm SHA
         ]
     )
-    MNEMONIC = (
-        "erupt remain ride bleak year cabin orange sure ghost gospel husband oppose"
-    )
+    MNEMONIC = "fun island vivid slide cable pyramid device tuition only essence thought gadget"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     dice_entropy = DiceEntropy(ctx, is_d20=True)
@@ -345,7 +362,7 @@ def test_new_24w_from_d20(m5stickv, mocker):
             BUTTON_ENTER,  # 1 press to confirm SHA
         ]
     )
-    MNEMONIC = "fun island vivid slide cable pyramid device tuition only essence thought gain silk jealous eternal anger response virus couple faculty ozone test key vocal"
+    MNEMONIC = "source foster human mind myself floor breeze fire people exit horse erosion home barely imitate tunnel ribbon enroll mosquito pilot pumpkin ignore resemble pizza"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     dice_entropy = DiceEntropy(ctx, is_d20=True)
