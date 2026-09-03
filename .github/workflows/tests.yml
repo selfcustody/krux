@@ -17,9 +17,9 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.py-version }}
       - uses: psf/black@stable
@@ -51,11 +51,11 @@ jobs:
         py-version: [ "3.11.5", "3.12.13"]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v9.0.0
         with:
           enable-cache: true
       - name: Set up Python
@@ -73,11 +73,11 @@ jobs:
         py-version: [ "3.11.5", "3.12.13"]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v9.0.0
         with:
           enable-cache: true
       - name: Set up Python
@@ -95,11 +95,11 @@ jobs:
         py-version: [ "3.11.5", "3.12.13"]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v9.0.0
         with:
           enable-cache: true
       - name: Set up Python
@@ -116,11 +116,11 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@main
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v9.0.0
         with:
           enable-cache: true
       - name: Set up Python
@@ -135,6 +135,6 @@ jobs:
       - name: Build coverage file
         run: uv run --python 3.12.13 pytest --cache-clear --cov src/krux --cov-report xml tests
       - name: Upload coverage reports to Codecov with GitHub Action
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

@@ -41,6 +41,10 @@ __pycache__/
 *.pyc
 *.egg-info
 
+# uv virtual environment (do NOT ignore uv.lock, it must be committed)
+######################
+.venv/
+
 # Customized Makefile/project overrides
 ######################
 GNUmakefile

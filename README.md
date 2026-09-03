@@ -70,20 +70,20 @@ The first time, the build can take around an hour or so to complete. Subsequent 
 ## Install Krux and dev tools
 Krux uses [uv](https://docs.astral.sh/uv/) for Python packaging and environment management. Install uv by following its [installation guide](https://docs.astral.sh/uv/getting-started/installation/), then sync the project to install runtime deps ([embit](https://github.com/diybitcoinhardware/embit) and [uUR](https://github.com/selfcustody/cUR), the native UR module compiled from the same sources the devices run) along with the `dev` group ([pytest](https://docs.pytest.org), [pylint](https://pypi.org/project/pylint/), [black](https://github.com/psf/black) and i18n helpers):
 ```bash
-uv sync
+uv sync --frozen
 ```
 
-> **`uUR` is a C extension** It is built from the `bc-ur` submodule nested under `firmware/MaixPy`, so clone with `--recursive` (or run `git submodule update --init --recursive`) and make sure a C compiler and the Python development headers are installed (`python3-dev` on Debian/Ubuntu). After changing the submodule, rebuild it with `uv sync --reinstall-package uUR`.
+> **`uUR` is a C extension** It is built from the `bc-ur` submodule nested under `firmware/MaixPy`, so clone with `--recursive` (or run `git submodule update --init --recursive`) and make sure a C compiler and the Python development headers are installed (`python3-dev` on Debian/Ubuntu). After changing the submodule, rebuild it with `uv sync --frozen --reinstall-package uUR`.
 
-`uv sync` creates a `.venv` in the project root, resolves `uv.lock` if needed, and installs everything — this is the day-to-day command. When dependencies in `pyproject.toml` change but you only want to refresh `uv.lock` without touching the venv, run `uv lock` instead; `uv sync` will then pick the new pins on its next run.
+`uv sync --frozen` creates a `.venv` in the project root and installs exactly what `uv.lock` pins **without re-resolving** — this is the day-to-day command and it matches what CI runs, so your local dependency versions stay reproducible. When dependencies in `pyproject.toml` change and you want to refresh the pins, run `uv lock` (updates `uv.lock` only) followed by `uv sync` (without `--frozen`, so it applies the new pins to the venv).
 
-> **CI uses `uv sync --frozen`** The workflows refuse to silently re-resolve when `uv.lock` drifts (we value a lot reproducible builds). Whenever you edit `pyproject.toml` (add, remove, or bump a dependency), run `uv lock` (or `uv sync`) and commit `uv.lock` (in same change). Otherwise CI will fail.
+> **CI uses `uv sync --frozen`** The workflows refuse to silently re-resolve when `uv.lock` drifts (we value reproducible builds a lot). Whenever you edit `pyproject.toml` (add, remove, or bump a dependency), run `uv lock` (or `uv sync` without `--frozen`) and commit `uv.lock` in the same change. Otherwise CI will fail.
 
 ### Migrating from a previous Poetry clone
 If your clone was set up with Poetry, remove the old environment before the first `uv sync` so the two managers do not shadow each other:
 ```bash
 rm -rf .venv poetry.lock
-uv sync
+uv sync --frozen
 ```
 
 ## Format code
@@ -143,10 +143,10 @@ This is useful for rapid code development that utilizes UI/UX. It is also good f
 Before executing, make sure you have synced the simulator extras:
 ```bash
 # This cmd installs the simulator extras alongside the dev group
-uv sync --extra simulator
+uv sync --frozen --extra simulator
 
 # To install all extras, use:
-uv sync --all-extras
+uv sync --frozen --all-extras
 ```
 
 Run the simulator:
@@ -282,10 +282,10 @@ Before change documentation, and run the mkdocs server, make sure you have synce
 
 ```bash
 # This cmd installs the docs extras alongside the dev group
-uv sync --extra docs
+uv sync --frozen --extra docs
 
 # To install all extras, use:
-uv sync --all-extras
+uv sync --frozen --all-extras
 ```
 
 To change lateral and upper menus on documentation, see `mkdocs.yml` file on `nav` section. To create or edit translations (TODO: need help!), read [here](i18n/README.md).
