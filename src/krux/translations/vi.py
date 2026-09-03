@@ -191,6 +191,7 @@ translation_array = [
     "Trung bình",
     "Tin nhắn",
     "Tin nhắn:",
+    "Entropy tối thiểu:",
     "Chi tiết nhỏ",
     "Tọa độ gương X",
     "Thiếu tập tin chữ ký",

@@ -191,6 +191,7 @@ translation_array = [
     "Orta",
     "Mesaj",
     "Mesaj:",
+    "Min-entropi:",
     "Mini senaryo",
     "Ayna X Koordinatları",
     "İmza dosyası eksik",
