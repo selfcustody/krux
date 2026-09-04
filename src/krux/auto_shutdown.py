@@ -21,10 +21,10 @@
 # THE SOFTWARE.
 
 from machine import Timer
-from .krux_settings import Settings
+from krux.krux_settings import Settings
 
 ONE_SECOND = 1000
-from .power import power_manager
+from krux.power import power_manager
 
 
 def seconds_counter(_):

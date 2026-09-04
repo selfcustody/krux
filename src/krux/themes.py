@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .krux_settings import Settings, ThemeSettings
-from .kboard import kboard
+from krux.krux_settings import Settings, ThemeSettings
+from krux.kboard import kboard
 
 # To create new colors from RGB values use firmware/scripts/rgbconv.py script
 

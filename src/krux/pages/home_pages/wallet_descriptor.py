@@ -20,29 +20,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .. import (
+from krux.pages import (
     Page,
     Menu,
     MENU_CONTINUE,
     LOAD_FROM_CAMERA,
     LOAD_FROM_SD,
 )
-from ...display import (
+from krux.display import (
     DEFAULT_PADDING,
     BOTTOM_PROMPT_LINE,
     FONT_HEIGHT,
     FONT_WIDTH,
     MINIMAL_PADDING,
 )
-from ...krux_settings import t
-from ...qr import FORMAT_NONE, FORMAT_PMOFN
-from ...sd_card import (
+from krux.krux_settings import t
+from krux.qr import FORMAT_NONE, FORMAT_PMOFN
+from krux.sd_card import (
     DESCRIPTOR_FILE_EXTENSION,
     JSON_FILE_EXTENSION,
 )
-from ...themes import theme
-from ...key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL, P2TR
-from ...kboard import kboard
+from krux.themes import theme
+from krux.key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL, P2TR
+from krux.kboard import kboard
 
 
 class WalletDescriptor(Page):
@@ -97,14 +97,14 @@ class WalletDescriptor(Page):
             else:
                 self.display_wallet(self.ctx.wallet)
                 wallet_data, qr_format = self.ctx.wallet.wallet_qr()
-            from ..utils import Utils
+            from krux.pages.utils import Utils
 
             utils = Utils(self.ctx)
             utils.print_standard_qr(wallet_data, qr_format, title)
 
             # Try to save the Wallet output descriptor on the SD card
             if self.has_sd_card() and not self.ctx.wallet.persisted:
-                from ..file_operations import SaveFile
+                from krux.pages.file_operations import SaveFile
 
                 save_page = SaveFile(self.ctx)
                 if is_encrypted:
@@ -129,7 +129,7 @@ class WalletDescriptor(Page):
 
         load_method = self.load_method()
         if load_method == LOAD_FROM_CAMERA:
-            from ..qr_capture import QRCodeCapture
+            from krux.pages.qr_capture import QRCodeCapture
 
             qr_capture = QRCodeCapture(self.ctx)
             wallet_data, qr_format = qr_capture.qr_capture_loop()
@@ -138,7 +138,7 @@ class WalletDescriptor(Page):
         elif load_method == LOAD_FROM_SD:
             # Try to read the wallet output descriptor from a file on the SD card
             qr_format = FORMAT_NONE
-            from ..utils import Utils
+            from krux.pages.utils import Utils
 
             utils = Utils(self.ctx)
             filename, wallet_data = utils.load_file(
@@ -159,23 +159,15 @@ class WalletDescriptor(Page):
         self.ctx.display.draw_centered_text(t("Processing…"))
 
         # Decrypt if needed
-        from ..encryption_ui import decrypt_kef
+        from krux.pages.encryption_ui import try_decrypt_kef
 
-        try:
-            wallet_data = decrypt_kef(self.ctx, wallet_data)
-
-            # Cpython raises UnicodeDecodeError, MaixPy raises TypeError
-            try:
-                wallet_data = wallet_data.decode()
-            except:
-                self.flash_error(t("Failed to load"))
-                return None
-        except KeyError:
+        wallet_data, error = try_decrypt_kef(self.ctx, wallet_data)
+        if error == "decrypt":
             self.flash_error(t("Failed to decrypt"))
             return None
-        except ValueError:
-            # ValueError=not KEF or declined to decrypt
-            pass
+        if error == "load":
+            self.flash_error(t("Failed to load"))
+            return None
 
         return wallet_data, qr_format, persisted
 
@@ -189,7 +181,7 @@ class WalletDescriptor(Page):
         required_script_type=None,
     ):
         """Builds warning text for policy/network/script type mismatch"""
-        from ...key import get_policy_type_name, get_network_name
+        from krux.key import get_policy_type_name, get_network_name
 
         offset_y = DEFAULT_PADDING + 2 * FONT_HEIGHT
 
@@ -252,8 +244,8 @@ class WalletDescriptor(Page):
 
     def _handle_policy_mismatch(self, exception, wallet_data, qr_format, persisted):
         """Handles policy/network mismatch by prompting user and re-deriving key"""
-        from ...wallet import Wallet
-        from ...key import Key
+        from krux.wallet import Wallet
+        from krux.key import Key
 
         required_policy_type = exception.args[0]
         required_script_type = exception.args[1]
@@ -302,7 +294,7 @@ class WalletDescriptor(Page):
 
     def _attempt_wallet_load(self, wallet_data, qr_format, persisted):
         """Attempts to load wallet with exception handling"""
-        from ...wallet import Wallet, PolicyMismatchWarning
+        from krux.wallet import Wallet, PolicyMismatchWarning
 
         wallet = Wallet(self.ctx.wallet.key)
         wallet.persisted = persisted
@@ -379,7 +371,7 @@ class WalletDescriptor(Page):
 
     def display_loading_wallet(self, wallet):
         """Displays wallet descriptor attributes while loading"""
-        from ...settings import THIN_SPACE, ELLIPSIS
+        from krux.settings import THIN_SPACE, ELLIPSIS
 
         def draw_header():
             nonlocal offset_y
@@ -467,7 +459,7 @@ class WalletDescriptor(Page):
 
         # Display miniscript policies if available
         if wallet.is_miniscript():
-            from .miniscript_indenter import MiniScriptIndenter
+            from krux.pages.home_pages.miniscript_indenter import MiniScriptIndenter
 
             max_width = self.ctx.display.width() // FONT_WIDTH
             miniscript_policy = MiniScriptIndenter().indent(

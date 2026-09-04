@@ -23,8 +23,8 @@
 
 import gc
 import sensor
-from .krux_settings import Settings
-from .kboard import kboard
+from krux.krux_settings import Settings
+from krux.kboard import kboard
 
 OV2640_ID = 0x2642  # Lenses, vertical flip - Embed Fire
 OV7740_ID = 0x7742  # No lenses, no Flip - M5sitckV, Amigo

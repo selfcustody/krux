@@ -22,28 +22,28 @@
 
 from embit import bip32, compact, script
 from embit.networks import NETWORKS
-import hashlib
 import binascii
-from .. import MENU_CONTINUE, LOAD_FROM_CAMERA, LOAD_FROM_SD, Menu
-from ..utils import Utils
-from ...key import SINGLESIG_SCRIPT_PURPOSE, P2PKH, P2WPKH, P2TR, P2SH_P2WPKH
-from ...themes import theme
-from ...display import (
+from krux.hashes import sha256, sha256d
+from krux.pages import MENU_CONTINUE, LOAD_FROM_CAMERA, LOAD_FROM_SD, Menu
+from krux.pages.utils import Utils
+from krux.key import SINGLESIG_SCRIPT_PURPOSE, P2PKH, P2WPKH, P2TR, P2SH_P2WPKH
+from krux.themes import theme
+from krux.display import (
     DEFAULT_PADDING,
     FONT_HEIGHT,
     TOTAL_LINES,
     BOTTOM_PROMPT_LINE,
 )
-from ...baseconv import base_encode
-from ...krux_settings import t
-from ...qr import FORMAT_NONE
-from ...sd_card import (
+from krux.baseconv import base_encode
+from krux.krux_settings import t
+from krux.qr import FORMAT_NONE
+from krux.sd_card import (
     SIGNATURE_FILE_EXTENSION,
     SIGNED_FILE_SUFFIX,
     PUBKEY_FILE_EXTENSION,
 )
-from ...settings import TEST_TXT, MAIN_TXT
-from ...kboard import kboard
+from krux.settings import TEST_TXT, MAIN_TXT
+from krux.kboard import kboard
 
 SD_MESSAGE_HEADER = "-----BEGIN BITCOIN SIGNED MESSAGE-----"
 SD_SIGNATURE_HEADER = "-----BEGIN BITCOIN SIGNATURE-----"
@@ -58,7 +58,7 @@ class SignMessage(Utils):
         load_method = self.load_method()
 
         if load_method == LOAD_FROM_CAMERA:
-            from ..qr_capture import QRCodeCapture
+            from krux.pages.qr_capture import QRCodeCapture
 
             qr_capture = QRCodeCapture(self.ctx)
             data, qr_format = qr_capture.qr_capture_loop()
@@ -147,13 +147,10 @@ class SignMessage(Utils):
         if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
             return None
 
-        message_hash = hashlib.sha256(
-            hashlib.sha256(
-                b"\x18Bitcoin Signed Message:\n"
-                + compact.to_bytes(len(message))
-                + message
-            ).digest()
-        ).digest()
+        # BIP-137 signs a double hash; not the single hash shown elsewhere
+        message_hash = sha256d(
+            b"\x18Bitcoin Signed Message:\n" + compact.to_bytes(len(message)) + message
+        )
 
         sig = self.ctx.wallet.key.sign_at(derivation, message_hash)
         self._display_signature(base_encode(sig, 64))
@@ -274,7 +271,7 @@ class SignMessage(Utils):
                 return binascii.unhexlify(data), True
             except:
                 pass
-        return hashlib.sha256(data).digest(), False
+        return sha256(data).digest(), False
 
     def _export_signature(
         self,
@@ -334,7 +331,7 @@ class SignMessage(Utils):
 
     def _export_to_sd(self, sig, pubkey, message_filename, message="", address=""):
         """Exports the signature and public key to SD card"""
-        from ..file_operations import SaveFile
+        from krux.pages.file_operations import SaveFile
 
         save_page = SaveFile(self.ctx)
         if address:

@@ -22,7 +22,7 @@
 # THE SOFTWARE.
 
 from embit.wordlists.bip39 import WORDLIST
-from . import (
+from krux.pages import (
     Page,
     Menu,
     DIGITS,
@@ -33,10 +33,10 @@ from . import (
     BASE_HEX_SUFFIX,
     BASE_OCT_SUFFIX,
 )
-from ..display import BOTTOM_PROMPT_LINE
-from ..qr import FORMAT_UR
-from ..key import Key
-from ..krux_settings import t
+from krux.display import BOTTOM_PROMPT_LINE
+from krux.qr import FORMAT_UR
+from krux.key import Key
+from krux.krux_settings import t
 
 DIGITS_HEX = "0123456789ABCDEF"
 DIGITS_OCT = "01234567"
@@ -97,7 +97,7 @@ class MnemonicLoader(Page):
 
     def load_mnemonic_from_storage(self):
         """Handler to 'load mnemonic'>'from storage"""
-        from .encryption_ui import LoadEncryptedMnemonic
+        from krux.pages.encryption_ui import LoadEncryptedMnemonic
 
         encrypted_mnemonics = LoadEncryptedMnemonic(self.ctx)
         words = encrypted_mnemonics.load_from_storage()
@@ -110,7 +110,7 @@ class MnemonicLoader(Page):
 
     def load_key_from_text(self, new=False):
         """Handler for both 'new/load mnemonic'>[...]>'via words' menu items"""
-        from .mnemonic_editor import MnemonicEditor
+        from krux.pages.mnemonic_editor import MnemonicEditor
 
         if new:
             len_mnemonic = self.choose_len_mnemonic()
@@ -250,7 +250,7 @@ class MnemonicLoader(Page):
 
     def load_key_from_1248(self):
         """Menu handler to load key from Stackbit 1248 sheet metal storage method"""
-        from .stack_1248 import Stackbit
+        from krux.pages.stack_1248 import Stackbit
 
         stackbit = Stackbit(self.ctx)
         words = stackbit.enter_1248()
@@ -261,7 +261,7 @@ class MnemonicLoader(Page):
 
     def load_key_from_tiny_seed(self):
         """Menu handler to manually load key from Tinyseed sheet metal storage method"""
-        from .tiny_seed import TinySeed
+        from krux.pages.tiny_seed import TinySeed
 
         len_mnemonic = self.choose_len_mnemonic()
         if not len_mnemonic:
@@ -276,7 +276,7 @@ class MnemonicLoader(Page):
 
     def load_key_from_tiny_seed_image(self, grid_type="Tinyseed"):
         """Menu handler to scan key from Tinyseed sheet metal storage method"""
-        from .tiny_seed import TinyScanner
+        from krux.pages.tiny_seed import TinyScanner
 
         len_mnemonic = self.choose_len_mnemonic()
         if not len_mnemonic:
@@ -298,22 +298,18 @@ class MnemonicLoader(Page):
 
     def load_key_from_qr_code(self):
         """Handler for the 'via qr code' menu item"""
-        from .qr_capture import QRCodeCapture
-        from .encryption_ui import decrypt_kef
+        from krux.pages.qr_capture import QRCodeCapture
+        from krux.pages.encryption_ui import try_decrypt_kef
 
         qr_capture = QRCodeCapture(self.ctx)
         data, qr_format = qr_capture.qr_capture_loop()
         if data is None:  # user left the QR scanner
             return MENU_CONTINUE
 
-        try:
-            data = decrypt_kef(self.ctx, data)
-        except KeyError:
+        data, error = try_decrypt_kef(self.ctx, data, decode=False)
+        if error == "decrypt":
             self.flash_error(t("Failed to decrypt"))
             return MENU_CONTINUE
-        except ValueError:
-            # ValueError=not KEF or declined to decrypt
-            pass
 
         words = []
         if qr_format == FORMAT_UR:
@@ -453,7 +449,7 @@ class MnemonicLoader(Page):
         return MENU_CONTINUE
 
     def _confirm_key_from_digits(self, mnemonic, charset):
-        from .utils import Utils
+        from krux.pages.utils import Utils
 
         charset_type = {
             DIGITS: Utils.BASE_DEC,

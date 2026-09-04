@@ -1,9 +1,9 @@
 import pytest
 from unittest.mock import patch
-from . import create_ctx
-from ..shared_mocks import mock_context
-from ..test_sd_card import mocker_sd_card_ok
-from .test_login import mocker_printer
+from tests.pages import create_ctx
+from tests.shared_mocks import mock_context
+from tests.test_sd_card import mocker_sd_card_ok
+from tests.pages.test_login import mocker_printer
 
 
 ################### Test menus
@@ -16,7 +16,7 @@ class RebootException(Exception):
 def test_settings_m5stickv(m5stickv, mocker, mocker_printer):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.krux_settings import Settings, CategorySetting, NumberSetting
+    from krux.krux_settings import Settings, CategorySetting
     from krux.translations import available_languages
 
     index_pt = available_languages.index("pt-BR")
@@ -370,7 +370,7 @@ def test_settings_on_amigo_tft(amigo, mocker, mocker_printer):
 def test_change_display_type_on_amigo(amigo, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.krux_settings import Settings, CategorySetting, NumberSetting
+    from krux.krux_settings import Settings, CategorySetting
 
     BTN_SEQUENCE = [
         *([BUTTON_PAGE] * 2),  # Move to "Hardware"
@@ -412,7 +412,7 @@ def test_change_display_type_on_amigo(amigo, mocker):
 def test_change_display_lcd_on_amigo(amigo, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.krux_settings import Settings, CategorySetting, NumberSetting
+    from krux.krux_settings import Settings, CategorySetting
 
     BTN_SEQUENCE = [
         *([BUTTON_PAGE] * 2),  # Move to "Hardware"
@@ -640,7 +640,7 @@ def test_restore_settings(amigo, mocker, mocker_sd_card_ok):
 def test_set_first_tc_code(amigo, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
-    from ..shared_mocks import MockFile, mock_open
+    from tests.shared_mocks import MockFile, mock_open
 
     TC_CODE_EXTENDED_HASH = b"z\xc0\x99\xac\x01\x1f\xef\x91\xb6\xd5\xbd\xa8\xdc\xfc\x14\xcco-A\x9d\xba\xde\xaf\xe3\xe1{@0t\xb2\x85{"
     mocker.patch(
@@ -676,7 +676,7 @@ def test_set_first_tc_code(amigo, mocker):
 def test_set_first_tc_code_not_match(amigo, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER
-    from ..shared_mocks import MockFile, mock_open
+    from tests.shared_mocks import MockFile, mock_open
 
     CODES = ["123456", "654321"]
 
@@ -696,7 +696,7 @@ def test_set_first_tc_code_not_match(amigo, mocker):
 def test_set_new_tc_code(amigo, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
-    from ..shared_mocks import MockFile, mock_open
+    from tests.shared_mocks import MockFile, mock_open
 
     TC_CODE_EXTENDED_HASH = b"z\xc0\x99\xac\x01\x1f\xef\x91\xb6\xd5\xbd\xa8\xdc\xfc\x14\xcco-A\x9d\xba\xde\xaf\xe3\xe1{@0t\xb2\x85{"
     mocker.patch(
@@ -734,7 +734,7 @@ def test_set_new_tc_code(amigo, mocker):
 
 def test_wrong_code_set_new_tc_code(amigo, mocker):
     from krux.pages.settings_page import SettingsPage
-    from ..shared_mocks import MockFile, mock_open
+    from tests.shared_mocks import MockFile, mock_open
 
     # TC Code check returns false
     mocker.patch(

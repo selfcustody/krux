@@ -1,5 +1,5 @@
-from ..shared_mocks import MockPrinter, snapshot_generator
-from .home_pages.test_home import tdata, create_ctx
+from tests.shared_mocks import MockPrinter, snapshot_generator
+from tests.pages.home_pages.test_home import tdata, create_ctx
 
 
 def test_export_mnemonic_tiny_seed_menu(mocker, m5stickv, tdata):

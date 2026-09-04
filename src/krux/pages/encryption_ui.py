@@ -23,12 +23,12 @@
 import time
 from embit import bip39
 from binascii import hexlify
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
-from ..krux_settings import t, Settings
-from ..encryption import QR_CODE_ITER_MULTIPLE
+from krux.display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
+from krux.krux_settings import t, Settings
+from krux.encryption import QR_CODE_ITER_MULTIPLE
 from krux import kef
-from ..themes import theme
-from . import (
+from krux.themes import theme
+from krux.pages import (
     Page,
     Menu,
     MENU_CONTINUE,
@@ -114,6 +114,31 @@ def decrypt_kef(ctx, data):
         kef_envelope = KEFEnvelope(ctx)
         if not kef_envelope.parse(data):
             return data
+
+
+def try_decrypt_kef(ctx, data, decode=True):
+    """Wraps decrypt_kef, mapping its exceptions to an error tag.
+
+    Returns a (data, error) tuple where error is one of:
+      None        decrypted, or not KEF / user declined (data unchanged)
+      "decrypt"   KEF envelope found but decryption failed
+      "load"      decrypted but the result could not be decoded
+    """
+    try:
+        data = decrypt_kef(ctx, data)
+    except KeyError:
+        return None, "decrypt"
+    except ValueError:
+        # ValueError=not KEF or declined to decrypt
+        return data, None
+
+    if decode:
+        # Cpython raises UnicodeDecodeError, MaixPy raises TypeError
+        try:
+            data = data.decode()
+        except:
+            return None, "load"
+    return data, None
 
 
 def prompt_for_text_update(
@@ -296,7 +321,7 @@ class KEFEnvelope(Page):
                 self.flash_error(error_txt)
                 self.__iv = None
                 return None
-            from .capture_entropy import CameraEntropy
+            from krux.pages.capture_entropy import CameraEntropy
 
             camera_entropy = CameraEntropy(self.ctx)
             entropy = camera_entropy.capture(show_entropy_details=False)
@@ -550,7 +575,7 @@ class EncryptionKey(Page):
     def load_qr_encryption_key(self):
         """Loads and returns a key from a QR code"""
 
-        from .qr_capture import QRCodeCapture
+        from krux.pages.qr_capture import QRCodeCapture
 
         qr_capture = QRCodeCapture(self.ctx)
         data, _ = qr_capture.qr_capture_loop()
@@ -615,7 +640,7 @@ class EncryptMnemonic(Page):
     def store_mnemonic_on_memory(self, sd_card=False):
         """Save encrypted mnemonic on flash or sd_card"""
 
-        from ..encryption import MnemonicStorage, StorageCorruptedError
+        from krux.encryption import MnemonicStorage, StorageCorruptedError
 
         encrypted_data, mnemonic_id = self._encrypt_mnemonic_with_label()
         if encrypted_data is None:
@@ -666,8 +691,8 @@ class EncryptMnemonic(Page):
         if encrypted_data is None:
             return
 
-        from .qr_view import SeedQRView
-        from ..baseconv import base_encode
+        from krux.pages.qr_view import SeedQRView
+        from krux.baseconv import base_encode
 
         # All currently offered versions should encode to base43
         qr_data = base_encode(encrypted_data, 43)
@@ -684,8 +709,8 @@ class LoadEncryptedMnemonic(Page):
 
     def load_from_storage(self, remove_opt=False):
         """Lists all encrypted mnemonics stored is flash and SD card"""
-        from ..encryption import MnemonicStorage
-        from ..settings import THIN_SPACE
+        from krux.encryption import MnemonicStorage
+        from krux.settings import THIN_SPACE
 
         mnemonic_ids_menu = []
         mnemonic_storage = MnemonicStorage()
@@ -723,7 +748,7 @@ class LoadEncryptedMnemonic(Page):
 
     def _load_encrypted_mnemonic(self, mnemonic_id, sd_card=False):
         """Uses encryption module to load and decrypt a mnemonic"""
-        from ..encryption import MnemonicStorage
+        from krux.encryption import MnemonicStorage
 
         error_txt = t("Failed to decrypt")
 
@@ -757,7 +782,7 @@ class LoadEncryptedMnemonic(Page):
 
     def _remove_encrypted_mnemonic(self, mnemonic_id, sd_card=False):
         """Deletes a mnemonic"""
-        from ..encryption import MnemonicStorage
+        from krux.encryption import MnemonicStorage
 
         mnemonic_storage = MnemonicStorage()
         self.ctx.display.clear()
