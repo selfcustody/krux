@@ -9,7 +9,7 @@
 All Maix Bit support has been removed from the source tree, including its firmware build project. Support for the device was discontinued in 25.09.0, which at the time kept the build parameters available; those are now gone too. The OV5642 sensor handling, used only by that device, was removed along with it.
 
 ### Stackbit 1248 Vertical Layout
-Added vertical layout option for Stackbit 1248 backup display, allowing users to choose between Standard (horizontal) and Vertical (transposed) grid orientations.
+- Added vertical layout option for Stackbit 1248 backup display/mnemonic input, allowing users to choose between Standard (horizontal) and Vertical (transposed) grid orientations.
 
 ### Migrate UR encoding to uUR C module
 Switch from the pure-Python urtypes and foundation-ur-py packages to the new uUR C module, allowing faster UR QR codes decoding with a smaller RAM footprint. Tests and the simulator now build the same module for CPython instead of shimming the pure-Python packages, so host and device run identical UR code.

@@ -24,3 +24,27 @@ x5 press BUTTON_B
 press BUTTON_A
 
 #screenshot load-mnemonic-via-stackbit-filled.png
+
+# Go back to menu
+press BUTTON_B
+x2 press BUTTON_A
+
+# Navigate to Vertical
+press BUTTON_B
+press BUTTON_A
+
+screenshot load-mnemonic-via-stackbit-vertical-initial.png
+
+# Fill word 1
+press BUTTON_B
+press BUTTON_A
+x2 press BUTTON_B
+press BUTTON_A
+x3 press BUTTON_B
+press BUTTON_A
+x5 press BUTTON_B
+press BUTTON_A
+x2 press BUTTON_B
+press BUTTON_A
+
+screenshot load-mnemonic-via-stackbit-vertical-filled.png

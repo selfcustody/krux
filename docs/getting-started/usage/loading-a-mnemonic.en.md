@@ -28,6 +28,12 @@ After opening a wallet, you can use Krux to [back up the mnemonic](navigating-th
 Enter each BIP39 word one at a time. Krux disables impossible letters as you type and attempts to autocomplete each word.
 
 <div style="clear: both"></div>
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-stackbit-vertical-filled-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/load-mnemonic-via-stackbit-vertical-filled-300.png" align="right" class="amigo">
+
+Vertical layout transposes the grid, with rows = weights (1,2,4,8) and columns = digits.
+
+<div style="clear: both"></div>
 
 ### From Storage
 
