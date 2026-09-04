@@ -48,8 +48,12 @@ class TCCodeVerification(Page):
             if changing_tc_code
             else t("Tamper Check Code")
         )
+        keysets = [NUM_SPECIAL_1, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2]
+        scan_fn = None if changing_tc_code else self._load_qr_tc_code
         tc_code = self.capture_from_keypad(
-            label, [NUM_SPECIAL_1, LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_2]
+            label,
+            keysets,
+            scan_fn=scan_fn,
         )
         if tc_code == ESC_KEY:
             return False
@@ -76,3 +80,33 @@ class TCCodeVerification(Page):
 
         self.flash_error(t("Invalid Tamper Check Code"))
         return False
+
+    def _load_qr_tc_code(self):
+        """Loads and validates a Tamper Check Code from a QR code."""
+        from .qr_capture import QRCodeCapture
+
+        qr_capture = QRCodeCapture(self.ctx)
+        data, _ = qr_capture.qr_capture_loop()
+        tc_code = self._sanitize_qr_tc_code(data)
+        if tc_code is None:
+            self.flash_error(t("Failed to load"))
+        return tc_code
+
+    @staticmethod
+    def _sanitize_qr_tc_code(tc_code):
+        """Returns a single-line QR value supported by the TC keypad."""
+        if isinstance(tc_code, bytes):
+            try:
+                tc_code = tc_code.decode()
+            except (UnicodeError, TypeError):
+                return None
+        if not isinstance(tc_code, str):
+            return None
+
+        if not tc_code or "\n" in tc_code or "\r" in tc_code:
+            return None
+
+        allowed_chars = NUM_SPECIAL_1 + LETTERS + UPPERCASE_LETTERS + NUM_SPECIAL_2
+        if any(char not in allowed_chars for char in tc_code):
+            return None
+        return tc_code

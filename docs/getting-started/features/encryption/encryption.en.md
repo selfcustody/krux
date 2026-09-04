@@ -8,7 +8,14 @@ During encryption, users may be prompted to override their preferences or select
 <img src="../../../../img/maixpy_m5stickv/load-mnemonic-kef-via-qr-250.png" align="right" class="m5stickv">
 <img src="../../../../img/maixpy_amigo/load-mnemonic-kef-via-qr-300.png" align="right" class="amigo">
 
-When Krux detects data resembling a KEF-encrypted envelope, it prompts the user to *"Decrypt?"*, showing the KEF version, envelope ID (or label), and the PBKDF2 iteration count used during creation. To decrypt, the same key (typed or scanned) must be provided. Once unlocked, Krux uses the plaintext within context. If decryption is declined, the raw envelope is used instead—usually resulting in an error, since KEF data is meaningless without decryption.
+When Krux detects data resembling a KEF-encrypted envelope, it prompts the user
+to *"Decrypt?"*, showing the KEF version, envelope ID (or label), and the PBKDF2
+iteration count used during creation. To decrypt, provide the same key by typing
+it or selecting the QR glyph on the last symbols keypad. Scanned text returns to
+the keypad for review and editing; QR keys that cannot be decoded as text are
+rejected. Once unlocked, Krux uses the plaintext within context. If decryption
+is declined, the raw envelope is used instead—usually resulting in an error,
+since KEF data is meaningless without decryption.
 
 <div style="clear: both"></div>
 

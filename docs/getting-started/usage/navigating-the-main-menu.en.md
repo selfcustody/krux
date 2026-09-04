@@ -55,7 +55,12 @@ Please refer to [Transcribing QR Codes](../features/QR-transcript-tools.md) for 
 
 This feature allows you to back up your mnemonic by encrypting it and storing it on the device's flash memory, on an SD card, or in QR code format. You can customize the encryption method and parameters in the [settings](../settings.md/#encryption).
 
-When using any of the encryption methods, you will be prompted to enter an encryption key. This key can be provided in text or QR code format. Additionally, you have the option to set a custom ID for easier management of your mnemonics. If a custom ID is not specified, the current loaded wallet fingerprint will be used.
+When using any of the encryption methods, you will be prompted to enter an
+encryption key. Type the key normally, or open the last symbols keypad and
+select the QR glyph to scan it. Scanned text returns to the keypad for review
+and editing. Additionally, you have the option to set a custom ID for easier
+management of your mnemonics. If a custom ID is not specified, the current
+loaded wallet fingerprint will be used.
 
 **Note**: The stored encrypted mnemonic is protected only by the key you defined to encrypt it. Also, it is advisable not to rely solely on digital methods for backup. Read the considerations section on [Krux Mnemonics Encryption](../features/encryption/encryption.md/#considerations).
 
@@ -180,12 +185,13 @@ Krux also allows you to verify a descriptor's receive and change addresses witho
 Please note that if you customize the wallet parameters or restart the device, the descriptor will be unloaded, and you may need to load it again to check addresses.
 
 #### Passphrase
-<img src="../../../img/maixpy_m5stickv/passphrase-load-options-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/passphrase-load-options-300.png" align="right" class="amigo">
 
-If you forgot to load a passphrase while loading your wallet, or if you use multiple passphrases with the same mnemonic, you can add, replace, or remove a passphrase here. Simply choose between typing or scanning it.
+If you forgot to load a passphrase while loading your wallet, or if you use
+multiple passphrases with the same mnemonic, you can add, replace, or remove a
+passphrase here. Type it normally, or select the QR glyph on the last symbols
+keypad to scan it.
 
-To remove a passphrase, select `Type BIP39 Passphrase`, leave the field blank, and press `Go`.
+To remove a passphrase, leave the field blank and press `Go`.
 
 Don't forget to verify the resulting fingerprint in the status bar to ensure you've loaded the correct key.
 

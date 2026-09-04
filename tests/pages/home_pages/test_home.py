@@ -391,7 +391,6 @@ def test_change_passphrase_menu(mocker, amigo, tdata):
 
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # Proceed on message
-        BUTTON_ENTER,  # Type passphrase
         BUTTON_ENTER,  # Enter "a"
         BUTTON_PAGE_PREV,  # Move to Go
         BUTTON_ENTER,  # Confirm Go
