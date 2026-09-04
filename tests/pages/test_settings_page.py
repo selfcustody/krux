@@ -600,24 +600,38 @@ def test_number_setting_rejects_values_outside_range(m5stickv, mocker, value, er
     assert Settings().appearance.screensaver_time == 5
 
 
-@pytest.mark.parametrize("input_kind", ["cancel", "empty"])
-def test_number_setting_cancel_or_empty_input_does_not_change_storage(
-    m5stickv, mocker, input_kind
-):
+def test_number_setting_cancel_does_not_change_storage(m5stickv, mocker):
     from krux.pages import ESC_KEY
     from krux.pages.settings_page import SettingsPage
     from krux.krux_settings import Settings, ThemeSettings
     from krux.settings import store
 
     settings_page = SettingsPage(mock_context(mocker))
-    value = ESC_KEY if input_kind == "cancel" else ""
-    settings_page.capture_from_keypad = mocker.MagicMock(return_value=value)
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value=ESC_KEY)
     starting_storage = store.settings.copy()
 
     settings_page.number_setting(ThemeSettings(), ThemeSettings.screensaver_time)
 
     assert Settings().appearance.screensaver_time == 5
     assert store.settings == starting_storage
+
+
+def test_number_setting_empty_input_shows_error_and_retries(m5stickv, mocker):
+    from krux.pages.settings_page import SettingsPage
+    from krux.krux_settings import Settings, ThemeSettings
+
+    settings_page = SettingsPage(mock_context(mocker))
+    settings_page.capture_from_keypad = mocker.MagicMock(side_effect=("", "10"))
+    settings_page.flash_error = mocker.MagicMock()
+
+    settings_page.number_setting(ThemeSettings(), ThemeSettings.screensaver_time)
+
+    settings_page.flash_error.assert_called_once_with("Empty")
+    assert Settings().appearance.screensaver_time == 10
+    assert (
+        settings_page.capture_from_keypad.call_args_list[1].kwargs["starting_buffer"]
+        == ""
+    )
 
 
 def test_restore_settings(amigo, mocker, mocker_sd_card_ok):
