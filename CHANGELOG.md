@@ -1,3 +1,28 @@
+# Changelog 26.09.0 - September 2026
+
+### New Maintainer
+As of this release: I Jean Do (jdlcdl), am replacing Odudex as maintainer. Github's "selfcustody" account ownership has been exclusively transfered. As well the selfcustody (Krux) firmware signing-key has been securely shared (now known to: myself, Odudex and Jeff).  I will include attestations verifiable with my github/keybase gpg key whenever I use the selfcustody firmware signing key.
+
+### Features
+  - Implemented a mandatory disclaimer regarding Krux "Research and Development" focus, which must be acknowledged once per firmware version upon first boot, always reviewable in **About**.  The intention is to *ground* user expectations, to reinforce *"Don't trust, verify."*, and for users to assume responsibility for their decision to use krux.
+  - The mnemonic recovery flow now prioritizes format selection (QR Code, Words, From Storage, Other Formats) at the start, simplifying common recovery paths and improving user experience.
+  - Added units and allowed ranges to numeric editors for Screensaver Time, Shutdown Time, and Buttons Debounce, providing clearer input guidance.
+
+### Bug Fixes and Hardening
+  - Corrected the GCM tag buffer size to match the 16 bytes written by the SDK, ensuring proper handling of cryptographic tags and maintaining compatibility with existing KEF envelopes.
+  - Fixed issues where pressing 'back' incorrectly triggered "failed to load" errors in the SD card file browser and QR scanner. Error handling is now more robust, distinguishing between user cancellation and actual load failures.
+  - Updated Embit to v0.8.2, incorporating hardened PSBT checks.
+
+### Improvements
+  - Added a critical privacy warning to the tamper detection documentation, alerting users that camera frames are stored unscrambled and could potentially be reconstructed from a flash dump.
+  - Clarified the entropy measurement label display as "Estimated entropy:".
+
+### Documentation
+  - Updated the security contact information to include Jean Do.
+  - Fixed dependency freezing issues related to `uv` auto-updating libraries.
+  - Updated `mkdocs.yml` variables and contributor keys, and emphasized the importance of verifying both authenticity and integrity checks.
+
+
 # Changelog 26.08.0 - August 2026
 
 ### Security Fixes
