@@ -49,6 +49,9 @@ BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
 TC_CODE_PATH = "/flash/tcc"
 TC_CODE_PBKDF2_ITERATIONS = 100000
 
+# Stores the firmware version the disclaimer was acknowledged for
+DISCLAIMER_PATH = "/flash/disclaimer"
+
 DEFAULT_LOCALE = "en-US"
 
 DEFAULT_TX_PIN = (
@@ -301,7 +304,7 @@ class ButtonsSettings(SettingsNamespace):
 
     namespace = "settings.buttons"
     default_deb = 50 if kboard.is_m5stickv else 80
-    debounce = NumberSetting(int, "debounce", default_deb, [20, 500])
+    debounce = NumberSetting(int, "debounce", default_deb, [20, 500], "ms")
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -315,7 +318,7 @@ class TouchSettings(SettingsNamespace):
 
     namespace = "settings.touchscreen"
     default_th = 40 if kboard.is_wonder_k else 22
-    threshold = NumberSetting(int, "threshold", default_th, [2, 200])
+    threshold = NumberSetting(int, "threshold", default_th, [2, 200], show_range=True)
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -459,7 +462,7 @@ class ThemeSettings(SettingsNamespace):
     }
     namespace = "settings.appearance"
     theme = CategorySetting("theme", DARK_THEME_NAME, list(THEME_NAMES.values()))
-    screensaver_time = NumberSetting(int, "screensaver_time", 5, [0, 30])
+    screensaver_time = NumberSetting(int, "screensaver_time", 5, [0, 30], "min")
 
     def label(self, attr):
         """Returns a label for UI when given a setting name or namespace"""
@@ -473,7 +476,7 @@ class SecuritySettings(SettingsNamespace):
     """Security settings"""
 
     namespace = "settings.security"
-    auto_shutdown = NumberSetting(int, "auto_shutdown", 10, [0, 60])
+    auto_shutdown = NumberSetting(int, "auto_shutdown", 10, [0, 60], "min")
     hide_mnemonic = CategorySetting("hide_mnemonic", False, [False, True])
     boot_flash_hash = CategorySetting("boot_flash_hash", False, [False, True])
 

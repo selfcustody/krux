@@ -22,7 +22,7 @@
 
 [project]
 name = "krux"
-version = "26.08.0"
+version = "26.09.0"
 description = "Open-source signing device firmware for Bitcoin"
 authors = [{ name = "Jeff S", email = "jeffreesun@protonmail.com" }]
 readme = "README.md"

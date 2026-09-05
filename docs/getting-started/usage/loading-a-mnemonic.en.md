@@ -1,92 +1,102 @@
-Once you have either a 12 or 24-word [BIP39 mnemonic](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki), choose `Load Mnemonic` on Krux's start menu (aka login menu), and choose an input method:
+Once you have either a 12 or 24-word [BIP39 mnemonic](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki), choose `Load Mnemonic` on Krux's start menu, then choose the backup format you recognise:
 
 <img src="../../../img/maixpy_amigo/load-mnemonic-options-300.png" class="amigo">
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-options-250.png" class="m5stickv">
 
-## Input Methods
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-camera-options-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-camera-options-300.png" align="right" class="amigo">
+## Backup Formats
 
-### Via Camera
-You can choose to use the camera to scan a `QR code`, `Tinyseed`, `OneKey KeyTag` or a `Binary Grid`. Learn more about these [metal backups here](../features/tinyseed.en.md).
+### QR Code
+
+Use the camera to read a QR code containing the mnemonic. Krux can decode four types:
+
+- **Plain text QR**: mnemonic words separated by spaces
+- [SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md): the BIP39 word numbers concatenated as text
+- [Compact SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md/#compactseedqr-specification): the mnemonic bits concatenated as bytes
+- [Encrypted Mnemonic](../features/encryption/encryption.md/#regarding-bip39-mnemonics): a Krux format that encrypts the mnemonic bits and records the encryption method.
 
 ----8<----
 camera-scan-tips.en.txt
 ----8<----
 
-<div style="clear: both"></div>
+After opening a wallet, you can use Krux to [back up the mnemonic](navigating-the-main-menu.md#backup-mnemonic) as a QR code, [transcribe](../features/QR-transcript-tools.md) it to paper or metal, or print it with a thermal printer. See the [printing section](../features/printing/printing.md) for more information. You can also use an [offline QR code generator](https://iancoleman.io/bip39/), ideally on an air-gapped device.
 
-#### QR Code
+### Words
 
-It's unpleasant having to manually enter 12 or 24 words every time you want to use Krux. To remedy this you can instead use the device's camera to read a QR code containing the words. Krux will decode QR codes of four types:
-
-- **Plain text QR**: The mnemonic words encoded as text, with words separated by spaces.
-- [SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md): Basically, it is the mnemonic words of the respective BIP39 numbers concatenated, encoded as text.
-- [Compact SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md/#compactseedqr-specification): Basically, it is the mnemonic words bits concatenated as bytes.
-- [Encrypted Mnemonic](../features/encryption/encryption.md/#regarding-bip39-mnemonics): A specification created by Krux that encrypts the mnemonic words bits and adds some information about the encryption used.
-
-After opening a wallet via one of the methods available you can use Krux to [backup the mnemonic](navigating-the-main-menu.md#backup-mnemonic) as QR code, [transcribe](../features/QR-transcript-tools.md) them to paper or metal using the transcription helpers or attach a thermal printer to your Krux and print out the mnemonic as QR. Check out the [printing section](../features/printing/printing.md) for more information.
-You can also use [an offline QR code generator for this](https://iancoleman.io/bip39/) (ideally on an airgapped device).
-
-#### Tinyseed, OneKey KeyTag or Binary Grid
-[Tinyseed](https://tinyseed.io/), [Onekey KeyTag](https://onekey.so/products/onekey-keytag/) and others directly encode a seed as binary, allowing for a very compact mnemonic storage. Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them (this feature is not available in [Krux Mobile Android app](../../faq.md#what-is-krux-mobile-android-app)).
-
-To ensure a proper scan, place the backup plate over a black background and fill in the punched areas with black to enhance contrast. Alternatively, you can scan a [thermally printed version](../features/printing/printing.md) or a completed template. You can view some [examples of encoded mnemonics here](../features/tinyseed.md), and explore our [available transcription templates here](../templates/index.md).
-
-### Via Manual Input
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-manual-options-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-manual-options-300.png" align="right" class="amigo">
-
-Manually type `Words`, `Word Numbers`, `Tinyseed` (toggle the bits or punches) or [`Stackbit 1248`](https://stackbit.me/produto/stackbit-1248/).
-
-<div style="clear: both"></div>
-
-#### Words
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-via-text-word-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-text-word-300.png" align="right" class="amigo">
 
-Enter each word of your BIP39 mnemonic one at a time. Krux will disable impossible-to-reach letters as you type and will attempt to autocomplete your words to speed up the process.
-
-<div style="clear: both"></div>
-
-#### Word Numbers
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-numbers-word-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-via-numbers-word-300.png" align="right" class="amigo">
-
-##### Decimal
-Enter each word of your BIP39 mnemonic as a number (1-2048) one at a time. You can use [this list](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt) for reference.
-
-##### Hexadecimal and Octal
-You can also enter your BIP39 mnemonic word's numbers (1-2048) in hexadecimal format, with values ranging from 0x1 to 0x800, or in octal format, with values ranging from 01 to 04000. This is useful with some metal plate backups that uses those formats.
-
-<div style="clear: both"></div>
-
-#### Tinyseed (Bits)
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-tinyseed-filled-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-via-tinyseed-filled-300.png" align="right" class="amigo">
-
-Enter the BIP39 mnemonic word's numbers (1-2048) in binary format, toggling necessary bits to recreate each of the word's respective number. The last word will have checksum bits dynamically toggled while you fill the bits.
-
-**Tip**: You can use this screen to generate a mnemonic by flipping a coin:
-
-- Flip a coin, if it is heads, mark the first space (value 1) of the word, if it is tails do nothing. Repeat this step for each space up to 1024 (if you flip 11 tails in a row, just leave the 2048 square marked).
-- The last word has the checksum, you will do as you did with the other words, the only difference is that you cannot set some spaces, they are calculated automatically. For 12 words you will flip the coin only 7 times, for spaces 16, 32, 64, 128, 256, 512 and 1024. For 24 words you will flip the coin only 3 times, for spaces 256, 512 and 1024.
-
-<div style="clear: both"></div>
-
-#### Stackbit 1248
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-stackbit-filled-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-via-stackbit-filled-300.png" align="right" class="amigo">
-
-Enter the BIP39 mnemonic word's numbers (1-2048) using the Stackbit 1248 metal plate backup method, where each of the four digits of the word's number is a sum of the numbers marked (punched) 1, 2, 4, or 8. For example, to enter the word "oyster", number 1268, you must punch (1)(2)(2,4)(8).
+Enter each BIP39 word one at a time. Krux disables impossible letters as you type and attempts to autocomplete each word.
 
 <div style="clear: both"></div>
 
 ### From Storage
+
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-storage-options-250.png" align="right" class="m5stickv">
 <img src="../../../img/maixpy_amigo/load-mnemonic-storage-options-300.png" align="right" class="amigo">
 
-You can also retrieve [encrypted mnemonics previously stored](./navigating-the-main-menu.md/#encrypted) on device's internal memory or external (SD card). To load them you'll have to enter the same key you used to encrypt them.
+Retrieve an [encrypted mnemonic previously stored](./navigating-the-main-menu.md/#encrypted) in internal memory or on an SD card. Enter the same key that was used to encrypt it.
+
+<div style="clear: both"></div>
+
+### Other Formats
+
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-other-formats-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/load-mnemonic-other-formats-300.png" align="right" class="amigo">
+
+Specialist backup formats are grouped in one menu: `Tinyseed (scan)`, `Binary Grid (manual)`, `OneKey KeyTag (scan)`, `Binary Grid (scan)`, `Word Numbers`, and `Stackbit 1248`.
+
+<div style="clear: both"></div>
+
+#### Tinyseed (scan)
+
+[Tinyseed](https://tinyseed.io/) directly encodes a seed as binary on a compact backup plate. Krux can scan a completed Tinyseed with its camera. This feature is not available in the [Krux Mobile Android app](../../faq.md#what-is-krux-mobile-android-app).
+
+Place the backup over a black background and fill punched areas with black to improve contrast. You can also scan a [thermally printed version](../features/printing/printing.md) or a completed template. See the [encoded examples](../features/tinyseed.md) and [transcription templates](../templates/index.md).
+
+#### Binary Grid (manual)
+
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-tinyseed-filled-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/load-mnemonic-via-tinyseed-filled-300.png" align="right" class="amigo">
+
+Enter each BIP39 word number (1-2048) in binary by toggling its bits. Krux calculates the checksum bits for the final word while you enter it.
+
+**Tip**: You can use this screen to generate a mnemonic with coin flips:
+
+- For each bit through 1024, mark it for heads and leave it unmarked for tails
+- For the last word, Krux calculates the checksum positions. Flip seven times for a 12-word mnemonic or three times for a 24-word mnemonic.
+
+<div style="clear: both"></div>
+
+#### OneKey KeyTag (scan)
+
+[OneKey KeyTag](https://onekey.so/products/onekey-keytag/) also stores a seed as a compact binary pattern. Use the camera to scan the completed plate.
+
+#### Binary Grid (scan)
+
+Use the camera to scan another supported binary-grid backup or a completed
+transcription template.
+
+#### Word Numbers
+
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-numbers-word-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/load-mnemonic-via-numbers-word-300.png" align="right" class="amigo">
+
+##### Decimal
+
+Enter each BIP39 word as its number from 1 to 2048. Use the [BIP39 English word list](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt) for reference.
+
+##### Hexadecimal and Octal
+
+Word numbers can also be entered in hexadecimal from `0x1` to `0x800`, or in octal from `01` to `04000`. These forms are useful with metal backups that use those number systems.
+
+<div style="clear: both"></div>
+
+#### Stackbit 1248
+
+<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-stackbit-filled-250.png" align="right" class="m5stickv">
+<img src="../../../img/maixpy_amigo/load-mnemonic-via-stackbit-filled-300.png" align="right" class="amigo">
+
+Enter each BIP39 word number with the [Stackbit 1248](https://stackbit.me/produto/stackbit-1248/) backup method. Each digit is the sum of marked values 1, 2, 4, or 8. For example, word number 1268 uses `(1)(2)(2,4)(8)`.
 
 <div style="clear: both"></div>
 

@@ -145,26 +145,19 @@ def test_menu_load_and_back(mocker, m5stickv, tdata):
             BUTTON_ENTER,  # Press Back
         ),
         (
-            BUTTON_ENTER,  # Press "Via camera"
+            *([BUTTON_PAGE] * 3),  # Move to "Other Formats"
+            BUTTON_ENTER,  # Press "Other Formats"
             BUTTON_PAGE_PREV,  # Move to Back
+            BUTTON_ENTER,  # Back to "Load Mnemonic"
+            BUTTON_PAGE,  # Move to Back
             BUTTON_ENTER,  # Press Back
-            BUTTON_PAGE_PREV,  # Move to "Back"
-            BUTTON_ENTER,  # Press "Back"
         ),
         (
-            BUTTON_PAGE,  # Move to "Via manual input"
-            BUTTON_ENTER,  # Press "Via manual input"
+            *([BUTTON_PAGE] * 2),  # Move to "From Storage"
+            BUTTON_ENTER,  # Press "From Storage"
             BUTTON_PAGE_PREV,  # Move to Back
             BUTTON_ENTER,  # Press Back
-            *([BUTTON_PAGE_PREV] * 2),  # Move to "Back"
-            BUTTON_ENTER,  # Press "Back"
-        ),
-        (
-            *([BUTTON_PAGE] * 2),  # Move to "Via storage"
-            BUTTON_ENTER,  # Press "Via storage
-            BUTTON_PAGE_PREV,  # Move to Back
-            BUTTON_ENTER,  # Press Back
-            BUTTON_PAGE,  # Move to "Back"
+            *([BUTTON_PAGE] * 2),  # Move to "Back"
             BUTTON_ENTER,  # Press "Back"
         ),
     ]
@@ -195,24 +188,18 @@ def test_menu_load_qrcode_and_back(mocker, amigo, tdata):
     cases = [
         # Not accept the part
         (
-            BUTTON_ENTER,  # Press "Via camera"
-            BUTTON_ENTER,  # QRCode
+            BUTTON_ENTER,  # QR Code
             BUTTON_PAGE_PREV,  # Move to "No"
             BUTTON_ENTER,  # Press "No"
-            BUTTON_PAGE_PREV,  # Move to Back
-            BUTTON_ENTER,  # Press Back
             BUTTON_PAGE_PREV,  # Move to Back
             BUTTON_ENTER,  # Press Back
         ),
         # Load the part, but not accept the fingerprint
         (
-            BUTTON_ENTER,  # Press "Via camera"
-            BUTTON_ENTER,  # QRCode
+            BUTTON_ENTER,  # QR Code
             BUTTON_ENTER,  # Press "Yes"
             BUTTON_PAGE_PREV,  # Move to "No"
             BUTTON_ENTER,  # Press "No"
-            BUTTON_PAGE_PREV,  # Move to back
-            BUTTON_ENTER,  # Press back
             BUTTON_PAGE_PREV,  # Move to back
             BUTTON_ENTER,  # Press back
         ),
@@ -245,17 +232,16 @@ def test_load_from_qrcode(mocker, amigo, tdata):
     from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
     from krux.key import Key, TYPE_SINGLESIG
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_NONE
     from krux.pages.qr_capture import QRCodeCapture
 
     cases = [
         # Case from https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#12-words-xor-seed-example-using-3-parts
-        # Via camera, QRCode, XOR 12, 1st XOR 2nd shares
+        # QR Code, XOR 12, 1st XOR 2nd shares
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
+                BUTTON_ENTER,  # QR Code
                 BUTTON_ENTER,  # Press "Yes" to accept part words
                 BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
                 BUTTON_ENTER,  # Press "Yes" to accept XORed words
@@ -267,11 +253,10 @@ def test_load_from_qrcode(mocker, amigo, tdata):
             ),
             ("a70e2c26", "d9987b75"),
         ),
-        # Via camera, QRCode, XOR 12, (1st XOR 2nd) XOR 3rd shares
+        # QR Code, XOR 12, (1st XOR 2nd) XOR 3rd shares
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
+                BUTTON_ENTER,  # QR Code
                 BUTTON_ENTER,  # Press "Yes" to accept part words
                 BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
                 BUTTON_ENTER,  # Press "Yes" to accept XORed words
@@ -284,11 +269,10 @@ def test_load_from_qrcode(mocker, amigo, tdata):
             ("d9987b75", "60259e7d"),
         ),
         # Case from https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#24-words-xor-seed-example-using-3-parts
-        # Via camera, QRCode, XOR 24, 1st XOR 2nd
+        # QR Code, XOR 24, 1st XOR 2nd
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
+                BUTTON_ENTER,  # QR Code
                 BUTTON_ENTER,  # Press "Yes" to accept part words
                 BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
                 BUTTON_ENTER,  # Press "Yes" to accept XORed words
@@ -300,11 +284,10 @@ def test_load_from_qrcode(mocker, amigo, tdata):
             ),
             ("e51c20a3", "0849dc5e"),
         ),
-        # Via camera, QRCode, XOR 24, (1st XOR 2nd) XOR 3rd
+        # QR Code, XOR 24, (1st XOR 2nd) XOR 3rd
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
+                BUTTON_ENTER,  # QR Code
                 BUTTON_ENTER,  # Press "Yes" to accept part words
                 BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
                 BUTTON_ENTER,  # Press "Yes" to accept XORed words
@@ -356,11 +339,10 @@ def test_load_from_qrcode_with_hide_mnemonic(mocker, amigo, tdata):
 
     cases = [
         # Case from https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#12-words-xor-seed-example-using-3-parts
-        # Via camera, QRCode, XOR 12, 1st XOR 2nd shares
+        # QR Code, XOR 12, 1st XOR 2nd shares
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
+                BUTTON_ENTER,  # QR Code
                 BUTTON_ENTER,  # Press "Yes" to accept part words
                 BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
                 BUTTON_ENTER,  # Press "Yes" to accept XORed words
@@ -372,11 +354,10 @@ def test_load_from_qrcode_with_hide_mnemonic(mocker, amigo, tdata):
             ),
             ("a70e2c26", "d9987b75"),
         ),
-        # Via camera, QRCode, XOR 12, (1st XOR 2nd) XOR 3rd shares
+        # QR Code, XOR 12, (1st XOR 2nd) XOR 3rd shares
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
+                BUTTON_ENTER,  # QR Code
                 BUTTON_ENTER,  # Press "Yes" to accept part words
                 BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
                 BUTTON_ENTER,  # Press "Yes" to accept XORed words
@@ -389,11 +370,10 @@ def test_load_from_qrcode_with_hide_mnemonic(mocker, amigo, tdata):
             ("d9987b75", "60259e7d"),
         ),
         # Case from https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#24-words-xor-seed-example-using-3-parts
-        # Via camera, QRCode, XOR 24, 1st XOR 2nd
+        # QR Code, XOR 24, 1st XOR 2nd
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
+                BUTTON_ENTER,  # QR Code
                 BUTTON_ENTER,  # Press "Yes" to accept part words
                 BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
                 BUTTON_ENTER,  # Press "Yes" to accept XORed words
@@ -405,11 +385,10 @@ def test_load_from_qrcode_with_hide_mnemonic(mocker, amigo, tdata):
             ),
             ("e51c20a3", "0849dc5e"),
         ),
-        # Via camera, QRCode, XOR 24, (1st XOR 2nd) XOR 3rd
+        # QR Code, XOR 24, (1st XOR 2nd) XOR 3rd
         (
             [
-                BUTTON_ENTER,  # Press "Via camera"
-                BUTTON_ENTER,  # QRCode
+                BUTTON_ENTER,  # QR Code
                 BUTTON_ENTER,  # Press "Yes" to accept part words
                 BUTTON_ENTER,  # Press "Yes" to Proceed after see fingerprints
                 BUTTON_ENTER,  # Press "Yes" to accept XORed words
@@ -460,12 +439,11 @@ def test_export_from_words(mocker, amigo, tdata):
 
     cases = [
         # Case from https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#12-words-xor-seed-example-using-3-parts
-        # Via manual input/words, QRCode, XOR 12, 1st XOR 2nd shares
+        # Words, XOR 12, 1st XOR 2nd shares
         (
             [
-                BUTTON_PAGE,  # Move to "Via Manual Input"
-                BUTTON_ENTER,  # Press "Via Manual Input"
-                BUTTON_ENTER,  # Words
+                BUTTON_PAGE,  # Move to "Words"
+                BUTTON_ENTER,  # Press "Words"
                 BUTTON_ENTER,  # Press "Yes" for "Enter each word of your BIP39 mnemonic"
                 *([BUTTON_ENTER] * 12),  # Accept each word
                 BUTTON_ENTER,  # Done "Yes"
@@ -480,12 +458,11 @@ def test_export_from_words(mocker, amigo, tdata):
             ),
             ("a70e2c26", "d9987b75"),
         ),
-        # Via manual input/words, QRCode, XOR 12, (1st XOR 2nd) XOR 3rd shares
+        # Words, XOR 12, (1st XOR 2nd) XOR 3rd shares
         (
             [
-                BUTTON_PAGE,  # Move to "Via Manual Input"
-                BUTTON_ENTER,  # Press "Via Manual Input"
-                BUTTON_ENTER,  # Words
+                BUTTON_PAGE,  # Move to "Words"
+                BUTTON_ENTER,  # Press "Words"
                 BUTTON_ENTER,  # Press "Yes" for "Enter each word of your BIP39 mnemonic"
                 *([BUTTON_ENTER] * 12),  # Accept each word
                 BUTTON_ENTER,  # Done "Yes"
@@ -501,12 +478,11 @@ def test_export_from_words(mocker, amigo, tdata):
             ("d9987b75", "60259e7d"),
         ),
         # Case from https://github.com/Coldcard/firmware/blob/master/docs/seed-xor.md#24-words-xor-seed-example-using-3-parts
-        # Via manual input/words, QRCode, XOR 24, 1st XOR 2nd shares
+        # Words, XOR 24, 1st XOR 2nd shares
         (
             [
-                BUTTON_PAGE,  # Move to "Via Manual Input"
-                BUTTON_ENTER,  # Press "Via Manual Input"
-                BUTTON_ENTER,  # Words
+                BUTTON_PAGE,  # Move to "Words"
+                BUTTON_ENTER,  # Press "Words"
                 BUTTON_ENTER,  # Press "Yes" for "Enter each word of your BIP39 mnemonic"
                 *([BUTTON_ENTER] * 12),  # Accept each word
                 BUTTON_PAGE_PREV,  # Move to "No" (we do not finished)
@@ -523,12 +499,11 @@ def test_export_from_words(mocker, amigo, tdata):
             ),
             ("e51c20a3", "0849dc5e"),
         ),
-        # Via manual input/words, QRCode, XOR 24, (1st XOR 2nd) XOR 3rd shares
+        # Words, XOR 24, (1st XOR 2nd) XOR 3rd shares
         (
             [
-                BUTTON_PAGE,  # Move to "Via Manual Input"
-                BUTTON_ENTER,  # Press "Via Manual Input"
-                BUTTON_ENTER,  # Words
+                BUTTON_PAGE,  # Move to "Words"
+                BUTTON_ENTER,  # Press "Words"
                 BUTTON_ENTER,  # Press "Yes" for "Enter each word of your BIP39 mnemonic"
                 *([BUTTON_ENTER] * 12),  # Accept each word
                 BUTTON_PAGE_PREV,  # Move to "No" (we do not finished)
@@ -580,12 +555,9 @@ def test_export_xor_to_same_mnemonic_from_qrcode(mocker, amigo, tdata):
     from krux.pages.qr_capture import QRCodeCapture
 
     BTN_SEQUENCE = [
-        BUTTON_ENTER,  # Press "Via camera"
-        BUTTON_ENTER,  # QRCode
+        BUTTON_ENTER,  # QR Code
         BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
-        *([BUTTON_PAGE] * 5),  # Move to back
-        BUTTON_ENTER,  # Press back
-        *([BUTTON_PAGE] * 3),  # Move to back
+        *([BUTTON_PAGE] * 5),  # Dismiss error and move to Back
         BUTTON_ENTER,  # Press back
     ]
 
@@ -616,18 +588,15 @@ def test_export_xor_to_inverted_mnemonic_from_qrcode(mocker, amigo, tdata):
     from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
     from krux.key import Key, TYPE_SINGLESIG
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_NONE
     from krux.pages.qr_capture import QRCodeCapture
 
     ZOO = "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong"
     BTN_SEQUENCE = [
-        BUTTON_ENTER,  # Press "Via camera"
-        BUTTON_ENTER,  # QRCodeCapture
+        BUTTON_ENTER,  # QR Code
         BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
-        *([BUTTON_PAGE] * 5),  # Move to back
-        BUTTON_ENTER,  # Press back
-        *([BUTTON_PAGE] * 3),  # Move to back
+        *([BUTTON_PAGE] * 5),  # Dismiss error and move to Back
         BUTTON_ENTER,  # Press back
     ]
 
@@ -658,7 +627,7 @@ def test_export_xor_low_entropy_mnemonic_from_qrcode(mocker, amigo, tdata):
     from krux.pages.home_pages.mnemonic_xor import MnemonicXOR
     from krux.key import Key, TYPE_SINGLESIG
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_NONE
     from krux.pages.qr_capture import QRCodeCapture
 
@@ -666,12 +635,9 @@ def test_export_xor_low_entropy_mnemonic_from_qrcode(mocker, amigo, tdata):
         "dutch aerobic know utility deer toilet siege breeze evolve sniff bike wrap"
     )
     BTN_SEQUENCE = [
-        BUTTON_ENTER,  # Press "Via camera"
-        BUTTON_ENTER,  # QRCodeCapture
+        BUTTON_ENTER,  # QR Code
         BUTTON_ENTER,  # Press "Yes" to accept part words (will raise error)
-        *([BUTTON_PAGE] * 5),  # Move to back
-        BUTTON_ENTER,  # Press back
-        *([BUTTON_PAGE] * 3),  # Move to back
+        *([BUTTON_PAGE] * 5),  # Dismiss error and move to Back
         BUTTON_ENTER,  # Press back
     ]
 

@@ -110,7 +110,7 @@ Supported by Krux since September 2024, this touchscreen device features a metal
 ### TZT
 <img src="../img/maixpy_tzt/logo-314.png" align="right" style="width: 15%;">
 
-Supported by Krux since October 2025, this touchscreen device comes in a premium milled aluminum housing and features five buttons. Available through the following distributors:
+Supported by Krux since October 2025, this touchscreen device comes in a milled aluminum housing and features five buttons. Available through the following distributors:
 
 - [AliExpress](https://www.aliexpress.com/w/wholesale-canmv-k210-ai-vision.html)
 

@@ -151,8 +151,12 @@ class SettingsPage(Page):
 
         self.ctx.display.clear()
         if not self.prompt(
-            t("Enter a 6+ characters Tamper Check Code") + "\n" + t("(Experimental)"),
-            self.ctx.display.height() // 2,
+            t("Enter a 6+ characters Tamper Check Code")
+            + "\n\n"
+            + t("(Experimental)")
+            + "\n"
+            + t("Read the documentation before proceeding"),
+            self.ctx.display.height() // 2 + FONT_HEIGHT,
         ):
             return MENU_CONTINUE
 
@@ -490,11 +494,26 @@ class SettingsPage(Page):
         if setting.numtype == float:
             numerals += "."
 
+        buffer_suffix = ""
+        buffer_short_suffix = ""
+        if setting.show_range:
+            range_suffix = "[%s-%s]" % (
+                setting.value_range[0],
+                setting.value_range[1],
+            )
+            if setting.unit:
+                buffer_short_suffix = setting.unit
+                buffer_suffix = "%s %s" % (setting.unit, range_suffix)
+            else:
+                buffer_suffix = range_suffix
+
         new_value = self.capture_from_keypad(
             self.fit_to_line(settings_namespace.label(setting.attr)),
             [numerals],
             starting_buffer=str(starting_value),
             esc_prompt=False,
+            buffer_suffix=buffer_suffix,
+            buffer_short_suffix=buffer_short_suffix,
         )
         if new_value in (ESC_KEY, ""):
             return MENU_CONTINUE
