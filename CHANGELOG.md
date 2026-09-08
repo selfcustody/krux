@@ -4,7 +4,7 @@
 As of this release: I Jean Do (jdlcdl), am replacing Odudex as maintainer. Github's "selfcustody" account ownership has been exclusively transfered. As well the selfcustody (Krux) firmware signing-key has been securely shared (now known to: myself, Odudex and Jeff).  I will include attestations verifiable with my github/keybase gpg key whenever I use the selfcustody firmware signing key.
 
 ### Features
-  - Implemented a mandatory disclaimer regarding Krux "Research and Development" focus, which must be acknowledged once per firmware version upon first boot, always reviewable in **About**.  The intention is to *ground* user expectations, to reinforce *"Don't trust, verify."*, and for users to assume responsibility for their decision to use krux.
+  - Implemented a mandatory disclaimer which must be acknowledged once per firmware version upon first boot, always reviewable in **About**.  Appropriate for this past summer, this version's disclaimer informs of Krux's innovative "Research and Development" focus, with intent to *ground* user expectations, to reinforce *"Don't trust, verify."*, and for users to assume responsibility for their decision to use Krux.
   - The mnemonic recovery flow now prioritizes format selection (QR Code, Words, From Storage, Other Formats) at the start, simplifying common recovery paths and improving user experience.
   - Added units and allowed ranges to numeric editors for Screensaver Time, Shutdown Time, and Buttons Debounce, providing clearer input guidance.
 
