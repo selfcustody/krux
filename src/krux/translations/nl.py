@@ -255,6 +255,7 @@ translation_array = [
     "Lees de documentatie voordat u doorgaat",
     "Opnieuw opstarten",
     "Ontvangen",
+    "Aanbevolen: %d worpen",
     "Regio:",
     "Verwijderen %s?",
     "Geheugensteun verwijderen",

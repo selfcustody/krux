@@ -39,17 +39,26 @@ from ...kboard import kboard
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
 
-D6_12W_MIN_ROLLS = 70
-D6_24W_MIN_ROLLS = 125
-D20_12W_MIN_ROLLS = 60
-D20_24W_MIN_ROLLS = 90
+# Minimum rolls accepted to generate a mnemonic. Kept unchanged so roll sequences
+# recorded with previous versions can still be replayed to reproduce their mnemonics.
+D6_12W_MIN_ROLLS = 50
+D6_24W_MIN_ROLLS = 99
+D20_12W_MIN_ROLLS = 30
+D20_24W_MIN_ROLLS = 60
+
+# Min-entropy (H_min = -log2(p_max)) is a worst-case measure: even a fair die needs
+# noticeably more rolls than Shannon's average-case entropy would suggest to reach the
+# bit targets below. These recommended amounts are calibrated so that ~90% of fair-die
+# sessions reach the target, with the tolerance below covering the rest. Rolling less
+# than recommended is allowed, but warns about the entropy actually collected.
+D6_12W_RECOMMENDED_ROLLS = 70
+D6_24W_RECOMMENDED_ROLLS = 125
+D20_12W_RECOMMENDED_ROLLS = 60
+D20_24W_RECOMMENDED_ROLLS = 90
+
 MIN_ENTROPY_12W = 128
 MIN_ENTROPY_24W = 256
 
-# Min-entropy (H_min = -log2(p_max)) is a worst-case measure: even a fair die needs
-# noticeably more rolls than Shannon's average-case entropy would suggest to reliably
-# clear the bit target above. These minimums are calibrated so that ~90% of fair-die
-# rolls reach it at the minimum count; the small tolerance below covers the rest.
 ENTROPY_TOLERANCE = 2  # bits
 
 PATTERN_DETECT_TOLERANCE = 30  # %
@@ -67,6 +76,7 @@ class DiceEntropy(Page):
         self.roll_states = D20_STATES if is_d20 else D6_STATES
         self.num_sides = len(self.roll_states)
         self.min_rolls = 0
+        self.recommended_rolls = 0
         self.min_entropy = 0
         self.rolls = []
         self.roll_counts = [0] * self.num_sides
@@ -138,7 +148,7 @@ class DiceEntropy(Page):
         Displays statistical information and a graphical representation of dice roll outcomes.
         This method provides a deeper insight into the entropy collection process by showing:
         1. Distribution of dice rolls as a bar graph.
-        2. The calculated min-entropy in bits.
+        2. The calculated min-entropy and Shannon's entropy in bits.
         It's intended for users interested in the quality and distribution of their entropy source.
         """
         self.ctx.display.clear()
@@ -146,6 +156,10 @@ class DiceEntropy(Page):
             t("Rolls distribution:"), FONT_HEIGHT, theme.highlight_color
         )
         min_entropy_bits = self.calculate_entropy()
+        total_rolls = len(self.rolls) or 1  # Prevent division by zero
+        shannon_bits = int(
+            self.shannon_sum(self.roll_counts, total_rolls) * total_rolls
+        )
         max_count = max(self.roll_counts) or 1  # Prevent division by zero
 
         # Calculate scale factor based on display height and BAR_GRAPH_SIZE percentage
@@ -172,11 +186,15 @@ class DiceEntropy(Page):
             )
             offset_x += bar_pad
 
-        # Draw min-entropy below the graph
+        # Draw both entropy measurements below the graph
         suffix = " bits" if not kboard.has_minimal_display else "b"
         self.ctx.display.draw_hcentered_text(
             t("Min-entropy:") + " " + str(min_entropy_bits) + suffix,
             offset_y + FONT_HEIGHT,
+        )
+        self.ctx.display.draw_hcentered_text(
+            t("Shannon's entropy:") + " " + str(shannon_bits) + suffix,
+            offset_y + 2 * FONT_HEIGHT,
         )
 
         self.ctx.input.wait_for_button()
@@ -185,16 +203,16 @@ class DiceEntropy(Page):
         """
         Draws a progress bar on the display to show the current progress of dice rolls.
         The progress bar consists of two sections: one indicating the number of rolls
-        made relative to the minimum required, and the other indicating the min-entropy
+        made relative to the recommended amount, and the other indicating the min-entropy
         of the rolls relative to the minimum required entropy. It changes color
-        to indicate when the minimum criteria have been met.
+        to indicate when the recommended criteria have been met.
         """
         offset_y = DEFAULT_PADDING + 2 * FONT_HEIGHT
         pb_height = FONT_HEIGHT - 4
         if len(self.rolls) > 0:  # Only draws if rolls > 0
-            progress = min(self.min_rolls, len(self.rolls))
+            progress = min(self.recommended_rolls, len(self.rolls))
             progress *= self.ctx.display.usable_width() - 3
-            progress //= self.min_rolls
+            progress //= self.recommended_rolls
             self.ctx.display.fill_rectangle(
                 DEFAULT_PADDING + 2,
                 offset_y + 2,
@@ -220,7 +238,7 @@ class DiceEntropy(Page):
             )
         if (
             min_entropy_bits >= (self.min_entropy - ENTROPY_TOLERANCE)
-            and len(self.rolls) >= self.min_rolls
+            and len(self.rolls) >= self.recommended_rolls
         ):
             outline_color = theme.go_color
         else:
@@ -244,13 +262,21 @@ class DiceEntropy(Page):
         if len_mnemonic == 24:
             self.min_entropy = MIN_ENTROPY_24W
             self.min_rolls = D20_24W_MIN_ROLLS if self.is_d20 else D6_24W_MIN_ROLLS
+            self.recommended_rolls = (
+                D20_24W_RECOMMENDED_ROLLS if self.is_d20 else D6_24W_RECOMMENDED_ROLLS
+            )
         else:  # 12 words
             self.min_entropy = MIN_ENTROPY_12W
             self.min_rolls = D20_12W_MIN_ROLLS if self.is_d20 else D6_12W_MIN_ROLLS
+            self.recommended_rolls = (
+                D20_12W_RECOMMENDED_ROLLS if self.is_d20 else D6_12W_RECOMMENDED_ROLLS
+            )
 
         delete_flag = False
         self.ctx.display.draw_hcentered_text(
             t("Roll dice at least %d times to generate a mnemonic.") % (self.min_rolls)
+            + "\n"
+            + t("Recommended: %d rolls") % (self.recommended_rolls)
         )
         if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
 

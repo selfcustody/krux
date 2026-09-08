@@ -11,11 +11,19 @@ PATTERN_ROLLS_TOUCH_SEQUENCE = (
     + [5] * 9  # 9 number 6 presses
 )
 
-# rolls which will result in poor min-entropy AND a detectable pattern: cycling
-# through only faces 1,2,3 skews the distribution (p_max ~= 1/3) and produces a
-# constant derivative between consecutive rolls
-POOR_ROLLS_TOUCH_SEQUENCE = [0, 1, 2] * 23 + [0]
+# rolls which will result in poor entropy
+POOR_ROLLS_TOUCH_SEQUENCE = (
+    [0] * 10  # 10 number 1 presses
+    + [1] * 10  # 10 number 2 presses
+    + [2] * 10  # 10 number 3 presses
+    + [3] * 10  # 16 number 4 presses
+    + [4] * 6  # 2 number 5 presses
+    + [5] * 4  # 2 number 6 presses
+)
 
+# 70 rolls (the recommended amount for a 12 words mnemonic from a d6) with enough
+# min-entropy to clear the 128 bits target. Its first 50 rolls, the bare minimum
+# accepted, hold only ~102 bits and are used to test the low entropy warning.
 GOOD_ROLLS_SEQUENCE = [
     5,
     0,
@@ -160,9 +168,7 @@ def test_new_12w_from_d6(m5stickv, mocker):
             BUTTON_ENTER,  # 1 press to confirm SHA
         ]
     )
-    MNEMONIC = (
-        "reflect net crush light tobacco cat boil begin laptop fish kangaroo speed"
-    )
+    MNEMONIC = "diet glad hat rural panther lawsuit act drop gallery urge where fit"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     dice_entropy = DiceEntropy(ctx)
@@ -196,7 +202,7 @@ def test_new_24w_from_d6(m5stickv, mocker):
             BUTTON_ENTER,  # 1 press to confirm SHA
         ]
     )
-    MNEMONIC = "artist glimpse decade mountain deliver latin forum permit clown wheat digital report parent hockey replace control awesome afford rough assume rain long village soup"
+    MNEMONIC = "wheel erase puppy pistol chapter accuse carpet drop quote final attend near scrap satisfy limit style crunch person south inspire lunch meadow enact tattoo"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     dice_entropy = DiceEntropy(ctx)
@@ -230,9 +236,7 @@ def test_new_12w_from_d6_on_amigo_device(amigo, mocker):
             BUTTON_ENTER,  # 1 press to confirm SHA
         ]
     )
-    MNEMONIC = (
-        "reflect net crush light tobacco cat boil begin laptop fish kangaroo speed"
-    )
+    MNEMONIC = "diet glad hat rural panther lawsuit act drop gallery urge where fit"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     dice_entropy = DiceEntropy(ctx)
@@ -266,7 +270,7 @@ def test_new_24w_from_d6_on_amigo_device(amigo, mocker):
             BUTTON_ENTER,  # 1 press to confirm SHA
         ]
     )
-    MNEMONIC = "artist glimpse decade mountain deliver latin forum permit clown wheat digital report parent hockey replace control awesome afford rough assume rain long village soup"
+    MNEMONIC = "wheel erase puppy pistol chapter accuse carpet drop quote final attend near scrap satisfy limit style crunch person south inspire lunch meadow enact tattoo"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     dice_entropy = DiceEntropy(
@@ -328,7 +332,9 @@ def test_new_12w_from_d20(m5stickv, mocker):
             BUTTON_ENTER,  # 1 press to confirm SHA
         ]
     )
-    MNEMONIC = "fun island vivid slide cable pyramid device tuition only essence thought gadget"
+    MNEMONIC = (
+        "erupt remain ride bleak year cabin orange sure ghost gospel husband oppose"
+    )
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     dice_entropy = DiceEntropy(ctx, is_d20=True)
@@ -362,7 +368,7 @@ def test_new_24w_from_d20(m5stickv, mocker):
             BUTTON_ENTER,  # 1 press to confirm SHA
         ]
     )
-    MNEMONIC = "source foster human mind myself floor breeze fire people exit horse erosion home barely imitate tunnel ribbon enroll mosquito pilot pumpkin ignore resemble pizza"
+    MNEMONIC = "fun island vivid slide cable pyramid device tuition only essence thought gain silk jealous eternal anger response virus couple faculty ozone test key vocal"
 
     ctx = create_ctx(mocker, BTN_SEQUENCE)
     dice_entropy = DiceEntropy(ctx, is_d20=True)
@@ -412,7 +418,7 @@ def test_cancel_new_12w_from_d20(m5stickv, mocker):
 
 
 # Test low entropy warning
-def test_low_shannon_entropy_warning(amigo, mocker):
+def test_low_min_entropy_warning(amigo, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
     from krux.themes import theme
@@ -450,9 +456,12 @@ def test_low_shannon_entropy_warning(amigo, mocker):
     ctx.display.draw_centered_text.assert_has_calls([call_message])
 
 
-# Test low entropy warning is not shown when Shannon's entropy is good
+# Test low entropy warning is not shown when min-entropy is good
 def test_good_rolls(amigo, mocker):
-    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+    from krux.pages.new_mnemonic.dice_rolls import (
+        DiceEntropy,
+        D6_12W_RECOMMENDED_ROLLS,
+    )
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
     BTN_SEQUENCE = (
@@ -462,8 +471,8 @@ def test_good_rolls(amigo, mocker):
         # 1 press to proceed msg
         [BUTTON_ENTER]
         +
-        # 10 number 1 presses
-        [BUTTON_TOUCH for _ in range(D6_12W_MIN_ROLLS)]
+        # 1 touch per roll, the recommended amount of rolls
+        [BUTTON_TOUCH for _ in range(D6_12W_RECOMMENDED_ROLLS)]
         +
         # 1 press prev and 1 press on btn Go
         [BUTTON_PAGE_PREV, BUTTON_ENTER]
@@ -487,9 +496,57 @@ def test_good_rolls(amigo, mocker):
         assert args != call_message
 
 
+# Test that the minimum amount of rolls warns about entropy, but is still accepted
+def test_minimum_rolls_warns_but_proceeds(amigo, mocker):
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+    from krux.themes import theme
+
+    BTN_SEQUENCE = (
+        # 1 press to proceed to 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press to proceed msg
+        [BUTTON_ENTER]
+        +
+        # 1 touch per roll, only the minimum amount of rolls
+        [BUTTON_TOUCH for _ in range(D6_12W_MIN_ROLLS)]
+        +
+        # 1 press prev and 1 press on btn Go
+        [BUTTON_PAGE_PREV, BUTTON_ENTER]
+        + [
+            BUTTON_ENTER,  # proceed with poor entropy,
+            BUTTON_PAGE,  # move to Generate Words, while seeing rolls
+            BUTTON_ENTER,  # generate words
+            BUTTON_ENTER,  # 1 press to confirm SHA
+        ]
+    )
+    MNEMONIC = "they unaware loan soccer atom lumber maple quarter face army cabin idea"
+
+    ctx = create_ctx(
+        mocker, BTN_SEQUENCE, touch_seq=GOOD_ROLLS_SEQUENCE[:D6_12W_MIN_ROLLS]
+    )
+    dice_entropy = DiceEntropy(ctx)
+    entropy = dice_entropy.new_key()
+    words = bip39.mnemonic_from_bytes(entropy)
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # Rolls are well distributed, there are just not enough of them: only the
+    # low entropy warning is shown, no pattern warning
+    call_message = mocker.call("Estimated entropy: Poor!", theme.error_color)
+    ctx.display.draw_centered_text.assert_has_calls([call_message])
+
+    # Generating the mnemonic is warned about, but not blocked
+    assert words == MNEMONIC
+
+
 # Test stats for nerds
 def test_stats_for_nerds(amigo, mocker):
-    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+    from krux.pages.new_mnemonic.dice_rolls import (
+        DiceEntropy,
+        D6_12W_RECOMMENDED_ROLLS,
+    )
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
     BTN_SEQUENCE = (
@@ -499,8 +556,8 @@ def test_stats_for_nerds(amigo, mocker):
         # 1 press to proceed msg
         [BUTTON_ENTER]
         +
-        # 10 number 1 presses
-        [BUTTON_TOUCH for _ in range(D6_12W_MIN_ROLLS)]
+        # 1 touch per roll, the recommended amount of rolls
+        [BUTTON_TOUCH for _ in range(D6_12W_RECOMMENDED_ROLLS)]
         +
         # 1 press prev and 1 press on btn Go
         [BUTTON_PAGE_PREV, BUTTON_ENTER]

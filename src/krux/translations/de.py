@@ -255,6 +255,7 @@ translation_array = [
     "Lesen Sie die Dokumentation, bevor Sie fortfahren",
     "Neustart",
     "Empfangen",
+    "Empfohlen: %d Würfe",
     "Region:",
     "Löschen %s?",
     "Mnemonic löschen",

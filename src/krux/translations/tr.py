@@ -255,6 +255,7 @@ translation_array = [
     "Devam etmeden önce belgeleri okuyun",
     "Yeniden Başlat",
     "Al",
+    "Önerilen: %d atış",
     "Bölge:",
     "%s kaldırılsın mı?",
     "Mnemonic'i Kaldır",
