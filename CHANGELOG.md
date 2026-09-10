@@ -8,6 +8,12 @@
 ### Removed Maix Bit Code
 All Maix Bit support has been removed from the source tree, including its firmware build project. Support for the device was discontinued in 25.09.0, which at the time kept the build parameters available; those are now gone too. The OV5642 sensor handling, used only by that device, was removed along with it.
 
+### QR Scanning from Text Keypads
+Passphrases, encryption keys, and Tamper Check Codes can now be scanned from a
+QR key on the last symbols keypad. Scanned text returns to the keypad for review
+and editing, removing the extra Type or Scan selection screen. Creating or
+changing a Tamper Check Code remains manual.
+
 ### Stackbit 1248 Vertical Layout
 Added vertical layout option for Stackbit 1248 backup display, allowing users to choose between Standard (horizontal) and Vertical (transposed) grid orientations.
 

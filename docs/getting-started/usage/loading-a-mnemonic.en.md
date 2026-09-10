@@ -171,10 +171,13 @@ Informs if the wallet has a passphrase. Adding or changing the passphrase result
 It is possible to change any of the **wallet's attributes** (it will be possible to change them later too, after loading). To load it faster next time, some default wallet attributes can be set in [settings](../settings.md), they are: `Network`, `Policy Type` and `Script Type`.
 
 #### Passphrase
-<img src="../../../img/maixpy_m5stickv/passphrase-load-options-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/passphrase-load-options-300.png" align="right" class="amigo">
 
-You can type or scan a BIP39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change keypads if your device has a touchscreen. Hold `PAGE` or `PREVIOUS` to move quickly through letters, and hold `ENTER` to jump to the next keypad.
+You can type or scan a BIP39 passphrase from the same keypad. Swipe right
+:material-gesture-swipe-right: to reach the last symbols keypad on touchscreen
+devices, or use the keypad toggle on button devices, then select the QR glyph.
+After a successful scan, the passphrase returns to the keypad so you can review
+or edit it before pressing `Go`. If text is already present, Krux asks before
+replacing it; cancelling or failing a scan preserves the existing text.
 
 For scanning, you can generate an offline passphrase QR code using the [Datum tool](../features/tools.md/#datum-tool).
 

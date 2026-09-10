@@ -693,6 +693,39 @@ def test_set_first_tc_code_not_match(amigo, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_set_first_tc_code_retries_on_short_code(amigo, mocker):
+    from krux.pages.settings_page import SettingsPage
+    from krux.input import BUTTON_ENTER
+    from ..shared_mocks import MockFile, mock_open
+
+    # Too-short code, then confirmed short code, before valid entries both times
+    CODES = ["123", "123456", "123", "123456"]
+
+    mock_file = MockFile()
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,
+        BUTTON_ENTER,  # Confirm TC Flash Hash at boot
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx.tc_code_enabled = False
+    settings_page = SettingsPage(ctx)
+    settings_page.capture_from_keypad = mocker.MagicMock(side_effect=CODES)
+    settings_page.flash_error = mocker.MagicMock()
+    mocker.patch(
+        "krux.pages.fill_flash.FillFlash.fill_flash_with_camera_entropy",
+        new=mocker.MagicMock(),
+    )
+    mocker.patch("krux.pages.flash_tools.FlashHash", new=mocker.MagicMock())
+    mocker.patch("machine.unique_id", return_value=b"\x01" * 32)
+
+    with patch("builtins.open", mock_open(mock_file)):
+        settings_page.enter_modify_tc_code()
+
+    assert settings_page.capture_from_keypad.call_count == len(CODES)
+    assert settings_page.flash_error.call_count == 2
+    assert ctx.tc_code_enabled == True
+
+
 def test_set_new_tc_code(amigo, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
