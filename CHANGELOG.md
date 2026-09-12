@@ -12,6 +12,7 @@ As of this release: I Jean Do (jdlcdl), am replacing Odudex as maintainer. Githu
   - Corrected the GCM tag buffer size to match the 16 bytes written by the SDK, ensuring proper handling of cryptographic tags and maintaining compatibility with existing KEF envelopes.
   - Fixed issues where pressing 'back' incorrectly triggered "failed to load" errors in the SD card file browser and QR scanner. Error handling is now more robust, distinguishing between user cancellation and actual load failures.
   - Updated Embit to v0.8.2, incorporating hardened PSBT checks.
+  - Past verification of *ktool* firmware-flasher binaries since v23.09.0; inclusion of these utilities in standard binary-reproducibility checks.
 
 ### Improvements
   - Added a critical privacy warning to the tamper detection documentation, alerting users that camera frames are stored unscrambled and could potentially be reconstructed from a flash dump.
