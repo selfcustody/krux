@@ -146,7 +146,11 @@ Using the same 50-roll sample from the Shannon example above (`4, 9, 7, 10, 12, 
 ![H_{min} = -\log_2(0.24) \approx 2.059 \text{ bits per roll}](img/math/eq-27.svg){ .math-display }
 ![H_{min,total} = 50 \times 2.059 \approx 103 \text{ bits}](img/math/eq-28.svg){ .math-display }
 
-Note that this is meaningfully lower than the ~125.8 bits Shannon's formula gave for the very same data. Min-entropy is only concerned with how predictable the *single most likely* outcome is, so it is much less forgiving of small, ordinary sampling imperfections than Shannon's average-case formula — which is precisely why more rolls are required to reliably clear a given bit target when min-entropy is the measure being used.
+Note that this is meaningfully lower than the ~125.8 bits Shannon's formula gave for the very same data. This gap is not a general property of min-entropy — a truly fair die has a min-entropy of `-log2(1/6) ≈ 2.585` bits per roll, the same as its Shannon entropy, which would total `50 × 2.585 ≈ 129` bits at 50 rolls, already above the 128-bit target. The gap seen in this example comes from the *estimator*: with a small sample, the observed *p<sub>max</sub>* fluctuates due to sampling noise, and that noise is why more rolls than the theoretical minimum are needed in practice to reliably clear the target — see the next section.
+
+### A Note on Sample Size
+
+The formula above is a *plug-in estimate*: it treats the observed proportion of the most frequent face as if it were the die's true probability, with no statistical margin for sampling noise. At the roll counts used in practice — tens of rolls, not the much larger samples recommended by NIST SP 800-90B for rigorous min-entropy estimation — that noise is large enough that a fair die can, purely by chance, produce a *p<sub>max</sub>* similar to what a mildly loaded die would produce on average. The indicator therefore cannot reliably tell an unlucky fair die apart from a subtly biased one; it is best understood as a heuristic that flags sequences well short of the recommended roll count, grossly uneven distributions, or other obvious issues, rather than a statistical guarantee against a slightly biased die. As with every entropy check in Krux, it only warns and never blocks mnemonic generation.
 
 ### Minimum and Recommended Rolls
 
