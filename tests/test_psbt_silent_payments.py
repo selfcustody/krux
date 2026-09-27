@@ -1324,7 +1324,7 @@ def test_sp_send_derives_outputs_only_once(mocker, m5stickv):
     from krux.qr import FORMAT_NONE
 
     psbt_b64, _root, _scan, _spend, _child = _build_sp_psbt()
-    spy = mocker.spy(SilentPaymentsPSBT, "derive_sp_outputs")
+    spy = mocker.spy(SilentPaymentsPSBT, "derive_sp_outputs_from_keys")
 
     wallet = Wallet(Key(TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
     signer = PSBTSigner(wallet, psbt_b64, FORMAT_NONE)
