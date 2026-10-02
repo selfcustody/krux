@@ -101,6 +101,17 @@ class SaveFile(Page):
             self.flash_text(t("SD card not detected."))
         return persisted
 
+    def save_to_sd(self, data, name, file_extension=".txt"):
+        """Save data to SD card with given name and extension, no prompt."""
+        self.save_file(
+            data,
+            name,
+            name,
+            file_extension=file_extension,
+            save_as_binary=False,
+            prompt=False,
+        )
+
     def set_filename(
         self, curr_filename="", empty_filename="some_file", suffix="", file_extension=""
     ):

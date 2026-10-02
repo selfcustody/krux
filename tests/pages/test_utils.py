@@ -75,3 +75,16 @@ def test_load_file_with_sd_read_error(m5stickv, mocker):
     assert data is None
     # same rule: a read that blew up must report itself, not look like a cancel
     assert ctx.display.flash_text.call_args.args[0] == "Failed to load"
+
+
+def test_generate_wallet_info_silent_payment(m5stickv, mocker):
+    from krux.pages.utils import Utils
+    from krux.key import TYPE_SILENT_PAYMENT, P2TR, NAME_SILENT_PAYMENT
+
+    ctx = create_ctx(mocker, None)
+    utils = Utils(ctx)
+    wallet_info = utils.generate_wallet_info(
+        "Testnet", TYPE_SILENT_PAYMENT, P2TR, "m/352h/1h/0h"
+    )
+
+    assert NAME_SILENT_PAYMENT in wallet_info

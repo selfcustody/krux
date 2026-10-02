@@ -126,6 +126,7 @@ class Utils(Page):
                     y_offset + (line_index * (FONT_HEIGHT)),
                     part,
                     theme.highlight_color,
+                    theme.bg_color,
                 )
             x_addr_offset += lcd.string_width_px(part + " ")
             highlight = not highlight
@@ -169,8 +170,12 @@ class Utils(Page):
             TYPE_SINGLESIG,
             TYPE_MULTISIG,
             TYPE_MINISCRIPT,
+            TYPE_SILENT_PAYMENT,
+            NAME_SINGLE_SIG,
+            NAME_MULTISIG,
+            NAME_MINISCRIPT,
+            NAME_SILENT_PAYMENT,
         )
-        from ..key import NAME_SINGLE_SIG, NAME_MULTISIG, NAME_MINISCRIPT
 
         wallet_info = network + "\n"
 
@@ -182,6 +187,8 @@ class Utils(Page):
             if is_login and script == P2TR:
                 wallet_info += "TR "
             wallet_info += NAME_MINISCRIPT
+        elif policy == TYPE_SILENT_PAYMENT:
+            wallet_info += NAME_SILENT_PAYMENT
 
         wallet_info += "\n"
 
