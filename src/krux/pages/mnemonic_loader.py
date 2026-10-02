@@ -67,23 +67,17 @@ class MnemonicLoader(Page):
 
     def load_other_formats(self):
         """Handler for the 'load mnemonic > other formats' menu item."""
-        scan_suffix = " ({})".format(t("scan"))
-        manual_suffix = " ({})".format(t("manual"))
-        binary_grid = t("Binary Grid")
         submenu = Menu(
             self.ctx,
             [
+                ("Tinyseed", lambda: self.load_key_from_tiny_seed_image("Tinyseed")),
+                ("Tinyseed (Bits)", self.load_key_from_tiny_seed),
                 (
-                    "Tinyseed" + scan_suffix,
-                    lambda: self.load_key_from_tiny_seed_image("Tinyseed"),
-                ),
-                (binary_grid + manual_suffix, self.load_key_from_tiny_seed),
-                (
-                    "OneKey KeyTag" + scan_suffix,
+                    "OneKey KeyTag",
                     lambda: self.load_key_from_tiny_seed_image("OneKey KeyTag"),
                 ),
                 (
-                    binary_grid + scan_suffix,
+                    t("Binary Grid"),
                     lambda: self.load_key_from_tiny_seed_image("Binary Grid"),
                 ),
                 (t("Word Numbers"), self.pre_load_key_from_digits),
@@ -267,7 +261,7 @@ class MnemonicLoader(Page):
         if not len_mnemonic:
             return MENU_CONTINUE
 
-        tiny_seed = TinySeed(self.ctx, label=t("Binary Grid"))
+        tiny_seed = TinySeed(self.ctx)
         words = tiny_seed.enter_tiny_seed(len_mnemonic == 24)
         del tiny_seed
         if words is not None:
