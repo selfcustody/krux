@@ -192,10 +192,12 @@ class DiceEntropy(Page):
             t("Min-entropy:") + " " + str(min_entropy_bits) + suffix,
             offset_y + FONT_HEIGHT,
         )
-        self.ctx.display.draw_hcentered_text(
-            t("Shannon's entropy:") + " " + str(shannon_bits) + suffix,
-            offset_y + 2 * FONT_HEIGHT,
-        )
+        # Small screens only have room for one line
+        if not kboard.has_minimal_display:
+            self.ctx.display.draw_hcentered_text(
+                t("Shannon's entropy:") + " " + str(shannon_bits) + suffix,
+                offset_y + 2 * FONT_HEIGHT,
+            )
 
         self.ctx.input.wait_for_button()
 

@@ -577,3 +577,19 @@ def test_stats_for_nerds(amigo, mocker):
 
     # Assert stats for nerds was called
     dice_entropy.stats_for_nerds.assert_called_once()
+
+
+def test_stats_for_nerds_minimal_display(m5stickv, mocker):
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy
+    from krux.input import BUTTON_ENTER
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    dice_entropy = DiceEntropy(ctx)
+    dice_entropy.rolls = [str(r + 1) for r in GOOD_ROLLS_SEQUENCE]
+    dice_entropy.roll_counts = [GOOD_ROLLS_SEQUENCE.count(i) for i in range(6)]
+    dice_entropy.stats_for_nerds()
+
+    texts = [c.args[0] for c in ctx.display.draw_hcentered_text.call_args_list]
+    # Small screens show only the min-entropy line
+    assert any(t.startswith("Min-entropy:") for t in texts)
+    assert not any("Shannon" in t for t in texts)
