@@ -388,7 +388,10 @@ class TinySeed(Page):
                     page += 1
                 elif index >= TS_ESC_START_POSITION:  # "Esc"
                     self.ctx.display.clear()
-                    if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
+                    if self.prompt(
+                        t("Back to Menu") + "\n\n" + t("Are you sure?"),
+                        self.ctx.display.height() >> 1,
+                    ):
                         break
                     self._map_keys_array()
                 elif _editable_bit():
