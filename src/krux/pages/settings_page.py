@@ -151,12 +151,8 @@ class SettingsPage(Page):
 
         self.ctx.display.clear()
         if not self.prompt(
-            t("Enter a 6+ characters Tamper Check Code")
-            + "\n\n"
-            + t("(Experimental)")
-            + "\n"
-            + t("Read the documentation before proceeding"),
-            self.ctx.display.height() // 2 + FONT_HEIGHT,
+            t("Enter a 6+ characters Tamper Check Code") + "\n" + t("(Experimental)"),
+            self.ctx.display.height() // 2,
         ):
             return MENU_CONTINUE
 
