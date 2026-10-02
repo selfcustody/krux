@@ -39,10 +39,6 @@ POOR_ENTROPY = 1
 GOOD_ENTROPY = 2
 UNKNOWN_ENTROPY = 3
 
-# Label is a fixed prefix plus a status line.
-# The prefix takes two lines on m5stickv's narrow screen, one line elsewhere.
-LABEL_LINES = 3 if kboard.is_m5stickv else 2
-
 
 class CameraEntropy(Page):
     """Class for capturing entropy from a snapshot"""
@@ -57,11 +53,9 @@ class CameraEntropy(Page):
         self.measurement_machine_state = 0
         self.previous_measurement = UNKNOWN_ENTROPY
         self.stdev_index = 0
-        self.y_label_offset = BOTTOM_LINE - (LABEL_LINES - 1) * FONT_HEIGHT
+        self.y_label_offset = BOTTOM_LINE
         if kboard.is_amigo:
             self.y_label_offset = BOTTOM_PROMPT_LINE
-        # Updated with how many lines the prefix actually took when it is drawn
-        self.y_status_offset = self.y_label_offset + (LABEL_LINES - 1) * FONT_HEIGHT
 
     def _callback(self):
         """
@@ -106,36 +100,28 @@ class CameraEntropy(Page):
                 entropy_level = POOR_ENTROPY
             if self.previous_measurement != entropy_level and show_measurement:
                 self.ctx.display.to_portrait()
-                if self.previous_measurement == UNKNOWN_ENTROPY:
-                    # Prefix never changes, so it is drawn only once
-                    prefix_lines = self.ctx.display.draw_hcentered_text(
-                        t("Estimated entropy:"),
-                        self.y_label_offset,
-                        max_lines=LABEL_LINES - 1,
-                    )
-                    self.y_status_offset = (
-                        self.y_label_offset + prefix_lines * FONT_HEIGHT
-                    )
                 self.previous_measurement = entropy_level
                 self.ctx.display.fill_rectangle(
                     0,
-                    self.y_status_offset,
+                    self.y_label_offset,
                     self.ctx.display.width(),
                     FONT_HEIGHT,
                     theme.bg_color,
                 )
                 if entropy_level == GOOD_ENTROPY:
-                    status = t("Good")
-                    status_color = theme.go_color
+                    self.ctx.display.draw_hcentered_text(
+                        t("Good entropy"), self.y_label_offset, theme.go_color
+                    )
                 elif entropy_level == POOR_ENTROPY:
-                    status = t("Poor!")
-                    status_color = theme.del_color
+                    self.ctx.display.draw_hcentered_text(
+                        t("Poor entropy!"), self.y_label_offset, theme.del_color
+                    )
                 else:
-                    status = t("Insufficient!")
-                    status_color = theme.error_color
-                self.ctx.display.draw_hcentered_text(
-                    status, self.y_status_offset, status_color, max_lines=1
-                )
+                    self.ctx.display.draw_hcentered_text(
+                        t("Insufficient entropy!"),
+                        self.y_label_offset,
+                        theme.error_color,
+                    )
                 self.ctx.display.to_landscape()
 
         elif self.measurement_machine_state == 1:
@@ -177,8 +163,7 @@ class CameraEntropy(Page):
                 break
 
             self.entropy_measurement_update(img)
-            # One line is already free below the image, reserve the remaining ones
-            self.ctx.display.render_image(img, extra_bottom_lines=LABEL_LINES - 1)
+            self.ctx.display.render_image(img)
 
         self.ctx.display.to_portrait()
         gc.collect()
@@ -215,7 +200,7 @@ class CameraEntropy(Page):
             shannon_16b < INSUFFICIENT_SHANNONS_ENTROPY_TH
             or self.stdev_index < INSUFFICIENT_VARIANCE_TH
         ):
-            error_msg = t("Estimated entropy:") + " " + t("Insufficient!")
+            error_msg = t("Insufficient entropy!")
             error_msg += "\n\n"
             error_msg += entropy_msg
             self.ctx.display.draw_centered_text(error_msg, theme.error_color)
