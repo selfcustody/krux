@@ -66,7 +66,7 @@ class MnemonicLoader(Page):
         return status
 
     def load_other_formats(self):
-        """Handler for the 'load mnemonic > other formats' menu item."""
+        """Handler for specialist mnemonic backup formats"""
         submenu = Menu(
             self.ctx,
             [
