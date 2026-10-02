@@ -120,7 +120,7 @@ We can calculate Shannon's entropy as follows:
 Thus, the Shannon's entropy for the given distribution of dice rolls is approximately 2.52 bits per roll. This will give you a different value than log₂(6) due to the deviations in the empirical probabilities.
 
 - The total entropy for the *N* = 50 rolls is:
-![S_{total} = S \times N = 2.515 + 50 \approx 125.8 \text{ bits}](img/math/eq-23.svg){ .math-display }
+![S_{total} = S \times N = 2.515 \times 50 \approx 125.8 \text{ bits}](img/math/eq-23.svg){ .math-display }
 
 #### Shannon's Entropy in Practice
 
