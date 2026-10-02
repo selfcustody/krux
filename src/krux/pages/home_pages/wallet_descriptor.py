@@ -133,30 +133,32 @@ class WalletDescriptor(Page):
 
             qr_capture = QRCodeCapture(self.ctx)
             wallet_data, qr_format = qr_capture.qr_capture_loop()
-            if wallet_data is None:
-                return None  # user left the QR scanner
         elif load_method == LOAD_FROM_SD:
             # Try to read the wallet output descriptor from a file on the SD card
             qr_format = FORMAT_NONE
-            from ..utils import Utils
+            try:
+                from ..utils import Utils
 
-            utils = Utils(self.ctx)
-            filename, wallet_data = utils.load_file(
-                (
-                    DESCRIPTOR_FILE_EXTENSION,
-                    JSON_FILE_EXTENSION,
-                ),
-                prompt=False,
-            )
-            if not filename:
-                # Cancelled, or load_file already reported the failure
-                return None
-            persisted = True
+                utils = Utils(self.ctx)
+                _, wallet_data = utils.load_file(
+                    (
+                        DESCRIPTOR_FILE_EXTENSION,
+                        JSON_FILE_EXTENSION,
+                    ),
+                    prompt=False,
+                )
+                persisted = True
+            except OSError:
+                pass
         else:  # Cancel
-            return None
+            return None, None, False
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing…"))
+        if wallet_data is None:
+            # Camera or SD card loading failed!
+            self.flash_error(t("Failed to load"))
+            return None, None, False
 
         # Decrypt if needed
         from ..encryption_ui import decrypt_kef
@@ -169,10 +171,10 @@ class WalletDescriptor(Page):
                 wallet_data = wallet_data.decode()
             except:
                 self.flash_error(t("Failed to load"))
-                return None
+                return None, None, False
         except KeyError:
             self.flash_error(t("Failed to decrypt"))
-            return None
+            return None, None, False
         except ValueError:
             # ValueError=not KEF or declined to decrypt
             pass
@@ -320,10 +322,9 @@ class WalletDescriptor(Page):
     def _load_wallet(self):
         """Load a wallet output descriptor from the camera or SD card"""
         # Load wallet data
-        loaded = self._load_wallet_data()
-        if loaded is None:  # user chose Back, or the load already reported itself
+        wallet_data, qr_format, persisted = self._load_wallet_data()
+        if wallet_data is None:
             return MENU_CONTINUE
-        wallet_data, qr_format, persisted = loaded
 
         # Attempt to load the wallet with exception handling
         wallet, wallet_load_exception = self._attempt_wallet_load(

@@ -366,8 +366,15 @@ class DatumToolMenu(Page):
         """Handler for the 'Read File' menu item"""
         from .utils import Utils
 
+        if not self.has_sd_card():
+            self.flash_error(t("SD card not detected."))
+            return MENU_CONTINUE
+
         utils = Utils(self.ctx)
-        filename, contents = utils.load_file(prompt=False)
+        try:
+            filename, contents = utils.load_file(prompt=False)
+        except OSError:
+            pass
 
         if not contents:
             return MENU_CONTINUE
