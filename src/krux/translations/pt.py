@@ -397,8 +397,6 @@ translation_array = [
     "from hex",
     "de utf8",
     "é um endereço válido!",
-    "manual",
-    "escanear",
     "Trocar caixa",
     "Taxa de sucesso:",
     "deslize",

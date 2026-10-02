@@ -397,8 +397,6 @@ translation_array = [
     "aus Sechskant",
     "von utf8",
     "ist eine gültige Adresse!",
-    "manuell",
-    "scannen",
     "schaltkoffer",
     "Erfolgsrate:",
     "wischen",

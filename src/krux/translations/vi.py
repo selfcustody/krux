@@ -397,8 +397,6 @@ translation_array = [
     "từ hex",
     "từ utf8",
     "là một địa chỉ hợp lệ!",
-    "thủ công",
-    "quét",
     "trường hợp ca làm việc",
     "Tỉ lệ thành công:",
     "vuốt",

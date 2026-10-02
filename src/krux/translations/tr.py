@@ -397,8 +397,6 @@ translation_array = [
     "onaltılıktan",
     "utf8 'den",
     "geçerli bir adres!",
-    "manuel",
-    "tara",
     "vites kutusu",
     "Başarı Puanı:",
     "kaydırın",
