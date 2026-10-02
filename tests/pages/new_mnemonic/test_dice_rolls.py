@@ -21,57 +21,80 @@ POOR_ROLLS_TOUCH_SEQUENCE = (
     + [5] * 4  # 2 number 6 presses
 )
 
+# 70 rolls (the recommended amount for a 12 words mnemonic from a d6) with enough
+# min-entropy to clear the 128 bits target. Its first 50 rolls, the bare minimum
+# accepted, hold only ~102 bits and are used to test the low entropy warning.
 GOOD_ROLLS_SEQUENCE = [
-    1,
-    4,
-    5,
-    2,
-    0,
-    3,
-    2,
-    4,
-    4,
-    5,
-    5,
     5,
     0,
-    5,
-    2,
-    3,
-    2,
-    5,
-    2,
-    5,
     0,
     5,
     2,
     1,
+    1,
+    1,
+    5,
+    0,
+    5,
+    5,
+    4,
+    0,
     4,
     3,
     0,
-    5,
-    3,
+    0,
+    0,
+    1,
+    1,
+    4,
+    4,
+    0,
     4,
     1,
-    0,
-    3,
-    0,
-    3,
     5,
+    5,
+    5,
+    4,
+    3,
+    1,
+    3,
+    4,
+    2,
+    0,
+    1,
+    5,
+    3,
+    2,
+    2,
+    1,
+    1,
+    2,
+    0,
+    0,
+    3,
+    0,
+    2,
+    2,
+    4,
+    2,
+    0,
+    5,
+    3,
+    4,
+    0,
+    3,
+    0,
+    4,
+    2,
     5,
     4,
     2,
-    1,
     4,
     1,
     5,
-    4,
+    0,
+    0,
     5,
-    2,
-    0,
-    3,
-    3,
-    0,
 ]
 
 
@@ -395,7 +418,7 @@ def test_cancel_new_12w_from_d20(m5stickv, mocker):
 
 
 # Test low entropy warning
-def test_low_shannon_entropy_warning(amigo, mocker):
+def test_low_min_entropy_warning(amigo, mocker):
     from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
     from krux.themes import theme
@@ -433,9 +456,12 @@ def test_low_shannon_entropy_warning(amigo, mocker):
     ctx.display.draw_centered_text.assert_has_calls([call_message])
 
 
-# Test low entropy warning is not shown when Shannon's entropy is good
+# Test low entropy warning is not shown when min-entropy is good
 def test_good_rolls(amigo, mocker):
-    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+    from krux.pages.new_mnemonic.dice_rolls import (
+        DiceEntropy,
+        D6_12W_RECOMMENDED_ROLLS,
+    )
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
     BTN_SEQUENCE = (
@@ -445,8 +471,8 @@ def test_good_rolls(amigo, mocker):
         # 1 press to proceed msg
         [BUTTON_ENTER]
         +
-        # 10 number 1 presses
-        [BUTTON_TOUCH for _ in range(D6_12W_MIN_ROLLS)]
+        # 1 touch per roll, the recommended amount of rolls
+        [BUTTON_TOUCH for _ in range(D6_12W_RECOMMENDED_ROLLS)]
         +
         # 1 press prev and 1 press on btn Go
         [BUTTON_PAGE_PREV, BUTTON_ENTER]
@@ -470,9 +496,57 @@ def test_good_rolls(amigo, mocker):
         assert args != call_message
 
 
+# Test that the minimum amount of rolls warns about entropy, but is still accepted
+def test_minimum_rolls_warns_but_proceeds(amigo, mocker):
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+    from krux.themes import theme
+
+    BTN_SEQUENCE = (
+        # 1 press to proceed to 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press to proceed msg
+        [BUTTON_ENTER]
+        +
+        # 1 touch per roll, only the minimum amount of rolls
+        [BUTTON_TOUCH for _ in range(D6_12W_MIN_ROLLS)]
+        +
+        # 1 press prev and 1 press on btn Go
+        [BUTTON_PAGE_PREV, BUTTON_ENTER]
+        + [
+            BUTTON_ENTER,  # proceed with poor entropy,
+            BUTTON_PAGE,  # move to Generate Words, while seeing rolls
+            BUTTON_ENTER,  # generate words
+            BUTTON_ENTER,  # 1 press to confirm SHA
+        ]
+    )
+    MNEMONIC = "they unaware loan soccer atom lumber maple quarter face army cabin idea"
+
+    ctx = create_ctx(
+        mocker, BTN_SEQUENCE, touch_seq=GOOD_ROLLS_SEQUENCE[:D6_12W_MIN_ROLLS]
+    )
+    dice_entropy = DiceEntropy(ctx)
+    entropy = dice_entropy.new_key()
+    words = bip39.mnemonic_from_bytes(entropy)
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # Rolls are well distributed, there are just not enough of them: only the
+    # low entropy warning is shown, no pattern warning
+    call_message = mocker.call("Estimated entropy: Poor!", theme.error_color)
+    ctx.display.draw_centered_text.assert_has_calls([call_message])
+
+    # Generating the mnemonic is warned about, but not blocked
+    assert words == MNEMONIC
+
+
 # Test stats for nerds
 def test_stats_for_nerds(amigo, mocker):
-    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+    from krux.pages.new_mnemonic.dice_rolls import (
+        DiceEntropy,
+        D6_12W_RECOMMENDED_ROLLS,
+    )
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
     BTN_SEQUENCE = (
@@ -482,8 +556,8 @@ def test_stats_for_nerds(amigo, mocker):
         # 1 press to proceed msg
         [BUTTON_ENTER]
         +
-        # 10 number 1 presses
-        [BUTTON_TOUCH for _ in range(D6_12W_MIN_ROLLS)]
+        # 1 touch per roll, the recommended amount of rolls
+        [BUTTON_TOUCH for _ in range(D6_12W_RECOMMENDED_ROLLS)]
         +
         # 1 press prev and 1 press on btn Go
         [BUTTON_PAGE_PREV, BUTTON_ENTER]
@@ -503,3 +577,19 @@ def test_stats_for_nerds(amigo, mocker):
 
     # Assert stats for nerds was called
     dice_entropy.stats_for_nerds.assert_called_once()
+
+
+def test_stats_for_nerds_minimal_display(m5stickv, mocker):
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy
+    from krux.input import BUTTON_ENTER
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    dice_entropy = DiceEntropy(ctx)
+    dice_entropy.rolls = [str(r + 1) for r in GOOD_ROLLS_SEQUENCE]
+    dice_entropy.roll_counts = [GOOD_ROLLS_SEQUENCE.count(i) for i in range(6)]
+    dice_entropy.stats_for_nerds()
+
+    texts = [c.args[0] for c in ctx.display.draw_hcentered_text.call_args_list]
+    # Small screens show only the min-entropy line
+    assert any(t.startswith("Min-entropy:") for t in texts)
+    assert not any("Shannon" in t for t in texts)

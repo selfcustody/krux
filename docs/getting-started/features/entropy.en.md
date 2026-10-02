@@ -1,5 +1,5 @@
 
-## Why Does Krux Say the Entropy of My Fifty Dice Rolls Does Not Contain 128 Bits of Entropy?
+## Why Does Krux Say My Dice Rolls Do Not Contain Enough Entropy?
 We want Krux to help users understand the concepts involved in the process, present statistics and indicators, and encourage users to experiment and evaluate results. This way, users learn about best practices in key generation. Below, we delve deeper into the concepts of entropy to better support users' knowledge of sovereign self-custody.
 
 ## Entropy in Dice Rolls
@@ -128,11 +128,50 @@ Calculating Shannon's entropy on a real sample of dice rolls provides insights i
 
 Shannon's entropy evaluates the statistical probability distribution of samples of a dice roll. An even distribution results in higher entropy, closer to the theoretical maximum entropy, which assumes perfectly distributed rolls. An uneven distribution, created, for example, by a biased die, will result in lower Shannon's entropy. In an extreme case, with a terribly biased die that always lands on the same side, Shannon's entropy will be zero.
 
+## Min-Entropy: A More Conservative Measure
+
+Shannon's entropy is an *average-case* measure: it can stay relatively high even when one particular outcome is meaningfully more likely than the others. That is exactly the scenario an attacker would exploit, since a brute-force or dictionary-style attack targets the single most likely sequence first, not the average one. For this reason, Krux also calculates **min-entropy**, the conservative, worst-case measure recommended by [NIST SP 800-90B](https://csrc.nist.gov/pubs/sp/800/90/b/final) for exactly this purpose, and uses it as the entropy indicator for dice rolls:
+
+![H_{min}(X) = -\log_2(p_{max})](img/math/eq-24.svg){ .math-display }
+
+where *p<sub>max</sub>* is the probability of the single most frequent outcome observed. For *N* independent rolls, the total min-entropy is:
+
+![H_{min,total} = N \times \left(-\log_2(p_{max})\right)](img/math/eq-25.svg){ .math-display }
+
+### Example
+
+Using the same 50-roll sample from the Shannon example above (`4, 9, 7, 10, 12, 8` occurrences for faces 1 through 6), the most frequent face is `5`, rolled 12 times:
+
+![p_{max} = \frac{12}{50} = 0.24](img/math/eq-26.svg){ .math-display }
+![H_{min} = -\log_2(0.24) \approx 2.059 \text{ bits per roll}](img/math/eq-27.svg){ .math-display }
+![H_{min,total} = 50 \times 2.059 \approx 103 \text{ bits}](img/math/eq-28.svg){ .math-display }
+
+Note that this is meaningfully lower than the ~125.8 bits Shannon's formula gave for the very same data. This gap is not a general property of min-entropy — a truly fair die has a min-entropy of `-log2(1/6) ≈ 2.585` bits per roll, the same as its Shannon entropy, which would total `50 × 2.585 ≈ 129` bits at 50 rolls, already above the 128-bit target. The gap seen in this example comes from the *estimator*: with a small sample, the observed *p<sub>max</sub>* fluctuates due to sampling noise, and that noise is why more rolls than the theoretical minimum are needed in practice to reliably clear the target — see the next section.
+
+### A Note on Sample Size
+
+The formula above is a *plug-in estimate*: it treats the observed proportion of the most frequent face as if it were the die's true probability, with no statistical margin for sampling noise. At the roll counts used in practice — tens of rolls, not the much larger samples recommended by NIST SP 800-90B for rigorous min-entropy estimation — that noise is large enough that a fair die can, purely by chance, produce a *p<sub>max</sub>* similar to what a mildly loaded die would produce on average. The indicator therefore cannot reliably tell an unlucky fair die apart from a subtly biased one; it is best understood as a heuristic that flags sequences well short of the recommended roll count, grossly uneven distributions, or other obvious issues, rather than a statistical guarantee against a slightly biased die. As with every entropy check in Krux, it only warns and never blocks mnemonic generation.
+
+### Minimum and Recommended Rolls
+
+Because min-entropy is so conservative, the amount of rolls that has historically been Krux's minimum is not enough to actually reach 128 or 256 bits of min-entropy — with 50 rolls of a d6, even a perfectly even distribution would only amount to about 123.7 bits. Krux therefore works with two amounts:
+
+| Dice | Mnemonic | Minimum rolls | Recommended rolls |
+|---|---|---|---|
+| d6 | 12 words | 50 | 70 |
+| d6 | 24 words | 99 | 125 |
+| d20 | 12 words | 30 | 60 |
+| d20 | 24 words | 60 | 90 |
+
+The **minimum** is the amount below which Krux refuses to generate a mnemonic. It is deliberately unchanged from previous versions: it is a common and useful practice to store the roll sequence together with the backup, so that `rolls → mnemonic` can be reproduced later — to re-verify a mnemonic against another implementation, or to demonstrate knowledge of the pre-image of the SHA256 that produced the entropy. Raising the minimum would make sequences recorded with older versions impossible to replay.
+
+The **recommended** amount is calibrated so that roughly 90% or more of the sessions with a fair die reach the target bit count as measured by min-entropy, with the remainder covered by a small tolerance. Rolling fewer times than recommended is allowed, but Krux will warn that the collected entropy is below the target before generating the mnemonic. The progress bar on the roll screen is filled against the recommended amount.
+
 ## Cryptographic Entropy
 
-Shannon's entropy, while a powerful measure of information content and uncertainty in a statistical distribution for natural samples, is not considered cryptographic entropy due to its inability to detect patterns or other sources of predictability within data. Shannon's formula quantifies the average information produced by a stochastic process, essentially measuring the expected surprise in a sequence of symbols based on their probabilities. However, it does not account for potential structure, correlations, or regularities within the data that could be inserted by a user and exploited by an attacker.
+Shannon's entropy, while a powerful measure of information content and uncertainty in a statistical distribution for natural samples, is not considered cryptographic entropy due to its inability to detect patterns or other sources of predictability within data. Shannon's formula quantifies the average information produced by a stochastic process, essentially measuring the expected surprise in a sequence of symbols based on their probabilities. However, it does not account for potential structure, correlations, or regularities within the data that could be inserted by a user and exploited by an attacker. Min-entropy addresses the "one likely outcome" weakness described above, but like Shannon's entropy it is still a statistical measure over the observed distribution of symbols — it does not by itself detect structure *between* rolls, such as an arithmetic progression. That is what Krux's separate pattern detection check (below) is for.
 
-Cryptographic entropy, on the other hand, requires a higher standard of unpredictability. It must ensure that every bit of the cryptographic key is as random and independent as possible, making it resilient against any form of analysis that could reveal patterns or reduce the effective randomness. While Shannon's entropy can evaluate the statistical distribution of symbols, it falls short in guaranteeing the absence of patterns or dependencies, which are crucial for maintaining the security of cryptographic systems. Thus, cryptographic entropy encompasses a broader concept of randomness, ensuring that the generated keys are not only statistically random but also free from any detectable structure or predictability.
+Cryptographic entropy, on the other hand, requires a higher standard of unpredictability. It must ensure that every bit of the cryptographic key is as random and independent as possible, making it resilient against any form of analysis that could reveal patterns or reduce the effective randomness. While Shannon's and min-entropy can evaluate the statistical distribution of symbols, they fall short in guaranteeing the absence of patterns or dependencies, which are crucial for maintaining the security of cryptographic systems. Thus, cryptographic entropy encompasses a broader concept of randomness, ensuring that the generated keys are not only statistically random but also free from any detectable structure or predictability.
 
 ### Pattern Detection
 
@@ -142,9 +181,10 @@ To mitigate this issue, Krux has implemented a pattern detection algorithm that 
 
 ## What Krux Does?
 
-- Krux requires a minimum number of rolls based on theoretical entropy.
-- Krux warns the user if low Shannon's entropy, calculated with the actual rolls, is detected.
+- Krux requires a minimum number of rolls, unchanged from previous versions, and recommends a higher amount, calibrated so that a fair die's min-entropy reliably reaches the target bit count.
+- Krux warns the user if low min-entropy, calculated with the actual rolls, is detected — which is the case when fewer than the recommended rolls are made — but does not block the generation.
 - Krux warns the user if it suspects there are patterns within the actual rolls.
+- Krux displays both min-entropy and Shannon's entropy of the actual rolls on the "Stats for Nerds" screen.
 
 ## Conclusion
 
