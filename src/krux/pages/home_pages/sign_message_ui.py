@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from embit import bip32, compact, script
+from embit import bip32, script
 from embit.networks import NETWORKS
 import hashlib
 import binascii
@@ -137,7 +137,8 @@ class SignMessage(Utils):
         return addr
 
     def _sign_at_address(self, message, derivation_str, address=""):
-        """Signs a message at a derived Bitcoin address"""
+        """Signs a BIP137 message at a derived Bitcoin address"""
+        from krux import bip137
 
         derivation = bip32.parse_path(derivation_str)
         self._display_message_sign_prompt(
@@ -147,15 +148,8 @@ class SignMessage(Utils):
         if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
             return None
 
-        message_hash = hashlib.sha256(
-            hashlib.sha256(
-                b"\x18Bitcoin Signed Message:\n"
-                + compact.to_bytes(len(message))
-                + message
-            ).digest()
-        ).digest()
-
-        sig = self.ctx.wallet.key.sign_at(derivation, message_hash)
+        script_type = self.get_script_type_from_path(derivation_str) or "p2pkh"
+        _, sig = bip137.sign(message, self.ctx.wallet.key, derivation, script_type)
         self._display_signature(base_encode(sig, 64))
         return sig
 
@@ -238,6 +232,8 @@ class SignMessage(Utils):
 
     def sign_standard_message(self, data):
         """Signs a standard message"""
+        from krux import bip137
+
         message_hash, is_raw_hash = self._compute_message_hash(data)
         if message_hash is None:
             return ""
@@ -252,6 +248,8 @@ class SignMessage(Utils):
             )
             if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
                 return ""
+        else:
+            message_hash = bip137.message_commitment(data)
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(
@@ -261,7 +259,13 @@ class SignMessage(Utils):
         if not self.prompt(t("Sign?"), BOTTOM_PROMPT_LINE):
             return ""
 
-        sig = self.ctx.wallet.key.sign(message_hash).serialize()
+        key = self.ctx.wallet.key
+        if is_raw_hash:
+            sig = key.sign(message_hash).serialize()
+        else:
+            _, sig = bip137.sign(
+                data, key, bip32.parse_path(key.derivation), key.script_type
+            )
         self._display_signature(base_encode(sig, 64))
         return sig
 
