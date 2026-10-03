@@ -246,7 +246,7 @@ class Wallet:
         if self.descriptor.key and not self.descriptor.taptree:
             if not self.label:
                 self.label = t("Single-sig")
-            self.policy = {"type": self.descriptor.scriptpubkey_type()}
+            self.policy = {"type": self.get_scriptpubkey_type()}
         elif self.descriptor.is_basic_multisig:
             m = int(str(self.descriptor.miniscript.args[0]))
             n = len(self.descriptor.keys)
