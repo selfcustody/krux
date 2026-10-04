@@ -600,6 +600,39 @@ def test_number_setting_rejects_values_outside_range(m5stickv, mocker, value, er
     assert Settings().appearance.screensaver_time == 5
 
 
+def test_auto_shutdown_out_of_range_does_not_reinit_timer(m5stickv, mocker):
+    from krux.pages.settings_page import SettingsPage
+    from krux.krux_settings import Settings, SecuritySettings
+    from krux.auto_shutdown import auto_shutdown
+
+    settings_page = SettingsPage(mock_context(mocker))
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value="600")
+    settings_page.flash_error = mocker.MagicMock()
+    auto_shutdown.init_timer(Settings().security.auto_shutdown)
+    starting_shutdown_time = auto_shutdown.shutdown_time
+
+    settings_page.number_setting(SecuritySettings(), SecuritySettings.auto_shutdown)
+
+    settings_page.flash_error.assert_called_once()
+    assert Settings().security.auto_shutdown == 10
+    assert auto_shutdown.shutdown_time == starting_shutdown_time == 600
+
+
+def test_auto_shutdown_in_range_reinits_timer(m5stickv, mocker):
+    from krux.pages.settings_page import SettingsPage
+    from krux.krux_settings import Settings, SecuritySettings
+    from krux.auto_shutdown import auto_shutdown
+
+    settings_page = SettingsPage(mock_context(mocker))
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value="20")
+    auto_shutdown.init_timer(Settings().security.auto_shutdown)
+
+    settings_page.number_setting(SecuritySettings(), SecuritySettings.auto_shutdown)
+
+    assert Settings().security.auto_shutdown == 20
+    assert auto_shutdown.shutdown_time == 1200
+
+
 @pytest.mark.parametrize("input_kind", ["cancel", "empty"])
 def test_number_setting_cancel_or_empty_input_does_not_change_storage(
     m5stickv, mocker, input_kind

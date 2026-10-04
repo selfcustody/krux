@@ -521,15 +521,14 @@ class SettingsPage(Page):
         new_value = setting.numtype(new_value)
         if setting.value_range[0] <= new_value <= setting.value_range[1]:
             setting.__set__(settings_namespace, new_value)
+            if setting.attr == "auto_shutdown" and starting_value != new_value:
+                from ..auto_shutdown import auto_shutdown
+
+                auto_shutdown.init_timer(new_value)
         else:
             self.flash_error(
                 t("Value %s out of range: [%s, %s]")
                 % (new_value, setting.value_range[0], setting.value_range[1])
             )
-
-        if setting.attr == "auto_shutdown" and starting_value != new_value:
-            from ..auto_shutdown import auto_shutdown
-
-            auto_shutdown.init_timer(new_value)
 
         return MENU_CONTINUE
