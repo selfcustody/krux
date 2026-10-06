@@ -2306,3 +2306,115 @@ def test_fee_percent_zero_out_amount(mocker, m5stickv, tdata):
     resume_fee_str, fee_percent = signer._get_resume_fee(1000, 0, {})
     assert fee_percent == 100.0
     assert "100.0%" in resume_fee_str
+
+
+def test_fee_percent_ignores_change(mocker, m5stickv, tdata):
+    """The summary shows the fee against all outputs, while the high fee
+    warning uses the amount spent, so a large change output can't hide it"""
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    psbt = PSBT.parse(tdata.P2WPKH_PSBT)
+    # Spend 10,000,000 sat with a 1,000,000 sat fee, the rest returns as change
+    change = next(out for out in psbt.outputs if out.bip32_derivations)
+    change.value = psbt.inputs[0].utxo.value - 10_000_000 - 1_000_000  # 89,000,000 sat
+
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    outputs, fee_percent = signer.outputs()
+
+    assert fee_percent == 10.0
+    assert "(1.1%)" in outputs[0]
+
+
+def test_fee_percent_spend_and_self_transfer(mocker, m5stickv, tdata):
+    """The high fee warning adds a self transfer next to a spend to its base,
+    while the summary still divides by all outputs"""
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG, P2TR
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(
+        Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"], script_type=P2TR)
+    )
+    # 1,000 sat spend, 1,000 sat self transfer, 7,738 sat change, 373 sat fee
+    signer = PSBTSigner(wallet, tdata.P2TR_PSBT, FORMAT_NONE)
+    outputs, fee_percent = signer.outputs()
+
+    assert fee_percent == 18.7
+    assert "(3.9%)" in outputs[0]
+
+
+def test_fee_percent_without_spend(mocker, m5stickv, tdata):
+    """With only a change output, the high fee warning falls back to the
+    change amount"""
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    psbt = PSBT.parse(tdata.P2WPKH_PSBT)
+    # Keep only the change output: 99,000,000 sat back, 1,000,000 sat fee
+    psbt.outputs = [out for out in psbt.outputs if out.bip32_derivations]
+    psbt.outputs[0].value = psbt.inputs[0].utxo.value - 1_000_000
+
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    outputs, fee_percent = signer.outputs()
+
+    assert "Spend" not in outputs[0]
+    assert fee_percent == 1.1
+
+
+def test_fee_percent_self_transfer(mocker, m5stickv, tdata):
+    """A self transfer is the high fee warning base when nothing is spent,
+    with or without a change output next to it"""
+    from embit import bip32
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, DerivationPath
+    from embit.script import p2wpkh
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    key = Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"])
+    wallet = Wallet(key)
+    receive_path = bip32.parse_path(key.derivation + "/0/0")
+    receive_pub = key.root.derive(receive_path).key.get_public_key()
+
+    cases = [
+        # keep change output, self transfer amount, expected fee percent
+        (False, 99_000_000, 1.1),
+        (True, 10_000_000, 10.0),
+    ]
+    for keep_change, self_amount, expected in cases:
+        psbt = PSBT.parse(tdata.P2WPKH_PSBT)
+        change = next(out for out in psbt.outputs if out.bip32_derivations)
+        own = next(out for out in psbt.outputs if not out.bip32_derivations)
+        # Turn the payment into a transfer to this wallet's first receive address
+        own.script_pubkey = p2wpkh(receive_pub)
+        own.bip32_derivations = {
+            receive_pub: DerivationPath(key.fingerprint, receive_path)
+        }
+        own.value = self_amount
+        # 1,000,000 sat fee in both cases
+        if keep_change:
+            change.value = psbt.inputs[0].utxo.value - self_amount - 1_000_000
+        else:
+            psbt.outputs.remove(change)
+
+        signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+        outputs, fee_percent = signer.outputs()
+
+        assert "Spend" not in outputs[0]
+        assert "Fee: ₿ 0.01 000 000" in outputs[0].replace(" ", " ")
+        assert fee_percent == expected
