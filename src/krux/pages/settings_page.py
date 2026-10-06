@@ -507,18 +507,27 @@ class SettingsPage(Page):
             else:
                 buffer_suffix = range_suffix
 
-        new_value = self.capture_from_keypad(
-            self.fit_to_line(settings_namespace.label(setting.attr)),
-            [numerals],
-            starting_buffer=str(starting_value),
-            esc_prompt=False,
-            buffer_suffix=buffer_suffix,
-            buffer_short_suffix=buffer_short_suffix,
-        )
-        if new_value in (ESC_KEY, ""):
-            return MENU_CONTINUE
+        new_value = str(starting_value)
+        while True:
+            new_value = self.capture_from_keypad(
+                self.fit_to_line(settings_namespace.label(setting.attr)),
+                [numerals],
+                starting_buffer=new_value,
+                esc_prompt=False,
+                buffer_suffix=buffer_suffix,
+                buffer_short_suffix=buffer_short_suffix,
+            )
+            if new_value == ESC_KEY:
+                return MENU_CONTINUE
+            if new_value == "":
+                self.flash_error(t("Empty"))
+                continue
+            try:
+                new_value = setting.numtype(new_value)
+                break
+            except ValueError:
+                self.flash_error(t("Failed to convert"))
 
-        new_value = setting.numtype(new_value)
         if setting.value_range[0] <= new_value <= setting.value_range[1]:
             setting.__set__(settings_namespace, new_value)
         else:
