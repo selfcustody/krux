@@ -23,17 +23,17 @@
 
 import sys
 from embit.networks import NETWORKS
-from . import (
+from krux.pages import (
     Menu,
     MENU_CONTINUE,
     MENU_EXIT,
     LETTERS,
     EXTRA_MNEMONIC_LENGTH_FLAG,
 )
-from .mnemonic_loader import MnemonicLoader
-from ..display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
-from ..krux_settings import Settings
-from ..key import (
+from krux.pages.mnemonic_loader import MnemonicLoader
+from krux.display import DEFAULT_PADDING, FONT_HEIGHT, BOTTOM_PROMPT_LINE
+from krux.krux_settings import Settings
+from krux.key import (
     Key,
     P2WPKH,
     P2WSH,
@@ -47,8 +47,8 @@ from ..key import (
     POLICY_TYPE_IDS,
     NAME_MULTISIG,
 )
-from ..krux_settings import t
-from ..kboard import kboard
+from krux.krux_settings import t
+from krux.kboard import kboard
 
 DOUBLE_MNEMONICS_MAX_TRIES = 200
 MASK256 = (1 << 256) - 1
@@ -104,7 +104,7 @@ class Login(MnemonicLoader):
 
     def new_key_from_dice(self, d_20=False):
         """Handler for both 'new mnemonic'>'via D6/D20' menu items. Default is D6"""
-        from .new_mnemonic.dice_rolls import DiceEntropy
+        from krux.pages.new_mnemonic.dice_rolls import DiceEntropy
 
         dice_entropy = DiceEntropy(self.ctx, d_20)
         captured_entropy = dice_entropy.new_key()
@@ -128,14 +128,14 @@ class Login(MnemonicLoader):
             + t("(Experimental)")
         )
         if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
-            from .capture_entropy import CameraEntropy
+            from krux.pages.capture_entropy import CameraEntropy
 
             camera_entropy = CameraEntropy(self.ctx)
             entropy_bytes = camera_entropy.capture()
             if entropy_bytes is not None:
                 import binascii
                 from embit.bip39 import mnemonic_from_bytes
-                from ..bip39 import entropy_checksum
+                from krux.bip39 import entropy_checksum
 
                 entropy_hash = binascii.hexlify(entropy_bytes).decode()
                 self.ctx.display.clear()
@@ -201,8 +201,8 @@ class Login(MnemonicLoader):
 
     def _wallet_info_menu(self, key, wallet_info, network_name, menu_items):
         """Draws the wallet info box and returns a menu placed below it"""
-        from ..themes import theme
-        from .utils import Utils
+        from krux.themes import theme
+        from krux.pages.utils import Utils
 
         self.ctx.display.clear()
         menu = Menu(
@@ -240,7 +240,7 @@ class Login(MnemonicLoader):
                 if self._confirm_key_from_digits(mnemonic, charset) is not None:
                     return MENU_CONTINUE
 
-            from .mnemonic_editor import MnemonicEditor
+            from krux.pages.mnemonic_editor import MnemonicEditor
 
             mnemonic = MnemonicEditor(self.ctx, mnemonic, new).edit()
         if mnemonic is None:
@@ -287,8 +287,8 @@ class Login(MnemonicLoader):
 
         derivation_path = ""
 
-        from ..wallet import Wallet
-        from .utils import Utils
+        from krux.wallet import Wallet
+        from krux.pages.utils import Utils
 
         utils = Utils(self.ctx)
         while True:
@@ -357,14 +357,14 @@ class Login(MnemonicLoader):
                 # shift onto the Passphrase and Customize arms of the main menu
                 index += 1
             if index == 1:
-                from .wallet_settings import PassphraseEditor
+                from krux.pages.wallet_settings import PassphraseEditor
 
                 passphrase_editor = PassphraseEditor(self.ctx)
                 temp_passphrase = passphrase_editor.load_passphrase_menu(mnemonic)
                 if temp_passphrase is not None:
                     passphrase = temp_passphrase
             elif index == 2:
-                from .wallet_settings import WalletSettings
+                from krux.pages.wallet_settings import WalletSettings
 
                 wallet_settings = WalletSettings(self.ctx)
                 network, policy_type, script_type, account, derivation_path = (
@@ -379,7 +379,7 @@ class Login(MnemonicLoader):
 
     def tools(self):
         """Handler for the 'Tools' menu item"""
-        from .tools import Tools
+        from krux.pages.tools import Tools
 
         while True:
             if Tools(self.ctx).run() == MENU_EXIT:
@@ -393,7 +393,7 @@ class Login(MnemonicLoader):
 
     def settings(self):
         """Handler for the 'settings' menu item"""
-        from .settings_page import SettingsPage
+        from krux.pages.settings_page import SettingsPage
 
         settings_page = SettingsPage(self.ctx)
         return settings_page.settings()
@@ -402,9 +402,9 @@ class Login(MnemonicLoader):
         """Handler for the 'about' menu item"""
 
         import board
-        from ..metadata import VERSION
-        from ..qr import FORMAT_NONE
-        from .disclaimer import Disclaimer
+        from krux.metadata import VERSION
+        from krux.qr import FORMAT_NONE
+        from krux.pages.disclaimer import Disclaimer
 
         Disclaimer(self.ctx).show()
 

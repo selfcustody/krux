@@ -23,10 +23,10 @@ import gc
 import time
 import lcd
 import _thread
-from ..context import Context
-from .keypads import Keypad
-from ..themes import theme, WHITE, GREEN, DARKGREY
-from ..input import (
+from krux.context import Context
+from krux.pages.keypads import Keypad
+from krux.themes import theme, WHITE, GREEN, DARKGREY
+from krux.input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
     BUTTON_PAGE_PREV,
@@ -39,7 +39,7 @@ from ..input import (
     SWIPE_RIGHT,
     ONE_MINUTE,
 )
-from ..display import (
+from krux.display import (
     DEFAULT_PADDING,
     MINIMAL_PADDING,
     FLASH_MSG_TIME,
@@ -47,10 +47,10 @@ from ..display import (
     STATUS_BAR_HEIGHT,
     BOTTOM_LINE,
 )
-from ..qr import to_qr_codes, FORMAT_NONE
-from ..krux_settings import t, Settings
-from ..sd_card import SDHandler
-from ..kboard import kboard
+from krux.qr import to_qr_codes, FORMAT_NONE
+from krux.krux_settings import t, Settings
+from krux.sd_card import SDHandler
+from krux.kboard import kboard
 
 MENU_CONTINUE = 0
 MENU_EXIT = 1
@@ -386,7 +386,7 @@ class Page:
         fingerprint="",
     ):
         """Displays the 12 or 24-word list of words to the user"""
-        from ..wallet import is_double_mnemonic
+        from krux.wallet import is_double_mnemonic
 
         display_mnemonic = display_mnemonic or mnemonic
         words = display_mnemonic.split(" ")
@@ -723,7 +723,7 @@ class Menu:
 
     def screensaver(self):
         """Loads and starts screensaver"""
-        from .screensaver import ScreenSaver
+        from krux.pages.screensaver import ScreenSaver
 
         ScreenSaver(self.ctx).start()
 

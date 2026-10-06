@@ -21,15 +21,15 @@
 # THE SOFTWARE.
 import board
 import time
-from . import Page
-from ..display import FONT_HEIGHT, MINIMAL_PADDING, BOTTOM_LINE
-from ..buttons import PRESSED
-from ..themes import theme
-from ..qr import QRPartParser, FORMAT_UR
-from ..wdt import wdt
-from ..krux_settings import t
-from ..camera import QR_SCAN_MODE, ANTI_GLARE_MODE, ZOOMED_MODE
-from ..kboard import kboard
+from krux.pages import Page
+from krux.display import FONT_HEIGHT, MINIMAL_PADDING, BOTTOM_LINE
+from krux.buttons import PRESSED
+from krux.themes import theme
+from krux.qr import QRPartParser, FORMAT_UR
+from krux.wdt import wdt
+from krux.krux_settings import t
+from krux.camera import QR_SCAN_MODE, ANTI_GLARE_MODE, ZOOMED_MODE
+from krux.kboard import kboard
 
 ANTI_GLARE_WAIT_TIME = 500
 MESSAGE_DISPLAY_PERIOD = 5000

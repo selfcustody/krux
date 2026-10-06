@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 import board
 import binascii
-from .settings import (
+from krux.settings import (
     SettingsNamespace,
     CategorySetting,
     NumberSetting,
@@ -32,7 +32,7 @@ from .settings import (
     TEST_TXT,
 )
 
-from .key import (
+from krux.key import (
     NAME_SINGLE_SIG,
     NAME_MULTISIG,
     NAME_MINISCRIPT,
@@ -42,7 +42,7 @@ from .key import (
     MINISCRIPT_SCRIPT_NAMES,
 )
 
-from .kboard import kboard
+from krux.kboard import kboard
 
 BAUDRATES = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
 
@@ -95,7 +95,7 @@ class LocaleControl:
 
     def update_locales(self):
         """Updates the list of available locales"""
-        from .translations import available_languages
+        from krux.translations import available_languages
 
         self.locales = []
         self.locales.append(DEFAULT_LOCALE)
@@ -116,7 +116,7 @@ class LocaleControl:
 
         self.translation = getattr(translation_module, "translation_array")
         if self.reference is None:
-            from .translations import ref_array
+            from krux.translations import ref_array
 
             self.reference = ref_array
 

@@ -1,4 +1,4 @@
-from .test_home import tdata, create_ctx
+from tests.pages.home_pages.test_home import tdata, create_ctx
 
 
 def test_bip85_bip39_mnemonic_derivation_amigo(mocker, amigo, tdata):

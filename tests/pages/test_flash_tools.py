@@ -1,4 +1,4 @@
-from . import create_ctx
+from tests.pages import create_ctx
 
 
 def test_erase_users_data(amigo, mocker):

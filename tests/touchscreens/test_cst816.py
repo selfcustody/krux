@@ -26,7 +26,7 @@ def mock_cst816(mocker):
         if reg_addr == CST816S_VERSION:
             return [0x01]
         elif reg_addr == CST816S_TOUCH_DATA:
-            from .helpers import create_cst816_touch_data
+            from tests.touchscreens.helpers import create_cst816_touch_data
 
             return create_cst816_touch_data(
                 points=0x01, event=EVENT_TOUCH_CONTACT, x_coord=0x0050, y_coord=0x00A0
@@ -97,7 +97,7 @@ def test_point_not_read(mocker, dock):
 
 def test_point_read(mocker, embed_fire):
     from krux.touchscreens.cst816 import CST816, EVENT_TOUCH_CONTACT, SCREEN_WIDTH
-    from .helpers import create_cst816_touch_data
+    from tests.touchscreens.helpers import create_cst816_touch_data
 
     touch = CST816()
     mocker.patch("time.ticks_ms", return_value=1000)
@@ -117,7 +117,7 @@ def test_point_read(mocker, embed_fire):
 
 def test_point_validate_read(mocker, embed_fire):
     from krux.touchscreens.cst816 import CST816, EVENT_TOUCH_CONTACT, SCREEN_WIDTH
-    from .helpers import create_cst816_touch_data
+    from tests.touchscreens.helpers import create_cst816_touch_data
 
     touch = CST816()
     x_coord = 0x0028
@@ -134,7 +134,7 @@ def test_point_validate_read(mocker, embed_fire):
 
 def test_no_touch_points(mocker, embed_fire):
     from krux.touchscreens.cst816 import CST816, EVENT_TOUCH_CONTACT
-    from .helpers import create_cst816_touch_data
+    from tests.touchscreens.helpers import create_cst816_touch_data
 
     touch = CST816()
     touch_data = create_cst816_touch_data(0x00, EVENT_TOUCH_CONTACT, 0x00, 0x00)
@@ -314,7 +314,7 @@ def test_threshold(mocker, embed_fire, capsys):
 )
 def test_coordinate_mirroring(mocker, embed_fire, x_coord, y_coord, expected_x):
     from krux.touchscreens.cst816 import CST816, EVENT_TOUCH_CONTACT
-    from .helpers import create_cst816_touch_data
+    from tests.touchscreens.helpers import create_cst816_touch_data
 
     touch = CST816()
     touch_data = create_cst816_touch_data(0x01, EVENT_TOUCH_CONTACT, x_coord, y_coord)

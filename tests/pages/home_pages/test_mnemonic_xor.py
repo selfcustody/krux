@@ -1,6 +1,6 @@
 import pytest
-from .test_home import tdata
-from .. import create_ctx
+from tests.pages.home_pages.test_home import tdata
+from tests.pages import create_ctx
 
 
 def test_xor_bytes(mocker, m5stickv):

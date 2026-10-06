@@ -1,4 +1,4 @@
-from .home_pages.test_home import tdata, create_ctx
+from tests.pages.home_pages.test_home import tdata, create_ctx
 
 
 def test_export_mnemonic_stackbit_standard(mocker, m5stickv, tdata):
