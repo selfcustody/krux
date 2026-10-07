@@ -176,6 +176,8 @@ def test_enter_tiny_seed_24w_amigo(amigo, mocker):
         + [3]
         # Toggle to last editable bit
         + [135]
+        # An invalid index don't change result
+        + [-1]
         # Press ESC
         + [TS_ESC_START_POSITION]
         # Give up from ESC
