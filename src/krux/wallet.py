@@ -152,10 +152,8 @@ class Wallet:
         ):
             script_type = descriptor.scriptpubkey_type()
             # Check for nested segwit (sh(wpkh(...)))
-            if script_type == "p2sh" and hasattr(descriptor, "witness_script"):
-                if descriptor.witness_script:
-                    # It's sh(wpkh(...)) = P2SH-P2WPKH
-                    script_type = P2SH_P2WPKH
+            if script_type == P2SH and descriptor.wpkh:
+                script_type = P2SH_P2WPKH
             return TYPE_SINGLESIG, script_type
 
         raise ValueError("Unable to determine descriptor policy type")
@@ -232,6 +230,14 @@ class Wallet:
             descriptor_xpubs.append(
                 key.key.to_base58(version=NETWORKS[network]["xpub"])
             )
+
+        # Only wsh and tr miniscript are supported, not sh(...) wrapped ones
+        if (
+            descriptor.sh
+            and descriptor.miniscript is not None
+            and not descriptor.is_basic_multisig
+        ):
+            raise ValueError("Invalid Descriptor: nested miniscript not supported")
 
         if self.key:
             try:
