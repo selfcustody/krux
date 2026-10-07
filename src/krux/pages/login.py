@@ -95,12 +95,27 @@ class Login(MnemonicLoader):
                 (t("Via Words"), lambda: self.load_key_from_text(new=True)),
                 (t("Via D6"), self.new_key_from_dice),
                 (t("Via D20"), lambda: self.new_key_from_dice(True)),
+                (t("Via Entropy App 2XD8"), self.new_key_from_entropy_app_2xd8),
             ],
         )
         index, status = submenu.run_loop()
         if index == submenu.back_index:
             return MENU_CONTINUE
         return status
+
+
+    def new_key_from_entropy_app_2xd8(self):
+        """Handler for 'new mnemonic'>'via Entropy App 2XD8' menu item"""
+        from .new_mnemonic.entropy_app_2xd8 import EntropyApp2XD8
+
+        entropy_app_2xd8 = EntropyApp2XD8(self.ctx)
+        captured_entropy = entropy_app_2xd8.new_key()
+        if captured_entropy is not None:
+            from embit.bip39 import mnemonic_from_bytes
+
+            words = mnemonic_from_bytes(captured_entropy).split()
+            return self._load_key_from_words(words, new=True)
+        return MENU_CONTINUE
 
     def new_key_from_dice(self, d_20=False):
         """Handler for both 'new mnemonic'>'via D6/D20' menu items. Default is D6"""
