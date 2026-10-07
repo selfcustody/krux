@@ -34,6 +34,15 @@ As of this release: I Jean Do (jdlcdl), am replacing Odudex as maintainer. Githu
 ### Removed Maix Bit Code
 All Maix Bit support has been removed from the source tree, including its firmware build project. Support for the device was discontinued in 25.09.0, which at the time kept the build parameters available; those are now gone too. The OV5642 sensor handling, used only by that device, was removed along with it.
 
+### NFC Card Storage (proof of concept, off by default)
+Store KEF-encrypted seed backups on NFC cards through an external WS1850S module (M5Stack RFID Unit 2) on I2C. The card is a third destination alongside flash and SD: the same envelope, the same password prompt, a different medium. MIFARE Classic 1K is the only tag family supported: it is the one that has been through a card, and its capacity is known rather than read from the tag. The on-card format is shared with the Kern NFC branch, which originated it, so a card written by either firmware reads on the other.
+
+Nothing happens until `Settings > Hardware > NFC > Enabled` is switched on; while it is off the bus is never opened and the antenna is never powered. The field comes up only inside the "hold a card to the reader" page and drops when it closes, and only ciphertext ever crosses it. Menu entries appear under `Backup > Encrypted > Store on NFC Card`, `Load Mnemonic > From NFC Card`, `Tools > Erase NFC Card` and `Tools > Device Tests > NFC Reader`. Erasing zeroes the whole data area rather than just the record header, because a header-only wipe leaves the envelope on the card for an offline attack; sector trailers are never written, so it cannot brick a sector and cannot rescue an NDEF-formatted card. See [NFC Card Storage](https://selfcustody.github.io/krux/getting-started/features/nfc/) for wiring and the threat model.
+
+Wallet output descriptors can go on a card too, plaintext or encrypted, from `Wallet > Wallet Descriptor` and back through `Load from NFC card`. Seeds cannot: a mnemonic record is always sealed, and the mnemonic loader accepts nothing else. Each record declares its type, so a descriptor card and a seed card refuse each other's loaders. A plaintext descriptor record is written with its BIP-380 checksum and refused without a matching one — the on-card format has no checksum of its own because the envelope authenticates a sealed record, and embit accepts a descriptor whether or not its checksum agrees, so a flipped bit in a derivation path would otherwise point the wallet at other addresses in silence.
+
+This is a proof of concept and has had no security review — do not put real seeds on these cards.
+
 ### Stackbit 1248 Vertical Layout
 Added vertical layout option for Stackbit 1248 backup display, allowing users to choose between Standard (horizontal) and Vertical (transposed) grid orientations.
 
