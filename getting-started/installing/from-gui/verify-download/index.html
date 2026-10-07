@@ -2167,7 +2167,7 @@
   <h1>Verify</h1>
 
 <p>Before start using the GUI, it's <strong>strongly recommended</strong> to verify the authenticity of the <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.24/krux-installer_0.0.24.SHA256.txt">krux-installer_0.0.24.SHA256.txt</a> file.
-It attest the integrity of all variants (<a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.24/krux_installer_0.0.24_amd64.deb">krux_installer_0.0.24_amd64.deb</a>, <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.24/krux_installer-0.0.24-1.x86_64.rpm">krux_installer-0.0.24-1.x86_64.rpm</a>, <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.24/krux_installer_0.0.24_arm64.dmg">krux_installer_0.0.24_arm64.dmg</a>, <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.24/krux_installer_v0.0.24_Setup.exe">krux_installer_v0.0.24_Setup.exe</a>).</p>
+It attest the integrity of all variants (<a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.24/krux-installer_0.0.24_amd64.deb">krux-installer_0.0.24_amd64.deb</a>, <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.24/krux-installer-0.0.24-1.x86_64.rpm">krux-installer-0.0.24-1.x86_64.rpm</a>, <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.24/krux-installer_0.0.24_arm64.dmg">krux-installer_0.0.24_arm64.dmg</a>, <a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.24/krux-installer_v0.0.24_Setup.exe">krux-installer_v0.0.24_Setup.exe</a>).</p>
 <p>To do this, download two files:</p>
 <ul>
 <li><a href="https://github.com/selfcustody/krux-installer/releases/download/v0.0.24/krux-installer_0.0.24.SHA256.txt"><code>krux-installer_0.0.24.SHA256.txt</code></a>;</li>
@@ -2199,7 +2199,7 @@ is authentic, we can proceed with the integrity check in your <code>bash</code>/
 </code></pre></div>
 <p><strong>Windows</strong></p>
 <p>You can verify the integrity with this command in a <code>powershell</code> terminal:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">$exe</span> <span class="p">=</span> <span class="s1">&#39;.\krux_installer_v0.0.24_Setup.exe&#39;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">$exe</span> <span class="p">=</span> <span class="s1">&#39;.\krux-installer_v0.0.24_Setup.exe&#39;</span>
 <span class="nv">$file</span> <span class="p">=</span> <span class="nb">Split-Path</span> <span class="nv">$exe</span> <span class="n">-Leaf</span>
 
 <span class="p">(</span><span class="nb">Get-FileHash</span> <span class="nv">$exe</span> <span class="n">-Algorithm</span> <span class="n">SHA256</span><span class="p">).</span><span class="n">Hash</span> <span class="o">-eq</span>
