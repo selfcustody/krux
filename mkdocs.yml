@@ -50,10 +50,10 @@ site_dir: public
 extra:
   latest_krux: krux-v26.09.0
   latest_installer: v0.0.24
-  latest_installer_rpm: krux_installer-0.0.24-1.x86_64.rpm
-  latest_installer_deb: krux_installer_0.0.24_amd64.deb
-  latest_installer_win: krux_installer_v0.0.24_Setup.exe
-  latest_installer_mac_arm: krux_installer_0.0.24_arm64.dmg
+  latest_installer_rpm: krux-installer-0.0.24-1.x86_64.rpm
+  latest_installer_deb: krux-installer_0.0.24_amd64.deb
+  latest_installer_win: krux-installer_v0.0.24_Setup.exe
+  latest_installer_mac_arm: krux-installer_0.0.24_arm64.dmg
   latest_installer_sha: krux-installer_0.0.24.SHA256.txt
   latest_installer_sig: krux-installer_0.0.24.SHA256.txt.asc
   latest_installer_key: C43B4A5325273ABA93A8EED5B38829728980AA8B
