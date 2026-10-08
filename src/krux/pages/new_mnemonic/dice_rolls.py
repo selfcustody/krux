@@ -224,13 +224,14 @@ class DiceEntropy(Page):
             outline_color,
         )
 
-    def new_key(self):
-        """Create a new key from dice rolls"""
+    def new_key(self, len_mnemonic=None):
+        """Create entropy from dice rolls"""
         from ...settings import ELLIPSIS
 
-        len_mnemonic = self.choose_len_mnemonic()
-        if not len_mnemonic:
-            return None
+        if len_mnemonic is None:
+            len_mnemonic = self.choose_len_mnemonic()
+            if not len_mnemonic:
+                return None
 
         if len_mnemonic == 24:
             self.min_entropy = MIN_ENTROPY_24W
