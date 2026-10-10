@@ -303,19 +303,17 @@ class PSBTSigner:
 
         return prefix + BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(amount)
 
+    def _fee_percent(self, fee, base):
+        # fee percent with 1 decimal precision using math.ceil (minimum of 0.1)
+        if base > 0:
+            return max(0.1, (((fee * 10000 // base) + 9) // 10) / 10)
+        return 100.0
+
     def _get_resume_fee(self, inp_amount, out_amount, output_policy_count):
         from .format import replace_decimal_separator
 
         fee = inp_amount - out_amount
-
-        # fee percent with 1 decimal precision using math.ceil (minimum of 0.1)
-        if out_amount > 0:
-            fee_percent = max(
-                0.1,
-                (((fee * 10000 // out_amount) + 9) // 10) / 10,
-            )
-        else:
-            fee_percent = 100.0
+        fee_percent = self._fee_percent(fee, out_amount)
 
         resume_fee_str = (
             t("Fee:")
@@ -433,8 +431,9 @@ class PSBTSigner:
                 + "\n\n"
             )
 
-        resume_fee_str, fee_percent = self._get_resume_fee(
-            inp_amount, self_amount + change_amount + spend_amount, output_policy_count
+        out_amount = self_amount + change_amount + spend_amount
+        resume_fee_str, _ = self._get_resume_fee(
+            inp_amount, out_amount, output_policy_count
         )
 
         messages = []
@@ -455,7 +454,14 @@ class PSBTSigner:
         # sequence of change
         messages.extend(self._sequence_render(t("Change:"), change_list))
 
-        return messages, fee_percent
+        # The summary shows the fee against all outputs, as coordinators like
+        # Sparrow do. The high fee warning measures it against what is sent,
+        # spends and self transfers, so a large change output can't hide a
+        # high fee. Change is the base only when nothing else is sent.
+        warn_percent = self._fee_percent(
+            inp_amount - out_amount, (spend_amount + self_amount) or change_amount
+        )
+        return messages, warn_percent
 
     def check_sighash(self):
         """Check that all inputs use SIGHASH_ALL (or DEFAULT for taproot).
