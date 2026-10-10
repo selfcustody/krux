@@ -255,7 +255,6 @@ translation_array = [
     "Lisez la documentation avant de continuer",
     "Redémarrer",
     "Recevoir",
-    "Recommandé : %d jets",
     "Région\u2009:",
     "Supprimer %s\u2009?",
     "Supprimer mnémonique",

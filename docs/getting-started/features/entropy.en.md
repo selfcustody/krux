@@ -150,22 +150,22 @@ Note that this is meaningfully lower than the ~125.8 bits Shannon's formula gave
 
 ### A Note on Sample Size
 
-The formula above is a *plug-in estimate*: it treats the observed proportion of the most frequent face as if it were the die's true probability, with no statistical margin for sampling noise. At the roll counts used in practice — tens of rolls, not the much larger samples recommended by NIST SP 800-90B for rigorous min-entropy estimation — that noise is large enough that a fair die can, purely by chance, produce a *p<sub>max</sub>* similar to what a mildly loaded die would produce on average. The indicator therefore cannot reliably tell an unlucky fair die apart from a subtly biased one; it is best understood as a heuristic that flags sequences well short of the recommended roll count, grossly uneven distributions, or other obvious issues, rather than a statistical guarantee against a slightly biased die. As with every entropy check in Krux, it only warns and never blocks mnemonic generation.
+The formula above is a *plug-in estimate*: it treats the observed proportion of the most frequent face as if it were the die's true probability, with no statistical margin for sampling noise. At the roll counts used in practice — tens of rolls, not the much larger samples recommended by NIST SP 800-90B for rigorous min-entropy estimation — that noise is large enough that a fair die can, purely by chance, produce a *p<sub>max</sub>* similar to what a mildly loaded die would produce on average. The indicator therefore cannot reliably tell an unlucky fair die apart from a subtly biased one; it is best understood as a heuristic that flags sequences well short of the minimum roll count, grossly uneven distributions, or other obvious issues, rather than a statistical guarantee against a slightly biased die. As with every entropy check in Krux, it only warns and never blocks mnemonic generation.
 
-### Minimum and Recommended Rolls
+### Minimum and Legacy Minimum Rolls
 
 Because min-entropy is so conservative, the amount of rolls that has historically been Krux's minimum is not enough to actually reach 128 or 256 bits of min-entropy — with 50 rolls of a d6, even a perfectly even distribution would only amount to about 123.7 bits. Krux therefore works with two amounts:
 
-| Dice | Mnemonic | Minimum rolls | Recommended rolls |
+| Dice | Mnemonic | Legacy minimum rolls | Minimum rolls |
 |---|---|---|---|
 | d6 | 12 words | 50 | 70 |
 | d6 | 24 words | 99 | 125 |
 | d20 | 12 words | 30 | 60 |
 | d20 | 24 words | 60 | 90 |
 
-The **minimum** is the amount below which Krux refuses to generate a mnemonic. It is deliberately unchanged from previous versions: it is a common and useful practice to store the roll sequence together with the backup, so that `rolls → mnemonic` can be reproduced later — to re-verify a mnemonic against another implementation, or to demonstrate knowledge of the pre-image of the SHA256 that produced the entropy. Raising the minimum would make sequences recorded with older versions impossible to replay.
+The **minimum** is the amount shown on the roll screen, and the one the progress bar is filled against. It is calibrated so that roughly 90% or more of the sessions with a fair die reach the target bit count as measured by min-entropy, with the remainder covered by a small tolerance.
 
-The **recommended** amount is calibrated so that roughly 90% or more of the sessions with a fair die reach the target bit count as measured by min-entropy, with the remainder covered by a small tolerance. Rolling fewer times than recommended is allowed, but Krux will warn that the collected entropy is below the target before generating the mnemonic. The progress bar on the roll screen is filled against the recommended amount.
+The **legacy minimum** is the minimum of previous versions, below which Krux refuses to generate a mnemonic. It is still accepted for backward compatibility only: it is a common and useful practice to store the roll sequence together with the backup, so that `rolls → mnemonic` can be reproduced later — to re-verify a mnemonic against another implementation, or to demonstrate knowledge of the pre-image of the SHA256 that produced the entropy. Refusing these amounts would make sequences recorded with older versions impossible to replay. Generating a mnemonic between the legacy minimum and the minimum is allowed, but Krux will warn that the collected entropy is below the target before generating it.
 
 ## Cryptographic Entropy
 
@@ -181,8 +181,8 @@ To mitigate this issue, Krux has implemented a pattern detection algorithm that 
 
 ## What Krux Does?
 
-- Krux requires a minimum number of rolls, unchanged from previous versions, and recommends a higher amount, calibrated so that a fair die's min-entropy reliably reaches the target bit count.
-- Krux warns the user if low min-entropy, calculated with the actual rolls, is detected — which is the case when fewer than the recommended rolls are made — but does not block the generation.
+- Krux requires a minimum number of rolls, calibrated so that a fair die's min-entropy reliably reaches the target bit count, while still accepting the lower legacy minimum of previous versions so recorded roll sequences can be replayed.
+- Krux warns the user if low min-entropy, calculated with the actual rolls, is detected — which is the case when fewer than the minimum rolls are made — but does not block the generation.
 - Krux warns the user if it suspects there are patterns within the actual rolls.
 - Krux displays both min-entropy and Shannon's entropy of the actual rolls on the "Stats for Nerds" screen.
 

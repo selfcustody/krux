@@ -39,22 +39,24 @@ from ...kboard import kboard
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
 
-# Minimum rolls accepted to generate a mnemonic. Kept unchanged so roll sequences
-# recorded with previous versions can still be replayed to reproduce their mnemonics.
-D6_12W_MIN_ROLLS = 50
-D6_24W_MIN_ROLLS = 99
-D20_12W_MIN_ROLLS = 30
-D20_24W_MIN_ROLLS = 60
+# Legacy minimum rolls, the minimum of previous versions. Still accepted, only so roll
+# sequences recorded with previous versions can be replayed to reproduce their mnemonics.
+# Below these amounts a mnemonic can't be generated at all.
+D6_12W_LEGACY_MIN_ROLLS = 50
+D6_24W_LEGACY_MIN_ROLLS = 99
+D20_12W_LEGACY_MIN_ROLLS = 30
+D20_24W_LEGACY_MIN_ROLLS = 60
 
 # Min-entropy (H_min = -log2(p_max)) is a worst-case measure: even a fair die needs
 # noticeably more rolls than Shannon's average-case entropy would suggest to reach the
-# bit targets below. These recommended amounts are calibrated so that ~90% of fair-die
+# bit targets below. These minimum amounts are calibrated so that ~90% of fair-die
 # sessions reach the target, with the tolerance below covering the rest. Rolling less
-# than recommended is allowed, but warns about the entropy actually collected.
-D6_12W_RECOMMENDED_ROLLS = 70
-D6_24W_RECOMMENDED_ROLLS = 125
-D20_12W_RECOMMENDED_ROLLS = 60
-D20_24W_RECOMMENDED_ROLLS = 90
+# than the minimum (down to the legacy minimum) is allowed, but warns about the
+# entropy actually collected.
+D6_12W_MIN_ROLLS = 70
+D6_24W_MIN_ROLLS = 125
+D20_12W_MIN_ROLLS = 60
+D20_24W_MIN_ROLLS = 90
 
 MIN_ENTROPY_12W = 128
 MIN_ENTROPY_24W = 256
@@ -75,8 +77,8 @@ class DiceEntropy(Page):
         self.is_d20 = is_d20
         self.roll_states = D20_STATES if is_d20 else D6_STATES
         self.num_sides = len(self.roll_states)
+        self.legacy_min_rolls = 0
         self.min_rolls = 0
-        self.recommended_rolls = 0
         self.min_entropy = 0
         self.rolls = []
         self.roll_counts = [0] * self.num_sides
@@ -118,7 +120,7 @@ class DiceEntropy(Page):
         """
         import math
 
-        if len(self.rolls) < self.min_rolls // 2:
+        if len(self.rolls) < self.legacy_min_rolls // 2:
             return 0  # Not enough data to analyze
 
         # Calculate derivatives
@@ -205,16 +207,16 @@ class DiceEntropy(Page):
         """
         Draws a progress bar on the display to show the current progress of dice rolls.
         The progress bar consists of two sections: one indicating the number of rolls
-        made relative to the recommended amount, and the other indicating the min-entropy
+        made relative to the minimum amount, and the other indicating the min-entropy
         of the rolls relative to the minimum required entropy. It changes color
-        to indicate when the recommended criteria have been met.
+        to indicate when the minimum criteria have been met.
         """
         offset_y = DEFAULT_PADDING + 2 * FONT_HEIGHT
         pb_height = FONT_HEIGHT - 4
         if len(self.rolls) > 0:  # Only draws if rolls > 0
-            progress = min(self.recommended_rolls, len(self.rolls))
+            progress = min(self.min_rolls, len(self.rolls))
             progress *= self.ctx.display.usable_width() - 3
-            progress //= self.recommended_rolls
+            progress //= self.min_rolls
             self.ctx.display.fill_rectangle(
                 DEFAULT_PADDING + 2,
                 offset_y + 2,
@@ -240,7 +242,7 @@ class DiceEntropy(Page):
             )
         if (
             min_entropy_bits >= (self.min_entropy - ENTROPY_TOLERANCE)
-            and len(self.rolls) >= self.recommended_rolls
+            and len(self.rolls) >= self.min_rolls
         ):
             outline_color = theme.go_color
         else:
@@ -263,22 +265,20 @@ class DiceEntropy(Page):
 
         if len_mnemonic == 24:
             self.min_entropy = MIN_ENTROPY_24W
-            self.min_rolls = D20_24W_MIN_ROLLS if self.is_d20 else D6_24W_MIN_ROLLS
-            self.recommended_rolls = (
-                D20_24W_RECOMMENDED_ROLLS if self.is_d20 else D6_24W_RECOMMENDED_ROLLS
+            self.legacy_min_rolls = (
+                D20_24W_LEGACY_MIN_ROLLS if self.is_d20 else D6_24W_LEGACY_MIN_ROLLS
             )
+            self.min_rolls = D20_24W_MIN_ROLLS if self.is_d20 else D6_24W_MIN_ROLLS
         else:  # 12 words
             self.min_entropy = MIN_ENTROPY_12W
-            self.min_rolls = D20_12W_MIN_ROLLS if self.is_d20 else D6_12W_MIN_ROLLS
-            self.recommended_rolls = (
-                D20_12W_RECOMMENDED_ROLLS if self.is_d20 else D6_12W_RECOMMENDED_ROLLS
+            self.legacy_min_rolls = (
+                D20_12W_LEGACY_MIN_ROLLS if self.is_d20 else D6_12W_LEGACY_MIN_ROLLS
             )
+            self.min_rolls = D20_12W_MIN_ROLLS if self.is_d20 else D6_12W_MIN_ROLLS
 
         delete_flag = False
         self.ctx.display.draw_hcentered_text(
             t("Roll dice at least %d times to generate a mnemonic.") % (self.min_rolls)
-            + "\n"
-            + t("Recommended: %d rolls") % (self.recommended_rolls)
         )
         if self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
 
@@ -320,7 +320,7 @@ class DiceEntropy(Page):
                         delete_flag = False
                         if len(self.rolls) > 0:
                             self.rolls.pop()
-                    elif len(self.rolls) < self.min_rolls:  # Not enough to Go
+                    elif len(self.rolls) < self.legacy_min_rolls:  # Not enough to Go
                         self.flash_text(t("Not enough rolls!"))
                     else:
                         warning_txt = ""

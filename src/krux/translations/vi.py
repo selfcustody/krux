@@ -255,7 +255,6 @@ translation_array = [
     "Đọc tài liệu trước khi tiếp tục",
     "Khởi động lại",
     "Nhận được",
-    "Khuyến nghị: %d lần",
     "Vùng:",
     "Xóa %s?",
     "Xóa Mnemonic",
