@@ -204,20 +204,24 @@ class SeedQRView(Page):
                 ),
                 zoom=True,
             )
-            for i in range(self.region_size + 1):
+            max_rows = min(self.region_size, self.qr_size - (row * self.region_size))
+            max_columns = min(
+                self.region_size, self.qr_size - (column * self.region_size)
+            )
+            for i in range(max_rows + 1):
                 self.ctx.display.fill_rectangle(
                     zoomed_grid_offset,
                     zoomed_grid_offset + i * zoomed_grid_pad,
-                    self.region_size * zoomed_grid_pad + 1,
+                    max_columns * zoomed_grid_pad + 1,
                     grid_size,
                     theme.highlight_color,
                 )
-            for i in range(self.region_size + 1):
+            for i in range(max_columns + 1):
                 self.ctx.display.fill_rectangle(
                     zoomed_grid_offset + i * zoomed_grid_pad,
                     zoomed_grid_offset,
                     grid_size,
-                    self.region_size * zoomed_grid_pad + 1,
+                    max_rows * zoomed_grid_pad + 1,
                     theme.highlight_color,
                 )
             self._region_legend(row, column)
