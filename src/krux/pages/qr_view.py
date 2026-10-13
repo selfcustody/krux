@@ -238,8 +238,8 @@ class SeedQRView(Page):
                 region=(
                     column * self.region_size,
                     (row) * self.region_size,
-                    self.region_size,
-                    self.region_size,
+                    max_columns,
+                    max_rows,
                 ),
             )
             line_offset = grid_pad * row * self.region_size
