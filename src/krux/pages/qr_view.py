@@ -168,7 +168,7 @@ class SeedQRView(Page):
                 self.ctx.display.fill_rectangle(
                     grid_offset,
                     grid_offset + i * grid_pad + line_offset,
-                    self.qr_size * grid_pad + 1,
+                    self.qr_size * grid_pad + grid_size,
                     grid_size,
                     theme.highlight_color,
                 )
@@ -177,7 +177,7 @@ class SeedQRView(Page):
                     grid_offset + i * grid_pad,
                     grid_offset + line_offset,
                     grid_size,
-                    grid_pad + 1,
+                    grid_pad + grid_size,
                     theme.highlight_color,
                 )
             self.ctx.display.draw_hcentered_text(
@@ -194,25 +194,25 @@ class SeedQRView(Page):
             zoomed_grid_offset //= 2
             row = self.lr_index // self.columns
             column = self.lr_index % self.columns
+            max_rows = min(self.region_size, self.qr_size - (row * self.region_size))
+            max_columns = min(
+                self.region_size, self.qr_size - (column * self.region_size)
+            )
             self.highlight_qr_region(
                 self.code,
                 region=(
                     column * self.region_size,
                     (row) * self.region_size,
-                    self.region_size,
-                    self.region_size,
+                    max_columns,
+                    max_rows,
                 ),
                 zoom=True,
-            )
-            max_rows = min(self.region_size, self.qr_size - (row * self.region_size))
-            max_columns = min(
-                self.region_size, self.qr_size - (column * self.region_size)
             )
             for i in range(max_rows + 1):
                 self.ctx.display.fill_rectangle(
                     zoomed_grid_offset,
                     zoomed_grid_offset + i * zoomed_grid_pad,
-                    max_columns * zoomed_grid_pad + 1,
+                    max_columns * zoomed_grid_pad + grid_size,
                     grid_size,
                     theme.highlight_color,
                 )
@@ -221,13 +221,17 @@ class SeedQRView(Page):
                     zoomed_grid_offset + i * zoomed_grid_pad,
                     zoomed_grid_offset,
                     grid_size,
-                    max_rows * zoomed_grid_pad + 1,
+                    max_rows * zoomed_grid_pad + grid_size,
                     theme.highlight_color,
                 )
             self._region_legend(row, column)
         elif mode == REGION_MODE:
             row = self.lr_index // self.columns
             column = self.lr_index % self.columns
+            max_rows = min(self.region_size, self.qr_size - (row * self.region_size))
+            max_columns = min(
+                self.region_size, self.qr_size - (column * self.region_size)
+            )
             self.ctx.display.draw_qr_code(self.code, light_color=theme.disabled_color)
             self.highlight_qr_region(
                 self.code,
@@ -240,37 +244,24 @@ class SeedQRView(Page):
             )
             line_offset = grid_pad * row * self.region_size
             column_offset = grid_pad * column * self.region_size
-            draw_limit = grid_offset + self.qr_size * grid_pad
-            for i in range(self.region_size + 1):
-                x_position = grid_offset + column_offset
-                x_length = self.region_size * grid_pad + 1
-                transposed = x_position + x_length - draw_limit
-                if transposed > 0:
-                    x_length -= transposed
+            for i in range(max_rows + 1):
                 y_position = grid_offset + i * grid_pad + line_offset
-                if y_position > draw_limit:
-                    break
+                x_position = grid_offset + column_offset
                 self.ctx.display.fill_rectangle(
                     x_position,
                     y_position,
-                    x_length,
+                    max_columns * grid_pad + grid_size,
                     grid_size,
                     theme.highlight_color,
                 )
-            for i in range(self.region_size + 1):
+            for i in range(max_columns + 1):
                 x_position = grid_offset + i * grid_pad + column_offset
-                if x_position > draw_limit:
-                    break
                 y_position = grid_offset + line_offset
-                y_length = self.region_size * grid_pad + 1
-                transposed = y_position + y_length - draw_limit
-                if transposed > 0:
-                    y_length -= transposed
                 self.ctx.display.fill_rectangle(
                     x_position,
                     y_position,
                     grid_size,
-                    y_length,
+                    max_rows * grid_pad + grid_size,
                     theme.highlight_color,
                 )
             self._region_legend(row, column)
@@ -280,7 +271,7 @@ class SeedQRView(Page):
                 self.ctx.display.fill_rectangle(
                     grid_offset,
                     grid_offset + i * grid_pad,
-                    self.qr_size * grid_pad + 1,
+                    self.qr_size * grid_pad + grid_size,
                     grid_size,
                     theme.highlight_color,
                 )
@@ -288,7 +279,7 @@ class SeedQRView(Page):
                     grid_offset + i * grid_pad,
                     grid_offset,
                     grid_size,
-                    self.qr_size * grid_pad + 1,
+                    self.qr_size * grid_pad + grid_size,
                     theme.highlight_color,
                 )
 
