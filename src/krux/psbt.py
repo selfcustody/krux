@@ -589,7 +589,13 @@ class PSBTSigner:
         from embit.psbt import DerivationPath
 
         if self.psbt.xpubs:
-            return self.psbt.xpubs, None
+            # Global xpubs only cover keys with origin. A taptree only descriptor's
+            # origin-less internal key (e.g. NUMS) still comes from the descriptor
+            origin_less_xpub = None
+            descriptor = self.wallet.descriptor
+            if descriptor and descriptor.taptree and not descriptor.key.origin:
+                origin_less_xpub = descriptor.key.key
+            return self.psbt.xpubs, origin_less_xpub
 
         if not self.wallet.descriptor:
             raise ValueError("missing xpubs")
@@ -749,11 +755,15 @@ def get_cosigners_taproot_miniscript(taproot_derivations, xpubs, origin_less_xpu
                         # Append the xpub as a base58 string
                         cosigners.append(xpub.to_base58())
                         break
-
-    if origin_less_xpub:
-        # Pocicies which don't cover internal key spending (e.g. taptree only)
-        # can have an origin-less xpub for internal key derivation
-        cosigners.append(origin_less_xpub.to_base58())
+        else:
+            # Policies which don't cover internal key spending (e.g. taptree only)
+            # can have an origin-less xpub for internal key derivation
+            if (
+                origin_less_xpub
+                and origin_less_xpub.derive(full_path[-2:]).key.xonly()
+                == xonly_pubkey.xonly()
+            ):
+                cosigners.append(origin_less_xpub.to_base58())
 
     # Ensure all pubkeys have a matching xpub
     if len(cosigners) != len(taproot_derivations):

@@ -2105,6 +2105,53 @@ def test_xpubs_rejects_multiple_origin_less_keys(mocker, m5stickv):
         signer.xpubs()
 
 
+def test_tr_miniscript_global_xpubs_with_origin_less_internal_key(m5stickv, tdata):
+    # Coordinators like Nunchuk add PSBT_GLOBAL_XPUB only for keys with origin,
+    # the NUMS internal key must still be resolved from the loaded descriptor
+    from embit.bip32 import HDKey
+    from embit.descriptor import Descriptor
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, DerivationPath
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_MINISCRIPT, P2TR
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(
+        Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"], script_type=P2TR)
+    )
+    wallet.load(TR_EXP_MULTI_MINISCRIPT, FORMAT_NONE)
+    descriptor = Descriptor.from_string(TR_EXP_MULTI_MINISCRIPT)
+
+    psbt = PSBT.parse(tdata.EXP_TR_MINIS_PSBT)
+    for key in descriptor.keys:
+        if key.origin:
+            psbt.xpubs[key.key] = DerivationPath(
+                key.origin.fingerprint, key.origin.derivation
+            )
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    assert signer.policy == wallet.policy
+    signer.sign()
+    assert signer.psbt_qr() == (tdata.SIGNED_EXP_TR_MINIS_PSBT, FORMAT_NONE)
+
+    # Internal key also present in global xpubs must not be counted twice
+    nums = HDKey.from_string(descriptor.key.key.to_base58())
+    psbt.xpubs[nums] = DerivationPath(nums.my_fingerprint, [])
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    assert signer.policy == wallet.policy
+
+    # Internal key derivation that doesn't derive from the descriptor key
+    del psbt.xpubs[nums]
+    internal_key = psbt.inputs[0].taproot_internal_key
+    leafs, der = psbt.inputs[0].taproot_bip32_derivations[internal_key]
+    psbt.inputs[0].taproot_bip32_derivations[internal_key] = (
+        leafs,
+        DerivationPath(der.fingerprint, [0, 5]),
+    )
+    with pytest.raises(ValueError, match="policy mismatch"):
+        PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+
+
 def test_sign_single_1_input_1_output_no_change(m5stickv):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
