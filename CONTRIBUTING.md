@@ -195,10 +195,7 @@ When maintainers and contributors agree that `develop` is stable and has
 enough features, `develop` is merged into `main`. After further testing, a
 maintainer publishes the release.
 
-Releases include pre-built binaries on the GitHub assets page. They are
-OpenSSL signed by [odudex](mailto:odudex@proton.me) and verifiable with
-[`selfcustody.pem`](./selfcustody.pem), and ship as a `zip` accompanied by a
-`zip.sha256.txt` file.
+Releases include reproducible pre-built binaries for all devices shipped as a `.zip` file, with additional attestations on the GitHub assets page. Attestations include manifests and signatures for verifying the integrity of a release.
 
 If bugs are found in a release, fixes may be backported on top of the release
 branch and published as a new minor release.

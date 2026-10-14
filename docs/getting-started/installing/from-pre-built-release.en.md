@@ -5,30 +5,40 @@ This page explains how to download and install Krux firmware from our official, 
 ### Verify the files
 Before installing the release, it's a good idea to check that:
 
-1. The *SHA256 hash* of `{{latest_krux}}.zip` matches the hash in `{{latest_krux}}.zip.sha256.txt`
-2. The *signature file* `{{latest_krux}}.zip.sig` can be verified with the [`selfcustody.pem` public key](https://github.com/selfcustody/krux/blob/main/selfcustody.pem) found in the root of the krux repository.
+1. The *SHA256 hash* of `{{latest_krux}}.zip` matches the hash in `SHA256SUMS`:
+    ```bash
+    sha256sum --check SHA256SUMS
+    ```
 
-You can either do this manually or with the `krux` shell script, which contains helper commands for this:
-```bash
-### Using krux script ###
-# Hash checksum
-./krux sha256 {{latest_krux}}.zip
-# Signature
-./krux verify {{latest_krux}}.zip selfcustody.pem
+    On Mac you may need to install `coreutils` to be able to use `sha256sum`:
+    ```
+    brew install coreutils
+    ```
 
-### Manually ###
-# Hash checksum
-sha256sum {{latest_krux}}.zip.sha256.txt -c
-#Signature
-openssl sha256 <{{latest_krux}}.zip -binary | openssl pkeyutl -verify -pubin -inkey selfcustody.pem -sigfile {{latest_krux}}.zip.sig
-```
+    This check is done to ensure the integrity and completeness of files downloaded.  Seeing "OK" per file entry proves that your downloaded file is an exact copy of the file intended for download, that it is complete, and that it has not been modified along the way.
 
-On Mac you may need to install `coreutils` to be able to use `sha256sum`
-```
-brew install coreutils
-```
+2. The *DER signature file* `SHA256SUMS.sig` can be verified with the [`selfcustody.pem` public key](https://github.com/selfcustody/krux/blob/main/selfcustody.pem) found in the root of the krux repository.
 
-Fun fact: Each new Krux release is signed with Krux!
+    You can either do this manually or with the `krux` shell script, which contains helper commands for this:
+    ```bash
+    ### Using krux script ###
+    ./krux verify SHA256SUMS selfcustody.pem
+
+    ### Manually using openssl ###
+    openssl sha256 <SHA256SUMS -binary | openssl pkeyutl -verify -pubin -inkey selfcustody.pem -sigfile SHA256SUMS.sig
+    ```
+    *expect "Signature Verified Successfully" for the *selfcustody* firmware signing key.*
+
+    Alternatively, the *GPG signature file* `SHA256SUMS.asc` can be verified for Krux contributors -- if they have also signed a pre-built release:
+    ```bash
+    gpg --verify SHA256SUMS.asc SHA256SUMS
+    ```
+    *expect "GOOD SIGNATURE" from the maintainer -- and/or other contributors that you trust.*
+
+    These checks are done to ensure that the repository maintainer -- or other contributors, have provably attested to the exact SHA256SUMS file checked above, and that it truly represents the binary release files.  Without this check, we have no idea who has authored or signed-off on the release.
+
+    Fun fact: Each new Krux release is signed with Krux!
+
 
 ### Flash the firmware onto the device
 Extract the latest version of Krux you downloaded and enter the folder:
