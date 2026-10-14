@@ -15,6 +15,8 @@ Before installing the release, it's a good idea to check that:
     brew install coreutils
     ```
 
+    This check is done to ensure the integrity and completeness of files downloaded.  Seeing "OK" per file entry proves that your downloaded file is an exact copy of the file intended for download, that it is complete, and that it has not been modified along the way.
+
 2. The *DER signature file* `SHA256SUMS.sig` can be verified with the [`selfcustody.pem` public key](https://github.com/selfcustody/krux/blob/main/selfcustody.pem) found in the root of the krux repository.
 
     You can either do this manually or with the `krux` shell script, which contains helper commands for this:
@@ -25,11 +27,15 @@ Before installing the release, it's a good idea to check that:
     ### Manually using openssl ###
     openssl sha256 <SHA256SUMS -binary | openssl pkeyutl -verify -pubin -inkey selfcustody.pem -sigfile SHA256SUMS.sig
     ```
+    *expect "Signature Verified Successfully" for the *selfcustody* firmware signing key.*
 
     Alternatively, the *GPG signature file* `SHA256SUMS.asc` can be verified for Krux contributors -- if they have also signed a pre-built release:
     ```bash
     gpg --verify SHA256SUMS.asc SHA256SUMS
     ```
+    *expect "GOOD SIGNATURE" from the maintainer -- and/or other contributors that you trust.*
+
+    These checks are done to ensure that the repository maintainer -- or other contributors, have provably attested to the exact SHA256SUMS file checked above, and that it truly represents the binary release files.  Without this check, we have no idea who has authored or signed-off on the release.
 
     Fun fact: Each new Krux release is signed with Krux!
 
