@@ -163,6 +163,9 @@ Set the time it takes for Krux to automatically shut down. This feature not only
 
 Chose if you would like to run [Tamper Check Flash Hash](features/tamper-detection.md) every time the device is powered on.
 
+A [Tamper Check Code](#tamper-check-code) must be set first. Otherwise, Krux
+shows a warning and keeps this option disabled.
+
 Activating *TC Flash Hash* at boot helps prevent unauthorized use by requiring the *TC Code*. But is important to note, unlike a PIN, the *TC Code* does not provide access control over USB. This means that the device's memory remains accessible via USB, allowing it to be flashed with firmware that does not require the *TC Code*.
 
 <div style="clear: both"></div>
