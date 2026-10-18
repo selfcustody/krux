@@ -452,6 +452,11 @@ class SettingsPage(Page):
                 )
                 if btn != BUTTON_PAGE_PREV:
                     self.ctx.power_manager.reboot()
+        elif setting.attr == "boot_flash_hash":
+            # Without a TC Code there is nothing to verify at boot
+            if new_category and not self.ctx.tc_code_enabled:
+                self.flash_error(t("Set a tamper check code first"))
+                Settings().security.boot_flash_hash = False
 
     def _category_change_exit_check(
         self, settings_namespace, setting, starting_category
