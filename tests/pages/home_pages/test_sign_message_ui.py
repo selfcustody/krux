@@ -1,6 +1,6 @@
-from ...shared_mocks import MockPrinter, get_mock_open
-from .. import create_ctx, assert_not_flashed
-from .test_home import tdata
+from tests.shared_mocks import MockPrinter, get_mock_open
+from tests.pages import create_ctx, assert_not_flashed
+from tests.pages.home_pages.test_home import tdata
 
 
 def test_sign_message(mocker, m5stickv, tdata):

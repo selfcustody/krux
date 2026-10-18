@@ -20,21 +20,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .. import (
+from krux.pages import (
     Page,
     Menu,
     MENU_EXIT,
     ESC_KEY,
 )
-from ...themes import theme
-from ...krux_settings import t
-from ...display import (
+from krux.themes import theme
+from krux.krux_settings import t
+from krux.display import (
     DEFAULT_PADDING,
     FONT_HEIGHT,
     TOTAL_LINES,
     BOTTOM_PROMPT_LINE,
 )
-from ...kboard import kboard
+from krux.kboard import kboard
 
 D6_STATES = [str(i + 1) for i in range(6)]
 D20_STATES = [str(i + 1) for i in range(20)]
@@ -226,7 +226,7 @@ class DiceEntropy(Page):
 
     def new_key(self):
         """Create a new key from dice rolls"""
-        from ...settings import ELLIPSIS
+        from krux.settings import ELLIPSIS
 
         len_mnemonic = self.choose_len_mnemonic()
         if not len_mnemonic:
@@ -332,19 +332,17 @@ class DiceEntropy(Page):
             if index == 0:
                 self.stats_for_nerds()
 
-            import hashlib
             import binascii
+            from krux.hashes import sha256
 
             entropy_bytes = entropy.encode()
-            entropy_hash = binascii.hexlify(
-                hashlib.sha256(entropy_bytes).digest()
-            ).decode()
+            entropy_hash = binascii.hexlify(sha256(entropy_bytes).digest()).decode()
             self.ctx.display.clear()
             self.ctx.display.draw_centered_text(
                 t("SHA256 of rolls:") + "\n\n%s" % entropy_hash, highlight_prefix=":"
             )
             self.ctx.input.wait_for_button()
             num_bytes = 32 if len_mnemonic == 24 else 16
-            return hashlib.sha256(entropy_bytes).digest()[:num_bytes]
+            return sha256(entropy_bytes).digest()[:num_bytes]
 
         return None

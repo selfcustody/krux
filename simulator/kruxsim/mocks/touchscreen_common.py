@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import pygame as pg
-from . import lcd
+from kruxsim.mocks import lcd
 
 sequence_executor = None
 

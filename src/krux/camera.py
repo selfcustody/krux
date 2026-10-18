@@ -23,8 +23,8 @@
 
 import gc
 import sensor
-from .krux_settings import Settings
-from .kboard import kboard
+from krux.krux_settings import Settings
+from krux.kboard import kboard
 
 OV2640_ID = 0x2642  # Lenses, vertical flip - Embed Fire
 OV7740_ID = 0x7742  # No lenses, no Flip - M5sitckV, Amigo
@@ -85,7 +85,7 @@ class Camera:
             # Camera power-on inrush may brownout-reset the LCD controller,
             # leaving a black screen while firmware keeps running.
             # Re-initialize the LCD and redraw the splash to recover.
-            from .display import display, SPLASH
+            from krux.display import display, SPLASH
 
             display.initialize_lcd()
             display.clear()

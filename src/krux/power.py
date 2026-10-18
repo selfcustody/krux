@@ -21,8 +21,8 @@
 # THE SOFTWARE.
 import machine
 import sys
-from .i2c import i2c_bus
-from .kboard import kboard
+from krux.i2c import i2c_bus
+from krux.kboard import kboard
 
 # https://github.com/m5stack/M5StickC/blob/0527606d9e56c956ab17b278c25e3d07d7664f5e/src/AXP192.cpp#L20
 MAX_BATTERY_MV = 4200

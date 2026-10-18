@@ -26,8 +26,8 @@
 
 from Maix import GPIO
 from fpioa_manager import fm
-from . import Touchscreen
-from ..i2c import i2c_bus
+from krux.touchscreens import Touchscreen
+from krux.i2c import i2c_bus
 
 FT_DEVICE_MODE = 0x00
 # GEST_ID = 0x01

@@ -22,12 +22,12 @@
 import gc
 from embit.psbt import PSBT, CompressMode
 from uUR import UR, Types
-from .baseconv import base_decode
-from .krux_settings import t
-from .settings import THIN_SPACE, ELLIPSIS
-from .qr import FORMAT_PMOFN, FORMAT_BBQR
-from .key import Key, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
-from .sats_vb import SatsVB
+from krux.baseconv import base_decode
+from krux.krux_settings import t
+from krux.settings import THIN_SPACE, ELLIPSIS
+from krux.qr import FORMAT_PMOFN, FORMAT_BBQR
+from krux.key import Key, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
+from krux.sats_vb import SatsVB
 
 # PSBT Output Types:
 CHANGE = 0
@@ -62,7 +62,7 @@ class PSBTSigner:
         # Parse the PSBT
         if psbt_filename:
             gc.collect()
-            from .settings import SD_PATH
+            from krux.settings import SD_PATH
 
             file_path = "/%s/%s" % (SD_PATH, psbt_filename)
             try:
@@ -299,12 +299,12 @@ class PSBTSigner:
         return SPEND
 
     def _btc_render(self, amount, prefix=" "):
-        from .format import format_btc
+        from krux.format import format_btc
 
         return prefix + BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(amount)
 
     def _get_resume_fee(self, inp_amount, out_amount, output_policy_count):
-        from .format import replace_decimal_separator
+        from krux.format import replace_decimal_separator
 
         fee = inp_amount - out_amount
 
@@ -336,7 +336,7 @@ class PSBTSigner:
         return resume_fee_str, fee_percent
 
     def _sequence_render(self, title, elements):
-        from .format import format_address
+        from krux.format import format_address
 
         message_seq = []
         for i, out in enumerate(elements):
@@ -565,13 +565,13 @@ class PSBTSigner:
         gc.collect()
 
         if self.qr_format == FORMAT_BBQR:
-            from .bbqr import encode_bbqr
+            from krux.bbqr import encode_bbqr
 
             psbt_data = encode_bbqr(psbt_data, file_type="P")
             return psbt_data, self.qr_format
 
         if self.base_encoding is not None:
-            from .baseconv import base_encode
+            from krux.baseconv import base_encode
 
             psbt_data = base_encode(psbt_data, self.base_encoding)
 
