@@ -147,6 +147,9 @@ class PSBTSigner:
 
     def validate(self):
         """Validates the PSBT"""
+        # Embit parses a PSBT without inputs, but there is nothing to sign in it
+        if not self.psbt.inputs:
+            raise ValueError("no inputs")
         # Any non_witness_utxo present must really hash to the prevout txid.
         self.psbt.verify(ignore_missing=True)
         # From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L110

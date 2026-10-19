@@ -197,6 +197,26 @@ def test_accepts_zero_fee(m5stickv):
     assert isinstance(signer, PSBTSigner)
 
 
+@pytest.mark.parametrize("version", [None, 2])
+@pytest.mark.parametrize("output_values", [[], [1000]])
+def test_rejects_psbt_without_inputs(m5stickv, version, output_values):
+    """Embit parses a PSBT with no inputs, but there is nothing to sign in it"""
+    from embit import script
+    from embit.psbt import PSBT
+    from embit.transaction import Transaction, TransactionOutput
+    from krux.psbt import PSBTSigner
+    from krux.qr import FORMAT_NONE
+
+    tx = Transaction(
+        vin=[],
+        vout=[
+            TransactionOutput(value, script.Script(b"\x6a")) for value in output_values
+        ],
+    )
+    with pytest.raises(ValueError, match="Invalid PSBT: no inputs"):
+        PSBTSigner(_wallet(), PSBT(tx, version=version).serialize(), FORMAT_NONE)
+
+
 def _psbt_with_contradicting_amounts(root, real_value, declared_value):
     """Builds a PSBT whose witness_utxo lies about the previous tx output"""
     from embit import script
