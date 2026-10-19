@@ -11,13 +11,6 @@ from .shared_mocks import MockFile, mock_open
 TEST_MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 
 
-def _kv(key, value):
-    """Serializes a PSBT key/value pair"""
-    from embit import compact
-
-    return compact.to_bytes(len(key)) + key + compact.to_bytes(len(value)) + value
-
-
 def _root():
     from embit import bip32, bip39
     from embit.networks import NETWORKS
@@ -42,6 +35,25 @@ def _wallet():
     from krux.wallet import Wallet
 
     return Wallet(Key(TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+
+
+def _force_compressed_fallback(mocker):
+    """Makes the uncompressed SD card parse run out of memory.
+
+    That is what the CompressMode.CLEAR_ALL fallback exists for on device, so
+    the PSBT under test can reach compressed mode without being malformed.
+    """
+    import krux.psbt
+    from embit.psbt import CompressMode
+
+    read_from = krux.psbt.PSBT.read_from
+
+    def low_memory_read_from(stream, compress=CompressMode.KEEP_ALL):
+        if compress == CompressMode.KEEP_ALL:
+            raise MemoryError
+        return read_from(stream, compress=compress)
+
+    mocker.patch("krux.psbt.PSBT.read_from", side_effect=low_memory_read_from)
 
 
 def test_rejects_fabricated_non_witness_utxo(m5stickv):
@@ -89,6 +101,7 @@ def test_rejects_fabricated_non_witness_utxo(m5stickv):
 def test_rejects_fabricated_non_witness_utxo_from_sdcard(mocker, m5stickv):
     """The SD card fallback into compressed mode must not bypass the check"""
     from embit import script
+    from embit.psbt import PSBT
     from embit.transaction import Transaction, TransactionInput, TransactionOutput
     from krux.psbt import PSBTSigner
     from krux.qr import FORMAT_NONE
@@ -105,17 +118,12 @@ def test_rejects_fabricated_non_witness_utxo_from_sdcard(mocker, m5stickv):
         vin=[TransactionInput(b"\x66" * 32, 0)],
         vout=[TransactionOutput(20000, script_pubkey)],
     )
-    partial_sig = _kv(b"\x02" + pubkey.sec(), b"\x30" * 71)
-    input_map = (
-        _kv(b"\x00", fake_prev.serialize())
-        + _kv(b"\x06" + pubkey.sec(), derivation.serialize())
-        + partial_sig
-        + partial_sig
-        + b"\x00"
-    )
-    raw = b"psbt\xff" + _kv(b"\x00", tx.serialize()) + b"\x00" + input_map + b"\x00"
+    psbt = PSBT(tx)
+    psbt.inputs[0].non_witness_utxo = fake_prev
+    psbt.inputs[0].bip32_derivations[pubkey] = derivation
 
-    mocker.patch("builtins.open", mock_open(MockFile(raw)))
+    mocker.patch("builtins.open", mock_open(MockFile(psbt.serialize())))
+    _force_compressed_fallback(mocker)
     with pytest.raises(ValueError, match="Previous txid"):
         PSBTSigner(_wallet(), None, FORMAT_NONE, "dummy.psbt")
 
@@ -189,15 +197,10 @@ def test_accepts_zero_fee(m5stickv):
     assert isinstance(signer, PSBTSigner)
 
 
-def _compressed_psbt_with_contradicting_amounts(root, real_value, declared_value):
-    """Builds a PSBT that forces the compressed parse and lies in witness_utxo.
-
-    A duplicated PSBT_IN_PARTIAL_SIG key makes the uncompressed parse raise,
-    so PSBTSigner falls back to CompressMode.CLEAR_ALL. That mode streams the
-    previous transaction into _utxo, which is what the signer reads, while
-    witness_utxo carries the attacker's value.
-    """
+def _psbt_with_contradicting_amounts(root, real_value, declared_value):
+    """Builds a PSBT whose witness_utxo lies about the previous tx output"""
     from embit import script
+    from embit.psbt import PSBT
     from embit.transaction import Transaction, TransactionInput, TransactionOutput
 
     pubkey, derivation = _key_at(root, "m/84h/1h/0h/0/0")
@@ -215,18 +218,11 @@ def _compressed_psbt_with_contradicting_amounts(root, real_value, declared_value
             )
         ],
     )
-    lying_utxo = TransactionOutput(declared_value, script_pubkey)
-    partial_sig = _kv(b"\x02" + pubkey.sec(), b"\x30" * 71)
-    input_map = (
-        _kv(b"\x00", prev_tx.serialize())
-        + _kv(b"\x01", lying_utxo.serialize())
-        + _kv(b"\x06" + pubkey.sec(), derivation.serialize())
-        + partial_sig
-        + partial_sig
-        + b"\x00"
-    )
-    raw = b"psbt\xff" + _kv(b"\x00", tx.serialize()) + b"\x00" + input_map + b"\x00"
-    return raw, tx, pubkey, script_pubkey
+    psbt = PSBT(tx)
+    psbt.inputs[0].non_witness_utxo = prev_tx
+    psbt.inputs[0].witness_utxo = TransactionOutput(declared_value, script_pubkey)
+    psbt.inputs[0].bip32_derivations[pubkey] = derivation
+    return psbt.serialize()
 
 
 def _two_input_psbt(root, taproot=False, with_prev_txs=False):
@@ -312,48 +308,33 @@ def test_no_warning_for_single_input(m5stickv):
     assert signer.unverified_input_amounts() is False
 
 
-def test_displayed_amount_is_the_signed_amount(mocker, m5stickv):
-    """Display and sighash must read the same UTXO, even in compressed mode"""
-    from embit import ec, script
-    from embit.transaction import SIGHASH
-    from krux.format import format_btc
+@pytest.mark.parametrize("from_sdcard", [False, True])
+def test_rejects_witness_utxo_contradicting_previous_tx(mocker, m5stickv, from_sdcard):
+    """A witness_utxo that contradicts the previous tx must be refused.
+
+    The full parse reads the amount from witness_utxo and compressed mode from
+    the previous tx, so accepting both would make the displayed and signed
+    amount depend on how the PSBT was loaded.
+    """
     from krux.psbt import PSBTSigner
     from krux.qr import FORMAT_NONE
 
-    root = _root()
-    real_value = 1000000000
-    raw, tx, pubkey, script_pubkey = _compressed_psbt_with_contradicting_amounts(
-        root, real_value, 101000
-    )
+    raw = _psbt_with_contradicting_amounts(_root(), 1000000000, 101000)
+    if from_sdcard:
+        mocker.patch("builtins.open", mock_open(MockFile(raw)))
+        _force_compressed_fallback(mocker)
+        args = (None, FORMAT_NONE, "dummy.psbt")
+    else:
+        args = (raw, FORMAT_NONE)
 
-    mocker.patch("builtins.open", mock_open(MockFile(raw)))
-    signer = PSBTSigner(_wallet(), None, FORMAT_NONE, "dummy.psbt")
-
-    tx_input = signer.psbt.inputs[0]
-    # The lie is still in the PSBT, it just is not what gets displayed
-    assert tx_input.witness_utxo.value == 101000
-    assert tx_input.utxo.value == real_value
-
-    messages, fee_percent = signer.outputs()
-    assert format_btc(real_value) in messages[0]
-    # 9.999 BTC of a 0.001 BTC spend, the high fee warning must fire
-    assert fee_percent >= 10.0
-
-    signer.sign(trim=False)
-    signature = list(signer.psbt.inputs[0].partial_sigs.values())[0]
-    parsed = ec.Signature.parse(signature[:-1])
-    signed_over = tx.sighash_segwit(
-        0,
-        script.p2pkh_from_p2wpkh(script_pubkey),
-        real_value,
-        sighash=SIGHASH.ALL,
-    )
-    assert pubkey.verify(parsed, signed_over)
+    with pytest.raises(ValueError, match="Witness utxo doesn't match"):
+        PSBTSigner(_wallet(), *args)
 
 
 def test_compressed_parse_keeps_legacy_psbt_usable(mocker, m5stickv):
     """Compressed mode stores the previous output in _utxo, not non_witness_utxo"""
     from embit import script
+    from embit.psbt import PSBT
     from embit.transaction import Transaction, TransactionInput, TransactionOutput
     from krux.format import format_btc
     from krux.psbt import PSBTSigner
@@ -371,17 +352,12 @@ def test_compressed_parse_keeps_legacy_psbt_usable(mocker, m5stickv):
         vin=[TransactionInput(prev_tx.txid(), 0)],
         vout=[TransactionOutput(20000, script_pubkey)],
     )
-    partial_sig = _kv(b"\x02" + pubkey.sec(), b"\x30" * 71)
-    input_map = (
-        _kv(b"\x00", prev_tx.serialize())
-        + _kv(b"\x06" + pubkey.sec(), derivation.serialize())
-        + partial_sig
-        + partial_sig
-        + b"\x00"
-    )
-    raw = b"psbt\xff" + _kv(b"\x00", tx.serialize()) + b"\x00" + input_map + b"\x00"
+    psbt = PSBT(tx)
+    psbt.inputs[0].non_witness_utxo = prev_tx
+    psbt.inputs[0].bip32_derivations[pubkey] = derivation
 
-    mocker.patch("builtins.open", mock_open(MockFile(raw)))
+    mocker.patch("builtins.open", mock_open(MockFile(psbt.serialize())))
+    _force_compressed_fallback(mocker)
     signer = PSBTSigner(_wallet(), None, FORMAT_NONE, "dummy.psbt")
 
     assert signer.psbt.inputs[0].non_witness_utxo is None
