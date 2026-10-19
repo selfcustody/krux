@@ -2306,3 +2306,49 @@ def test_fee_percent_zero_out_amount(mocker, m5stickv, tdata):
     resume_fee_str, fee_percent = signer._get_resume_fee(1000, 0, {})
     assert fee_percent == 100.0
     assert "100.0%" in resume_fee_str
+
+
+def test_sign_trim_keeps_psbt_v2(m5stickv):
+    """A PSBTv2 must come back as a PSBTv2 that still derives the signed locktime"""
+    from embit import bip32, bip39, ec, script
+    from embit.bip32 import parse_path
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, DerivationPath
+    from embit.transaction import Transaction, TransactionInput, TransactionOutput
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.psbt import PSBTSigner
+    from krux.qr import FORMAT_NONE
+    from krux.wallet import Wallet
+
+    mnemonic = "abandon " * 11 + "about"
+    root = bip32.HDKey.from_seed(
+        bip39.mnemonic_to_seed(mnemonic), version=NETWORKS["test"]["xprv"]
+    )
+    derivation = parse_path("m/84h/1h/0h/0/0")
+    pubkey = root.derive(derivation).to_public().key
+    tx = Transaction(
+        vin=[TransactionInput(b"\x99" * 32, 0)],
+        vout=[TransactionOutput(90000, script.p2wpkh(pubkey))],
+    )
+    psbt = PSBT(tx, version=2)
+    psbt.locktime = 100
+    psbt.tx_modifiable_flags = 0b11
+    psbt.inputs[0].required_height_locktime = 800000
+    psbt.inputs[0].witness_utxo = TransactionOutput(100000, script.p2wpkh(pubkey))
+    psbt.inputs[0].bip32_derivations[pubkey] = DerivationPath(
+        root.my_fingerprint, derivation
+    )
+
+    wallet = Wallet(Key(mnemonic, TYPE_SINGLESIG, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    signer.sign()
+    trimmed = PSBT.parse(signer.psbt.serialize())
+
+    assert trimmed.version == 2
+    assert trimmed.locktime == 100
+    assert trimmed.inputs[0].required_height_locktime == 800000
+    assert trimmed.tx.locktime == 800000
+    # SIGHASH_ALL commits to every input and output
+    assert trimmed.tx_modifiable_flags == 0
+    signature = list(trimmed.inputs[0].partial_sigs.values())[0]
+    assert pubkey.verify(ec.Signature.parse(signature[:-1]), trimmed.sighash(0))
