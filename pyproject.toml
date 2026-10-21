@@ -72,6 +72,8 @@ dev = [
 # krux is firmware, not a distributable Python package
 [tool.uv]
 package = false
+required-version = ">=0.13.4"
+constraint-dependencies = ["certifi>=2026.10.19"]
 
 [tool.uv.sources]
 embit = { path = "vendor/embit", editable = true }
