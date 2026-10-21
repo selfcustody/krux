@@ -68,7 +68,7 @@ To build and flash the firmware:
 The first time, the build can take around an hour or so to complete. Subsequent builds should take only a few minutes. If all goes well, you should see a new `build` folder containing `firmware.bin` and `kboot.kfpkg` files when the build completes.
 
 ## Install Krux and dev tools
-Krux uses [uv](https://docs.astral.sh/uv/) for Python packaging and environment management. Install uv by following its [installation guide](https://docs.astral.sh/uv/getting-started/installation/), then sync the project to install runtime deps ([embit](https://github.com/diybitcoinhardware/embit) and [uUR](https://github.com/selfcustody/cUR), the native UR module compiled from the same sources the devices run) along with the `dev` group ([pytest](https://docs.pytest.org), [pylint](https://pypi.org/project/pylint/), [black](https://github.com/psf/black) and i18n helpers):
+Krux uses [uv](https://docs.astral.sh/uv/) 0.13.4 or newer for Python packaging and environment management. Install uv by following its [installation guide](https://docs.astral.sh/uv/getting-started/installation/), then sync the project to install runtime deps ([embit](https://github.com/diybitcoinhardware/embit) and [uUR](https://github.com/selfcustody/cUR), the native UR module compiled from the same sources the devices run) along with the `dev` group ([pytest](https://docs.pytest.org), [pylint](https://pypi.org/project/pylint/), [black](https://github.com/psf/black) and i18n helpers):
 ```bash
 uv sync --frozen
 ```

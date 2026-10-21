@@ -28,6 +28,9 @@
 ############
 FROM gcc:12-bookworm@sha256:112aacdc53e949b9d2ccefb9ed64930a7fda5e10e007430f244be27e0263220b AS build-base
 
+ARG PIP_VERSION="26.2.2"
+ARG PIP_SHA256="fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70"
+
 RUN apt-get update -y && \
     apt-get install --no-install-recommends -y -q \
         wget \
@@ -54,6 +57,7 @@ RUN apt-get update -y && \
         zlib1g-dev \
         libexpat-dev \
         libisl-dev \
+        ca-certificates \
         python3 \
         python3-pip \
         python3-setuptools
@@ -82,6 +86,11 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.21.0/cmake-3.21.0
 
 RUN apt-get update && apt-get install python3-venv -y
 RUN python3 -m venv /kruxenv
+RUN wget -O /tmp/pip.whl \
+        "https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-${PIP_VERSION}-py3-none-any.whl" && \
+    echo "${PIP_SHA256}  /tmp/pip.whl" | sha256sum -c && \
+    /kruxenv/bin/python -m pip install --no-index /tmp/pip.whl && \
+    rm /tmp/pip.whl
 RUN /kruxenv/bin/pip install astor
 RUN /kruxenv/bin/pip install pyserial==3.4
 
