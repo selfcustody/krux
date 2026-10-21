@@ -15,13 +15,14 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v9.0.0
         with:
+          version: ">=0.13.4"
           enable-cache: true
       - name: Set up Python
-        run: uv python install 3.12
+        run: uv python install 3.12.13
       - name: Install docs dependencies
-        run: uv sync --frozen --python 3.12 --extra docs
+        run: uv sync --frozen --python 3.12.13 --extra docs
       - name: Build docs
-        run: uv run --python 3.12 mkdocs build
+        run: uv run --python 3.12.13 mkdocs build
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
