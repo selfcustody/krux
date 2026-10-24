@@ -6,12 +6,15 @@ on:
       - main
       - develop
       - 'release-**'
+  pull_request:
+    paths:
+      - Dockerfile
 
 jobs:
   build:
     strategy:
       matrix:
-        device: [maixpy_m5stickv, maixpy_amigo, maixpy_dock, maixpy_yahboom, maixpy_cube, maixpy_wonder_mv, maixpy_tzt, maixpy_embed_fire, maixpy_wonder_k]
+        device: ${{ fromJSON(github.event_name == 'pull_request' && '["maixpy_m5stickv"]' || '["maixpy_m5stickv","maixpy_amigo","maixpy_dock","maixpy_yahboom","maixpy_cube","maixpy_wonder_mv","maixpy_tzt","maixpy_embed_fire","maixpy_wonder_k"]') }}
     runs-on: ubuntu-latest
     services:
       registry:
@@ -26,15 +29,15 @@ jobs:
           sudo rm -rf "/usr/local/share/boost"
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           submodules: recursive
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
         with:
           driver-opts: network=host
       - name: Cache Docker layers
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -43,7 +46,7 @@ jobs:
 
       - name: Build for M5StickV
         if: matrix.device == 'maixpy_m5stickv'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
           build-args: DEVICE=maixpy_m5stickv
@@ -54,20 +57,20 @@ jobs:
       - name: Extract firmware for M5StickV
         id: extract-m5stickv
         if: matrix.device == 'maixpy_m5stickv'
-        uses: shrink/actions-docker-extract@v4
+        uses: shrink/actions-docker-extract@f1ef61065b78731fe3310b4e84e511f6a927a77e # v4
         with:
           image: localhost:5000/selfcustody/krux-builder-m5stickv:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for M5StickV
         if: matrix.device == 'maixpy_m5stickv'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           path: ${{ steps.extract-m5stickv.outputs.destination }}
           name: build-m5stickv
 
       - name: Build for Amigo
         if: matrix.device == 'maixpy_amigo'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
           build-args: DEVICE=maixpy_amigo
@@ -78,20 +81,20 @@ jobs:
       - name: Extract firmware for Amigo
         id: extract-amigo
         if: matrix.device == 'maixpy_amigo'
-        uses: shrink/actions-docker-extract@v4
+        uses: shrink/actions-docker-extract@f1ef61065b78731fe3310b4e84e511f6a927a77e # v4
         with:
           image: localhost:5000/selfcustody/krux-builder-amigo:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for Amigo
         if: matrix.device == 'maixpy_amigo'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           path: ${{ steps.extract-amigo.outputs.destination }}
           name: build-amigo
 
       - name: Build for Dock
         if: matrix.device == 'maixpy_dock'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
           build-args: DEVICE=maixpy_dock
@@ -102,20 +105,20 @@ jobs:
       - name: Extract firmware for Dock
         id: extract-dock
         if: matrix.device == 'maixpy_dock'
-        uses: shrink/actions-docker-extract@v4
+        uses: shrink/actions-docker-extract@f1ef61065b78731fe3310b4e84e511f6a927a77e # v4
         with:
           image: localhost:5000/selfcustody/krux-builder-dock:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for Dock
         if: matrix.device == 'maixpy_dock'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           path: ${{ steps.extract-dock.outputs.destination }}
           name: build-dock
 
       - name: Build for Yahboom
         if: matrix.device == 'maixpy_yahboom'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
           build-args: DEVICE=maixpy_yahboom
@@ -126,20 +129,20 @@ jobs:
       - name: Extract firmware for Yahboom
         id: extract-yahboom
         if: matrix.device == 'maixpy_yahboom'
-        uses: shrink/actions-docker-extract@v4
+        uses: shrink/actions-docker-extract@f1ef61065b78731fe3310b4e84e511f6a927a77e # v4
         with:
           image: localhost:5000/selfcustody/krux-builder-yahboom:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for Yahboom
         if: matrix.device == 'maixpy_yahboom'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           path: ${{ steps.extract-yahboom.outputs.destination }}
           name: build-yahboom
 
       - name: Build for Cube
         if: matrix.device == 'maixpy_cube'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
           build-args: DEVICE=maixpy_cube
@@ -150,20 +153,20 @@ jobs:
       - name: Extract firmware for Cube
         id: extract-cube
         if: matrix.device == 'maixpy_cube'
-        uses: shrink/actions-docker-extract@v4
+        uses: shrink/actions-docker-extract@f1ef61065b78731fe3310b4e84e511f6a927a77e # v4
         with:
           image: localhost:5000/selfcustody/krux-builder-cube:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for Cube
         if: matrix.device == 'maixpy_cube'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           path: ${{ steps.extract-cube.outputs.destination }}
           name: build-cube
 
       - name: Build for WonderMV
         if: matrix.device == 'maixpy_wonder_mv'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
           build-args: DEVICE=maixpy_wonder_mv
@@ -174,20 +177,20 @@ jobs:
       - name: Extract firmware for WonderMV
         id: extract-wonder-mv
         if: matrix.device == 'maixpy_wonder_mv'
-        uses: shrink/actions-docker-extract@v4
+        uses: shrink/actions-docker-extract@f1ef61065b78731fe3310b4e84e511f6a927a77e # v4
         with:
           image: localhost:5000/selfcustody/krux-builder-wonder-mv:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for WonderMV
         if: matrix.device == 'maixpy_wonder_mv'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           path: ${{ steps.extract-wonder-mv.outputs.destination }}
           name: build-wonder-mv
 
       - name: Build for TZT
         if: matrix.device == 'maixpy_tzt'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
           build-args: DEVICE=maixpy_tzt
@@ -198,20 +201,20 @@ jobs:
       - name: Extract firmware for TZT
         id: extract-tzt
         if: matrix.device == 'maixpy_tzt'
-        uses: shrink/actions-docker-extract@v4
+        uses: shrink/actions-docker-extract@f1ef61065b78731fe3310b4e84e511f6a927a77e # v4
         with:
           image: localhost:5000/selfcustody/krux-builder-tzt:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for TZT
         if: matrix.device == 'maixpy_tzt'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           path: ${{ steps.extract-tzt.outputs.destination }}
           name: build-tzt
 
       - name: Build for Embed Fire
         if: matrix.device == 'maixpy_embed_fire'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
           build-args: DEVICE=maixpy_embed_fire
@@ -222,20 +225,20 @@ jobs:
       - name: Extract firmware for Embed Fire
         id: extract-embed-fire
         if: matrix.device == 'maixpy_embed_fire'
-        uses: shrink/actions-docker-extract@v4
+        uses: shrink/actions-docker-extract@f1ef61065b78731fe3310b4e84e511f6a927a77e # v4
         with:
           image: localhost:5000/selfcustody/krux-builder-embed-fire:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for Embed Fire
         if: matrix.device == 'maixpy_embed_fire'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           path: ${{ steps.extract-embed-fire.outputs.destination }}
           name: build-embed-fire
 
       - name: Build for WonderK
         if: matrix.device == 'maixpy_wonder_k'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
           build-args: DEVICE=maixpy_wonder_k
@@ -246,13 +249,13 @@ jobs:
       - name: Extract firmware for WonderK
         id: extract-wonder-k
         if: matrix.device == 'maixpy_wonder_k'
-        uses: shrink/actions-docker-extract@v4
+        uses: shrink/actions-docker-extract@f1ef61065b78731fe3310b4e84e511f6a927a77e # v4
         with:
           image: localhost:5000/selfcustody/krux-builder-wonder-k:latest
           path: /src/firmware/Kboot/build/.
       - name: Upload firmware for WonderK
         if: matrix.device == 'maixpy_wonder_k'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           path: ${{ steps.extract-wonder-k.outputs.destination }}
           name: build-wonder-k

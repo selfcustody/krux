@@ -9,22 +9,22 @@ jobs:
   build-gh-pages:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           submodules: recursive
       - name: Install uv
-        uses: astral-sh/setup-uv@v9.0.0
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          version: ">=0.13.4"
+          version: ">=0.13.6"
           enable-cache: true
       - name: Set up Python
-        run: uv python install 3.12.13
+        run: uv python install 3.12.15
       - name: Install docs dependencies
-        run: uv sync --frozen --python 3.12.13 --extra docs
+        run: uv sync --frozen --python 3.12.15 --extra docs
       - name: Build docs
-        run: uv run --python 3.12.13 mkdocs build
+        run: uv run --python 3.12.15 mkdocs build
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
