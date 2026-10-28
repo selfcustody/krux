@@ -975,3 +975,29 @@ def test_wallet_load_camera_back_is_silent(mocker, m5stickv, tdata):
 
     # "Back" is not a failure - it must not flash an error
     assert_not_flashed(ctx, "Failed to load")
+
+
+def test_wallet_descriptor_sp_is_not_a_dead_end(mocker, m5stickv, tdata):
+    """SP wallets must not be offered a descriptor load they cannot complete.
+
+    Regression: is_loaded() is False for SP wallets, so this screen used to ask
+    "Wallet output descriptor not found. Load?" and then fail the scan with
+    ValueError('SP wallets do not load external descriptors').
+    """
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.pages import MENU_CONTINUE
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+
+    wallet = Wallet(tdata.SILENT_PAYMENT_KEY)
+    assert not wallet.is_loaded()
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER], wallet)
+    load_wallet = mocker.patch.object(WalletDescriptor, "_load_wallet")
+
+    assert WalletDescriptor(ctx).wallet() == MENU_CONTINUE
+    load_wallet.assert_not_called()
+    shown = "".join(
+        str(call.args[0]) for call in ctx.display.draw_centered_text.call_args_list
+    )
+    assert "do not use an output descriptor" in shown

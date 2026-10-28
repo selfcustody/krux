@@ -20,7 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import gc
-from embit.psbt import PSBT, CompressMode
+from embit.psbt import CompressMode
+from embit.silent_payments import SilentPaymentsPSBT as PSBT
+from embit.silent_payments.sp import get_eligible_inputs
 from uUR import UR, Types
 from .baseconv import base_decode
 from .krux_settings import t
@@ -38,6 +40,18 @@ SPEND = 2
 BTC_SYMBOL = "₿"
 
 MAX_POLICY_COSIGNERS_DISPLAYED = 5
+
+
+class _HashWriter:
+    """Stream that feeds a hash, so write_to() needs no serialized copy"""
+
+    def __init__(self, h):
+        self.h = h
+
+    def write(self, data):
+        """Hashes data, returns its length like a file write"""
+        self.h.update(data)
+        return len(data)
 
 
 class Counter(dict):
@@ -58,6 +72,11 @@ class PSBTSigner:
         self.qr_format = qr_format
         self.policy = None
         self.is_b64_file = False
+        self.zero_fingerprints_filled = 0
+        self._has_sp = False
+        self._sp_keys = None
+        self._sp_scripts = {}
+        validated = False
 
         # Parse the PSBT
         if psbt_filename:
@@ -65,13 +84,25 @@ class PSBTSigner:
             from .settings import SD_PATH
 
             file_path = "/%s/%s" % (SD_PATH, psbt_filename)
+            parsed = False
             try:
                 with open(file_path, "rb") as file:
                     self.psbt = PSBT.read_from(file)
+                parsed = True
+                # Validated here too, so running out of RAM in validate()
+                # also falls back to the lighter compressed read below
                 self.validate()
-            except:
+                validated = True
+            except Exception as err:
+                # A fully parsed PSBT that validate() rejected stays rejected,
+                # re-reading it compressed would only repeat the same checks
+                if parsed and not isinstance(err, MemoryError):
+                    raise ValueError("Invalid PSBT: %s" % err)
+                # Drop the failed attempt and what its validate() cached
+                self.psbt = None
+                self.policy = None
+                gc.collect()
                 try:
-                    self.policy = None  # Reset policy
                     self.is_b64_file = self.file_is_base64_encoded(file_path)
                     if self.is_b64_file:
                         # BlueWallet exports PSBTs as base64 encoded files
@@ -86,6 +117,16 @@ class PSBTSigner:
                             self.psbt = PSBT.read_from(
                                 file, compress=CompressMode.CLEAR_ALL
                             )
+                        # Compressed reads drop partial sigs and final witnesses.
+                        # Fine for BIP-352 eligible inputs, which all belong to
+                        # this seed and get re-signed, but any other input may
+                        # carry another signer's witness, and a BIP-375 Signer
+                        # must hand those back as they came
+                        inputs = self.psbt.inputs
+                        if self.psbt.has_sp_outputs and len(
+                            get_eligible_inputs(inputs)
+                        ) < len(inputs):
+                            raise ValueError("too large to keep other inputs")
                 except Exception as e:
                     raise ValueError("Error loading PSBT file: %s" % e)
             self.base_encoding = 64  # In case it is exported as QR code
@@ -122,8 +163,7 @@ class PSBTSigner:
                             self.base_encoding = 43
                         except:
                             raise ValueError("invalid PSBT")
-        if self.policy is None:
-            # If not yet validated (e.g. from file and compressed), validate now
+        if not validated:
             try:
                 self.validate()
             except Exception as e:
@@ -200,6 +240,35 @@ class PSBTSigner:
             if self.wallet.policy != self.policy:
                 raise ValueError("policy mismatch")
 
+        # embit matches derivations by fingerprint, so a PSBT exported by an
+        # xpub-only wallet looks foreign until the zeroes are repaired
+        self.zero_fingerprints_filled = self.fill_zero_fingerprint()
+
+        self._has_sp = self.psbt.has_sp_outputs
+        if self._has_sp:
+            from .silent_payments import derive_scripts, validate_eligibility
+
+            validate_eligibility(self.policy)
+            # Derived here so an unsignable PSBT is rejected before the user
+            # reviews it, and the review can show the Taproot address of each
+            # SP output. The DLEQ proofs still run once, inside sign_with().
+            self._sp_scripts = derive_scripts(self.psbt, self.wallet.key.root)
+            # Only SP wallets own SP outputs. A BIP-84 or BIP-86 watch-only
+            # wallet never scans for them, so for those wallets an output to
+            # the seed's own sp1 address is still a spend to verify.
+            self._sp_keys = self.wallet.key.sp_keys
+
+    def has_sp_spend(self):
+        """Returns True if a Silent Payment output pays someone else.
+
+        Own SP change and self-transfers are left out, there is no recipient
+        to check their sp1/tsp1 address with.
+        """
+        return self._has_sp and any(
+            out.sp_data is not None and self._classify_output(None, out) == SPEND
+            for out in self.psbt.outputs
+        )
+
     def unverified_input_amounts(self):
         """True if an input amount could be understated without breaking its signature.
 
@@ -229,24 +298,18 @@ class PSBTSigner:
         der_path_nodes = len(self.wallet.key.derivation.split("/")) - 1
         for _input in self.psbt.inputs:
             if self.policy["type"] == P2TR:
-                derivations = _input.taproot_bip32_derivations
+                paths = [der for _, der in _input.taproot_bip32_derivations.values()]
+                # BIP-376 SP spends keep the spend key path in its own field
+                paths += _input.sp_spend_bip32_derivations.values()
             else:
-                derivations = _input.bip32_derivations
-            for pubkey in derivations:
+                paths = _input.bip32_derivations.values()
+            for der in paths:
                 # Checks if fingerprint belongs to loaded key
-                if self.policy["type"] == P2TR:
-                    fingerprint = derivations[pubkey][1].fingerprint
-                else:
-                    fingerprint = derivations[pubkey].fingerprint
-                if fingerprint != self.wallet.key.fingerprint:
+                if der.fingerprint != self.wallet.key.fingerprint:
                     # Not our key, won't check derivation path mismatch
                     continue
-                if self.policy["type"] == P2TR:
-                    derivation_path = derivations[pubkey][1].derivation
-                else:
-                    derivation_path = derivations[pubkey].derivation
                 textual_path = "m"
-                for index in derivation_path[:der_path_nodes]:
+                for index in der.derivation[:der_path_nodes]:
                     if index >= 2**31:
                         textual_path += "/{}h".format(index - 2**31)
                     else:
@@ -261,12 +324,22 @@ class PSBTSigner:
     def address_belongs_to_descriptor(self, psbt_output):
         """Check if the output is from our wallet descriptor"""
 
-        if self.wallet.descriptor:
-            return self.wallet.descriptor.owns(psbt_output)
-        return False
+        if not self.wallet.descriptor:
+            return False
+        return self.wallet.descriptor.owns(psbt_output)
 
     def _classify_output(self, out_policy, out):
         """Classify the output based on its properties and policy"""
+
+        if out.sp_data is not None:
+            from .silent_payments import own_sp_output_type
+
+            own = own_sp_output_type(out, self._sp_keys)
+            if own == "change":
+                return CHANGE
+            if own == "self":
+                return SELF_TRANSFER
+            return SPEND
 
         address_from_my_wallet = False
         address_is_change = False
@@ -344,7 +417,20 @@ class PSBTSigner:
                 (("%d. " + title + " \n\n%s\n\n") % (i + 1, format_address(out[0])))
                 + self._btc_render(out[1], prefix="")
             )
+            if out[2] is not None:
+                # SP output: a second page with the address it lands on
+                message_seq.append(
+                    ("%d. " + t("Taproot address:") + "\n\n%s")
+                    % (i + 1, format_address(out[2]))
+                )
         return message_seq
+
+    def _taproot_address(self, index):
+        """Returns the Taproot address an SP output lands on, else None"""
+        script = self._sp_scripts.get(index)
+        if script is None:
+            return None
+        return script.address(network=self.wallet.key.network)
 
     def outputs(self):
         """Returns a list of messages describing where amounts are going"""
@@ -378,43 +464,43 @@ class PSBTSigner:
         except:
             # Expected to fail to get xpubs from Miniscript PSBT
             pass
+        from .silent_payments import output_address
+
+        # psbt.tx is a property that rebuilds the whole transaction on every
+        # access, so read it once instead of three times per output.
+        vout = self.psbt.tx.vout
+
         for i, out in enumerate(self.psbt.outputs):
-            out_policy = get_policy(
-                out, self.psbt.tx.vout[i].script_pubkey, xpubs, origin_less_xpub
+            if out.sp_data is not None:
+                # script_pubkey is empty until the sender derives it; skip the
+                # policy lookup and rely on _classify_output's SP short-circuit.
+                # SP outputs always land as P2TR, so count them for the fee/vB
+                # estimate even though the script is not derived yet.
+                output_policy_count[P2TR] += 1
+                output_type = self._classify_output(None, out)
+            else:
+                out_policy = get_policy(
+                    out, vout[i].script_pubkey, xpubs, origin_less_xpub
+                )
+                output_policy_count[out_policy["type"]] += 1
+                output_type = self._classify_output(out_policy, out)
+
+            value = vout[i].value
+            output = (
+                output_address(out, vout[i].script_pubkey, self.wallet),
+                value,
+                self._taproot_address(i),
             )
-            output_policy_count[out_policy["type"]] += 1
-            output_type = self._classify_output(out_policy, out)
 
             if output_type == CHANGE:
-                change_list.append(
-                    (
-                        self.psbt.tx.vout[i].script_pubkey.address(
-                            network=self.wallet.key.network
-                        ),
-                        self.psbt.tx.vout[i].value,
-                    )
-                )
-                change_amount += self.psbt.tx.vout[i].value
+                change_list.append(output)
+                change_amount += value
             elif output_type == SELF_TRANSFER:
-                self_transfer_list.append(
-                    (
-                        self.psbt.tx.vout[i].script_pubkey.address(
-                            network=self.wallet.key.network
-                        ),
-                        self.psbt.tx.vout[i].value,
-                    )
-                )
-                self_amount += self.psbt.tx.vout[i].value
+                self_transfer_list.append(output)
+                self_amount += value
             else:  # Address is from other wallet
-                spend_list.append(
-                    (
-                        self.psbt.tx.vout[i].script_pubkey.address(
-                            network=self.wallet.key.network
-                        ),
-                        self.psbt.tx.vout[i].value,
-                    )
-                )
-                spend_amount += self.psbt.tx.vout[i].value
+                spend_list.append(output)
+                spend_amount += value
 
         if len(spend_list) > 0:
             resume_spend_str = (
@@ -474,17 +560,53 @@ class PSBTSigner:
                     "Input %d has non-standard sighash type: 0x%02x" % (i, sighash_val)
                 )
 
-    def add_signatures(self):
+    def _sp_aux_rand(self):
+        """Returns the 32-byte `r` input to BIP-374 DLEQ proof generation.
+
+        The wallet nonce is sha256(root_secret || fingerprint ||
+        sha256(psbt_bytes)). It hashes the whole PSBT (not psbt.tx) because SP
+        outputs may have None script_pubkeys before derivation, which would
+        crash TransactionOutput.write_to(). The PSBT is streamed into the hash,
+        a serialized copy of a big one may not fit in RAM.
+
+        The result is deliberately near-deterministic: only the low 32 bits of
+        the tick counter vary, the rest is seed- and PSBT-derived. That is safe
+        because BIP-374 derives the proof nonce as k = H(t || A || C), binding
+        it to the statement being proven, so two proofs never share a nonce
+        unless they prove the same statement -- in which case the proofs are
+        identical anyway.
+
+        K210 RNG is the reason this does not use embit's urandom() default.
+        """
+        import hashlib
+        import time
+
+        psbt_hash = hashlib.sha256()
+        self.psbt.write_to(_HashWriter(psbt_hash))
+        psbt_hash = psbt_hash.digest()
+        wallet_nonce = hashlib.sha256(
+            self.wallet.key.root.secret + self.wallet.key.fingerprint + psbt_hash
+        ).digest()
+
+        try:
+            tick_val = time.ticks_us()
+        except AttributeError:
+            tick_val = int(time.time() * 1000000)
+
+        tick = (tick_val & 0xFFFFFFFF).to_bytes(4, "little")
+
+        return hashlib.sha256(tick + wallet_nonce).digest()
+
+    def add_signatures(self, **kwargs):
         """Add signatures to PSBT"""
         self.check_sighash()
-        sigs_added = self.psbt.sign_with(self.wallet.key.root)
+        sigs_added = self.psbt.sign_with(self.wallet.key.root, **kwargs)
         if sigs_added == 0:
             raise ValueError("cannot sign")
 
     def fill_zero_fingerprint(self):
         """Fix for zeroes in fingerprint that happen when user imports the wallet
-        with XPUB only (without derivation path)
-        """
+        with XPUB only (without derivation path)"""
         filled = 0
 
         for inp in self.psbt.inputs:
@@ -509,53 +631,102 @@ class PSBTSigner:
                 derivation = derivations[pub]
             if derivation.fingerprint == b"\x00\x00\x00\x00":
                 # check if pubkey matches
-                if self.wallet.key.get_xpub(derivation.derivation).key == pub:
+                key = self.wallet.key.get_xpub(derivation.derivation).key
+                # Taproot keys are x-only, parsed with an even y
+                if self.policy["type"] == P2TR:
+                    matches = key.xonly() == pub.xonly()
+                else:
+                    matches = key == pub
+                if matches:
                     derivation.fingerprint = self.wallet.key.fingerprint
                     filled += 1
+        # BIP-376 SP spends keep the spend key path in its own field, keyed by sec
+        for pub, derivation in getattr(scope, "sp_spend_bip32_derivations", {}).items():
+            if (
+                derivation.fingerprint == b"\x00\x00\x00\x00"
+                and self.wallet.key.get_xpub(derivation.derivation).key.sec() == pub
+            ):
+                derivation.fingerprint = self.wallet.key.fingerprint
+                filled += 1
         return filled
 
     def sign(self, trim=True):
         """Signs the PSBT and preserves necessary fields for the final transaction"""
-        self.add_signatures()
+        has_sp = self._has_sp
 
-        if not trim:
-            return
+        # embit signs BIP-376 SP-spend inputs (sp_tweak) on every PSBT, not
+        # just ones with new SP outputs, so this can raise regardless of has_sp.
+        from embit.silent_payments.psbt import SPValidationError, SPFieldError
 
-        trimmed_psbt = PSBT(self.psbt.tx)
-        for i, inp in enumerate(self.psbt.inputs):
-            # Copy the final_scriptwitness if present
-            if inp.final_scriptwitness:
-                trimmed_psbt.inputs[i].final_scriptwitness = inp.final_scriptwitness
+        try:
+            if has_sp:
+                self.add_signatures(aux_rand=self._sp_aux_rand())
+            else:
+                self.add_signatures()
+        except (SPValidationError, SPFieldError) as e:
+            raise ValueError(str(e))
 
-            # Copy any partial signatures
-            if inp.partial_sigs:
-                trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
+        if has_sp:
+            # What gets signed must be what was shown for review.
+            for i, script in self._sp_scripts.items():
+                if self.psbt.outputs[i].script_pubkey != script:
+                    raise ValueError("output %d changed after review" % i)
 
-            # Preserve witness UTXO if present
-            if inp.witness_utxo:
-                trimmed_psbt.inputs[i].witness_utxo = inp.witness_utxo
+            # BIP-375: the Signer must hand back an unfinalized PSBT so the
+            # coordinator can verify the derived Silent Payment outputs before
+            # finalizing. embit finalizes taproot key-path inputs on signing,
+            # which makes coordinators skip the merge that picks up the derived
+            # PSBT_OUT_SCRIPT and the global ECDH shares / DLEQ proofs.
+            #
+            # Every BIP-352 eligible input belongs to this seed (checked at
+            # load), so those are the ones to clear. Any other input is left as
+            # it came: e.g. a script path spend with the BIP-341 NUMS internal
+            # key is not eligible, and may carry another signer's witness.
+            for i in get_eligible_inputs(self.psbt.inputs):
+                self.psbt.inputs[i].final_scriptwitness = None
+                self.psbt.inputs[i].final_scriptsig = None
 
-            # Preserve non-witness UTXO if present (for legacy inputs)
-            if inp.non_witness_utxo:
-                trimmed_psbt.inputs[i].non_witness_utxo = inp.non_witness_utxo
+        if trim:
+            trimmed_psbt = PSBT(self.psbt.tx, version=self.psbt.version)
+            for i, inp in enumerate(self.psbt.inputs):
+                if inp.final_scriptwitness:
+                    trimmed_psbt.inputs[i].final_scriptwitness = inp.final_scriptwitness
+                if inp.partial_sigs:
+                    trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
+                if inp.witness_utxo:
+                    trimmed_psbt.inputs[i].witness_utxo = inp.witness_utxo
+                if inp.non_witness_utxo:
+                    trimmed_psbt.inputs[i].non_witness_utxo = inp.non_witness_utxo
+                if inp.redeem_script:
+                    trimmed_psbt.inputs[i].redeem_script = inp.redeem_script
+                if inp.witness_script:
+                    trimmed_psbt.inputs[i].witness_script = inp.witness_script
+                if inp.taproot_key_sig:
+                    trimmed_psbt.inputs[i].taproot_key_sig = inp.taproot_key_sig
+                if inp.taproot_sigs:
+                    trimmed_psbt.inputs[i].taproot_sigs = inp.taproot_sigs
+                # BIP-376 sp_tweak / sp_spend_bip32_derivations are deliberately
+                # NOT copied: the coordinator authored them and still holds them,
+                # and they would add ~70 bytes per input to the animated QR. The
+                # SD export (trim=False) keeps them, so embit's finalize_sp_spends
+                # works there but not on the trimmed QR artifact.
 
-            # Preserve redeem_script for P2SH or nested SegWit
-            if inp.redeem_script:
-                trimmed_psbt.inputs[i].redeem_script = inp.redeem_script
+            if has_sp:
+                trimmed_psbt.sp_ecdh_shares = self.psbt.sp_ecdh_shares
+                trimmed_psbt.sp_dleq_proofs = self.psbt.sp_dleq_proofs
+                for i, out in enumerate(self.psbt.outputs):
+                    if out.sp_data is not None:
+                        trimmed_psbt.outputs[i].sp_data = out.sp_data
+                    if out.sp_label is not None:
+                        trimmed_psbt.outputs[i].sp_label = out.sp_label
+                trimmed_psbt.tx_modifiable_flags = 0
 
-            # Preserve witness_script for P2WSH multisig
-            if inp.witness_script:
-                trimmed_psbt.inputs[i].witness_script = inp.witness_script
+            self.psbt = trimmed_psbt
 
-            # Preserve taproot_key_sig for Taproot inputs
-            if inp.taproot_key_sig:
-                trimmed_psbt.inputs[i].taproot_key_sig = inp.taproot_key_sig
+        if has_sp:
+            from .silent_payments import validate as sp_validate
 
-            # Preserve taproot script path sigs
-            if inp.taproot_sigs:
-                trimmed_psbt.inputs[i].taproot_sigs = inp.taproot_sigs
-
-        self.psbt = trimmed_psbt
+            sp_validate(self.psbt)
 
     def psbt_qr(self):
         """Returns the psbt in the same form it was read as a QR code"""

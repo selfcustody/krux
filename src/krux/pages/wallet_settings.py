@@ -36,15 +36,17 @@ from . import (
     NUM_SPECIAL_2,
 )
 from ..key import (
+    Key,
     SINGLESIG_SCRIPT_PURPOSE,
     MULTISIG_SCRIPT_PURPOSE,
-    MINISCRIPT_PURPOSE,
     TYPE_SINGLESIG,
     TYPE_MULTISIG,
     TYPE_MINISCRIPT,
+    TYPE_SILENT_PAYMENT,
     NAME_SINGLE_SIG,
     NAME_MULTISIG,
     NAME_MINISCRIPT,
+    NAME_SILENT_PAYMENT,
 )
 
 from ..settings import (
@@ -56,8 +58,6 @@ from ..key import P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 
 PASSPHRASE_MAX_LEN = 200
 DERIVATION_KEYPAD = "1234567890/h"
-
-P2SH_DEFAULT_DERIVATION = "m/45h"
 
 
 class PassphraseEditor(Page):
@@ -107,7 +107,6 @@ class PassphraseEditor(Page):
                     continue
 
             from ..themes import theme
-            from ..key import Key
 
             self.ctx.display.clear()
             self.ctx.display.draw_hcentered_text(
@@ -222,7 +221,10 @@ class WalletSettings(Page):
                 [
                     (t("Network"), lambda: None),
                     (t("Policy Type"), lambda: None),
-                    (t("Script Type"), lambda: None),
+                    (
+                        t("Script Type"),
+                        None if policy_type == TYPE_SILENT_PAYMENT else lambda: None,
+                    ),
                     (account_txt, lambda: None),
                 ],
                 offset=info_len * FONT_HEIGHT + DEFAULT_PADDING,
@@ -247,6 +249,9 @@ class WalletSettings(Page):
                 new_policy_type = self._policy_type()
                 if new_policy_type is not None:
                     derivation_path = ""
+                    if policy_type == TYPE_SILENT_PAYMENT:
+                        # SP forced P2TR, the user never picked it, so ask again
+                        script_type = None
                     policy_type = new_policy_type
                     if (
                         policy_type == TYPE_SINGLESIG
@@ -271,6 +276,9 @@ class WalletSettings(Page):
                         # If is miniscript, pick P2WSH or P2TR
                         script_type = self._miniscript_type()
                         script_type = P2WSH if script_type is None else script_type
+
+                    elif policy_type == TYPE_SILENT_PAYMENT:
+                        script_type = P2TR
 
             elif index == 2:
                 if policy_type == TYPE_MINISCRIPT:
@@ -321,6 +329,7 @@ class WalletSettings(Page):
                 (NAME_SINGLE_SIG, lambda: MENU_EXIT),
                 (NAME_MULTISIG, lambda: MENU_EXIT),
                 (NAME_MINISCRIPT + " (Experimental)", lambda: MENU_EXIT),
+                (NAME_SILENT_PAYMENT + " (Experimental)", lambda: MENU_EXIT),
             ],
             disable_statusbar=True,
         )
@@ -384,39 +393,8 @@ class WalletSettings(Page):
         # Sparrow uses m/45h as default derivation path. Therefore
         # to maintain compatibility with those wallets, use m/45h.
         if policy_type == TYPE_MULTISIG and script_type == P2SH:
-            return P2SH_DEFAULT_DERIVATION
-
-        derivation_path = "m/"
-
-        # Add the purpose type to the derivation path in accordance with
-        # the specified BIP (45, 48, or 84)
-        if policy_type == TYPE_SINGLESIG:
-            derivation_path += str(SINGLESIG_SCRIPT_PURPOSE[script_type])
-        elif policy_type == TYPE_MULTISIG:
-            derivation_path += str(MULTISIG_SCRIPT_PURPOSE[script_type])
-        elif policy_type == TYPE_MINISCRIPT:
-            # For now, miniscript is the same as multisig
-            derivation_path += str(MINISCRIPT_PURPOSE)
-
-        # The first derivation node is always hardened
-        derivation_path += "h/"
-
-        # If another we're using BIP48 or BIP84,
-        # we use the zeroth (for mainnet) or first (for testnet)
-        # derivation node as the coin type (hardened) as well
-        # the account index (hardened)
-        derivation_path += "0h" if network == NETWORKS[MAIN_TXT] else "1h"
-        derivation_path += "/" + str(account) + "h"
-
-        # As stated in the BIP48, the script type is
-        # 1h for P2SH_P2WSH and 2h for P2WSH
-        if policy_type is TYPE_MULTISIG and script_type == P2SH_P2WSH:
-            derivation_path += "/1h"
-        elif policy_type is TYPE_MULTISIG and script_type == P2WSH:
-            derivation_path += "/2h"
-        elif policy_type is TYPE_MINISCRIPT:
-            derivation_path += "/2h"
-        return derivation_path
+            account = None
+        return Key.get_default_derivation(policy_type, network, account, script_type)
 
     def _derivation_path(self, derivation):
         """Derivation path input"""

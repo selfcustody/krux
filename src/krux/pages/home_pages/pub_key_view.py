@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ...display import FONT_HEIGHT
+from ...display import FONT_HEIGHT, BOTTOM_PROMPT_LINE
 from ...krux_settings import t
 from .. import (
     Page,
@@ -38,8 +38,81 @@ WALLET_XPUB_START = 4
 class PubkeyView(Page):
     """UI to show and export extended public key"""
 
+    def _key_text_view(self, key_text, save_to_sd):
+        """Shows a key with its derivation and fingerprint, and a save menu"""
+        from ...themes import theme
+
+        items = [
+            (t("Save to SD card"), None if not self.has_sd_card() else save_to_sd),
+        ]
+        info_text = (
+            "\n\n" + self.ctx.wallet.key.derivation_str(pretty=True) + "\n\n" + key_text
+        )
+        offset = (len(self.ctx.display.to_lines(info_text)) + 1) * FONT_HEIGHT
+        menu = Menu(self.ctx, items, offset=offset)
+        self.ctx.display.clear()
+        self.ctx.display.draw_hcentered_text(
+            info_text, offset_y=FONT_HEIGHT, info_box=True
+        )
+        self.ctx.display.draw_hcentered_text(
+            self.ctx.wallet.key.fingerprint_hex_str(pretty=True),
+            offset_y=FONT_HEIGHT,
+            color=theme.highlight_color,
+            bg_color=theme.info_bg_color,
+        )
+        menu.run_loop()
+
+    def _sp_scan_key_view(self):
+        """Handler for showing the BIP-352 scan key for SP wallets"""
+        # The BIP-352 scan key is private key material, not a public key: it
+        # cannot move funds, but it reveals every payment the wallet receives.
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(
+            t("Warning:")
+            + " "
+            + t("The scan key is private.")
+            + " "
+            + t("Anyone holding it can see every payment this wallet receives.")
+            + "\n\n"
+            + t("Only share it with your own watch-only wallet."),
+            highlight_prefix=":",
+        )
+        if not self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE):
+            return MENU_CONTINUE
+
+        net_name = self.ctx.wallet.which_network()
+        spscan = self.ctx.wallet.key.sp_scan_key_encoded(net_name)
+
+        def _show_text():
+            from ..file_operations import SaveFile
+
+            self._key_text_view(
+                spscan[spscan.index("]") + 1 :] if "]" in spscan else spscan,
+                lambda: SaveFile(self.ctx).save_to_sd(spscan, "SPSCAN"),
+            )
+
+        def _show_qr():
+            from ..qr_view import SeedQRView
+
+            SeedQRView(self.ctx, data=spscan, title="SPSCAN").display_qr(
+                allow_export=True, transcript_tools=False
+            )
+
+        items = [
+            ("SPSCAN - " + t("Text"), _show_text),
+            ("SPSCAN - " + t("QR Code"), _show_qr),
+        ]
+        menu = Menu(self.ctx, items)
+        while True:
+            _, status = menu.run_loop()
+            if status == MENU_EXIT:
+                break
+        return MENU_CONTINUE
+
     def public_key(self):
         """Handler for the 'xpub' menu item"""
+        if self.ctx.wallet.is_silent_payment():
+            return self._sp_scan_key_view()
 
         def _save_xpub_to_sd(version):
             from ..file_operations import SaveFile
@@ -59,40 +132,10 @@ class PubkeyView(Page):
             )
 
         def _pub_key_text(version):
-            from ...themes import theme
-
-            pub_text_menu_items = [
-                (
-                    t("Save to SD card"),
-                    (
-                        None
-                        if not self.has_sd_card()
-                        else lambda: _save_xpub_to_sd(version)
-                    ),
-                ),
-            ]
-            full_pub_key = self.ctx.wallet.key.account_pubkey_str(version)
-            info_text = (
-                "\n\n"
-                + self.ctx.wallet.key.derivation_str(pretty=True)
-                + "\n\n"
-                + full_pub_key
+            self._key_text_view(
+                self.ctx.wallet.key.account_pubkey_str(version),
+                lambda: _save_xpub_to_sd(version),
             )
-            menu_offset = (len(self.ctx.display.to_lines(info_text)) + 1) * FONT_HEIGHT
-            pub_key_menu = Menu(self.ctx, pub_text_menu_items, offset=menu_offset)
-            self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(
-                info_text,
-                offset_y=FONT_HEIGHT,
-                info_box=True,
-            )
-            self.ctx.display.draw_hcentered_text(
-                self.ctx.wallet.key.fingerprint_hex_str(pretty=True),
-                offset_y=FONT_HEIGHT,
-                color=theme.highlight_color,
-                bg_color=theme.info_bg_color,
-            )
-            pub_key_menu.run_loop()
 
         def _pub_key_qr(version):
             title = self.ctx.wallet.key.account_pubkey_str(version)[

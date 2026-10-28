@@ -28,6 +28,7 @@ def tdata(mocker):
         TYPE_SINGLESIG,
         TYPE_MULTISIG,
         TYPE_MINISCRIPT,
+        TYPE_SILENT_PAYMENT,
     )
 
     TEST_MNEMONIC1 = (
@@ -519,6 +520,74 @@ def test_init_miniscript(mocker, m5stickv, tdata):
     assert wallet.descriptor is None
     assert wallet.label is None
     assert wallet.policy is None
+
+
+def test_init_silent_payment(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.key import Key, TYPE_SILENT_PAYMENT, P2TR
+    from embit.networks import NETWORKS
+
+    key = Key(
+        tdata.TEST_MNEMONIC1,
+        TYPE_SILENT_PAYMENT,
+        NETWORKS["test"],
+    )
+    wallet = Wallet(key)
+
+    assert isinstance(wallet, Wallet)
+    assert wallet.is_silent_payment()
+    assert not wallet.is_multisig()
+    assert not wallet.is_miniscript()
+    assert wallet.has_change_addr() is False
+    assert wallet.label == "Single-sig SP"
+    assert wallet.policy == {"type": P2TR}
+    assert wallet.descriptor is None
+
+
+def test_silent_payment_load_rejected(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.key import Key, TYPE_SILENT_PAYMENT
+    from embit.networks import NETWORKS
+
+    key = Key(
+        tdata.TEST_MNEMONIC1,
+        TYPE_SILENT_PAYMENT,
+        NETWORKS["test"],
+    )
+    wallet = Wallet(key)
+
+    with pytest.raises(ValueError, match="SP wallets do not load external descriptors"):
+        wallet.load("some wallet data", 0)
+
+
+def test_load_silent_payment_descriptor_rejected(mocker, m5stickv, tdata):
+    from embit import bip32, bip39
+    from embit.networks import NETWORKS
+    from krux.wallet import Wallet
+    from krux.key import Key, TYPE_SILENT_PAYMENT
+    from krux.qr import FORMAT_NONE
+
+    net = NETWORKS["test"]
+    sp_key = Key(tdata.TEST_MNEMONIC1, TYPE_SILENT_PAYMENT, net)
+    root = bip32.HDKey.from_seed(
+        bip39.mnemonic_to_seed(tdata.TEST_MNEMONIC1), version=net["xprv"]
+    )
+    descriptors = [
+        # single-arg spscan key
+        "sp(%s)" % sp_key.sp_scan_key_encoded("test"),
+        # two-arg private scan key, public spend key
+        "sp(%s/0,%s/0)"
+        % (
+            root.derive("m/352h/1h/0h/1h").to_base58(),
+            root.derive("m/352h/1h/0h/0h").to_public().to_base58(),
+        ),
+    ]
+    for wallet_key in (tdata.SINGLESIG_KEY, None):
+        for desc in descriptors:
+            with pytest.raises(
+                ValueError, match="Silent Payment descriptors are not supported"
+            ):
+                Wallet(wallet_key).load(desc, FORMAT_NONE)
 
 
 def test_is_multisig(mocker, m5stickv, tdata):
@@ -2054,3 +2123,19 @@ def test_wallet_load_rejects_descriptor_m_greater_than_n(mocker, m5stickv):
     wallet = Wallet(None)
     with pytest.raises(ValueError, match="m .* exceeds n"):
         wallet.load("fake_data", 0)
+
+
+def test_silent_payment_obtain_sp_address(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.key import Key, TYPE_SILENT_PAYMENT
+    from embit.networks import NETWORKS
+
+    key = Key(
+        tdata.TEST_MNEMONIC1,
+        TYPE_SILENT_PAYMENT,
+        NETWORKS["test"],
+    )
+    wallet = Wallet(key)
+
+    address = wallet.obtain_sp_address()
+    assert address.startswith("tsp1")

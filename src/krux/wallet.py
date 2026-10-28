@@ -21,6 +21,7 @@
 
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key
+from embit.descriptor.sp import SilentPaymentDescriptor
 from embit.networks import NETWORKS
 from .krux_settings import t
 from .qr import FORMAT_BBQR, FORMAT_NONE
@@ -35,6 +36,7 @@ from .key import (
     TYPE_SINGLESIG,
     TYPE_MULTISIG,
     TYPE_MINISCRIPT,
+    TYPE_SILENT_PAYMENT,
 )
 
 
@@ -74,6 +76,10 @@ class Wallet:
                 )
             self.label = t("Single-sig")
             self.policy = {"type": self.get_scriptpubkey_type()}
+        elif self.key and self.key.policy_type == TYPE_SILENT_PAYMENT:
+            # SP wallets have no output descriptor, so descriptor stays None
+            self.label = t("Single-sig SP")
+            self.policy = {"type": P2TR}
 
     def get_scriptpubkey_type(self):
         """Returns the scriptpubkey type of the wallet descriptor"""
@@ -125,6 +131,16 @@ class Wallet:
                 or self.descriptor.taptree  #  taptree is "" when not present
             )
         return False
+
+    def is_silent_payment(self):
+        """Returns a boolean indicating whether or not the wallet is silent payment"""
+        if self.key:
+            return self.key.policy_type == TYPE_SILENT_PAYMENT
+        return False
+
+    def obtain_sp_address(self):
+        """Returns the wallet's BIP-352 reusable silent payment address"""
+        return self.key.sp_address(self.which_network())
 
     def is_loaded(self):
         """Returns a boolean indicating whether or not this wallet has been loaded"""
@@ -223,7 +239,12 @@ class Wallet:
 
     def load(self, wallet_data, qr_format):
         """Loads the wallet from the given data"""
+        if self.is_silent_payment():
+            raise ValueError("SP wallets do not load external descriptors")
         descriptor, label = parse_wallet(wallet_data)
+        if isinstance(descriptor, SilentPaymentDescriptor):
+            # Has no xpubs to check, and an SP wallet would refuse it anyway
+            raise ValueError("Silent Payment descriptors are not supported")
 
         # convert descriptor keys to 'xpub' on same network -- for comparison only
         descriptor_xpubs = []
@@ -321,7 +342,8 @@ class Wallet:
 
     def has_change_addr(self):
         """Returns if this wallet knows how to derive its change addresses"""
-
+        if self.is_silent_payment():
+            return False
         return self.descriptor.num_branches > 1
 
 
