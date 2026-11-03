@@ -13,50 +13,40 @@ jobs:
       matrix:
         # minimum tested python version
         # maximum python version
-        py-version: [ "3.11.5", "3.12.13"]
+        py-version: [ "3.11.17", "3.12.15"]
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - name: Setup Python
-        uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          python-version: ${{ matrix.py-version }}
-      - uses: psf/black@stable
+          submodules: recursive
+      - name: Install uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          options: "--check --verbose"
-          src: "./firmware/font"
-      - uses: psf/black@stable
-        with:
-          options: "--check --verbose"
-          src: "./firmware/scripts"
-      - uses: psf/black@stable
-        with:
-          options: "--check --verbose"
-          src: "./i18n"
-      - uses: psf/black@stable
-        with:
-          options: "--check --verbose"
-          src: "./src"
-      - uses: psf/black@stable
-        with:
-          options: "--check --verbose"
-          src: "./tests"
-          
+          version: ">=0.13.6"
+          enable-cache: true
+      - name: Set up Python
+        run: uv python install ${{ matrix.py-version }}
+      - name: Sync dependencies
+        run: uv sync --frozen --python ${{ matrix.py-version }}
+      - name: Check formatting
+        run: uv run --python ${{ matrix.py-version }} black --check --verbose firmware/font firmware/scripts i18n src tests
+
   lint-pylint:
     strategy:
       matrix:
         # minimum tested python version
         # maximum python version
-        py-version: [ "3.11.5", "3.12.13"]
+        py-version: [ "3.11.17", "3.12.15"]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           submodules: recursive
       - name: Install uv
-        uses: astral-sh/setup-uv@v9.0.0
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
+          version: ">=0.13.6"
           enable-cache: true
       - name: Set up Python
         run: uv python install ${{ matrix.py-version }}
@@ -70,15 +60,16 @@ jobs:
       matrix:
         # minimum tested python version
         # maximum python version
-        py-version: [ "3.11.5", "3.12.13"]
+        py-version: [ "3.11.17", "3.12.15"]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           submodules: recursive
       - name: Install uv
-        uses: astral-sh/setup-uv@v9.0.0
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
+          version: ">=0.13.6"
           enable-cache: true
       - name: Set up Python
         run: uv python install ${{ matrix.py-version }}
@@ -92,15 +83,16 @@ jobs:
       matrix:
         # minimum tested python version
         # maximum python version
-        py-version: [ "3.11.5", "3.12.13"]
+        py-version: [ "3.11.17", "3.12.15"]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           submodules: recursive
       - name: Install uv
-        uses: astral-sh/setup-uv@v9.0.0
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
+          version: ">=0.13.6"
           enable-cache: true
       - name: Set up Python
         run: uv python install ${{ matrix.py-version }}
@@ -116,25 +108,26 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           submodules: recursive
       - name: Install uv
-        uses: astral-sh/setup-uv@v9.0.0
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
+          version: ">=0.13.6"
           enable-cache: true
       - name: Set up Python
         # no need to use many coverages
-        run: uv python install 3.12.13
+        run: uv python install 3.12.15
       - name: Sync dependencies
-        run: uv sync --frozen --python 3.12.13
+        run: uv sync --frozen --python 3.12.15
       - name: Build libsecp256k1
-        run: uv run --python 3.12.13 poe secp256k1-build
+        run: uv run --python 3.12.15 poe secp256k1-build
       - name: Check embit uses the C secp256k1
-        run: uv run --python 3.12.13 poe secp256k1-check
+        run: uv run --python 3.12.15 poe secp256k1-check
       - name: Build coverage file
-        run: uv run --python 3.12.13 pytest --cache-clear --cov src/krux --cov-report xml tests
+        run: uv run --python 3.12.15 pytest --cache-clear --cov src/krux --cov-report xml tests
       - name: Upload coverage reports to Codecov with GitHub Action
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
