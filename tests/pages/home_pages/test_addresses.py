@@ -1,6 +1,5 @@
-import pytest
-from .. import assert_not_flashed
-from .test_home import tdata, create_ctx
+from tests.pages import assert_not_flashed
+from tests.pages.home_pages.test_home import tdata, create_ctx
 
 # fortdata.SINGLESIG_ACTION_KEY_TEST_P2WPKH
 DESCRIPTOR_SINGLESIG_ACTION_WITHOUT_CHANGE = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt"

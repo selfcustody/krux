@@ -1,4 +1,4 @@
-from .. import create_ctx
+from tests.pages import create_ctx
 from embit import bip39
 
 # rolls which will result in good entropy

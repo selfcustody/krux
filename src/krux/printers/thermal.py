@@ -40,11 +40,11 @@ from fpioa_manager import fm
 from machine import UART
 
 # from ..settings import CategorySetting, NumberSetting, SettingsNamespace
-from ..krux_settings import Settings
+from krux.krux_settings import Settings
 
 # from ..krux_settings import t
-from ..wdt import wdt
-from . import Printer
+from krux.wdt import wdt
+from krux.printers import Printer
 
 
 class AdafruitPrinter(Printer):
@@ -115,7 +115,7 @@ class AdafruitPrinter(Printer):
 
     def print_qr_code(self, qr_code):
         """Prints a QR code, scaling it up as large as possible"""
-        from ..qr import get_size
+        from krux.qr import get_size
 
         size = get_size(qr_code)
 

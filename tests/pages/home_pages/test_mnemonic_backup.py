@@ -1,6 +1,6 @@
-from .test_home import tdata
-from ...shared_mocks import MockPrinter
-from .. import create_ctx
+from tests.pages.home_pages.test_home import tdata
+from tests.shared_mocks import MockPrinter
+from tests.pages import create_ctx
 
 
 def test_load_mnemonic_encryption(mocker, amigo):

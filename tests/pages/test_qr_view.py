@@ -1,6 +1,6 @@
-from ..shared_mocks import mock_context
-from . import create_ctx
-from .home_pages.test_home import tdata
+from tests.shared_mocks import mock_context
+from tests.pages import create_ctx
+from tests.pages.home_pages.test_home import tdata
 from unittest.mock import patch
 
 SINGLE_SIG_12W_BINARY_QR = bytearray(
@@ -230,7 +230,7 @@ def test_load_seed_qr(amigo, mocker, tdata):
 def test_loop_through_regions(amigo, mocker):
     from krux.pages.qr_view import SeedQRView
     from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV, SWIPE_LEFT, SWIPE_RIGHT
-    from ..test_encryption import CBC_ENCRYPTED_QR
+    from tests.test_encryption import CBC_ENCRYPTED_QR
 
     BTN_SEQUENCE = (
         [
