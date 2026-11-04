@@ -36,6 +36,8 @@ SPEND = 2
 
 OP_RETURN = b"\x6a"
 OP_PUSHDATA1 = 0x4C
+# Longer data is cut so the output amount still fits on the smallest screen
+OP_RETURN_DISPLAY_BYTES = 32
 
 # We always uses thin spaces after the ₿ in this file
 BTC_SYMBOL = "₿"
@@ -866,6 +868,8 @@ def op_return_data(script_pubkey):
         data = data[1:]
     elif len(data) > 1 and data[0] == OP_PUSHDATA1 and len(data) == 2 + data[1]:
         data = data[2:]
+    if len(data) > OP_RETURN_DISPLAY_BYTES:
+        return hexlify(data[:OP_RETURN_DISPLAY_BYTES]).decode() + ELLIPSIS
     return hexlify(data).decode()
 
 

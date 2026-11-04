@@ -1737,6 +1737,13 @@ def test_outputs_op_return(mocker, m5stickv, tdata):
         (b"\x6a\x05hello", 0, "6865 6c6c 6f", "₿ 0.00 000 000"),
         (b"\x6a\x4c\x05hello", 0, "6865 6c6c 6f", "₿ 0.00 000 000"),
         (b"\x6a\x01\x01\x01\x02", 0, "0101 0102", "₿ 0.00 000 000"),
+        (
+            b"\x6a\x4c\x50" + bytes(range(80)),
+            0,
+            "0001 0203 0405 0607 0809 0a0b 0c0d 0e0f "
+            "1011 1213 1415 1617 1819 1a1b 1c1d 1e1f …",
+            "₿ 0.00 000 000",
+        ),
         (b"\x6a", 1000, "", "₿ 0.00 001 000"),
     ]
     for script, value, data, amount in cases:
