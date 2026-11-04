@@ -34,6 +34,11 @@ CHANGE = 0
 SELF_TRANSFER = 1
 SPEND = 2
 
+OP_RETURN = b"\x6a"
+OP_PUSHDATA1 = 0x4C
+# Longer data is cut so the output amount still fits on the smallest screen
+OP_RETURN_DISPLAY_BYTES = 32
+
 # We always uses thin spaces after the ₿ in this file
 BTC_SYMBOL = "₿"
 
@@ -362,6 +367,7 @@ class PSBTSigner:
         self_transfer_list = []
         change_list = []
         spend_list = []
+        op_return_list = []
 
         self_amount = 0
         change_amount = 0
@@ -379,9 +385,15 @@ class PSBTSigner:
             # Expected to fail to get xpubs from Miniscript PSBT
             pass
         for i, out in enumerate(self.psbt.outputs):
-            out_policy = get_policy(
-                out, self.psbt.tx.vout[i].script_pubkey, xpubs, origin_less_xpub
-            )
+            script_pubkey = self.psbt.tx.vout[i].script_pubkey
+            if script_pubkey.data[:1] == OP_RETURN:
+                # Has no address, so its data is shown instead
+                op_return_list.append(
+                    (op_return_data(script_pubkey), self.psbt.tx.vout[i].value)
+                )
+                spend_amount += self.psbt.tx.vout[i].value
+                continue
+            out_policy = get_policy(out, script_pubkey, xpubs, origin_less_xpub)
             output_policy_count[out_policy["type"]] += 1
             output_type = self._classify_output(out_policy, out)
 
@@ -416,9 +428,9 @@ class PSBTSigner:
                 )
                 spend_amount += self.psbt.tx.vout[i].value
 
-        if len(spend_list) > 0:
+        if len(spend_list) + len(op_return_list) > 0:
             resume_spend_str = (
-                (t("Spend (%d):") % len(spend_list))
+                (t("Spend (%d):") % (len(spend_list) + len(op_return_list)))
                 + self._btc_render(spend_amount)
                 + "\n\n"
             )
@@ -448,6 +460,7 @@ class PSBTSigner:
 
         # sequence of spend
         messages.extend(self._sequence_render(t("Spend:"), spend_list))
+        messages.extend(self._sequence_render("OP_RETURN:", op_return_list))
 
         # sequence of self_transfer
         messages.extend(self._sequence_render(t("Self-transfer:"), self_transfer_list))
@@ -843,6 +856,21 @@ def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
             pass
 
     return policy
+
+
+def op_return_data(script_pubkey):
+    """Hex of the data an OP_RETURN script carries, or of every byte after
+    OP_RETURN when it is not a single push"""
+    from binascii import hexlify
+
+    data = script_pubkey.data[1:]
+    if data and data[0] < OP_PUSHDATA1 and len(data) == 1 + data[0]:
+        data = data[1:]
+    elif len(data) > 1 and data[0] == OP_PUSHDATA1 and len(data) == 2 + data[1]:
+        data = data[2:]
+    if len(data) > OP_RETURN_DISPLAY_BYTES:
+        return hexlify(data[:OP_RETURN_DISPLAY_BYTES]).decode() + ELLIPSIS
+    return hexlify(data).decode()
 
 
 def is_segwit_input(inp):
