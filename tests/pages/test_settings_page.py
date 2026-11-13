@@ -783,7 +783,7 @@ def test_wrong_code_set_new_tc_code(amigo, mocker):
     assert mock_file.write_data == b""
 
 
-def test_enable_boot_flash_hash_without_tc_code(m5stickv, mocker):
+def test_enable_boot_flash_hash_without_tc_code(multiple_devices, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.krux_settings import Settings, SecuritySettings
@@ -806,7 +806,7 @@ def test_enable_boot_flash_hash_without_tc_code(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_enable_boot_flash_hash_with_tc_code(m5stickv, mocker):
+def test_enable_boot_flash_hash_with_tc_code(multiple_devices, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.krux_settings import Settings, SecuritySettings
@@ -829,7 +829,7 @@ def test_enable_boot_flash_hash_with_tc_code(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
-def test_disable_stored_boot_flash_hash_without_tc_code(m5stickv, mocker):
+def test_disable_stored_boot_flash_hash_without_tc_code(multiple_devices, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.krux_settings import Settings, SecuritySettings
@@ -852,6 +852,30 @@ def test_disable_stored_boot_flash_hash_without_tc_code(m5stickv, mocker):
 
     settings_page.flash_error.assert_not_called()
     assert Settings().security.boot_flash_hash == False
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_unchanged_press_keeps_stored_boot_flash_hash_quiet(multiple_devices, mocker):
+    from krux.pages.settings_page import SettingsPage
+    from krux.input import BUTTON_ENTER, SWIPE_UP
+    from krux.krux_settings import Settings, SecuritySettings
+
+    # A press that does not change the value must not show the error
+    Settings().security.boot_flash_hash = True
+    BTN_SEQUENCE = [
+        SWIPE_UP,  # Leaves the value unchanged
+        BUTTON_ENTER,  # Leave the setting
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx.tc_code_enabled = False
+    settings_page = SettingsPage(ctx)
+    settings_page.flash_error = mocker.MagicMock()
+
+    settings_page.category_setting(
+        Settings().security, SecuritySettings.boot_flash_hash
+    )
+
+    settings_page.flash_error.assert_not_called()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
