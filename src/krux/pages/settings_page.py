@@ -394,13 +394,15 @@ class SettingsPage(Page):
                     setting.__set__(settings_namespace, new_category)
                     break
 
-            self._category_change_special_cases(setting, new_category)
+            self._category_change_special_cases(
+                setting, new_category, new_category != current_category
+            )
 
         return self._category_change_exit_check(
             settings_namespace, setting, starting_category
         )
 
-    def _category_change_special_cases(self, setting, new_category):
+    def _category_change_special_cases(self, setting, new_category, changed=True):
         if setting.attr == "locale":
             locale_control.load_locale(new_category)
         elif setting.attr == "theme":
@@ -452,6 +454,11 @@ class SettingsPage(Page):
                 )
                 if btn != BUTTON_PAGE_PREV:
                     self.ctx.power_manager.reboot()
+        elif setting.attr == "boot_flash_hash":
+            # Without a TC Code there is nothing to verify at boot
+            if changed and new_category and not self.ctx.tc_code_enabled:
+                self.flash_error(t("Set a tamper check code first"))
+                Settings().security.boot_flash_hash = False
 
     def _category_change_exit_check(
         self, settings_namespace, setting, starting_category
