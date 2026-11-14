@@ -608,6 +608,22 @@ def test_is_multisig(mocker, m5stickv, tdata):
         wallet.load(tdata.KRUX_LEGACY1_RAW_PUBKEY, FORMAT_NONE)
 
 
+def test_load_nested_miniscript_fails(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    inner = tdata.LIANA_MINISCRIPT_DESCRIPTOR.split("#")[0]
+
+    # Only wsh and tr miniscript are supported, with or without a key loaded
+    for key in (tdata.MINISCRIPT_KEY, None):
+        for nested in ("sh(" + inner + ")", "sh(" + inner[len("wsh(") : -1] + ")"):
+            wallet = Wallet(key)
+            with pytest.raises(ValueError, match="nested miniscript not supported"):
+                wallet.load(nested, FORMAT_NONE)
+            assert not wallet.is_loaded()
+            assert wallet.descriptor is None
+
+
 def test_is_miniscript(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
