@@ -1,0 +1,23 @@
+include _wait-for-logo.txt
+
+# Navigate to New Mnemonic > Via Entropy App 2XD8
+press BUTTON_B
+press BUTTON_A
+x4 press BUTTON_B
+press BUTTON_A
+
+# 12 words, then Proceed
+press BUTTON_A
+press BUTTON_A
+
+screenshot amigo-entropy-app-2xd8-wheel-start.png
+
+# Dial White up to 5, lock; Black stays default and locks
+x4 press BUTTON_B
+press BUTTON_A
+
+screenshot amigo-entropy-app-2xd8-white-locked.png
+
+press BUTTON_A
+
+screenshot amigo-entropy-app-2xd8-card-revealed.png
