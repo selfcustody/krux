@@ -1,6 +1,6 @@
 import pytest
 
-from . import create_ctx
+from tests.pages import create_ctx
 
 
 def test_load_key_menu_is_format_first(m5stickv, mocker):

@@ -1,5 +1,5 @@
-from . import create_ctx, assert_not_flashed
-from .home_pages.test_home import tdata
+from tests.pages import create_ctx, assert_not_flashed
+from tests.pages.home_pages.test_home import tdata
 import pytest
 
 

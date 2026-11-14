@@ -24,8 +24,8 @@ import board
 from Maix import GPIO
 from fpioa_manager import fm
 import time
-from .krux_settings import Settings
-from .buttons import Button
+from krux.krux_settings import Settings
+from krux.buttons import Button
 
 RIGHT = 1
 LEFT = 0
