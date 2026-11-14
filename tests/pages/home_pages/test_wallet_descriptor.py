@@ -270,7 +270,7 @@ def test_load_desc_without_change(mocker, m5stickv, tdata):
     wallet_descriptor = WalletDescriptor(ctx)
     mocker.spy(wallet_descriptor, "prompt")
 
-    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt"
+    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#33em82t2"
     mocker.patch.object(
         QRCodeCapture, "qr_capture_loop", new=lambda self: (descriptor, FORMAT_PMOFN)
     )
@@ -322,7 +322,7 @@ def test_cancel_load_desc_without_change(mocker, m5stickv, tdata):
     wallet_descriptor = WalletDescriptor(ctx)
     mocker.spy(wallet_descriptor, "prompt")
 
-    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#tykcfujt"
+    descriptor = b"wpkh([e0c595c5/84h/1h/0h]tpubDCberYHnzBMaKUa34hXGTNXECt9bKprGKtqYt2Bm4qGFK3bqMkMA6KxRR1kPPSh73QoX6LtmsArgNYXRw8HnkWwc8ywf7Ru6XcxRnJo9HfW/2/*)#33em82t2"
     mocker.patch.object(
         QRCodeCapture, "qr_capture_loop", new=lambda self: (descriptor, FORMAT_PMOFN)
     )

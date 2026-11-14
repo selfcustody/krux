@@ -2,9 +2,9 @@ import pytest
 from .shared_mocks import MockFile, mock_open
 
 WSH_MULTISIG = "wsh(sortedmulti(2,[02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*,[8cb36b38/48h/1h/0h/2h]tpubDESTVwqbbaSoN2mPq7tcWkPBpRBkaEADrUzUhRTVnNef6oVn6w2PHL4zoUjUAJSPLJQRBetkgX4sDRcoaCyFHxqHGyWyaiV8REKDkh7zQac/<0;1>/*,[73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*))#jpxgnm0a"
-WSH_MINISCRIPT = "wsh(or_d(pk([73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*),and_v(v:pkh([02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*),older(65535))))#466dtswe"
-TR_MINISCRIPT = "tr([73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*,and_v(v:pk([02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*),older(6)))#rfuhsd9c"
-TR_EXP_MULTI_MINISCRIPT = "tr(tpubD6NzVbkrYhZ4YYQjuKXFp85eRGCk4oA94MXbbHJW6zNAibMfkwZh7JQNVHEhpcQYaRCUs3b5PhvKPKESGoAJptiLvF8Rm1jhoFsryyFuR1P/<0;1>/*,{and_v(v:multi_a(2,[73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<2;3>/*,[02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<2;3>/*,[8cb36b38/48h/1h/0h/2h]tpubDESTVwqbbaSoN2mPq7tcWkPBpRBkaEADrUzUhRTVnNef6oVn6w2PHL4zoUjUAJSPLJQRBetkgX4sDRcoaCyFHxqHGyWyaiV8REKDkh7zQac/<0;1>/*),older(6)),multi_a(2,[73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*,[02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*)})#6ga85u82"
+WSH_MINISCRIPT = "wsh(or_d(pk([73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*),and_v(v:pkh([02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*),older(65535))))#h5jlv8lw"
+TR_MINISCRIPT = "tr([73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*,and_v(v:pk([02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*),older(6)))#x5xpaecg"
+TR_EXP_MULTI_MINISCRIPT = "tr(tpubD6NzVbkrYhZ4YYQjuKXFp85eRGCk4oA94MXbbHJW6zNAibMfkwZh7JQNVHEhpcQYaRCUs3b5PhvKPKESGoAJptiLvF8Rm1jhoFsryyFuR1P/<0;1>/*,{and_v(v:multi_a(2,[73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<2;3>/*,[02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<2;3>/*,[8cb36b38/48h/1h/0h/2h]tpubDESTVwqbbaSoN2mPq7tcWkPBpRBkaEADrUzUhRTVnNef6oVn6w2PHL4zoUjUAJSPLJQRBetkgX4sDRcoaCyFHxqHGyWyaiV8REKDkh7zQac/<0;1>/*),older(6)),multi_a(2,[73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*,[02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*)})#kt0e0vfv"
 
 
 @pytest.fixture
@@ -2306,3 +2306,49 @@ def test_fee_percent_zero_out_amount(mocker, m5stickv, tdata):
     resume_fee_str, fee_percent = signer._get_resume_fee(1000, 0, {})
     assert fee_percent == 100.0
     assert "100.0%" in resume_fee_str
+
+
+def test_sign_trim_keeps_psbt_v2(m5stickv):
+    """A PSBTv2 must come back as a PSBTv2 that still derives the signed locktime"""
+    from embit import bip32, bip39, ec, script
+    from embit.bip32 import parse_path
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, DerivationPath
+    from embit.transaction import Transaction, TransactionInput, TransactionOutput
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.psbt import PSBTSigner
+    from krux.qr import FORMAT_NONE
+    from krux.wallet import Wallet
+
+    mnemonic = "abandon " * 11 + "about"
+    root = bip32.HDKey.from_seed(
+        bip39.mnemonic_to_seed(mnemonic), version=NETWORKS["test"]["xprv"]
+    )
+    derivation = parse_path("m/84h/1h/0h/0/0")
+    pubkey = root.derive(derivation).to_public().key
+    tx = Transaction(
+        vin=[TransactionInput(b"\x99" * 32, 0)],
+        vout=[TransactionOutput(90000, script.p2wpkh(pubkey))],
+    )
+    psbt = PSBT(tx, version=2)
+    psbt.locktime = 100
+    psbt.tx_modifiable_flags = 0b11
+    psbt.inputs[0].required_height_locktime = 800000
+    psbt.inputs[0].witness_utxo = TransactionOutput(100000, script.p2wpkh(pubkey))
+    psbt.inputs[0].bip32_derivations[pubkey] = DerivationPath(
+        root.my_fingerprint, derivation
+    )
+
+    wallet = Wallet(Key(mnemonic, TYPE_SINGLESIG, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    signer.sign()
+    trimmed = PSBT.parse(signer.psbt.serialize())
+
+    assert trimmed.version == 2
+    assert trimmed.locktime == 100
+    assert trimmed.inputs[0].required_height_locktime == 800000
+    assert trimmed.tx.locktime == 800000
+    # SIGHASH_ALL commits to every input and output
+    assert trimmed.tx_modifiable_flags == 0
+    signature = list(trimmed.inputs[0].partial_sigs.values())[0]
+    assert pubkey.verify(ec.Signature.parse(signature[:-1]), trimmed.sighash(0))

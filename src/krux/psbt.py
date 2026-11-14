@@ -147,6 +147,9 @@ class PSBTSigner:
 
     def validate(self):
         """Validates the PSBT"""
+        # Embit parses a PSBT without inputs, but there is nothing to sign in it
+        if not self.psbt.inputs:
+            raise ValueError("no inputs")
         # Any non_witness_utxo present must really hash to the prevout txid.
         self.psbt.verify(ignore_missing=True)
         # From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L110
@@ -521,8 +524,20 @@ class PSBTSigner:
         if not trim:
             return
 
-        trimmed_psbt = PSBT(self.psbt.tx)
+        trimmed_psbt = PSBT(self.psbt.tx, version=self.psbt.version)
+        if self.psbt.version == 2:
+            # Keep the fallback locktime and the TX_MODIFIABLE flags updated
+            # by the signer, so the coordinator gets back a matching PSBTv2
+            trimmed_psbt.locktime = self.psbt.locktime
+            trimmed_psbt.tx_modifiable_flags = self.psbt.tx_modifiable_flags
         for i, inp in enumerate(self.psbt.inputs):
+            # PSBTv2 input locktimes, which together with the fallback locktime
+            # derive the locktime that was signed
+            trimmed_psbt.inputs[i].required_time_locktime = inp.required_time_locktime
+            trimmed_psbt.inputs[i].required_height_locktime = (
+                inp.required_height_locktime
+            )
+
             # Copy the final_scriptwitness if present
             if inp.final_scriptwitness:
                 trimmed_psbt.inputs[i].final_scriptwitness = inp.final_scriptwitness
