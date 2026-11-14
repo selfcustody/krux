@@ -18,30 +18,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Setup Python
-        uses: actions/setup-python@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9.0.0
         with:
-          python-version: ${{ matrix.py-version }}
-      - uses: psf/black@stable
-        with:
-          options: "--check --verbose"
-          src: "./firmware/font"
-      - uses: psf/black@stable
-        with:
-          options: "--check --verbose"
-          src: "./firmware/scripts"
-      - uses: psf/black@stable
-        with:
-          options: "--check --verbose"
-          src: "./i18n"
-      - uses: psf/black@stable
-        with:
-          options: "--check --verbose"
-          src: "./src"
-      - uses: psf/black@stable
-        with:
-          options: "--check --verbose"
-          src: "./tests"
+          enable-cache: true
+      - name: Set up Python
+        run: uv python install ${{ matrix.py-version }}
+      - name: Sync dependencies
+        # only the dev group: black does not need the submodule dependencies
+        run: uv sync --frozen --only-group dev --python ${{ matrix.py-version }}
+      - name: Check formatting
+        run: uv run --frozen --no-sync --python ${{ matrix.py-version }} black --check --verbose firmware/font firmware/scripts i18n src tests
           
   lint-pylint:
     strategy:
