@@ -1718,6 +1718,57 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
         case_num += 1
 
 
+def test_outputs_op_return(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, OutputScope
+    from embit.script import Script
+    from embit.transaction import TransactionOutput
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG, P2WPKH
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+    from krux.format import format_address
+
+    wallet = Wallet(
+        Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"], script_type=P2WPKH)
+    )
+    # Pushes are dropped when the script is a single push, otherwise all bytes are shown
+    cases = [
+        (b"\x6a\x05hello", 0, "6865 6c6c 6f", "₿ 0.00 000 000"),
+        (b"\x6a\x4c\x05hello", 0, "6865 6c6c 6f", "₿ 0.00 000 000"),
+        (b"\x6a\x01\x01\x01\x02", 0, "0101 0102", "₿ 0.00 000 000"),
+        (
+            b"\x6a\x4c\x50" + bytes(range(80)),
+            0,
+            "0001 0203 0405 0607 0809 0a0b 0c0d 0e0f "
+            "1011 1213 1415 1617 1819 1a1b 1c1d 1e1f …",
+            "₿ 0.00 000 000",
+        ),
+        (b"\x6a", 1000, "", "₿ 0.00 001 000"),
+    ]
+    for script, value, data, amount in cases:
+        psbt = PSBT.parse(tdata.P2WPKH_PSBT)
+        psbt.outputs.append(OutputScope(vout=TransactionOutput(value, Script(script))))
+        signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+        outputs, _ = signer.outputs()
+        assert outputs[0].startswith("Inputs (1): ₿ 1.00 000 000\n\nSpend (2): ")
+        assert outputs[1:] == [
+            "1. Spend: \n\n"
+            + format_address("tb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx")
+            + "\n\n₿ 0.10 000 000",
+            "1. OP_RETURN: \n\n" + data + "\n\n" + amount,
+            "1. Change: \n\n"
+            + format_address("tb1q9u62588spffmq4dzjxsr5l297znf3z6j5p2688")
+            + "\n\n₿ 0.89 997 180",
+        ]
+    assert outputs[0] == (
+        "Inputs (1): ₿ 1.00 000 000\n\n"
+        "Spend (2): ₿ 0.10 001 000\n\n"
+        "Self-transfer or Change (1): ₿ 0.89 997 180\n\n"
+        "Fee: ₿ 0.00 001 820 (0.1%) ~12.9 sat/vB"
+    )
+
+
 def test_outputs_multisig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
