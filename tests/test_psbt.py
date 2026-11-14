@@ -152,10 +152,10 @@ def tdata(mocker):
     MINIS_P2WSH_PSBT_B64 = "cHNidP8BAKgCAAAAAZZZFyTIyHAAHpgx4RTJClY3DBD/wvYtvHlQBWiIcZydAAAAAAD9////AyChBwAAAAAAFgAUVpExmvtni79DrSaMRaiKiM2NT2tAQg8AAAAAACIAIJ/v3lcOin2rUPE1jh1mzXq69rL7BIX/ddrN29OP3A3zq40HAAAAAAAiACDfZk57e1AVXMBz66RuW/0oR+hUhBOkRWLyvAnNpy8cagAAAAAAAQCiAgAAAAABAU8jn+rTqB80fFdKbj1CdOpWL99Sy8fOXvs6iNQCMGMmAQAAAAD9////AQZ5HgAAAAAAIgAgGtm2ZA4YoTas6xCsjIQq247clo23ri8+wy0TRq/dMwcBQD/YWe8kwsYxkM6iEcf+7RaaFH3JU+nFKXO/gFUX23DngDPpbNA4sqoTRJ3/5io1PLJZdUZ+T699wfAsNhxhPOQAAAAAAQErBnkeAAAAAAAiACAa2bZkDhihNqzrEKyMhCrbjtyWjbeuLz7DLRNGr90zBwEFRCEDaJVy4osP7anWmBwCN9nl3tv+wW3nFD9oCgLtXRWfdYesc2R2qRRQZtW0nWWtzkLdyI8F8UQ/7KmQioitA///ALJoIgYDLMRSZBc2IWvKWJwMwQE43VdzU3UzmLMSnBUa9H/5NpIcAui/8jAAAIABAACAAAAAgAIAAIAAAAAAAQAAACIGA2iVcuKLD+2p1pgcAjfZ5d7b/sFt5xQ/aAoC7V0Vn3WHHHPF2gowAACAAQAAgAAAAIACAACAAAAAAAEAAAAAACICAnEftmGVk/vJgt8Yn9ZQ0htivPcj0929eTfkCa5qm+oEHALov/IwAACAAQAAgAAAAIACAACAAAAAAAMAAAAiAgKxoTXVKpUeAQDixkzK2NmSWE0DUbnae31O4vHK0SaoBBxzxdoKMAAAgAEAAIAAAACAAgAAgAAAAAADAAAAACICAnxuOjHDK8ueogVkcyIpbFujaTY/E2747lrLIcj51R5QHALov/IwAACAAQAAgAAAAIACAACAAQAAAAEAAAAiAgL2bDCgfbz9YefFtvrPTmwn+Ue6+suz/A6igeAWfm6UjRxzxdoKMAAAgAEAAIAAAACAAgAAgAEAAAABAAAAAA=="
     MINIS_P2WSH_PSBT_UR_PSBT = UR("crypto-psbt", Types.psbt_to_cbor(MINIS_P2WSH_PSBT))
 
-    SIGNED_MINIS_P2WSH_PSBT = b'psbt\xff\x01\x00\xa8\x02\x00\x00\x00\x01\x96Y\x17$\xc8\xc8p\x00\x1e\x981\xe1\x14\xc9\nV7\x0c\x10\xff\xc2\xf6-\xbcyP\x05h\x88q\x9c\x9d\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03 \xa1\x07\x00\x00\x00\x00\x00\x16\x00\x14V\x911\x9a\xfbg\x8b\xbfC\xad&\x8cE\xa8\x8a\x88\xcd\x8dOk@B\x0f\x00\x00\x00\x00\x00"\x00 \x9f\xef\xdeW\x0e\x8a}\xabP\xf15\x8e\x1df\xcdz\xba\xf6\xb2\xfb\x04\x85\xffu\xda\xcd\xdb\xd3\x8f\xdc\r\xf3\xab\x8d\x07\x00\x00\x00\x00\x00"\x00 \xdffN{{P\x15\\\xc0s\xeb\xa4n[\xfd(G\xe8T\x84\x13\xa4Eb\xf2\xbc\t\xcd\xa7/\x1cj\x00\x00\x00\x00\x00\x01\x00\xa2\x02\x00\x00\x00\x00\x01\x01O#\x9f\xea\xd3\xa8\x1f4|WJn=Bt\xeaV/\xdfR\xcb\xc7\xce^\xfb:\x88\xd4\x020c&\x01\x00\x00\x00\x00\xfd\xff\xff\xff\x01\x06y\x1e\x00\x00\x00\x00\x00"\x00 \x1a\xd9\xb6d\x0e\x18\xa16\xac\xeb\x10\xac\x8c\x84*\xdb\x8e\xdc\x96\x8d\xb7\xae/>\xc3-\x13F\xaf\xdd3\x07\x01@?\xd8Y\xef$\xc2\xc61\x90\xce\xa2\x11\xc7\xfe\xed\x16\x9a\x14}\xc9S\xe9\xc5)s\xbf\x80U\x17\xdbp\xe7\x803\xe9l\xd08\xb2\xaa\x13D\x9d\xff\xe6*5<\xb2YuF~O\xaf}\xc1\xf0,6\x1ca<\xe4\x00\x00\x00\x00\x01\x01+\x06y\x1e\x00\x00\x00\x00\x00"\x00 \x1a\xd9\xb6d\x0e\x18\xa16\xac\xeb\x10\xac\x8c\x84*\xdb\x8e\xdc\x96\x8d\xb7\xae/>\xc3-\x13F\xaf\xdd3\x07"\x02\x03h\x95r\xe2\x8b\x0f\xed\xa9\xd6\x98\x1c\x027\xd9\xe5\xde\xdb\xfe\xc1m\xe7\x14?h\n\x02\xed]\x15\x9fu\x87G0D\x02 +\xe4\x00\xa1\xcb\xf1\x87\x8b\xef\x07\x86\x89\x1aV\x99\x0b%3W\xfb\xe0v\xc2S\\\xaf\xc4T\x8ej\xe6p\x02 \x1d/\\\x9eS\x0e<\xff\xd0\x81UL\xd1\x15|\x1c}y\x8e?\xdc\xaa\xbc=6\xc1\xcc\x06ll\xca\xc9\x01\x01\x05D!\x03h\x95r\xe2\x8b\x0f\xed\xa9\xd6\x98\x1c\x027\xd9\xe5\xde\xdb\xfe\xc1m\xe7\x14?h\n\x02\xed]\x15\x9fu\x87\xacsdv\xa9\x14Pf\xd5\xb4\x9de\xad\xceB\xdd\xc8\x8f\x05\xf1D?\xec\xa9\x90\x8a\x88\xad\x03\xff\xff\x00\xb2h\x00\x00\x00\x00'
-    SIGNED_MINIS_P2WSH_PSBT_B43 = "1TFBDGI0U9N.JNF9JXZO5QI.R..ULE3SYFCOR2+C/2/N6GRF$UFW0$ONNTH.6JYIB/NLQX6H4IPU+P+BHLUB-40/ZB8IK$01$$CS3:5K6MD5R-1U7Z4Y$4QON+B9T:L3$V1OWNAAAK9PHL6:J:1FEHNJ1OV74-I*KNUCQ6G*JGP0/JC:N3Q-X-2-3+OF-:B$--I1TX8X7N+8606XP01.OV1CGGZ2R6R9+Z-KX9ZQXH-LXX75-P43.X6TO44.ARWD85RI1WHNLD903+IAV2FV6T5//T1EM9HNP*1EYDKUZN3*$U8L944W3K*Y2N0N7:AW-M:X0:PZURT:+4:ZBVOZ3$1BKQGHG1DDP8T8YO:NI7.NBVUVPN2-0-4:STS*GJM28W+B-J/T+IJTK4U.OV+MFEYLOC012A22J+L/37BE+E7PZ-2.7F:-UY/E$ZN1ZC2+P7V5FS4CIPRTDAGGCB-XBGZ7.3T7929P8$VPZQSAPU4V8/8BAR:PP/IE+DP.YWW1HJW/3JPDXE.Z90.BN91FW1HQSUVQDHL46*UXBX2BL9T23HT7F.TBS3:86MGX/I8M:YD*:+JMS$WKPWB65.T36WJP1.7A7H*K03GCUW0KGLU-H*5C6Z/0P*LQY2CL$-.P7XC1XG0HQPJM.FKGOC6S3+3KLZX:XW79I.-*4G.S6A05R:YE*6AU*UHA89R$RV.XJX5OQH:9UGKJ0X-JQ2EUTP2TBB/2B6933J.CNJW6M711I2GG-S9*8NTM*ONCBIBQ3BR87.HP17HKP*1P6$8*WRDVWUXRYRMDD9B-OG0+CZ7L3SKK0W64SUVH1-TRP8N$:.F1+6BQ0"
-    SIGNED_MINIS_P2WSH_PSBT_B58 = "3UCmDenEJ8kw38Fft6J4JkeeDFYGE139af8mZigLkDsjrthMUBvRfHGs8vFUB8R4LP71PWpogqs6qnCbALrfbFCntEtFGPUNLR4WPrZAe1NCDVwGKHiJfBhxZidHBW2AzLStnJ5utyBZaWG1EjbiPbnhjVNymwy83FQjHjJNr6cqYf71efwP1QXqM33cT5SiFiFw2ANxSKyJxbvWkvVexKqc46fBBkbBnhnPzh5ycnjjNL8v6vx2yzigCPNpRs1xXrPWvdCKf6dFQbuDneqS4uFuUvR1eWv7DfWDVoMZaxvvttKAoUhEELibnSJFkuQoh4637PRbRaAL4EeyRnYP4mqiKEXvTbT4Dp2mYBvW28eZ1irrXkWsLhNyRyuE54NahJpd9vVfpBpa7U5EDRReN83xSaiboWNJ8dxc6UdGAkKqYmDu5RmPAxKYfmTWmA2s1o1WWpNchgaqkYPygMR1VyV8jrbNc8jnhfzGiH9Jo2Wjc8snnUPHY7mGXMmcgvtZtVQqBgMpqfgo1p5JP94LdiTrvu6fPxA9a8GpRw2hXBjeZd1BszHXcPeVWWx8LLkCAn5BiVmRG4RFh8pSfz4yQd5VDWGvrSepRnToPDQNPAYLbQCMKMgUPf3m2uRQtRRqf5t7wcwnSAdCzYVqKScZV3SRWZM2aNZD8fDnj4XKd6TJmmBTuxe51h3odc7fJWqZju2MuJQqAV4grSwE24xk478pyfXSN7Jg9f54MucGTeGFuVFYyiTkozkLjfaXY9mB6SpCBP5wo1R"
-    SIGNED_MINIS_P2WSH_PSBT_B64 = "cHNidP8BAKgCAAAAAZZZFyTIyHAAHpgx4RTJClY3DBD/wvYtvHlQBWiIcZydAAAAAAD9////AyChBwAAAAAAFgAUVpExmvtni79DrSaMRaiKiM2NT2tAQg8AAAAAACIAIJ/v3lcOin2rUPE1jh1mzXq69rL7BIX/ddrN29OP3A3zq40HAAAAAAAiACDfZk57e1AVXMBz66RuW/0oR+hUhBOkRWLyvAnNpy8cagAAAAAAAQCiAgAAAAABAU8jn+rTqB80fFdKbj1CdOpWL99Sy8fOXvs6iNQCMGMmAQAAAAD9////AQZ5HgAAAAAAIgAgGtm2ZA4YoTas6xCsjIQq247clo23ri8+wy0TRq/dMwcBQD/YWe8kwsYxkM6iEcf+7RaaFH3JU+nFKXO/gFUX23DngDPpbNA4sqoTRJ3/5io1PLJZdUZ+T699wfAsNhxhPOQAAAAAAQErBnkeAAAAAAAiACAa2bZkDhihNqzrEKyMhCrbjtyWjbeuLz7DLRNGr90zByICA2iVcuKLD+2p1pgcAjfZ5d7b/sFt5xQ/aAoC7V0Vn3WHRzBEAiAr5AChy/GHi+8HhokaVpkLJTNX++B2wlNcr8RUjmrmcAIgHS9cnlMOPP/QgVVM0RV8HH15jj/cqrw9NsHMBmxsyskBAQVEIQNolXLiiw/tqdaYHAI32eXe2/7BbecUP2gKAu1dFZ91h6xzZHapFFBm1bSdZa3OQt3IjwXxRD/sqZCKiK0D//8AsmgAAAAA"
+    SIGNED_MINIS_P2WSH_PSBT = b'psbt\xff\x01\x00\xa8\x02\x00\x00\x00\x01\x96Y\x17$\xc8\xc8p\x00\x1e\x981\xe1\x14\xc9\nV7\x0c\x10\xff\xc2\xf6-\xbcyP\x05h\x88q\x9c\x9d\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03 \xa1\x07\x00\x00\x00\x00\x00\x16\x00\x14V\x911\x9a\xfbg\x8b\xbfC\xad&\x8cE\xa8\x8a\x88\xcd\x8dOk@B\x0f\x00\x00\x00\x00\x00"\x00 \x9f\xef\xdeW\x0e\x8a}\xabP\xf15\x8e\x1df\xcdz\xba\xf6\xb2\xfb\x04\x85\xffu\xda\xcd\xdb\xd3\x8f\xdc\r\xf3\xab\x8d\x07\x00\x00\x00\x00\x00"\x00 \xdffN{{P\x15\\\xc0s\xeb\xa4n[\xfd(G\xe8T\x84\x13\xa4Eb\xf2\xbc\t\xcd\xa7/\x1cj\x00\x00\x00\x00\x00\x01\x01+\x06y\x1e\x00\x00\x00\x00\x00"\x00 \x1a\xd9\xb6d\x0e\x18\xa16\xac\xeb\x10\xac\x8c\x84*\xdb\x8e\xdc\x96\x8d\xb7\xae/>\xc3-\x13F\xaf\xdd3\x07"\x02\x03h\x95r\xe2\x8b\x0f\xed\xa9\xd6\x98\x1c\x027\xd9\xe5\xde\xdb\xfe\xc1m\xe7\x14?h\n\x02\xed]\x15\x9fu\x87G0D\x02 +\xe4\x00\xa1\xcb\xf1\x87\x8b\xef\x07\x86\x89\x1aV\x99\x0b%3W\xfb\xe0v\xc2S\\\xaf\xc4T\x8ej\xe6p\x02 \x1d/\\\x9eS\x0e<\xff\xd0\x81UL\xd1\x15|\x1c}y\x8e?\xdc\xaa\xbc=6\xc1\xcc\x06ll\xca\xc9\x01\x01\x05D!\x03h\x95r\xe2\x8b\x0f\xed\xa9\xd6\x98\x1c\x027\xd9\xe5\xde\xdb\xfe\xc1m\xe7\x14?h\n\x02\xed]\x15\x9fu\x87\xacsdv\xa9\x14Pf\xd5\xb4\x9de\xad\xceB\xdd\xc8\x8f\x05\xf1D?\xec\xa9\x90\x8a\x88\xad\x03\xff\xff\x00\xb2h\x00\x00\x00\x00'
+    SIGNED_MINIS_P2WSH_PSBT_B43 = "R3P$B6$NWMQ02LYCJXDP9+I-1P8FBX:BT0/NYX+VXIJGAZ9+1265.O.Y4KYKB:BG.:LQFAAW/*TXOG:QGC8EGW.GF+-6.1:VJGHZ36.3M2AH22AC5*.CE80C4XNL.61AIZ$XPOK0+68::6EOY3-0ZY1FWGBOIJKM*/30G44-KQKK3P/ECTDXXMU3E9B-Y+-TNWGF6S8X-K-S-/41OQNRKU0FY67E27WEK+IA15-KRQX0ZO8FDQ9ID$WBMD-S+2+84CMM.I0U9R$8$8X8IR68HGL09A29KPMEG5/*TYL8WM6EN*I9X*L+X0M*F$G2KX0RQ5GZX9W:H66YSV8PA117SAES446-SJB449E:L*5QN.9H5W817O7.3P.$VL/WCG*09JO1H4YP48X9691VZBH76P+Y1HGTOV$0FT8ZZFA9LC5TEAUHOMQN+3U:-6Y521Y-/SX+5VNCTF$.-SNUPMOEX+Z81J+4A*YT$9LTEW/Y4GNC2CHCYHI8B2Z-ESR009AZZQGA.SG:9X.XEO5YDKKWY66US:T23L+./B39:KW*HDAO$/MSHUEIU:UEP3SZBZ3-*F:GJ0KNITDI0XGB:ZEOT"
+    SIGNED_MINIS_P2WSH_PSBT_B58 = "dxJdhwffFEKPZWZfrt9sykgqAByxXdaCuJHUwgN7pMTSy3AwnHx7mn1L95CpGkc2VWpvraX2qp3pgUqqLt14fZNBdHbyEQYjyVGqoifuFNtHzFmtjhUtX9wopMxuASV2At2uwa5LffSYCCG7HwLDMb7G9iGu8EcdHqBFz4M5qW99EdbsNmiRHeiih7aTvmGy6hf3UfX3cciAWae2DQhfw4BTAeP6VmyEmyx8MyZwKSdCZEEfGXiiuEggacV4zxTBJGAHCaNdxDBxRAJWfsBDxW81DuF77eqRYBFFkB7tEz2Eui36wNc9JSokQUucA8oktuUtMTsyiVj8yAPigHdpLtLrXBUBZJMw6hDwPktnobMLcStbHm32JsKdy77SzrfA44zbJHYKJ7zNCYmGCSE1m3WBd7AWF6ZYrQDZwQaSqBpSqZE4wX3WijLaEHkwuSmCungi5s6aWmR2pNbyk7m8QTUcMXW5SzbCqZwjcQ3kkdCm9PwG87VAVWggN4w1g1YwFfa61JMF4uCTLydbUpC4LLisAuped7W4c8FboAPQj"
+    SIGNED_MINIS_P2WSH_PSBT_B64 = "cHNidP8BAKgCAAAAAZZZFyTIyHAAHpgx4RTJClY3DBD/wvYtvHlQBWiIcZydAAAAAAD9////AyChBwAAAAAAFgAUVpExmvtni79DrSaMRaiKiM2NT2tAQg8AAAAAACIAIJ/v3lcOin2rUPE1jh1mzXq69rL7BIX/ddrN29OP3A3zq40HAAAAAAAiACDfZk57e1AVXMBz66RuW/0oR+hUhBOkRWLyvAnNpy8cagAAAAAAAQErBnkeAAAAAAAiACAa2bZkDhihNqzrEKyMhCrbjtyWjbeuLz7DLRNGr90zByICA2iVcuKLD+2p1pgcAjfZ5d7b/sFt5xQ/aAoC7V0Vn3WHRzBEAiAr5AChy/GHi+8HhokaVpkLJTNX++B2wlNcr8RUjmrmcAIgHS9cnlMOPP/QgVVM0RV8HH15jj/cqrw9NsHMBmxsyskBAQVEIQNolXLiiw/tqdaYHAI32eXe2/7BbecUP2gKAu1dFZ91h6xzZHapFFBm1bSdZa3OQt3IjwXxRD/sqZCKiK0D//8AsmgAAAAA"
     SIGNED_MINIS_P2WSH_PSBT_UR_PSBT = UR(
         "crypto-psbt", Types.psbt_to_cbor(SIGNED_MINIS_P2WSH_PSBT)
     )
@@ -1257,6 +1257,37 @@ def test_sign_miniscript(mocker, m5stickv, tdata):
         signer = PSBTSigner(wallet, case[0], case[1])
         signer.sign()
         assert signer.psbt_qr() == (case[2], case[1])
+
+
+def test_sign_trims_previous_tx_from_segwit_inputs(mocker, m5stickv, tdata):
+    """The previous transaction verifies a segwit input's amount, but only
+    legacy inputs carry it back in the signed QR PSBT"""
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG, TYPE_MINISCRIPT
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    # Segwit input that carries both UTXO fields
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, tdata.MINIS_P2WSH_PSBT, FORMAT_NONE)
+    assert signer.psbt.inputs[0].witness_utxo
+    assert signer.psbt.inputs[0].non_witness_utxo
+    signer.sign()
+    assert signer.psbt.inputs[0].partial_sigs
+    assert signer.psbt.inputs[0].witness_utxo
+    assert signer.psbt.inputs[0].non_witness_utxo is None
+
+    # Untrimmed, as saved to SD card, it stays
+    signer = PSBTSigner(wallet, tdata.MINIS_P2WSH_PSBT, FORMAT_NONE)
+    signer.sign(trim=False)
+    assert signer.psbt.inputs[0].non_witness_utxo
+
+    # Legacy inputs: the previous transaction is their only UTXO field
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, tdata.P2PKH_PSBT, FORMAT_NONE)
+    signer.sign()
+    assert all(inp.non_witness_utxo for inp in signer.psbt.inputs)
 
 
 def test_sign_miniscript_from_sdcard(mocker, m5stickv, tdata):
