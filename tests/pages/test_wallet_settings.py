@@ -1052,3 +1052,37 @@ def test_change_derivation_path_not_hardened_node(amigo, mocker, tdata):
     assert ctx.wallet.key.derivation_str() == "m/48h/0h/0h/2"
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     wallet_settings.prompt.assert_has_calls(prompt_calls)
+
+
+def test_change_policy_from_p2sh_multisig(m5stickv, mocker, tdata):
+    from krux.pages.wallet_settings import WalletSettings
+    from krux.wallet import Wallet
+    from krux.key import Key, TYPE_SINGLESIG, P2WPKH
+    from krux.pages import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE,  # Go to "Policy Type"
+        BUTTON_ENTER,  # Enter "Policy Type"
+        BUTTON_ENTER,  # Pick Single-sig
+        *([BUTTON_PAGE] * 2),  # P2SH is not single-sig, go to Native Segwit
+        BUTTON_ENTER,  # Confirm Native Segwit
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+
+    # P2SH multisig keys carry account_index=None
+    ctx = create_ctx(mocker, BTN_SEQUENCE, Wallet(tdata.LEGACY1_MULTISIG_KEY))
+    wallet_settings = WalletSettings(ctx)
+    mnemonic = ctx.wallet.key.mnemonic
+    network, policy_type, script_type, account, derivation_path = (
+        wallet_settings.customize_wallet(ctx.wallet.key)
+    )
+
+    assert policy_type == TYPE_SINGLESIG
+    assert script_type == P2WPKH
+    assert derivation_path == "m/84h/0h/0h"
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # Changing the passphrase rebuilds the key from the account index
+    key = Key(mnemonic, policy_type, network, "", account, script_type)
+    assert key.derivation == "m/84h/0h/0h"
