@@ -195,6 +195,7 @@ translation_array = [
     "Média",
     "Mensagem",
     "Mensagem:",
+    "Entropia mínima:",
     "Miniscript",
     "Coordenadas X espelhadas",
     "Arquivo de assinatura não encontrado",
