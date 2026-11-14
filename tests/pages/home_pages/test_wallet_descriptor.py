@@ -975,3 +975,385 @@ def test_wallet_load_camera_back_is_silent(mocker, m5stickv, tdata):
 
     # "Back" is not a failure - it must not flash an error
     assert_not_flashed(ctx, "Failed to load")
+
+
+# ---------- NFC card ----------
+#
+# The point of these is that NFC adds a medium and not a parser: a card hands
+# back a sealed envelope, and everything that decides whether it is a descriptor
+# is the same code a QR code or an SD card file goes through.
+
+
+def _descriptor_of(specter_json):
+    """The raw descriptor, which is what an export actually writes to a card"""
+    import json
+
+    return json.loads(specter_json)["descriptor"]
+
+
+def _seal(plaintext, label="2 of 3 multisig", key="pass", iterations=10000):
+    """A genuine KEF envelope - real AES, the bytes a card actually carries"""
+    from krux import kef
+
+    version = 0
+    cipher = kef.Cipher(key, label, iterations)
+    payload = cipher.encrypt(plaintext, version)
+    return kef.wrap(label, version, iterations, payload), key
+
+
+def _mock_nfc_card(mocker, envelope, key):
+    """An NFC facade holding one descriptor record, with the password answered"""
+    from krux.pages.encryption_ui import KEFEnvelope
+
+    nfc = mocker.MagicMock()
+    nfc.read_record.return_value = envelope
+    mocker.patch("krux.nfc.NFC", mocker.MagicMock(return_value=nfc))
+    mocker.patch.object(KEFEnvelope, "public_info_ui", return_value=True)
+
+    def supply_key(self, creating=True):
+        setattr(self, "_KEFEnvelope__key", key)
+        return True
+
+    mocker.patch.object(KEFEnvelope, "input_key_ui", supply_key)
+    return nfc
+
+
+@pytest.fixture
+def nfc_on(m5stickv):
+    from krux.krux_settings import Settings
+
+    Settings().hardware.nfc.enabled = True
+    yield m5stickv
+    Settings().hardware.nfc.enabled = False
+
+
+def test_load_descriptor_from_nfc_card(mocker, nfc_on, tdata):
+    """End to end: a sealed 2 of 3 comes off a card and becomes the wallet"""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.nfc import RECORD_DESCRIPTOR
+
+    descriptor = _descriptor_of(tdata.SPECTER_MULTISIG_WALLET_DATA)
+    envelope, key = _seal(descriptor.encode())
+    nfc = _mock_nfc_card(mocker, envelope, key)
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load?
+        BUTTON_PAGE,  # Load from camera -> Load from SD card
+        BUTTON_PAGE,  # -> Load from NFC card
+        BUTTON_ENTER,  # Load from NFC card
+        BUTTON_ENTER,  # Loaded wallet confirmation
+    ]
+    ctx = create_ctx(mocker, btn_seq, Wallet(tdata.MULTISIG_12_WORD_KEY))
+    WalletDescriptor(ctx).wallet()
+
+    nfc.read_record.assert_called_once_with(RECORD_DESCRIPTOR)
+    nfc.deinit.assert_called_once()  # antenna down before the password prompt
+    assert ctx.wallet.is_loaded()
+    assert ctx.wallet.is_multisig()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        bytes(range(16)),  # raw BIP39 entropy - decrypts, is not text
+        b"abandon abandon abandon",  # decrypts, is text, is not a descriptor
+        b"wsh(sortedmulti(2,truncated",  # decrypts, looks like one, is not
+    ],
+)
+def test_a_card_that_is_not_a_descriptor_loads_nothing(mocker, nfc_on, tdata, payload):
+    """Decrypting does not make these bytes a wallet. The password can be right
+    and the record type can match, and the descriptor parser still has the last
+    word - the same one it has over a QR code."""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    envelope, key = _seal(payload)
+    _mock_nfc_card(mocker, envelope, key)
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load?
+        BUTTON_PAGE,  # -> Load from SD card
+        BUTTON_PAGE,  # -> Load from NFC card
+        BUTTON_ENTER,  # Load from NFC card
+        BUTTON_ENTER,  # dismiss the failure
+    ]
+    ctx = create_ctx(mocker, btn_seq, Wallet(tdata.MULTISIG_12_WORD_KEY))
+    WalletDescriptor(ctx).wallet()
+
+    assert not ctx.wallet.is_loaded()
+
+
+def test_the_card_option_is_absent_while_nfc_is_off(mocker, m5stickv, tdata):
+    """With the setting off the load menu is the one it has always been, which
+    is also why no existing button sequence in this file had to change."""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    import krux.pages as pages
+
+    captured = []
+
+    class FakeMenu:
+        back_index = 2
+
+        def __init__(self, _ctx, items, **_kwargs):
+            captured.extend(items)
+
+        def run_loop(self, *_args, **_kwargs):
+            return 2, None  # Back
+
+        def run(self, *_args, **_kwargs):
+            return 2, None
+
+    mocker.patch.object(pages, "Menu", FakeMenu)
+    ctx = create_ctx(mocker, [], Wallet(tdata.MULTISIG_12_WORD_KEY))
+    WalletDescriptor(ctx)._load_wallet_data()
+
+    labels = [item[0] for item in captured]
+    assert labels == ["Load from camera", "Load from SD card"]
+
+
+def test_store_descriptor_on_nfc_card(mocker, nfc_on, tdata):
+    """The encrypted export gains a card as a destination, next to SD"""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.pages.qr_view import SeedQRView
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.nfc import RECORD_DESCRIPTOR
+    from krux.qr import FORMAT_NONE
+
+    envelope = b"SEALED-DESCRIPTOR-ENVELOPE"
+    mocker.patch.object(KEFEnvelope, "seal_ui", return_value=envelope)
+    mocker.patch.object(SeedQRView, "display_qr", return_value=None)
+
+    nfc = mocker.MagicMock()
+    nfc.has_record.return_value = False
+    mocker.patch("krux.nfc.NFC", mocker.MagicMock(return_value=nfc))
+
+    wallet = Wallet(tdata.MULTISIG_12_WORD_KEY)
+    wallet.load(tdata.SPECTER_MULTISIG_WALLET_DATA, FORMAT_NONE)
+
+    btn_seq = [
+        BUTTON_PAGE,  # Plaintext -> Encrypted
+        BUTTON_ENTER,  # Encrypted
+        BUTTON_ENTER,  # Store on NFC Card?
+    ]
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    WalletDescriptor(ctx).wallet()
+
+    nfc.write_record.assert_called_once_with(envelope, RECORD_DESCRIPTOR)
+    nfc.deinit.assert_called_once()
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+def test_declining_the_card_leaves_the_reader_alone(mocker, nfc_on, tdata):
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.pages.qr_view import SeedQRView
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_NONE
+
+    mocker.patch.object(KEFEnvelope, "seal_ui", return_value=b"SEALED")
+    mocker.patch.object(SeedQRView, "display_qr", return_value=None)
+    nfc = mocker.MagicMock()
+    mocker.patch("krux.nfc.NFC", mocker.MagicMock(return_value=nfc))
+
+    wallet = Wallet(tdata.MULTISIG_12_WORD_KEY)
+    wallet.load(tdata.SPECTER_MULTISIG_WALLET_DATA, FORMAT_NONE)
+
+    btn_seq = [
+        BUTTON_PAGE,  # Plaintext -> Encrypted
+        BUTTON_ENTER,  # Encrypted
+        BUTTON_PAGE,  # Store on NFC Card? -> No
+    ]
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    WalletDescriptor(ctx).wallet()
+
+    nfc.init.assert_not_called()  # declining never opens the bus
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+# ---------- Plaintext records ----------
+#
+# A card may hold a descriptor unsealed, the same way a .txt on SD may. What it
+# may never hold unsealed is a seed.
+
+
+def _plain_card(mocker, payload):
+    """An NFC facade holding one unsealed descriptor record"""
+    nfc = mocker.MagicMock()
+    nfc.read_record.return_value = payload
+    mocker.patch("krux.nfc.NFC", mocker.MagicMock(return_value=nfc))
+    return nfc
+
+
+def _load_from_card_btns():
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    return [
+        BUTTON_ENTER,  # Load?
+        BUTTON_PAGE,  # -> Load from SD card
+        BUTTON_PAGE,  # -> Load from NFC card
+        BUTTON_ENTER,  # Load from NFC card
+        BUTTON_ENTER,  # confirmation or failure
+    ]
+
+
+def test_load_a_plaintext_descriptor_from_a_card(mocker, nfc_on, tdata):
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from embit.descriptor.checksum import add_checksum
+
+    descriptor = add_checksum(_descriptor_of(tdata.SPECTER_MULTISIG_WALLET_DATA))
+    _plain_card(mocker, descriptor.encode())
+
+    ctx = create_ctx(mocker, _load_from_card_btns(), Wallet(tdata.MULTISIG_12_WORD_KEY))
+    WalletDescriptor(ctx).wallet()
+
+    assert ctx.wallet.is_loaded()
+    assert ctx.wallet.is_multisig()
+
+
+def test_an_unsealed_card_without_a_checksum_is_refused(mocker, nfc_on, tdata):
+    """Unsealed, the checksum is the only integrity the record has, so it is
+    required rather than merely honoured when present."""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+
+    descriptor = _descriptor_of(tdata.SPECTER_MULTISIG_WALLET_DATA).split("#")[0]
+    _plain_card(mocker, descriptor.encode())
+
+    ctx = create_ctx(mocker, _load_from_card_btns(), Wallet(tdata.MULTISIG_12_WORD_KEY))
+    WalletDescriptor(ctx).wallet()
+
+    assert not ctx.wallet.is_loaded()
+
+
+def test_a_card_failing_its_checksum_reports_once(mocker, nfc_on, tdata):
+    """The refusal ends the load the way every other failed load does. Only a
+    bare None tells _load_wallet the failure was already reported; anything else
+    goes on to load an empty wallet and stacks "Invalid wallet" on top of
+    "Failed to load"."""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    descriptor = _descriptor_of(tdata.SPECTER_MULTISIG_WALLET_DATA).split("#")[0]
+    _plain_card(mocker, descriptor.encode())
+
+    btn_seq = [
+        BUTTON_ENTER,  # Load?
+        BUTTON_PAGE,  # -> Load from SD card
+        BUTTON_PAGE,  # -> Load from NFC card
+        BUTTON_ENTER,  # Load from NFC card
+    ]
+    ctx = create_ctx(mocker, btn_seq, Wallet(tdata.MULTISIG_12_WORD_KEY))
+    WalletDescriptor(ctx).wallet()
+
+    assert not ctx.wallet.is_loaded()
+    assert ctx.display.flash_text.call_count == 1
+    shown = [str(call[0][0]) for call in ctx.display.draw_centered_text.call_args_list]
+    assert not any("Invalid wallet" in text for text in shown)
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        b"\xff\xfe\x00\x01 not text at all",  # does not decode
+        "wsh(\u00a3)#abcdefgh".encode(),  # decodes, not a checksummable string
+        b"#",  # a separator and nothing else
+        b"",
+    ],
+)
+def test_an_unsealed_card_of_rubbish_is_refused(mocker, nfc_on, tdata, payload):
+    """Whatever a card hands back, deciding it is not a descriptor happens
+    without an exception reaching the user."""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+
+    _plain_card(mocker, payload)
+    ctx = create_ctx(mocker, _load_from_card_btns(), Wallet(tdata.MULTISIG_12_WORD_KEY))
+    WalletDescriptor(ctx).wallet()
+
+    assert not ctx.wallet.is_loaded()
+
+
+def test_a_corrupted_derivation_on_an_unsealed_card_is_caught(mocker, nfc_on, tdata):
+    """The bit embit would have let through. Only the xpubs are base58check;
+    a flipped bit in a derivation path changes which addresses the wallet
+    watches and nothing else in the string would notice."""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from embit.descriptor.checksum import add_checksum
+    from embit.descriptor import Descriptor
+
+    descriptor = _descriptor_of(tdata.SPECTER_MULTISIG_WALLET_DATA)
+    carded = add_checksum(descriptor)
+    corrupted = carded.replace("/48h/0h/0h/2h]xpub6EKm", "/48h/0h/1h/2h]xpub6EKm", 1)
+    assert corrupted != carded
+    # embit itself has no objection, which is the whole point
+    Descriptor.from_string(corrupted)
+
+    _plain_card(mocker, corrupted.encode())
+    ctx = create_ctx(mocker, _load_from_card_btns(), Wallet(tdata.MULTISIG_12_WORD_KEY))
+    WalletDescriptor(ctx).wallet()
+
+    assert not ctx.wallet.is_loaded()
+
+
+def test_store_a_plaintext_descriptor_writes_its_checksum(mocker, nfc_on, tdata):
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.nfc import RECORD_DESCRIPTOR
+    from krux.qr import FORMAT_NONE
+    from embit.descriptor.checksum import checksum
+
+    nfc = mocker.MagicMock()
+    nfc.has_record.return_value = False
+    mocker.patch("krux.nfc.NFC", mocker.MagicMock(return_value=nfc))
+    # The QR display is not what this is about
+    mocker.patch.object(WalletDescriptor, "display_wallet", return_value=None)
+
+    wallet = Wallet(tdata.MULTISIG_12_WORD_KEY)
+    wallet.load(tdata.SPECTER_MULTISIG_WALLET_DATA, FORMAT_NONE)
+
+    btn_seq = [
+        BUTTON_ENTER,  # Plaintext
+        BUTTON_ENTER,  # Store on NFC Card?
+    ]
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    WalletDescriptor(ctx).wallet()
+
+    written, record_type = nfc.write_record.call_args[0]
+    assert record_type == RECORD_DESCRIPTOR
+    body, separator, provided = written.decode().partition("#")
+    assert separator and checksum(body) == provided
+    assert body == wallet.descriptor.to_string()
+
+
+def test_a_seed_card_is_never_read_unsealed(mocker, nfc_on):
+    """The other half of allowing plaintext descriptors: the mnemonic loader
+    takes only a sealed record, so a card carrying words in the clear has no
+    way in however it is labelled."""
+    from krux.pages.encryption_ui import LoadEncryptedMnemonic
+    from krux.pages import MENU_CONTINUE
+    from krux.nfc import RECORD_KEF
+
+    nfc = mocker.MagicMock()
+    nfc.read_record.return_value = (
+        b"olympic term tissue route sense program under choose bean emerge "
+        b"velvet absurd"
+    )
+    mocker.patch("krux.nfc.NFC", mocker.MagicMock(return_value=nfc))
+
+    ctx = create_ctx(mocker, [])
+    assert LoadEncryptedMnemonic(ctx).load_from_nfc() == MENU_CONTINUE
+    nfc.read_record.assert_called_once_with(RECORD_KEF)
+    ctx.display.flash_text.assert_called_once()

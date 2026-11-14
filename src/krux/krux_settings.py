@@ -371,6 +371,23 @@ class DisplaySettings(SettingsNamespace):
         return options[attr]
 
 
+class NFCSettings(SettingsNamespace):
+    """NFC card storage settings"""
+
+    namespace = "settings.hardware.nfc"
+    enabled = CategorySetting("enabled", False, [False, True])
+    sda_pin = NumberSetting(int, "sda_pin", DEFAULT_TX_PIN, [0, 47])
+    scl_pin = NumberSetting(int, "scl_pin", DEFAULT_RX_PIN, [0, 47])
+
+    def label(self, attr):
+        """Returns a label for UI when given a setting name or namespace"""
+        return {
+            "enabled": t("Enabled"),
+            "sda_pin": t("SDA Pin"),
+            "scl_pin": t("SCL Pin"),
+        }[attr]
+
+
 class HardwareSettings(SettingsNamespace):
     """Hardware Related Settings"""
 
@@ -379,6 +396,7 @@ class HardwareSettings(SettingsNamespace):
     def __init__(self):
         self.printer = PrinterSettings()
         self.buttons = ButtonsSettings()
+        self.nfc = NFCSettings()
         if board.config["krux"]["display"].get("touch", False):
             self.touch = TouchSettings()
         if kboard.is_amigo:
@@ -393,6 +411,7 @@ class HardwareSettings(SettingsNamespace):
             "printer": t("Printer"),
         }
         hardware_menu["buttons"] = t("Buttons")
+        hardware_menu["nfc"] = "NFC"
         if board.config["krux"]["display"].get("touch", False):
             hardware_menu["touchscreen"] = t("Touchscreen")
         if kboard.is_amigo:

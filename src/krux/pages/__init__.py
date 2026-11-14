@@ -75,6 +75,7 @@ BATTERY_HEIGHT = 7
 
 LOAD_FROM_CAMERA = 0
 LOAD_FROM_SD = 1
+LOAD_FROM_NFC = 2
 
 EXTRA_MNEMONIC_LENGTH_FLAG = 48
 
@@ -108,19 +109,23 @@ class Page:
             self.ctx.input.touch.clear_regions()
         return ESC_KEY if answer else None
 
-    def load_method(self):
-        """Prompts user to choose a method to load data from"""
-        load_menu = Menu(
-            self.ctx,
-            [
-                (t("Load from camera"), lambda: None),
-                (
-                    t("Load from SD card"),
-                    None if not self.has_sd_card() else lambda: None,
-                ),
-            ],
-            back_status=lambda: None,
-        )
+    def load_method(self, nfc=False):
+        """Prompts user to choose a method to load data from.
+
+        nfc is opt in per caller rather than global: a card can only be offered
+        where something on the other side knows how to validate what comes off
+        it. With the setting off the menu is the one it has always been.
+        """
+        load_items = [
+            (t("Load from camera"), lambda: None),
+            (
+                t("Load from SD card"),
+                None if not self.has_sd_card() else lambda: None,
+            ),
+        ]
+        if nfc and Settings().hardware.nfc.enabled:
+            load_items.append((t("Load from NFC card"), lambda: None))
+        load_menu = Menu(self.ctx, load_items, back_status=lambda: None)
         index, _ = load_menu.run_loop()
         return index
 

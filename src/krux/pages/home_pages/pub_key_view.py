@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 from ...display import FONT_HEIGHT
-from ...krux_settings import t
+from ...krux_settings import t, Settings
 from .. import (
     Page,
     Menu,
@@ -58,6 +58,12 @@ class PubkeyView(Page):
                 save_as_binary=False,
             )
 
+        def _store_xpub_on_nfc(version):
+            from ..nfc_ui import StoreOnNFC
+
+            xpub = self.ctx.wallet.key.key_expression(version)
+            return StoreOnNFC(self.ctx).write_xpub(xpub.encode())
+
         def _pub_key_text(version):
             from ...themes import theme
 
@@ -71,6 +77,10 @@ class PubkeyView(Page):
                     ),
                 ),
             ]
+            if Settings().hardware.nfc.enabled:
+                pub_text_menu_items.append(
+                    (t("Store on NFC Card"), lambda: _store_xpub_on_nfc(version))
+                )
             full_pub_key = self.ctx.wallet.key.account_pubkey_str(version)
             info_text = (
                 "\n\n"
