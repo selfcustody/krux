@@ -535,8 +535,10 @@ class PSBTSigner:
             if inp.witness_utxo:
                 trimmed_psbt.inputs[i].witness_utxo = inp.witness_utxo
 
-            # Preserve non-witness UTXO if present (for legacy inputs)
-            if inp.non_witness_utxo:
+            # Preserve non-witness UTXO for legacy inputs only. On segwit inputs
+            # the previous transaction is used here to verify the amount, and
+            # witness_utxo is all the signed PSBT needs to carry back.
+            if inp.non_witness_utxo and not (inp.witness_utxo and is_segwit_input(inp)):
                 trimmed_psbt.inputs[i].non_witness_utxo = inp.non_witness_utxo
 
             # Preserve redeem_script for P2SH or nested SegWit
