@@ -1,7 +1,11 @@
 # Usage
 
-Krux Installer bundles one version of the Krux firmware. Once installed, it can
-flash your device offline. To use a different firmware version, download an
+Krux Installer bundles one version of the Krux firmware and can flash your
+device offline. Use USB flashing for the first installation or to reinstall
+after a [Wipe device](#wipe-device) procedure. For subsequent firmware updates,
+we recommend the [air-gapped update](#air-gapped-update) using a microSD card.
+
+To flash a different firmware version over USB, download an
 [installer release](https://github.com/selfcustody/krux-installer/releases) that
 bundles it or follow the [manual installation instructions](../from-pre-built-release.md).
 
@@ -39,7 +43,8 @@ Models unavailable for the bundled firmware are dimmed.
 1. Connect your device to the computer with a USB data cable and turn it on.
 2. Confirm that the model shown next to **Device** matches your hardware, then
    click **Flash firmware**.
-3. Leave the device connected until the installer displays **DONE**.
+3. Leave the USB cable connected and the device powered on until the installer
+   displays **DONE**. Do not disconnect it while flashing.
 
 <img width="640" src="../../../../img/krux-installer/device_selected.png" alt="Krux Installer with Amigo selected and Flash firmware enabled">
 
@@ -57,15 +62,18 @@ If flashing fails or stalls while trying to enter K210 ROM ISP mode, see
 
 ### Air-gapped update
 
-After the initial USB installation, you can install subsequent updates using
-the [microSD card update guide](../../features/sd-card-update.md).
+After the initial USB installation, follow the
+[microSD card update guide](../../features/sd-card-update.md) to update firmware
+without connecting the device to a computer over USB.
 
 ## Settings
 
-Open **Settings** to change **Flash baudrate**, which controls how fast firmware
-is written over USB, or **Locale**, which changes the installer language.
+Open **Settings** to configure **Asset's destination path**, which determines
+where downloaded assets are saved; **Flash baudrate**, which controls how fast
+firmware is written over USB; and **Locale**, which changes the installer
+language.
 
-<img width="640" src="../../../../img/krux-installer/app_settings.png" alt="Krux Installer settings with flash baudrate and locale options">
+<img width="640" src="../../../../img/krux-installer/app_settings.png" alt="Krux Installer settings showing asset destination path, flash baudrate, and locale options">
 
 ## Wipe device
 
@@ -74,7 +82,8 @@ wallet recovery information you need before proceeding.
 
 1. Connect the device over USB and select its model.
 2. Click **Wipe device** and read the warning. Click **Proceed** to start the wipe.
-3. Leave the device connected until the installer displays **DONE**. Disconnect
+3. Leave the USB cable connected and the device powered on until the installer
+   displays **DONE**. Do not disconnect it while wiping. Disconnect
    and reconnect it before flashing the firmware again.
 
 <img width="640" src="../../../../img/krux-installer/wipe_warn.png" alt="Warning that a full wipe permanently erases data and firmware">
