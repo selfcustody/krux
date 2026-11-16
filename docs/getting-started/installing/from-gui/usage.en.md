@@ -68,12 +68,10 @@ without connecting the device to a computer over USB.
 
 ## Settings
 
-Open **Settings** to configure **Asset's destination path**, which determines
-where downloaded assets are saved; **Flash baudrate**, which controls how fast
-firmware is written over USB; and **Locale**, which changes the installer
-language.
+Open **Settings** to change **Flash baudrate**, which controls how fast firmware
+is written over USB, or **Locale**, which changes the installer language.
 
-<img width="960" src="../../../../img/krux-installer/app_settings.png" alt="Krux Installer settings showing asset destination path, flash baudrate, and locale options">
+<img width="960" src="../../../../img/krux-installer/app_settings.png" alt="Krux Installer settings showing asset destination path, flash baudrate, and locale">
 
 ## Wipe device
 
