@@ -73,7 +73,7 @@ where downloaded assets are saved; **Flash baudrate**, which controls how fast
 firmware is written over USB; and **Locale**, which changes the installer
 language.
 
-<img width="640" src="../../../../img/krux-installer/app_settings.png" alt="Krux Installer settings showing asset destination path, flash baudrate, and locale options">
+<img width="960" src="../../../../img/krux-installer/app_settings.png" alt="Krux Installer settings showing asset destination path, flash baudrate, and locale options">
 
 ## Wipe device
 
