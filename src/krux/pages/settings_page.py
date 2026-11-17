@@ -447,6 +447,9 @@ class SettingsPage(Page):
                 self.ctx.display.draw_centered_text(
                     t('Press "PREVIOUS" (up arrow) button to keep this setting.')
                 )
+                # After a touch, the next button press only activates the
+                # buttons: without this, that press would not count as PREVIOUS
+                self.ctx.input.buttons_active = True
                 btn = self.ctx.input.wait_for_button(
                     block=False, wait_duration=DISPLAY_TEST_TIME
                 )

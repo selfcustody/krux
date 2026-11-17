@@ -445,6 +445,51 @@ def test_change_display_lcd_on_amigo(amigo, mocker):
     ctx.power_manager.reboot.assert_called()
 
 
+@pytest.mark.parametrize("pressed, kept", [("page_prev", True), ("page", False)])
+def test_change_display_lcd_on_amigo_using_touch(amigo, mocker, pressed, kept):
+    """Using touch, change LCD Type and press PREVIOUS as asked: it is kept"""
+    import time
+    from krux.input import Input, BUTTON_TOUCH, BUTTON_PAGE, BUTTON_PAGE_PREV
+    from krux.pages.settings_page import SettingsPage
+    from tests.test_input import mock_timer_ticks, reset_input_states
+
+    real_input = reset_input_states(mocker, Input())
+    mocker.patch.object(time, "ticks_ms", side_effect=mock_timer_ticks())
+    # one press of a physical button, then released
+    mocker.patch.object(
+        real_input, pressed + "_event", side_effect=[False, True] + [False] * 50
+    )
+
+    real_wait_for_button = real_input.wait_for_button
+    returned = []
+
+    def wait_for_button(*args, **kwargs):
+        if not returned:
+            # the warning is dismissed with a tap, which leaves buttons inactive
+            real_input.buttons_active = False
+            returned.append(BUTTON_TOUCH)
+        else:
+            returned.append(real_wait_for_button(*args, **kwargs))
+        return returned[-1]
+
+    real_input.wait_for_button = wait_for_button
+
+    ctx = mock_context(mocker)
+    ctx.input = real_input
+    page = SettingsPage(ctx)
+    mocker.patch.object(page, "_amigo_lcd_reconfigure")
+    setting = mocker.MagicMock(attr="lcd_type")
+
+    page._category_change_special_cases(setting, 1)
+
+    # the press counts as the button it is, not as "activating buttons"
+    assert returned == [BUTTON_TOUCH, BUTTON_PAGE_PREV if kept else BUTTON_PAGE]
+    if kept:
+        ctx.power_manager.reboot.assert_not_called()
+    else:
+        ctx.power_manager.reboot.assert_called_once()
+
+
 def test_encryption_pbkdf2_setting(m5stickv, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.krux_settings import Settings, EncryptionSettings
