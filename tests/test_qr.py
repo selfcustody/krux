@@ -279,6 +279,63 @@ def test_parse_pmofn_rejects_invalid_index(m5stickv):
         parse_pmofn_qr_part("p4of3 data")
 
 
+@pytest.mark.parametrize("part", ["p2of2 BBB", "p1of2 XXX", "p1of4 AAA"])
+def test_parser_rejects_pmofn_total_mismatch(m5stickv, part):
+    from krux.qr import QRPartParser
+
+    parser = QRPartParser()
+    parser.parse("p1of3 AAA")
+
+    with pytest.raises(ValueError, match="pMofN part total mismatch"):
+        parser.parse(part)
+
+    assert parser.parts == {1: "AAA"}
+    assert parser.total == 3
+    assert parser.parsed_count() == 1
+    assert not parser.is_complete()
+
+    # Rejecting a fragment must leave the original scan usable.
+    parser.parse("p3of3 CCC")
+    parser.parse("p2of3 BBB")
+    assert parser.is_complete()
+    assert parser.result() == "AAABBBCCC"
+
+
+@pytest.mark.parametrize("index", [1, 2])
+def test_parser_rejects_conflicting_pmofn_part(m5stickv, index):
+    from krux.qr import QRPartParser
+
+    parser = QRPartParser()
+    parser.parse("p%dof2 AAA" % index)
+
+    with pytest.raises(ValueError, match="Conflicting pMofN part"):
+        parser.parse("p%dof2 XXX" % index)
+
+    assert parser.parts == {index: "AAA"}
+    assert parser.total == 2
+    assert parser.parsed_count() == 1
+    assert not parser.is_complete()
+
+    parser.parse("p%dof2 BBB" % (3 - index))
+    assert parser.is_complete()
+    assert parser.result() == ("AAABBB" if index == 1 else "BBBAAA")
+
+
+def test_parser_pmofn_out_of_order_and_identical_duplicates(m5stickv):
+    from krux.qr import QRPartParser
+
+    parser = QRPartParser()
+    for part in ("p3of3 CCC", "p1of3 AAA", "p1of3 AAA", "p2of3 BBB"):
+        parser.parse(part)
+    assert parser.is_complete()
+    assert parser.parsed_count() == 3
+    assert parser.result() == "AAABBBCCC"
+
+    assert parser.parse("p3of3 CCC") == 2
+    assert parser.is_complete()
+    assert parser.result() == "AAABBBCCC"
+
+
 def test_parser_rejects_bbqr_header_mismatch(m5stickv):
     """Parts must agree with the encoding and file type of the first part,
     which is the one detect_format used to set up decoding"""
