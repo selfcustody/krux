@@ -295,7 +295,6 @@ class WalletDescriptor(Page):
         wallet.persisted = persisted
         try:
             wallet.load(wallet_data, qr_format)
-            self.ctx.wallet.key = updated_key
             return wallet, None
         except Exception as e:
             return wallet, e
