@@ -106,9 +106,17 @@ class FillFlash(Page):
 
             if chunk_index == MAX_CHUNK_INDEX:
                 chunk_index = 0
-                img_bytes = self.capture_image_with_sufficient_entropy(
-                    entropy_measurement
-                )
+                try:
+                    img_bytes = self.capture_image_with_sufficient_entropy(
+                        entropy_measurement
+                    )
+                except ValueError as e:
+                    # too little light for too long: leave the flash as
+                    # filled so far and let the caller carry on
+                    self.ctx.camera.stop_sensor()
+                    self.ctx.display.to_portrait()
+                    self.flash_error(str(e))
+                    return MENU_CONTINUE
 
             start = chunk_index * BLOCK_SIZE
             end = start + BLOCK_SIZE
