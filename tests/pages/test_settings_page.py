@@ -708,6 +708,53 @@ def test_set_first_tc_code(amigo, mocker):
     assert ctx.input.wait_for_button.call_count == 2
 
 
+def test_set_first_tc_code_with_too_little_light_to_fill_flash(amigo, mocker):
+    """The camera never gets enough entropy to fill the flash: the user is
+    told, and TC Code setup still goes on to the TC Flash Hash"""
+    from krux.pages.settings_page import SettingsPage
+    from krux.krux_settings import Settings
+    from krux.input import BUTTON_ENTER
+    from ..shared_mocks import MockFile, mock_open
+
+    mocker.patch("machine.unique_id", return_value=b"\x01" * 32)
+    mocker.patch("flash.read", return_value=b"\xff" * 0x1000)
+    flash_write = mocker.patch("flash.write")
+    mocker.patch(
+        "krux.pages.fill_flash.FillFlash.capture_image_with_sufficient_entropy",
+        side_effect=ValueError("Estimated entropy: Insufficient!"),
+    )
+    flash_hash = mocker.patch("krux.pages.flash_tools.FlashHash")
+    mock_file = MockFile()
+    BTN_SEQUENCE = [
+        BUTTON_ENTER,  # Proceed to enter a TC Code
+        BUTTON_ENTER,  # Fill the flash with entropy from camera
+        BUTTON_ENTER,  # Confirm TC Flash Hash at boot
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    ctx.tc_code_enabled = False
+    Settings().security.boot_flash_hash = False
+    settings_page = SettingsPage(ctx)
+    settings_page.capture_from_keypad = mocker.MagicMock(return_value="123456")
+
+    with patch("builtins.open", mock_open(mock_file)):
+        settings_page.enter_modify_tc_code()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert ctx.tc_code_enabled == True
+    # told why the flash was not filled, with the sensor turned off again
+    flashed = [call.args[0] for call in ctx.display.flash_text.call_args_list]
+    assert flashed == [
+        "Tamper check code set successfully",
+        "Estimated entropy: Insufficient!",
+    ]
+    flash_write.assert_not_called()
+    ctx.camera.stop_sensor.assert_called_once()
+    # and setup went on: asked about the boot check, shown the TC Flash Hash
+    assert Settings().security.boot_flash_hash == True
+    flash_hash.assert_called_once()
+    flash_hash.return_value.generate.assert_called_once()
+
+
 def test_set_first_tc_code_not_match(amigo, mocker):
     from krux.pages.settings_page import SettingsPage
     from krux.input import BUTTON_ENTER
