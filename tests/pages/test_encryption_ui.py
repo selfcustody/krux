@@ -1467,6 +1467,27 @@ def test_kefenvelope_input_iterations_ui(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     assert page.iterations == default
 
+    print("If user empties the field, uses default and returns None")
+    BTN_SEQUENCE = (
+        [
+            BUTTON_PAGE_PREV,  # deny default
+            BUTTON_PAGE_PREV,  # back to Go
+            BUTTON_PAGE_PREV,  # back to ESC
+            BUTTON_PAGE_PREV,  # back to "<" delete
+        ]
+        + [BUTTON_ENTER] * len(str(default))  # remove every digit
+        + [
+            BUTTON_PAGE,  # forward to ESC
+            BUTTON_PAGE,  # forward to "Go"
+            BUTTON_ENTER,  # select Go
+        ]
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = KEFEnvelope(ctx)
+    assert page.input_iterations_ui() == None
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.iterations == default
+
 
 def test_kefenvelope_input_label_ui(m5stickv, mocker):
     from krux.pages.encryption_ui import KEFEnvelope
