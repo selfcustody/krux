@@ -172,6 +172,41 @@ def test_edit_new_mnemonic_last_word_using_touch(mocker, amigo):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_edit_new_mnemonic_final_word_must_be_a_candidate(mocker, amigo):
+    """ "win" is a BIP39 word typed on the way to the valid final words
+    "window" and "winter": Go on it must not take it as the final word"""
+    from krux.pages.mnemonic_editor import MnemonicEditor
+    from krux.input import BUTTON_TOUCH
+    from krux.key import Key
+
+    first11 = ["ability"] * 10 + ["abandon"]
+    candidates = Key.get_final_word_candidates(first11)
+    assert "win" not in candidates
+    assert [w for w in candidates if w.startswith("win")] == ["window", "winter"]
+    mnemonic = " ".join(first11 + [candidates[0]])
+
+    TOUCH_SEQUENCE = [
+        23,  # index 23 = 12th word for 12w mnemonic
+        22,  # Type w, i, n
+        8,
+        13,
+        29,  # Press Keypad's "Go" on "win": refused, the keypad reopens
+        22,  # Type w, i, n, d -> window
+        8,
+        13,
+        3,
+        1,  # Confirm window
+        25,  # Press "Go"
+    ]
+    BTN_SEQUENCE = [*([BUTTON_TOUCH] * len(TOUCH_SEQUENCE))]
+    ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=TOUCH_SEQUENCE)
+    mnemonic_editor = MnemonicEditor(ctx, mnemonic, new=True)
+    edited_mnemonic = mnemonic_editor.edit()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert edited_mnemonic == " ".join(first11 + ["window"])
+
+
 def test_edit_try_to_go_incomplete_word(mocker, amigo):
     from krux.pages.mnemonic_editor import MnemonicEditor
     from krux.input import BUTTON_TOUCH
