@@ -689,6 +689,35 @@ def test_init_multisig(mocker, m5stickv, tdata):
         n += 1
 
 
+def test_psbt_policy_string_lists_multisig_cosigners(mocker, m5stickv, tdata):
+    """The policy shown before signing without a descriptor names the
+    cosigners, whichever script type the multisig uses"""
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_MULTISIG, P2SH, P2SH_P2WSH, P2WSH
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    cases = [
+        (P2SH, tdata.P2SH_PSBT),
+        (P2SH_P2WSH, tdata.P2SH_P2WSH_PSBT),
+        (P2WSH, tdata.P2WSH_PSBT),
+    ]
+    for script_type, psbt in cases:
+        key = Key(
+            tdata.TEST_MNEMONIC, TYPE_MULTISIG, NETWORKS["test"], "", 0, script_type
+        )
+        signer = PSBTSigner(Wallet(key), psbt, FORMAT_NONE)
+        lines = signer.psbt_policy_string().split("\n")
+
+        assert lines[:3] == ["PSBT policy:", script_type, "2 of 3"]
+        # one line for each cosigner in the inputs, ours among them
+        fingerprints = lines[3:]
+        assert len(fingerprints) == 3
+        assert len(set(fingerprints)) == 3
+        assert Key.format_fingerprint(key.fingerprint, True) in fingerprints
+
+
 def test_init_multisig_from_sdcard(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
