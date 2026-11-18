@@ -194,6 +194,65 @@ def test_detect_encodings(mocker, m5stickv):
         assert encoding in result
 
 
+def test_detect_encodings_base32_must_encode_back(mocker, m5stickv):
+    """Text is base32 only if decoding then encoding it gives the same text"""
+    from krux.pages.datum_tool import detect_encodings
+    from krux.baseconv import base_decode, base_encode
+
+    # proper base32, with or without its padding
+    for text in ("MFRGG", "MFRGG===", "MFRGGZDF", "MFRGGZDFMY", "MFRGGZDFMY======"):
+        assert 32 in detect_encodings(text)
+        assert base_encode(base_decode(text, 32), 32) == text.rstrip("=")
+
+    # in the base32 alphabet and decodable, but with unused trailing bits set:
+    # encoding the result back gives another text
+    for text, encodes_back_as in (("AB", "AA"), ("BITCOIN", "BITCOII")):
+        assert base_encode(base_decode(text, 32), 32) == encodes_back_as
+        assert 32 not in detect_encodings(text)
+        # nothing is verified when asked not to
+        assert 32 in detect_encodings(text, verify=False)
+
+
+def test_base32_encodes_back_agrees_with_encoding_back(mocker, m5stickv):
+    """The check on the last character says what really encoding back says"""
+    from krux.pages.datum_tool import base32_encodes_back
+    from krux.baseconv import base_decode, base_encode
+
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+
+    def really_encodes_back(text):
+        try:
+            return base_encode(base_decode(text, 32), 32) == text
+        except ValueError:
+            # ie: a length no base32 text has
+            return False
+
+    # every text of 1 and 2 characters, then every last character on longer ones
+    texts = list(alphabet) + [a + b for a in alphabet for b in alphabet]
+    for start in ("MF", "MFR", "MFRG", "MFRGG", "MFRGGZ", "MFRGGZD", "MFRGGZDFM"):
+        texts.extend(start + last for last in alphabet)
+    assert len(texts) == 32 + 32 * 32 + 7 * 32
+
+    for text in texts:
+        assert base32_encodes_back(text) == really_encodes_back(text), text
+        # padding is left aside
+        assert base32_encodes_back(text + "===") == base32_encodes_back(text)
+
+    # proper base32 of every length encodes back
+    for size in range(1, 41):
+        text = base_encode(bytes(range(size)), 32)
+        assert base32_encodes_back(text)
+        assert base32_encodes_back(text + "=" * (-len(text) % 8))
+
+    # however long the padding is
+    assert base32_encodes_back("MY" + "=" * 70000)
+    assert not base32_encodes_back("MZ" + "=" * 70000)
+
+    # nothing but padding is not base32 text
+    assert not base32_encodes_back("")
+    assert not base32_encodes_back("====")
+
+
 def test_detect_encodings_no_verify(mocker, m5stickv):
     """detect_encodings can run quicker w/ verify=False, but caller cannot trust it."""
     from krux.pages.datum_tool import detect_encodings
@@ -996,10 +1055,10 @@ def test_datumtool__build_options_menu(m5stickv, mocker):
     page._analyze_contents()
     menu = page._build_options_menu(offer_convert=True, offer_show=False)
     assert ctx.input.wait_for_button.call_count == 0
+    # no "from base32": "DEADBEEF3456" would encode back as "DEADBEEF345Q"
     assert [name for name, func in menu] == [
         "from HEX",
         "shift case",
-        "from base32",
         "from base43",
         "from base64",
         "from utf8",
@@ -1184,6 +1243,46 @@ def test_datumtool_view_contents(m5stickv, mocker, mock_file_operations):
     page.contents = some_bytes
     page.view_contents()
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+
+def test_datumtool_undo_from_base32_restores_the_text(m5stickv, mocker):
+    """Whatever "from base32" is offered for, Undo gives the same text back"""
+    from krux.pages import MENU_EXIT, datum_tool
+    from krux.pages.datum_tool import DatumTool
+
+    def convert_and_undo(text):
+        """returns the Convert menus seen and the contents after each choice"""
+        choices = ["convert_begin", 32, "undo", MENU_EXIT]
+        menus, contents = [], []
+        page = DatumTool(create_ctx(mocker, []))
+        page.contents, page.title = text, "text"
+        mocker.patch.object(page, "_info_box", return_value=1)
+
+        def run_loop(self):
+            menus.append([label for label, _ in self.menu])
+            contents.append(page.contents)
+            choice = choices.pop(0)
+            if choice in (32, "undo"):
+                wanted = "from base32" if choice == 32 else "to base32 (Undo)"
+                if wanted not in menus[-1]:
+                    return (0, MENU_EXIT)
+            return (0, choice)
+
+        mocker.patch.object(datum_tool.Menu, "run_loop", run_loop)
+        page.view_contents()
+        return menus, contents
+
+    # proper base32 converts, and Undo restores it
+    menus, contents = convert_and_undo("MFRGGZDF")
+    assert "from base32" in menus[1]
+    assert "to base32 (Undo)" in menus[2]
+    assert contents == ["MFRGGZDF", "MFRGGZDF", b"abcde", "MFRGGZDF"]
+
+    # text that Undo could not restore is not offered the conversion
+    for text in ("AB", "BITCOIN"):
+        menus, contents = convert_and_undo(text)
+        assert "from base32" not in menus[1]
+        assert contents == [text, text]
 
 
 def test_datumtool_view_contents_multi_page(m5stickv, mocker):
