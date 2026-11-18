@@ -206,7 +206,6 @@ class WalletSettings(Page):
             )
 
             self.ctx.display.clear()
-            derivation_path = self.fit_to_line(derivation_path, crop_middle=False)
             info_len = self.ctx.display.draw_hcentered_text(wallet_info, info_box=True)
 
             # if the wallet is P2SH, we need to change
