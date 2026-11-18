@@ -68,7 +68,7 @@ def test_sign_message(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Hex Public Key Text
                 BUTTON_ENTER,  # PK QR code
             ],
-            "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==",
+            "KNDYjnAavccLPKVJ7u6RjWs9n2NzN+kHc8MHrrUiQRq9TEoXa3UAbwsjESNCi7wcAZ9Vw1N7K+ujZzasgEgsvL0=",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
@@ -86,7 +86,7 @@ def test_sign_message(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # Hex Public Key Text
                 BUTTON_ENTER,  # PK QR code
             ],
-            "MEQCIEHpCMfQ+5mBAOH//OCxF6iojpVtIS6G7X+3r3qB/0CaAiAkbjW2SGrPLvju+O05yH2x/4EKL2qlkdWnquiVkUY3jQ==",
+            "KIyFNagItWNotujcQQ7AoXLO90ndVEmsQvXeJbaTnFKufb2eq+G1RKvxRw+eR887Rn0UgqAKyrji4GQQYGfxvkw=",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
             None,
         ),
@@ -167,11 +167,11 @@ def test_sign_message(mocker, m5stickv, tdata):
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Press "Go" (saved pubkey to SD)
             ],
-            "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==",  # 4 base64 for display_qr_codes / print_qr_prompt
+            "KNDYjnAavccLPKVJ7u6RjWs9n2NzN+kHc8MHrrUiQRq9TEoXa3UAbwsjESNCi7wcAZ9Vw1N7K+ujZzasgEgsvL0=",  # 4 base64 for display_qr_codes / print_qr_prompt
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",  # 5 pubkey for display_qr_codes / print_qr_prompt
             # 6 SD file
             binascii.b2a_base64(
-                "MEQCIHKmpv1+vgPpFTN0JXjyrMK2TtLHVeJJ2TydPYmEt0RnAiBJVt/Y61ef5VlWjG08zf92AeF++BWdYm1Yd9IEy2cSqA==".encode(
+                "KNDYjnAavccLPKVJ7u6RjWs9n2NzN+kHc8MHrrUiQRq9TEoXa3UAbwsjESNCi7wcAZ9Vw1N7K+ujZzasgEgsvL0=".encode(
                     "utf-8"
                 ),
                 newline=False,
@@ -206,7 +206,6 @@ def test_sign_message(mocker, m5stickv, tdata):
             with patch(
                 "builtins.open", new=get_mock_open({"/sd/signed-message.sig": case[6]})
             ) as mock_file:
-
                 # function being tested
                 home.sign_message()
 
@@ -263,7 +262,7 @@ def test_sign_message_invalid_derivations(mocker, m5stickv, tdata):
             ],
             "signmessage m84h ascii:hello",
             "m84h",
-            "MEQCIA7DCCFox6tQqC3GE9a5IMvm8cVu1Zh6OWcUE1gls77gAiAzLncevU9FFJRvG83ahSJ8hISimgtSSdRHye2rmijwlg==",
+            "J7jAswueRmlhh64HDmfIuVvo5pcMMgBYdSCXAnMh2NQsQUwYkyI1O8G0F/8ChIiOz2pfCiQwE0FfOXWTAtMsMDE=",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
         ),
         (
@@ -278,7 +277,7 @@ def test_sign_message_invalid_derivations(mocker, m5stickv, tdata):
             ],
             "signmessage m/8xh/0/0 ascii:hello",
             "m/8xh/0/0",
-            "MEQCIDL/XdIRF+v0wnN/JDOu2XYMTYqJaAyjuIDdSG4E/909AiASARSc1zfJsvUKC6MDQlM3E2lrkTx3iYfpJUWRZy/Vpg==",
+            "JwdAF2MY6uglo4E3Wxbbi9G6NyrEna4LyYBsUueJg8yoLQm39BHDJ+ulgRhXl2RI/BManG05oTmRyXOqjDfDrs0=",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
         ),
         (  # 2 - QR invalid (empty segment)
@@ -293,15 +292,13 @@ def test_sign_message_invalid_derivations(mocker, m5stickv, tdata):
             ],
             "signmessage m//0 ascii:hello",
             "m//0",
-            "MEQCIDx4K8atJhGiaFdCCsgaUqFv22ncJ3AFHczFsNLZmbcGAiBuQdB5/pztOHjyQt0DKmuMKo799raQuRrXMVKK69ELjQ==",
+            "J0yYgnVLwEditYd+QwmJrXqFRplrBqfUfUHOpAF4m+EEW9MYf4BVp/SWPujLDYfQKWxbpRPVZdaYuyGm77bNSsE=",
             "02707a62fdacc26ea9b63b1c197906f56ee0180d0bcf1966e1a2da34f5f3a09a9b",
         ),
     ]
 
-    n = 0
-    for case in cases:
+    for n, case in enumerate(cases):
         print("Case: ", n)
-        n = 0
 
         # A mainnet wallet
         wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
@@ -372,7 +369,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             False,
             "a test message with a colon ':' character.",
             "3. bc1qgl5…3cn3",  # bc1qgl5vlg0zdl7yvprgxj9fevsc6q6x5dmcyk3cn3
-            "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
+            "KN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
         (  # 1 - Sign P2WPKH Testnet
             [
@@ -387,7 +384,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             False,
             "A test message.",
             "3. tb1qynp…m5km",
-            "ILc30ti8OPSpCtzfj7sNnftANBCuVpyRX7pnM3iAgOk9F9IUtnXNPus0+MF12y5HKYHAB6IVYr66sLmL3Vi3oEE=",
+            "KLc30ti8OPSpCtzfj7sNnftANBCuVpyRX7pnM3iAgOk9F9IUtnXNPus0+MF12y5HKYHAB6IVYr66sLmL3Vi3oEE=",
         ),
         (  # 2 - Sign P2TR Mainnet
             [
@@ -432,7 +429,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             False,
             "a test message with a colon ':' character.",
             "3. 38CahkV…sEAN",
-            "HyH8898c2S6eF8hTPGhRqLC6UQrJrhw/fdguBeFG0cCrOFkbG8TCVURXOgxXaEV93vrFlHyxNGEvL10IcsLtvvI=",
+            "IyH8898c2S6eF8hTPGhRqLC6UQrJrhw/fdguBeFG0cCrOFkbG8TCVURXOgxXaEV93vrFlHyxNGEvL10IcsLtvvI=",
         ),
         (  # 5 - Sign P2WPKH Mainnet - Save to SD card
             [
@@ -449,7 +446,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             True,  # Sign to SD
             "A test message.",
             "3. bc1qgl5…3cn3",
-            "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
+            "KN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
         (  # 6 - Sign P2WPKH Mainnet - Load from and save to SD card
             [
@@ -468,7 +465,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             True,  # Sign to SD
             "A test message.",
             "3. bc1qgl5…3cn3",
-            "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
+            "KN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
         (  # 7 - Sign empty - Load from and save to SD card
             [
@@ -488,7 +485,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
             True,  # Sign to SD
             "A test message.",
             "3. bc1qgl…cn3",
-            "IN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
+            "KN/4LmcGRaI5sgvBP2mrTXQFvD6FecXd8La03SixPabsb/255ElRGTcXhicT3KFsNJbfQ9te909ZXeKMaqUcaPM=",
         ),
     ]
     case_count = 0
@@ -532,7 +529,7 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
 
         if case[2] != b"":
             ctx.display.draw_hcentered_text.assert_has_calls(
-                [mocker.call("Message:", 10, theme.highlight_color)]
+                [mocker.call("Message:", mocker.ANY, theme.highlight_color)]
             )
             ctx.display.draw_hcentered_text.assert_has_calls(
                 [mocker.call(case[4], mocker.ANY, max_lines=10)]
@@ -577,20 +574,12 @@ def test_load_from_sd_card(mocker, m5stickv, tdata):
 
     ctx = create_ctx(mocker, btn_seq, wallet)
     sign_msg = SignMessage(ctx)
-
-    # test sign at address with binary content (it can't be decoded to UTF8 and it is not sign to address)
-    sign_msg._sign_at_address_from_sd(file_content) == None
-
-    # mock load of file
+    assert sign_msg._sign_at_address_from_sd(file_content) is None
     sign_msg._load_message = lambda: (file_content, FORMAT_NONE, filename)
 
     mocker.spy(sign_msg, "_export_signature")
     mocker.spy(sign_msg, "_export_to_qr")
-
-    # Successful sign a binary (that can't be decoded) from sd card
     sign_msg.sign_message()
-
-    # Assert signature sucessfully exported to QR
     sign_msg._export_signature.assert_called()
     sign_msg._export_to_qr.assert_called()
 
