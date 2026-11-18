@@ -1642,6 +1642,53 @@ def test_parse_wallet(mocker, m5stickv, tdata):
         assert label == case[2]
 
 
+def test_parse_wallet_invalid_checksum_raises_embit_descriptorerror(
+    mocker, m5stickv, tdata
+):
+    """
+    embit <= 0.8.2 was tolerant of cksum errors, so any users who
+    modified their trusted descriptor by-hand (ie: "H" or "'" became "h")
+    w/o recalcuating the bip380 output-descriptor cksum will fail
+    to load/recover their wallets.  embit > 0.8.2 is still tolerant when
+    cksum is omitted, so it can be removed by-hand as a fix.
+    """
+
+    from krux.wallet import parse_wallet, DescriptorError
+
+    cases = [
+        tdata.KRUX_LEGACY1_DESCRIPTOR,
+        tdata.KRUX_NATIVESW1_DESCRIPTOR,
+        tdata.KRUX_NESTEDSW1_DESCRIPTOR,
+        tdata.KRUX_TAPROOT1_DESCRIPTOR,
+        tdata.SPECTER_SINGLESIG_DESCRIPTOR,
+        tdata.SPECTER_MULTISIG_LEGACY_NO_COSIGNER_DESCRIPTOR,
+        tdata.SPECTER_MULTISIG_NESTED_DESCRIPTOR,
+        tdata.SPECTER_MULTISIG_DESCRIPTOR,
+        tdata.BLUEWALLET_LEGACY_DESCRIPTOR,
+        tdata.BLUEWALLET_NESTEDSW_DESCRIPTOR,
+        tdata.UR_OUTPUT_MULTISIG_DESCRIPTOR,
+        tdata.AMBIGUOUS_SINGLESIG_DESCRIPTOR,
+        tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR,
+        tdata.AMBIGUOUS_MULTISIG_DESCRIPTOR,
+        tdata.UNAMBIGUOUS_MULTISIG_DESCRIPTOR,
+        tdata.LIANA_MINISCRIPT_DESCRIPTOR,
+        tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR,
+    ]
+
+    case_n = 1
+    for case in cases:
+        print(case_n)
+        case_n += 1
+
+        # an invalid BIP-380 cksum fails to load
+        with pytest.raises(DescriptorError, match="Invalid descriptor checksum"):
+            descriptor, label = parse_wallet(case.split("#")[0] + "#badcksum")
+
+        # same descriptor w/o cksum is the fix
+        descriptor, label = parse_wallet(case.split("#")[0])
+        assert descriptor.to_string() == case.split("#")[0].replace("'", "h")
+
+
 def test_provably_unspendable(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE

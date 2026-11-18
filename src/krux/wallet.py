@@ -21,6 +21,7 @@
 
 from embit.descriptor.descriptor import Descriptor
 from embit.descriptor.arguments import Key
+from embit.descriptor.errors import DescriptorError
 from embit.networks import NETWORKS
 from .krux_settings import t
 from .qr import FORMAT_BBQR, FORMAT_NONE
@@ -473,6 +474,11 @@ def parse_wallet(wallet_data):
     try:
         descriptor = Descriptor.from_string(wallet_data.strip())
         return descriptor, None
+
+    except DescriptorError:
+        # embit > 0.8.2 improves descriptor validation, raise informative error
+        raise
+
     except Exception:
         # Untrusted input: not a bare descriptor either; fall through to the
         # final raise.
