@@ -320,7 +320,14 @@ class DatumToolMenu(Page):
         title = "QR Contents"
         if fmt == 2:
             title += ", UR:" + contents.type
-            contents = urobj_to_data(contents)
+            # None for a UR type not read here, raises if its CBOR is not valid
+            try:
+                contents = urobj_to_data(contents)
+            except:
+                contents = None
+            if contents is None:
+                self.flash_error(t("Failed to load"))
+                return MENU_CONTINUE
 
         if isinstance(contents, bytes):
             try:
