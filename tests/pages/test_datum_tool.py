@@ -1112,6 +1112,85 @@ def test_datumtool_view_contents_multi_page(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+@pytest.mark.parametrize(
+    "version_name, contents, reason",
+    [
+        # without padding marks, a trailing NUL could not be told from padding
+        ("AES-ECB", b"psbt\xff" + b"\x01" * 30 + b"\x00", "Cannot validate"),
+        ("AES-CBC", b"psbt\xff" + b"\x01" * 30 + b"\x00", "Cannot validate"),
+        # ECB would show which blocks repeat
+        ("AES-ECB", b"sixteen byte blk" * 3, "Duplicate blocks in ECB mode"),
+    ],
+)
+def test_datumtool_encrypt_with_unusable_version_keeps_datum(
+    m5stickv, mocker, version_name, contents, reason
+):
+    """Encrypt with a version that can't take these contents: told why,
+    and the datum is still loaded to try another version"""
+    import weakref
+    from krux import kef
+    from krux.pages import MENU_EXIT, datum_tool
+    from krux.pages.datum_tool import DatumTool
+    from krux.pages.encryption_ui import KEFEnvelope
+
+    version = [k for k, v in kef.VERSIONS.items() if v["name"] == version_name][0]
+
+    def pick_version(self):
+        """as input_version_ui does once the user picks from its list"""
+        self.version = version
+        self.version_name = version_name
+        self.mode = kef.VERSIONS[version]["mode"]
+        self.mode_name = [k for k, v in kef.MODE_NUMBERS.items() if v == self.mode][0]
+        self.iv_len = kef.MODE_IVS.get(self.mode, 0)
+        return True
+
+    envelopes = []
+
+    def set_key(self, creating=True):
+        envelopes.append(weakref.ref(self))
+        self._KEFEnvelope__key = "a strong enough key"
+        return True
+
+    def set_iv(self):
+        self._KEFEnvelope__iv = b"\x11" * self.iv_len if self.iv_len else None
+        return True
+
+    mocker.patch.object(KEFEnvelope, "input_key_ui", set_key)
+    mocker.patch.object(KEFEnvelope, "input_version_ui", pick_version)
+    mocker.patch.object(KEFEnvelope, "input_iterations_ui", lambda self: True)
+    mocker.patch.object(KEFEnvelope, "input_iv_ui", set_iv)
+    mocker.patch.object(KEFEnvelope, "input_label_ui", lambda self, *a, **k: True)
+
+    choices = ["encrypt", "convert_end", MENU_EXIT]
+    seen = []
+
+    def run_loop(self):
+        seen.append((page.contents, page.title))
+        # once it failed, the envelope and the key typed into it are gone
+        kept.append([ref() for ref in envelopes if ref() is not None])
+        return (0, choices.pop(0))
+
+    kept = []
+    mocker.patch.object(datum_tool.Menu, "run_loop", run_loop)
+
+    ctx = create_ctx(mocker, [])
+    page = DatumTool(ctx)
+    page.title, page.contents = "tx.psbt", contents
+    page.view_contents(try_decrypt=False, offer_convert=True)
+
+    assert not choices
+    assert len(envelopes) == 1
+    assert kept == [[], [], []]
+    # told what went wrong, and why
+    ctx.display.flash_text.assert_called_once()
+    message = ctx.display.flash_text.call_args.args[0]
+    assert message.startswith("Failed to convert\n\n")
+    assert reason in message
+    # nothing was encrypted, the datum is as it was in every menu after
+    assert seen == [(contents, "tx.psbt")] * 3
+    assert page.contents == contents and page.title == "tx.psbt"
+
+
 def test_datumtool_view_contents_convert_failure(mocker, m5stickv):
     """Contents cannot always be converted (ie: mem-alloc-err); flash_error"""
     from krux.pages.datum_tool import DatumTool

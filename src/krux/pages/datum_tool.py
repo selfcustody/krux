@@ -860,10 +860,17 @@ class DatumTool(Page):
             # if user chose to encrypt
             kef = KEFEnvelope(self.ctx)
             kef.label = self.datum if self.datum else self.title
-            encrypted = kef.seal_ui(
-                self.contents,
-                overrides=[OVERRIDE_VERSION, OVERRIDE_ITERATIONS, OVERRIDE_LABEL],
-            )
+            try:
+                encrypted = kef.seal_ui(
+                    self.contents,
+                    overrides=[OVERRIDE_VERSION, OVERRIDE_ITERATIONS, OVERRIDE_LABEL],
+                )
+            except ValueError as err:
+                # ie: a version that can't encrypt these contents. Keep them,
+                # but not the failed envelope: it still holds the key typed
+                kef = None
+                encrypted = None
+                self.flash_error(t("Failed to convert") + "\n\n" + str(err))
             if encrypted:
                 # now in "hiding secrets" mode
                 self.contents = encrypted
