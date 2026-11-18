@@ -161,6 +161,24 @@ def identify_datum(data, encodings=None):
     return datum
 
 
+def base32_encodes_back(text):
+    """
+    base32 decoding is NOT strict: it drops the bits of the last character
+    that don't fill a byte. Returns True if those bits are zero, which is when
+    encoding the decoded bytes gives this same text again (padding aside).
+    For text that already decoded, so any "=" is padding at its end
+    """
+    length = text.find("=")
+    if length < 0:
+        length = len(text)
+    unused_bits = length * 5 % 8
+    if not length or unused_bits > 4:
+        # nothing, or a last character that adds no byte at all
+        return False
+    last = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".find(text[length - 1])
+    return last & ((1 << unused_bits) - 1) == 0
+
+
 def detect_encodings(str_data, verify=True):
     """
     Detect which encodings this data str might be, returns list
@@ -211,7 +229,8 @@ def detect_encodings(str_data, verify=True):
         if verify:
             try:
                 base_decode(str_data, 32)
-                encodings.append(32)
+                if base32_encodes_back(str_data):
+                    encodings.append(32)
             except:
                 pass
         else:
