@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import gc
+from embit.bip32 import HARDENED_INDEX
 from embit.psbt import PSBT, CompressMode
 from uUR import UR, Types
 from .baseconv import base_decode
@@ -38,6 +39,8 @@ SPEND = 2
 BTC_SYMBOL = "₿"
 
 MAX_POLICY_COSIGNERS_DISPLAYED = 5
+
+OWN_INDEX_WINDOW = 1000
 
 
 class Counter(dict):
@@ -58,6 +61,7 @@ class PSBTSigner:
         self.qr_format = qr_format
         self.policy = None
         self.is_b64_file = False
+        self.distant_paths = []
 
         # Parse the PSBT
         if psbt_filename:
@@ -336,13 +340,22 @@ class PSBTSigner:
 
         return resume_fee_str, fee_percent
 
+    def _own_ders(self, scope):
+        """Derivations of a PSBT input or output that match the loaded descriptor"""
+        if not self.wallet.descriptor:
+            return []
+        check = self.wallet.descriptor.check_derivation
+        ders = list(scope.bip32_derivations.values())
+        ders += [der for _, der in scope.taproot_bip32_derivations.values()]
+        return [der for der in ders if check(der) is not None]
+
     def _sequence_render(self, title, elements):
         from .format import format_address
 
         message_seq = []
         for i, out in enumerate(elements):
             message_seq.append(
-                (("%d. " + title + " \n\n%s\n\n") % (i + 1, format_address(out[0])))
+                ("%d. %s %s\n\n%s\n\n" % (i + 1, title, out[2], format_address(out[0])))
                 + self._btc_render(out[1], prefix="")
             )
         return message_seq
@@ -372,6 +385,18 @@ class PSBTSigner:
 
         output_policy_count = Counter()
 
+        # Lowest own index across all matching entries of all inputs, so an entry
+        # with a fake high index can't widen the window
+        lowest = None
+        for inp in self.psbt.inputs:
+            for der in self._own_ders(inp):
+                if der.derivation[-1] < HARDENED_INDEX and (
+                    lowest is None or der.derivation[-1] < lowest
+                ):
+                    lowest = der.derivation[-1]
+        lowest = lowest or 0
+        self.distant_paths = []
+
         xpubs = []
         origin_less_xpub = None
         try:
@@ -386,6 +411,13 @@ class PSBTSigner:
             output_policy_count[out_policy["type"]] += 1
             output_type = self._classify_output(out_policy, out)
 
+            path = ""
+            if output_type != SPEND:
+                der = self._own_ders(out)[0]
+                path = "%d/%d" % (der.derivation[-2], der.derivation[-1])
+                if der.derivation[-1] > lowest + OWN_INDEX_WINDOW:
+                    self.distant_paths.append(path)
+
             if output_type == CHANGE:
                 change_list.append(
                     (
@@ -393,6 +425,7 @@ class PSBTSigner:
                             network=self.wallet.key.network
                         ),
                         self.psbt.tx.vout[i].value,
+                        path,
                     )
                 )
                 change_amount += self.psbt.tx.vout[i].value
@@ -403,6 +436,7 @@ class PSBTSigner:
                             network=self.wallet.key.network
                         ),
                         self.psbt.tx.vout[i].value,
+                        path,
                     )
                 )
                 self_amount += self.psbt.tx.vout[i].value
@@ -413,6 +447,7 @@ class PSBTSigner:
                             network=self.wallet.key.network
                         ),
                         self.psbt.tx.vout[i].value,
+                        "",
                     )
                 )
                 spend_amount += self.psbt.tx.vout[i].value

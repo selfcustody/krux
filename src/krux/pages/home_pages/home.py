@@ -432,6 +432,25 @@ class Home(Page):
 
         return True
 
+    def _distant_index_psbt_warn(self, signer):
+        """Warn when own outputs go to an address index far above the inputs"""
+        if signer.distant_paths:
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(
+                t("Warning:")
+                + " "
+                + t("Distant address!")
+                + "\n"
+                + ", ".join(signer.distant_paths)
+                + "\n"
+                + t("Your wallet may not find it."),
+                highlight_prefix=":",
+            )
+
+            return self.prompt(t("Proceed?"), BOTTOM_PROMPT_LINE)
+
+        return True
+
     def _fees_psbt_warn(self, fee_percent):
         """Warn if fees greater than 10% of what is spent"""
         if fee_percent >= 10.0:
@@ -530,6 +549,9 @@ class Home(Page):
         outputs, fee_percent = signer.outputs()
 
         if not self._unverified_amounts_psbt_warn(signer):
+            return MENU_CONTINUE
+
+        if not self._distant_index_psbt_warn(signer):
             return MENU_CONTINUE
 
         if not self._fees_psbt_warn(fee_percent):
