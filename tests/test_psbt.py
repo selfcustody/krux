@@ -1735,7 +1735,7 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
         (
             tdata.P2WSH_PSBT,
             [
-                "Inputs (2): ₿ 0.20 000 000\n\nSpend (2): ₿ 0.19 993 880\n\nFee: ₿ 0.00 006 120 (0.1%) ~20.1 sat/vB",
+                "Inputs (2): ₿ 0.20 000 000\n\nSpend (2): ₿ 0.19 993 880\n\nFee: ₿ 0.00 006 120 (0.1%) ~20.0 sat/vB",
                 "1. Spend: \n\n"
                 + format_address(
                     "tb1q4xgr8suxvgenukgf4c7r6qaawxxmy9zelh24q8hg5pfxzn2ekn3qfw808t"
@@ -2284,7 +2284,7 @@ def test_sign_sats_vB(m5stickv):
     outputs, _ = signer.outputs()
     assert (
         outputs[0]
-        == "Inputs (2): ₿ 0.00 130 622\n\nSpend (9): ₿ 0.00 028 343\n\nFee: ₿ 0.00 102 279 (360.9%) ~165.2 sat/vB"
+        == "Inputs (2): ₿ 0.00 130 622\n\nSpend (9): ₿ 0.00 028 343\n\nFee: ₿ 0.00 102 279 (360.9%) ~164.7 sat/vB"
     )
 
     # TODO: Add a multisig with descriptor so change can be deteted
