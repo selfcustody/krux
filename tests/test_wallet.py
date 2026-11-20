@@ -1997,6 +1997,32 @@ def test_parse_key_value_file_rejects_m_greater_than_n(m5stickv):
         parse_key_value_file(wallet_data)
 
 
+@pytest.mark.parametrize(
+    "wallet_data_name, script_prefix",
+    [
+        ("BLUEWALLET_MULTISIG_LEGACY_WALLET_DATA", "sh(sortedmulti("),
+        ("BLUEWALLET_MULTISIG_NESTED_WALLET_DATA", "sh(wsh(sortedmulti("),
+        ("BLUEWALLET_MULTISIG_WALLET_DATA", "wsh(sortedmulti("),
+    ],
+    ids=["P2SH", "P2SH-P2WSH", "P2WSH"],
+)
+def test_parse_key_value_file_without_name(
+    m5stickv, tdata, wallet_data_name, script_prefix
+):
+    """A key-value file without a Name line gets the M of N label"""
+    from krux.wallet import parse_key_value_file
+
+    named_data = getattr(tdata, wallet_data_name)
+    wallet_data = named_data.replace("Name: BlueWallet Multisig Wallet\n", "")
+    assert "Name" not in wallet_data
+
+    descriptor, label = parse_key_value_file(wallet_data)
+    named_descriptor, _ = parse_key_value_file(named_data)
+    assert label == "2 of 3 multisig"
+    assert descriptor.to_string().startswith(script_prefix)
+    assert descriptor.to_string() == named_descriptor.to_string()
+
+
 def test_descriptor_rejects_m_zero(m5stickv):
     """Audit C8: embit already rejects sortedmulti(0,...) at descriptor level"""
     from embit.descriptor import Descriptor
