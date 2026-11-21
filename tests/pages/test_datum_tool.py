@@ -334,6 +334,52 @@ def test_datumtoolmenu_scan_qr_abort(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_datumtoolmenu_scan_qr_of_unreadable_ur(m5stickv, mocker):
+    """Scan a UR that can't be turned into data: told so, no raw error"""
+    from krux.pages.datum_tool import DatumToolMenu, DatumTool
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from uUR import UR, Types
+
+    view_contents = mocker.patch.object(DatumTool, "view_contents")
+    unreadable = [
+        # types Datum Tool does not read
+        UR("psbt", Types.bytes_to_cbor(b"psbt\xff" + b"\x00" * 40)),
+        UR("crypto-hdkey", Types.bytes_to_cbor(b"anything")),
+        # types it reads, holding CBOR that is not of that type
+        UR("crypto-psbt", b"\x00"),
+        UR("crypto-account", Types.bytes_to_cbor(b"anything")),
+        UR("crypto-output", Types.bytes_to_cbor(b"anything")),
+        UR("crypto-bip39", Types.bytes_to_cbor(b"anything")),
+        UR("bytes", b"\x00"),
+    ]
+    for ur_obj in unreadable:
+        mocker.patch.object(
+            QRCodeCapture, "qr_capture_loop", new=lambda self, ur=ur_obj: (ur, 2)
+        )
+        BTN_SEQUENCE = (
+            BUTTON_ENTER,  # go Via Camera
+            BUTTON_PAGE_PREV,  # to Back
+            BUTTON_ENTER,  # go Back
+        )
+        ctx = create_ctx(mocker, BTN_SEQUENCE)
+        DatumToolMenu(ctx).run()
+
+        assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+        ctx.display.flash_text.assert_called_once()
+        assert ctx.display.flash_text.call_args.args[0] == "Failed to load"
+        drawn = [str(c.args[0]) for c in ctx.display.draw_centered_text.call_args_list]
+        assert not [text for text in drawn if "Error" in text]
+        view_contents.assert_not_called()
+
+    # a UR it can read still opens
+    ur_obj = UR("bytes", Types.bytes_to_cbor(b"readable"))
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (ur_obj, 2))
+    ctx = create_ctx(mocker, [])
+    DatumToolMenu(ctx).scan_qr()
+    view_contents.assert_called_once()
+
+
 def test_datumtoolmenu_text_entry_abort(m5stickv, mocker):
     """Into DatumToolMenu and text_entry"""
     from krux.pages.datum_tool import DatumToolMenu
