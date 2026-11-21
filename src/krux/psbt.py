@@ -275,34 +275,17 @@ class PSBTSigner:
     def _classify_output(self, out_policy, out):
         """Classify the output based on its properties and policy"""
 
-        address_from_my_wallet = False
-        address_is_change = False
         # if policy is the same - probably change
-        if out_policy == self.policy:
-            # double-check that it's change
-            # we already checked in get_cosigners and parse_multisig
-            # that pubkeys are generated from cosigners,
-            # and witness script is corresponding multisig
-            # so we only need to check that scriptpubkey is generated from
-            # witness script
-
-            address_from_my_wallet = self.address_belongs_to_descriptor(out)
-
-            if self.policy["type"] == P2TR:
-                if address_from_my_wallet:
-                    # _ = leafs
-                    _, der = list(out.taproot_bip32_derivations.values())[0]
-                    address_is_change = der.derivation[-2] == 1
-            else:
-                if address_from_my_wallet:
-                    address_is_change = (
-                        len(list(out.bip32_derivations.values())) > 0
-                        and list(out.bip32_derivations.values())[0].derivation[-2] == 1
-                    )
-        if address_is_change:
-            return CHANGE
-        if address_from_my_wallet:
-            return SELF_TRANSFER
+        # double-check that it's change
+        # we already checked in get_cosigners and parse_multisig
+        # that pubkeys are generated from cosigners,
+        # and witness script is corresponding multisig
+        # so we only need to check that scriptpubkey is generated from
+        # witness script
+        if out_policy == self.policy and self.address_belongs_to_descriptor(out):
+            # Branch of the entry the descriptor derived the script from
+            _, branch = self._own_indexes(out)[0]
+            return CHANGE if branch == 1 else SELF_TRANSFER
         return SPEND
 
     def _btc_render(self, amount, prefix=" "):
@@ -340,14 +323,15 @@ class PSBTSigner:
 
         return resume_fee_str, fee_percent
 
-    def _own_ders(self, scope):
-        """Derivations of a PSBT input or output that match the loaded descriptor"""
+    def _own_indexes(self, scope):
+        """(index, branch) of each derivation of a PSBT input or output that
+        matches the loaded descriptor, branch 1 being change"""
         if not self.wallet.descriptor:
             return []
         check = self.wallet.descriptor.check_derivation
         ders = list(scope.bip32_derivations.values())
         ders += [der for _, der in scope.taproot_bip32_derivations.values()]
-        return [der for der in ders if check(der) is not None]
+        return [res for res in map(check, ders) if res is not None]
 
     def _sequence_render(self, title, elements):
         from .format import format_address
@@ -360,7 +344,7 @@ class PSBTSigner:
             )
         return message_seq
 
-    def outputs(self):
+    def outputs(self):  # pylint: disable=too-many-locals
         """Returns a list of messages describing where amounts are going"""
 
         inp_amount = 0
@@ -389,11 +373,9 @@ class PSBTSigner:
         # with a fake high index can't widen the window
         lowest = None
         for inp in self.psbt.inputs:
-            for der in self._own_ders(inp):
-                if der.derivation[-1] < HARDENED_INDEX and (
-                    lowest is None or der.derivation[-1] < lowest
-                ):
-                    lowest = der.derivation[-1]
+            for idx, _ in self._own_indexes(inp):
+                if idx < HARDENED_INDEX and (lowest is None or idx < lowest):
+                    lowest = idx
         lowest = lowest or 0
         self.distant_paths = []
 
@@ -413,9 +395,9 @@ class PSBTSigner:
 
             path = ""
             if output_type != SPEND:
-                der = self._own_ders(out)[0]
-                path = "%d/%d" % (der.derivation[-2], der.derivation[-1])
-                if der.derivation[-1] > lowest + OWN_INDEX_WINDOW:
+                idx, branch = self._own_indexes(out)[0]
+                path = "%d/%d" % (branch, idx)
+                if idx > lowest + OWN_INDEX_WINDOW:
                     self.distant_paths.append(path)
 
             if output_type == CHANGE:

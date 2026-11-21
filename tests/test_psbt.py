@@ -2649,6 +2649,75 @@ def test_distant_own_index_is_flagged(mocker, m5stickv, tdata, chain, title):
         assert any(("%s: %s\n" % (title, path)) in screen for screen in outputs)
 
 
+def test_own_output_branch_from_checked_entry(mocker, m5stickv, tdata):
+    """Branch and index come from the entry the descriptor derived the script
+    from, not from an entry of another key listed before it"""
+    from embit import script
+    from embit.bip32 import HARDENED_INDEX
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, DerivationPath
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    key = Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"])
+    wallet = Wallet(key)
+    base = [HARDENED_INDEX + 84, HARDENED_INDEX + 1, HARDENED_INDEX]
+    near_pub = key.root.derive(base + [1, 5]).key.get_public_key()
+    far_pub = key.root.derive(base + [0, 2147483000]).key.get_public_key()
+
+    psbt = PSBT.parse(tdata.P2WPKH_PSBT)
+    own_out = next(out for out in psbt.outputs if out.bip32_derivations)
+    own_out.script_pubkey = script.p2wpkh(far_pub)
+    own_out.bip32_derivations = {
+        # fingerprint of no wallet key, so the descriptor never checks it
+        near_pub: DerivationPath(b"\xde\xad\xbe\xef", base + [1, 5]),
+        far_pub: DerivationPath(key.fingerprint, base + [0, 2147483000]),
+    }
+
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    own_out = next(out for out in signer.psbt.outputs if out.bip32_derivations)
+    first = list(own_out.bip32_derivations.values())[0]
+    assert first.fingerprint == b"\xde\xad\xbe\xef"
+    outputs, _ = signer.outputs()
+
+    assert outputs[-1].startswith("1. Self-transfer: 0/2147483000\n")
+    assert signer.distant_paths == ["0/2147483000"]
+
+
+def test_expanding_multisig_change_branch(mocker, m5stickv, tdata):
+    """Change of an expanding multisig is told by the descriptor branch, also
+    when a key on <2;3> is listed first, as Liana sorts these by key"""
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_MINISCRIPT, P2TR
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(
+        Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"], script_type=P2TR)
+    )
+    wallet.load(TR_EXP_MULTI_MINISCRIPT, FORMAT_NONE)
+    psbt = PSBT.parse(tdata.EXP_TR_MINIS_PSBT)
+    # The change at 1/1 also derives the <2;3> keys at 3/1, list those first
+    change = psbt.outputs[2]
+    change.taproot_bip32_derivations = dict(
+        sorted(
+            change.taproot_bip32_derivations.items(),
+            key=lambda item: item[1][1].derivation[-2] != 3,
+        )
+    )
+
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    _, first = list(signer.psbt.outputs[2].taproot_bip32_derivations.values())[0]
+    assert first.derivation[-2] == 3
+    outputs, _ = signer.outputs()
+
+    assert outputs[-1].startswith("1. Change: 1/1\n")
+
+
 def test_fee_percent_spend_and_self_transfer(mocker, m5stickv, tdata):
     """The high fee warning adds a self transfer next to a spend to its base,
     while the summary still divides by all outputs"""
