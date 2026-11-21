@@ -21,57 +21,80 @@ POOR_ROLLS_TOUCH_SEQUENCE = (
     + [5] * 4  # 2 number 6 presses
 )
 
+# 70 rolls (the minimum amount for a 12 words mnemonic from a d6) with enough
+# min-entropy to clear the 128 bits target. Its first 50 rolls, the legacy minimum
+# accepted, hold only ~102 bits and are used to test the low entropy warning.
 GOOD_ROLLS_SEQUENCE = [
-    1,
-    4,
-    5,
-    2,
-    0,
-    3,
-    2,
-    4,
-    4,
-    5,
-    5,
     5,
     0,
-    5,
-    2,
-    3,
-    2,
-    5,
-    2,
-    5,
     0,
     5,
     2,
     1,
+    1,
+    1,
+    5,
+    0,
+    5,
+    5,
+    4,
+    0,
     4,
     3,
     0,
-    5,
-    3,
+    0,
+    0,
+    1,
+    1,
+    4,
+    4,
+    0,
     4,
     1,
-    0,
-    3,
-    0,
-    3,
     5,
+    5,
+    5,
+    4,
+    3,
+    1,
+    3,
+    4,
+    2,
+    0,
+    1,
+    5,
+    3,
+    2,
+    2,
+    1,
+    1,
+    2,
+    0,
+    0,
+    3,
+    0,
+    2,
+    2,
+    4,
+    2,
+    0,
+    5,
+    3,
+    4,
+    0,
+    3,
+    0,
+    4,
+    2,
     5,
     4,
     2,
-    1,
     4,
     1,
     5,
-    4,
+    0,
+    0,
     5,
-    2,
-    0,
-    3,
-    3,
-    0,
 ]
 
 
@@ -123,7 +146,7 @@ def test_entropy_on_amigo_device_but_not_proceed(amigo, mocker):
 
 
 def test_new_12w_from_d6(m5stickv, mocker):
-    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_LEGACY_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
@@ -134,7 +157,7 @@ def test_new_12w_from_d6(m5stickv, mocker):
         [BUTTON_ENTER]
         +
         # 1 presses per roll
-        [BUTTON_ENTER for _ in range(D6_12W_MIN_ROLLS)]
+        [BUTTON_ENTER for _ in range(D6_12W_LEGACY_MIN_ROLLS)]
         +
         # 1 press prev and 1 press on btn Go
         [BUTTON_PAGE_PREV, BUTTON_ENTER]
@@ -157,7 +180,7 @@ def test_new_12w_from_d6(m5stickv, mocker):
 
 
 def test_new_24w_from_d6(m5stickv, mocker):
-    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_24W_MIN_ROLLS
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_24W_LEGACY_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
@@ -168,7 +191,7 @@ def test_new_24w_from_d6(m5stickv, mocker):
         [BUTTON_ENTER]
         +
         # 1 presses per roll
-        [BUTTON_ENTER for _ in range(D6_24W_MIN_ROLLS)]
+        [BUTTON_ENTER for _ in range(D6_24W_LEGACY_MIN_ROLLS)]
         +
         # 1 press prev and 1 press on btn Go
         [BUTTON_PAGE_PREV, BUTTON_ENTER]
@@ -191,7 +214,7 @@ def test_new_24w_from_d6(m5stickv, mocker):
 
 
 def test_new_12w_from_d6_on_amigo_device(amigo, mocker):
-    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_LEGACY_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
@@ -202,7 +225,7 @@ def test_new_12w_from_d6_on_amigo_device(amigo, mocker):
         [BUTTON_ENTER]
         +
         # 1 presses per roll
-        [BUTTON_ENTER for _ in range(D6_12W_MIN_ROLLS)]
+        [BUTTON_ENTER for _ in range(D6_12W_LEGACY_MIN_ROLLS)]
         +
         # 1 press prev and 1 press on btn Go
         [BUTTON_PAGE_PREV, BUTTON_ENTER]
@@ -225,7 +248,7 @@ def test_new_12w_from_d6_on_amigo_device(amigo, mocker):
 
 
 def test_new_24w_from_d6_on_amigo_device(amigo, mocker):
-    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_24W_MIN_ROLLS
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_24W_LEGACY_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
@@ -236,7 +259,7 @@ def test_new_24w_from_d6_on_amigo_device(amigo, mocker):
         [BUTTON_ENTER]
         +
         # 1 presses per roll
-        [BUTTON_ENTER for _ in range(D6_24W_MIN_ROLLS)]
+        [BUTTON_ENTER for _ in range(D6_24W_LEGACY_MIN_ROLLS)]
         +
         # 1 press prev and 1 press on btn Go
         [BUTTON_PAGE_PREV, BUTTON_ENTER]
@@ -287,7 +310,7 @@ def test_cancel_new_12w_from_d6_on_amigo_device(amigo, mocker):
 
 
 def test_new_12w_from_d20(m5stickv, mocker):
-    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D20_12W_MIN_ROLLS
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D20_12W_LEGACY_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
@@ -298,7 +321,7 @@ def test_new_12w_from_d20(m5stickv, mocker):
         [BUTTON_ENTER]
         +
         # 1 presses per roll
-        [BUTTON_ENTER for _ in range(D20_12W_MIN_ROLLS)]
+        [BUTTON_ENTER for _ in range(D20_12W_LEGACY_MIN_ROLLS)]
         +
         # 1 press prev and 1 press on btn Go
         [BUTTON_PAGE_PREV, BUTTON_ENTER]
@@ -323,7 +346,7 @@ def test_new_12w_from_d20(m5stickv, mocker):
 
 
 def test_new_24w_from_d20(m5stickv, mocker):
-    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D20_24W_MIN_ROLLS
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D20_24W_LEGACY_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
@@ -334,7 +357,7 @@ def test_new_24w_from_d20(m5stickv, mocker):
         [BUTTON_ENTER]
         +
         # 1 presses per roll
-        [BUTTON_ENTER for _ in range(D20_24W_MIN_ROLLS)]
+        [BUTTON_ENTER for _ in range(D20_24W_LEGACY_MIN_ROLLS)]
         +
         # 1 press prev and 1 press on btn Go
         [BUTTON_PAGE_PREV, BUTTON_ENTER]
@@ -357,8 +380,8 @@ def test_new_24w_from_d20(m5stickv, mocker):
 
 
 def test_cancel_new_12w_from_d20(m5stickv, mocker):
-    "Will test the Deletion button and the minimum roll on the roll screen"
-    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D20_12W_MIN_ROLLS
+    "Will test the Deletion button and the legacy minimum roll on the roll screen"
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D20_12W_LEGACY_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = (
@@ -369,7 +392,7 @@ def test_cancel_new_12w_from_d20(m5stickv, mocker):
         [BUTTON_ENTER]
         +
         # 1 presses per roll
-        [BUTTON_ENTER for _ in range(D20_12W_MIN_ROLLS)]
+        [BUTTON_ENTER for _ in range(D20_12W_LEGACY_MIN_ROLLS)]
         +
         # 3 press prev and 1 press on btn < (delete last roll)
         [BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_PAGE_PREV, BUTTON_ENTER]
@@ -395,8 +418,8 @@ def test_cancel_new_12w_from_d20(m5stickv, mocker):
 
 
 # Test low entropy warning
-def test_low_shannon_entropy_warning(amigo, mocker):
-    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+def test_low_min_entropy_warning(amigo, mocker):
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_LEGACY_MIN_ROLLS
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
     from krux.themes import theme
 
@@ -408,7 +431,7 @@ def test_low_shannon_entropy_warning(amigo, mocker):
         [BUTTON_ENTER]
         +
         # 10 number 1 presses
-        [BUTTON_TOUCH for _ in range(D6_12W_MIN_ROLLS)]
+        [BUTTON_TOUCH for _ in range(D6_12W_LEGACY_MIN_ROLLS)]
         +
         # 1 press prev and 1 press on btn Go
         [BUTTON_PAGE_PREV, BUTTON_ENTER]
@@ -433,9 +456,12 @@ def test_low_shannon_entropy_warning(amigo, mocker):
     ctx.display.draw_centered_text.assert_has_calls([call_message])
 
 
-# Test low entropy warning is not shown when Shannon's entropy is good
+# Test low entropy warning is not shown when min-entropy is good
 def test_good_rolls(amigo, mocker):
-    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+    from krux.pages.new_mnemonic.dice_rolls import (
+        DiceEntropy,
+        D6_12W_MIN_ROLLS,
+    )
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
     BTN_SEQUENCE = (
@@ -445,7 +471,7 @@ def test_good_rolls(amigo, mocker):
         # 1 press to proceed msg
         [BUTTON_ENTER]
         +
-        # 10 number 1 presses
+        # 1 touch per roll, the minimum amount of rolls
         [BUTTON_TOUCH for _ in range(D6_12W_MIN_ROLLS)]
         +
         # 1 press prev and 1 press on btn Go
@@ -470,9 +496,57 @@ def test_good_rolls(amigo, mocker):
         assert args != call_message
 
 
+# Test that the legacy minimum amount of rolls warns about entropy, but is still accepted
+def test_legacy_min_rolls_warns_but_proceeds(amigo, mocker):
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_LEGACY_MIN_ROLLS
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
+    from krux.themes import theme
+
+    BTN_SEQUENCE = (
+        # 1 press to proceed to 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press to proceed msg
+        [BUTTON_ENTER]
+        +
+        # 1 touch per roll, only the legacy minimum amount of rolls
+        [BUTTON_TOUCH for _ in range(D6_12W_LEGACY_MIN_ROLLS)]
+        +
+        # 1 press prev and 1 press on btn Go
+        [BUTTON_PAGE_PREV, BUTTON_ENTER]
+        + [
+            BUTTON_ENTER,  # proceed with poor entropy,
+            BUTTON_PAGE,  # move to Generate Words, while seeing rolls
+            BUTTON_ENTER,  # generate words
+            BUTTON_ENTER,  # 1 press to confirm SHA
+        ]
+    )
+    MNEMONIC = "they unaware loan soccer atom lumber maple quarter face army cabin idea"
+
+    ctx = create_ctx(
+        mocker, BTN_SEQUENCE, touch_seq=GOOD_ROLLS_SEQUENCE[:D6_12W_LEGACY_MIN_ROLLS]
+    )
+    dice_entropy = DiceEntropy(ctx)
+    entropy = dice_entropy.new_key()
+    words = bip39.mnemonic_from_bytes(entropy)
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+
+    # Rolls are well distributed, there are just not enough of them: only the
+    # low entropy warning is shown, no pattern warning
+    call_message = mocker.call("Estimated entropy: Poor!", theme.error_color)
+    ctx.display.draw_centered_text.assert_has_calls([call_message])
+
+    # Generating the mnemonic is warned about, but not blocked
+    assert words == MNEMONIC
+
+
 # Test stats for nerds
 def test_stats_for_nerds(amigo, mocker):
-    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+    from krux.pages.new_mnemonic.dice_rolls import (
+        DiceEntropy,
+        D6_12W_MIN_ROLLS,
+    )
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV, BUTTON_TOUCH
 
     BTN_SEQUENCE = (
@@ -482,7 +556,7 @@ def test_stats_for_nerds(amigo, mocker):
         # 1 press to proceed msg
         [BUTTON_ENTER]
         +
-        # 10 number 1 presses
+        # 1 touch per roll, the minimum amount of rolls
         [BUTTON_TOUCH for _ in range(D6_12W_MIN_ROLLS)]
         +
         # 1 press prev and 1 press on btn Go
@@ -503,3 +577,44 @@ def test_stats_for_nerds(amigo, mocker):
 
     # Assert stats for nerds was called
     dice_entropy.stats_for_nerds.assert_called_once()
+
+
+def test_stats_for_nerds_minimal_display(m5stickv, mocker):
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy
+    from krux.input import BUTTON_ENTER
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    dice_entropy = DiceEntropy(ctx)
+    dice_entropy.rolls = [str(r + 1) for r in GOOD_ROLLS_SEQUENCE]
+    dice_entropy.roll_counts = [GOOD_ROLLS_SEQUENCE.count(i) for i in range(6)]
+    dice_entropy.stats_for_nerds()
+
+    texts = [c.args[0] for c in ctx.display.draw_hcentered_text.call_args_list]
+    # Small screens show only the min-entropy line
+    assert any(t.startswith("Min-entropy:") for t in texts)
+    assert not any("Shannon" in t for t in texts)
+
+
+def test_intro_shows_only_minimum_rolls(amigo, mocker):
+    from krux.pages.new_mnemonic.dice_rolls import DiceEntropy, D6_12W_MIN_ROLLS
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    BTN_SEQUENCE = (
+        # 1 press to proceed to 12 words
+        [BUTTON_ENTER]
+        +
+        # 1 press to cancel the proceed and then confirm the cancelation
+        [BUTTON_PAGE, BUTTON_ENTER]
+    )
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    dice_entropy = DiceEntropy(ctx)
+    dice_entropy.new_key()
+
+    texts = [c.args[0] for c in ctx.display.draw_hcentered_text.call_args_list]
+    # Only the minimum amount is shown, the legacy minimum is not
+    assert (
+        "Roll dice at least %d times to generate a mnemonic." % D6_12W_MIN_ROLLS
+        in texts
+    )
+    assert not any("Recommended" in t for t in texts)
