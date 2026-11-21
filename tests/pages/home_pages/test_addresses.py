@@ -380,7 +380,6 @@ def test_scan_address_fails_on_encrypted_non_ascii_bytes(mocker, m5stickv, tdata
 
     btn_seq = [
         BUTTON_ENTER,  # confirm decrypt
-        BUTTON_ENTER,  # type key
         BUTTON_ENTER,  # enter "a"
         BUTTON_PAGE_PREV,  # back to Go
         BUTTON_ENTER,  # go Go

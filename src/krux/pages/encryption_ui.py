@@ -473,26 +473,12 @@ class EncryptionKey(Page):
         return t("Weak")
 
     def encryption_key(self, creating=False):
-        """Loads and returns an encryption key from keypad or QR code"""
-        submenu = Menu(
-            self.ctx,
-            [
-                (t("Type Key"), self.load_key),
-                (t("Scan Key QR Code"), self.load_qr_encryption_key),
-            ],
-            back_label=None,
-        )
-        _, key = submenu.run_loop()
+        """Loads and returns an encryption key from the keypad or QR code."""
+        key = self.load_key()
 
         try:
             # encryption key may have been encrypted
-            decrypted = decrypt_kef(self.ctx, key)
-            try:
-                # no assumed decodings except for utf8
-                decrypted = decrypted.decode()
-            except:
-                pass
-
+            decrypted = self._decode_key(decrypt_kef(self.ctx, key))
             key = decrypted if decrypted else key
         except KeyError:
             self.flash_error(t("Failed to decrypt"))
@@ -542,10 +528,37 @@ class EncryptionKey(Page):
             t("Key"),
             [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
             starting_buffer=data,
+            scan_fn=self._load_qr_key_for_keypad,
         )
         if len(str(data)) > ENCRYPTION_KEY_MAX_LEN:
             raise ValueError("Maximum length exceeded (%s)" % ENCRYPTION_KEY_MAX_LEN)
         return data
+
+    def _load_qr_key_for_keypad(self):
+        """Loads a QR key and decrypts KEF data before keypad review."""
+        try:
+            key = self.load_qr_encryption_key()
+        except ValueError:
+            self.flash_error(t("Failed to load"))
+            return None
+        if key is None:
+            return None
+
+        try:
+            decrypted = self._decode_key(decrypt_kef(self.ctx, key))
+            if isinstance(decrypted, str):
+                return decrypted
+            self.flash_error(t("Failed to load"))
+            return None
+        except KeyError:
+            self.flash_error(t("Failed to decrypt"))
+            return None
+        except ValueError:
+            # ValueError=not KEF or declined to decrypt
+            if isinstance(key, str):
+                return key
+            self.flash_error(t("Failed to load"))
+            return None
 
     def load_qr_encryption_key(self):
         """Loads and returns a key from a QR code"""
@@ -558,12 +571,17 @@ class EncryptionKey(Page):
             return None
         if len(data) > ENCRYPTION_KEY_MAX_LEN:
             raise ValueError("Maximum length exceeded (%s)" % ENCRYPTION_KEY_MAX_LEN)
-        if isinstance(data, bytes):
-            try:
-                data = data.decode()
-            except:
-                pass
-        return data
+        return self._decode_key(data)
+
+    @staticmethod
+    def _decode_key(key):
+        """Decodes a UTF-8 byte key while preserving non-text data."""
+        if not isinstance(key, bytes):
+            return key
+        try:
+            return key.decode()
+        except (UnicodeError, TypeError):
+            return key
 
 
 class EncryptMnemonic(Page):

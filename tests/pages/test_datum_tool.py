@@ -803,7 +803,6 @@ def test_datumtool__decrypt_as_kef_envelope(m5stickv, mocker):
     # now with kef encrypted envelopes
     BTN_SEQUENCE = (
         BUTTON_ENTER,  # confirm Decrypt
-        BUTTON_ENTER,  # go Enter Key
         BUTTON_ENTER,  # go "a"
         BUTTON_PAGE_PREV,  # to Go
         BUTTON_ENTER,  # go Go

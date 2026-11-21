@@ -1,6 +1,5 @@
 from . import create_ctx, assert_not_flashed
 from .home_pages.test_home import tdata
-import pytest
 
 
 def test_type_passphrase(m5stickv, mocker):
@@ -24,7 +23,6 @@ def test_type_passphrase_esc(m5stickv, mocker):
     from krux.pages import BUTTON_ENTER, BUTTON_PAGE_PREV
 
     BTN_SEQUENCE = [
-        BUTTON_ENTER,  # Type BIP39 Passphrase
         *([BUTTON_PAGE_PREV] * 2),  # Go to "Esc"
         BUTTON_ENTER,  # Press Esc
         BUTTON_ENTER,  # Confirm Esc
@@ -53,12 +51,50 @@ def test_qr_passphrase(m5stickv, mocker):
     qr_capturer.assert_called_once()
 
 
-def test_qr_passphrase_too_long(m5stickv, mocker):
-    from krux.pages.wallet_settings import (
-        PassphraseEditor,
-        MENU_CONTINUE,
-        PASSPHRASE_MAX_LEN,
+def test_qr_passphrase_decodes_byte_mode_text(m5stickv, mocker):
+    from krux.pages.wallet_settings import PassphraseEditor
+    from krux.pages.qr_capture import QRCodeCapture
+
+    ctx = create_ctx(mocker, None)
+    passphrase_editor = PassphraseEditor(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (b"https://it-tools.tech", None),
     )
+    mocker.patch(
+        "krux.pages.encryption_ui.decrypt_kef",
+        side_effect=ValueError,
+    )
+
+    assert passphrase_editor._load_qr_passphrase() == "https://it-tools.tech"
+    ctx.display.flash_text.assert_not_called()
+
+
+def test_qr_passphrase_rejects_non_text_bytes(m5stickv, mocker):
+    from krux.pages.wallet_settings import PassphraseEditor
+    from krux.pages.qr_capture import QRCodeCapture
+
+    ctx = create_ctx(mocker, None)
+    passphrase_editor = PassphraseEditor(ctx)
+    mocker.patch.object(
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (b"\x8f", None),
+    )
+    mocker.patch(
+        "krux.pages.encryption_ui.decrypt_kef",
+        side_effect=ValueError,
+    )
+
+    assert passphrase_editor._load_qr_passphrase() is None
+    ctx.display.flash_text.assert_called_once_with(
+        "Failed to load", 248, 2000, highlight_prefix=""
+    )
+
+
+def test_qr_passphrase_too_long(m5stickv, mocker):
+    from krux.pages.wallet_settings import PassphraseEditor, PASSPHRASE_MAX_LEN
     from krux.pages.qr_capture import QRCodeCapture
 
     TEST_VALUE = "Test value" * 25
@@ -68,17 +104,15 @@ def test_qr_passphrase_too_long(m5stickv, mocker):
     mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (QR_DATA))
     qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
 
-    error_message = "Maximum length exceeded (%s)" % PASSPHRASE_MAX_LEN
-    with pytest.raises(ValueError) as error:
-        test_passphrase = passphrase_editor._load_qr_passphrase()
-
-        assert error_message in str(error.value)
-        assert test_passphrase == MENU_CONTINUE
-        qr_capturer.assert_called_once()
+    assert passphrase_editor._load_qr_passphrase() is None
+    passphrase_editor.ctx.display.flash_text.assert_called_with(
+        "Failed to load", 248, 2000, highlight_prefix=""
+    )
+    qr_capturer.assert_called_once()
 
 
 def test_qr_passphrase_camera_back_is_silent(m5stickv, mocker):
-    from krux.pages.wallet_settings import PassphraseEditor, MENU_CONTINUE
+    from krux.pages.wallet_settings import PassphraseEditor
     from krux.pages.qr_capture import QRCodeCapture
 
     TEST_VALUE = None
@@ -89,7 +123,7 @@ def test_qr_passphrase_camera_back_is_silent(m5stickv, mocker):
     qr_capturer = mocker.spy(QRCodeCapture, "qr_capture_loop")
     test_passphrase = passphrase_editor._load_qr_passphrase()
 
-    assert test_passphrase == MENU_CONTINUE
+    assert test_passphrase is None
     qr_capturer.assert_called_once()
 
     # "Back" is not a failure - it must not flash an error
@@ -100,7 +134,6 @@ def test_qr_passphrase_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.pages.wallet_settings import PassphraseEditor
     from krux.pages.qr_capture import QRCodeCapture
-    from krux.pages import MENU_CONTINUE
 
     # nonsensical 0x8f byte encrypted w/ key="a" to test decryption failure
     mocker.patch.object(
@@ -114,7 +147,6 @@ def test_qr_passphrase_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
 
     btn_seq = [
         BUTTON_ENTER,  # confirm decrypt
-        BUTTON_ENTER,  # type key
         BUTTON_PAGE,  # to "b"
         BUTTON_ENTER,  # enter "b"
         BUTTON_PAGE_PREV,  # back to "a"
@@ -124,7 +156,7 @@ def test_qr_passphrase_fails_on_decrypt_kef_key_error(mocker, m5stickv, tdata):
     ]
     ctx = create_ctx(mocker, btn_seq)
     passphrase_editor = PassphraseEditor(ctx)
-    assert passphrase_editor._load_qr_passphrase() == MENU_CONTINUE
+    assert passphrase_editor._load_qr_passphrase() is None
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
     ctx.display.flash_text.assert_called_with(
         "Failed to decrypt", 248, 2000, highlight_prefix=""
@@ -135,7 +167,6 @@ def test_qr_passphrase_fails_on_encrypted_non_ascii_bytes(mocker, m5stickv, tdat
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.pages.wallet_settings import PassphraseEditor
     from krux.pages.qr_capture import QRCodeCapture
-    from krux.pages import MENU_CONTINUE
 
     # non-ascii 0x8f byte encrypted w/ key="a" to test decoding failure
     # in Cpython: UnicodeDecodeError is raised; in MaixPy: TypeError is raised
@@ -150,7 +181,6 @@ def test_qr_passphrase_fails_on_encrypted_non_ascii_bytes(mocker, m5stickv, tdat
 
     btn_seq = [
         BUTTON_ENTER,  # confirm decrypt
-        BUTTON_ENTER,  # type key
         BUTTON_ENTER,  # enter "a"
         BUTTON_PAGE_PREV,  # back to Go
         BUTTON_ENTER,  # go Go
@@ -158,41 +188,7 @@ def test_qr_passphrase_fails_on_encrypted_non_ascii_bytes(mocker, m5stickv, tdat
     ]
     ctx = create_ctx(mocker, btn_seq)
     passphrase_editor = PassphraseEditor(ctx)
-    assert passphrase_editor._load_qr_passphrase() == MENU_CONTINUE
-    assert ctx.input.wait_for_button.call_count == len(btn_seq)
-    ctx.display.flash_text.assert_called_with(
-        "Failed to load", 248, 2000, highlight_prefix=""
-    )
-
-
-def test_qr_passphrase_fails_on_encrypted_non_ascii_bytes(mocker, m5stickv, tdata):
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
-    from krux.pages.wallet_settings import PassphraseEditor
-    from krux.pages.qr_capture import QRCodeCapture
-    from krux.pages import MENU_CONTINUE
-
-    # non-ascii 0x8f byte encrypted w/ key="a" to test decoding failure
-    # in Cpython: UnicodeDecodeError is raised; in MaixPy: TypeError is raised
-    mocker.patch.object(
-        QRCodeCapture,
-        "qr_capture_loop",
-        new=lambda self: (
-            b"\x06binkey\x05\x01\x88WB\xb9\xab\xb6\xe9\x83\x97y\x1ab\xb0F\xe2|\xd3E\x84\x2b\x2c",
-            0,
-        ),
-    )
-
-    btn_seq = [
-        BUTTON_ENTER,  # confirm decrypt
-        BUTTON_ENTER,  # type key
-        BUTTON_ENTER,  # enter "a"
-        BUTTON_PAGE_PREV,  # back to Go
-        BUTTON_ENTER,  # go Go
-        BUTTON_ENTER,  # confirm key "a"
-    ]
-    ctx = create_ctx(mocker, btn_seq)
-    passphrase_editor = PassphraseEditor(ctx)
-    assert passphrase_editor._load_qr_passphrase() == MENU_CONTINUE
+    assert passphrase_editor._load_qr_passphrase() is None
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
     ctx.display.flash_text.assert_called_with(
         "Failed to load", 248, 2000, highlight_prefix=""
@@ -201,36 +197,28 @@ def test_qr_passphrase_fails_on_encrypted_non_ascii_bytes(mocker, m5stickv, tdat
 
 def test_passphrase_non_ascii_validation(m5stickv, mocker, tdata):
     from krux.pages.wallet_settings import PassphraseEditor
-    from krux.pages import Menu, MENU_EXIT
-    from krux.input import BUTTON_PAGE_PREV
+    from krux.pages import ESC_KEY
 
     # Test non-ASCII passphrase rejection
     NON_ASCII_PASSPHRASE = "Testá"  # Contains non-ASCII character
-    ctx = create_ctx(mocker, [BUTTON_PAGE_PREV], tdata.SINGLESIG_12_WORD_KEY)
+    ctx = create_ctx(mocker, [], tdata.SINGLESIG_12_WORD_KEY)
     passphrase_editor = PassphraseEditor(ctx)
-
-    # Mock the Menu's run_loop to return non-ASCII passphrase first, then exit
-    menu_returns = [
-        (0, NON_ASCII_PASSPHRASE),  # First call returns non-ASCII passphrase
-        (0, MENU_EXIT),  # Second call exits
-    ]
     mocker.patch.object(
-        Menu,
-        "run_loop",
-        side_effect=menu_returns,
+        passphrase_editor,
+        "_load_passphrase",
+        side_effect=[NON_ASCII_PASSPHRASE, ESC_KEY],
     )
+    passphrase_editor.prompt = mocker.MagicMock(return_value=False)
 
     # Mock prompt to track if it was called
-    prompt_spy = mocker.spy(passphrase_editor, "prompt")
-
     result = passphrase_editor.load_passphrase_menu(
         tdata.SINGLESIG_12_WORD_KEY.mnemonic
     )
 
     # Verify that it was called
-    prompt_spy.assert_called()
+    passphrase_editor.prompt.assert_called()
     # Get the actual call arguments
-    call_args = prompt_spy.call_args[0][0]
+    call_args = passphrase_editor.prompt.call_args[0][0]
     assert call_args == "Proceed?"
 
     # Verify that the method returned None (exited without accepting passphrase)
@@ -239,22 +227,17 @@ def test_passphrase_non_ascii_validation(m5stickv, mocker, tdata):
 
 def test_passphrase_non_decodeable_validation(m5stickv, mocker, tdata):
     from krux.pages.wallet_settings import PassphraseEditor
-    from krux.pages import Menu, MENU_EXIT
+    from krux.pages import ESC_KEY
 
     # Test non-ASCII passphrase rejection
     BINARY_PASSPHRASE = b"\xde\xad\xbe\xef"  # Contains 0xdeadbeef, not decodeable
     ctx = create_ctx(mocker, None, tdata.SINGLESIG_12_WORD_KEY)
     passphrase_editor = PassphraseEditor(ctx)
 
-    # Mock the Menu's run_loop to return non-ASCII passphrase first, then exit
-    menu_returns = [
-        (0, BINARY_PASSPHRASE),  # First call returns binary passphrase
-        (0, MENU_EXIT),  # Second call exits
-    ]
     mocker.patch.object(
-        Menu,
-        "run_loop",
-        side_effect=menu_returns,
+        passphrase_editor,
+        "_load_passphrase",
+        side_effect=[BINARY_PASSPHRASE, ESC_KEY],
     )
 
     # Mock flash_error to track if it was called

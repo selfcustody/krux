@@ -181,6 +181,10 @@ When `True`, Krux will disable the [New Mnemonic](./usage/generating-a-mnemonic.
 
 Create or modify a Tamper Check Code. This code will be required every time [Tamper Check Flash Hash](features/tamper-detection.md) is executed.
 
+Creating or changing the code always uses manual keypad input. During
+verification, the QR glyph on the last symbols keypad can scan a code for review
+and editing before it is submitted.
+
 After creating the code, you will be prompted to fill the empty memory spaces with random entropy from the camera. This step is important to make *TC Flash Hash* more resilient to data manipulation by eliminating empty memory spaces that could be exploited in a sophisticated tamper attempt.
 
 The filling process requires good entropy images. If, for any reason, such as starting the process in a dark room, you fail to capture good entropy images, you can restart the filling process by resetting your *TC Code*.
