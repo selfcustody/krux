@@ -411,10 +411,12 @@ class MnemonicLoader(Page):
                 word_num = ""
                 while True:
                     word_num = ""
+                    valid_words = WORDLIST
 
                     # if new and last word, lead input to a valid mnemonic
                     if new and len(words) == len_mnemonic - 1:
                         finalwords = Key.get_final_word_candidates(words)
+                        valid_words = finalwords
                         word = self.capture_from_keypad(
                             t("Word %d") % (len(words) + 1),
                             [charset],
@@ -441,7 +443,9 @@ class MnemonicLoader(Page):
                         word_num = word
                         word = to_word(word)
 
-                    if word not in WORDLIST:
+                    # a BIP39 word can still be no valid final word: "win"
+                    # is typed on the way to "window" or "winter"
+                    if word not in valid_words:
                         word = ""
 
                     if word != "":

@@ -788,6 +788,62 @@ def test_create_key_from_text(m5stickv, mocker):
         assert ctx.wallet.key.mnemonic == case[1]
 
 
+def test_create_key_from_text_final_word_must_be_a_candidate(amigo, mocker):
+    """ "win" is a BIP39 word typed on the way to the valid final words
+    "window" and "winter": Go on it must not take it as the final word"""
+    from krux.pages.login import Login
+    from krux.pages.keypads import Keypad
+    from krux.input import BUTTON_ENTER, BUTTON_TOUCH
+    from krux.key import Key
+    from embit.wordlists.bip39 import WORDLIST
+
+    letters = "abcdefghijklmnopqrstuvwxyz"
+    first11 = ["ability"] * 10 + ["abandon"]
+    candidates = Key.get_final_word_candidates(first11)
+    assert "win" in WORDLIST and "win" not in candidates
+    assert [w for w in candidates if w.startswith("win")] == ["window", "winter"]
+
+    def unique_prefix(word):
+        """what to type before the keypad autocompletes the word"""
+        for n in range(1, len(word) + 1):
+            if len([w for w in WORDLIST if w.startswith(word[:n])]) == 1:
+                return word[:n]
+        return word
+
+    go_index = Keypad(create_ctx(mocker, []), [letters]).go_index
+    btn_seq, touch_seq = [BUTTON_ENTER], []  # Proceed
+    for word in first11:
+        for letter in unique_prefix(word):
+            btn_seq.append(BUTTON_TOUCH)
+            touch_seq.append(letters.index(letter))
+        btn_seq.append(BUTTON_ENTER)  # confirm word
+    btn_seq.append(BUTTON_ENTER)  # skip "Leave blank..." message
+    for letter in "win":
+        btn_seq.append(BUTTON_TOUCH)
+        touch_seq.append(letters.index(letter))
+    btn_seq.append(BUTTON_TOUCH)  # Go on "win": refused, the keypad reopens
+    touch_seq.append(go_index)
+    for letter in "wind":  # autocompletes to "window"
+        btn_seq.append(BUTTON_TOUCH)
+        touch_seq.append(letters.index(letter))
+    btn_seq.append(BUTTON_ENTER)  # confirm "12. window"
+
+    ctx = create_ctx(mocker, btn_seq, touch_seq=touch_seq)
+    login = Login(ctx)
+    mocker.patch.object(login, "choose_len_mnemonic", return_value=12)
+    mocker.patch.object(login, "_load_key_from_words", return_value="loaded")
+
+    assert login.load_key_from_text(new=True) == "loaded"
+
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    login._load_key_from_words.assert_called_once_with(
+        first11 + ["window"], letters, True
+    )
+    # "win" was never put to the user as the 12th word
+    prompts = [str(call.args[0]) for call in ctx.display.method_calls if call.args]
+    assert not [text for text in prompts if "win\n" in text]
+
+
 ############## load words from digits tests
 
 
