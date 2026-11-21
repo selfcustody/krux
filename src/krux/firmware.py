@@ -27,7 +27,7 @@ import time
 import flash
 import board
 from embit import ec
-from .input import Input, BUTTON_PAGE, BUTTON_PAGE_PREV
+from .input import Input, BUTTON_ENTER, BUTTON_TOUCH
 from .metadata import SIGNER_PUBKEY
 from .display import display
 from .krux_settings import t
@@ -373,7 +373,8 @@ def upgrade():
             ":",
         )
         inp.buttons_active = True
-        if inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
+        # Only ENTER or TOUCH installs, a held button or a swipe cancels
+        if inp.wait_for_button() not in (BUTTON_ENTER, BUTTON_TOUCH):
             display.clear()
             inp.wait_for_release()  # Wait for button release loading inputs on context
             return False
@@ -429,7 +430,7 @@ def upgrade():
         t("Upgrade complete.") + "\n\n\n" + t("Remove firmware files from SD Card?")
     )
     inp.buttons_active = True
-    if not inp.wait_for_button() in (BUTTON_PAGE, BUTTON_PAGE_PREV):
+    if inp.wait_for_button() in (BUTTON_ENTER, BUTTON_TOUCH):
         os.remove(firmware_path)
         os.remove(firmware_path + ".sig")
 
