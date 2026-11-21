@@ -707,7 +707,12 @@ class DatumTool(Page):
 
         while True:
             kef = KEFEnvelope(self.ctx)
-            plaintext = kef.unseal_ui(self.contents)
+            try:
+                plaintext = kef.unseal_ui(self.contents)
+            except KeyError:
+                # wrong key: say so and keep the envelope loaded
+                self.flash_error(t("Failed to decrypt"))
+                break
             if plaintext is None:
                 break
             try:
