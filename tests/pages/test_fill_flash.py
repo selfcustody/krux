@@ -94,8 +94,11 @@ def mock_flash_write_error(mocker):
 def test_fill_flash_entropy_timeout_scenario(amigo, mocker):
     # Test entropy timeout scenario with user confirmation navigation
     # User hesitates, checks options, then accepts but entropy capture times out
-    from krux.pages.fill_flash import FillFlash
+    from krux.pages.fill_flash import FillFlash, MENU_CONTINUE
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    mocker.patch("flash.read", return_value=b"\xff" * 0x1000)
+    flash_write = mocker.patch("flash.write")
 
     btn_sequence = [
         BUTTON_PAGE_PREV,  # Navigate to "No" (user hesitates)
@@ -114,16 +117,25 @@ def test_fill_flash_entropy_timeout_scenario(amigo, mocker):
     ctx = create_ctx(mocker, btn_sequence)
     fill_flash = FillFlash(ctx)
 
-    # Execute test and verify timeout exception
-    with pytest.raises(ValueError):
-        fill_flash.fill_flash_with_camera_entropy()
+    # Execute test: the timeout is reported and the page ends as usual
+    assert fill_flash.fill_flash_with_camera_entropy() == MENU_CONTINUE
 
     # Verify user interaction occurred as expected
     assert ctx.input.wait_for_button.call_count == len(btn_sequence)
 
+    # the user is told why, with the sensor off and the display upright again
+    ctx.display.flash_text.assert_called_once()
+    assert (
+        ctx.display.flash_text.call_args.args[0] == "Estimated entropy: Insufficient!"
+    )
+    ctx.camera.initialize_run.assert_called_once()
+    ctx.camera.stop_sensor.assert_called_once()
+    ctx.display.to_portrait.assert_called()
+    flash_write.assert_not_called()
+
 
 def test_fill_flash_insufficient_entropy_scenario(amigo, mocker):
-    from krux.pages.fill_flash import FillFlash
+    from krux.pages.fill_flash import FillFlash, MENU_CONTINUE
     from krux.pages.capture_entropy import CameraEntropy, INSUFFICIENT_VARIANCE_TH
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
 
@@ -162,11 +174,18 @@ def test_fill_flash_insufficient_entropy_scenario(amigo, mocker):
     )
 
     # Execute test and verify insufficient entropy is handled
-    with pytest.raises(ValueError, match="Estimated entropy: Insufficient!"):
-        fill_flash.fill_flash_with_camera_entropy()
+    assert fill_flash.fill_flash_with_camera_entropy() == MENU_CONTINUE
 
     # Verify user interaction occurred as expected
     assert ctx.input.wait_for_button.call_count == len(btn_sequence)
+
+    # the user is told why, with the sensor off and the display upright again
+    ctx.display.flash_text.assert_called_once()
+    assert (
+        ctx.display.flash_text.call_args.args[0] == "Estimated entropy: Insufficient!"
+    )
+    ctx.camera.stop_sensor.assert_called_once()
+    ctx.display.to_portrait.assert_called()
 
 
 def test_fill_flash_touch_decline_scenario(amigo, mocker):
