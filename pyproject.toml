@@ -22,7 +22,7 @@
 
 [project]
 name = "krux"
-version = "26.08.0"
+version = "26.09.0"
 description = "Open-source signing device firmware for Bitcoin"
 authors = [{ name = "Jeff S", email = "jeffreesun@protonmail.com" }]
 readme = "README.md"
@@ -72,6 +72,8 @@ dev = [
 # krux is firmware, not a distributable Python package
 [tool.uv]
 package = false
+required-version = ">=0.13.6"
+constraint-dependencies = ["certifi>=2026.10.23"]
 
 [tool.uv.sources]
 embit = { path = "vendor/embit", editable = true }

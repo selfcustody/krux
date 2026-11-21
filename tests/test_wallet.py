@@ -248,7 +248,7 @@ def tdata(mocker):
     """
 
     # TODO: Switch to 2-of-3 from keys defined above
-    UR_OUTPUT_MULTISIG_DESCRIPTOR = "wsh(multi(1,xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB/1/0/*,xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH/0/0/*))"
+    UR_OUTPUT_MULTISIG_DESCRIPTOR = "wsh(multi(1,xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB/1/0/*,[bd16bee5/0]xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH/0/0/*))"
     UR_OUTPUT_MULTISIG_WALLET_DATA = UR(
         "crypto-output",
         bytearray(
@@ -606,6 +606,22 @@ def test_is_multisig(mocker, m5stickv, tdata):
     wallet = Wallet(None)
     with pytest.raises(ValueError, match="invalid wallet format") as exc:
         wallet.load(tdata.KRUX_LEGACY1_RAW_PUBKEY, FORMAT_NONE)
+
+
+def test_load_nested_miniscript_fails(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    inner = tdata.LIANA_MINISCRIPT_DESCRIPTOR.split("#")[0]
+
+    # Only wsh and tr miniscript are supported, with or without a key loaded
+    for key in (tdata.MINISCRIPT_KEY, None):
+        for nested in ("sh(" + inner + ")", "sh(" + inner[len("wsh(") : -1] + ")"):
+            wallet = Wallet(key)
+            with pytest.raises(ValueError, match="nested miniscript not supported"):
+                wallet.load(nested, FORMAT_NONE)
+            assert not wallet.is_loaded()
+            assert wallet.descriptor is None
 
 
 def test_is_miniscript(mocker, m5stickv, tdata):

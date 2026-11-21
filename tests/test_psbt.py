@@ -2,9 +2,9 @@ import pytest
 from .shared_mocks import MockFile, mock_open
 
 WSH_MULTISIG = "wsh(sortedmulti(2,[02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*,[8cb36b38/48h/1h/0h/2h]tpubDESTVwqbbaSoN2mPq7tcWkPBpRBkaEADrUzUhRTVnNef6oVn6w2PHL4zoUjUAJSPLJQRBetkgX4sDRcoaCyFHxqHGyWyaiV8REKDkh7zQac/<0;1>/*,[73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*))#jpxgnm0a"
-WSH_MINISCRIPT = "wsh(or_d(pk([73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*),and_v(v:pkh([02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*),older(65535))))#466dtswe"
-TR_MINISCRIPT = "tr([73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*,and_v(v:pk([02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*),older(6)))#rfuhsd9c"
-TR_EXP_MULTI_MINISCRIPT = "tr(tpubD6NzVbkrYhZ4YYQjuKXFp85eRGCk4oA94MXbbHJW6zNAibMfkwZh7JQNVHEhpcQYaRCUs3b5PhvKPKESGoAJptiLvF8Rm1jhoFsryyFuR1P/<0;1>/*,{and_v(v:multi_a(2,[73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<2;3>/*,[02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<2;3>/*,[8cb36b38/48h/1h/0h/2h]tpubDESTVwqbbaSoN2mPq7tcWkPBpRBkaEADrUzUhRTVnNef6oVn6w2PHL4zoUjUAJSPLJQRBetkgX4sDRcoaCyFHxqHGyWyaiV8REKDkh7zQac/<0;1>/*),older(6)),multi_a(2,[73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*,[02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*)})#6ga85u82"
+WSH_MINISCRIPT = "wsh(or_d(pk([73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*),and_v(v:pkh([02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*),older(65535))))#h5jlv8lw"
+TR_MINISCRIPT = "tr([73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*,and_v(v:pk([02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*),older(6)))#x5xpaecg"
+TR_EXP_MULTI_MINISCRIPT = "tr(tpubD6NzVbkrYhZ4YYQjuKXFp85eRGCk4oA94MXbbHJW6zNAibMfkwZh7JQNVHEhpcQYaRCUs3b5PhvKPKESGoAJptiLvF8Rm1jhoFsryyFuR1P/<0;1>/*,{and_v(v:multi_a(2,[73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<2;3>/*,[02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<2;3>/*,[8cb36b38/48h/1h/0h/2h]tpubDESTVwqbbaSoN2mPq7tcWkPBpRBkaEADrUzUhRTVnNef6oVn6w2PHL4zoUjUAJSPLJQRBetkgX4sDRcoaCyFHxqHGyWyaiV8REKDkh7zQac/<0;1>/*),older(6)),multi_a(2,[73c5da0a/48h/1h/0h/2h]tpubDFH9dgzveyD8zTbPUFuLrGmCydNvxehyNdUXKJAQN8x4aZ4j6UZqGfnqFrD4NqyaTVGKbvEW54tsvPTK2UoSbCC1PJY8iCNiwTL3RWZEheQ/<0;1>/*,[02e8bff2/48h/1h/0h/2h]tpubDESmyzX6RMHRHvzxgLVXymd193CSYYT6C9M9wa4XK649tbAy2WeEvkPwBgoC7i76MypQxpuruUazQjqibbCogTZuENJX6YiuZ5Fy8sf7GNi/<0;1>/*)})#kt0e0vfv"
 
 
 @pytest.fixture
@@ -152,10 +152,10 @@ def tdata(mocker):
     MINIS_P2WSH_PSBT_B64 = "cHNidP8BAKgCAAAAAZZZFyTIyHAAHpgx4RTJClY3DBD/wvYtvHlQBWiIcZydAAAAAAD9////AyChBwAAAAAAFgAUVpExmvtni79DrSaMRaiKiM2NT2tAQg8AAAAAACIAIJ/v3lcOin2rUPE1jh1mzXq69rL7BIX/ddrN29OP3A3zq40HAAAAAAAiACDfZk57e1AVXMBz66RuW/0oR+hUhBOkRWLyvAnNpy8cagAAAAAAAQCiAgAAAAABAU8jn+rTqB80fFdKbj1CdOpWL99Sy8fOXvs6iNQCMGMmAQAAAAD9////AQZ5HgAAAAAAIgAgGtm2ZA4YoTas6xCsjIQq247clo23ri8+wy0TRq/dMwcBQD/YWe8kwsYxkM6iEcf+7RaaFH3JU+nFKXO/gFUX23DngDPpbNA4sqoTRJ3/5io1PLJZdUZ+T699wfAsNhxhPOQAAAAAAQErBnkeAAAAAAAiACAa2bZkDhihNqzrEKyMhCrbjtyWjbeuLz7DLRNGr90zBwEFRCEDaJVy4osP7anWmBwCN9nl3tv+wW3nFD9oCgLtXRWfdYesc2R2qRRQZtW0nWWtzkLdyI8F8UQ/7KmQioitA///ALJoIgYDLMRSZBc2IWvKWJwMwQE43VdzU3UzmLMSnBUa9H/5NpIcAui/8jAAAIABAACAAAAAgAIAAIAAAAAAAQAAACIGA2iVcuKLD+2p1pgcAjfZ5d7b/sFt5xQ/aAoC7V0Vn3WHHHPF2gowAACAAQAAgAAAAIACAACAAAAAAAEAAAAAACICAnEftmGVk/vJgt8Yn9ZQ0htivPcj0929eTfkCa5qm+oEHALov/IwAACAAQAAgAAAAIACAACAAAAAAAMAAAAiAgKxoTXVKpUeAQDixkzK2NmSWE0DUbnae31O4vHK0SaoBBxzxdoKMAAAgAEAAIAAAACAAgAAgAAAAAADAAAAACICAnxuOjHDK8ueogVkcyIpbFujaTY/E2747lrLIcj51R5QHALov/IwAACAAQAAgAAAAIACAACAAQAAAAEAAAAiAgL2bDCgfbz9YefFtvrPTmwn+Ue6+suz/A6igeAWfm6UjRxzxdoKMAAAgAEAAIAAAACAAgAAgAEAAAABAAAAAA=="
     MINIS_P2WSH_PSBT_UR_PSBT = UR("crypto-psbt", Types.psbt_to_cbor(MINIS_P2WSH_PSBT))
 
-    SIGNED_MINIS_P2WSH_PSBT = b'psbt\xff\x01\x00\xa8\x02\x00\x00\x00\x01\x96Y\x17$\xc8\xc8p\x00\x1e\x981\xe1\x14\xc9\nV7\x0c\x10\xff\xc2\xf6-\xbcyP\x05h\x88q\x9c\x9d\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03 \xa1\x07\x00\x00\x00\x00\x00\x16\x00\x14V\x911\x9a\xfbg\x8b\xbfC\xad&\x8cE\xa8\x8a\x88\xcd\x8dOk@B\x0f\x00\x00\x00\x00\x00"\x00 \x9f\xef\xdeW\x0e\x8a}\xabP\xf15\x8e\x1df\xcdz\xba\xf6\xb2\xfb\x04\x85\xffu\xda\xcd\xdb\xd3\x8f\xdc\r\xf3\xab\x8d\x07\x00\x00\x00\x00\x00"\x00 \xdffN{{P\x15\\\xc0s\xeb\xa4n[\xfd(G\xe8T\x84\x13\xa4Eb\xf2\xbc\t\xcd\xa7/\x1cj\x00\x00\x00\x00\x00\x01\x00\xa2\x02\x00\x00\x00\x00\x01\x01O#\x9f\xea\xd3\xa8\x1f4|WJn=Bt\xeaV/\xdfR\xcb\xc7\xce^\xfb:\x88\xd4\x020c&\x01\x00\x00\x00\x00\xfd\xff\xff\xff\x01\x06y\x1e\x00\x00\x00\x00\x00"\x00 \x1a\xd9\xb6d\x0e\x18\xa16\xac\xeb\x10\xac\x8c\x84*\xdb\x8e\xdc\x96\x8d\xb7\xae/>\xc3-\x13F\xaf\xdd3\x07\x01@?\xd8Y\xef$\xc2\xc61\x90\xce\xa2\x11\xc7\xfe\xed\x16\x9a\x14}\xc9S\xe9\xc5)s\xbf\x80U\x17\xdbp\xe7\x803\xe9l\xd08\xb2\xaa\x13D\x9d\xff\xe6*5<\xb2YuF~O\xaf}\xc1\xf0,6\x1ca<\xe4\x00\x00\x00\x00\x01\x01+\x06y\x1e\x00\x00\x00\x00\x00"\x00 \x1a\xd9\xb6d\x0e\x18\xa16\xac\xeb\x10\xac\x8c\x84*\xdb\x8e\xdc\x96\x8d\xb7\xae/>\xc3-\x13F\xaf\xdd3\x07"\x02\x03h\x95r\xe2\x8b\x0f\xed\xa9\xd6\x98\x1c\x027\xd9\xe5\xde\xdb\xfe\xc1m\xe7\x14?h\n\x02\xed]\x15\x9fu\x87G0D\x02 +\xe4\x00\xa1\xcb\xf1\x87\x8b\xef\x07\x86\x89\x1aV\x99\x0b%3W\xfb\xe0v\xc2S\\\xaf\xc4T\x8ej\xe6p\x02 \x1d/\\\x9eS\x0e<\xff\xd0\x81UL\xd1\x15|\x1c}y\x8e?\xdc\xaa\xbc=6\xc1\xcc\x06ll\xca\xc9\x01\x01\x05D!\x03h\x95r\xe2\x8b\x0f\xed\xa9\xd6\x98\x1c\x027\xd9\xe5\xde\xdb\xfe\xc1m\xe7\x14?h\n\x02\xed]\x15\x9fu\x87\xacsdv\xa9\x14Pf\xd5\xb4\x9de\xad\xceB\xdd\xc8\x8f\x05\xf1D?\xec\xa9\x90\x8a\x88\xad\x03\xff\xff\x00\xb2h\x00\x00\x00\x00'
-    SIGNED_MINIS_P2WSH_PSBT_B43 = "1TFBDGI0U9N.JNF9JXZO5QI.R..ULE3SYFCOR2+C/2/N6GRF$UFW0$ONNTH.6JYIB/NLQX6H4IPU+P+BHLUB-40/ZB8IK$01$$CS3:5K6MD5R-1U7Z4Y$4QON+B9T:L3$V1OWNAAAK9PHL6:J:1FEHNJ1OV74-I*KNUCQ6G*JGP0/JC:N3Q-X-2-3+OF-:B$--I1TX8X7N+8606XP01.OV1CGGZ2R6R9+Z-KX9ZQXH-LXX75-P43.X6TO44.ARWD85RI1WHNLD903+IAV2FV6T5//T1EM9HNP*1EYDKUZN3*$U8L944W3K*Y2N0N7:AW-M:X0:PZURT:+4:ZBVOZ3$1BKQGHG1DDP8T8YO:NI7.NBVUVPN2-0-4:STS*GJM28W+B-J/T+IJTK4U.OV+MFEYLOC012A22J+L/37BE+E7PZ-2.7F:-UY/E$ZN1ZC2+P7V5FS4CIPRTDAGGCB-XBGZ7.3T7929P8$VPZQSAPU4V8/8BAR:PP/IE+DP.YWW1HJW/3JPDXE.Z90.BN91FW1HQSUVQDHL46*UXBX2BL9T23HT7F.TBS3:86MGX/I8M:YD*:+JMS$WKPWB65.T36WJP1.7A7H*K03GCUW0KGLU-H*5C6Z/0P*LQY2CL$-.P7XC1XG0HQPJM.FKGOC6S3+3KLZX:XW79I.-*4G.S6A05R:YE*6AU*UHA89R$RV.XJX5OQH:9UGKJ0X-JQ2EUTP2TBB/2B6933J.CNJW6M711I2GG-S9*8NTM*ONCBIBQ3BR87.HP17HKP*1P6$8*WRDVWUXRYRMDD9B-OG0+CZ7L3SKK0W64SUVH1-TRP8N$:.F1+6BQ0"
-    SIGNED_MINIS_P2WSH_PSBT_B58 = "3UCmDenEJ8kw38Fft6J4JkeeDFYGE139af8mZigLkDsjrthMUBvRfHGs8vFUB8R4LP71PWpogqs6qnCbALrfbFCntEtFGPUNLR4WPrZAe1NCDVwGKHiJfBhxZidHBW2AzLStnJ5utyBZaWG1EjbiPbnhjVNymwy83FQjHjJNr6cqYf71efwP1QXqM33cT5SiFiFw2ANxSKyJxbvWkvVexKqc46fBBkbBnhnPzh5ycnjjNL8v6vx2yzigCPNpRs1xXrPWvdCKf6dFQbuDneqS4uFuUvR1eWv7DfWDVoMZaxvvttKAoUhEELibnSJFkuQoh4637PRbRaAL4EeyRnYP4mqiKEXvTbT4Dp2mYBvW28eZ1irrXkWsLhNyRyuE54NahJpd9vVfpBpa7U5EDRReN83xSaiboWNJ8dxc6UdGAkKqYmDu5RmPAxKYfmTWmA2s1o1WWpNchgaqkYPygMR1VyV8jrbNc8jnhfzGiH9Jo2Wjc8snnUPHY7mGXMmcgvtZtVQqBgMpqfgo1p5JP94LdiTrvu6fPxA9a8GpRw2hXBjeZd1BszHXcPeVWWx8LLkCAn5BiVmRG4RFh8pSfz4yQd5VDWGvrSepRnToPDQNPAYLbQCMKMgUPf3m2uRQtRRqf5t7wcwnSAdCzYVqKScZV3SRWZM2aNZD8fDnj4XKd6TJmmBTuxe51h3odc7fJWqZju2MuJQqAV4grSwE24xk478pyfXSN7Jg9f54MucGTeGFuVFYyiTkozkLjfaXY9mB6SpCBP5wo1R"
-    SIGNED_MINIS_P2WSH_PSBT_B64 = "cHNidP8BAKgCAAAAAZZZFyTIyHAAHpgx4RTJClY3DBD/wvYtvHlQBWiIcZydAAAAAAD9////AyChBwAAAAAAFgAUVpExmvtni79DrSaMRaiKiM2NT2tAQg8AAAAAACIAIJ/v3lcOin2rUPE1jh1mzXq69rL7BIX/ddrN29OP3A3zq40HAAAAAAAiACDfZk57e1AVXMBz66RuW/0oR+hUhBOkRWLyvAnNpy8cagAAAAAAAQCiAgAAAAABAU8jn+rTqB80fFdKbj1CdOpWL99Sy8fOXvs6iNQCMGMmAQAAAAD9////AQZ5HgAAAAAAIgAgGtm2ZA4YoTas6xCsjIQq247clo23ri8+wy0TRq/dMwcBQD/YWe8kwsYxkM6iEcf+7RaaFH3JU+nFKXO/gFUX23DngDPpbNA4sqoTRJ3/5io1PLJZdUZ+T699wfAsNhxhPOQAAAAAAQErBnkeAAAAAAAiACAa2bZkDhihNqzrEKyMhCrbjtyWjbeuLz7DLRNGr90zByICA2iVcuKLD+2p1pgcAjfZ5d7b/sFt5xQ/aAoC7V0Vn3WHRzBEAiAr5AChy/GHi+8HhokaVpkLJTNX++B2wlNcr8RUjmrmcAIgHS9cnlMOPP/QgVVM0RV8HH15jj/cqrw9NsHMBmxsyskBAQVEIQNolXLiiw/tqdaYHAI32eXe2/7BbecUP2gKAu1dFZ91h6xzZHapFFBm1bSdZa3OQt3IjwXxRD/sqZCKiK0D//8AsmgAAAAA"
+    SIGNED_MINIS_P2WSH_PSBT = b'psbt\xff\x01\x00\xa8\x02\x00\x00\x00\x01\x96Y\x17$\xc8\xc8p\x00\x1e\x981\xe1\x14\xc9\nV7\x0c\x10\xff\xc2\xf6-\xbcyP\x05h\x88q\x9c\x9d\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03 \xa1\x07\x00\x00\x00\x00\x00\x16\x00\x14V\x911\x9a\xfbg\x8b\xbfC\xad&\x8cE\xa8\x8a\x88\xcd\x8dOk@B\x0f\x00\x00\x00\x00\x00"\x00 \x9f\xef\xdeW\x0e\x8a}\xabP\xf15\x8e\x1df\xcdz\xba\xf6\xb2\xfb\x04\x85\xffu\xda\xcd\xdb\xd3\x8f\xdc\r\xf3\xab\x8d\x07\x00\x00\x00\x00\x00"\x00 \xdffN{{P\x15\\\xc0s\xeb\xa4n[\xfd(G\xe8T\x84\x13\xa4Eb\xf2\xbc\t\xcd\xa7/\x1cj\x00\x00\x00\x00\x00\x01\x01+\x06y\x1e\x00\x00\x00\x00\x00"\x00 \x1a\xd9\xb6d\x0e\x18\xa16\xac\xeb\x10\xac\x8c\x84*\xdb\x8e\xdc\x96\x8d\xb7\xae/>\xc3-\x13F\xaf\xdd3\x07"\x02\x03h\x95r\xe2\x8b\x0f\xed\xa9\xd6\x98\x1c\x027\xd9\xe5\xde\xdb\xfe\xc1m\xe7\x14?h\n\x02\xed]\x15\x9fu\x87G0D\x02 +\xe4\x00\xa1\xcb\xf1\x87\x8b\xef\x07\x86\x89\x1aV\x99\x0b%3W\xfb\xe0v\xc2S\\\xaf\xc4T\x8ej\xe6p\x02 \x1d/\\\x9eS\x0e<\xff\xd0\x81UL\xd1\x15|\x1c}y\x8e?\xdc\xaa\xbc=6\xc1\xcc\x06ll\xca\xc9\x01\x01\x05D!\x03h\x95r\xe2\x8b\x0f\xed\xa9\xd6\x98\x1c\x027\xd9\xe5\xde\xdb\xfe\xc1m\xe7\x14?h\n\x02\xed]\x15\x9fu\x87\xacsdv\xa9\x14Pf\xd5\xb4\x9de\xad\xceB\xdd\xc8\x8f\x05\xf1D?\xec\xa9\x90\x8a\x88\xad\x03\xff\xff\x00\xb2h\x00\x00\x00\x00'
+    SIGNED_MINIS_P2WSH_PSBT_B43 = "R3P$B6$NWMQ02LYCJXDP9+I-1P8FBX:BT0/NYX+VXIJGAZ9+1265.O.Y4KYKB:BG.:LQFAAW/*TXOG:QGC8EGW.GF+-6.1:VJGHZ36.3M2AH22AC5*.CE80C4XNL.61AIZ$XPOK0+68::6EOY3-0ZY1FWGBOIJKM*/30G44-KQKK3P/ECTDXXMU3E9B-Y+-TNWGF6S8X-K-S-/41OQNRKU0FY67E27WEK+IA15-KRQX0ZO8FDQ9ID$WBMD-S+2+84CMM.I0U9R$8$8X8IR68HGL09A29KPMEG5/*TYL8WM6EN*I9X*L+X0M*F$G2KX0RQ5GZX9W:H66YSV8PA117SAES446-SJB449E:L*5QN.9H5W817O7.3P.$VL/WCG*09JO1H4YP48X9691VZBH76P+Y1HGTOV$0FT8ZZFA9LC5TEAUHOMQN+3U:-6Y521Y-/SX+5VNCTF$.-SNUPMOEX+Z81J+4A*YT$9LTEW/Y4GNC2CHCYHI8B2Z-ESR009AZZQGA.SG:9X.XEO5YDKKWY66US:T23L+./B39:KW*HDAO$/MSHUEIU:UEP3SZBZ3-*F:GJ0KNITDI0XGB:ZEOT"
+    SIGNED_MINIS_P2WSH_PSBT_B58 = "dxJdhwffFEKPZWZfrt9sykgqAByxXdaCuJHUwgN7pMTSy3AwnHx7mn1L95CpGkc2VWpvraX2qp3pgUqqLt14fZNBdHbyEQYjyVGqoifuFNtHzFmtjhUtX9wopMxuASV2At2uwa5LffSYCCG7HwLDMb7G9iGu8EcdHqBFz4M5qW99EdbsNmiRHeiih7aTvmGy6hf3UfX3cciAWae2DQhfw4BTAeP6VmyEmyx8MyZwKSdCZEEfGXiiuEggacV4zxTBJGAHCaNdxDBxRAJWfsBDxW81DuF77eqRYBFFkB7tEz2Eui36wNc9JSokQUucA8oktuUtMTsyiVj8yAPigHdpLtLrXBUBZJMw6hDwPktnobMLcStbHm32JsKdy77SzrfA44zbJHYKJ7zNCYmGCSE1m3WBd7AWF6ZYrQDZwQaSqBpSqZE4wX3WijLaEHkwuSmCungi5s6aWmR2pNbyk7m8QTUcMXW5SzbCqZwjcQ3kkdCm9PwG87VAVWggN4w1g1YwFfa61JMF4uCTLydbUpC4LLisAuped7W4c8FboAPQj"
+    SIGNED_MINIS_P2WSH_PSBT_B64 = "cHNidP8BAKgCAAAAAZZZFyTIyHAAHpgx4RTJClY3DBD/wvYtvHlQBWiIcZydAAAAAAD9////AyChBwAAAAAAFgAUVpExmvtni79DrSaMRaiKiM2NT2tAQg8AAAAAACIAIJ/v3lcOin2rUPE1jh1mzXq69rL7BIX/ddrN29OP3A3zq40HAAAAAAAiACDfZk57e1AVXMBz66RuW/0oR+hUhBOkRWLyvAnNpy8cagAAAAAAAQErBnkeAAAAAAAiACAa2bZkDhihNqzrEKyMhCrbjtyWjbeuLz7DLRNGr90zByICA2iVcuKLD+2p1pgcAjfZ5d7b/sFt5xQ/aAoC7V0Vn3WHRzBEAiAr5AChy/GHi+8HhokaVpkLJTNX++B2wlNcr8RUjmrmcAIgHS9cnlMOPP/QgVVM0RV8HH15jj/cqrw9NsHMBmxsyskBAQVEIQNolXLiiw/tqdaYHAI32eXe2/7BbecUP2gKAu1dFZ91h6xzZHapFFBm1bSdZa3OQt3IjwXxRD/sqZCKiK0D//8AsmgAAAAA"
     SIGNED_MINIS_P2WSH_PSBT_UR_PSBT = UR(
         "crypto-psbt", Types.psbt_to_cbor(SIGNED_MINIS_P2WSH_PSBT)
     )
@@ -1259,6 +1259,37 @@ def test_sign_miniscript(mocker, m5stickv, tdata):
         assert signer.psbt_qr() == (case[2], case[1])
 
 
+def test_sign_trims_previous_tx_from_segwit_inputs(mocker, m5stickv, tdata):
+    """The previous transaction verifies a segwit input's amount, but only
+    legacy inputs carry it back in the signed QR PSBT"""
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG, TYPE_MINISCRIPT
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    # Segwit input that carries both UTXO fields
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, tdata.MINIS_P2WSH_PSBT, FORMAT_NONE)
+    assert signer.psbt.inputs[0].witness_utxo
+    assert signer.psbt.inputs[0].non_witness_utxo
+    signer.sign()
+    assert signer.psbt.inputs[0].partial_sigs
+    assert signer.psbt.inputs[0].witness_utxo
+    assert signer.psbt.inputs[0].non_witness_utxo is None
+
+    # Untrimmed, as saved to SD card, it stays
+    signer = PSBTSigner(wallet, tdata.MINIS_P2WSH_PSBT, FORMAT_NONE)
+    signer.sign(trim=False)
+    assert signer.psbt.inputs[0].non_witness_utxo
+
+    # Legacy inputs: the previous transaction is their only UTXO field
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, tdata.P2PKH_PSBT, FORMAT_NONE)
+    signer.sign()
+    assert all(inp.non_witness_utxo for inp in signer.psbt.inputs)
+
+
 def test_sign_miniscript_from_sdcard(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
@@ -1718,6 +1749,149 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
         case_num += 1
 
 
+FORGED_OWNERSHIP_CASES = [
+    "p2wpkh_keeps_our_key",
+    "p2wpkh_lists_other_key",
+    "p2wpkh_paying_key_first",
+    "p2wpkh_paying_key_last",
+    "p2wpkh_receive_path",
+    "p2sh_p2wpkh_keeps_our_key",
+    "p2sh_p2wpkh_lists_other_key",
+    "p2pkh_keeps_our_key",
+    "p2pkh_lists_other_key",
+    "p2tr_keeps_our_key",
+    "p2tr_lists_other_key",
+]
+
+
+@pytest.mark.parametrize("case", FORGED_OWNERSHIP_CASES)
+def test_outputs_singlesig_forged_ownership(mocker, m5stickv, tdata, case):
+    """An output whose script our descriptor does not derive is a spend,
+    whatever fingerprint, path and key its derivation claims"""
+    from embit import bip32, bip39, ec
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, DerivationPath, OutputScope
+    from embit.script import p2pkh, p2sh, p2tr, p2wpkh
+    from embit.transaction import TransactionOutput
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG, P2PKH, P2SH_P2WPKH, P2WPKH, P2TR
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+    from krux.format import format_address
+
+    network = NETWORKS["test"]
+    root = bip32.HDKey.from_seed(
+        bip39.mnemonic_to_seed(tdata.TEST_MNEMONIC), version=network["xprv"]
+    )
+    other_key = ec.PrivateKey(b"\x11" * 32).get_public_key()
+    other_origin = DerivationPath(
+        b"\xde\xad\xbe\xef", bip32.parse_path("m/84h/1h/0h/1/0")
+    )
+
+    def ours(path):
+        derivation = bip32.parse_path(path)
+        pubkey = root.derive(derivation).to_public().key
+        return pubkey, DerivationPath(root.my_fingerprint, derivation)
+
+    recipient = "tb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx"
+    self_transfers = []
+    if case.startswith("p2wpkh"):
+        # Output 0 is the change, output 1 pays the recipient
+        script_type = P2WPKH
+        psbt = PSBT.parse(tdata.P2WPKH_PSBT)
+        forged = psbt.outputs[0]
+        forged.script_pubkey = p2wpkh(other_key)
+        ((our_key, our_derivation),) = forged.bip32_derivations.items()
+        # Our real entry next to an entry for the key that is paid
+        if case == "p2wpkh_paying_key_first":
+            forged.bip32_derivations = {
+                other_key: other_origin,
+                our_key: our_derivation,
+            }
+        elif case == "p2wpkh_paying_key_last":
+            forged.bip32_derivations = {
+                our_key: our_derivation,
+                other_key: other_origin,
+            }
+        elif case == "p2wpkh_receive_path":
+            forged.bip32_derivations = dict([ours("m/84h/1h/0h/0/5")])
+        spends = [(forged, "0.89 997 180"), (recipient, "0.10 000 000")]
+        spend_total = "0.99 997 180"
+    elif case.startswith("p2sh_p2wpkh"):
+        # Output 0 is the change, output 1 pays the recipient
+        script_type = P2SH_P2WPKH
+        psbt = PSBT.parse(tdata.P2SH_P2WPKH_PSBT)
+        forged = psbt.outputs[0]
+        forged.redeem_script = p2wpkh(other_key)
+        forged.script_pubkey = p2sh(forged.redeem_script)
+        spends = [(forged, "0.89 996 700"), (recipient, "0.10 000 000")]
+        spend_total = "0.99 996 700"
+    elif case.startswith("p2pkh"):
+        # The honest PSBT has no change, so add one paid from the fee
+        script_type = P2PKH
+        psbt = PSBT.parse(tdata.P2PKH_PSBT)
+        forged = OutputScope(vout=TransactionOutput(500, p2pkh(other_key)))
+        forged.bip32_derivations = dict([ours("m/44h/1h/0h/1/0")])
+        psbt.outputs.append(forged)
+        spends = [
+            ("tb1q4mx3ahp7laj65gyaqg27w0tsjpwuz6rvaxx3tl", "0.00 001 000"),
+            (forged, "0.00 000 500"),
+        ]
+        spend_total = "0.00 001 500"
+    else:
+        # Output 0 is the change, 1 a self transfer, 2 pays the recipient
+        script_type = P2TR
+        psbt = PSBT.parse(tdata.P2TR_PSBT)
+        forged = psbt.outputs[0]
+        forged.script_pubkey = p2tr(other_key)
+        if case == "p2tr_lists_other_key":
+            forged.taproot_internal_key = other_key
+            (leaves_and_derivation,) = forged.taproot_bip32_derivations.values()
+            forged.taproot_bip32_derivations = {other_key: leaves_and_derivation}
+        spends = [
+            (forged, "0.00 007 738"),
+            ("tb1q4mx3ahp7laj65gyaqg27w0tsjpwuz6rvaxx3tl", "0.00 001 000"),
+        ]
+        spend_total = "0.00 008 738"
+        self_transfers = [
+            (
+                "tb1pn5kekm0xpnwd6kg8c8qfvv2fr0w5xnhw42927wem7xwk84f7gzvsvctkhp",
+                "0.00 001 000",
+            )
+        ]
+
+    if case.endswith("lists_other_key") and not case.startswith("p2tr"):
+        # Our fingerprint and path, but the key that is paid
+        ((_, derivation),) = forged.bip32_derivations.items()
+        forged.bip32_derivations = {other_key: derivation}
+
+    def address(output):
+        if isinstance(output, str):
+            return output
+        return output.script_pubkey.address(network)
+
+    summary = ["Spend (%d): ₿ %s" % (len(spends), spend_total)]
+    if self_transfers:
+        summary.append("Self-transfer or Change (1): ₿ 0.00 001 000")
+    screens = [
+        "%d. Spend: \n\n%s\n\n₿ %s" % (i + 1, format_address(address(out)), amount)
+        for i, (out, amount) in enumerate(spends)
+    ] + [
+        "%d. Self-transfer: \n\n%s\n\n₿ %s" % (i + 1, format_address(out), amount)
+        for i, (out, amount) in enumerate(self_transfers)
+    ]
+
+    wallet = Wallet(
+        Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, network, script_type=script_type)
+    )
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    outputs, _ = signer.outputs()
+
+    # The summary is inputs, spend, any self transfer or change, then fee
+    assert outputs[0].split("\n\n")[1:-1] == summary
+    assert outputs[1:] == screens
+
+
 def test_outputs_multisig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
@@ -2105,6 +2279,53 @@ def test_xpubs_rejects_multiple_origin_less_keys(mocker, m5stickv):
         signer.xpubs()
 
 
+def test_tr_miniscript_global_xpubs_with_origin_less_internal_key(m5stickv, tdata):
+    # Coordinators like Nunchuk add PSBT_GLOBAL_XPUB only for keys with origin,
+    # the NUMS internal key must still be resolved from the loaded descriptor
+    from embit.bip32 import HDKey
+    from embit.descriptor import Descriptor
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, DerivationPath
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_MINISCRIPT, P2TR
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(
+        Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"], script_type=P2TR)
+    )
+    wallet.load(TR_EXP_MULTI_MINISCRIPT, FORMAT_NONE)
+    descriptor = Descriptor.from_string(TR_EXP_MULTI_MINISCRIPT)
+
+    psbt = PSBT.parse(tdata.EXP_TR_MINIS_PSBT)
+    for key in descriptor.keys:
+        if key.origin:
+            psbt.xpubs[key.key] = DerivationPath(
+                key.origin.fingerprint, key.origin.derivation
+            )
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    assert signer.policy == wallet.policy
+    signer.sign()
+    assert signer.psbt_qr() == (tdata.SIGNED_EXP_TR_MINIS_PSBT, FORMAT_NONE)
+
+    # Internal key also present in global xpubs must not be counted twice
+    nums = HDKey.from_string(descriptor.key.key.to_base58())
+    psbt.xpubs[nums] = DerivationPath(nums.my_fingerprint, [])
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    assert signer.policy == wallet.policy
+
+    # Internal key derivation that doesn't derive from the descriptor key
+    del psbt.xpubs[nums]
+    internal_key = psbt.inputs[0].taproot_internal_key
+    leafs, der = psbt.inputs[0].taproot_bip32_derivations[internal_key]
+    psbt.inputs[0].taproot_bip32_derivations[internal_key] = (
+        leafs,
+        DerivationPath(der.fingerprint, [0, 5]),
+    )
+    with pytest.raises(ValueError, match="policy mismatch"):
+        PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+
+
 def test_sign_single_1_input_1_output_no_change(m5stickv):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
@@ -2306,3 +2527,161 @@ def test_fee_percent_zero_out_amount(mocker, m5stickv, tdata):
     resume_fee_str, fee_percent = signer._get_resume_fee(1000, 0, {})
     assert fee_percent == 100.0
     assert "100.0%" in resume_fee_str
+
+
+def test_sign_trim_keeps_psbt_v2(m5stickv):
+    """A PSBTv2 must come back as a PSBTv2 that still derives the signed locktime"""
+    from embit import bip32, bip39, ec, script
+    from embit.bip32 import parse_path
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, DerivationPath
+    from embit.transaction import Transaction, TransactionInput, TransactionOutput
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.psbt import PSBTSigner
+    from krux.qr import FORMAT_NONE
+    from krux.wallet import Wallet
+
+    mnemonic = "abandon " * 11 + "about"
+    root = bip32.HDKey.from_seed(
+        bip39.mnemonic_to_seed(mnemonic), version=NETWORKS["test"]["xprv"]
+    )
+    derivation = parse_path("m/84h/1h/0h/0/0")
+    pubkey = root.derive(derivation).to_public().key
+    tx = Transaction(
+        vin=[TransactionInput(b"\x99" * 32, 0)],
+        vout=[TransactionOutput(90000, script.p2wpkh(pubkey))],
+    )
+    psbt = PSBT(tx, version=2)
+    psbt.locktime = 100
+    psbt.tx_modifiable_flags = 0b11
+    psbt.inputs[0].required_height_locktime = 800000
+    psbt.inputs[0].witness_utxo = TransactionOutput(100000, script.p2wpkh(pubkey))
+    psbt.inputs[0].bip32_derivations[pubkey] = DerivationPath(
+        root.my_fingerprint, derivation
+    )
+
+    wallet = Wallet(Key(mnemonic, TYPE_SINGLESIG, NETWORKS["test"]))
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    signer.sign()
+    trimmed = PSBT.parse(signer.psbt.serialize())
+
+    assert trimmed.version == 2
+    assert trimmed.locktime == 100
+    assert trimmed.inputs[0].required_height_locktime == 800000
+    assert trimmed.tx.locktime == 800000
+    # SIGHASH_ALL commits to every input and output
+    assert trimmed.tx_modifiable_flags == 0
+    signature = list(trimmed.inputs[0].partial_sigs.values())[0]
+    assert pubkey.verify(ec.Signature.parse(signature[:-1]), trimmed.sighash(0))
+
+
+def test_fee_percent_ignores_change(mocker, m5stickv, tdata):
+    """The summary shows the fee against all outputs, while the high fee
+    warning uses the amount spent, so a large change output can't hide it"""
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    psbt = PSBT.parse(tdata.P2WPKH_PSBT)
+    # Spend 10,000,000 sat with a 1,000,000 sat fee, the rest returns as change
+    change = next(out for out in psbt.outputs if out.bip32_derivations)
+    change.value = psbt.inputs[0].utxo.value - 10_000_000 - 1_000_000  # 89,000,000 sat
+
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    outputs, fee_percent = signer.outputs()
+
+    assert fee_percent == 10.0
+    assert "(1.1%)" in outputs[0]
+
+
+def test_fee_percent_spend_and_self_transfer(mocker, m5stickv, tdata):
+    """The high fee warning adds a self transfer next to a spend to its base,
+    while the summary still divides by all outputs"""
+    from embit.networks import NETWORKS
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG, P2TR
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(
+        Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"], script_type=P2TR)
+    )
+    # 1,000 sat spend, 1,000 sat self transfer, 7,738 sat change, 373 sat fee
+    signer = PSBTSigner(wallet, tdata.P2TR_PSBT, FORMAT_NONE)
+    outputs, fee_percent = signer.outputs()
+
+    assert fee_percent == 18.7
+    assert "(3.9%)" in outputs[0]
+
+
+def test_fee_percent_without_spend(mocker, m5stickv, tdata):
+    """With only a change output, the high fee warning falls back to the
+    change amount"""
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
+    psbt = PSBT.parse(tdata.P2WPKH_PSBT)
+    # Keep only the change output: 99,000,000 sat back, 1,000,000 sat fee
+    psbt.outputs = [out for out in psbt.outputs if out.bip32_derivations]
+    psbt.outputs[0].value = psbt.inputs[0].utxo.value - 1_000_000
+
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    outputs, fee_percent = signer.outputs()
+
+    assert "Spend" not in outputs[0]
+    assert fee_percent == 1.1
+
+
+def test_fee_percent_self_transfer(mocker, m5stickv, tdata):
+    """A self transfer is the high fee warning base when nothing is spent,
+    with or without a change output next to it"""
+    from embit import bip32
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, DerivationPath
+    from embit.script import p2wpkh
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    key = Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"])
+    wallet = Wallet(key)
+    receive_path = bip32.parse_path(key.derivation + "/0/0")
+    receive_pub = key.root.derive(receive_path).key.get_public_key()
+
+    cases = [
+        # keep change output, self transfer amount, expected fee percent
+        (False, 99_000_000, 1.1),
+        (True, 10_000_000, 10.0),
+    ]
+    for keep_change, self_amount, expected in cases:
+        psbt = PSBT.parse(tdata.P2WPKH_PSBT)
+        change = next(out for out in psbt.outputs if out.bip32_derivations)
+        own = next(out for out in psbt.outputs if not out.bip32_derivations)
+        # Turn the payment into a transfer to this wallet's first receive address
+        own.script_pubkey = p2wpkh(receive_pub)
+        own.bip32_derivations = {
+            receive_pub: DerivationPath(key.fingerprint, receive_path)
+        }
+        own.value = self_amount
+        # 1,000,000 sat fee in both cases
+        if keep_change:
+            change.value = psbt.inputs[0].utxo.value - self_amount - 1_000_000
+        else:
+            psbt.outputs.remove(change)
+
+        signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+        outputs, fee_percent = signer.outputs()
+
+        assert "Spend" not in outputs[0]
+        assert "Fee: ₿ 0.01 000 000" in outputs[0].replace(" ", " ")
+        assert fee_percent == expected

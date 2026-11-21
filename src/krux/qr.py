@@ -174,6 +174,10 @@ class QRPartParser:
             self.total = 1
         elif self.format == FORMAT_PMOFN:
             part, index, total = parse_pmofn_qr_part(data)
+            if self.total not in (-1, total):
+                raise ValueError("pMofN part total mismatch")
+            if self.parts.get(index, part) != part:
+                raise ValueError("Conflicting pMofN part")
             self.parts[index] = part
             self.total = total
             return index - 1

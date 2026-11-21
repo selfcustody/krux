@@ -178,6 +178,9 @@ class Display:
             lcd.init(invert=False)
             lcd.mirror(False)
             lcd.bgr_to_rgb(False)
+        # lcd.init resets the driver's rotation state, so invalidate the
+        # cached orientation to make to_portrait() re-apply it on re-init
+        self.portrait = False
         self.to_portrait()
 
     def gpio_backlight_ctrl(self, brightness):
@@ -374,6 +377,12 @@ class Display:
             x = self.width() - x
             x -= width
         lcd.fill_rectangle(x, y, width, height, color, radius)
+
+    def draw_circle(self, x, y, radius, color=theme.fg_color):
+        """Draws a filled circle to the screen"""
+        if self.flipped_x_coordinates:
+            x = self.width() - x - 1
+        lcd.draw_circle(x, y, radius, 0, color)
 
     def draw_line(self, x_0, y_0, x_1, y_1, color=theme.fg_color):
         """Draws a line to the screen"""

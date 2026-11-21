@@ -281,7 +281,7 @@ class Key:
             return DER_SINGLE % (
                 SINGLESIG_SCRIPT_PURPOSE[script_type],
                 network["bip32"],
-                account,
+                0 if account is None else account,
             )
         if policy_type == TYPE_MULTISIG:
             if script_type == P2SH:

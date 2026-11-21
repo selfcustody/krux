@@ -43,7 +43,6 @@ def test_init(mocker, multiple_devices):
     mocker.spy(Display, "set_pmu_backlight")
 
     if board.config["type"] == "m5stickv":
-
         # Test the pmu backlight brightness levels
         # for m5stickv, 1 to 5 are valid brightness levels
         # (1 inclusive and 6 exclusive)
@@ -88,6 +87,20 @@ def test_init(mocker, multiple_devices):
         assert isinstance(d, Display)
         d.initialize_lcd.assert_called()
         krux.display.lcd.init.assert_called_once()
+
+
+def test_init_embed_fire(mocker, embed_fire):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    d.initialize_lcd()
+
+    krux.display.lcd.init.assert_called_once()
+    assert krux.display.lcd.init.call_args.kwargs["type"] == 6
+    assert krux.display.lcd.init.call_args.kwargs["lcd_type"] == 6
+    assert krux.display.lcd.init.call_args.kwargs["invert"] is False
 
 
 def test_width(mocker, m5stickv):
@@ -671,6 +684,35 @@ def test_fill_rectangle_on_inverted_display(mocker, amigo):
     )
 
 
+def test_draw_circle(mocker, m5stickv):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+
+    d.draw_circle(50, 50, 10, krux.display.lcd.WHITE)
+
+    krux.display.lcd.draw_circle.assert_called_with(
+        50, 50, 10, 0, krux.display.lcd.WHITE
+    )
+
+
+def test_draw_circle_on_inverted_display(mocker, amigo):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+
+    d = Display()
+    mocker.patch.object(d, "width", new=lambda: 480)
+
+    d.draw_circle(50, 50, 10, krux.display.lcd.WHITE)
+
+    krux.display.lcd.draw_circle.assert_called_with(
+        480 - 50 - 1, 50, 10, 0, krux.display.lcd.WHITE
+    )
+
+
 def test_draw_string(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux
@@ -1063,13 +1105,44 @@ def test_render_image_with_double_subtitle(mocker, multiple_devices):
         krux.display.lcd.display.assert_called_once_with(
             img, oft=(40, 40), roi=(0, 0, 320, 240)
         )
-    elif board.config["type"] == "dock":
-        krux.display.lcd.display.assert_called_once_with(
-            img, oft=(26, 0), roi=(34, 0, 262, 240)
-        )
     elif board.config["type"] == "cube":
         krux.display.lcd.display.assert_called_once_with(
             img, oft=(24, 0), roi=(72, 0, 186, 240)
+        )
+    else:
+        # Do not silently forget other devices, while some
+        # share sibling devices on default-value regions
+        # for different devices
+        krux.display.lcd.display.assert_called_once_with(
+            img, oft=(26, 0), roi=(34, 0, 262, 240)
+        )
+
+
+def test_render_image_with_extra_bottom_line(mocker, multiple_devices):
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+    import krux
+    from krux.display import Display
+    import board
+
+    d = Display()
+    img = mocker.MagicMock()
+
+    # one extra line reserved for same config above
+    d.render_image(img, title_lines=1, double_subtitle=True, extra_bottom_lines=1)
+    if board.config["type"] == "m5stickv":
+        assert krux.display.lcd.display.call_args.kwargs["oft"] == (24, 0)
+        assert krux.display.lcd.display.call_args.kwargs["roi"] == (92, 52, 161, 135)
+    elif board.config["type"] == "amigo":
+        krux.display.lcd.display.assert_called_once_with(
+            img, oft=(40, 40), roi=(0, 0, 320, 240)
+        )
+    elif board.config["type"] == "cube":
+        krux.display.lcd.display.assert_called_once_with(
+            img, oft=(24, 0), roi=(72, 0, 172, 240)
+        )
+    else:
+        krux.display.lcd.display.assert_called_once_with(
+            img, oft=(26, 0), roi=(34, 0, 246, 240)
         )
 
 

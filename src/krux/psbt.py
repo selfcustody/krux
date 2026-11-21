@@ -147,6 +147,9 @@ class PSBTSigner:
 
     def validate(self):
         """Validates the PSBT"""
+        # Embit parses a PSBT without inputs, but there is nothing to sign in it
+        if not self.psbt.inputs:
+            raise ValueError("no inputs")
         # Any non_witness_utxo present must really hash to the prevout txid.
         self.psbt.verify(ignore_missing=True)
         # From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L110
@@ -303,19 +306,17 @@ class PSBTSigner:
 
         return prefix + BTC_SYMBOL + THIN_SPACE + "%s" % format_btc(amount)
 
+    def _fee_percent(self, fee, base):
+        # fee percent with 1 decimal precision using math.ceil (minimum of 0.1)
+        if base > 0:
+            return max(0.1, (((fee * 10000 // base) + 9) // 10) / 10)
+        return 100.0
+
     def _get_resume_fee(self, inp_amount, out_amount, output_policy_count):
         from .format import replace_decimal_separator
 
         fee = inp_amount - out_amount
-
-        # fee percent with 1 decimal precision using math.ceil (minimum of 0.1)
-        if out_amount > 0:
-            fee_percent = max(
-                0.1,
-                (((fee * 10000 // out_amount) + 9) // 10) / 10,
-            )
-        else:
-            fee_percent = 100.0
+        fee_percent = self._fee_percent(fee, out_amount)
 
         resume_fee_str = (
             t("Fee:")
@@ -433,8 +434,9 @@ class PSBTSigner:
                 + "\n\n"
             )
 
-        resume_fee_str, fee_percent = self._get_resume_fee(
-            inp_amount, self_amount + change_amount + spend_amount, output_policy_count
+        out_amount = self_amount + change_amount + spend_amount
+        resume_fee_str, _ = self._get_resume_fee(
+            inp_amount, out_amount, output_policy_count
         )
 
         messages = []
@@ -455,7 +457,14 @@ class PSBTSigner:
         # sequence of change
         messages.extend(self._sequence_render(t("Change:"), change_list))
 
-        return messages, fee_percent
+        # The summary shows the fee against all outputs, as coordinators like
+        # Sparrow do. The high fee warning measures it against what is sent,
+        # spends and self transfers, so a large change output can't hide a
+        # high fee. Change is the base only when nothing else is sent.
+        warn_percent = self._fee_percent(
+            inp_amount - out_amount, (spend_amount + self_amount) or change_amount
+        )
+        return messages, warn_percent
 
     def check_sighash(self):
         """Check that all inputs use SIGHASH_ALL (or DEFAULT for taproot).
@@ -521,8 +530,20 @@ class PSBTSigner:
         if not trim:
             return
 
-        trimmed_psbt = PSBT(self.psbt.tx)
+        trimmed_psbt = PSBT(self.psbt.tx, version=self.psbt.version)
+        if self.psbt.version == 2:
+            # Keep the fallback locktime and the TX_MODIFIABLE flags updated
+            # by the signer, so the coordinator gets back a matching PSBTv2
+            trimmed_psbt.locktime = self.psbt.locktime
+            trimmed_psbt.tx_modifiable_flags = self.psbt.tx_modifiable_flags
         for i, inp in enumerate(self.psbt.inputs):
+            # PSBTv2 input locktimes, which together with the fallback locktime
+            # derive the locktime that was signed
+            trimmed_psbt.inputs[i].required_time_locktime = inp.required_time_locktime
+            trimmed_psbt.inputs[i].required_height_locktime = (
+                inp.required_height_locktime
+            )
+
             # Copy the final_scriptwitness if present
             if inp.final_scriptwitness:
                 trimmed_psbt.inputs[i].final_scriptwitness = inp.final_scriptwitness
@@ -535,8 +556,10 @@ class PSBTSigner:
             if inp.witness_utxo:
                 trimmed_psbt.inputs[i].witness_utxo = inp.witness_utxo
 
-            # Preserve non-witness UTXO if present (for legacy inputs)
-            if inp.non_witness_utxo:
+            # Preserve non-witness UTXO for legacy inputs only. On segwit inputs
+            # the previous transaction is used here to verify the amount, and
+            # witness_utxo is all the signed PSBT needs to carry back.
+            if inp.non_witness_utxo and not (inp.witness_utxo and is_segwit_input(inp)):
                 trimmed_psbt.inputs[i].non_witness_utxo = inp.non_witness_utxo
 
             # Preserve redeem_script for P2SH or nested SegWit
@@ -589,7 +612,13 @@ class PSBTSigner:
         from embit.psbt import DerivationPath
 
         if self.psbt.xpubs:
-            return self.psbt.xpubs, None
+            # Global xpubs only cover keys with origin. A taptree only descriptor's
+            # origin-less internal key (e.g. NUMS) still comes from the descriptor
+            origin_less_xpub = None
+            descriptor = self.wallet.descriptor
+            if descriptor and descriptor.taptree and not descriptor.key.origin:
+                origin_less_xpub = descriptor.key.key
+            return self.psbt.xpubs, origin_less_xpub
 
         if not self.wallet.descriptor:
             raise ValueError("missing xpubs")
@@ -749,11 +778,15 @@ def get_cosigners_taproot_miniscript(taproot_derivations, xpubs, origin_less_xpu
                         # Append the xpub as a base58 string
                         cosigners.append(xpub.to_base58())
                         break
-
-    if origin_less_xpub:
-        # Pocicies which don't cover internal key spending (e.g. taptree only)
-        # can have an origin-less xpub for internal key derivation
-        cosigners.append(origin_less_xpub.to_base58())
+        else:
+            # Policies which don't cover internal key spending (e.g. taptree only)
+            # can have an origin-less xpub for internal key derivation
+            if (
+                origin_less_xpub
+                and origin_less_xpub.derive(full_path[-2:]).key.xonly()
+                == xonly_pubkey.xonly()
+            ):
+                cosigners.append(origin_less_xpub.to_base58())
 
     # Ensure all pubkeys have a matching xpub
     if len(cosigners) != len(taproot_derivations):
