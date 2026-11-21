@@ -831,6 +831,86 @@ def test_datumtool__decrypt_as_kef_envelope(m5stickv, mocker):
     assert page.decrypted == True
 
 
+def test_datumtool__decrypt_as_kef_envelope_wrong_key(m5stickv, mocker):
+    """A wrong key says "Failed to decrypt" and keeps the envelope loaded"""
+    from krux.pages.datum_tool import DatumTool
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    kef_a_hello_world = (
+        b'\x07key="a"\x05\x01\xa7Z\xe8Z\x99k\xee\xa9\x13N5\xc9\x96\xc14M\xcdK\x15Qi'
+    )
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # confirm Decrypt
+        BUTTON_ENTER,  # go Enter Key
+        BUTTON_PAGE,  # to "b"
+        BUTTON_ENTER,  # go "b", the key is "a"
+        BUTTON_PAGE_PREV,  # to "a"
+        BUTTON_PAGE_PREV,  # to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents, page.title = kef_a_hello_world, "QR Contents"
+    mocker.spy(page, "flash_error")
+    page._decrypt_as_kef_envelope()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    page.flash_error.assert_called_once_with("Failed to decrypt")
+    assert page.contents == kef_a_hello_world
+    assert page.title == "QR Contents"
+    assert page.decrypted == False
+
+
+def test_datumtoolmenu_scan_kef_wrong_key_keeps_datum(m5stickv, mocker):
+    """Scan a KEF envelope, give a wrong key: the envelope is still shown"""
+    from krux.pages.datum_tool import DatumToolMenu, DatumTool
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    kef_a_hello_world = (
+        b'\x07key="a"\x05\x01\xa7Z\xe8Z\x99k\xee\xa9\x13N5\xc9\x96\xc14M\xcdK\x15Qi'
+    )
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (kef_a_hello_world, 0)
+    )
+    shown = []
+    info_box = DatumTool._info_box
+
+    def spy_info_box(self, *args, **kwargs):
+        shown.append((self.title, self.contents))
+        return info_box(self, *args, **kwargs)
+
+    mocker.patch.object(DatumTool, "_info_box", spy_info_box)
+
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # go Via Camera
+        BUTTON_ENTER,  # confirm Decrypt
+        BUTTON_ENTER,  # go Enter Key
+        BUTTON_PAGE,  # to "b"
+        BUTTON_ENTER,  # go "b", the key is "a"
+        BUTTON_PAGE_PREV,  # to "a"
+        BUTTON_PAGE_PREV,  # to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key
+        BUTTON_PAGE_PREV,  # in the datum's menu, to Back
+        BUTTON_ENTER,  # go Back
+        BUTTON_PAGE_PREV,  # in Datum Tool's menu, to Back
+        BUTTON_ENTER,  # go Back
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    DatumToolMenu(ctx).run()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    # told what went wrong, not shown a raw exception
+    ctx.display.flash_text.assert_called_once()
+    assert ctx.display.flash_text.call_args.args[0] == "Failed to decrypt"
+    texts = [str(c.args[0]) for c in ctx.display.draw_centered_text.call_args_list]
+    assert not [text for text in texts if "KeyError" in text]
+    # and the scanned envelope is still loaded
+    assert shown == [("QR Contents", kef_a_hello_world)]
+
+
 def test_datumtool__build_options_menu(m5stickv, mocker):
     """With DatumTool already initialized, test ._build_options_menu()"""
     from krux.pages.datum_tool import DatumTool
