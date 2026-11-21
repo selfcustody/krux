@@ -263,9 +263,11 @@ class MnemonicEditor(Page):
         self.flash_text(word_txt)
         while True:
             self.compute_search_ranges()
+            valid_words = WORDLIST
             # if new and last word, lead input to a valid mnemonic
             if self.new_mnemonic and index == self.mnemonic_length - 1:
                 final_words = Key.get_final_word_candidates(self.current_mnemonic[:-1])
+                valid_words = final_words
                 word = self.capture_from_keypad(
                     t("Word %d") % (index + 1),
                     [LETTERS],
@@ -281,7 +283,8 @@ class MnemonicEditor(Page):
                 )
             if word == ESC_KEY:
                 return None
-            if word in WORDLIST:
+            # a BIP39 word can still be no valid final word
+            if word in valid_words:
                 return word
             word = ""
 
