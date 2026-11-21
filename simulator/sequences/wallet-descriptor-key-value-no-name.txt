@@ -1,0 +1,26 @@
+include _load-12-word-mnemonic.txt
+
+# Navigate to Wallet > Wallet Descriptor
+x2 press BUTTON_B
+x2 press BUTTON_A
+
+# Load? > Load from camera
+x2 press BUTTON_A
+
+# Key-value multisig file with Policy, Derivation, Format and keys, but no Name
+qrcode key-value-multisig-wallet-no-name.png
+wait 0.5
+
+screenshot wallet-key-value-no-name-mismatch.png
+
+# The loaded key is single-sig, so accept "Change wallet?" to switch to multisig
+press BUTTON_A
+wait 0.3
+
+screenshot wallet-key-value-no-name-load-prompt.png
+
+# Load
+press BUTTON_A
+wait 0.1
+
+screenshot wallet-key-value-no-name-loaded.png

@@ -410,11 +410,10 @@ def parse_key_value_file(wallet_data):
                 ("wsh(sortedmulti(%d," % m) + ",".join(keys) + "))"
             )
 
-        label = (
-            key_vals[key_vals.index("Name") + 1]
-            if key_vals.index("Name") >= 0
-            else None
-        )
+        try:
+            label = key_vals[key_vals.index("Name") + 1]
+        except ValueError:
+            label = t("%d of %d multisig") % (m, n)
         return descriptor, label
     return None, None
 

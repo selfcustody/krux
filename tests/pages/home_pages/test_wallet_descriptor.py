@@ -975,3 +975,54 @@ def test_wallet_load_camera_back_is_silent(mocker, m5stickv, tdata):
 
     # "Back" is not a failure - it must not flash an error
     assert_not_flashed(ctx, "Failed to load")
+
+
+@pytest.mark.parametrize(
+    "key_name, wallet_data_name",
+    [
+        ("MULTISIG_LEGACY_1", "BLUEWALLET_MULTISIG_LEGACY_WALLET_DATA"),
+        ("MULTISIG_NESTED_SW_1", "BLUEWALLET_MULTISIG_NESTED_WALLET_DATA"),
+        ("MULTISIG_NATIVE_SW_1", "BLUEWALLET_MULTISIG_WALLET_DATA"),
+    ],
+    ids=["P2SH", "P2SH-P2WSH", "P2WSH"],
+)
+def test_load_key_value_file_without_name(
+    mocker, m5stickv, wallet_tdata, key_name, wallet_data_name
+):
+    """A key-value file without a Name line loads with the default label"""
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
+
+    wallet_data = getattr(wallet_tdata, wallet_data_name).replace(
+        "Name: BlueWallet Multisig Wallet\n", ""
+    )
+    assert "Name" not in wallet_data
+
+    btn_seq = [
+        BUTTON_ENTER,  # Wallet output descriptor not found. Load?
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # Load?
+    ]
+    ctx = create_ctx(mocker, btn_seq, Wallet(getattr(wallet_tdata, key_name)))
+    wallet_descriptor = WalletDescriptor(ctx)
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (wallet_data, FORMAT_NONE)
+    )
+    mocker.spy(wallet_descriptor, "display_loading_wallet")
+    mocker.spy(wallet_descriptor, "flash_success")
+
+    wallet_descriptor.wallet()
+
+    drawn = [str(c) for c in ctx.display.draw_centered_text.call_args_list]
+    assert not any("Invalid wallet" in text for text in drawn)
+    wallet_descriptor.display_loading_wallet.assert_called_once()
+    wallet_descriptor.flash_success.assert_called_once_with(
+        "Wallet output descriptor loaded!"
+    )
+    assert ctx.wallet.is_loaded()
+    assert ctx.wallet.label == "2 of 3 multisig"
+    ctx.display.draw_hcentered_text.assert_any_call("2 of 3 multisig", mocker.ANY)
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
