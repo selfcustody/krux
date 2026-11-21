@@ -1986,6 +1986,40 @@ def test_unverified_amounts_warning(mocker, m5stickv):
     assert ctx.display.draw_centered_text.call_count == 0
 
 
+def test_distant_index_warning(mocker, m5stickv):
+    """The warning lists the paths and must abort signing when declined"""
+    from krux.pages.home_pages.home import Home
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    class FakeSigner:
+        def __init__(self, paths):
+            self.distant_paths = paths
+
+    # Declined
+    ctx = create_ctx(mocker, [BUTTON_PAGE])
+    home = Home(ctx)
+    mocker.spy(ctx.display, "draw_centered_text")
+    assert (
+        home._distant_index_psbt_warn(FakeSigner(["1/123456789", "0/99999"])) is False
+    )
+    shown = ctx.display.draw_centered_text.call_args[0][0]
+    assert "Distant address!" in shown
+    assert "1/123456789, 0/99999" in shown
+    assert "Your wallet may not find it." in shown
+
+    # Accepted
+    ctx = create_ctx(mocker, [BUTTON_ENTER])
+    home = Home(ctx)
+    assert home._distant_index_psbt_warn(FakeSigner(["1/123456789"])) is True
+
+    # Nothing to warn about, no prompt consumed
+    ctx = create_ctx(mocker, [])
+    home = Home(ctx)
+    mocker.spy(ctx.display, "draw_centered_text")
+    assert home._distant_index_psbt_warn(FakeSigner([])) is True
+    assert ctx.display.draw_centered_text.call_count == 0
+
+
 def test_load_sign_psbt_camera_back_is_silent(mocker, amigo, tdata):
     from krux.pages.home_pages.home import Home
     from krux.pages import MENU_CONTINUE

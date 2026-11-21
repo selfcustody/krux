@@ -1679,7 +1679,7 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
                 "1. Spend: \n\n"
                 + format_address("tb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx")
                 + "\n\n₿ 0.10 000 000",
-                "1. Change: \n\n"
+                "1. Change: 1/0\n\n"
                 + format_address("tb1q9u62588spffmq4dzjxsr5l297znf3z6j5p2688")
                 + "\n\n₿ 0.89 997 180",
             ],
@@ -1699,7 +1699,7 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
                 "1. Spend: \n\n"
                 + format_address("tb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx")
                 + "\n\n₿ 0.10 000 000",
-                "1. Change: \n\n"
+                "1. Change: 1/0\n\n"
                 + format_address("2MvdUi5o3f2tnEFh9yGvta6FzptTZtkPJC8")
                 + "\n\n₿ 0.89 996 700",
             ],
@@ -1719,12 +1719,12 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
                 "1. Spend: \n\n"
                 + format_address("tb1q4mx3ahp7laj65gyaqg27w0tsjpwuz6rvaxx3tl")
                 + "\n\n₿ 0.00 001 000",
-                "1. Self-transfer: \n\n"
+                "1. Self-transfer: 0/10\n\n"
                 + format_address(
                     "tb1pn5kekm0xpnwd6kg8c8qfvv2fr0w5xnhw42927wem7xwk84f7gzvsvctkhp"
                 )
                 + "\n\n₿ 0.00 001 000",
-                "1. Change: \n\n"
+                "1. Change: 1/1\n\n"
                 + format_address(
                     "tb1pwhn9lzpaukrjwvwe365x7hcgvtcfywwsaxcq7j04jgrfcxzdq23qhzr7wt"
                 )
@@ -1857,6 +1857,7 @@ def test_outputs_singlesig_forged_ownership(mocker, m5stickv, tdata, case):
             (
                 "tb1pn5kekm0xpnwd6kg8c8qfvv2fr0w5xnhw42927wem7xwk84f7gzvsvctkhp",
                 "0.00 001 000",
+                "0/10",
             )
         ]
 
@@ -1877,8 +1878,9 @@ def test_outputs_singlesig_forged_ownership(mocker, m5stickv, tdata, case):
         "%d. Spend: \n\n%s\n\n₿ %s" % (i + 1, format_address(address(out)), amount)
         for i, (out, amount) in enumerate(spends)
     ] + [
-        "%d. Self-transfer: \n\n%s\n\n₿ %s" % (i + 1, format_address(out), amount)
-        for i, (out, amount) in enumerate(self_transfers)
+        "%d. Self-transfer: %s\n\n%s\n\n₿ %s"
+        % (i + 1, path, format_address(out), amount)
+        for i, (out, amount, path) in enumerate(self_transfers)
     ]
 
     wallet = Wallet(
@@ -1986,12 +1988,12 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
                 "1. Spend: \n\n"
                 + format_address("tb1qs9q8afpd6nc78r8l7456agajhpde657uzn9uh4")
                 + "\n\n₿ 0.00 100 000",
-                "1. Self-transfer: \n\n"
+                "1. Self-transfer: 0/1\n\n"
                 + format_address(
                     "tb1q6dac4cdyf9sfuln0kzfgswc96nlh2g98s4uyez5tvm7ymhq9ua0sa0z6h7"
                 )
                 + "\n\n₿ 0.00 200 000",
-                "1. Change: \n\n"
+                "1. Change: 1/0\n\n"
                 + format_address(
                     "tb1q0xmw6txz6lp2aakdujwhhrel0m7grfvvn00nzwjda7ps06c3jwnqk7m0ww"
                 )
@@ -2059,12 +2061,12 @@ def test_outputs_miniscript(mocker, m5stickv, tdata):
                 "1. Spend: \n\n"
                 + format_address("tb1q26gnrxhmv79m7sady6xyt2y23rxc6nmt50dfyq")
                 + "\n\n₿ 0.00 500 000",
-                "1. Self-transfer: \n\n"
+                "1. Self-transfer: 0/3\n\n"
                 + format_address(
                     "tb1qnlhau4cw3f76k583xk8p6ekd02a0dvhmqjzl7aw6ehda8r7upheskzwzea"
                 )
                 + "\n\n₿ 0.01 000 000",
-                "1. Change: \n\n"
+                "1. Change: 1/1\n\n"
                 + format_address(
                     "tb1qmanyu7mm2q24esrnawjxukla9pr7s4yyzwjy2chjhsyumfe0r34q5dzsug"
                 )
@@ -2134,12 +2136,12 @@ def test_outputs_tr_miniscript(mocker, m5stickv, tdata):
                     "tb1qrtvmveqwrzsndt8tzzkgepp2mw8de95dk7hz70kr95f5dt7axvrsgq8lcp"
                 )
                 + "\n\n₿ 0.01 000 000",
-                "1. Self-transfer: \n\n"
+                "1. Self-transfer: 0/5\n\n"
                 + format_address(
                     "tb1pgzdsuzcewwntpm6c3xrrn5lmdc0cvnpsdyrsz7gvcq5t0kqry2rswl8vnz"
                 )
                 + "\n\n₿ 0.00 500 000",
-                "1. Change: \n\n"
+                "1. Change: 1/1\n\n"
                 + format_address(
                     "tb1pt064gyzas6dnqq9p955p7ujus8z7l3xg3apxm425u72dupy3wffqjzkszd"
                 )
@@ -2209,12 +2211,12 @@ def test_outputs_tr_miniscript_provably_unspendable(mocker, m5stickv, tdata):
                     "tb1p3gev77tasfmd45w64dq5azkdl3y02cxlnkykw2v00x3jnu6yu8pskn06gu"
                 )
                 + "\n\n₿ 0.01 000 000",
-                "1. Self-transfer: \n\n"
+                "1. Self-transfer: 0/3\n\n"
                 + format_address(
                     "tb1psawr7wemsqgvplsxu0wvk6hdqrzf5rv387xuxx43mgjnkzn932pqne6l2c"
                 )
                 + "\n\n₿ 0.00 500 000",
-                "1. Change: \n\n"
+                "1. Change: 1/1\n\n"
                 + format_address(
                     "tb1pzfd2t5k93dfvsl4a3ka36jcd9n4ppuskg7vfqeeu3zjqc5p8luaqs7f0ct"
                 )
@@ -2596,6 +2598,124 @@ def test_fee_percent_ignores_change(mocker, m5stickv, tdata):
 
     assert fee_percent == 10.0
     assert "(1.1%)" in outputs[0]
+
+
+@pytest.mark.parametrize("chain,title", [(1, "Change"), (0, "Self-transfer")])
+def test_distant_own_index_is_flagged(mocker, m5stickv, tdata, chain, title):
+    """Own outputs that moved to an index far above the inputs are shown with
+    their index and flagged, on both the change and receive chains, as the
+    wallet may not scan that far"""
+    from embit import script
+    from embit.bip32 import HARDENED_INDEX
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, DerivationPath
+    from krux.psbt import PSBTSigner, OWN_INDEX_WINDOW
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    key = Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"])
+    wallet = Wallet(key)
+    base = [HARDENED_INDEX + 84, HARDENED_INDEX + 1, HARDENED_INDEX, chain]
+    # (output index, fake high index entry added to the input first, flagged)
+    cases = [
+        (OWN_INDEX_WINDOW, False, False),
+        (OWN_INDEX_WINDOW + 1, False, True),
+        (123456789, False, True),
+        (123456789, True, True),
+    ]
+    for idx, fake_entry, flagged in cases:
+        psbt = PSBT.parse(tdata.P2WPKH_PSBT)
+        inp = psbt.inputs[0]
+        # the input is at index 0
+        assert list(inp.bip32_derivations.values())[0].derivation[-1] == 0
+        if fake_entry:
+            fake_pub = key.root.derive(base + [HARDENED_INDEX - 1]).key.get_public_key()
+            real = dict(inp.bip32_derivations)
+            inp.bip32_derivations = {
+                fake_pub: DerivationPath(key.fingerprint, base + [HARDENED_INDEX - 1])
+            }
+            inp.bip32_derivations.update(real)
+        own_out = next(out for out in psbt.outputs if out.bip32_derivations)
+        pub = key.root.derive(base + [idx]).key.get_public_key()
+        own_out.bip32_derivations = {pub: DerivationPath(key.fingerprint, base + [idx])}
+        own_out.script_pubkey = script.p2wpkh(pub)
+
+        signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+        outputs, _ = signer.outputs()
+
+        path = "%d/%d" % (chain, idx)
+        assert signer.distant_paths == ([path] if flagged else [])
+        assert any(("%s: %s\n" % (title, path)) in screen for screen in outputs)
+
+
+def test_own_output_branch_from_checked_entry(mocker, m5stickv, tdata):
+    """Branch and index come from the entry the descriptor derived the script
+    from, not from an entry of another key listed before it"""
+    from embit import script
+    from embit.bip32 import HARDENED_INDEX
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, DerivationPath
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    key = Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"])
+    wallet = Wallet(key)
+    base = [HARDENED_INDEX + 84, HARDENED_INDEX + 1, HARDENED_INDEX]
+    near_pub = key.root.derive(base + [1, 5]).key.get_public_key()
+    far_pub = key.root.derive(base + [0, 2147483000]).key.get_public_key()
+
+    psbt = PSBT.parse(tdata.P2WPKH_PSBT)
+    own_out = next(out for out in psbt.outputs if out.bip32_derivations)
+    own_out.script_pubkey = script.p2wpkh(far_pub)
+    own_out.bip32_derivations = {
+        # fingerprint of no wallet key, so the descriptor never checks it
+        near_pub: DerivationPath(b"\xde\xad\xbe\xef", base + [1, 5]),
+        far_pub: DerivationPath(key.fingerprint, base + [0, 2147483000]),
+    }
+
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    own_out = next(out for out in signer.psbt.outputs if out.bip32_derivations)
+    first = list(own_out.bip32_derivations.values())[0]
+    assert first.fingerprint == b"\xde\xad\xbe\xef"
+    outputs, _ = signer.outputs()
+
+    assert outputs[-1].startswith("1. Self-transfer: 0/2147483000\n")
+    assert signer.distant_paths == ["0/2147483000"]
+
+
+def test_expanding_multisig_change_branch(mocker, m5stickv, tdata):
+    """Change of an expanding multisig is told by the descriptor branch, also
+    when a key on <2;3> is listed first, as Liana sorts these by key"""
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_MINISCRIPT, P2TR
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(
+        Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"], script_type=P2TR)
+    )
+    wallet.load(TR_EXP_MULTI_MINISCRIPT, FORMAT_NONE)
+    psbt = PSBT.parse(tdata.EXP_TR_MINIS_PSBT)
+    # The change at 1/1 also derives the <2;3> keys at 3/1, list those first
+    change = psbt.outputs[2]
+    change.taproot_bip32_derivations = dict(
+        sorted(
+            change.taproot_bip32_derivations.items(),
+            key=lambda item: item[1][1].derivation[-2] != 3,
+        )
+    )
+
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    _, first = list(signer.psbt.outputs[2].taproot_bip32_derivations.values())[0]
+    assert first.derivation[-2] == 3
+    outputs, _ = signer.outputs()
+
+    assert outputs[-1].startswith("1. Change: 1/1\n")
 
 
 def test_fee_percent_spend_and_self_transfer(mocker, m5stickv, tdata):

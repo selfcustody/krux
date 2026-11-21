@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import gc
+from embit.bip32 import HARDENED_INDEX
 from embit.psbt import PSBT, CompressMode
 from uUR import UR, Types
 from .baseconv import base_decode
@@ -38,6 +39,8 @@ SPEND = 2
 BTC_SYMBOL = "₿"
 
 MAX_POLICY_COSIGNERS_DISPLAYED = 5
+
+OWN_INDEX_WINDOW = 1000
 
 
 class Counter(dict):
@@ -58,6 +61,7 @@ class PSBTSigner:
         self.qr_format = qr_format
         self.policy = None
         self.is_b64_file = False
+        self.distant_paths = []
 
         # Parse the PSBT
         if psbt_filename:
@@ -271,34 +275,17 @@ class PSBTSigner:
     def _classify_output(self, out_policy, out):
         """Classify the output based on its properties and policy"""
 
-        address_from_my_wallet = False
-        address_is_change = False
         # if policy is the same - probably change
-        if out_policy == self.policy:
-            # double-check that it's change
-            # we already checked in get_cosigners and parse_multisig
-            # that pubkeys are generated from cosigners,
-            # and witness script is corresponding multisig
-            # so we only need to check that scriptpubkey is generated from
-            # witness script
-
-            address_from_my_wallet = self.address_belongs_to_descriptor(out)
-
-            if self.policy["type"] == P2TR:
-                if address_from_my_wallet:
-                    # _ = leafs
-                    _, der = list(out.taproot_bip32_derivations.values())[0]
-                    address_is_change = der.derivation[-2] == 1
-            else:
-                if address_from_my_wallet:
-                    address_is_change = (
-                        len(list(out.bip32_derivations.values())) > 0
-                        and list(out.bip32_derivations.values())[0].derivation[-2] == 1
-                    )
-        if address_is_change:
-            return CHANGE
-        if address_from_my_wallet:
-            return SELF_TRANSFER
+        # double-check that it's change
+        # we already checked in get_cosigners and parse_multisig
+        # that pubkeys are generated from cosigners,
+        # and witness script is corresponding multisig
+        # so we only need to check that scriptpubkey is generated from
+        # witness script
+        if out_policy == self.policy and self.address_belongs_to_descriptor(out):
+            # Branch of the entry the descriptor derived the script from
+            _, branch = self._own_indexes(out)[0]
+            return CHANGE if branch == 1 else SELF_TRANSFER
         return SPEND
 
     def _btc_render(self, amount, prefix=" "):
@@ -336,18 +323,28 @@ class PSBTSigner:
 
         return resume_fee_str, fee_percent
 
+    def _own_indexes(self, scope):
+        """(index, branch) of each derivation of a PSBT input or output that
+        matches the loaded descriptor, branch 1 being change"""
+        if not self.wallet.descriptor:
+            return []
+        check = self.wallet.descriptor.check_derivation
+        ders = list(scope.bip32_derivations.values())
+        ders += [der for _, der in scope.taproot_bip32_derivations.values()]
+        return [res for res in map(check, ders) if res is not None]
+
     def _sequence_render(self, title, elements):
         from .format import format_address
 
         message_seq = []
         for i, out in enumerate(elements):
             message_seq.append(
-                (("%d. " + title + " \n\n%s\n\n") % (i + 1, format_address(out[0])))
+                ("%d. %s %s\n\n%s\n\n" % (i + 1, title, out[2], format_address(out[0])))
                 + self._btc_render(out[1], prefix="")
             )
         return message_seq
 
-    def outputs(self):
+    def outputs(self):  # pylint: disable=too-many-locals
         """Returns a list of messages describing where amounts are going"""
 
         inp_amount = 0
@@ -372,6 +369,16 @@ class PSBTSigner:
 
         output_policy_count = Counter()
 
+        # Lowest own index across all matching entries of all inputs, so an entry
+        # with a fake high index can't widen the window
+        lowest = None
+        for inp in self.psbt.inputs:
+            for idx, _ in self._own_indexes(inp):
+                if idx < HARDENED_INDEX and (lowest is None or idx < lowest):
+                    lowest = idx
+        lowest = lowest or 0
+        self.distant_paths = []
+
         xpubs = []
         origin_less_xpub = None
         try:
@@ -386,6 +393,13 @@ class PSBTSigner:
             output_policy_count[out_policy["type"]] += 1
             output_type = self._classify_output(out_policy, out)
 
+            path = ""
+            if output_type != SPEND:
+                idx, branch = self._own_indexes(out)[0]
+                path = "%d/%d" % (branch, idx)
+                if idx > lowest + OWN_INDEX_WINDOW:
+                    self.distant_paths.append(path)
+
             if output_type == CHANGE:
                 change_list.append(
                     (
@@ -393,6 +407,7 @@ class PSBTSigner:
                             network=self.wallet.key.network
                         ),
                         self.psbt.tx.vout[i].value,
+                        path,
                     )
                 )
                 change_amount += self.psbt.tx.vout[i].value
@@ -403,6 +418,7 @@ class PSBTSigner:
                             network=self.wallet.key.network
                         ),
                         self.psbt.tx.vout[i].value,
+                        path,
                     )
                 )
                 self_amount += self.psbt.tx.vout[i].value
@@ -413,6 +429,7 @@ class PSBTSigner:
                             network=self.wallet.key.network
                         ),
                         self.psbt.tx.vout[i].value,
+                        "",
                     )
                 )
                 spend_amount += self.psbt.tx.vout[i].value
