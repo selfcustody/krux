@@ -665,6 +665,51 @@ def test_change_multisig_script_types(m5stickv, mocker, tdata):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_customize_keeps_a_path_longer_than_a_line(m5stickv, mocker, tdata):
+    """A derivation path too long for one line of the screen is shown cropped,
+    but the path itself must come back whole"""
+    from krux.pages.wallet_settings import WalletSettings
+    from krux.wallet import Wallet
+    from krux.key import Key, TYPE_SINGLESIG, P2WPKH
+    from krux.pages import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    mnemonic = tdata.SINGLESIG_12_WORD_KEY.mnemonic
+    long_account = 1234567
+    key = Key(
+        mnemonic,
+        TYPE_SINGLESIG,
+        tdata.SINGLESIG_12_WORD_KEY.network,
+        "",  # passphrase
+        long_account,
+        P2WPKH,
+    )
+    assert key.derivation == "m/84h/0h/1234567h"
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Go to Back
+        BUTTON_ENTER,  # Leave
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE, Wallet(key))
+    # one more character than a line of this screen holds
+    assert len(key.derivation) == ctx.display.ascii_chars_per_line() + 1
+    wallet_settings = WalletSettings(ctx)
+    network, policy_type, script_type, account, derivation_path = (
+        wallet_settings.customize_wallet(key)
+    )
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    # shown cropped in the info box
+    info_box = ctx.display.draw_hcentered_text.call_args_list[0].args[0]
+    assert info_box.endswith("…")
+    # returned whole, so the same key can be built from it
+    assert derivation_path == "m/84h/0h/1234567h"
+    same_key = Key(
+        mnemonic, policy_type, network, "", account, script_type, derivation_path
+    )
+    assert same_key.derivation == key.derivation
+    assert same_key.fingerprint == key.fingerprint
+
+
 def test_change_account(m5stickv, mocker, tdata):
     from krux.pages.wallet_settings import WalletSettings
     from krux.wallet import Wallet
