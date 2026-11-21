@@ -452,6 +452,8 @@ def parse_wallet(wallet_data):
             label = wallet_json["label"] if "label" in wallet_json else None
             return descriptor, label
         raise KeyError('"descriptor" key not found in JSON')
+    except DescriptorError:
+        raise
     except KeyError:
         raise ValueError("invalid wallet format")
     except Exception:
@@ -474,11 +476,8 @@ def parse_wallet(wallet_data):
     try:
         descriptor = Descriptor.from_string(wallet_data.strip())
         return descriptor, None
-
     except DescriptorError:
-        # embit > 0.8.2 improves descriptor validation, raise informative error
         raise
-
     except Exception:
         # Untrusted input: not a bare descriptor either; fall through to the
         # final raise.

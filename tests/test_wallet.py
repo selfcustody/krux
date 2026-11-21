@@ -1633,10 +1633,7 @@ def test_parse_wallet(mocker, m5stickv, tdata):
         ),
     ]
 
-    case_n = 1
     for case in cases:
-        print(case_n)
-        case_n += 1
         descriptor, label = parse_wallet(case[0])
         assert descriptor.to_string() == case[1].split("#")[0].replace("'", "h")
         assert label == case[2]
@@ -1675,10 +1672,7 @@ def test_parse_wallet_invalid_checksum_raises_embit_descriptorerror(
         tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR,
     ]
 
-    case_n = 1
     for case in cases:
-        print(case_n)
-        case_n += 1
 
         # an invalid BIP-380 cksum fails to load
         with pytest.raises(DescriptorError, match="Invalid descriptor checksum"):
@@ -1687,6 +1681,44 @@ def test_parse_wallet_invalid_checksum_raises_embit_descriptorerror(
         # same descriptor w/o cksum is the fix
         descriptor, label = parse_wallet(case.split("#")[0])
         assert descriptor.to_string() == case.split("#")[0].replace("'", "h")
+
+
+def test_parse_wallet_json_invalid_checksum_raises_embit_descriptorerror(
+    mocker, m5stickv, tdata
+):
+    """
+    embit <= 0.8.2 was tolerant of cksum errors, so any users who
+    modified their trusted descriptor by-hand (ie: "H" or "'" became "h")
+    w/o recalcuating the bip380 output-descriptor cksum will fail
+    to load/recover their wallets.  embit > 0.8.2 is still tolerant when
+    cksum is omitted, so it can be removed by-hand as a fix.
+    """
+
+    import ujson as json
+    from krux.wallet import parse_wallet, DescriptorError
+
+    cases = [
+        tdata.SPECTER_SINGLESIG_WALLET_DATA,
+        tdata.SPECTER_MULTISIG_LEGACY_NO_COSIGNER_WALLET_DATA,
+        tdata.SPECTER_MULTISIG_LEGACY_WALLET_DATA,
+        tdata.SPECTER_MULTISIG_NESTED_WALLET_DATA,
+        tdata.SPECTER_MULTISIG_WALLET_DATA,
+    ]
+
+    for case in cases:
+
+        wallet = json.loads(case)
+        sans_cksum = wallet["descriptor"].split("#")[0]
+
+        # an invalid BIP-380 cksum fails to load
+        wallet["descriptor"] = sans_cksum + "#badcksum"
+        with pytest.raises(DescriptorError, match="Invalid descriptor checksum"):
+            descriptor, label = parse_wallet(json.dumps(wallet))
+
+        # same descriptor w/o cksum is the fix
+        wallet["descriptor"] = sans_cksum
+        descriptor, label = parse_wallet(json.dumps(wallet))
+        assert descriptor.to_string() == sans_cksum
 
 
 def test_provably_unspendable(mocker, m5stickv, tdata):
