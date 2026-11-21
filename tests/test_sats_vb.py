@@ -13,6 +13,21 @@ def test_get_vbytes_p2sh_p2wsh(m5stickv):
     assert SatsVB.get_vbytes(policy, {P2WSH: 1}, 2, 1) == 333
 
 
+def test_get_vbytes_p2wsh(m5stickv):
+    from krux.sats_vb import SatsVB
+    from krux.key import P2WSH
+
+    policy = {"type": P2WSH, "m": 2, "n": 3}
+
+    # 2-of-3 native P2WSH input, with an empty scriptSig:
+    # txid 32 + vout 4 + scriptSig length 1 + sequence 4 = 41
+    # witness: dummy 1 + 2 * (1 + 72) + script length 1 + script 105 = 253 WU
+    # 41 + 253 / 4 = 104.25 vB
+    # overhead: 4 + 1 + 1 + 4 + marker/flag 0.5 + 2 * 0.25 item counts = 11
+    # 11 + 2 * 104.25 + P2WSH output 43 = 262.5
+    assert SatsVB.get_vbytes(policy, {P2WSH: 1}, 2, 1) == 263
+
+
 def test_get_size_of_script_length_element(m5stickv):
     from krux.sats_vb import SatsVB
 
