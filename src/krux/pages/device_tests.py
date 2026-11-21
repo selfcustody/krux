@@ -22,7 +22,7 @@
 
 from . import Page, Menu, MENU_CONTINUE
 from ..display import DEFAULT_PADDING, FONT_HEIGHT, FONT_WIDTH
-from ..krux_settings import t
+from ..krux_settings import t, Settings
 from ..wdt import wdt
 from ..kboard import kboard
 
@@ -38,6 +38,8 @@ class DeviceTests(Page):
         ]
         if kboard.has_touchscreen:
             menu_items += [(t("Touchscreen"), self.test_touch)]
+        if Settings().hardware.nfc.enabled:
+            menu_items += [(t("NFC Reader"), self.test_nfc_reader)]
         super().__init__(
             ctx,
             Menu(
@@ -46,6 +48,16 @@ class DeviceTests(Page):
             ),
         )
         self.results = []
+
+    def test_nfc_reader(self):
+        """Handler for the 'NFC Reader' menu item.
+
+        A one off probe, so the module is attached and dropped again without
+        the field ever coming up.
+        """
+        from .nfc_ui import NFCTapPage
+
+        return NFCTapPage(self.ctx).test_reader()
 
     def sd_check(self):
         """Handler for the 'SD Check' menu item"""

@@ -31,7 +31,7 @@ from . import (
     # NUM_SPECIAL_1,
     # NUM_SPECIAL_2,
 )
-from ..krux_settings import t
+from ..krux_settings import t, Settings
 
 # TODO: re-enable "Create a QR Code" (and keypads ^^^) once encryption is possible w/o Datum Tool
 
@@ -40,21 +40,25 @@ class Tools(Page):
     """Krux generic tools"""
 
     def __init__(self, ctx):
-        super().__init__(
-            ctx,
-            Menu(
-                ctx,
-                [
-                    (t("Datum Tool"), self.datum_tool),
-                    (t("Device Tests"), self.device_tests),
-                    # (t("Create QR Code"), self.create_qr),
-                    (t("Descriptor Addresses"), self.descriptor_addresses),
-                    (t("Flash Tools"), self.flash_tools),
-                    (t("Remove Mnemonic"), self.rm_stored_mnemonic),
-                ],
-            ),
-        )
+        menu_items = [
+            (t("Datum Tool"), self.datum_tool),
+            (t("Device Tests"), self.device_tests),
+            # (t("Create QR Code"), self.create_qr),
+            (t("Descriptor Addresses"), self.descriptor_addresses),
+            (t("Flash Tools"), self.flash_tools),
+            (t("Remove Mnemonic"), self.rm_stored_mnemonic),
+        ]
+        if Settings().hardware.nfc.enabled:
+            menu_items.insert(3, (t("Erase NFC Card"), self.erase_nfc_card))
+        super().__init__(ctx, Menu(ctx, menu_items))
         self.ctx = ctx
+
+    def erase_nfc_card(self):
+        """Handler for the 'Erase NFC Card' menu item"""
+
+        from .nfc_ui import EraseNFC
+
+        return EraseNFC(self.ctx).erase()
 
     def flash_tools(self):
         """Handler for the 'Flash Tools' menu item"""

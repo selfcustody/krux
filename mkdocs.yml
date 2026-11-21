@@ -107,6 +107,7 @@ nav:
       - Printing:
         - Printing: getting-started/features/printing/printing.en.md
         - CNC Engraving: getting-started/features/printing/cnc.en.md
+      - NFC Card Storage: getting-started/features/nfc.en.md
       - SD Card Updates: getting-started/features/sd-card-update.en.md
       - Tools: getting-started/features/tools.en.md
       - Transcribing QR Codes: getting-started/features/QR-transcript-tools.en.md

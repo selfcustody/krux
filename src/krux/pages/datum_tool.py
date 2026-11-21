@@ -39,7 +39,7 @@ from .encryption_ui import (
     OVERRIDE_LABEL,
 )
 from ..display import FONT_WIDTH, FONT_HEIGHT, DEFAULT_PADDING, TOTAL_LINES
-from ..krux_settings import t
+from ..krux_settings import t, Settings
 from ..input import (
     BUTTON_TOUCH,
     BUTTON_ENTER,
@@ -294,17 +294,45 @@ class DatumToolMenu(Page):
     """Krux Datum Tool Menu"""
 
     def __init__(self, ctx):
-        super().__init__(
-            ctx,
-            Menu(
-                ctx,
-                [
-                    (t("Via Camera"), self.scan_qr),
-                    (t("Via Manual Input"), self.text_entry),
-                    (t("From Storage"), self.read_file),
-                ],
-            ),
-        )
+        menu_items = [
+            (t("Via Camera"), self.scan_qr),
+            (t("Via Manual Input"), self.text_entry),
+            (t("From Storage"), self.read_file),
+        ]
+        if Settings().hardware.nfc.enabled:
+            menu_items.append((t("From NFC Card"), self.read_nfc))
+        super().__init__(ctx, Menu(ctx, menu_items))
+
+    def read_nfc(self):
+        """Handler for the 'From NFC Card' menu item.
+
+        Reads any record Krux knows how to write, not just the datum type. This
+        is the inspection tool: refusing to show what is on a card its owner is
+        holding would be theatre, and a KEF envelope read here is still
+        ciphertext that the decrypt option below has to unseal like any other.
+        """
+        from .nfc_ui import LoadFromNFC
+        from ..nfc import KNOWN_RECORD_TYPES
+
+        payload = LoadFromNFC(self.ctx).read(KNOWN_RECORD_TYPES)
+        if payload is None:
+            return MENU_CONTINUE
+
+        # A card always hands back binary. Decode it when it is text, as the SD
+        # card path does, so a datum written from manual input comes back as the
+        # text it was rather than as its hex. Unlike that path no trailing
+        # newline is trimmed: a file usually ends with one, while a record holds
+        # exactly the bytes that were written.
+        payload = bytes(payload)
+        try:
+            payload = payload.decode()
+        except:
+            pass
+
+        page = DatumTool(self.ctx)
+        page.contents = payload
+        page.title = t("NFC Card")
+        return page.view_contents()
 
     def scan_qr(self):
         """Handler for the 'Scan a QR' menu item"""
@@ -535,6 +563,15 @@ class DatumTool(Page):
             prompt=False,
         )
 
+    def save_nfc(self):
+        """Reusable handler for storing the datum on an NFC card"""
+        from .nfc_ui import StoreOnNFC
+
+        payload = self.contents
+        if not isinstance(payload, bytes):
+            payload = payload.encode()
+        StoreOnNFC(self.ctx).write_datum(payload)
+
     def _info_box(self, preview=True, about_suffix=""):
         """clears screen, displays info_box, returns height-in-lines"""
         from binascii import hexlify
@@ -735,6 +772,10 @@ class DatumTool(Page):
             # when not sensitive, allow export to sd
             if not self.sensitive:
                 menu.append((t("Save to SD card"), lambda: "export_sd"))
+                # Same gate as the SD card, and for the same reason: what looks
+                # like a mnemonic does not leave the device in the clear.
+                if Settings().hardware.nfc.enabled:
+                    menu.append((t("Store on NFC Card"), lambda: "export_nfc"))
 
         else:
             if isinstance(self.contents, bytes):
@@ -875,6 +916,8 @@ class DatumTool(Page):
         elif status == "export_qr":
             # if user chose to export_qr
             self.view_qr()
+        elif status == "export_nfc":
+            self.save_nfc()
         else:
             # user chose export_sd
             self.save_sd()
