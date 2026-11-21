@@ -56,7 +56,7 @@ class SatsVB:
     @classmethod
     def _get_size_of_script_length_element(cls, length):
         """Get size of script in bytes for fees/vB"""
-        if length < 75:
+        if length <= 75:
             return 1
         if length <= cls.ONE_BYTE_MAX_SIZE:
             return 2
@@ -69,9 +69,9 @@ class SatsVB:
         """Get size of int in bytes for fees/vB"""
         if length < 253:
             return 1
-        if length < cls.TWO_BYTE_MAX_SIZE:
+        if length <= cls.TWO_BYTE_MAX_SIZE:
             return 3
-        if length < cls.FOUR_BYTE_MAX_SIZE:
+        if length <= cls.FOUR_BYTE_MAX_SIZE:
             return 5
         return 9
 
@@ -155,19 +155,22 @@ class SatsVB:
             )
         elif policy["type"] in (P2SH_P2WSH, P2WSH):
             redeem_script_size = cls._get_redeem_script_size(policy)
-            input_witness_size = cls._get_script_signature_size(
-                policy, redeem_script_size
+            input_witness_size = (
+                1
+                + policy["m"] * (1 + cls.SIGNATURE_SIZE)
+                + cls._get_size_of_var_int(redeem_script_size)
+                + redeem_script_size
             )
             input_size += (
                 cls.TX_INPUT_TXID_SIZE
                 + cls.TX_INPUT_VOUT_SIZE
-                + input_witness_size
-                * cls.TX_SEGWIT_INPUT_DISCOUNT  # outpoint (spent UTXO ID)
-                + cls.TX_INPUT_SEQUENCE_SIZE  # witness program  # nSequence
+                + 1  # scriptSig length
+                + input_witness_size * cls.TX_SEGWIT_INPUT_DISCOUNT
+                + cls.TX_INPUT_SEQUENCE_SIZE
             )
             if policy["type"] == P2SH_P2WSH:
+                # scriptSig: push of the 34-byte witness program
                 input_size += cls.TX_INPUT_TXID_SIZE + 3
-                # P2SH wrapper (redeemscript hash) + overhead?
 
         policy_size = 0
         for policy_type, v in output_policy_count.items():
