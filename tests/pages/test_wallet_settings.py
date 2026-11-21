@@ -1052,3 +1052,62 @@ def test_change_derivation_path_not_hardened_node(amigo, mocker, tdata):
     assert ctx.wallet.key.derivation_str() == "m/48h/0h/0h/2"
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
     wallet_settings.prompt.assert_has_calls(prompt_calls)
+
+
+def test_change_policy_from_p2sh_multisig(m5stickv, mocker, tdata):
+    from krux.pages.wallet_settings import WalletSettings
+    from krux.wallet import Wallet
+    from krux.key import (
+        Key,
+        TYPE_SINGLESIG,
+        TYPE_MULTISIG,
+        TYPE_MINISCRIPT,
+        P2PKH,
+        P2SH_P2WPKH,
+        P2WPKH,
+        P2TR,
+        P2SH_P2WSH,
+        P2WSH,
+    )
+    from krux.pages import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    def pick(index):
+        return [BUTTON_PAGE] * index + [BUTTON_ENTER]
+
+    # (policy type, index in its script type menu, script type, derivation)
+    cases = [
+        (TYPE_SINGLESIG, 0, P2PKH, "m/44h/0h/0h"),
+        (TYPE_SINGLESIG, 1, P2SH_P2WPKH, "m/49h/0h/0h"),
+        (TYPE_SINGLESIG, 2, P2WPKH, "m/84h/0h/0h"),
+        (TYPE_SINGLESIG, 3, P2TR, "m/86h/0h/0h"),
+        (TYPE_MULTISIG, 1, P2SH_P2WSH, "m/48h/0h/0h/1h"),
+        (TYPE_MULTISIG, 2, P2WSH, "m/48h/0h/0h/2h"),
+        (TYPE_MINISCRIPT, 0, P2WSH, "m/48h/0h/0h/2h"),
+        (TYPE_MINISCRIPT, 1, P2TR, "m/48h/0h/0h/2h"),
+    ]
+    for expected_policy, script_index, expected_script, expected_derivation in cases:
+        if expected_policy == TYPE_MULTISIG:
+            # Already multisig, so open "Script Type" directly
+            btn_sequence = pick(2)
+        else:
+            # Open "Policy Type" and pick it (index is the policy type id),
+            # P2SH is not valid there so the script type menu opens after
+            btn_sequence = pick(1) + pick(expected_policy)
+        btn_sequence += pick(script_index) + [BUTTON_PAGE_PREV, BUTTON_ENTER]
+
+        # P2SH multisig keys carry account_index=None
+        ctx = create_ctx(mocker, btn_sequence, Wallet(tdata.LEGACY1_MULTISIG_KEY))
+        wallet_settings = WalletSettings(ctx)
+        mnemonic = ctx.wallet.key.mnemonic
+        network, policy_type, script_type, account, derivation_path = (
+            wallet_settings.customize_wallet(ctx.wallet.key)
+        )
+
+        assert policy_type == expected_policy
+        assert script_type == expected_script
+        assert derivation_path == expected_derivation
+        assert ctx.input.wait_for_button.call_count == len(btn_sequence)
+
+        # Changing the passphrase rebuilds the key from the account index
+        key = Key(mnemonic, policy_type, network, "", account, script_type)
+        assert key.derivation == expected_derivation
