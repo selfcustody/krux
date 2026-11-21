@@ -161,6 +161,20 @@ def identify_datum(data, encodings=None):
     return datum
 
 
+def is_mnemonic_text(text):
+    """Does this text look like a mnemonic, as words or as SeedQR digits"""
+
+    # does it look like a 12 or 24 word mnemonic / Mnemonic QR?
+    if len(text[:256].split()) in (12, 24):
+        return True
+
+    # does it look like a 12 or 24 word decimal mnemonic / StandadardSeedQR?
+    return (
+        len(text) in (12 * 4, 24 * 4)
+        and len(set((x in "0123456789" for x in text))) == 1
+    )
+
+
 def detect_encodings(str_data, verify=True):
     """
     Detect which encodings this data str might be, returns list
@@ -655,6 +669,9 @@ class DatumTool(Page):
             self.about = self.about_prefix + " " + t("%s bytes") % len(self.contents)
             try:
                 as_str = self.contents.decode()
+                # mnemonic text as bytes (ie: once decrypted) is still secret
+                if is_mnemonic_text(as_str):
+                    self.sensitive = True
                 suggestion = str(detect_encodings(as_str, False)[0])
                 del as_str
                 gc.collect()
@@ -679,15 +696,7 @@ class DatumTool(Page):
             self.about = self.about_prefix + " " + t("%s chars") % len(self.contents)
             self.encodings = detect_encodings(self.contents)
 
-            # does it look like a 12 or 24 word mnemonic / Mnemonic QR?
-            if len(self.contents[:256].split()) in (12, 24):
-                self.sensitive = True
-
-            # does it look like a 12 or 24 word decimal mnemonic / StandadardSeedQR?
-            elif (
-                len(self.contents) in (12 * 4, 24 * 4)
-                and len(set((x in "0123456789" for x in self.contents))) == 1
-            ):
+            if is_mnemonic_text(self.contents):
                 self.sensitive = True
 
             # fits on one line in info_box
