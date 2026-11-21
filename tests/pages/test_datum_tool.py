@@ -831,6 +831,55 @@ def test_datumtool__decrypt_as_kef_envelope(m5stickv, mocker):
     assert page.decrypted == True
 
 
+def test_datumtool_encrypt_with_emptied_iterations_keeps_datum(m5stickv, mocker):
+    """Encrypt, empty the PBKDF2 iterations field, Go: nothing is lost"""
+    from krux.pages.datum_tool import DatumTool
+    from krux.pages.encryption_ui import KEFEnvelope
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    some_bytes = b"These are bytes that won't fit on one-line."
+    digits = len(str(KEFEnvelope(create_ctx(mocker, [])).iterations))
+
+    BTN_SEQUENCE = (
+        [
+            BUTTON_PAGE,  # to Convert
+            BUTTON_ENTER,  # go Convert
+            BUTTON_PAGE_PREV,  # to Done Converting
+            BUTTON_PAGE_PREV,  # to Encrypt
+            BUTTON_ENTER,  # go Encrypt
+            BUTTON_ENTER,  # go Type Key
+            BUTTON_ENTER,  # go "a"
+            BUTTON_PAGE_PREV,  # to Go
+            BUTTON_ENTER,  # go Go
+            BUTTON_ENTER,  # confirm weak key "a"
+            BUTTON_PAGE_PREV,  # deny default key iterations
+            BUTTON_PAGE_PREV,  # back to Go
+            BUTTON_PAGE_PREV,  # back to ESC
+            BUTTON_PAGE_PREV,  # back to "<" delete
+        ]
+        + [BUTTON_ENTER] * digits  # remove every digit
+        + [
+            BUTTON_PAGE,  # forward to ESC
+            BUTTON_PAGE,  # forward to Go
+            BUTTON_ENTER,  # go Go with the field empty
+            BUTTON_PAGE_PREV,  # still converting: to Done Converting
+            BUTTON_ENTER,  # go Done Converting
+            BUTTON_PAGE_PREV,  # to Back
+            BUTTON_ENTER,  # go Back
+        ]
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.title = "title"
+    page.contents = some_bytes
+    page.view_contents()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    # not encrypted, and still loaded
+    assert page.contents == some_bytes
+    assert page.title == "title"
+
+
 def test_datumtool__build_options_menu(m5stickv, mocker):
     """With DatumTool already initialized, test ._build_options_menu()"""
     from krux.pages.datum_tool import DatumTool
