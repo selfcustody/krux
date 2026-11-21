@@ -1749,6 +1749,149 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
         case_num += 1
 
 
+FORGED_OWNERSHIP_CASES = [
+    "p2wpkh_keeps_our_key",
+    "p2wpkh_lists_other_key",
+    "p2wpkh_paying_key_first",
+    "p2wpkh_paying_key_last",
+    "p2wpkh_receive_path",
+    "p2sh_p2wpkh_keeps_our_key",
+    "p2sh_p2wpkh_lists_other_key",
+    "p2pkh_keeps_our_key",
+    "p2pkh_lists_other_key",
+    "p2tr_keeps_our_key",
+    "p2tr_lists_other_key",
+]
+
+
+@pytest.mark.parametrize("case", FORGED_OWNERSHIP_CASES)
+def test_outputs_singlesig_forged_ownership(mocker, m5stickv, tdata, case):
+    """An output whose script our descriptor does not derive is a spend,
+    whatever fingerprint, path and key its derivation claims"""
+    from embit import bip32, bip39, ec
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, DerivationPath, OutputScope
+    from embit.script import p2pkh, p2sh, p2tr, p2wpkh
+    from embit.transaction import TransactionOutput
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG, P2PKH, P2SH_P2WPKH, P2WPKH, P2TR
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+    from krux.format import format_address
+
+    network = NETWORKS["test"]
+    root = bip32.HDKey.from_seed(
+        bip39.mnemonic_to_seed(tdata.TEST_MNEMONIC), version=network["xprv"]
+    )
+    other_key = ec.PrivateKey(b"\x11" * 32).get_public_key()
+    other_origin = DerivationPath(
+        b"\xde\xad\xbe\xef", bip32.parse_path("m/84h/1h/0h/1/0")
+    )
+
+    def ours(path):
+        derivation = bip32.parse_path(path)
+        pubkey = root.derive(derivation).to_public().key
+        return pubkey, DerivationPath(root.my_fingerprint, derivation)
+
+    recipient = "tb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx"
+    self_transfers = []
+    if case.startswith("p2wpkh"):
+        # Output 0 is the change, output 1 pays the recipient
+        script_type = P2WPKH
+        psbt = PSBT.parse(tdata.P2WPKH_PSBT)
+        forged = psbt.outputs[0]
+        forged.script_pubkey = p2wpkh(other_key)
+        ((our_key, our_derivation),) = forged.bip32_derivations.items()
+        # Our real entry next to an entry for the key that is paid
+        if case == "p2wpkh_paying_key_first":
+            forged.bip32_derivations = {
+                other_key: other_origin,
+                our_key: our_derivation,
+            }
+        elif case == "p2wpkh_paying_key_last":
+            forged.bip32_derivations = {
+                our_key: our_derivation,
+                other_key: other_origin,
+            }
+        elif case == "p2wpkh_receive_path":
+            forged.bip32_derivations = dict([ours("m/84h/1h/0h/0/5")])
+        spends = [(forged, "0.89 997 180"), (recipient, "0.10 000 000")]
+        spend_total = "0.99 997 180"
+    elif case.startswith("p2sh_p2wpkh"):
+        # Output 0 is the change, output 1 pays the recipient
+        script_type = P2SH_P2WPKH
+        psbt = PSBT.parse(tdata.P2SH_P2WPKH_PSBT)
+        forged = psbt.outputs[0]
+        forged.redeem_script = p2wpkh(other_key)
+        forged.script_pubkey = p2sh(forged.redeem_script)
+        spends = [(forged, "0.89 996 700"), (recipient, "0.10 000 000")]
+        spend_total = "0.99 996 700"
+    elif case.startswith("p2pkh"):
+        # The honest PSBT has no change, so add one paid from the fee
+        script_type = P2PKH
+        psbt = PSBT.parse(tdata.P2PKH_PSBT)
+        forged = OutputScope(vout=TransactionOutput(500, p2pkh(other_key)))
+        forged.bip32_derivations = dict([ours("m/44h/1h/0h/1/0")])
+        psbt.outputs.append(forged)
+        spends = [
+            ("tb1q4mx3ahp7laj65gyaqg27w0tsjpwuz6rvaxx3tl", "0.00 001 000"),
+            (forged, "0.00 000 500"),
+        ]
+        spend_total = "0.00 001 500"
+    else:
+        # Output 0 is the change, 1 a self transfer, 2 pays the recipient
+        script_type = P2TR
+        psbt = PSBT.parse(tdata.P2TR_PSBT)
+        forged = psbt.outputs[0]
+        forged.script_pubkey = p2tr(other_key)
+        if case == "p2tr_lists_other_key":
+            forged.taproot_internal_key = other_key
+            (leaves_and_derivation,) = forged.taproot_bip32_derivations.values()
+            forged.taproot_bip32_derivations = {other_key: leaves_and_derivation}
+        spends = [
+            (forged, "0.00 007 738"),
+            ("tb1q4mx3ahp7laj65gyaqg27w0tsjpwuz6rvaxx3tl", "0.00 001 000"),
+        ]
+        spend_total = "0.00 008 738"
+        self_transfers = [
+            (
+                "tb1pn5kekm0xpnwd6kg8c8qfvv2fr0w5xnhw42927wem7xwk84f7gzvsvctkhp",
+                "0.00 001 000",
+            )
+        ]
+
+    if case.endswith("lists_other_key") and not case.startswith("p2tr"):
+        # Our fingerprint and path, but the key that is paid
+        ((_, derivation),) = forged.bip32_derivations.items()
+        forged.bip32_derivations = {other_key: derivation}
+
+    def address(output):
+        if isinstance(output, str):
+            return output
+        return output.script_pubkey.address(network)
+
+    summary = ["Spend (%d): ₿ %s" % (len(spends), spend_total)]
+    if self_transfers:
+        summary.append("Self-transfer or Change (1): ₿ 0.00 001 000")
+    screens = [
+        "%d. Spend: \n\n%s\n\n₿ %s" % (i + 1, format_address(address(out)), amount)
+        for i, (out, amount) in enumerate(spends)
+    ] + [
+        "%d. Self-transfer: \n\n%s\n\n₿ %s" % (i + 1, format_address(out), amount)
+        for i, (out, amount) in enumerate(self_transfers)
+    ]
+
+    wallet = Wallet(
+        Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, network, script_type=script_type)
+    )
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    outputs, _ = signer.outputs()
+
+    # The summary is inputs, spend, any self transfer or change, then fee
+    assert outputs[0].split("\n\n")[1:-1] == summary
+    assert outputs[1:] == screens
+
+
 def test_outputs_multisig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
