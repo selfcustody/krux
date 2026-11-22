@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from . import Page
-from ..krux_settings import t, Settings, CNC_FILE_DRIVER
-from ..qr import to_qr_codes, FORMAT_NONE
-from ..printers import create_printer
+from krux.pages import Page
+from krux.krux_settings import t, Settings, CNC_FILE_DRIVER
+from krux.qr import to_qr_codes, FORMAT_NONE
+from krux.printers import create_printer
 
 
 class PrintPage(Page):
@@ -39,7 +39,7 @@ class PrintPage(Page):
     def _send_qr_to_printer(self, qr_code, i=0, count=1):
         self.ctx.display.clear()
         if Settings().hardware.printer.driver == CNC_FILE_DRIVER:
-            from ..printers.cnc import FilePrinter
+            from krux.printers.cnc import FilePrinter
 
             self.ctx.display.draw_centered_text(
                 t("Exporting %s to SD card…") % FilePrinter.CNC_FILENAME
@@ -73,7 +73,7 @@ class PrintPage(Page):
 
     def print_mnemonic_text(self, mnemonic, suffix=""):
         """Prints Mnemonics words as text"""
-        from . import BASE_DEC_SUFFIX, BASE_HEX_SUFFIX, BASE_OCT_SUFFIX
+        from krux.pages import BASE_DEC_SUFFIX, BASE_HEX_SUFFIX, BASE_OCT_SUFFIX
 
         self.ctx.display.clear()
         self.ctx.display.draw_hcentered_text(

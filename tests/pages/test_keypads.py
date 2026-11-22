@@ -1,5 +1,4 @@
-from . import create_ctx
-import pytest
+from tests.pages import create_ctx
 
 
 def test_button_turbo(mocker, m5stickv):

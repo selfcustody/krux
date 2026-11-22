@@ -21,17 +21,17 @@
 # THE SOFTWARE.
 
 import lcd
-from . import Page, Menu, MENU_CONTINUE, DEFAULT_PADDING
-from ..themes import theme
-from ..krux_settings import t
-from ..display import FONT_HEIGHT, FONT_WIDTH
-from ..wdt import wdt
-from ..firmware import (
+from krux.pages import Page, Menu, MENU_CONTINUE, DEFAULT_PADDING
+from krux.themes import theme
+from krux.krux_settings import t
+from krux.display import FONT_HEIGHT, FONT_WIDTH
+from krux.wdt import wdt
+from krux.firmware import (
     FLASH_SIZE,
     SPIFFS_ADDR,
     ERASE_BLOCK_SIZE,
 )
-from ..kboard import kboard
+from krux.kboard import kboard
 
 BLOCK_SIZE = 0x1000
 FLASH_ROWS = 64
@@ -154,7 +154,7 @@ class FlashTools(Page):
         """Load the flash hash page"""
 
         if self.ctx.tc_code_enabled:
-            from .tc_code_verification import TCCodeVerification
+            from krux.pages.tc_code_verification import TCCodeVerification
 
             tc_code_verification = TCCodeVerification(self.ctx)
             tc_code_hash = tc_code_verification.capture(return_hash=True)
@@ -213,7 +213,7 @@ class FlashHash(Page):
 
     def hash_pin_with_flash(self, spiffs_region=False):
         """Hashes the tamper check code, unique ID, and flash memory together."""
-        import uhashlib_hw
+        from krux.hashes import sha256_hw
         import flash
         from machine import unique_id
 
@@ -226,20 +226,20 @@ class FlashHash(Page):
         if self.ctx.display.width() < self.ctx.display.height():
             percentage_offset += FONT_HEIGHT
         uid = unique_id()
-        sha256 = uhashlib_hw.sha256()
-        sha256.update(self.tc_code_hash)
-        sha256.update(uid)
+        hasher = sha256_hw()
+        hasher.update(self.tc_code_hash)
+        hasher.update(uid)
         for address in range(range_begin, range_end, BLOCK_SIZE):
             counter += 1
             data = flash.read(address, BLOCK_SIZE)
-            sha256.update(data)
+            hasher.update(data)
             if counter % 200 == 0:
                 # Update progress
                 self.ctx.display.draw_hcentered_text(
                     "%d%%" % (counter // 41), percentage_offset
                 )
                 wdt.feed()
-        return sha256.digest()
+        return hasher.digest()
 
     def hash_to_random_color(self, hash_bytes):
         """Generates a random color from part of the hash."""

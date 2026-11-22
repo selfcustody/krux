@@ -1,7 +1,7 @@
 # Mnemonic convertion to seed and to/from bytes
 # pylint: disable=W0102
 
-import hashlib
+from krux.hashes import sha256
 from embit.wordlists.bip39 import WORDLIST
 
 WORDINDEX = {word: i for i, word in enumerate(WORDLIST)}
@@ -11,7 +11,7 @@ def entropy_checksum(entropy: bytes, checksum_length_bits: int = 4):
     """
     Computes checksum for the given entropy
     """
-    h = hashlib.sha256(entropy).digest()
+    h = sha256(entropy).digest()
     return int(h[0]) >> (8 - checksum_length_bits)
 
 

@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from . import Page, Menu, MENU_EXIT, MENU_SHUTDOWN
-from ..display import DEFAULT_PADDING, FONT_HEIGHT
-from ..krux_settings import t, DISCLAIMER_PATH
-from ..themes import theme
+from krux.pages import Page, Menu, MENU_EXIT, MENU_SHUTDOWN
+from krux.display import DEFAULT_PADDING, FONT_HEIGHT
+from krux.krux_settings import t, DISCLAIMER_PATH
+from krux.themes import theme
 
 
 class Disclaimer(Page):
@@ -119,7 +119,7 @@ class Disclaimer(Page):
 def acknowledged():
     """Returns True if the disclaimer was already acknowledged for this version"""
 
-    from ..metadata import VERSION
+    from krux.metadata import VERSION
 
     try:
         with open(DISCLAIMER_PATH, "r") as disclaimer_file:
@@ -131,7 +131,7 @@ def acknowledged():
 def store_acknowledgment():
     """Stores the version the disclaimer was acknowledged for"""
 
-    from ..metadata import VERSION
+    from krux.metadata import VERSION
 
     try:
         with open(DISCLAIMER_PATH, "w") as disclaimer_file:

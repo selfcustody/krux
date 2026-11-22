@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 import os
 from machine import SDCard
-from .settings import SD_PATH
+from krux.settings import SD_PATH
 
 SIGNED_FILE_SUFFIX = "-signed"
 PSBT_FILE_EXTENSION = ".psbt"

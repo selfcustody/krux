@@ -23,8 +23,8 @@
 
 import time
 
-from .kboard import kboard
-from .krux_settings import Settings
+from krux.kboard import kboard
+from krux.krux_settings import Settings
 
 IDLE = 0
 PRESSED = 1
@@ -56,17 +56,18 @@ class Touch:
         self.state = IDLE
         self.width, self.height = width, height
         if kboard.is_embed_fire:
-            from .touchscreens.cst816 import touch_control
+            from krux.touchscreens.cst816 import touch_control
 
             self.touch_driver = touch_control
             self.touch_driver.activate(irq_pin)
         elif res_pin is not None:
-            from .touchscreens.gt911 import touch_control
+            from krux.touchscreens.gt911 import touch_control
 
             self.touch_driver = touch_control
-            self.touch_driver.activate(irq_pin, res_pin)
+            # pylint cannot tell which driver self.touch_driver holds per branch
+            self.touch_driver.activate(irq_pin, res_pin)  # pylint: disable=E1121
         else:
-            from .touchscreens.ft6x36 import touch_control
+            from krux.touchscreens.ft6x36 import touch_control
 
             self.touch_driver = touch_control
             self.touch_driver.activate_irq(irq_pin)

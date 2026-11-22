@@ -22,19 +22,19 @@
 import io
 import os
 import binascii
-import uhashlib_hw
+from krux.hashes import sha256_hw
 import time
 import flash
 import board
 from embit import ec
-from .input import Input, BUTTON_PAGE, BUTTON_PAGE_PREV
-from .metadata import SIGNER_PUBKEY
-from .display import display
-from .krux_settings import t
-from .wdt import wdt
-from .themes import theme
-from .metadata import VERSION
-from .settings import SD_PATH
+from krux.input import Input, BUTTON_PAGE, BUTTON_PAGE_PREV
+from krux.metadata import SIGNER_PUBKEY
+from krux.display import display
+from krux.krux_settings import t
+from krux.wdt import wdt
+from krux.themes import theme
+from krux.metadata import VERSION
+from krux.settings import SD_PATH
 
 FLASH_SIZE = 2**24
 MAX_FIRMWARE_SIZE = 0x300000
@@ -169,9 +169,9 @@ def fsize(firmware_filename):
     return size
 
 
-def sha256(firmware_filename, firmware_size=None):
+def file_sha256(firmware_filename, firmware_size=None):
     """Returns the sha256 hash of the firmware"""
-    hasher = uhashlib_hw.sha256()
+    hasher = sha256_hw()
     # If firmware size is supplied, then we want a sha256 of the firmware with its header
     if firmware_size is not None:
         hasher.update(b"\x00" + firmware_size.to_bytes(4, "little"))
@@ -336,7 +336,7 @@ def upgrade():
         return False
 
     # Validate signature
-    firmware_hash = sha256(firmware_path)
+    firmware_hash = file_sha256(firmware_path)
     try:
         # Parse, serialize, and reparse to ensure signature is compact prior to verification
         sig = ec.Signature.parse(ec.Signature.parse(sig).serialize())
@@ -384,7 +384,7 @@ def upgrade():
     # Write new firmware to the opposite slot
     new_address = FIRMWARE_SLOT_2 if address == FIRMWARE_SLOT_1 else FIRMWARE_SLOT_1
 
-    firmware_with_header_hash = sha256(firmware_path, new_size)
+    firmware_with_header_hash = file_sha256(firmware_path, new_size)
     try:
         with open(firmware_path, "rb", buffering=0) as firmware_file:
             write_data(

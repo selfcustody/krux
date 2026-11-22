@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from ..krux_settings import PrinterSettings, Settings
+from krux.krux_settings import PrinterSettings, Settings
 
 
 class Printer:
@@ -59,6 +59,6 @@ def create_printer():
     if not cls:
         return None
     return getattr(
-        __import__(module, globals(), None, [None], 1),
+        __import__("krux.printers." + module, None, None, [None]),
         cls,
     )()

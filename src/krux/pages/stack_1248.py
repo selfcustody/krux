@@ -21,11 +21,11 @@
 # THE SOFTWARE.
 
 from embit.wordlists.bip39 import WORDLIST
-from . import Page
-from ..themes import theme
-from ..krux_settings import t
-from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
-from ..input import (
+from krux.pages import Page
+from krux.themes import theme
+from krux.krux_settings import t
+from krux.display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT, FONT_WIDTH
+from krux.input import (
     BUTTON_ENTER,
     BUTTON_PAGE,
     BUTTON_PAGE_PREV,
@@ -33,7 +33,7 @@ from ..input import (
     FAST_FORWARD,
     FAST_BACKWARD,
 )
-from ..kboard import kboard
+from krux.kboard import kboard
 
 STACKBIT_GO_INDEX = 38
 STACKBIT_ESC_INDEX = 35

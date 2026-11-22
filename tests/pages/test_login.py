@@ -1,5 +1,5 @@
 import pytest
-from . import create_ctx, assert_not_flashed
+from tests.pages import create_ctx, assert_not_flashed
 
 
 @pytest.fixture

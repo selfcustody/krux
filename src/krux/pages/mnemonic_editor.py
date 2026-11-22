@@ -22,11 +22,11 @@
 
 from embit import bip39
 from embit.wordlists.bip39 import WORDLIST
-from . import Page, ESC_KEY, LETTERS
-from ..display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT
-from ..krux_settings import t
-from ..themes import theme
-from ..input import (
+from krux.pages import Page, ESC_KEY, LETTERS
+from krux.display import DEFAULT_PADDING, MINIMAL_PADDING, FONT_HEIGHT
+from krux.krux_settings import t
+from krux.themes import theme
+from krux.input import (
     BUTTON_TOUCH,
     BUTTON_ENTER,
     BUTTON_PAGE,
@@ -34,8 +34,8 @@ from ..input import (
     FAST_FORWARD,
     FAST_BACKWARD,
 )
-from ..key import Key
-from ..kboard import kboard
+from krux.key import Key
+from krux.kboard import kboard
 
 GO_INDEX = 25
 ESC_INDEX = 24
@@ -135,7 +135,7 @@ class MnemonicEditor(Page):
 
     def _draw_header(self):
         """Draw current mnemonic words"""
-        from ..wallet import is_double_mnemonic
+        from krux.wallet import is_double_mnemonic
 
         header = "BIP39" + " " + t("Mnemonic")
         mnemonic = " ".join(self.current_mnemonic)

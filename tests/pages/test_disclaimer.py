@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from . import create_ctx
+from tests.pages import create_ctx
 
 TEXT = (
     "Krux is a research and development project, made by nerds building"
@@ -50,7 +50,7 @@ def test_acknowledge_stores_version(mocker, multiple_devices):
     from krux.pages.disclaimer import Disclaimer
     from krux.metadata import VERSION
     from krux.input import BUTTON_ENTER
-    from ..shared_mocks import MockFile, mock_open
+    from tests.shared_mocks import MockFile, mock_open
 
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # past the disclaimer
@@ -74,7 +74,7 @@ def test_acknowledge_stores_version(mocker, multiple_devices):
 def test_shutdown_instead_of_acknowledging(mocker, multiple_devices):
     from krux.pages.disclaimer import Disclaimer
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
-    from ..shared_mocks import MockFile, mock_open
+    from tests.shared_mocks import MockFile, mock_open
 
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # past the disclaimer
@@ -96,7 +96,7 @@ def test_shutdown_instead_of_acknowledging(mocker, multiple_devices):
 def test_acknowledged(m5stickv):
     from krux.pages.disclaimer import acknowledged
     from krux.metadata import VERSION
-    from ..shared_mocks import MockFile, mock_open
+    from tests.shared_mocks import MockFile, mock_open
 
     with patch("builtins.open", mock_open(MockFile(VERSION))):
         assert acknowledged() is True
