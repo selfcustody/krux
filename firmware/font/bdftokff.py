@@ -41,6 +41,11 @@ FONT24 = "ter-u24b"
 WIDE14 = "FusionPixel-14"
 WIDE16 = "unifont-16"
 WIDE24 = "NotoSansCJK-24"
+QR_GLYPH_FONTS = {
+    WIDE14: "qr-u14",
+    WIDE16: "qr-u16",
+    WIDE24: "qr-u24",
+}
 
 SMALL_FONT_REF = "m5stickv"
 MID_FONT_REF = "dock"
@@ -81,6 +86,17 @@ def open_bdf_save_kff(filename, width, height):
     font_hex = "\n".join(bdftohex.bdftohex(filename + ".bdf")) + "\n"
     with open(filename + ".hex", "w", encoding="utf-8", newline="\n") as save_file:
         save_file.write(font_hex)
+
+    qr_glyph_font = QR_GLYPH_FONTS.get(filename)
+    if qr_glyph_font:
+        qr_glyph_hex = qr_glyph_font + ".hex"
+        font_hex = "\n".join(bdftohex.bdftohex(qr_glyph_font + ".bdf")) + "\n"
+        with open(qr_glyph_hex, "w", encoding="utf-8", newline="\n") as save_file:
+            save_file.write(font_hex)
+        font_hex = "\n".join(hexmerge.hexmerge([filename + ".hex", qr_glyph_hex]))
+        with open(filename + ".hex", "w", encoding="utf-8", newline="\n") as save_file:
+            save_file.write(font_hex + "\n")
+        os.remove(qr_glyph_hex)
 
     # Fill the hexfile with missing empty glyphs
     font_hex_filled = "".join(hexfill.hexfill(filename + ".hex", width, height)).strip()

@@ -157,14 +157,22 @@ class Page:
         starting_buffer="",
         esc_prompt=True,
         buffer_title="",
+        scan_fn=None,
         buffer_suffix="",
         buffer_short_suffix="",
     ):
-        """Displays a key pad and captures a series of keys until the user returns.
-        Returns a string.
+        """Displays a keypad and captures keys until the user returns.
+
+        If provided, scan_fn returns a string to replace the editable buffer or
+        None to preserve it. Other return types are rejected.
         """
         buffer = starting_buffer
-        pad = Keypad(self.ctx, keysets, possible_keys_fn)
+        pad = Keypad(
+            self.ctx,
+            keysets,
+            possible_keys_fn,
+            has_scan_key=scan_fn is not None,
+        )
         swipe_has_not_been_used = True
         show_swipe_hint = False
         while True:
@@ -212,6 +220,8 @@ class Page:
                     if swipeable and swipe_has_not_been_used:
                         show_swipe_hint = True
                     pad.next_keyset()
+                elif pad.cur_key_index == pad.scan_index:
+                    buffer = self._capture_keypad_scan(pad, buffer, scan_fn)
                 elif pad.cur_key_index < len(pad.keys):
                     buffer += pad.keys[pad.cur_key_index]
                     changed = True
@@ -231,6 +241,24 @@ class Page:
                 pad.navigate(btn)
         if kboard.has_touchscreen:
             self.ctx.input.touch.clear_regions()
+        return buffer
+
+    def _capture_keypad_scan(self, pad, buffer, scan_fn):
+        """Runs a keypad scan and replaces the buffer only with text."""
+        overwrite = True
+        if buffer:
+            self.ctx.display.clear()
+            overwrite = self.prompt(t("Overwrite?"), self.ctx.display.height() // 2)
+        if overwrite:
+            scanned = scan_fn()
+            if isinstance(scanned, str):
+                buffer = scanned
+            elif scanned is not None:
+                self.flash_error(t("Failed to load"))
+        if kboard.has_touchscreen:
+            self.ctx.input.touch.set_regions(
+                pad.layout.x_keypad_map, pad.layout.y_keypad_map
+            )
         return buffer
 
     def _print_keypad_header(

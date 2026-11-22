@@ -31,6 +31,7 @@ import json
 BYTE_LEN = 2
 CHAR_LIST_EXCEPT_ASIAN = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !#$%&'()*+,-./:;<=>?@`[\\]^_\"{|}~█₿ ⊚↳«»…"
 DEFAULT_CODEPOINTS = [ord(char) for char in CHAR_LIST_EXCEPT_ASIAN]
+CUSTOM_WIDE_CODEPOINTS = {0xE000}
 TRANSLATIONS_DIR = "../../i18n/translations"
 
 JAPANESE_CODEPOINT_MIN = 0x3000  # defined as WIDEFONT_CODEPOINT_MIN in MaixPy
@@ -61,7 +62,7 @@ def hextokff(filename=None, width=None, height=None, wide_glyphs=None):
     if not wide_glyphs:
         used_codepoints = set(DEFAULT_CODEPOINTS)
     else:
-        used_codepoints = set()
+        used_codepoints = set(CUSTOM_WIDE_CODEPOINTS)
     for translation_file in os.listdir(TRANSLATIONS_DIR):
         current_translation = translation_file[:5]
         if not wide_glyphs or current_translation in wide_glyphs:

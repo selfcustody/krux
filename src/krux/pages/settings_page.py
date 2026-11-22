@@ -168,6 +168,8 @@ class SettingsPage(Page):
             )
             if tamper_check_code == ESC_KEY:
                 return MENU_CONTINUE
+            if len(tamper_check_code) < 6:
+                self.flash_error(t("Minimum of 6 characters required"))
         while len(tc_code_confirm) < 6:
             tc_code_confirm = self.capture_from_keypad(
                 t("Confirm Tamper Check Code"),
@@ -175,6 +177,8 @@ class SettingsPage(Page):
             )
             if tc_code_confirm == ESC_KEY:
                 return MENU_CONTINUE
+            if len(tc_code_confirm) < 6:
+                self.flash_error(t("Minimum of 6 characters required"))
         if tamper_check_code != tc_code_confirm:
             self.flash_error(t("Tamper check codes do not match"))
             return MENU_CONTINUE
