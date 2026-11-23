@@ -768,6 +768,65 @@ def board_embed_fire():
     )
 
 
+def board_tzt():
+    return mock.MagicMock(
+        config={
+            "type": "tzt",
+            "sensor": {
+                "pin_sda": 40,
+                "cmos_href": 44,
+                "cmos_pclk": 47,
+                "cmos_xclk": 46,
+                "cmos_pwdn": 45,
+                "cmos_vsync": 42,
+                "reg_width": 16,
+                "i2c_num": 2,
+                "pin_clk": 41,
+                "cmos_rst": 43,
+            },
+            "sdcard": {"cs": 32, "cs_gpio": 29, "sclk": 34, "mosi": 33, "miso": 35},
+            "lcd": {
+                "offset_y2": 0,
+                "dir": 96,
+                "dcx": 37,
+                "invert": 1,
+                "lcd_type": 0,
+                "offset_y1": 0,
+                "ss": 38,
+                "offset_x1": 0,
+                "offset_x2": 0,
+                "rst": 39,
+                "clk": 36,
+                "height": 240,
+                "width": 320,
+            },
+            "board_info": {
+                "BOOT_KEY": 16,
+                "CONNEXT_A": 8,
+                "CONNEXT_B": 7,
+                "I2C_SDA": 40,
+                "I2C_SCL": 41,
+                "SPI_SCLK": 34,
+                "SPI_MOSI": 33,
+                "SPI_MISO": 35,
+                "SPI_CS": 32,
+            },
+            "krux": {
+                "pins": {
+                    "BUTTON_C": 11,
+                    "BUTTON_B": 12,
+                    "BUTTON_A": 16,
+                    "BUTTON_X": 13,
+                    "TOUCH_IRQ": 22,
+                    "I2C_SDA": 25,
+                    "I2C_SCL": 24,
+                },
+                "display": {"touch": True, "font": [8, 16], "font_wide": [16, 16]},
+            },
+        }
+    )
+
+
 def mock_context(mocker):
     import board
 
@@ -924,6 +983,31 @@ def mock_context(mocker):
         )
 
     elif board.config["type"] == "wonder_k":
+        return mocker.MagicMock(
+            input=mocker.MagicMock(
+                touch=mocker.MagicMock(),
+                enter_event=mocker.MagicMock(return_value=False),
+                page_event=mocker.MagicMock(return_value=False),
+                page_prev_event=mocker.MagicMock(return_value=False),
+                touch_event=mocker.MagicMock(return_value=False),
+            ),
+            display=mocker.MagicMock(
+                font_width=8,
+                font_height=16,
+                total_lines=20,  # 320 / 16
+                width=mocker.MagicMock(return_value=DOCK_WIDTH),
+                height=mocker.MagicMock(return_value=DOCK_HEIGHT),
+                usable_width=mocker.MagicMock(return_value=DOCK_USABLE_WIDTH),
+                usable_pixels_in_line=mocker.MagicMock(return_value=DOCK_USABLE_WIDTH),
+                ascii_chars_per_line=mocker.MagicMock(return_value=DOCK_IN_LINE),
+                to_lines=mocker.MagicMock(return_value=[""]),
+                to_lines_endpos=mocker.MagicMock(return_value=([""], 0)),
+                max_menu_lines=mocker.MagicMock(return_value=9),
+                draw_hcentered_text=mocker.MagicMock(return_value=1),
+            ),
+        )
+
+    elif board.config["type"] == "tzt":
         return mocker.MagicMock(
             input=mocker.MagicMock(
                 touch=mocker.MagicMock(),

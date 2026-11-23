@@ -103,6 +103,23 @@ def test_init_embed_fire(mocker, embed_fire):
     assert krux.display.lcd.init.call_args.kwargs["invert"] is False
 
 
+def test_init_tzt(mocker, tzt):
+    import krux
+    from krux.display import Display
+
+    mocker.patch("krux.display.lcd", new=mocker.MagicMock())
+
+    d = Display()
+    d.initialize_lcd()
+
+    krux.display.lcd.init.assert_called_once()
+    assert krux.display.lcd.init.call_args.kwargs["invert"] is True
+    assert krux.display.lcd.init.call_args.kwargs["rst"] == 39
+    assert krux.display.lcd.init.call_args.kwargs["dcx"] == 37
+    assert krux.display.lcd.init.call_args.kwargs["ss"] == 38
+    assert krux.display.lcd.init.call_args.kwargs["clk"] == 36
+
+
 def test_width(mocker, m5stickv):
     mocker.patch("krux.display.lcd", new=mocker.MagicMock())
     import krux

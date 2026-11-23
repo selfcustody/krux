@@ -456,6 +456,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
     YAHBOOM = "yahboom"
     WONDER_MV = "wonder_mv"
     WONDER_K = "wonder_k"
+    TZT = "tzt"
 
     cases = [
         {
@@ -467,6 +468,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             YAHBOOM: "0123456789abc…nopqrstuvwxyz",
             WONDER_MV: "0123456789abc…nopqrstuvwxyz",
             WONDER_K: "0123456789abc…nopqrstuvwxyz",
+            TZT: "0123456789abc…nopqrstuvwxyz",
         },
         {
             TXT: "0123456789abcdefghijklmnopqrstuvwxy",
@@ -477,6 +479,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             YAHBOOM: "0123456789abc…mnopqrstuvwxy",
             WONDER_MV: "0123456789abc…mnopqrstuvwxy",
             WONDER_K: "0123456789abc…mnopqrstuvwxy",
+            TZT: "0123456789abc…mnopqrstuvwxy",
         },
         {
             TXT: "0123456789abcdefghijklmnopqrstuvwx",
@@ -487,6 +490,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             YAHBOOM: "0123456789abc…lmnopqrstuvwx",
             WONDER_MV: "0123456789abc…lmnopqrstuvwx",
             WONDER_K: "0123456789abc…lmnopqrstuvwx",
+            TZT: "0123456789abc…lmnopqrstuvwx",
         },
         {
             TXT: "0123456789abcdefghijklmnopqrstuvw",
@@ -497,6 +501,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             YAHBOOM: "0123456789abc…klmnopqrstuvw",
             WONDER_MV: "0123456789abc…klmnopqrstuvw",
             WONDER_K: "0123456789abc…klmnopqrstuvw",
+            TZT: "0123456789abc…klmnopqrstuvw",
         },
         {
             TXT: "0123456789abcdefghijklmnopqr",
@@ -507,6 +512,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             YAHBOOM: "0123456789abc…fghijklmnopqr",
             WONDER_MV: "0123456789abc…fghijklmnopqr",
             WONDER_K: "0123456789abc…fghijklmnopqr",
+            TZT: "0123456789abc…fghijklmnopqr",
         },
         {
             TXT: "0123456789abcdefghijklmnopq",
@@ -517,6 +523,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             YAHBOOM: "0123456789abcdefghijklmnopq",
             WONDER_MV: "0123456789abcdefghijklmnopq",
             WONDER_K: "0123456789abcdefghijklmnopq",
+            TZT: "0123456789abcdefghijklmnopq",
         },
         {
             TXT: "0123456789abcdefghijklmnop",
@@ -527,6 +534,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             YAHBOOM: "0123456789abcdefghijklmnop",
             WONDER_MV: "0123456789abcdefghijklmnop",
             WONDER_K: "0123456789abcdefghijklmnop",
+            TZT: "0123456789abcdefghijklmnop",
         },
         {
             TXT: "0123456789abcdefghijklmno",
@@ -537,6 +545,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             YAHBOOM: "0123456789abcdefghijklmno",
             WONDER_MV: "0123456789abcdefghijklmno",
             WONDER_K: "0123456789abcdefghijklmno",
+            TZT: "0123456789abcdefghijklmno",
         },
         {
             TXT: "0123456789abcdefghijklmn",
@@ -547,6 +556,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             YAHBOOM: "0123456789abcdefghijklmn",
             WONDER_MV: "0123456789abcdefghijklmn",
             WONDER_K: "0123456789abcdefghijklmn",
+            TZT: "0123456789abcdefghijklmn",
         },
         {
             TXT: "0123456789abcdefghijklm",
@@ -557,6 +567,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             YAHBOOM: "0123456789abcdefghijklm",
             WONDER_MV: "0123456789abcdefghijklm",
             WONDER_K: "0123456789abcdefghijklm",
+            TZT: "0123456789abcdefghijklm",
         },
         {
             TXT: "0123456789abcdefghij",
@@ -567,6 +578,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             YAHBOOM: "0123456789abcdefghij",
             WONDER_MV: "0123456789abcdefghij",
             WONDER_K: "0123456789abcdefghij",
+            TZT: "0123456789abcdefghij",
         },
         {
             TXT: "0123456789abcdefg",
@@ -577,6 +589,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             YAHBOOM: "0123456789abcdefg",
             WONDER_MV: "0123456789abcdefg",
             WONDER_K: "0123456789abcdefg",
+            TZT: "0123456789abcdefg",
         },
         {
             TXT: "0123456789abcdef",
@@ -587,6 +600,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             YAHBOOM: "0123456789abcdef",
             WONDER_MV: "0123456789abcdef",
             WONDER_K: "0123456789abcdef",
+            TZT: "0123456789abcdef",
         },
         {
             TXT: "0123456789abcde",
@@ -597,6 +611,7 @@ def test_fit_to_line_text(mocker, multiple_devices, mock_page_cls):
             YAHBOOM: "0123456789abcde",
             WONDER_MV: "0123456789abcde",
             WONDER_K: "0123456789abcde",
+            TZT: "0123456789abcde",
         },
     ]
 

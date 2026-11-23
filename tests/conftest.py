@@ -10,6 +10,7 @@ from tests.shared_mocks import (
     board_yahboom,
     board_wonder_k,
     board_embed_fire,
+    board_tzt,
     encode_to_string,
     encode,
     statvfs,
@@ -191,6 +192,15 @@ def embed_fire(monkeypatch, mp_modules):
     reset_krux_modules()
 
 
+@pytest.fixture
+def tzt(monkeypatch, mp_modules):
+    import sys
+
+    monkeypatch.setitem(sys.modules, "board", board_tzt())
+    monkeypatch.setitem(sys.modules, "pmu", None)
+    reset_krux_modules()
+
+
 @pytest.fixture(
     params=[
         "amigo",
@@ -200,6 +210,7 @@ def embed_fire(monkeypatch, mp_modules):
         "yahboom",
         "wonder_mv",
         "wonder_k",
+        "tzt",
     ]
 )
 def multiple_devices(request):
