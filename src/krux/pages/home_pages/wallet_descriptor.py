@@ -387,8 +387,27 @@ class WalletDescriptor(Page):
             offset_y = DEFAULT_PADDING + (3 * FONT_HEIGHT) // 2
 
         offset_y = DEFAULT_PADDING
-        self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
-        offset_y += (3 * FONT_HEIGHT) // 2
+        offset_y += (
+            self.ctx.display.draw_hcentered_text(wallet.label, offset_y) * FONT_HEIGHT
+        )
+        if wallet.is_multisig():
+            # The label can come from the file being loaded. State the policy
+            # Krux computed from the descriptor itself: quorum, script type
+            # and whether keys are sorted.
+            policy_text = "%d of %d %s %s" % (
+                wallet.policy["m"],
+                wallet.policy["n"],
+                wallet.policy["type"].upper(),
+                "sortedmulti" if wallet.descriptor.is_sorted else "multi",
+            )
+            offset_y += (
+                self.ctx.display.draw_hcentered_text(
+                    policy_text, offset_y, theme.highlight_color
+                )
+                * FONT_HEIGHT
+            )
+        offset_y += FONT_HEIGHT // 2
+        chars_per_line = self.ctx.display.ascii_chars_per_line()
         our_key_indexes_chars = []
         unused_key_index = None
         for i, key in enumerate(wallet.descriptor.keys):
@@ -450,19 +469,34 @@ class WalletDescriptor(Page):
                     )
                     offset_y += FONT_HEIGHT
 
-            xpub_text = self.fit_to_line(
-                ("" if kboard.has_minimal_display else " " * 3) + key.key.to_base58()
-            )
-            self.ctx.display.draw_string(padding, offset_y, xpub_text, label_color)
-            offset_y += (FONT_HEIGHT * 3) // 2
+            # The derivation applied after the xpub decides every address.
+            # Show it whenever it is not the standard receive/change pair.
+            xpub = key.key.to_base58()
+            key_str = str(key)
+            suffix = key_str[key_str.rfind(xpub) + len(xpub) :]
+            if suffix != "/<0;1>/*":
+                for line in self.ctx.display.to_lines("xpub" + (suffix or " (fixed)")):
+                    self.ctx.display.draw_string(
+                        sub_padding, offset_y, line, theme.error_color
+                    )
+                    offset_y += FONT_HEIGHT
 
-            # Check if there's another key and room for it
-            if (
-                i + 1 < len(wallet.descriptor.keys)
-                and offset_y + (FONT_HEIGHT * 4) > self.ctx.display.height()
-            ):
-                self.ctx.input.wait_for_button()
-                draw_header()
+            # Full xpub, wrapped: a cropped one can be matched by another key
+            xpub_width = chars_per_line - (0 if kboard.has_minimal_display else 3)
+            for start in range(0, len(xpub), xpub_width):
+                self.ctx.display.draw_string(
+                    sub_padding, offset_y, xpub[start : start + xpub_width], label_color
+                )
+                offset_y += FONT_HEIGHT
+            offset_y += FONT_HEIGHT // 2
+
+            # Check if there's another key and room for it, above the prompt
+            if i + 1 < len(wallet.descriptor.keys):
+                next_xpub = wallet.descriptor.keys[i + 1].key.to_base58()
+                next_lines = 3 + (len(next_xpub) + xpub_width - 1) // xpub_width
+                if offset_y + next_lines * FONT_HEIGHT > BOTTOM_PROMPT_LINE:
+                    self.ctx.input.wait_for_button()
+                    draw_header()
 
         # Display miniscript policies if available
         if wallet.is_miniscript():

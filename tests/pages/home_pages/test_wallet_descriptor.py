@@ -370,6 +370,7 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
             [
                 BUTTON_ENTER,  # Load? Yes
                 BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # To next page
                 BUTTON_ENTER,  # Accept
             ],
         ),
@@ -379,6 +380,7 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
             [
                 BUTTON_ENTER,  # Load? Yes
                 BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # To next page
                 BUTTON_ENTER,  # Accept
             ],
         ),
@@ -391,6 +393,14 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
                 BUTTON_ENTER,  # To next page
                 BUTTON_ENTER,  # To next page
                 BUTTON_ENTER,  # To next page
+                BUTTON_ENTER,  # To next page
+                BUTTON_ENTER,  # To next page
+                BUTTON_ENTER,  # To next page
+                BUTTON_ENTER,  # To next page
+                BUTTON_ENTER,  # To next page
+                BUTTON_ENTER,  # To next page
+                BUTTON_ENTER,  # To next page
+                BUTTON_ENTER,  # To next page
                 BUTTON_ENTER,  # Accept
             ],
         ),
@@ -400,6 +410,7 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
             [
                 BUTTON_ENTER,  # Load? Yes
                 BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # To next page
                 BUTTON_ENTER,  # Accept
             ],
         ),
@@ -409,6 +420,11 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
             [
                 BUTTON_ENTER,  # Load? Yes
                 BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # To next page
+                BUTTON_ENTER,  # To next page
+                BUTTON_ENTER,  # To next page
+                BUTTON_ENTER,  # To next page
+                BUTTON_ENTER,  # To next page
                 BUTTON_ENTER,  # To next page
                 BUTTON_ENTER,  # Accept
             ],
@@ -1005,6 +1021,8 @@ def test_load_key_value_file_without_name(
     btn_seq = [
         BUTTON_ENTER,  # Wallet output descriptor not found. Load?
         BUTTON_ENTER,  # Load from camera
+        BUTTON_ENTER,  # To next page (xpubs are shown in full)
+        BUTTON_ENTER,  # To next page
         BUTTON_ENTER,  # Load?
     ]
     ctx = create_ctx(mocker, btn_seq, Wallet(getattr(wallet_tdata, key_name)))
@@ -1026,4 +1044,12 @@ def test_load_key_value_file_without_name(
     assert ctx.wallet.is_loaded()
     assert ctx.wallet.label == "2 of 3 multisig"
     ctx.display.draw_hcentered_text.assert_any_call("2 of 3 multisig", mocker.ANY)
+    # The policy computed from the descriptor is drawn under the label
+    policy_lines = [
+        call.args[0]
+        for call in ctx.display.draw_hcentered_text.call_args_list
+        if str(call.args[0]).startswith("2 of 3 P2")
+    ]
+    assert len(policy_lines) == 1
+    assert policy_lines[0].endswith("sortedmulti")
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
