@@ -442,7 +442,11 @@ class Page:
         if not self.has_printer() and check_printer:
             return False
         self.ctx.display.clear()
-        prompt_text = (text + "\n\n%s\n\n") % Settings().hardware.printer.driver
+        driver = Settings().hardware.printer.driver
+        prompt_text = (text + "\n\n%s\n\n") % driver
+        if driver == "cnc/file":
+            # This driver does not print: say where the data is going
+            prompt_text += "Writes qr.nc to the SD card!" + "\n\n"
         return self.prompt(prompt_text, self.ctx.display.height() // 2)
 
     def prompt(self, text, offset_y=0, highlight_prefix=""):
