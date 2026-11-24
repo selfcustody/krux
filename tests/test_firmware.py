@@ -13116,6 +13116,7 @@ def test_upgrade_succeed(mocker, m5stickv, mock_success_input_cls, tdata):
                 65536,
                 True,
                 binascii.unhexlify(tdata.TEST_FIRMWARE_WITH_HEADER_SHA256),
+                expected_hash=binascii.unhexlify(tdata.TEST_FIRMWARE_SHA256),
             ),
             mocker.call(
                 mocker.ANY,
@@ -13265,6 +13266,7 @@ def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
                 65536,
                 True,
                 binascii.unhexlify(tdata.TEST_FIRMWARE_WITH_HEADER_SHA256),
+                expected_hash=binascii.unhexlify(tdata.TEST_FIRMWARE_SHA256),
             ),
             mocker.call(
                 mocker.ANY,
@@ -13365,6 +13367,7 @@ def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(
                 65536,
                 True,
                 binascii.unhexlify(tdata.TEST_FIRMWARE_WITH_HEADER_SHA256),
+                expected_hash=binascii.unhexlify(tdata.TEST_FIRMWARE_SHA256),
             ),
             mocker.call(
                 mocker.ANY,
@@ -14061,3 +14064,43 @@ def test_upgrade_fail_not_this_device_exception(
     display_mocker.flash_text.assert_called_with(
         "Firmware not for this device", theme.error_color
     )
+
+
+def test_write_data_rejects_data_that_is_not_the_verified_firmware(mocker, m5stickv):
+    """The flash writer hashes what it writes and refuses anything but the
+    image whose signature was verified"""
+    import hashlib
+    import io
+    from krux import firmware
+
+    mocker.patch("krux.firmware.flash", new=mocker.MagicMock())
+    mocker.patch("krux.firmware.sha256_hw", new=hashlib.sha256)
+    verified = b"signed firmware image" * 100
+    expected = hashlib.sha256(verified).digest()
+
+    # Same bytes as verified: accepted
+    firmware.write_data(
+        lambda pct: None,
+        firmware.FIRMWARE_SLOT_2,
+        io.BytesIO(verified),
+        len(verified),
+        4096,
+        True,
+        b"\x00" * 32,
+        expected_hash=expected,
+    )
+
+    # A different image of the same size: refused
+    swapped = b"other firmware image!" * 100
+    assert len(swapped) == len(verified)
+    with pytest.raises(ValueError, match="data changed after verification"):
+        firmware.write_data(
+            lambda pct: None,
+            firmware.FIRMWARE_SLOT_2,
+            io.BytesIO(swapped),
+            len(swapped),
+            4096,
+            True,
+            b"\x00" * 32,
+            expected_hash=expected,
+        )

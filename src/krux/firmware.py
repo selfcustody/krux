@@ -86,10 +86,37 @@ def update_boot_config_sector(
     return bytes(updated_sector)
 
 
+class HashingReader:
+    """Wraps a file and hashes every byte handed to the flash writer"""
+
+    def __init__(self, file):
+        self.file = file
+        self.hasher = sha256_hw()
+
+    def read(self, size):
+        """Reads from the file, updating the hash"""
+        data = self.file.read(size)
+        self.hasher.update(data)
+        return data
+
+
 def write_data(
-    pct_cb, address, data, data_size, chunk_size, header=False, sha_suffix=None
+    pct_cb,
+    address,
+    data,
+    data_size,
+    chunk_size,
+    header=False,
+    sha_suffix=None,
+    expected_hash=None,
 ):
-    """Writes data to the flash, optionally adding header and sha suffix for firmware"""
+    """Writes data to the flash, optionally adding header and sha suffix for firmware.
+
+    With expected_hash, the bytes read from data are hashed on the way to the
+    flash and a ValueError is raised if their SHA-256 is not expected_hash.
+    """
+    if expected_hash is not None:
+        data = HashingReader(data)
     buffer = bytearray(chunk_size)
     i = 0
     chunk_read = 0
@@ -155,6 +182,9 @@ def write_data(
         i += 1
         num_read = 0
         chunk_read = 0
+
+    if expected_hash is not None and data.hasher.digest() != expected_hash:
+        raise ValueError("data changed after verification")
 
 
 def fsize(firmware_filename):
@@ -398,6 +428,10 @@ def upgrade():
                 FIRMWARE_WRITE_CHUNCK_SIZE,
                 True,
                 firmware_with_header_hash,
+                # The bytes written must be the bytes whose signature was
+                # verified. Otherwise this raises before the boot config is
+                # touched, so the device keeps booting the current firmware.
+                expected_hash=firmware_hash,
             )
 
         write_data(
