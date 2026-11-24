@@ -271,20 +271,20 @@ elif [ "$1" == "build-release" ]; then
     cd build
     if [ ! -f "ktool-linux" ]; then
         wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-linux
-        echo "2b8be0c95abe9f0ff7016e9a5b343ff8d3df9751783bc4d6a4b4df775693fb57  ktool-linux" | sha256sum -c
     fi
+    echo "2b8be0c95abe9f0ff7016e9a5b343ff8d3df9751783bc4d6a4b4df775693fb57  ktool-linux" | sha256sum -c || { rm -f "ktool-linux"; exit 1; }
     if [ ! -f "ktool-mac" ]; then
         wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-mac
-        echo "008bbcfb81da7921510c73e09b46771677d013dc5d148de4d2205b901a2cc892  ktool-mac" | sha256sum -c
     fi
+    echo "008bbcfb81da7921510c73e09b46771677d013dc5d148de4d2205b901a2cc892  ktool-mac" | sha256sum -c || { rm -f "ktool-mac"; exit 1; }
     if [ ! -f "ktool-mac-10" ]; then
         wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-mac-10
-        echo "fc386abbde4a1b1b35f8ffad2df429786a737756063f137f69f0e080b190cb4c  ktool-mac-10" | sha256sum -c
     fi
+    echo "fc386abbde4a1b1b35f8ffad2df429786a737756063f137f69f0e080b190cb4c  ktool-mac-10" | sha256sum -c || { rm -f "ktool-mac-10"; exit 1; }
     if [ ! -f "ktool-win.exe" ]; then
         wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-win.exe
-        echo "5fca13023de5bfbf349bc898e046b4858217644bf60381b2af5c2649d9384c39  ktool-win.exe" | sha256sum -c
     fi
+    echo "5fca13023de5bfbf349bc898e046b4858217644bf60381b2af5c2649d9384c39  ktool-win.exe" | sha256sum -c || { rm -f "ktool-win.exe"; exit 1; }
     cp -f ktool-linux ../$release_dir/ktool-linux
     cp -f ktool-mac ../$release_dir/ktool-mac
     cp -f ktool-mac-10 ../$release_dir/ktool-mac-10
