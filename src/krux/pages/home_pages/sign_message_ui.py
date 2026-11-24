@@ -140,6 +140,7 @@ class SignMessage(Utils):
         """Signs a message at a derived Bitcoin address"""
 
         derivation = bip32.parse_path(derivation_str)
+        self._page_long_message(message)
         self._display_message_sign_prompt(
             message, self.fit_to_line(address, str(derivation[4]) + ". ", fixed_chars=3)
         )
@@ -156,9 +157,42 @@ class SignMessage(Utils):
         self._display_signature(base_encode(sig, 64))
         return sig
 
+    def _message_max_lines(self):
+        return TOTAL_LINES - (7 if kboard.has_minimal_display else 10)
+
+    def _page_long_message(self, message):
+        """A message that does not fit above the address is shown in full,
+        page by page, before the sign prompt"""
+        text = message.decode()
+        lines, end = self.ctx.display.to_lines_endpos(text, self._message_max_lines())
+        if end >= len(text):
+            return
+        page_lines = TOTAL_LINES - 4
+        pages = []
+        start = 0
+        while start < len(text):
+            lines, end = self.ctx.display.to_lines_endpos(text[start:], page_lines)
+            if end <= 0:
+                break
+            pages.append(lines)
+            start += end
+        for i, lines in enumerate(pages):
+            self.ctx.display.clear()
+            offset_y = DEFAULT_PADDING
+            offset_y += (
+                self.ctx.display.draw_hcentered_text(
+                    t("Message:") + " %d/%d" % (i + 1, len(pages)),
+                    offset_y,
+                    theme.highlight_color,
+                )
+                + 1
+            ) * FONT_HEIGHT
+            self.ctx.display.draw_hcentered_text(lines, offset_y)
+            self.ctx.input.wait_for_button()
+
     def _display_message_sign_prompt(self, message, address):
         """Helper to display message and address for signing"""
-        max_lines = TOTAL_LINES - (7 if kboard.has_minimal_display else 10)
+        max_lines = self._message_max_lines()
         offset_y = DEFAULT_PADDING
         self.ctx.display.clear()
 
