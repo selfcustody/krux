@@ -113,7 +113,8 @@ def write_data(
     """Writes data to the flash, optionally adding header and sha suffix for firmware.
 
     With expected_hash, the bytes read from data are hashed on the way to the
-    flash and a ValueError is raised if their SHA-256 is not expected_hash.
+    flash. If their SHA-256 is not expected_hash, the first block written is
+    erased and a ValueError is raised.
     """
     if expected_hash is not None:
         data = HashingReader(data)
@@ -184,6 +185,11 @@ def write_data(
         chunk_read = 0
 
     if expected_hash is not None and data.hasher.digest() != expected_hash:
+        # What was just written carries a sha suffix the bootloader would
+        # accept. Erase its first block, header included, so that it can never
+        # be booted, not even through the backup boot config.
+        flash.erase(address, chunk_size)
+        time.sleep_ms(FLASH_IO_WAIT_TIME)
         raise ValueError("data changed after verification")
 
 
@@ -429,8 +435,9 @@ def upgrade():
                 True,
                 firmware_with_header_hash,
                 # The bytes written must be the bytes whose signature was
-                # verified. Otherwise this raises before the boot config is
-                # touched, so the device keeps booting the current firmware.
+                # verified. Otherwise this invalidates the slot and raises
+                # before the boot config is touched, so the device keeps
+                # booting the current firmware.
                 expected_hash=firmware_hash,
             )
 

@@ -14073,22 +14073,43 @@ def test_write_data_rejects_data_that_is_not_the_verified_firmware(mocker, m5sti
     import io
     from krux import firmware
 
-    mocker.patch("krux.firmware.flash", new=mocker.MagicMock())
+    # A flash that behaves like the real one: erase sets 0xFF, write stores
+    slot = firmware.FIRMWARE_SLOT_2
+    chunk_size = 4096
+    memory = {}
+
+    def erase(address, size):
+        for i in range(address, address + size):
+            memory[i] = 0xFF
+
+    def write(address, data):
+        for i, byte in enumerate(bytes(data)):
+            memory[address + i] = byte
+
+    def stored(address, size):
+        return bytes(memory[i] for i in range(address, address + size))
+
+    flash = mocker.MagicMock()
+    flash.erase.side_effect = erase
+    flash.write.side_effect = write
+    mocker.patch("krux.firmware.flash", new=flash)
     mocker.patch("krux.firmware.sha256_hw", new=hashlib.sha256)
     verified = b"signed firmware image" * 100
     expected = hashlib.sha256(verified).digest()
+    header = b"\x00" + len(verified).to_bytes(4, "little")
 
-    # Same bytes as verified: accepted
+    # Same bytes as verified: accepted, and left in the slot
     firmware.write_data(
         lambda pct: None,
-        firmware.FIRMWARE_SLOT_2,
+        slot,
         io.BytesIO(verified),
         len(verified),
-        4096,
+        chunk_size,
         True,
         b"\x00" * 32,
         expected_hash=expected,
     )
+    assert stored(slot, 5 + len(verified)) == header + verified
 
     # A different image of the same size: refused
     swapped = b"other firmware image!" * 100
@@ -14096,11 +14117,16 @@ def test_write_data_rejects_data_that_is_not_the_verified_firmware(mocker, m5sti
     with pytest.raises(ValueError, match="data changed after verification"):
         firmware.write_data(
             lambda pct: None,
-            firmware.FIRMWARE_SLOT_2,
+            slot,
             io.BytesIO(swapped),
             len(swapped),
-            4096,
+            chunk_size,
             True,
             b"\x00" * 32,
             expected_hash=expected,
         )
+
+    # The refused image must not stay bootable: the first block of the slot,
+    # which holds the header, is erased and nothing is written afterwards
+    assert stored(slot, chunk_size) == b"\xff" * chunk_size
+    assert flash.mock_calls[-1] == mocker.call.erase(slot, chunk_size)
