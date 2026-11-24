@@ -68,7 +68,8 @@ RUN apt-get update -y && \
 
 RUN mkdir -p /opt && \
     GIT_TERMINAL_PROMPT=0 \
-    git clone --depth 1 --branch v8.2.0-20190409 https://github.com/kendryte/kendryte-gnu-toolchain
+    git clone --depth 1 --branch v8.2.0-20190409 https://github.com/kendryte/kendryte-gnu-toolchain && \
+    test "$(git -C kendryte-gnu-toolchain rev-parse HEAD)" = "289ea18741ac1f54e1752e1e7a8f16f1fa880ede"
 
 RUN cd kendryte-gnu-toolchain && \
     sed -i 's|https://github.com/bminor/binutils-gdb.git|https://github.com/riscvarchive/riscv-binutils-gdb.git|' .gitmodules && \
