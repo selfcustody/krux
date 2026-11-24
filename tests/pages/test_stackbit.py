@@ -291,7 +291,7 @@ def test_esc_entering_stackbit_vertical(amigo, mocker):
 
     BTN_SEQUENCE = (
         # Move to Esc
-        [BUTTON_PAGE_PREV] * 3
+        [BUTTON_PAGE_PREV] * 2
         + [BUTTON_ENTER]  # Select "Esc"
         + [BUTTON_ENTER]  # Confirm
     )
@@ -314,7 +314,7 @@ def test_enter_stackbit_vertical_reject_word(m5stickv, mocker):
         + [BUTTON_ENTER]  # press Go
         + [BUTTON_PAGE]  # prompt: No — reject word
         # continue: digits reset, index reset to 0
-        + [BUTTON_PAGE_PREV] * 3  # navigate 0 -> Go(18) -> 17 -> Esc(16)
+        + [BUTTON_PAGE_PREV] * 2  # navigate 0 -> Go -> Esc
         + [BUTTON_ENTER]  # press Esc
         + [BUTTON_ENTER]  # confirm "Are you sure?"
     )
@@ -367,7 +367,7 @@ def test_load_key_from_1248_vertical_cancel(amigo, mocker):
     BTN_SEQUENCE = [
         BUTTON_PAGE,  # submenu: move idx 0 → 1 (Vertical)
         BUTTON_ENTER,  # select Vertical
-        *([BUTTON_PAGE_PREV] * 3),  # in vertical grid: navigate to Esc
+        *([BUTTON_PAGE_PREV] * 2),  # in vertical grid: navigate to Esc
         BUTTON_ENTER,  # select Esc
         BUTTON_ENTER,  # confirm Esc; callback returns MENU_CONTINUE
         BUTTON_PAGE,  # submenu: idx 1 → 2 (Back)
@@ -473,7 +473,7 @@ def test_enter_stackbit_vertical_navigation_skips_invalid_cells(m5stickv, mocker
     BTN_SEQUENCE = (
         [BUTTON_PAGE] * 11  # 0 → 9 (skip 8) → 13 (skip 12)
         + [BUTTON_PAGE_PREV] * 4  # 13 → 11 (skip 12) → 7 (skip 8)
-        + [BUTTON_PAGE] * 7  # 7 → 16 (skip 8, 12); lands on Esc
+        + [BUTTON_PAGE] * 7  # 7 → Esc (skip 8, 12)
         + [BUTTON_ENTER] * 2  # select Esc, confirm
     )
     spy_index = mocker.spy(Stackbit, "_index_vertical")
@@ -518,7 +518,7 @@ def test_enter_stackbit_vertical_clamps_digit_on_overflow(m5stickv, mocker):
         + [BUTTON_PAGE_PREV] * 6  # 13 → 5 (col 1, row 1, weight 2); skips 12 and 8
         + [BUTTON_ENTER]  # cell 5: 8^2=10 > 9 → clamp digits[1] to 0
         # exit
-        + [BUTTON_PAGE] * 9  # 5 → 16 (Esc); skips 8 and 12
+        + [BUTTON_PAGE] * 9  # 5 → Esc; skips 8 and 12
         + [BUTTON_ENTER] * 2  # select Esc, confirm
     )
     snapshots = []
@@ -552,7 +552,7 @@ def test_enter_stackbit_vertical_index_wraps_at_grid_boundaries(m5stickv, mocker
     BTN_SEQUENCE = (
         [BUTTON_PAGE_PREV]  # 0 → VERT_GO_INDEX (backward wrap)
         + [BUTTON_PAGE]  # VERT_GO_INDEX → 0 (forward wrap)
-        + [BUTTON_PAGE_PREV] * 3  # 0 → 18 → 17 → 16 (Esc)
+        + [BUTTON_PAGE_PREV] * 2  # 0 → Go → Esc
         + [BUTTON_ENTER] * 2  # select Esc, confirm
     )
     spy_index = mocker.spy(Stackbit, "_index_vertical")
@@ -564,3 +564,150 @@ def test_enter_stackbit_vertical_index_wraps_at_grid_boundaries(m5stickv, mocker
     assert words is None
     assert spy_index.spy_return_list[0] == VERT_GO_INDEX  # backward wrap from 0
     assert spy_index.spy_return_list[1] == 0  # forward wrap from VERT_GO_INDEX
+
+
+def test_stackbit_vertical_touch_regions(amigo, mocker):
+    """The word preview, between the grid and the menu, is not part of the last row of cells."""
+    from krux.pages.stack_1248 import (
+        Stackbit,
+        VERT_N_CELLS,
+        VERT_ESC_INDEX,
+        VERT_GO_INDEX,
+    )
+    from krux.display import FONT_HEIGHT
+    from krux.touch import Touch
+
+    ctx = create_ctx(mocker, [])
+    ctx.input.touch = mocker.MagicMock(x_regions=[], y_regions=[])
+    stackbit = Stackbit(ctx)
+    x_grid, y_grid, _, y_menu, cell_w, cell_h, _, _, y_preview = (
+        stackbit._layout_vertical()
+    )
+    stackbit._map_keys_array_vertical(x_grid, y_grid, cell_w, cell_h, y_menu)
+
+    def touch_index(x, y):
+        return Touch._extract_index(ctx.input.touch, (x, y))
+
+    second_col = x_grid + cell_w + cell_w // 2
+    fourth_col = x_grid + 3 * cell_w + cell_w // 2
+    grid_bottom = y_grid + 4 * cell_h
+
+    # Last row of cells, the "8" of the second digit
+    assert touch_index(second_col, grid_bottom - cell_h // 2) == 13
+    # Right below the grid and over the word preview: no cell, no menu button
+    for y in (grid_bottom + 1, y_preview + FONT_HEIGHT // 2, y_menu - 1):
+        assert VERT_N_CELLS <= touch_index(second_col, y) < VERT_ESC_INDEX
+    # Menu: Esc on the left half, Go on the right half
+    assert (
+        VERT_ESC_INDEX <= touch_index(second_col, y_menu + cell_h // 2) < VERT_GO_INDEX
+    )
+    assert touch_index(fourth_col, y_menu + cell_h // 2) >= VERT_GO_INDEX
+
+
+def test_enter_stackbit_vertical_touch_ignores_preview(amigo, mocker, tdata):
+    """Touching the word preview does not change the digits nor leave the grid."""
+    from krux.pages.stack_1248 import Stackbit, VERT_N_CELLS, VERT_GO_INDEX
+    from krux.input import BUTTON_TOUCH
+
+    YES = 1
+    PREVIEW = VERT_N_CELLS + 1  # below the second digit
+    # 11x "abandon": touch "1" of fourth digit, touch the preview, Go, confirm
+    # 1x  "about":   touch "4" of fourth digit, touch the preview, Go, confirm, done
+    TOUCH_SEQUENCE = [3, PREVIEW, VERT_GO_INDEX, YES] * 11 + [
+        11,
+        PREVIEW,
+        VERT_GO_INDEX,
+        YES,
+        YES,
+    ]
+    BTN_SEQUENCE = [BUTTON_TOUCH] * len(TOUCH_SEQUENCE)
+
+    spy_toggle = mocker.spy(Stackbit, "_toggle_bit_vertical")
+    ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=TOUCH_SEQUENCE)
+    stackbit = Stackbit(ctx)
+    words = stackbit.enter_1248_vertical()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert " ".join(words) == tdata.SIGNING_MNEMONIC
+    assert [call.args[-1] for call in spy_toggle.call_args_list] == [3] * 11 + [11]
+
+
+def test_stackbit_vertical_esc_and_go_are_one_press_apart(m5stickv, mocker):
+    """Buttons move between the last cell, Esc, Go and the first cell one press at a time."""
+    from krux.pages.stack_1248 import (
+        Stackbit,
+        VERT_N_CELLS,
+        VERT_ESC_INDEX,
+        VERT_GO_INDEX,
+    )
+    from krux.input import BUTTON_PAGE, BUTTON_PAGE_PREV
+
+    stackbit = Stackbit(create_ctx(mocker, []))
+    last_cell = VERT_N_CELLS - 1
+
+    index = last_cell
+    forward = []
+    for _ in range(3):
+        index = stackbit._index_vertical(index, BUTTON_PAGE)
+        forward.append(index)
+    assert forward == [VERT_ESC_INDEX, VERT_GO_INDEX, 0]
+
+    backward = []
+    for _ in range(3):
+        index = stackbit._index_vertical(index, BUTTON_PAGE_PREV)
+        backward.append(index)
+    assert backward == [VERT_GO_INDEX, VERT_ESC_INDEX, last_cell]
+
+    # A touch on the right half of a menu button leaves its second index
+    assert stackbit._index_vertical(VERT_ESC_INDEX + 1, BUTTON_PAGE) == VERT_GO_INDEX
+    assert stackbit._index_vertical(VERT_GO_INDEX + 1, BUTTON_PAGE) == 0
+    assert (
+        stackbit._index_vertical(VERT_GO_INDEX + 1, BUTTON_PAGE_PREV) == VERT_ESC_INDEX
+    )
+    assert stackbit._index_vertical(VERT_ESC_INDEX + 1, BUTTON_PAGE_PREV) == last_cell
+
+
+def test_esc_after_12_words_entering_stackbit(amigo, mocker):
+    """Esc cancels even when exactly 12 words were already confirmed."""
+    from krux.pages.stack_1248 import Stackbit, STACKBIT_GO_INDEX, STACKBIT_ESC_INDEX
+    from krux.input import BUTTON_TOUCH
+
+    YES = 1
+    NO = 0
+    # 12x "language", not done, then Esc and confirm
+    TOUCH_SEQUENCE = [0, STACKBIT_GO_INDEX + 1, YES] * 12 + [
+        NO,
+        STACKBIT_ESC_INDEX,
+        YES,
+    ]
+    BTN_SEQUENCE = [BUTTON_TOUCH] * len(TOUCH_SEQUENCE)
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=TOUCH_SEQUENCE)
+    stackbit = Stackbit(ctx)
+    words = stackbit.enter_1248()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert words is None
+
+
+def test_esc_after_12_words_entering_stackbit_vertical(amigo, mocker):
+    """Esc cancels even when exactly 12 words were already confirmed."""
+    from krux.pages.stack_1248 import Stackbit, VERT_GO_INDEX, VERT_ESC_INDEX
+    from krux.input import BUTTON_TOUCH
+
+    YES = 1
+    NO = 0
+    # 11x "abandon" and "about", not done, then Esc and confirm
+    TOUCH_SEQUENCE = (
+        [3, VERT_GO_INDEX, YES] * 11
+        + [11, VERT_GO_INDEX, YES]
+        + [NO, VERT_ESC_INDEX, YES]
+    )
+    BTN_SEQUENCE = [BUTTON_TOUCH] * len(TOUCH_SEQUENCE)
+
+    ctx = create_ctx(mocker, BTN_SEQUENCE, touch_seq=TOUCH_SEQUENCE)
+    stackbit = Stackbit(ctx)
+    words = stackbit.enter_1248_vertical()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert words is None
