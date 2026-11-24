@@ -35,6 +35,11 @@ FLASH_PATH = "flash"
 SETTINGS_FILENAME = "settings.json"
 MNEMONICS_FILE = "seeds.json"
 
+# Namespaces that decide how the device protects itself and where secrets can
+# be sent. They are always read from and written to internal flash, so a
+# settings.json on an SD card can never supply them.
+FLASH_ONLY_NAMESPACES = ("security", "encryption", "printer")
+
 # Maximum accepted size of settings.json (bytes). Guards against malicious
 # oversized files on SD that could exhaust RAM during load.
 MAX_SETTINGS_FILE_SIZE = 8192
@@ -166,21 +171,25 @@ class Store:
 
     def __init__(self):
         self.settings = {}
-        self.file_location = Store.get_vfs_location(SD_PATH)
         self.dirty = False
 
-        # Check for the correct settings persist location
-        # Try to load from SD
+        # Read both files up front; each read starts from an empty dict, so a
+        # failed read can never leave another file's content in place
+        self.file_location = Store.get_vfs_location(FLASH_PATH)
+        self._load_settings()
+        flash_settings = self.settings
+
+        self.settings = {}
+        self.file_location = Store.get_vfs_location(SD_PATH)
         self._load_settings()
 
-        # Define location based on what was loaded or default undefined
-        self.file_location = self._persisted_location("undefined")
-
-        # Settings not found on SD, or 'persist.location' key not defined
-        if SD_PATH not in self.file_location:
-            # Try to load from flash
-            self.file_location = Store.get_vfs_location(FLASH_PATH)
-            self._load_settings()
+        if self._persisted_location("undefined") == SD_PATH:
+            # The card is the chosen persist location. The protected
+            # namespaces still come from flash only.
+            self._use_flash_only_namespaces(flash_settings)
+        else:
+            # Settings not found on SD, or 'persist.location' key not defined
+            self.settings = flash_settings
 
         # Settings persist location will point to SD (if defined) else defaults to flash
         self.file_location = Store.get_vfs_location(
@@ -202,6 +211,52 @@ class Store:
         if location not in (SD_PATH, FLASH_PATH):
             return default
         return location
+
+    def _use_flash_only_namespaces(self, flash_settings):
+        """Replaces the protected namespaces with the ones stored in flash"""
+        if not isinstance(self.settings.get("settings"), dict):
+            self.settings["settings"] = {}
+        node = self.settings["settings"]
+        source = flash_settings.get("settings")
+        if not isinstance(source, dict):
+            source = {}
+        for namespace in FLASH_ONLY_NAMESPACES:
+            if isinstance(source.get(namespace), dict):
+                node[namespace] = source[namespace]
+            else:
+                node.pop(namespace, None)
+
+    def _split_flash_only(self):
+        """Returns (settings without the protected namespaces, protected only)"""
+        node = self.settings.get("settings")
+        if not isinstance(node, dict):
+            node = {}
+        portable = dict(self.settings)
+        portable["settings"] = {
+            k: v for k, v in node.items() if k not in FLASH_ONLY_NAMESPACES
+        }
+        protected = {
+            "settings": {k: v for k, v in node.items() if k in FLASH_ONLY_NAMESPACES}
+        }
+        return portable, protected
+
+    @staticmethod
+    def _write_if_changed(settings_filename, new_contents):
+        """Writes new_contents unless the file already holds it"""
+        old_contents = "{}"
+        try:
+            with open(settings_filename, "r") as f:
+                old_contents = f.read()
+        except:
+            pass
+        if new_contents == old_contents:
+            return False
+        try:
+            with open(settings_filename, "w") as f:
+                f.write(new_contents)
+            return True
+        except:
+            return False
 
     @classmethod
     def get_vfs_location(cls, location):
@@ -287,21 +342,22 @@ class Store:
 
         if self.dirty:
             settings_filename = self.file_location + SETTINGS_FILENAME
-            new_contents = json.dumps(self.settings)
-            old_contents = "{}"
-            try:
-                with open(settings_filename, "r") as f:
-                    old_contents = f.read()
-            except:
-                pass
-            # Compare old and new file contents, if different, write new content
-            if new_contents != old_contents:
-                try:
-                    with open(settings_filename, "w") as f:
-                        f.write(new_contents)
+            if SD_PATH in self.file_location:
+                # The card gets everything except the protected namespaces,
+                # which stay in internal flash
+                portable, protected = self._split_flash_only()
+                persisted = self._write_if_changed(
+                    settings_filename, json.dumps(portable)
+                )
+                if self._write_if_changed(
+                    Store.get_vfs_location(FLASH_PATH) + SETTINGS_FILENAME,
+                    json.dumps(protected),
+                ):
                     persisted = True
-                except:
-                    pass
+            else:
+                persisted = self._write_if_changed(
+                    settings_filename, json.dumps(self.settings)
+                )
             self.dirty = False
 
         return persisted

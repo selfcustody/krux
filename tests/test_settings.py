@@ -214,8 +214,9 @@ def test_store_init(mocker, m5stickv):
     s = Store()
     assert isinstance(s, Store)
 
-    # flash location as default, loaded from SD because settings file is present
-    assert s.settings == json.loads(data_dict[sd_file])
+    # flash location as default, and a card that is not the chosen persist
+    # location is not applied
+    assert s.settings == {}
 
     # 2- SD has settings, key 'persist.location' not set, flash settings SET
     data_dict = {sd_file: sd_settings_without_key_persist, flash_file: flash_setting}
@@ -232,6 +233,34 @@ def test_store_init(mocker, m5stickv):
 
     # settings is set to SD ('persist.location' is king!)
     assert s.settings == json.loads(data_dict[sd_file])
+
+    # 3b- Same, but the SD file also carries protected namespaces: those are
+    # dropped and taken from flash instead
+    sd_with_protected = json.dumps(
+        {
+            "settings": {
+                "network": "test",
+                "persist": {"location": "sd"},
+                "security": {"boot_flash_hash": False},
+                "encryption": {"version": "AES-ECB"},
+                "printer": {"driver": "cnc/file"},
+            }
+        }
+    )
+    flash_with_protected = json.dumps(
+        {"settings": {"test": "True", "security": {"boot_flash_hash": True}}}
+    )
+    data_dict = {sd_file: sd_with_protected, flash_file: flash_with_protected}
+
+    s = Store()
+
+    assert s.settings == {
+        "settings": {
+            "network": "test",
+            "persist": {"location": "sd"},
+            "security": {"boot_flash_hash": True},
+        }
+    }
 
     # 4- SD settings None, flash settings SET
     data_dict = {sd_file: None, flash_file: flash_setting}
@@ -664,3 +693,54 @@ def test_all_labels(mocker, m5stickv):
     assert hardware.label("printer")
     assert security.label("auto_shutdown")
     assert settings.label("persist")
+
+
+def test_store_save_keeps_protected_namespaces_in_flash(mocker, m5stickv):
+    """With the SD card as persist location, the security, encryption and
+    printer namespaces are written to flash and everything else to the card"""
+    import json
+    from krux.settings import Store, SETTINGS_FILENAME, SD_PATH, FLASH_PATH
+
+    sd_file = Store.get_vfs_location(SD_PATH) + SETTINGS_FILENAME
+    flash_file = Store.get_vfs_location(FLASH_PATH) + SETTINGS_FILENAME
+    files = {sd_file: json.dumps({"settings": {"persist": {"location": "sd"}}})}
+
+    class Writer:
+        def __init__(self, name):
+            self.name = name
+            self.contents = ""
+
+        def write(self, data):
+            self.contents += data
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            files[self.name] = self.contents
+
+    def open_side_effect(name, mode="r"):
+        if "w" in mode:
+            return Writer(name)
+        if name not in files:
+            raise OSError
+        return mocker.mock_open(read_data=files[name])()
+
+    mocker.patch("builtins.open", side_effect=open_side_effect)
+
+    s = Store()
+    s.set("settings.security", "hide_mnemonic", True)
+    s.set("settings.i18n", "locale", "pt-BR")
+    assert s.save_settings()
+
+    assert json.loads(files[sd_file]) == {
+        "settings": {"persist": {"location": "sd"}, "i18n": {"locale": "pt-BR"}}
+    }
+    assert json.loads(files[flash_file]) == {
+        "settings": {"security": {"hide_mnemonic": True}}
+    }
+
+    # A fresh boot reads the protected namespace back from flash
+    s = Store()
+    assert s.get("settings.security", "hide_mnemonic", False) is True
+    assert s.get("settings.i18n", "locale", "en-US") == "pt-BR"
