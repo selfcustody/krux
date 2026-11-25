@@ -24,7 +24,13 @@ from embit import bip32, compact, script
 from embit.networks import NETWORKS
 import binascii
 from krux.hashes import sha256, sha256d
-from krux.pages import MENU_CONTINUE, LOAD_FROM_CAMERA, LOAD_FROM_SD, Menu
+from krux.pages import (
+    MENU_CONTINUE,
+    LOAD_FROM_CAMERA,
+    LOAD_FROM_SD,
+    ESC_KEY,
+    Menu,
+)
 from krux.pages.utils import Utils
 from krux.key import SINGLESIG_SCRIPT_PURPOSE, P2PKH, P2WPKH, P2TR, P2SH_P2WPKH
 from krux.themes import theme
@@ -44,6 +50,18 @@ from krux.sd_card import (
 )
 from krux.settings import TEST_TXT, MAIN_TXT
 from krux.kboard import kboard
+from krux.input import (
+    BUTTON_ENTER,
+    BUTTON_PAGE,
+    BUTTON_PAGE_PREV,
+    BUTTON_TOUCH,
+    SWIPE_RIGHT,
+    SWIPE_LEFT,
+    SWIPE_UP,
+    SWIPE_DOWN,
+    FAST_FORWARD,
+    FAST_BACKWARD,
+)
 
 SD_MESSAGE_HEADER = "-----BEGIN BITCOIN SIGNED MESSAGE-----"
 SD_SIGNATURE_HEADER = "-----BEGIN BITCOIN SIGNATURE-----"
@@ -140,7 +158,8 @@ class SignMessage(Utils):
         """Signs a message at a derived Bitcoin address"""
 
         derivation = bip32.parse_path(derivation_str)
-        self._page_long_message(message)
+        if not self._page_long_message(message):
+            return None
         self._display_message_sign_prompt(
             message, self.fit_to_line(address, str(derivation[4]) + ". ", fixed_chars=3)
         )
@@ -160,35 +179,106 @@ class SignMessage(Utils):
     def _message_max_lines(self):
         return TOTAL_LINES - (7 if kboard.has_minimal_display else 10)
 
-    def _page_long_message(self, message):
-        """A message that does not fit above the address is shown in full,
-        page by page, before the sign prompt"""
-        text = message.decode()
-        lines, end = self.ctx.display.to_lines_endpos(text, self._message_max_lines())
-        if end >= len(text):
-            return
-        page_lines = TOTAL_LINES - 4
-        pages = []
+    def _message_page(self, text, start, page_lines):
+        """Returns the lines of the page of text that begins at start, and
+        the position where the next page begins"""
+        # A line takes at most a full row of chars plus the separator it ends
+        # at, so this slice always holds one line more than the page
+        chunk_len = (page_lines + 1) * (self.ctx.display.ascii_chars_per_line() + 1)
+        # Asking for that extra line keeps the "…" to_lines puts on the last
+        # line it returns, in place of a char, out of the lines that are shown
+        lines = self.ctx.display.to_lines(
+            text[start : start + chunk_len], page_lines + 1
+        )[:page_lines]
+        end = start
+        for line in lines:
+            end += len(line)
+            # The space or newline a line was broken at is not part of it
+            if end < len(text) and text[end] in " \n":
+                end += 1
+        return lines, end
+
+    def _message_page_starts(self, text, page_lines):
+        """Returns the position in text where each page begins. Only these are
+        kept, pages are wrapped again when shown, so memory use stays small
+        even for a big message from SD card"""
+        starts = []
         start = 0
         while start < len(text):
-            lines, end = self.ctx.display.to_lines_endpos(text[start:], page_lines)
-            if end <= 0:
+            starts.append(start)
+            end = self._message_page(text, start, page_lines)[1]
+            if end <= start:
                 break
-            pages.append(lines)
-            start += end
-        for i, lines in enumerate(pages):
-            self.ctx.display.clear()
+            start = end
+        return starts
+
+    def _page_long_message(self, message):
+        """A message that does not fit above the address is shown in full,
+        page by page, before the sign prompt. Returns False if the user
+        leaves before reaching the last page"""
+        text = message.decode()
+        max_lines = self._message_max_lines()
+        if len(self.ctx.display.to_lines(text, max_lines + 1)) <= max_lines:
+            return True
+        display = self.ctx.display
+        title = t("Message:") + " %d/%d"
+        # Title, a blank line, the text, then the "Esc" / "Go" footer
+        page_lines = TOTAL_LINES - 4 - len(display.to_lines(title % (999, 999)))
+        starts = self._message_page_starts(text, page_lines)
+        last_page = len(starts) - 1
+        page = 0
+        while True:
+            display.clear()
             offset_y = DEFAULT_PADDING
             offset_y += (
-                self.ctx.display.draw_hcentered_text(
-                    t("Message:") + " %d/%d" % (i + 1, len(pages)),
-                    offset_y,
-                    theme.highlight_color,
+                display.draw_hcentered_text(
+                    title % (page + 1, len(starts)), offset_y, theme.highlight_color
                 )
                 + 1
             ) * FONT_HEIGHT
-            self.ctx.display.draw_hcentered_text(lines, offset_y)
-            self.ctx.input.wait_for_button()
+            display.draw_hcentered_text(
+                self._message_page(text, starts[page], page_lines)[0], offset_y
+            )
+            # The outlined option is what ENTER does: "Go", to the sign
+            # prompt, is only offered once the last page is on the screen
+            footer_y = offset_y + page_lines * FONT_HEIGHT
+            self.draw_proceed_menu(
+                t("Go"),
+                t("Esc"),
+                footer_y,
+                1 if page == last_page else 0,
+                go_enabled=page == last_page,
+            )
+            if kboard.has_touchscreen:
+                # Top row: previous | next page. Bottom row: "Esc" | "Go"
+                self.ctx.input.touch.set_regions(
+                    [0, display.width() // 2, display.width()],
+                    [0, footer_y, display.height()],
+                )
+            btn = self.ctx.input.wait_for_fastnav_button()
+            leave = False
+            if btn == BUTTON_TOUCH:
+                index = self.ctx.input.touch.current_index()
+                if index == 3 and page != last_page:
+                    continue  # "Go" is still disabled
+                leave = index == 2
+                btn = (BUTTON_PAGE_PREV, BUTTON_PAGE, None, BUTTON_ENTER)[index]
+            elif btn == BUTTON_ENTER:
+                leave = page != last_page
+            if leave:
+                if self.esc_prompt() == ESC_KEY:
+                    return False
+            elif btn == BUTTON_ENTER:
+                break
+            elif btn in (BUTTON_PAGE, FAST_FORWARD, SWIPE_UP, SWIPE_LEFT):
+                if page < last_page:
+                    page += 1
+            elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD, SWIPE_DOWN, SWIPE_RIGHT):
+                if page > 0:
+                    page -= 1
+        if kboard.has_touchscreen:
+            self.ctx.input.touch.clear_regions()
+        return True
 
     def _display_message_sign_prompt(self, message, address):
         """Helper to display message and address for signing"""
