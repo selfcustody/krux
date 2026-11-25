@@ -10,6 +10,7 @@ from embit.silent_payments.psbt import SilentPaymentData
 from embit.silent_payments.psbt import SPInputScope, SPOutputScope
 from embit.transaction import TransactionInput, TransactionOutput
 from embit.util.key import SECP256K1_ORDER
+from .test_wallet import tdata
 
 TEST_MNEMONIC = (
     "abandon abandon abandon abandon abandon abandon abandon abandon "
@@ -1399,7 +1400,7 @@ def test_sign_refuses_sp_output_changed_after_review(mocker, m5stickv):
         signer.sign(trim=False)
 
 
-def test_sp_send_with_foreign_input_rejected_at_load(mocker, m5stickv):
+def test_sp_send_with_foreign_input_rejected_at_load(mocker, m5stickv, tdata):
     """A PSBT this seed cannot sign is refused before the user reviews it."""
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
@@ -1408,10 +1409,7 @@ def test_sp_send_with_foreign_input_rejected_at_load(mocker, m5stickv):
     from krux.qr import FORMAT_NONE
 
     psbt_b64, _root, _scan, _spend, _child = _build_sp_psbt()
-    other_mnemonic = (
-        "legal winner thank year wave sausage worth useful legal winner thank yellow"
-    )
-    wallet = Wallet(Key(other_mnemonic, TYPE_SINGLESIG, NETWORKS["test"]))
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["test"]))
 
     with pytest.raises(ValueError, match="controlled by this seed"):
         PSBTSigner(wallet, psbt_b64, FORMAT_NONE)
@@ -1653,3 +1651,75 @@ def test_sd_compressed_fallback_refuses_sp_psbt_with_foreign_input(
     wallet = Wallet(Key(TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
     with pytest.raises(ValueError, match="too large to keep other inputs"):
         PSBTSigner(wallet, None, FORMAT_NONE, psbt_filename="sp.psbt")
+
+
+SCAN_PATH = parse_path("m/352h/1h/0h/1h/0")
+
+
+def _scan_key_psbt(root, coord_mnemonic, kind):
+    """A PSBT asking this seed to sign with its BIP-352 scan key.
+
+    The SPSCAN export hands the scan secret to the coordinator, which can put
+    that key in a "device + hot key" wallet it fully controls. If Krux signed
+    for it, a test spend would look like proof the wallet is the user's.
+    """
+    scan_priv = root.derive(SCAN_PATH).key
+    scan_pub = scan_priv.get_public_key()
+    fp = b"\x00" * 4 if kind == "p2wsh_zero_fp" else root.my_fingerprint
+    scan_der = DerivationPath(fp, SCAN_PATH)
+    coord_root = bip32.HDKey.from_seed(bip39.mnemonic_to_seed(coord_mnemonic))
+    coord_path = parse_path("m/48h/1h/0h/2h/0/0")
+    coord_pub = coord_root.derive(coord_path).get_public_key()
+
+    if kind == "sp_spend":
+        tweak = bytes([0x11] * 32)
+        output_xonly = scan_priv.sp_spend_tweak(tweak).xonly()
+        inp = _spend_input(100_000, output_xonly, tweak, (scan_pub.sec(), scan_der))
+    else:
+        inp = SPInputScope()
+        inp.txid = bytes([0xAB] * 32)
+        inp.vout = 0
+        inp.sequence = 0xFFFFFFFE
+        if kind == "p2tr":
+            spk = script.p2tr(scan_pub)
+            inp.taproot_bip32_derivations[scan_pub] = ([], scan_der)
+        else:
+            pks = sorted([scan_pub.sec(), coord_pub.sec()])
+            inp.witness_script = Script(
+                b"\x52\x21" + pks[0] + b"\x21" + pks[1] + b"\x52\xae"
+            )
+            spk = script.p2wsh(inp.witness_script)
+            inp.bip32_derivations[scan_pub] = scan_der
+            inp.bip32_derivations[coord_pub] = DerivationPath(
+                coord_root.my_fingerprint, coord_path
+            )
+        inp.witness_utxo = TransactionOutput(value=100_000, script_pubkey=spk)
+
+    psbt = SilentPaymentsPSBT.create_v2()
+    psbt.add_input(inp)
+    out = SPOutputScope()
+    out.value = 99_000
+    out.script_pubkey = script.p2wpkh(coord_pub)
+    psbt.add_output(out)
+    psbt.tx_modifiable_flags = 0
+    return psbt.to_string()
+
+
+@pytest.mark.parametrize("kind", ["p2wsh", "p2wsh_zero_fp", "p2tr", "sp_spend"])
+def test_refuses_to_sign_with_sp_scan_key(mocker, m5stickv, tdata, kind):
+    """The exported scan key never signs, whatever field the PSBT puts it in.
+
+    Multisig boot covers the "device + hot key" 2-of-2 built on the scan key,
+    SP boot covers a key path spend and a BIP-376 spend of the scan key.
+    """
+    from embit.networks import NETWORKS
+    from krux.key import Key, TYPE_MULTISIG, TYPE_SILENT_PAYMENT
+    from krux.psbt import PSBTSigner
+    from krux.qr import FORMAT_NONE
+    from krux.wallet import Wallet
+
+    policy = TYPE_MULTISIG if kind.startswith("p2wsh") else TYPE_SILENT_PAYMENT
+    wallet = Wallet(Key(TEST_MNEMONIC, policy, NETWORKS["test"]))
+    psbt = _scan_key_psbt(wallet.key.root, tdata.TEST_MNEMONIC1, kind)
+    with pytest.raises(ValueError, match="SP scan key"):
+        PSBTSigner(wallet, psbt, FORMAT_NONE)

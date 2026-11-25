@@ -244,6 +244,11 @@ class PSBTSigner:
         # xpub-only wallet looks foreign until the zeroes are repaired
         self.zero_fingerprints_filled = self.fill_zero_fingerprint()
 
+        # Checked after the repair above, so a zeroed fingerprint can't hide it
+        fingerprint = self.wallet.key.fingerprint
+        if any(uses_sp_scan_key(inp, fingerprint) for inp in self.psbt.inputs):
+            raise ValueError("PSBT asks to sign with the SP scan key")
+
         self._has_sp = self.psbt.has_sp_outputs
         if self._has_sp:
             from .silent_payments import derive_scripts, validate_eligibility
@@ -835,6 +840,25 @@ def is_multisig(policy):
         and "m" in policy
         and "n" in policy
         # and "cosigners" in policy
+    )
+
+
+def uses_sp_scan_key(inp, fingerprint):
+    """True if the input asks this seed to sign with its BIP-352 scan key.
+
+    The scan key (m/352h/coin'/account'/1h/0) is exported by design, so the
+    coordinator holds it and can build a wallet it fully controls on top of it.
+    If Krux signed for that wallet, a test spend would look like proof of
+    ownership. BIP-352 never spends with the scan key.
+    """
+    ders = list(inp.bip32_derivations.values())
+    ders += [der for _, der in inp.taproot_bip32_derivations.values()]
+    ders += getattr(inp, "sp_spend_bip32_derivations", {}).values()
+    return any(
+        der.fingerprint == fingerprint
+        and der.derivation[:1] == [352 + 2**31]
+        and der.derivation[3:4] == [1 + 2**31]
+        for der in ders
     )
 
 
