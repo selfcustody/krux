@@ -397,8 +397,13 @@ class KEFEnvelope(Page):
             time.sleep_ms(delay_ms)
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(t("Processing…"))
-        cipher = kef.Cipher(self.__key, self.label, self.iterations)
-        plaintext = cipher.decrypt(self.ciphertext, self.version)
+        try:
+            cipher = kef.Cipher(self.__key, self.label, self.iterations)
+            plaintext = cipher.decrypt(self.ciphertext, self.version)
+        except ValueError:
+            # After the key was typed, callers of decrypt_kef() must not get a
+            # ValueError, which they read as "not KEF" and use the raw data
+            plaintext = None
         self.__key = None
         if plaintext is None:
             KEFEnvelope.note_decrypt_failure()
@@ -496,6 +501,10 @@ class EncryptionKey(Page):
 
             key = decrypted if decrypted else key
         except KeyError:
+            if not creating:
+                # When decrypting, a key that fails its own decryption is a
+                # failed decrypt for the caller, not a cancelled key entry
+                raise
             self.flash_error(t("Failed to decrypt"))
             return None
         except ValueError:
@@ -729,7 +738,11 @@ class LoadEncryptedMnemonic(Page):
         error_txt = t("Failed to decrypt")
 
         key_capture = EncryptionKey(self.ctx)
-        key = key_capture.encryption_key()
+        try:
+            key = key_capture.encryption_key()
+        except KeyError:
+            self.flash_error(error_txt)
+            return MENU_CONTINUE
         if key in (None, "", ESC_KEY):
             self.flash_error(t("Key was not provided"))
             return MENU_CONTINUE

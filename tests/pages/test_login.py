@@ -575,6 +575,71 @@ def test_load_camera_fails_on_decrypt_kef_key_error(mocker, m5stickv):
     )
 
 
+def test_load_camera_kef_error_after_key_says_failed_to_decrypt(mocker, m5stickv):
+    import sys
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages.encryption_ui import EncryptionKey
+    from krux.pages import MENU_CONTINUE
+
+    # 32 byte KEF envelope (AES-GCM, 2,097,152 iterations): above the K210
+    # hardware PBKDF2 limit, so deriving the key raises ValueError on device
+    envelope = (
+        b"\x08a1b2c3d4\x14" + (2097152).to_bytes(3, "big") + bytes(range(0xC0, 0xD3))
+    )
+    assert len(envelope) == 32
+    mocker.patch.object(
+        sys.modules["uhashlib_hw"],
+        "pbkdf2_hmac_sha256",
+        side_effect=ValueError("iterations too large"),
+    )
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (envelope, 0)
+    )
+    mocker.patch.object(EncryptionKey, "encryption_key", return_value="abc")
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER] * 12)  # yes to every prompt
+    login = Login(ctx)
+    assert login.load_key_from_qr_code() == MENU_CONTINUE
+    ctx.display.flash_text.assert_called_with(
+        "Failed to decrypt", 248, 2000, highlight_prefix=""
+    )
+    assert ctx.wallet is None
+
+
+def test_load_camera_wrong_encrypted_key_says_failed_to_decrypt(mocker, m5stickv):
+    from krux import kef
+    from krux.pages import Menu
+    from krux.pages.login import Login
+    from krux.input import BUTTON_ENTER
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages import MENU_CONTINUE
+
+    # 32 byte KEF envelope, its key given as another KEF envelope that the
+    # typed key "wrong" can not decrypt
+    envelope = (
+        b"\x08a1b2c3d4\x14" + (2097152).to_bytes(3, "big") + bytes(range(0xC0, 0xD3))
+    )
+    encrypted_key = kef.wrap(
+        b"key", 0, 10000, kef.Cipher(b"right", b"key", 10000).encrypt(b"k3y", 0)
+    )
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (envelope, 0)
+    )
+    mocker.patch.object(
+        Menu, "run_loop", side_effect=[(1, encrypted_key), (0, "wrong")]
+    )
+
+    ctx = create_ctx(mocker, [BUTTON_ENTER] * 12)  # yes to every prompt
+    login = Login(ctx)
+    assert login.load_key_from_qr_code() == MENU_CONTINUE
+    ctx.display.flash_text.assert_called_with(
+        "Failed to decrypt", 248, 2000, highlight_prefix=""
+    )
+    assert ctx.wallet is None
+
+
 ############### load words from text tests
 
 
