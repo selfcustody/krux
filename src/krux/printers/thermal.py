@@ -53,6 +53,17 @@ class AdafruitPrinter(Printer):
     """
 
     def __init__(self):
+        import board
+
+        # Never route printer data to the pins of the USB-serial bridge
+        isp_pins = [
+            board.config["board_info"].get(name) for name in ("ISP_TX", "ISP_RX")
+        ]
+        if (
+            Settings().hardware.printer.thermal.adafruit.tx_pin in isp_pins
+            or Settings().hardware.printer.thermal.adafruit.rx_pin in isp_pins
+        ):
+            raise ValueError("Printer pin not allowed")
         fm.register(
             Settings().hardware.printer.thermal.adafruit.tx_pin,
             fm.fpioa.UART2_TX,
