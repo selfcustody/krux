@@ -73,9 +73,10 @@ class SignMessage(Utils):
         return None  # user chose Back
 
     def _is_valid_derivation_path(self, derivation_path):
-        """Strictly checks if the derivation path is valid according to BIP32"""
+        """Checks path syntax and the minimum length needed for address signing"""
         parts = derivation_path.split("/")
-        if parts[0] != "m":
+        # Address signing reads the purpose, coin type and address index.
+        if parts[0] != "m" or len(parts) < 6:
             return False
 
         return all(
@@ -197,8 +198,10 @@ class SignMessage(Utils):
             return None
 
         data_blocks = data.split(b" ")
+        if len(data_blocks) < 3:
+            return None
         derivation = data_blocks[1].decode()
-        if len(data_blocks) < 3 or not self._is_valid_derivation_path(derivation):
+        if not self._is_valid_derivation_path(derivation):
             return None
 
         message = b" ".join(data_blocks[2:]).split(b":", 1)
