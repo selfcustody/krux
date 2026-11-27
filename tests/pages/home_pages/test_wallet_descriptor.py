@@ -370,6 +370,7 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
             [
                 BUTTON_ENTER,  # Load? Yes
                 BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # To next page
                 BUTTON_ENTER,  # Accept
             ],
         ),
@@ -379,6 +380,7 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
             [
                 BUTTON_ENTER,  # Load? Yes
                 BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # To next page
                 BUTTON_ENTER,  # Accept
             ],
         ),
@@ -388,9 +390,7 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
             [
                 BUTTON_ENTER,  # Load? Yes
                 BUTTON_ENTER,  # Load from camera
-                BUTTON_ENTER,  # To next page
-                BUTTON_ENTER,  # To next page
-                BUTTON_ENTER,  # To next page
+                *([BUTTON_ENTER] * 11),  # To next pages
                 BUTTON_ENTER,  # Accept
             ],
         ),
@@ -400,6 +400,7 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
             [
                 BUTTON_ENTER,  # Load? Yes
                 BUTTON_ENTER,  # Load from camera
+                BUTTON_ENTER,  # To next page
                 BUTTON_ENTER,  # Accept
             ],
         ),
@@ -409,7 +410,7 @@ def test_loading_miniscript_descriptors(mocker, amigo, wallet_tdata):
             [
                 BUTTON_ENTER,  # Load? Yes
                 BUTTON_ENTER,  # Load from camera
-                BUTTON_ENTER,  # To next page
+                *([BUTTON_ENTER] * 6),  # To next pages
                 BUTTON_ENTER,  # Accept
             ],
         ),
@@ -1005,6 +1006,7 @@ def test_load_key_value_file_without_name(
     btn_seq = [
         BUTTON_ENTER,  # Wallet output descriptor not found. Load?
         BUTTON_ENTER,  # Load from camera
+        *([BUTTON_ENTER] * 2),  # To next page (xpubs are shown in full)
         BUTTON_ENTER,  # Load?
     ]
     ctx = create_ctx(mocker, btn_seq, Wallet(getattr(wallet_tdata, key_name)))
@@ -1025,5 +1027,212 @@ def test_load_key_value_file_without_name(
     )
     assert ctx.wallet.is_loaded()
     assert ctx.wallet.label == "2 of 3 multisig"
-    ctx.display.draw_hcentered_text.assert_any_call("2 of 3 multisig", mocker.ANY)
+    ctx.display.draw_hcentered_text.assert_any_call(
+        "2 of 3 multisig", mocker.ANY, max_lines=2
+    )
+    # The policy computed from the descriptor is drawn under the label,
+    # on each of the 3 pages
+    policy_lines = [
+        call.args[0]
+        for call in ctx.display.draw_hcentered_text.call_args_list
+        if str(call.args[0]).startswith("2 of 3 P2")
+    ]
+    assert len(policy_lines) == 3
+    assert all(line.endswith("sortedmulti") for line in policy_lines)
     assert ctx.input.wait_for_button.call_count == len(btn_seq)
+
+
+DEFAULT_SUFFIX = "/<0;1>/*"
+
+
+def _review_multisig_descriptor(
+    tdata, m, suffix=DEFAULT_SUFFIX, template="wsh(sortedmulti(%s))"
+):
+    """An m-of-3 testnet descriptor: the key of tdata.SIGNING_MNEMONIC and
+    2 cosigners"""
+    from embit import bip32, bip39
+    from embit.networks import NETWORKS
+
+    args = [str(m)]
+    for seed in (
+        bip39.mnemonic_to_seed(tdata.SIGNING_MNEMONIC),
+        b"\x01" * 64,
+        b"\x02" * 64,
+    ):
+        root = bip32.HDKey.from_seed(seed, version=NETWORKS["test"]["xprv"])
+        args.append(
+            "[%s/48h/1h/0h/2h]%s%s"
+            % (
+                root.my_fingerprint.hex(),
+                root.derive("m/48h/1h/0h/2h").to_public().to_base58(),
+                suffix,
+            )
+        )
+    return template % ",".join(args)
+
+
+def _review_pages(mocker, tdata, wallet_data):
+    """Loads wallet_data and reviews it with the line fitting of the real
+    Display. Returns the wallet and the pages drawn before the "Load?" prompt,
+    each a list of (text, color), after checking that all of it was visible"""
+    from embit.networks import NETWORKS
+    from krux.display import Display, BOTTOM_PROMPT_LINE, FONT_HEIGHT, FONT_WIDTH
+    from krux.key import Key, TYPE_MULTISIG
+    from krux.pages.home_pages.wallet_descriptor import WalletDescriptor
+    from krux.qr import FORMAT_NONE
+    from krux.wallet import Wallet
+    import board
+
+    display = Display()
+    # portrait: the short side of the LCD is the width
+    width = board.config["lcd"]["height"]
+    mocker.patch.object(display, "width", return_value=width)
+    mocker.patch.object(display, "height", return_value=board.config["lcd"]["width"])
+    mocker.patch(
+        "krux.display.lcd.string_width_px", side_effect=lambda s: len(s) * FONT_WIDTH
+    )
+    pages = []
+
+    def draw_string(x, y, text, color=None, bg_color=None):
+        assert 0 <= y and y + FONT_HEIGHT <= BOTTOM_PROMPT_LINE, "off-screen: " + text
+        assert 0 <= x and x + len(text) * FONT_WIDTH <= width, "off-screen: " + text
+        pages[-1].append((text, color))
+
+    mocker.patch.object(display, "clear", side_effect=lambda: pages.append([]))
+    mocker.patch.object(display, "draw_string", side_effect=draw_string)
+
+    key = Key(tdata.SIGNING_MNEMONIC, TYPE_MULTISIG, NETWORKS["test"])
+    ctx = mocker.MagicMock(display=display, wallet=Wallet(key))
+    wallet = Wallet(key)
+    wallet.load(wallet_data, FORMAT_NONE)
+    WalletDescriptor(ctx).display_loading_wallet(wallet)
+    assert ctx.input.wait_for_button.call_count == len(pages) - 1
+    return wallet, pages
+
+
+def _review_text(pages, color=None, separator=""):
+    """Joins what was drawn on pages, optionally only what was in a color"""
+    return separator.join(
+        text for page in pages for text, c in page if color in (None, c)
+    )
+
+
+def test_review_shows_whole_xpubs(mocker, multiple_devices, tdata):
+    from krux.settings import ELLIPSIS
+
+    wallet, pages = _review_pages(mocker, tdata, _review_multisig_descriptor(tdata, 2))
+
+    drawn = _review_text(pages)
+    assert len(wallet.descriptor.keys) == 3
+    for key in wallet.descriptor.keys:
+        assert key.key.to_base58() in drawn
+    assert ELLIPSIS not in drawn
+
+
+def test_review_warns_about_non_default_derivation(mocker, multiple_devices, tdata):
+    from krux.themes import theme
+
+    # No warning for the standard receive/change derivation, nor when it is
+    # omitted and Krux applies that same default
+    for suffix in (DEFAULT_SUFFIX, ""):
+        wallet, pages = _review_pages(
+            mocker, tdata, _review_multisig_descriptor(tdata, 2, suffix=suffix)
+        )
+        assert all(key.suffix == DEFAULT_SUFFIX for key in wallet.descriptor.keys)
+        assert _review_text(pages, theme.error_color) == ""
+
+    # Extra steps before receive/change, or no change branch, give other addresses
+    for suffix in ("/7/8/9/<0;1>/*", "/0/*"):
+        wallet, pages = _review_pages(
+            mocker, tdata, _review_multisig_descriptor(tdata, 2, suffix=suffix)
+        )
+        warning = "tpub" + suffix
+        # Once per key, next to the tpub it applies to
+        assert _review_text(pages, theme.error_color) == warning * 3
+        for key in wallet.descriptor.keys:
+            assert key.key.to_base58() in _review_text(pages)
+
+
+@pytest.mark.parametrize(
+    "m, template, policy",
+    [
+        (1, "wsh(sortedmulti(%s))", "1 of 3 P2WSH sortedmulti"),
+        (2, "wsh(multi(%s))", "2 of 3 P2WSH multi"),
+        (2, "sh(wsh(sortedmulti(%s)))", "2 of 3 P2SH-P2WSH sortedmulti"),
+        (3, "sh(sortedmulti(%s))", "3 of 3 P2SH sortedmulti"),
+    ],
+)
+def test_review_shows_computed_policy_not_the_label(
+    mocker, multiple_devices, tdata, m, template, policy
+):
+    import json
+    from krux.themes import theme
+
+    # The label says what the user expects to read, the descriptor differs
+    descriptor = _review_multisig_descriptor(tdata, m, template=template)
+    wallet_data = json.dumps({"label": "2 of 3 multisig", "descriptor": descriptor})
+    wallet, pages = _review_pages(mocker, tdata, wallet_data)
+
+    assert wallet.label == "2 of 3 multisig"
+    assert wallet.policy["m"] == m
+    for page in pages:
+        assert page[0] == ("2 of 3 multisig", theme.fg_color)
+        # The policy may wrap, and our key, in the same color, may follow it
+        assert _review_text([page[1:]], theme.highlight_color, " ").startswith(policy)
+
+
+@pytest.mark.parametrize(
+    "label",
+    [
+        "2 of 3 multisig" + "\n" * 40,
+        "\n" * 40 + "2 of 3 multisig",
+        "2 of 3 multisig " * 40,
+        "2of3multisig" * 40,
+    ],
+    ids=["trailing-newlines", "leading-newlines", "long-words", "long-unbroken"],
+)
+def test_review_label_cannot_hide_policy_or_keys(
+    mocker, multiple_devices, tdata, label
+):
+    import json
+    from krux.themes import theme
+
+    policy = "1 of 3 P2WSH sortedmulti"
+    wallet_data = json.dumps(
+        {"label": label, "descriptor": _review_multisig_descriptor(tdata, 1)}
+    )
+    wallet, pages = _review_pages(mocker, tdata, wallet_data)
+    _, plain_pages = _review_pages(mocker, tdata, _review_multisig_descriptor(tdata, 1))
+
+    # The label costs no more than the 2 lines it is capped to
+    assert len(pages) <= len(plain_pages) + 1
+    for page in pages:
+        assert policy in _review_text([page], theme.highlight_color, " ")
+    # Key A is still on the first page, the others follow
+    assert wallet.descriptor.keys[0].key.to_base58() in _review_text(pages[:1])
+    for key in wallet.descriptor.keys:
+        assert key.key.to_base58() in _review_text(pages)
+
+
+def test_review_continues_a_key_that_does_not_fit_a_page(mocker, m5stickv, tdata):
+    import json
+
+    # Two label lines, three policy lines and a derivation warning leave
+    # less than a whole key of room on the smallest display
+    descriptor = _review_multisig_descriptor(
+        tdata, 2, suffix="/7/8/9/<0;1>/*", template="sh(wsh(sortedmulti(%s)))"
+    )
+    wallet_data = json.dumps(
+        {"label": "A label that takes two lines", "descriptor": descriptor}
+    )
+    wallet, pages = _review_pages(mocker, tdata, wallet_data)
+
+    # Each key spills to a second page instead of being drawn off-screen
+    assert len(pages) == 2 * len(wallet.descriptor.keys)
+    # Label and policy, 5 lines, are repeated at the top of every page
+    assert all(page[:5] == pages[0][:5] for page in pages)
+    bodies = [page[5:] for page in pages]
+    for i, key in enumerate(wallet.descriptor.keys):
+        xpub = key.key.to_base58()
+        assert xpub not in _review_text(bodies[2 * i : 2 * i + 1])
+        assert xpub in _review_text(bodies[2 * i : 2 * i + 2])

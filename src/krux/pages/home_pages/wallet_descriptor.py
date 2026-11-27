@@ -376,93 +376,132 @@ class WalletDescriptor(Page):
             )
             self.ctx.input.wait_for_button()
 
+    def _draw_loading_header(self, wallet):
+        """Clears the screen, draws the label and the computed policy of the
+        wallet being loaded and returns the y offset for what follows"""
+        self.ctx.display.clear()
+        # The label can come from the file being loaded: cap its height, so
+        # it can't push what Krux computed from the descriptor off the screen
+        offset_y = DEFAULT_PADDING
+        offset_y += (
+            self.ctx.display.draw_hcentered_text(wallet.label, offset_y, max_lines=2)
+            * FONT_HEIGHT
+        )
+        if wallet.is_multisig():
+            # Quorum, script type and whether keys are sorted
+            policy_text = "%d of %d %s %s" % (
+                wallet.policy["m"],
+                wallet.policy["n"],
+                wallet.policy["type"].upper(),
+                "sortedmulti" if wallet.descriptor.is_sorted else "multi",
+            )
+            offset_y += (
+                self.ctx.display.draw_hcentered_text(
+                    policy_text, offset_y, theme.highlight_color
+                )
+                * FONT_HEIGHT
+            )
+        return offset_y + FONT_HEIGHT // 2
+
+    def _next_loading_page(self, wallet):
+        """Waits for a button, then starts a new page of the wallet being loaded"""
+        self.ctx.input.wait_for_button()
+        return self._draw_loading_header(wallet)
+
+    def _is_tr_internal_key(self, wallet, i, key):
+        """Tells if key is the provably unspendable TR internal key"""
+        return (
+            not key.origin
+            and i == 0
+            and wallet.is_miniscript()
+            and wallet.policy.get("type") == P2TR
+        )
+
+    def _is_our_key(self, wallet, key):
+        """Tells if key, from a wallet with many keys, is the one loaded"""
+        return (
+            self.ctx.wallet.key
+            and len(wallet.descriptor.keys) > 1
+            and key.fingerprint == self.ctx.wallet.key.fingerprint
+        )
+
+    def _loading_key_lines(self, wallet, i, key):
+        """Returns the lines, as (x, text, color), that describe a key of the
+        wallet being loaded"""
+        from krux.settings import THIN_SPACE
+
+        padding = MINIMAL_PADDING if kboard.has_minimal_display else DEFAULT_PADDING
+        indent = 0 if kboard.has_minimal_display else 3
+        sub_padding = padding + indent * FONT_WIDTH
+        sub_width = self.ctx.display.ascii_chars_per_line() - indent
+        is_tr_internal = self._is_tr_internal_key(wallet, i, key)
+
+        color = theme.fg_color
+        if self._is_our_key(wallet, key):
+            color = theme.highlight_color
+        elif is_tr_internal:
+            color = theme.disabled_color
+
+        title = " " * indent
+        if wallet.is_multisig() or wallet.is_miniscript():
+            title = "{}: ".format(chr(65 + i))
+        if is_tr_internal:
+            title += t("TR internal key")
+        else:
+            title += FINGERPRINT_SYMBOL + THIN_SPACE
+            title += str(key.origin)[:8] if key.origin else t("unknown")
+        lines = [(padding, line, color) for line in self.ctx.display.to_lines(title)]
+
+        if key.origin:
+            derivation = "{} m{}".format(DERIVATION_PATH_SYMBOL, str(key.origin)[8:])
+            lines.append((sub_padding, derivation, color))
+        elif is_tr_internal:
+            for line in self.ctx.display.to_lines(t("Provably unspendable")):
+                lines.append((sub_padding, line, color))
+
+        xpub = key.key.to_base58()
+        # The derivation applied after the xpub decides every address.
+        # Show it whenever it is not the standard receive/change pair.
+        if key.suffix != "/<0;1>/*":
+            suffix = xpub[:4] + (key.suffix or " (fixed)")
+            for start in range(0, len(suffix), sub_width):
+                lines.append(
+                    (sub_padding, suffix[start : start + sub_width], theme.error_color)
+                )
+
+        # Full xpub, wrapped: a cropped one can be matched by another key
+        for start in range(0, len(xpub), sub_width):
+            lines.append((sub_padding, xpub[start : start + sub_width], color))
+        return lines
+
     def display_loading_wallet(self, wallet):
         """Displays wallet descriptor attributes while loading"""
-        from krux.settings import THIN_SPACE, ELLIPSIS
+        from krux.settings import ELLIPSIS
 
-        def draw_header():
-            nonlocal offset_y
-            self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(wallet.label, DEFAULT_PADDING)
-            offset_y = DEFAULT_PADDING + (3 * FONT_HEIGHT) // 2
-
-        offset_y = DEFAULT_PADDING
-        self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
-        offset_y += (3 * FONT_HEIGHT) // 2
+        padding = MINIMAL_PADDING if kboard.has_minimal_display else DEFAULT_PADDING
+        page_top = offset_y = self._draw_loading_header(wallet)
         our_key_indexes_chars = []
         unused_key_index = None
         for i, key in enumerate(wallet.descriptor.keys):
-            label_color = theme.fg_color
-            padding = (
-                DEFAULT_PADDING if not kboard.has_minimal_display else MINIMAL_PADDING
-            )
-            key_label = (
-                "{}: ".format(chr(65 + i))
-                if (wallet.is_multisig() or wallet.is_miniscript())
-                else (" " * 3 if not kboard.has_minimal_display else "")
-            )
-            key_fingerprint = FINGERPRINT_SYMBOL + THIN_SPACE
-            if key.origin:
-                key_origin_str = str(key.origin)
-                key_fingerprint += key_origin_str[:8]
-            else:
-                if (
-                    i == 0
-                    and wallet.is_miniscript()
-                    and wallet.policy.get("type") == P2TR
-                ):
-                    key_fingerprint = t("TR internal key")
-                    label_color = theme.disabled_color
-                    unused_key_index = chr(65 + i)
-                else:
-                    key_fingerprint += t("unknown")
-            #  Check if the key is the one loaded in the wallet
-            if (
-                self.ctx.wallet.key
-                and len(wallet.descriptor.keys) > 1
-                and key.fingerprint == self.ctx.wallet.key.fingerprint
-            ):
-                label_color = theme.highlight_color
+            if self._is_tr_internal_key(wallet, i, key):
+                unused_key_index = chr(65 + i)
+            if self._is_our_key(wallet, key):
                 our_key_indexes_chars.append(chr(65 + i))
-            # Draw header and fingerprint lines
-            for line in self.ctx.display.to_lines(key_label + key_fingerprint):
-                self.ctx.display.draw_string(padding, offset_y, line, label_color)
-                offset_y += FONT_HEIGHT
 
-            sub_padding = padding + (
-                0 if kboard.has_minimal_display else 3 * FONT_WIDTH
-            )
-
-            if key.origin:
-                key_derivation_str = "{} m{}".format(
-                    DERIVATION_PATH_SYMBOL, key_origin_str[8:]
-                )
-                self.ctx.display.draw_string(
-                    sub_padding, offset_y, key_derivation_str, label_color
-                )
-                offset_y += FONT_HEIGHT
-            elif (
-                i == 0 and wallet.is_miniscript() and wallet.policy.get("type") == P2TR
-            ):
-                for line in self.ctx.display.to_lines(t("Provably unspendable")):
-                    self.ctx.display.draw_string(
-                        sub_padding, offset_y, line, label_color
-                    )
-                    offset_y += FONT_HEIGHT
-
-            xpub_text = self.fit_to_line(
-                ("" if kboard.has_minimal_display else " " * 3) + key.key.to_base58()
-            )
-            self.ctx.display.draw_string(padding, offset_y, xpub_text, label_color)
-            offset_y += (FONT_HEIGHT * 3) // 2
-
-            # Check if there's another key and room for it
+            lines = self._loading_key_lines(wallet, i, key)
+            # Keys go whole on a page, above the prompt, whenever they fit
             if (
-                i + 1 < len(wallet.descriptor.keys)
-                and offset_y + (FONT_HEIGHT * 4) > self.ctx.display.height()
+                offset_y > page_top
+                and offset_y + len(lines) * FONT_HEIGHT > BOTTOM_PROMPT_LINE
             ):
-                self.ctx.input.wait_for_button()
-                draw_header()
+                offset_y = self._next_loading_page(wallet)
+            for x, text, color in lines:
+                if offset_y + FONT_HEIGHT > BOTTOM_PROMPT_LINE:
+                    # Key is taller than a page, continue it on the next one
+                    offset_y = self._next_loading_page(wallet)
+                self.ctx.display.draw_string(x, offset_y, text, color)
+                offset_y += FONT_HEIGHT
+            offset_y += FONT_HEIGHT // 2
 
         # Display miniscript policies if available
         if wallet.is_miniscript():
@@ -476,7 +515,7 @@ class WalletDescriptor(Page):
 
             if len(miniscript_policy) > lines_left:
                 self.ctx.input.wait_for_button()
-                draw_header()
+                offset_y = self._draw_loading_header(wallet)
 
             for line in miniscript_policy:
                 self.ctx.display.draw_string(padding, offset_y, line)
@@ -494,4 +533,4 @@ class WalletDescriptor(Page):
                 if offset_y >= BOTTOM_PROMPT_LINE:
                     self.ctx.display.draw_hcentered_text(ELLIPSIS, offset_y)
                     self.ctx.input.wait_for_button()
-                    draw_header()
+                    offset_y = self._draw_loading_header(wallet)
