@@ -2827,3 +2827,69 @@ def test_fee_percent_self_transfer(mocker, m5stickv, tdata):
         assert "Spend" not in outputs[0]
         assert "Fee: ₿ 0.01 000 000" in outputs[0].replace(" ", " ")
         assert fee_percent == expected
+
+
+def test_tr_miniscript_origin_less_internal_key_with_extra_derivation(m5stickv, tdata):
+    # The origin-less internal key of a taptree only descriptor can have more
+    # steps than <0;1>/* after its xpub. Coordinators describe it with the
+    # xpub's own fingerprint and the path counted from that xpub
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, DerivationPath
+    from embit.transaction import Transaction, TransactionInput, TransactionOutput
+    from krux.psbt import PSBTSigner, get_cosigners_taproot_miniscript
+    from krux.key import Key, TYPE_MINISCRIPT, P2TR
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    descriptor_str = TR_EXP_MULTI_MINISCRIPT.split("#")[0]
+    assert descriptor_str.count("/<0;1>/*,{") == 1
+    descriptor_str = descriptor_str.replace("/<0;1>/*,{", "/7/<0;1>/*,{")
+
+    wallet = Wallet(
+        Key(tdata.TEST_MNEMONIC, TYPE_MINISCRIPT, NETWORKS["test"], script_type=P2TR)
+    )
+    wallet.load(descriptor_str, FORMAT_NONE)
+    internal_xpub = wallet.descriptor.key.key
+    assert wallet.descriptor.key.origin is None
+
+    # PSBT spending the first receive address
+    derived = wallet.descriptor.derive(0, branch_index=0)
+    psbt = PSBT(
+        Transaction(
+            vin=[TransactionInput(b"\x01" * 32, 0)],
+            vout=[TransactionOutput(90000, derived.script_pubkey())],
+        )
+    )
+    inp = psbt.inputs[0]
+    inp.witness_utxo = TransactionOutput(100000, derived.script_pubkey())
+    for key in derived.keys:
+        inp.taproot_bip32_derivations[key.key.key] = (
+            [],
+            DerivationPath(key.origin.fingerprint, key.origin.derivation),
+        )
+    internal_key = derived.key.key.key
+    _, der = inp.taproot_bip32_derivations[internal_key]
+    assert der.fingerprint == internal_xpub.my_fingerprint
+    assert der.derivation == [7, 0, 0]
+
+    signer = PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+    assert signer.policy == wallet.policy
+
+    # A path that does not lead from the xpub to the internal key is refused
+    inp.taproot_bip32_derivations[internal_key] = (
+        [],
+        DerivationPath(der.fingerprint, [0, 0]),
+    )
+    with pytest.raises(ValueError, match="policy mismatch"):
+        PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+
+    # With another fingerprint an unknown origin comes before the path, and
+    # the key is matched by its last two steps
+    xpubs, origin_less_xpub = signer.xpubs()
+    plain_xpub = TR_EXP_MULTI_MINISCRIPT.split("/<0;1>/*,{")[0][len("tr(") :]
+    assert origin_less_xpub.to_base58() == plain_xpub
+    child = origin_less_xpub.derive([1, 5]).key
+    foreign = DerivationPath(b"\x12\x34\x56\x78", [0x80000030, 0x80000001, 1, 5])
+    assert get_cosigners_taproot_miniscript(
+        {child: ([], foreign)}, xpubs, origin_less_xpub
+    ) == [plain_xpub]

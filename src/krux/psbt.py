@@ -801,12 +801,16 @@ def get_cosigners_taproot_miniscript(taproot_derivations, xpubs, origin_less_xpu
         else:
             # Policies which don't cover internal key spending (e.g. taptree only)
             # can have an origin-less xpub for internal key derivation
-            if (
-                origin_less_xpub
-                and origin_less_xpub.derive(full_path[-2:]).key.xonly()
-                == xonly_pubkey.xonly()
-            ):
-                cosigners.append(origin_less_xpub.to_base58())
+            if origin_less_xpub:
+                # With the xpub's own fingerprint the path starts at the xpub.
+                # Any other fingerprint means an origin unknown to the
+                # descriptor comes first, so only the last two steps are used
+                remainder = full_path
+                if fp != origin_less_xpub.my_fingerprint:
+                    remainder = full_path[-2:]
+                derived_key = origin_less_xpub.derive(remainder).key
+                if derived_key.xonly() == xonly_pubkey.xonly():
+                    cosigners.append(origin_less_xpub.to_base58())
 
     # Ensure all pubkeys have a matching xpub
     if len(cosigners) != len(taproot_derivations):
