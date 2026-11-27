@@ -213,7 +213,7 @@ class CameraEntropy(Page):
         self.ctx.input.reset_ios_state()
         if (
             shannon_16b < INSUFFICIENT_SHANNONS_ENTROPY_TH
-            or self.stdev_index < INSUFFICIENT_VARIANCE_TH
+            or self.stdev_index <= INSUFFICIENT_VARIANCE_TH
         ):
             error_msg = t("Estimated entropy:") + " " + t("Insufficient!")
             error_msg += "\n\n"
