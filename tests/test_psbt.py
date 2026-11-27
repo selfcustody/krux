@@ -862,6 +862,28 @@ def test_init_singlesig_fails_not_singlesig(mocker, m5stickv, tdata):
             PSBTSigner(wallet, case, FORMAT_NONE)
 
 
+def test_init_fails_with_op_return_output(mocker, m5stickv, tdata):
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, OutputScope
+    from embit.script import Script
+    from embit.transaction import TransactionOutput
+    from krux.psbt import PSBTSigner
+    from krux.key import Key, TYPE_SINGLESIG, P2WPKH
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    wallet = Wallet(
+        Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"], script_type=P2WPKH)
+    )
+    for script, value in [(b"\x6a\x05hello", 0), (b"\x6a", 1000)]:
+        psbt = PSBT.parse(tdata.P2WPKH_PSBT)
+        psbt.outputs.append(OutputScope(vout=TransactionOutput(value, Script(script))))
+        with pytest.raises(
+            ValueError, match="Invalid PSBT: OP_RETURN outputs are not supported"
+        ):
+            PSBTSigner(wallet, psbt.serialize(), FORMAT_NONE)
+
+
 def test_init_multisig_fails_not_multisig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner

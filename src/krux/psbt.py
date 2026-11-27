@@ -192,6 +192,9 @@ class PSBTSigner:
         ):
             raise ValueError("outputs exceed inputs")
 
+        if any(out.script_pubkey.data[:1] == b"\x6a" for out in self.psbt.tx.vout):
+            raise ValueError("OP_RETURN outputs are not supported")
+
         if self.wallet.is_miniscript():
             if not is_miniscript(self.policy):
                 raise ValueError("Not a miniscript PSBT")
