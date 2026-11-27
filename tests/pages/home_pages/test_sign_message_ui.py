@@ -1,3 +1,4 @@
+import pytest
 from tests.shared_mocks import MockPrinter, get_mock_open
 from tests.pages import create_ctx, assert_not_flashed
 from tests.pages.home_pages.test_home import tdata
@@ -641,3 +642,53 @@ def test_sign_message_camera_back_is_silent(mocker, m5stickv, tdata):
 
     # "Back" is not a failure - it must not flash an error
     assert_not_flashed(ctx, "Failed to load")
+
+
+@pytest.mark.parametrize("source", ["qr", "sd"])
+@pytest.mark.parametrize(
+    "path", ["m", "m/84h", "m/84h/0h", "m/84h/0h/0h", "m/84h/0h/0h/0"]
+)
+def test_short_address_path_uses_standard_message(
+    mocker, m5stickv, tdata, source, path
+):
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+    from krux.pages import MENU_CONTINUE
+
+    data = (
+        f"signmessage {path} ascii:test".encode()
+        if source == "qr"
+        else f"test\n{path}\nP2WPKH".encode()
+    )
+    filename = "" if source == "qr" else "message.txt"
+    page = SignMessage(create_ctx(mocker, [], Wallet(tdata.SINGLESIG_SIGNING_KEY)))
+    mocker.patch.object(
+        page, "_load_message", return_value=(data, FORMAT_NONE, filename)
+    )
+    standard = mocker.patch.object(page, "sign_standard_message", return_value="")
+    address = mocker.spy(page, "get_bitcoin_address")
+    sign_at = mocker.spy(page.ctx.wallet.key, "sign_at")
+    export = mocker.spy(page, "_export_signature")
+
+    assert page.sign_message() == MENU_CONTINUE
+    standard.assert_called_once_with(data)
+    address.assert_not_called()
+    sign_at.assert_not_called()
+    export.assert_not_called()
+    ctx = page.ctx
+    ctx.input.wait_for_button.assert_not_called()
+
+
+@pytest.mark.parametrize("data", [b"signmessage", b"signmessage "])
+def test_incomplete_signmessage_uses_standard_message(mocker, m5stickv, tdata, data):
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+    from krux.pages import MENU_CONTINUE
+
+    page = SignMessage(create_ctx(mocker, [], Wallet(tdata.SINGLESIG_SIGNING_KEY)))
+    mocker.patch.object(page, "_load_message", return_value=(data, FORMAT_NONE, ""))
+    standard = mocker.patch.object(page, "sign_standard_message", return_value="")
+    assert page.sign_message() == MENU_CONTINUE
+    standard.assert_called_once_with(data)
