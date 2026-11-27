@@ -641,3 +641,358 @@ def test_sign_message_camera_back_is_silent(mocker, m5stickv, tdata):
 
     # "Back" is not a failure - it must not flash an error
     assert_not_flashed(ctx, "Failed to load")
+
+
+LONG_MESSAGE_PATH = "m/84h/1h/0h/0/3"
+LONG_MESSAGE = (
+    "Proof of ownership for exchange withdrawal #4471.\n\n"
+    + "I agree to pay 10000 sats to Bob on delivery. " * 12
+    + "\nref:"
+    + "0123456789abcdef" * 9
+    + "\n"
+    + "Reference data follows, nothing to see here. " * 12
+    + "I ALSO ASSIGN ALL COINS IN THIS WALLET TO MALLORY."
+)
+
+
+def _long_message_signer(mocker, btn_seq, prompt_answers, touch_seq=()):
+    """A SignMessage page whose display wraps text with the real Display of
+    the board in use and records what is drawn, one list of lines per screen"""
+    import board
+    from embit.networks import NETWORKS
+    from krux.display import Display
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.wallet import Wallet
+
+    display = Display()
+    # portrait: the short side of the panel is the width
+    mocker.patch.object(display, "width", return_value=board.config["lcd"]["height"])
+    mocker.patch.object(display, "height", return_value=board.config["lcd"]["width"])
+    screens = []
+
+    def draw_hcentered_text(text, *args, **kwargs):
+        lines = display.to_lines(text, kwargs.get("max_lines", 100))
+        screens[-1].extend(lines)
+        return len(lines)
+
+    mocker.patch.object(display, "clear", side_effect=lambda: screens.append([]))
+    mocker.patch.object(display, "draw_hcentered_text", side_effect=draw_hcentered_text)
+
+    ctx = mocker.MagicMock()
+    ctx.display = display
+    ctx.wallet = Wallet(Key(tdata_mnemonic(), TYPE_SINGLESIG, NETWORKS["test"]))
+    ctx.input.wait_for_fastnav_button.side_effect = btn_seq
+    ctx.input.touch.current_index.side_effect = touch_seq
+    page = SignMessage(ctx)
+    mocker.patch.object(page, "draw_proceed_menu")
+    mocker.patch.object(page, "prompt", side_effect=prompt_answers)
+    mocker.patch.object(page, "_display_signature")
+    mocker.spy(ctx.wallet.key, "sign_at")
+    return page, screens
+
+
+def tdata_mnemonic():
+    return " ".join(["abandon"] * 11 + ["about"])
+
+
+def _message_pages(screens):
+    """The body of each "Message: n/m" screen, keyed by page number"""
+    pages = {}
+    for screen in screens:
+        if screen and screen[0].startswith("Message: "):
+            number, total = screen[0][len("Message: ") :].split("/")
+            pages[int(number)] = screen[1:]
+            assert len(pages) <= int(total)
+    return pages
+
+
+def _assert_whole_message_shown(mocker, message):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.settings import ELLIPSIS
+
+    # More PAGE presses than pages: extra ones stay on the last page
+    page, screens = _long_message_signer(
+        mocker, [BUTTON_PAGE] * 60 + [BUTTON_ENTER], [True]
+    )
+    qr = ("signmessage %s ascii:%s" % (LONG_MESSAGE_PATH, message)).encode()
+    sig, signed_text, _ = page._sign_at_address_from_qr(qr)
+
+    assert sig is not None
+    assert signed_text == message
+    pages = _message_pages(screens)
+    assert len(pages) > 1
+    shown = [line for number in sorted(pages) for line in pages[number]]
+    assert not any(ELLIPSIS in line for line in shown)
+    # Wrapping only drops the space or newline a line was broken at
+    assert "".join(shown).replace(" ", "") == message.replace(" ", "").replace("\n", "")
+    return pages
+
+
+def test_long_message_pages_show_every_char(mocker, multiple_devices):
+    _assert_whole_message_shown(mocker, LONG_MESSAGE)
+
+
+def test_long_message_page_ending_at_a_space(mocker, amigo):
+    from krux.display import Display, TOTAL_LINES
+
+    columns = Display().ascii_chars_per_line()
+    amount = "I agree to pay 10000"
+    # the amount ends exactly where the last line of the first page does
+    line = "x" * (columns - len(amount) - 1) + " " + amount
+    filler = ("y" * columns + " ") * (TOTAL_LINES - 6)
+    message = filler + line + " sats to Bob on delivery. " + "z " * 400
+
+    pages = _assert_whole_message_shown(mocker, message)
+
+    assert pages[1][-1] == line
+    assert pages[2][0].startswith("sats to Bob on delivery.")
+
+
+def test_long_message_navigation(mocker, m5stickv):
+    from krux.input import (
+        BUTTON_ENTER,
+        BUTTON_PAGE,
+        BUTTON_PAGE_PREV,
+        FAST_FORWARD,
+        FAST_BACKWARD,
+        SWIPE_LEFT,
+        SWIPE_RIGHT,
+    )
+
+    btn_seq = [
+        BUTTON_PAGE_PREV,  # already on the first page
+        BUTTON_PAGE,  # 2
+        SWIPE_LEFT,  # 3
+        SWIPE_RIGHT,  # 2
+        FAST_BACKWARD,  # 1
+        BUTTON_ENTER,  # leave? No
+        FAST_FORWARD,  # 2
+        BUTTON_ENTER,  # leave? Yes
+    ]
+    page, screens = _long_message_signer(mocker, btn_seq, [False, True])
+    qr = ("signmessage %s ascii:%s" % (LONG_MESSAGE_PATH, LONG_MESSAGE)).encode()
+    sig, _, _ = page._sign_at_address_from_qr(qr)
+
+    assert sig is None
+    page.ctx.wallet.key.sign_at.assert_not_called()
+    assert page.ctx.input.wait_for_fastnav_button.call_count == len(btn_seq)
+    titles = [s[0].split("/")[0] for s in screens if s and s[0].startswith("Message: ")]
+    assert titles == ["Message: %d" % n for n in (1, 1, 2, 3, 2, 1, 1, 2)]
+    # "Sign?" was never asked, only "Are you sure?"
+    assert [call.args[0] for call in page.prompt.call_args_list] == [
+        "Are you sure?"
+    ] * 2
+
+
+def test_long_message_declined_at_sign_prompt(mocker, m5stickv):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    page, _ = _long_message_signer(mocker, [BUTTON_PAGE] * 60 + [BUTTON_ENTER], [False])
+    qr = ("signmessage %s ascii:%s" % (LONG_MESSAGE_PATH, LONG_MESSAGE)).encode()
+    sig, _, _ = page._sign_at_address_from_qr(qr)
+
+    assert sig is None
+    page.ctx.wallet.key.sign_at.assert_not_called()
+
+
+def _sign_message_declined(mocker, loaded):
+    """Runs sign_message on a loaded sign-at-address request and answers No
+    at the "Sign?" prompt. Returns the page"""
+    from embit.networks import NETWORKS
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.wallet import Wallet
+
+    wallet = Wallet(Key(tdata_mnemonic(), TYPE_SINGLESIG, NETWORKS["test"]))
+    page = SignMessage(create_ctx(mocker, [], wallet))
+    mocker.patch.object(page, "_load_message", return_value=loaded)
+    mocker.patch.object(page, "prompt", return_value=False)
+    mocker.patch.object(page, "_export_signature")
+    mocker.spy(page, "sign_standard_message")
+    mocker.spy(wallet.key, "sign_at")
+
+    page.sign_message()
+
+    page.prompt.assert_called_once()
+    wallet.key.sign_at.assert_not_called()
+    return page
+
+
+def test_declined_qr_message_is_not_exported(mocker, m5stickv):
+    from krux.qr import FORMAT_NONE
+
+    qr = b"signmessage " + LONG_MESSAGE_PATH.encode() + b" ascii:hello world"
+    page = _sign_message_declined(mocker, (qr, FORMAT_NONE, ""))
+
+    page._export_signature.assert_not_called()
+    # and the request is not signed as a standard message instead
+    page.sign_standard_message.assert_not_called()
+
+
+def test_declined_sd_message_is_not_exported(mocker, m5stickv):
+    from krux.qr import FORMAT_NONE
+
+    content = ("hello world\n%s\nP2WPKH" % LONG_MESSAGE_PATH).encode()
+    page = _sign_message_declined(mocker, (content, FORMAT_NONE, "message.txt"))
+
+    page._export_signature.assert_not_called()
+    page.sign_standard_message.assert_not_called()
+
+
+def test_message_over_max_len_is_refused(mocker, m5stickv):
+    import pytest
+    from krux.pages.home_pages.sign_message_ui import MESSAGE_MAX_LEN
+
+    page, screens = _long_message_signer(mocker, [], [])
+    prefix = "signmessage %s ascii:" % LONG_MESSAGE_PATH
+
+    with pytest.raises(ValueError, match="Maximum length exceeded"):
+        page._sign_at_address_from_qr((prefix + "a" * (MESSAGE_MAX_LEN + 1)).encode())
+
+    # nothing was shown and nothing was signed
+    assert screens == []
+    page.prompt.assert_not_called()
+    page.ctx.wallet.key.sign_at.assert_not_called()
+
+
+def test_message_of_max_len_is_paged_and_signed(mocker, m5stickv):
+    from krux.input import BUTTON_ENTER, FAST_FORWARD
+    from krux.pages.home_pages.sign_message_ui import MESSAGE_MAX_LEN
+
+    page, screens = _long_message_signer(
+        mocker, [FAST_FORWARD] * 200 + [BUTTON_ENTER], [True]
+    )
+    message = ("All work and no play makes Jack a dull boy. " * 300)[:MESSAGE_MAX_LEN]
+    qr = ("signmessage %s ascii:%s" % (LONG_MESSAGE_PATH, message)).encode()
+
+    sig, signed_text, _ = page._sign_at_address_from_qr(qr)
+
+    assert sig is not None
+    assert signed_text == message
+    pages = _message_pages(screens)
+    shown = "".join(line for number in sorted(pages) for line in pages[number])
+    assert shown.replace(" ", "") == message.replace(" ", "")
+
+
+def test_big_message_is_paged_from_bounded_slices(mocker, m5stickv):
+    from krux.display import TOTAL_LINES
+
+    page, _ = _long_message_signer(mocker, [], [])
+    text = "All work and no play makes Jack a dull boy. " * 2500  # 110 kB
+    to_lines = mocker.spy(page.ctx.display, "to_lines")
+
+    starts = page._message_page_starts(text, TOTAL_LINES - 4)
+
+    assert len(starts) > 500
+    assert starts == sorted(set(starts))
+    # no call was handed the rest of the text, only about a page of it
+    assert max(len(call.args[0]) for call in to_lines.call_args_list) < 300
+
+
+def test_message_paging_stops_if_nothing_fits(mocker, m5stickv):
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+
+    # The mocked display wraps any text to a single empty line
+    page = SignMessage(create_ctx(mocker, []))
+
+    assert page._message_page_starts("abc", 13) == [0]
+
+
+def test_long_message_footer_offers_go_on_last_page_only(mocker, m5stickv):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    page, screens = _long_message_signer(
+        mocker, [BUTTON_PAGE] * 60 + [BUTTON_ENTER], [True]
+    )
+    qr = ("signmessage %s ascii:%s" % (LONG_MESSAGE_PATH, LONG_MESSAGE)).encode()
+    page._sign_at_address_from_qr(qr)
+
+    total = len(_message_pages(screens))
+    calls = page.draw_proceed_menu.call_args_list
+    assert len(calls) == 61
+    for number, call in enumerate(calls[:total], 1):
+        assert call.args[:2] == ("Go", "Esc")
+        # ENTER is outlined as "Esc" (0) until the last page, then "Go" (1)
+        assert call.args[3] == (1 if number == total else 0)
+        assert call.kwargs["go_enabled"] == (number == total)
+    # the footer starts below the last line of text the page can hold
+    from krux.display import DEFAULT_PADDING, FONT_HEIGHT, TOTAL_LINES
+
+    assert calls[0].args[2] == DEFAULT_PADDING + (TOTAL_LINES - 3) * FONT_HEIGHT
+    assert max(len(lines) for lines in _message_pages(screens).values()) == (
+        TOTAL_LINES - 5
+    )
+
+
+def test_long_message_touch_navigation(mocker, amigo):
+    from krux.input import BUTTON_TOUCH
+
+    touch_seq = [
+        0,  # previous: already on the first page
+        1,  # next: 2
+        1,  # next: 3
+        0,  # previous: 2
+        3,  # "Go": disabled before the last page
+        2,  # "Esc": No
+        2,  # "Esc": Yes
+    ]
+    page, screens = _long_message_signer(
+        mocker, [BUTTON_TOUCH] * len(touch_seq), [False, True], touch_seq
+    )
+    qr = ("signmessage %s ascii:%s" % (LONG_MESSAGE_PATH, LONG_MESSAGE)).encode()
+    sig, _, _ = page._sign_at_address_from_qr(qr)
+
+    assert sig is None
+    page.ctx.wallet.key.sign_at.assert_not_called()
+    titles = [s[0].split("/")[0] for s in screens if s and s[0].startswith("Message: ")]
+    # neither the disabled "Go" nor an unconfirmed "Esc" leaves page 2
+    assert titles == ["Message: %d" % n for n in (1, 1, 2, 3, 2, 2, 2)]
+    display = page.ctx.display
+    page.ctx.input.touch.set_regions.assert_called_with(
+        [0, display.width() // 2, display.width()],
+        [0, page.draw_proceed_menu.call_args.args[2], display.height()],
+    )
+
+
+def test_long_message_touch_go_and_esc_on_last_page(mocker, amigo):
+    from krux.input import BUTTON_PAGE, BUTTON_TOUCH
+
+    qr = ("signmessage %s ascii:%s" % (LONG_MESSAGE_PATH, LONG_MESSAGE)).encode()
+
+    # "Esc" still leaves when the last page is on the screen
+    page, _ = _long_message_signer(
+        mocker, [BUTTON_PAGE] * 60 + [BUTTON_TOUCH], [True], [2]
+    )
+    assert page._sign_at_address_from_qr(qr)[0] is None
+    assert [call.args[0] for call in page.prompt.call_args_list] == ["Are you sure?"]
+
+    # "Go" moves on to the sign prompt
+    page, _ = _long_message_signer(
+        mocker, [BUTTON_PAGE] * 60 + [BUTTON_TOUCH], [True], [3]
+    )
+    assert page._sign_at_address_from_qr(qr)[0] is not None
+    assert [call.args[0] for call in page.prompt.call_args_list] == ["Sign?"]
+    page.ctx.input.touch.clear_regions.assert_called()
+
+
+def test_long_message_footer_is_drawn(mocker, amigo):
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+
+    page, _ = _long_message_signer(mocker, [BUTTON_PAGE] * 60 + [BUTTON_ENTER], [True])
+    drawn = mocker.spy(page.ctx.display, "draw_string")
+    mocker.patch.object(
+        page,
+        "draw_proceed_menu",
+        side_effect=type(page).draw_proceed_menu.__get__(page),
+    )
+    mocker.patch("krux.pages.lcd.string_width_px", side_effect=lambda s: 12 * len(s))
+    qr = ("signmessage %s ascii:%s" % (LONG_MESSAGE_PATH, LONG_MESSAGE)).encode()
+    page._sign_at_address_from_qr(qr)
+
+    labels = [call.args[2] for call in drawn.call_args_list]
+    assert "Esc" in labels and "Go" in labels
+    # nothing of the footer is drawn past the bottom of the screen
+    assert max(call.args[1] for call in drawn.call_args_list) < (
+        page.ctx.display.height() - 24
+    )
