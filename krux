@@ -272,7 +272,7 @@ elif [ "$1" == "build-release" ]; then
     if [ ! -f "ktool-linux" ]; then
         wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-linux
     fi
-    echo "2b8be0c95abe9f0ff7016e9a5b343ff8d3df9751783bc4d6a4b4df775693fb57  ktool-linux" | sha256sum -c || { rm -f "ktool-linux"; exit 1; }
+    echo "2b8be0c95abe9f0ff7016e9a5b343ff8d3df9751783bc4d6a4b4df775693fb57  ktool-linux" | sha256sum -c || { echo "Removing $PWD/ktool-linux: checksum mismatch, re-run to download it again" >&2; rm -f "$PWD/ktool-linux"; exit 1; }
     if [ ! -f "ktool-mac" ]; then
         wget https://github.com/selfcustody/ktool/releases/download/v0.1.1/ktool-mac
     fi
