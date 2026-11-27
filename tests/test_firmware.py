@@ -13116,6 +13116,7 @@ def test_upgrade_succeed(mocker, m5stickv, mock_success_input_cls, tdata):
                 65536,
                 True,
                 binascii.unhexlify(tdata.TEST_FIRMWARE_WITH_HEADER_SHA256),
+                expected_hash=binascii.unhexlify(tdata.TEST_FIRMWARE_SHA256),
             ),
             mocker.call(
                 mocker.ANY,
@@ -13265,6 +13266,7 @@ def test_upgrade_uses_backup_sector_when_main_sector_is_missing_active_firmware(
                 65536,
                 True,
                 binascii.unhexlify(tdata.TEST_FIRMWARE_WITH_HEADER_SHA256),
+                expected_hash=binascii.unhexlify(tdata.TEST_FIRMWARE_SHA256),
             ),
             mocker.call(
                 mocker.ANY,
@@ -13365,6 +13367,7 @@ def test_upgrade_uses_slot_1_when_firmware_is_in_slot_2(
                 65536,
                 True,
                 binascii.unhexlify(tdata.TEST_FIRMWARE_WITH_HEADER_SHA256),
+                expected_hash=binascii.unhexlify(tdata.TEST_FIRMWARE_SHA256),
             ),
             mocker.call(
                 mocker.ANY,
@@ -14061,3 +14064,69 @@ def test_upgrade_fail_not_this_device_exception(
     display_mocker.flash_text.assert_called_with(
         "Firmware not for this device", theme.error_color
     )
+
+
+def test_write_data_rejects_data_that_is_not_the_verified_firmware(mocker, m5stickv):
+    """The flash writer hashes what it writes and refuses anything but the
+    image whose signature was verified"""
+    import hashlib
+    import io
+    from krux import firmware
+
+    # A flash that behaves like the real one: erase sets 0xFF, write stores
+    slot = firmware.FIRMWARE_SLOT_2
+    chunk_size = 4096
+    memory = {}
+
+    def erase(address, size):
+        for i in range(address, address + size):
+            memory[i] = 0xFF
+
+    def write(address, data):
+        for i, byte in enumerate(bytes(data)):
+            memory[address + i] = byte
+
+    def stored(address, size):
+        return bytes(memory[i] for i in range(address, address + size))
+
+    flash = mocker.MagicMock()
+    flash.erase.side_effect = erase
+    flash.write.side_effect = write
+    mocker.patch("krux.firmware.flash", new=flash)
+    mocker.patch("krux.firmware.sha256_hw", new=hashlib.sha256)
+    verified = b"signed firmware image" * 100
+    expected = hashlib.sha256(verified).digest()
+    header = b"\x00" + len(verified).to_bytes(4, "little")
+
+    # Same bytes as verified: accepted, and left in the slot
+    firmware.write_data(
+        lambda pct: None,
+        slot,
+        io.BytesIO(verified),
+        len(verified),
+        chunk_size,
+        True,
+        b"\x00" * 32,
+        expected_hash=expected,
+    )
+    assert stored(slot, 5 + len(verified)) == header + verified
+
+    # A different image of the same size: refused
+    swapped = b"other firmware image!" * 100
+    assert len(swapped) == len(verified)
+    with pytest.raises(ValueError, match="data changed after verification"):
+        firmware.write_data(
+            lambda pct: None,
+            slot,
+            io.BytesIO(swapped),
+            len(swapped),
+            chunk_size,
+            True,
+            b"\x00" * 32,
+            expected_hash=expected,
+        )
+
+    # The refused image must not stay bootable: the first block of the slot,
+    # which holds the header, is erased and nothing is written afterwards
+    assert stored(slot, chunk_size) == b"\xff" * chunk_size
+    assert flash.mock_calls[-1] == mocker.call.erase(slot, chunk_size)
