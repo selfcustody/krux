@@ -796,6 +796,85 @@ def test_long_message_declined_at_sign_prompt(mocker, m5stickv):
     page.ctx.wallet.key.sign_at.assert_not_called()
 
 
+def _sign_message_declined(mocker, loaded):
+    """Runs sign_message on a loaded sign-at-address request and answers No
+    at the "Sign?" prompt. Returns the page"""
+    from embit.networks import NETWORKS
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.wallet import Wallet
+
+    wallet = Wallet(Key(tdata_mnemonic(), TYPE_SINGLESIG, NETWORKS["test"]))
+    page = SignMessage(create_ctx(mocker, [], wallet))
+    mocker.patch.object(page, "_load_message", return_value=loaded)
+    mocker.patch.object(page, "prompt", return_value=False)
+    mocker.patch.object(page, "_export_signature")
+    mocker.spy(page, "sign_standard_message")
+    mocker.spy(wallet.key, "sign_at")
+
+    page.sign_message()
+
+    page.prompt.assert_called_once()
+    wallet.key.sign_at.assert_not_called()
+    return page
+
+
+def test_declined_qr_message_is_not_exported(mocker, m5stickv):
+    from krux.qr import FORMAT_NONE
+
+    qr = b"signmessage " + LONG_MESSAGE_PATH.encode() + b" ascii:hello world"
+    page = _sign_message_declined(mocker, (qr, FORMAT_NONE, ""))
+
+    page._export_signature.assert_not_called()
+    # and the request is not signed as a standard message instead
+    page.sign_standard_message.assert_not_called()
+
+
+def test_declined_sd_message_is_not_exported(mocker, m5stickv):
+    from krux.qr import FORMAT_NONE
+
+    content = ("hello world\n%s\nP2WPKH" % LONG_MESSAGE_PATH).encode()
+    page = _sign_message_declined(mocker, (content, FORMAT_NONE, "message.txt"))
+
+    page._export_signature.assert_not_called()
+    page.sign_standard_message.assert_not_called()
+
+
+def test_message_over_max_len_is_refused(mocker, m5stickv):
+    import pytest
+    from krux.pages.home_pages.sign_message_ui import MESSAGE_MAX_LEN
+
+    page, screens = _long_message_signer(mocker, [], [])
+    prefix = "signmessage %s ascii:" % LONG_MESSAGE_PATH
+
+    with pytest.raises(ValueError, match="Maximum length exceeded"):
+        page._sign_at_address_from_qr((prefix + "a" * (MESSAGE_MAX_LEN + 1)).encode())
+
+    # nothing was shown and nothing was signed
+    assert screens == []
+    page.prompt.assert_not_called()
+    page.ctx.wallet.key.sign_at.assert_not_called()
+
+
+def test_message_of_max_len_is_paged_and_signed(mocker, m5stickv):
+    from krux.input import BUTTON_ENTER, FAST_FORWARD
+    from krux.pages.home_pages.sign_message_ui import MESSAGE_MAX_LEN
+
+    page, screens = _long_message_signer(
+        mocker, [FAST_FORWARD] * 200 + [BUTTON_ENTER], [True]
+    )
+    message = ("All work and no play makes Jack a dull boy. " * 300)[:MESSAGE_MAX_LEN]
+    qr = ("signmessage %s ascii:%s" % (LONG_MESSAGE_PATH, message)).encode()
+
+    sig, signed_text, _ = page._sign_at_address_from_qr(qr)
+
+    assert sig is not None
+    assert signed_text == message
+    pages = _message_pages(screens)
+    shown = "".join(line for number in sorted(pages) for line in pages[number])
+    assert shown.replace(" ", "") == message.replace(" ", "")
+
+
 def test_big_message_is_paged_from_bounded_slices(mocker, m5stickv):
     from krux.display import TOTAL_LINES
 

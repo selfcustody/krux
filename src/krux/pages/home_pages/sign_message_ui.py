@@ -67,6 +67,11 @@ SD_MESSAGE_HEADER = "-----BEGIN BITCOIN SIGNED MESSAGE-----"
 SD_SIGNATURE_HEADER = "-----BEGIN BITCOIN SIGNATURE-----"
 SD_SIGNATURE_FOOTER = "-----END BITCOIN SIGNATURE-----"
 
+# A message signed at an address is shown in full before signing. Counting
+# its pages takes time that grows faster than its size, and the watchdog is
+# not fed meanwhile, so bigger messages are refused
+MESSAGE_MAX_LEN = 10000
+
 
 class SignMessage(Utils):
     """Message Signing user interface"""
@@ -157,6 +162,8 @@ class SignMessage(Utils):
     def _sign_at_address(self, message, derivation_str, address=""):
         """Signs a message at a derived Bitcoin address"""
 
+        if len(message) > MESSAGE_MAX_LEN:
+            raise ValueError("Maximum length exceeded (%s)" % MESSAGE_MAX_LEN)
         derivation = bip32.parse_path(derivation_str)
         if not self._page_long_message(message):
             return None
@@ -502,16 +509,20 @@ class SignMessage(Utils):
             signature_data = self._sign_at_address_from_sd(data)
             if signature_data:
                 sig, message, address = signature_data
-                self._export_signature(
-                    sig, FORMAT_NONE, message_filename, message, address
-                )
+                if sig is not None:  # None: the user did not sign
+                    self._export_signature(
+                        sig, FORMAT_NONE, message_filename, message, address
+                    )
                 return MENU_CONTINUE
 
         data = data.encode() if isinstance(data, str) else data
         signature_data = self._sign_at_address_from_qr(data)
         if signature_data:
             sig, message, address = signature_data
-            self._export_signature(sig, qr_format, message_filename, message, address)
+            if sig is not None:  # None: the user did not sign
+                self._export_signature(
+                    sig, qr_format, message_filename, message, address
+                )
             return MENU_CONTINUE
         sig = self.sign_standard_message(data)
         if sig:
