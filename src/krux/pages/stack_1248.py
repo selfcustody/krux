@@ -44,8 +44,10 @@ BIT_LABELS = ("1", "2", "4", "8")
 VERT_N_DIGITS = 4
 VERT_N_BITS = 4
 VERT_N_CELLS = VERT_N_DIGITS * VERT_N_BITS
-VERT_ESC_INDEX = VERT_N_CELLS
-VERT_GO_INDEX = VERT_N_CELLS + 2
+# Touch rows below the grid: the word preview (ignored), then the menu with
+# Esc on its left half and Go on its right half
+VERT_ESC_INDEX = VERT_N_CELLS + VERT_N_DIGITS
+VERT_GO_INDEX = VERT_ESC_INDEX + VERT_N_DIGITS // 2
 VERT_INVALID_CELLS = tuple(VERT_N_DIGITS * i for i in (2, 3))
 
 
@@ -711,16 +713,15 @@ class Stackbit(Page):
                 elif index >= STACKBIT_ESC_INDEX:  # ESC
                     self.ctx.display.clear()
                     if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
-                        break
+                        return None
                     # self._map_keys_array()
                 elif index < 14:
                     digits = self._toggle_bit(digits, index)
             else:
                 index = self.index(index, btn)
             self.ctx.display.clear()
-        if len(words) in (12, 24):
-            return words
-        return None
+        # The loop only ends with 12 words (Done) or with all 24
+        return words
 
     def _layout_vertical(self, pad=DEFAULT_PADDING):
         """Return geometry constants for the vertical input grid."""
@@ -774,8 +775,10 @@ class Stackbit(Page):
         for _ in range(VERT_N_DIGITS + 1):
             self.ctx.input.touch.x_regions.append(x)
             x += cell_w
+        # The delimiter at the grid bottom closes the last row of cells, so
+        # the word preview below it gets a row of its own
         y = y_grid
-        for _ in range(VERT_N_BITS):
+        for _ in range(VERT_N_BITS + 1):
             self.ctx.input.touch.y_regions.append(y)
             y += cell_h
         self.ctx.input.touch.y_regions.append(y_menu)
@@ -899,13 +902,27 @@ class Stackbit(Page):
     def _index_vertical(self, index, btn):
         """Advance or rewind the focused cell index, skipping invalid cells."""
         if btn in (BUTTON_PAGE, FAST_FORWARD):
-            index = 0 if index >= VERT_GO_INDEX else index + 1
-            if index in VERT_INVALID_CELLS:
+            if index >= VERT_GO_INDEX:
+                index = 0
+            elif index >= VERT_ESC_INDEX:
+                index = VERT_GO_INDEX
+            elif index >= VERT_N_CELLS - 1:
+                index = VERT_ESC_INDEX
+            else:
                 index += 1
+                if index in VERT_INVALID_CELLS:
+                    index += 1
         elif btn in (BUTTON_PAGE_PREV, FAST_BACKWARD):
-            index = VERT_GO_INDEX if index <= 0 else index - 1
-            if index in VERT_INVALID_CELLS:
+            if index <= 0:
+                index = VERT_GO_INDEX
+            elif index >= VERT_GO_INDEX:
+                index = VERT_ESC_INDEX
+            elif index >= VERT_N_CELLS:
+                index = VERT_N_CELLS - 1
+            else:
                 index -= 1
+                if index in VERT_INVALID_CELLS:
+                    index -= 1
         return index
 
     def enter_1248_vertical(self):
@@ -954,8 +971,13 @@ class Stackbit(Page):
             self._draw_punched_vertical(digits, x_grid, y_grid, cell_w, cell_h)
             btn = self.ctx.input.wait_for_fastnav_button()
             if btn == BUTTON_TOUCH:
+                touch_index = self.ctx.input.touch.current_index()
+                if VERT_N_CELLS <= touch_index < VERT_ESC_INDEX:
+                    # Touched the word preview, between the grid and the menu
+                    self.ctx.display.clear()
+                    continue
                 btn = BUTTON_ENTER
-                index = self.ctx.input.touch.current_index()
+                index = touch_index
             if btn == BUTTON_ENTER:
                 if index >= VERT_GO_INDEX:
                     word = self.digits_to_word(digits)
@@ -988,12 +1010,11 @@ class Stackbit(Page):
                 elif index >= VERT_ESC_INDEX:
                     self.ctx.display.clear()
                     if self.prompt(t("Are you sure?"), self.ctx.display.height() // 2):
-                        break
+                        return None
                 else:
                     digits = self._toggle_bit_vertical(digits, index)
             else:
                 index = self._index_vertical(index, btn)
             self.ctx.display.clear()
-        if len(words) in (12, 24):
-            return words
-        return None
+        # The loop only ends with 12 words (Done) or with all 24
+        return words
