@@ -282,6 +282,9 @@ class SignMessage(Utils):
         address="",
     ):
         """Exports the message signature to a QR code or SD card"""
+        if sig is None:  # user declined to sign at an address
+            return MENU_CONTINUE
+
         submenu = Menu(
             self.ctx,
             [

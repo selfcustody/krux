@@ -555,6 +555,62 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
         case_count += 1
 
 
+def test_sign_message_at_address_declined(mocker, m5stickv, tdata):
+    from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.wallet import Wallet
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.qr import FORMAT_NONE
+    from krux.pages.qr_capture import QRCodeCapture
+
+    cases = [
+        # Button sequence, QR message, SD file
+        (
+            [
+                BUTTON_ENTER,  # Load from camera
+                BUTTON_PAGE,  # "No" at Sign?
+            ],
+            "signmessage m/84'/0h/0H/0/3 ascii:A test message.",
+            None,
+        ),
+        (
+            [
+                BUTTON_PAGE,  # Load from SD card
+                BUTTON_ENTER,  # Press load from SD card
+                BUTTON_PAGE,  # "No" at Sign?
+            ],
+            None,
+            b"A test message.\nm/84'/0h/0H/0/3\nP2WPKH",
+        ),
+    ]
+    for case in cases:
+        wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
+        ctx = create_ctx(mocker, case[0], wallet)
+        message_signer = SignMessage(ctx)
+        mocker.patch.object(message_signer, "has_sd_card", new=lambda: True)
+        mocker.patch.object(
+            QRCodeCapture,
+            "qr_capture_loop",
+            new=lambda self: (case[1], FORMAT_NONE),
+        )
+        if case[2] is not None:
+            mocker.patch.object(
+                message_signer, "load_file", return_value=("signmessage.txt", case[2])
+            )
+        export = mocker.spy(message_signer, "_export_to_qr")
+        save = mocker.spy(message_signer, "_export_to_sd")
+        mocker.patch(
+            "os.listdir",
+            new=mocker.MagicMock(return_value=["somefile", "otherfile"]),
+        )
+
+        message_signer.sign_message()
+
+        # Declining at Sign? ends the flow: no export menu, nothing exported
+        assert ctx.input.wait_for_button.call_count == len(case[0])
+        export.assert_not_called()
+        save.assert_not_called()
+
+
 def test_load_from_sd_card(mocker, m5stickv, tdata):
     from krux.pages.home_pages.sign_message_ui import SignMessage
     from krux.input import BUTTON_ENTER
