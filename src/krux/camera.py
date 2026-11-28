@@ -81,7 +81,7 @@ class Camera:
             sensor.run(0)
         except Exception as e:
             print("Camera not found:", e)
-        if kboard.is_wonder_mv:
+        if kboard.is_wonder_mv or kboard.is_yahboom:
             # Camera power-on inrush may brownout-reset the LCD controller,
             # leaving a black screen while firmware keeps running.
             # Re-initialize the LCD and redraw the splash to recover.
@@ -101,7 +101,7 @@ class Camera:
 
     def initialize_sensor(self, mode=QR_SCAN_MODE):
         """Initializes the camera"""
-        if kboard.is_wonder_mv:
+        if kboard.is_wonder_mv or kboard.is_yahboom:
             # GC2145 sensor: probe only GC types (choice=2), skipping OV probe
             # rounds and their camera power cycles (inrush).
             # See: sensor_reset() in MaixPy/components/micropython/port/src/omv/sensor.c
