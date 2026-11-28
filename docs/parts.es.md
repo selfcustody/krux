@@ -6,11 +6,11 @@
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Rango de Precio | US$ 50-55 | US$ 50-85 | US$ 27-35  | US$ 45-61 | US$ 34-49 | US$ 58-86 | US$ 48 |
 | Tamaño de Pantalla / resolución | 1.14" / 135*240 | 3.5" / 320*480 | 2.4" / 240*320 | 2" / 240*320 | 1.3" / 240*240 | 2" / 240*320 | 2" / 240*320 |
-| Control de Brillo | :white_check_mark: | :x: | :x: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| Control de Brillo | :material-check: | :material-close: | :material-close: | :material-close: | :material-check: | :material-check: | :material-close: |
 | Tamaño del dispositivo | 48\*24\*22mm | 104\*63\*17mm | 98\*59\*18mm | 57\*41\*17mm | 40\*40\*16mm | 59\*41\*17mm | 57\*41\*16mm |
-| Pantalla Táctil | :x: | Capacitive | :x: | Capacitive | :x: | Capacitive | Capacitive |
+| Pantalla Táctil | :material-close: | Capacitive | :material-close: | Capacitive | :material-close: | Capacitive | Capacitive |
 | Camara | `OV7740` | `OV7740` rear<br>`GC0328` front | `GC0328` | `OV2640` <i style="font-size: 85%">(VER:1.0)</i> or<br>`GC2145` <i style="font-size: 85%">(VER:1.1)</i> | `OV7740` | `GC2145` | `GC2145` or<br>`GC0328` |
-| Bateria  | 200mAh | 520mAh | :x: | :x: | 200mAh | :x: | :x: |
+| Bateria  | 200mAh | 520mAh | :material-close: | :material-close: | 200mAh | :material-close: | :material-close: |
 | Requisitos | None | None | [Rotary encoder](https://duckduckgo.com/?q=ky-040)<br> [3D printed case](https://github.com/selfcustody/DockEncoderCase)<br> Soldering<br>Assembly | None | None | None | None |
 | Advertencias  | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) | [:material-numeric-2-circle:{ title="Maix Amigo screens" }](#amigo-info) | [:material-numeric-3-circle:{ title="Maix Dock and soldered pin" }](#dock-info) | Micro USB | 3-Way button | [:material-numeric-1-circle:{ title="USB-C recognition" }](#pull-up-resistor-info) [:material-numeric-4-circle:{ title="WonderMV and SD card" }](#wondermv-info) | None |
 
