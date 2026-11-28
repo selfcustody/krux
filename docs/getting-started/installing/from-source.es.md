@@ -11,7 +11,7 @@ git clone --recurse-submodules https://github.com/selfcustody/krux
 git pull origin main && git submodule update --init --recursive
 ```
 
-#### Requisito previo para actualizar mediante microSD
+#### Requisito previo para actualizar mediante microSD { #prerequisite-for-upgrading-via-microsd }
 Si desea realizar actualizaciones posteriores sin conección a internet mediante una tarjeta micro SD, necesitará un par de claves privada y pública para firmar sus compilaciones de código y verificar las firmas. Si no desea realizar más actualizaciones sin conección a internet, vaya a la [sección de compilación](#build-the-firmware-linux-or-wsl).
 
 Puedes usar una instalación de Krux existente y una clave mnemotécnica para firmar sus compilaciones de código, **o bien**, puede generar un par de claves y firmar desde la [linea de comando con `openssl`](https://wiki.openssl.org/index.php/Command_Line_Elliptic_Curve_Operations). Se han añadido comandos al script de shell de `krux` para facilitar esta tarea.
@@ -28,7 +28,7 @@ El primer comando creará los archivos `privkey.pem` y `pubkey.pem` que puedes u
 
 Una vez que hayas actualizado `SIGNER_PUBKEY` con este valor, puedes continuar con el proceso de compilación normal.
 
-### Compila el firmware (Linux o WSL)
+### Compila el firmware (Linux o WSL) { #build-the-firmware-linux-or-wsl }
 El [script bash de Krux](https://github.com/selfcustody/krux/blob/main/krux) contiene comandos para tareas de desarrollo comunes. Se asume un host Linux; necesitará tener instalados al menos [Docker Desktop o Docker Engine](https://docs.docker.com/desktop/), `openssl`, y `wget` para que los comandos funcionen correctamente. Funciona en Windows con WSL. El canal de YouTube Crypto Guide publicó un video paso a paso: [Krux DIY Bitcoin Signer: Build From Source & Verify (With Windows + WSL2 + Docker)](https://www.youtube.com/watch?v=Vmr_TFy2TfQ)
 
 Para compilar y flashear el firmware:
@@ -49,7 +49,7 @@ fatal: clone of ... failed
 Failed to clone ...
 ```
 
-#### Reproducibilidad
+#### Reproducibilidad { #reproducibility }
 Si compila desde la rama `main` del código fuente, debería poder reproducir el proceso de compilación utilizado para generar los binarios de la última versión y obtener exactamente las mismas copias de los archivos `firmware.bin` y `kboot.kfpkg`, con las sumas de comprobación hash correspondientes (para comprobar si hay una versión anterior, utilice la etiqueta `tag`).
 
 Para comprobarlo, utilice los archivos compilados para el dispositivo de destino. Cada comando debe generar el mismo hash para los dos archivos proporcionados:

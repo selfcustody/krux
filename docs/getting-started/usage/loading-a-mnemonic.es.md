@@ -31,7 +31,7 @@ También puedes usar un [generador de códigos QR sin conexión para esto](https
 #### Tinyseed, OneKey KeyTag o Binary Grid
 [Tinyseed](https://tinyseed.io/), [Onekey KeyTag](https://onekey.so/products/onekey-keytag/) y otras plataformas codifican directamente una semilla como brinario, lo que permite un almacenamiento mnemónico muy compacto. Los dispositivos Krux cuentan con funciones de visión computacional que permiten a los usuarios escanear estas placas metálicas y cargar instantáneamente los mnemónicos grabados en ellas (esta función no está disponible en la [aplicación Krux Mobile para Android ](../../faq.md#what-is-krux-mobile-android-app)).
 
-Para garantizar un escaneo correcto, coloque la placa de respaldo sobre un fondo negro y rellene las áreas perforadas con negro para mejorar el contraste. Como alternativa, puede escanear una [versión impresa térmicamente](../features/printing/printing.md) o una plantilla completa. Puede ver algunos [ejemplos mnemónicos codificados aquí](../features/tinyseed.md) y explorar nuestras [plantillas de transcipción disponibles aquí](../templates/templates.md).
+Para garantizar un escaneo correcto, coloque la placa de respaldo sobre un fondo negro y rellene las áreas perforadas con negro para mejorar el contraste. Como alternativa, puede escanear una [versión impresa térmicamente](../features/printing/printing.md) o una plantilla completa. Puede ver algunos [ejemplos mnemónicos codificados aquí](../features/tinyseed.md) y explorar nuestras [plantillas de transcripción disponibles aquí](../templates/index.md).
 
 ### Mediante Entrada Manual
 <img src="/krux/es/img/maixpy_m5stickv/load-mnemonic-manual-options-250.png" align="right" class="m5stickv">
@@ -113,7 +113,7 @@ Si comete un error al cargar un mnemónico, puede editarlo fácilmente. Simpleme
 
 <div style="clear: both"></div>
 
-### Confirmar atributos de la cartera
+### Confirmar atributos de la cartera { #confirm-wallet-attributes }
 <img src="/krux/es/img/maixpy_m5stickv/load-mnemonic-seq-overview-250.png" align="right" class="m5stickv">
 <img src="/krux/es/img/maixpy_amigo/load-mnemonic-seq-overview-300.png" align="right" class="amigo">
 

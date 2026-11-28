@@ -3,7 +3,7 @@ Después de ingresar tu mnemónico y cargar una cartera, llegarás al menú prin
 <img src="/krux/es/img/maixpy_amigo/home-options-300.png" class="amigo">
 <img src="/krux/es/img/maixpy_m5stickv/home-options-250.png" class="m5stickv">
 
-### Backup del mnemónico (respaldar el Mnemónico)
+### Backup del mnemónico (respaldar el Mnemónico) { #backup-mnemonic }
 <img src="/krux/es/img/maixpy_m5stickv/backup-options-250.png" align="right" class="m5stickv">
 <img src="/krux/es/img/maixpy_amigo/backup-options-300.png" align="right" class="amigo">
 
@@ -49,7 +49,7 @@ Esta opción convierte la frase mnemotécnica cifrada en un código QR. Introduz
 
 Consulte [Transcripción de códigos QR](../features/QR-transcript-tools.md) para obtener más información sobre los modos de transcripción y las herramientas de ayuda.
 
-#### Encriptado
+#### Encriptado { #encrypted }
 <img src="/krux/es/img/maixpy_m5stickv/home-encrypt-options-250.png" align="right" class="m5stickv">
 <img src="/krux/es/img/maixpy_amigo/home-encrypt-options-300.png" align="right" class="amigo">
 

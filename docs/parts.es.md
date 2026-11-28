@@ -150,7 +150,7 @@ sd-card-info-faq.es.txt
 ----8<----
 Yahboom incluye una tarjeta compatible de 32 GB. El tamaño de la tarjeta no es importante; una tarjeta de más de unos pocos megabytes será suficiente.
 
-### (Opcional) Impresora Térmica Serial TTL
+### (Opcional) Impresora Térmica Serial TTL { #optional-ttl-serial-thermal-printer }
 ----8<----
 warning-printer.es.txt
 ----8<----

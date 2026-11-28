@@ -14,7 +14,7 @@ Si no los ve, es posible que su sistema operativo no esté cargando los controla
 sudo apt-get remove brltty
 ```
 
-### ¿El dispositivo no carga o no es detectado?
+### ¿El dispositivo no carga o no es detectado? { #device-not-charging-or-being-recognized }
 
 *Si tienes un Maix Amigo, asegurate de usar el puerto USB-C en la parte inferior del dispositivo, no utilizar el puerto del lado izquiero.* 
 
@@ -60,7 +60,7 @@ Hemos añadido una IRQ(solicitud de interrupción) de hardware al firmware, por 
 <div style="clear: both"></div>
 
 
-### Solución de Problemas de la configuración de la pantalla LCD en Maix Amigo
+### Solución de Problemas de la configuración de la pantalla LCD en Maix Amigo { #troubleshooting-lcd-settings-on-maix-amigo }
 
 #### Botones en orden incorrecto
 
@@ -108,7 +108,7 @@ También puede instalar [MaixPy IDE](https://dl.sipeed.com/shareURL/MAIX/MaixPy/
 
 ## **Uso**
 
-### Por qué Krux no escanea el código QR?
+### Por qué Krux no escanea el código QR? { #why-isnt-krux-scanning-the-qr-code }
 
 <video style="width: 20%; min-width: 240px;" controls class="align-right margin-left">
     <source src="/krux/es/img/cam-adjust-pliers.mp4" type="video/mp4"></source>
@@ -162,12 +162,12 @@ Como alternativa, puede ser más sencillo usar una cartera móvil (BlueWallet o 
 
 Comprueba cómo funciona la [medición de entropía](getting-started/features/entropy.md).
 
-### ¿Por qué Krux no detecta mi tarjeta microSD o muestra un error?
+### ¿Por qué Krux no detecta mi tarjeta microSD o muestra un error? { #why-isnt-krux-detecting-my-microsd-card-or-presenting-an-error }
 A partir de la versión 23.09.0, Krux admite la conexión en caliente de tarjetas SD. Si usas versiones anteriores, es posible que solo detecte la tarjeta SD al arrancar, así que asegúrate de que Krux esté apagado al insertar la microSD. Para comprobar la compatibilidad de la tarjeta, utilice Krux [Herramientas -> Comprobar tarjetaa SD](getting-started/features/tools.md/#check-sd-card).
 
 **Nota**: Asegúrese de que la tarjeta SD utilice la tabla de particiones MBR/DOS y el formato FAT32. [En este vídeo](https://www.youtube.com/watch?v=dlOiAJOPoME) Crypto Guide explica cómo hacerlo en Windows. Si sigue sin detectarse, intente eliminar todos los archivos grandes que contenga.
 
-### ¿Por qué mi WonderMV se reinicia al insertar una tarjeta SD?
+### ¿Por qué mi WonderMV se reinicia al insertar una tarjeta SD? { #why-does-my-wondermv-reboot-when-i-insert-an-sd-card }
 
 Parece que WonderMV tiene un problema de diseño de hardware: carece de un condensador de desacoplamiento en el circuito que alimenta la tarjeta SD. Algunas tarjetas SD pueden provocar una caída de la tensión de alimentación al insertarlas, lo que provoca un reinicio.
 

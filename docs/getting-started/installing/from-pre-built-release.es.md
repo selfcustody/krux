@@ -2,7 +2,7 @@ Esta pagina explica como descargar e instalar el firmware de Krux desde nuestra 
 
 [<img src="/krux/img/badge_github.png" width="186">](https://github.com/selfcustody/krux/releases)
 
-### Verifica los archivos
+### Verifica los archivos { #verify-the-files }
 Antes de instalar la versión, es una buena idea revisar que:
 
 1. El *hash SHA256* de `{{latest_krux}}.zip` coincide con el hash en `{{latest_krux}}.zip.sha256.txt`

@@ -136,7 +136,6 @@ plugins:
  - macros
  - i18n:
     docs_structure: suffix
-    default_language: en
     languages:
       - locale: en
         default: true

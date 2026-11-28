@@ -30,7 +30,7 @@ Implementar ideas que hagan que la autocustodia sea más potente, accesible y f�
 
 ### No Confíes, Verifica
 
-No confíe en las intenciones ni en la competencia de los desarrolladores. Krux es un proyecto "hazlo tú mismo" (DIY), bajo su propio riesgo. Nos comprometemos a mejorar continuamente la seguridad, pero no haremos afirmaciones ni crearemos estrategias de marketing al respecto. Es responsabilidad de los usuarios verificar su hardware, el [firmware](getting-started/installing/from-pre-built-release.md/#verify-the-files) y el [Krux-Installer](getting-started/installing/from-gui/debian-like.md/#verify-the-integrity).
+No confíe en las intenciones ni en la competencia de los desarrolladores. Krux es un proyecto "hazlo tú mismo" (DIY), bajo su propio riesgo. Nos comprometemos a mejorar continuamente la seguridad, pero no haremos afirmaciones ni crearemos estrategias de marketing al respecto. Es responsabilidad de los usuarios verificar su hardware, el [firmware](getting-started/installing/from-pre-built-release.md/#verify-the-files) y el [Krux-Installer](getting-started/installing/from-gui/verify-download.md#verify-the-integrity).
 
 ### Donaciones
 

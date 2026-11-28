@@ -23,7 +23,7 @@ Durante la captura de la imagen, se muestra la estimación de la calidad de la e
 
 <div style="clear: both"></div>
 
-#### Doble mnemónico
+#### Doble mnemónico { #double-mnemonic }
 
 Es la combinación de dos mnemónicos de 12 palabras que también forman un mnemónico BIP39 válido de 24 palabras. Esto se logra utilizando los primeros 16 bytes (128 bits) de la entropía de la imagen para generar las primeras 12 palabras, luego utilizando los siguientes 16 bytes para generar las segundas 12 palabras y verificando si estas dos mnemónicas juntas forman un mnemónico válido de 24 palabras. De lo contrario, iteramos sobre las segundas 12 palabras incrementando sus bytes de entropía hasta que las dos mnemónicas formen un mnemónico válido de 24 palabras.
 

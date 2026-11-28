@@ -6,7 +6,7 @@ Para ello, descargue dos archivos:
 * [`{{latest_installer_sha}}`](https://github.com/selfcustody/krux-installer/releases/download/{{latest_installer}}/{{latest_installer_sha}});
 * [`{{latest_installer_sig}}`](https://github.com/selfcustody/krux-installer/releases/download/{{latest_installer}}/{{latest_installer_sig}}).
 
-## Verificar la autenticidad
+## Verificar la autenticidad { #verify-the-authenticity }
 
 **Linux/MacOS**
 
@@ -16,7 +16,7 @@ El siguiente paso es importar la llave del desarrollador:
 gpg --keyserver {{latest_installer_keyserver}} --recv-keys {{latest_installer_key}}
 ```
 
-Para verificar tu identidad, ejecuta esto:
+Para verificar la autenticidad del archivo, ejecuta:
 
 ```bash
 gpg --verify {{latest_installer_sig}}
@@ -34,7 +34,7 @@ verify-the-signature-tip.es.txt
 ----8<----
 > También puedes ignorar un mensaje de ADVERTENCIA si indica que la clave no es confiable (debes hacerlo manualmente).
 
-## Verificar la integridad
+## Verificar la integridad { #verify-the-integrity }
 
 Tras verificar la autenticidad del archivo [`{{latest_installer_sha}}`](https://github.com/selfcustody/krux-installer/releases/download/{{latest_installer}}/{{latest_installer_sha}}), podemos proceder a la comprobación de integridad en tu terminal `bash`/`zsh`:
 

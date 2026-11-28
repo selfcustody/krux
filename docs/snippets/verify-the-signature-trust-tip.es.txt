@@ -1,3 +1,2 @@
-> ⚠️  CONSEJO: Si seguiste los pasos en la [sección de autenticación](#verificar-la-autenticidad),
-ya tienes la garantía de que el software proviene de una fuente verificada y original.
-Esto también ayudará a establecer una cadena de confianza al realizar el paso de verificación del programa antes de la instalación.
+> 🛡️ CONSEJO: Si has seguido los pasos de [verificación de autenticidad](verify-download.md#verify-the-authenticity) **Y** de [verificación de integridad](verify-download.md#verify-the-integrity), tendrás mayor certeza de que el software proviene de una fuente verificada y auténtica.
+Esto también ayudará a establecer una cadena de confianza al realizar la verificación del firmware antes de instalarlo en el dispositivo.

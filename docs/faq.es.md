@@ -12,7 +12,7 @@ La versión de prueba o beta incluye las funciones más nuevas y experimentales,
 
 Solo recuerda que para el uso habitual, se recomienda utilizar siempre las versiones oficiales, que están firmadas, completamente probadas y bien documentadas. 
 
-## ¿Qué es la aplicación móvil Krux para Android?
+## ¿Qué es la aplicación móvil Krux para Android? { #what-is-krux-mobile-android-app }
 
 ### ¿Dónde puedo encontrarla?
 La aplicación Krux Mobile para Android se encuentra en la fase beta y esta disponible como archivo APK en [KruxMobileApp](https://github.com/selfcustody/KruxMobileApp). Requiere Android 6.0 o superior.

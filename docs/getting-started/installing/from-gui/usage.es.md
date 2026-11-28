@@ -175,9 +175,9 @@ Ahora podrá seleccionar si desea realizar un proceso de actualización o un pro
 
 <img width="640" src=" /krux/img/krux-installer/unzip.png" alt="Krux-Installer unzip" />
 
-Haga clic en [Actualizar con](#flash-with) para instalar mediante USB o en [Actualizar sin conexión a la red](#air-gapped-update-with) para realizar actualizaciones mediante una tarjeta SD.
+Haga clic en [Actualizar con](#flash-device) para instalar mediante USB o en [Actualizar sin conexión a la red](#air-gapped-update) para realizar actualizaciones mediante una tarjeta SD.
 
-#### Actualizar
+#### Actualizar { #flash-device }
 
 Cuando comienza la actualización, serás advertido de **no desconectar el dispositivo hasta que el proceso sea completado.** 
 Podrás ver el progreso de la actualización:
@@ -202,7 +202,7 @@ error-flashing-windows.es.txt
 
 
 
-#### Actualización sin conexión a la red
+#### Actualización sin conexión a la red { #air-gapped-update }
 
 Una vez instalado el firmware inicial en tu dispositivo mediante USB, puedes realizar actualizaciones adicionales mediante una tarjeta SD para mantener el dispositivo aislado de internet.
 
@@ -225,7 +225,7 @@ Ahora puede comparar el hash del firmware calculado por el instalador con el has
 <img width="640" src=" /krux/img/krux-installer/airgap_done.png" alt="Krux-Installer warn airgap" />
 > ⚠️ Una vez copiados los archivos, retira la tarjeta SD de la computadora, conéctala al dispositivo y compara los hashes.
 
-### Borrar dispositivo
+### Borrar dispositivo { #wipe-device }
 
 Este proceso consta de dos pasos: **Mensaje de advertencia** y **Proceso de borrado**.
 
