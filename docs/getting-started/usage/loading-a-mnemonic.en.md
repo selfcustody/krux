@@ -1,7 +1,7 @@
 Once you have either a 12 or 24-word [BIP39 mnemonic](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki), choose `Load Mnemonic` on Krux's start menu, then choose the backup format you recognise:
 
-<img src="../../../img/maixpy_amigo/load-mnemonic-options-300.png" class="amigo">
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-options-250.png" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/load-mnemonic-options-300.png" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/load-mnemonic-options-250.png" class="m5stickv">
 
 ## Backup Formats
 
@@ -22,14 +22,14 @@ After opening a wallet, you can use Krux to [back up the mnemonic](navigating-th
 
 ### Words
 
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-text-word-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-via-text-word-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/load-mnemonic-via-text-word-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/load-mnemonic-via-text-word-300.png" align="right" class="amigo">
 
 Enter each BIP39 word one at a time. Krux disables impossible letters as you type and attempts to autocomplete each word.
 
 <div style="clear: both"></div>
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-stackbit-vertical-filled-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-via-stackbit-vertical-filled-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/load-mnemonic-via-stackbit-vertical-filled-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/load-mnemonic-via-stackbit-vertical-filled-300.png" align="right" class="amigo">
 
 Vertical layout transposes the grid, with rows = weights (1,2,4,8) and columns = digits.
 
@@ -37,8 +37,8 @@ Vertical layout transposes the grid, with rows = weights (1,2,4,8) and columns =
 
 ### From Storage
 
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-storage-options-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-storage-options-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/load-mnemonic-storage-options-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/load-mnemonic-storage-options-300.png" align="right" class="amigo">
 
 Retrieve an [encrypted mnemonic previously stored](./navigating-the-main-menu.md/#encrypted) in internal memory or on an SD card. Enter the same key that was used to encrypt it.
 
@@ -46,8 +46,8 @@ Retrieve an [encrypted mnemonic previously stored](./navigating-the-main-menu.md
 
 ### Other Formats
 
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-other-formats-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-other-formats-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/load-mnemonic-other-formats-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/load-mnemonic-other-formats-300.png" align="right" class="amigo">
 
 Specialist backup formats are grouped in one menu: `Tinyseed (scan)`, `Binary Grid (manual)`, `OneKey KeyTag (scan)`, `Binary Grid (scan)`, `Word Numbers`, and `Stackbit 1248`.
 
@@ -61,8 +61,8 @@ Place the backup over a black background and fill punched areas with black to im
 
 #### Binary Grid (manual)
 
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-tinyseed-filled-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-via-tinyseed-filled-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/load-mnemonic-via-tinyseed-filled-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/load-mnemonic-via-tinyseed-filled-300.png" align="right" class="amigo">
 
 Enter each BIP39 word number (1-2048) in binary by toggling its bits. Krux calculates the checksum bits for the final word while you enter it.
 
@@ -84,8 +84,8 @@ transcription template.
 
 #### Word Numbers
 
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-numbers-word-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-via-numbers-word-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/load-mnemonic-via-numbers-word-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/load-mnemonic-via-numbers-word-300.png" align="right" class="amigo">
 
 ##### Decimal
 
@@ -99,8 +99,8 @@ Word numbers can also be entered in hexadecimal from `0x1` to `0x800`, or in oct
 
 #### Stackbit 1248
 
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-via-stackbit-filled-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-via-stackbit-filled-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/load-mnemonic-via-stackbit-filled-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/load-mnemonic-via-stackbit-filled-300.png" align="right" class="amigo">
 
 Enter each BIP39 word number with the [Stackbit 1248](https://stackbit.me/produto/stackbit-1248/) backup method. Each digit is the sum of marked values 1, 2, 4, or 8. For example, word number 1268 uses `(1)(2)(2,4)(8)`.
 
@@ -108,30 +108,30 @@ Enter each BIP39 word number with the [Stackbit 1248](https://stackbit.me/produt
 
 ## Confirm Wallet Setup
 ### Confirm Mnemonic Words
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-mnemonic-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/load-mnemonic-seq-mnemonic-300.png" align="right" class="amigo">
 
-Once you have entered your mnemonic, you will be presented with the full list of words to confirm. A 12 word has only 4 checksum bits, so it has a 1 in 16 chance (6,25%) of still being valid even if you mistype a word. A 24 word phrase has 8 checksum bits, so it only has 1 in 256 chance (~0,4%) of still being valid if you mistype a word.
+Once you have entered your mnemonic, you will be presented with the full list of words to confirm. A 12 word phrase has only 4 checksum bits, so it has a 1 in 16 chance (6,25%) of still being valid even if you mistype a word. A 24 word phrase has 8 checksum bits, so it only has 1 in 256 chance (~0,4%) of still being valid if you mistype a word.
 
 <div style="clear: both"></div>
 
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-double-mnemonic-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-double-mnemonic-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/load-mnemonic-seq-double-mnemonic-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/load-mnemonic-seq-double-mnemonic-300.png" align="right" class="amigo">
 If you see an asterisk (`*`) in the header, it means this is a [double mnemonic](generating-a-mnemonic.md/#double-mnemonic).
 
 <div style="clear: both"></div>
 
 ### (Optional) Edit Mnemonic
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-edited-wrong-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-mnemonic-edited-wrong-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/load-mnemonic-seq-mnemonic-edited-wrong-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/load-mnemonic-seq-mnemonic-edited-wrong-300.png" align="right" class="amigo">
 
 If you make a mistake while loading a mnemonic, you can easily edit it. Simply touch or navigate to the word you want to change and replace it. Edited words will be highlighted. If the final word contains an invalid checksum, it will appear in red. If your checksum word is red, please review your mnemonic carefully, as there may be an error.
 
 <div style="clear: both"></div>
 
 ### Confirm Wallet Attributes
-<img src="../../../img/maixpy_m5stickv/load-mnemonic-seq-overview-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/load-mnemonic-seq-overview-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/load-mnemonic-seq-overview-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/load-mnemonic-seq-overview-300.png" align="right" class="amigo">
 
 After confirming an existing mnemonic, a screen with an **information box at the
 top** shows the wallet's attributes. If they are as expected, just press
@@ -177,8 +177,8 @@ Informs if the wallet has a passphrase. Adding or changing the passphrase result
 It is possible to change any of the **wallet's attributes** (it will be possible to change them later too, after loading). To load it faster next time, some default wallet attributes can be set in [settings](../settings.md), they are: `Network`, `Policy Type` and `Script Type`.
 
 #### Passphrase
-<img src="../../../img/maixpy_m5stickv/passphrase-load-options-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/passphrase-load-options-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/passphrase-load-options-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/passphrase-load-options-300.png" align="right" class="amigo">
 
 You can type or scan a BIP39 passphrase. When typing, swipe left :material-gesture-swipe-left: or right :material-gesture-swipe-right: to change keypads if your device has a touchscreen. Hold `PAGE` or `PREVIOUS` to move quickly through letters, and hold `ENTER` to jump to the next keypad.
 
@@ -189,8 +189,8 @@ For scanning, you can generate an offline passphrase QR code using the [Datum to
 <div style="clear: both"></div>
 
 #### Customize
-<img src="../../../img/maixpy_m5stickv/wallet-customization-options-250.png" align="right" class="m5stickv">
-<img src="../../../img/maixpy_amigo/wallet-customization-options-300.png" align="right" class="amigo">
+<img src="/krux/img/maixpy_m5stickv/wallet-customization-options-250.png" align="right" class="m5stickv">
+<img src="/krux/img/maixpy_amigo/wallet-customization-options-300.png" align="right" class="amigo">
 
 This button opens a screen to change the `Network`, `Policy Type`, `Script Type`, and `Account` of the wallet. If `Policy Type` is Miniscript, you will be able to enter a custom derivation path.
 
