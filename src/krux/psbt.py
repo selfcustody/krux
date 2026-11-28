@@ -679,7 +679,7 @@ class PSBTSigner:
         fingerprints = []
         for inp in self.psbt.inputs:
             # Do we need to loop through all the inputs or just one?
-            if self.policy["type"] == P2WSH:
+            if self.policy["type"] in (P2SH, P2SH_P2WSH, P2WSH):
                 for pub in inp.bip32_derivations:
                     fingerprint_srt = Key.format_fingerprint(
                         inp.bip32_derivations[pub].fingerprint, True
