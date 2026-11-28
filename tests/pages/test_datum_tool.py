@@ -674,6 +674,47 @@ def test_datumtool_esc_on_save_sd(m5stickv, mocker, mock_file_operations):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQ)
 
 
+def test_datumtool_save_sd_of_ur_scan_suggests_a_name_fat_accepts(m5stickv, mocker):
+    """Scan a UR, Save to SD card, accept the suggested name: it is saved"""
+    from krux.pages.datum_tool import DatumToolMenu, DatumTool
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.pages.file_operations import SaveFile
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+    from uUR import UR, Types
+
+    ur_obj = UR("bytes", Types.bytes_to_cbor(b"\x00\xff\x01binary"))
+    mocker.patch.object(QRCodeCapture, "qr_capture_loop", new=lambda self: (ur_obj, 2))
+    # skip the viewer's menu, go straight to "Save to SD card"
+    mocker.patch.object(DatumTool, "view_contents", new=lambda self: self.save_sd())
+    mocker.patch("krux.sd_card.SDCard.remount", create=True)
+    mocker.patch("os.listdir", return_value=[])
+    mocker.patch("krux.sd_card.SDHandler.file_exists", return_value=False)
+
+    opened = []
+
+    def fatfs_open(path, mode="r", *args, **kwargs):
+        """as FAT does, refuse a name holding a colon"""
+        if ":" in path:
+            raise OSError(22, "EINVAL")
+        opened.append((path, mode))
+        return mocker.mock_open()()
+
+    mocker.patch("builtins.open", new=fatfs_open)
+    flash_text = mocker.spy(SaveFile, "flash_text")
+
+    BTN_SEQUENCE = [
+        BUTTON_PAGE_PREV,  # Move to Go
+        BUTTON_ENTER,  # Accept the suggested filename
+    ]
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    DatumToolMenu(ctx).scan_qr()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert opened == [("/sd/_UR_bytes", "wb")]
+    flash_text.assert_called_once()
+    assert flash_text.call_args.args[1] == "Saved to SD card:\n\n_UR_bytes"
+
+
 def test_datumtool__info_box(m5stickv, mocker):
     """With DatumTool already initialized, test ._info_box()"""
     from krux.pages.datum_tool import DatumTool

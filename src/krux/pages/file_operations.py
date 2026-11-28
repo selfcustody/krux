@@ -31,6 +31,8 @@ from krux.sd_card import SDHandler
 from krux.display import BOTTOM_PROMPT_LINE
 
 FILE_SPECIAL = "1234567890[]-._()~"
+# FAT refuses these in a file name; "/" and "\\" separate folders, so they stay
+FAT_FORBIDDEN = ':*?"<>|'
 
 
 class SaveFile(Page):
@@ -122,17 +124,19 @@ class SaveFile(Page):
             remove_suffix(curr_filename, file_extension), suffix
         )
 
+        # The suggestion may be built from a title or label that holds
+        # characters FAT refuses in a name: swap those before showing it
+        suggestion = (curr_filename if curr_filename else empty_filename) + suffix
+        for char in FAT_FORBIDDEN:
+            suggestion = suggestion.replace(char, "_")
+
         while True:
             # Loop until user types a valid name or presses ESC
             # Capture filename from keypad
             new_filename = self.capture_from_keypad(
                 t("Filename"),
                 [LETTERS, UPPERCASE_LETTERS, FILE_SPECIAL],
-                starting_buffer=(
-                    (curr_filename + suffix)
-                    if curr_filename
-                    else (empty_filename + suffix)
-                ),
+                starting_buffer=suggestion,
             )
 
             if new_filename == ESC_KEY:
