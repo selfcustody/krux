@@ -210,6 +210,33 @@ class PSBTSigner:
             if self.wallet.policy != self.policy:
                 raise ValueError("policy mismatch")
 
+        self._check_input_scripts()
+
+    def _check_input_scripts(self):
+        """The policy above is derived from each input's scriptPubKey type and
+        derivations, while the signer takes the script to sign from
+        witness_script, redeem_script and taproot_scripts. Make sure those
+        cannot carry anything the wallet was not set up for."""
+        single_sig = not (self.wallet.is_multisig() or self.wallet.is_miniscript())
+        fingerprint = self.wallet.key.fingerprint
+        for inp in self.psbt.inputs:
+            if single_sig:
+                if (
+                    inp.witness_script is not None
+                    or inp.taproot_scripts
+                    or (
+                        inp.redeem_script is not None
+                        and inp.redeem_script.script_type() != P2WPKH
+                    )
+                ):
+                    raise ValueError("Not a single-sig PSBT")
+            elif self.wallet.is_loaded():
+                derivations = list(inp.bip32_derivations.values())
+                derivations += [d for _, d in inp.taproot_bip32_derivations.values()]
+                if any(d.fingerprint == fingerprint for d in derivations):
+                    if not self.wallet.descriptor.owns(inp):
+                        raise ValueError("input not from the loaded descriptor")
+
     def unverified_input_amounts(self):
         """True if an input amount could be understated without breaking its signature.
 
