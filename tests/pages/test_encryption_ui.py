@@ -849,6 +849,23 @@ def test_load_encrypted_mnemonic_shares_failed_attempts_backoff(m5stickv, mocker
     assert KEFEnvelope._failed_attempts == 0
 
 
+def test_load_encrypted_mnemonic_wrong_encrypted_key(m5stickv, mocker):
+    # A key given as a KEF envelope that fails to decrypt says "Failed to
+    # decrypt" and stops, instead of "Key was not provided"
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.encryption_ui import LoadEncryptedMnemonic
+
+    mocker.patch(
+        "krux.pages.encryption_ui.EncryptionKey.encryption_key",
+        mocker.MagicMock(side_effect=KeyError("Failed to decrypt")),
+    )
+    ctx = create_ctx(mocker, [])
+    page = LoadEncryptedMnemonic(ctx)
+    mocker.spy(page, "flash_error")
+    assert page._load_encrypted_mnemonic("ecbID") == MENU_CONTINUE
+    page.flash_error.assert_called_once_with("Failed to decrypt")
+
+
 def test_decrypt_kef_offers_decrypt_ui_appropriately(m5stickv, mocker):
     """
     Intention here is to verify that KEFEnvelope class is instantiated
