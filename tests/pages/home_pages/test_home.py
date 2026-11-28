@@ -2040,3 +2040,87 @@ def test_load_sign_psbt_camera_back_is_silent(mocker, amigo, tdata):
 
     # "Back" is not a failure - it must not flash an error
     assert_not_flashed(ctx, "Failed to load")
+
+
+def _other_account_psbt(mnemonic, script_type, origin_map):
+    """PSBT spending a coin of account 5 of the mnemonic, with the key origin
+    given only in the named map"""
+    from embit import bip32, bip39, script
+    from embit.networks import NETWORKS
+    from embit.psbt import PSBT, DerivationPath
+    from embit.transaction import Transaction, TransactionInput, TransactionOutput
+
+    purpose = "86h" if script_type == "p2tr" else "84h"
+    path = "m/%s/1h/5h/0/0" % purpose
+    root = bip32.HDKey.from_seed(
+        bip39.mnemonic_to_seed(mnemonic),
+        version=NETWORKS["test"]["xprv"],
+    )
+    pub = root.derive(path).get_public_key()
+    coin = script.p2tr(pub) if script_type == "p2tr" else script.p2wpkh(pub)
+    dest = script.p2wpkh(root.derive("m/84h/1h/0h/0/1").get_public_key())
+    psbt = PSBT(
+        Transaction(
+            vin=[TransactionInput(bytes(range(32)), 0)],
+            vout=[TransactionOutput(90000, dest)],
+        )
+    )
+    psbt.inputs[0].witness_utxo = TransactionOutput(100000, coin)
+    origin = DerivationPath(root.my_fingerprint, bip32.parse_path(path))
+    if origin_map == "taproot_bip32_derivations":
+        psbt.inputs[0].taproot_bip32_derivations[pub] = ([], origin)
+    else:
+        psbt.inputs[0].bip32_derivations[pub] = origin
+    return psbt.serialize()
+
+
+@pytest.mark.parametrize(
+    "script_type,origin_map,psbt_path",
+    [
+        ("p2tr", "bip32_derivations", "m/86h/1h/5h"),
+        ("p2wpkh", "taproot_bip32_derivations", "m/84h/1h/5h"),
+    ],
+)
+def test_sign_psbt_path_mismatch_from_either_origin_map(
+    mocker, m5stickv, psbt_tdata, script_type, origin_map, psbt_path
+):
+    # The signer takes keys from both maps whatever the input type, so a path
+    # of another account in the other map must still be warned about
+    from embit.networks import NETWORKS
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.key import Key, TYPE_SINGLESIG
+    from krux.pages import MENU_CONTINUE
+    from krux.pages.home_pages.home import Home
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.psbt import PSBTSigner
+    from krux.qr import FORMAT_NONE
+    from krux.wallet import Wallet
+
+    wallet = Wallet(
+        Key(
+            psbt_tdata.TEST_MNEMONIC,
+            TYPE_SINGLESIG,
+            NETWORKS["test"],
+            script_type=script_type,
+        )
+    )
+    btn_seq = [
+        BUTTON_ENTER,  # Load from camera
+        BUTTON_PAGE,  # Path mismatch, No
+    ]
+    ctx = create_ctx(mocker, btn_seq, wallet)
+    raw = _other_account_psbt(psbt_tdata.TEST_MNEMONIC, script_type, origin_map)
+    mocker.patch.object(
+        QRCodeCapture, "qr_capture_loop", new=lambda self: (raw, FORMAT_NONE)
+    )
+    sign = mocker.spy(PSBTSigner, "sign")
+
+    assert Home(ctx).sign_psbt() == MENU_CONTINUE
+
+    ctx.display.draw_centered_text.assert_any_call(
+        "Warning: Path mismatch\nWallet: %s\nPSBT: %s"
+        % (wallet.key.derivation_str(), psbt_path),
+        highlight_prefix=":",
+    )
+    assert ctx.input.wait_for_button.call_count == len(btn_seq)
+    sign.assert_not_called()

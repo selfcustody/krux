@@ -238,23 +238,16 @@ class PSBTSigner:
         mismatched_paths = []
         der_path_nodes = len(self.wallet.key.derivation.split("/")) - 1
         for _input in self.psbt.inputs:
-            if self.policy["type"] == P2TR:
-                derivations = _input.taproot_bip32_derivations
-            else:
-                derivations = _input.bip32_derivations
-            for pubkey in derivations:
+            # The signer derives keys from both maps whatever the input type,
+            # so a path in either of them must be checked
+            origins = list(_input.bip32_derivations.values())
+            origins += [der for _, der in _input.taproot_bip32_derivations.values()]
+            for origin in origins:
                 # Checks if fingerprint belongs to loaded key
-                if self.policy["type"] == P2TR:
-                    fingerprint = derivations[pubkey][1].fingerprint
-                else:
-                    fingerprint = derivations[pubkey].fingerprint
-                if fingerprint != self.wallet.key.fingerprint:
+                if origin.fingerprint != self.wallet.key.fingerprint:
                     # Not our key, won't check derivation path mismatch
                     continue
-                if self.policy["type"] == P2TR:
-                    derivation_path = derivations[pubkey][1].derivation
-                else:
-                    derivation_path = derivations[pubkey].derivation
+                derivation_path = origin.derivation
                 textual_path = "m"
                 for index in derivation_path[:der_path_nodes]:
                     if index >= 2**31:
