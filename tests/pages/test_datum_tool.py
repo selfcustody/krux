@@ -719,6 +719,67 @@ def test_datumtool__info_box(m5stickv, mocker):
     )
 
 
+def test_datumtool_mnemonic_text_as_bytes_is_secret(m5stickv, mocker):
+    """Mnemonic text held as bytes is as secret as the text itself"""
+    from krux import kef
+    from krux.pages.datum_tool import DatumTool
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE_PREV
+
+    words = " ".join(["abandon"] * 11 + ["about"])
+    digits = "".join(["{:04d}".format(x * 128) for x in range(12)])
+
+    def options(page):
+        return [label for label, _ in page._build_options_menu()]
+
+    for secret in (words, " ".join(["zoo"] * 24), digits, digits * 2):
+        for contents in (secret, secret.encode()):
+            page = DatumTool(create_ctx(mocker, []))
+            page.contents = contents
+            page._analyze_contents()
+            assert page.sensitive == True
+            assert "Save to SD card" not in options(page)
+
+    # other text as bytes is not
+    page = DatumTool(create_ctx(mocker, []))
+    page.contents = " ".join(["abandon"] * 11).encode()
+    page._analyze_contents()
+    assert page.sensitive == False
+    assert "Save to SD card" in options(page)
+
+    # nor is other text of SeedQR length that mixes digits and letters
+    page = DatumTool(create_ctx(mocker, []))
+    page.contents = b"1a" * 24
+    page._analyze_contents()
+    assert page.sensitive == False
+    assert page.encodings == ["hex_via_utf8?"]
+    assert "Save to SD card" in options(page)
+
+    # a KEF envelope holding the words as text: once decrypted, still secret
+    version = [k for k, v in kef.VERSIONS.items() if v["name"] == "AES-GCM"][0]
+    cipher = kef.Cipher(b"a", "mnemonic", 10000)
+    payload = cipher.encrypt(words.encode(), version, b"\x01" * 12)
+    envelope = kef.wrap("mnemonic", version, 10000, payload)
+
+    BTN_SEQUENCE = (
+        BUTTON_ENTER,  # confirm Decrypt
+        BUTTON_ENTER,  # go Enter Key
+        BUTTON_ENTER,  # go "a"
+        BUTTON_PAGE_PREV,  # to Go
+        BUTTON_ENTER,  # go Go
+        BUTTON_ENTER,  # confirm key
+    )
+    ctx = create_ctx(mocker, BTN_SEQUENCE)
+    page = DatumTool(ctx)
+    page.contents = envelope
+    page._decrypt_as_kef_envelope()
+    page._analyze_contents()
+
+    assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
+    assert page.contents == words.encode()
+    assert page.sensitive == True
+    assert "Save to SD card" not in options(page)
+
+
 def test_datumtool__show_contents(m5stickv, mocker):
     """With DatumTool already initialized, test ._show_contents()"""
     from krux.pages.datum_tool import DatumTool
