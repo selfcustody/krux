@@ -660,6 +660,129 @@ def test_datumtool_view_qr(m5stickv, mocker):
     assert ctx.input.wait_for_button.call_count == len(BTN_SEQUENCE)
 
 
+def test_datumtool_view_qr_offers_bbqr_u_only_for_text(m5stickv, mocker):
+    """BBQr "U" is unicode text, it must not be offered for other bytes"""
+    from krux.pages import datum_tool
+    from krux.pages.datum_tool import DatumTool
+    from krux.bbqr import decode_bbqr
+    from krux.qr import FORMAT_BBQR
+
+    text_desc = "wsh(multi(1,xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB/1/0/*,xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH/0/0/*))#t2zpj2eu"
+    not_text = b"\x04DESC\x14\x00\x00\x01" + bytes(range(128, 256)) * 2
+
+    def offered_and_exported(contents, datum, choice):
+        """returns the labels view_qr offers and what `choice` exports"""
+        offered = []
+        exported = []
+
+        class FakeMenu:
+            def __init__(self, ctx, items, **kwargs):
+                self.labels = [label for label, _ in items]
+
+            def run_loop(self):
+                offered.extend(self.labels)
+                return self.labels.index(choice), None
+
+        mocker.patch.object(datum_tool, "Menu", FakeMenu)
+        mocker.patch.object(
+            DatumTool,
+            "display_qr_codes",
+            new=lambda self, data, qr_fmt, title=None: exported.extend([data, qr_fmt]),
+        )
+        page = DatumTool(create_ctx(mocker, []))
+        page.contents, page.title, page.datum = contents, "QR contents", datum
+        page.view_qr()
+        return offered, exported
+
+    for datum in ("DESC", "XPUB", "ADDR"):
+        # text is offered as BBQr U
+        offered, (bbqr, qr_fmt) = offered_and_exported(text_desc, datum, "BBQr U")
+        assert (qr_fmt, bbqr.file_type) == (FORMAT_BBQR, "U")
+        assert decode_bbqr({0: bbqr.payload}, bbqr.encoding, "U") == text_desc
+
+        # so is text as utf8 bytes, a scanner reads it as text
+        for text in (text_desc, text_desc + " é 日本"):
+            offered, (bbqr, qr_fmt) = offered_and_exported(
+                text.encode(), datum, "BBQr U"
+            )
+            assert (qr_fmt, bbqr.file_type) == (FORMAT_BBQR, "U")
+            assert decode_bbqr({0: bbqr.payload}, bbqr.encoding, "U") == text
+
+    # bytes that are not utf8 (ie: the descriptor once encrypted) are not:
+    # no scanner could decode them
+    with pytest.raises(UnicodeDecodeError):
+        not_text.decode()
+    for datum in ("DESC", "XPUB", "ADDR"):
+        offered, (ur, _) = offered_and_exported(not_text, datum, "UR bytes")
+        assert offered == ["Static", "Part M of N", "UR bytes"]
+        assert ur.type == "bytes"
+
+    # BBQr P is binary, it stays on offer for a psbt whatever its bytes
+    offered, (bbqr, qr_fmt) = offered_and_exported(not_text, "PSBT", "BBQr P")
+    assert offered == ["Static", "Part M of N", "BBQr P", "UR bytes"]
+    assert (qr_fmt, bbqr.file_type) == (FORMAT_BBQR, "P")
+    assert decode_bbqr({0: bbqr.payload}, bbqr.encoding, "P") == not_text
+
+
+def test_datumtool_encrypted_descriptor_is_not_offered_as_bbqr_u(m5stickv, mocker):
+    """Load a descriptor, encrypt it, export as QR: BBQr U is not offered"""
+    from krux import kef
+    from krux.pages import MENU_EXIT, datum_tool
+    from krux.pages.datum_tool import DatumTool
+    from krux.pages.encryption_ui import KEFEnvelope
+
+    text_desc = "wsh(multi(1,xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB/1/0/*,xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH/0/0/*))#t2zpj2eu"
+
+    def seal_ui(self, plaintext, overrides=None):
+        """encrypts as the real seal_ui would, without asking for a key"""
+        version = kef.suggest_versions(plaintext, "AES-GCM")[0]
+        iv = bytes(range(kef.MODE_IVS.get(kef.VERSIONS[version]["mode"], 0)))
+        cipher = kef.Cipher("a key", self.label, 10000)
+        return kef.wrap(
+            self.label, version, 10000, cipher.encrypt(plaintext, version, iv)
+        )
+
+    mocker.patch.object(KEFEnvelope, "seal_ui", seal_ui)
+
+    # what the user picks in each menu of view_contents and view_qr
+    choices = [
+        "convert_begin",  # Convert Datum
+        "utf8",  # from utf8
+        "encrypt",  # Encrypt
+        "convert_end",  # Done Converting
+        "export_qr",  # QR Code
+        "UR bytes",  # in the QR format menu
+        MENU_EXIT,
+    ]
+    qr_formats_offered = []
+
+    class FakeMenu:
+        def __init__(self, ctx, items, **kwargs):
+            self.labels = [label for label, _ in items]
+
+        def run_loop(self):
+            choice = choices.pop(0)
+            if choice == "UR bytes":
+                qr_formats_offered.extend(self.labels)
+                return self.labels.index(choice), None
+            return 0, choice
+
+    mocker.patch.object(datum_tool, "Menu", FakeMenu)
+    mocker.patch.object(DatumTool, "display_qr_codes")
+
+    page = DatumTool(create_ctx(mocker, []))
+    page.contents, page.title = text_desc, "wallet.txt"
+    page.view_contents()
+
+    assert not choices
+    # encrypted, and still known to be a descriptor
+    assert isinstance(page.contents, bytes)
+    assert page.datum == "DESC"
+    assert page.title == "DESC KEF"
+    assert qr_formats_offered == ["Static", "Part M of N", "UR bytes"]
+    DatumTool.display_qr_codes.assert_called_once()
+
+
 def test_datumtool_esc_on_save_sd(m5stickv, mocker, mock_file_operations):
     """With DatumTool already initialized, test .save_sd()"""
     from krux.pages.datum_tool import DatumTool

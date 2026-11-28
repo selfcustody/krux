@@ -487,10 +487,19 @@ class DatumTool(Page):
             menu_opts.append((t("Part M of N"), (FORMAT_PMOFN,)))
 
             if self.datum in DATUM_BBQR_TYPES:
+                # BBQr "U" is unicode text: a scanner decodes it as utf8,
+                # so don't offer it for bytes that are not (ie: encrypted)
+                is_text = True
+                if isinstance(self.contents, bytes):
+                    try:
+                        self.contents.decode()
+                    except:
+                        is_text = False
                 menu_opts.extend(
                     [
                         ("BBQr " + v, (FORMAT_BBQR, v))
                         for v in DATUM_BBQR_TYPES[self.datum]
+                        if v != "U" or is_text
                     ]
                 )
 
